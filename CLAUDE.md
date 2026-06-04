@@ -32,6 +32,17 @@ AML transformation framework. Keep vocabulary consistent with it
 - Develop: edit the file directly, or `python3 -m http.server` then open it.
 - Ship target (after M1): open `dist/index.html` — single self-contained file, offline.
 
+## Knowledge wiki
+Domain reference comes from the registered **aml-wiki** (central store at
+`/Users/jwang/private-knowledge/aml-wiki`) — AML typologies, red-flag indicators,
+FINTRAC/FinCEN + OSFI E-23 references, the atom/composition vocabulary. A machine-local
+symlink `wiki/ → aml-wiki` (gitignored) makes the harness auto-select it in this dir;
+the SessionStart hook activates the knowledge-wiki framework from it.
+- Query domain knowledge before guessing: `/wiki-query <question>` (auto-scopes to aml-wiki).
+- AML insights worth keeping go back to aml-wiki via `/wiki-add` — it is the canonical home.
+- For authoring a new typology (M2), pull paraphrased advisory specifics + indicators
+  from the wiki rather than inventing them. Retrieval over parametric guessing.
+
 ## Aesthetic
 Dark "dossier" theme, amber `--signal` (#f6a623) accent; fonts Newsreader / Archivo /
 JetBrains Mono. Theme lives in `:root` CSS variables. Refined, not flashy.

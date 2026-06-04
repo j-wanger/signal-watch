@@ -28,6 +28,11 @@
 - `tasks.md` — task tracking
 - `schema.md` — wiki schema · `config.md` — ceremony (lite)
 
+## Knowledge Wiki
+
+- **aml-wiki** (registered central store, `/Users/jwang/private-knowledge/aml-wiki`) — AML
+  domain reference. Linked via gitignored `wiki/` symlink; auto-scoped by CWD. Query: `/wiki-query`.
+
 ## Recent
 
-- [2026-06-04] dev wiki bootstrapped (retrofit from HANDOFF.md milestone plan)
+- [2026-06-04] dev wiki bootstrapped (retrofit from HANDOFF.md milestone plan); aml-wiki linked

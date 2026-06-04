@@ -25,5 +25,15 @@ venv/
 # Node (not used; guard only)
 node_modules/
 
+# Knowledge wiki: machine-local symlink to the central registered aml-wiki
+# (/Users/jwang/private-knowledge/aml-wiki). The association is documented in
+# CLAUDE.md; the symlink itself is per-machine and not repo content.
+/wiki
+
 # Audit trail (forensic, not source)
 .nana/audit.jsonl
+
+# Dev-wiki transient breadcrumbs (processed + deleted by session hooks, not source)
+.dev-wiki/.stale-queue
+.dev-wiki/.session-end
+.dev-wiki/.pending-commit

@@ -54,3 +54,5 @@ Abort: if blocked >3 attempts, ask user: skip or abort
 ## Cross-References
 
 - HANDOFF.md · CLAUDE.md · README.md
+- Knowledge wiki: **aml-wiki** (registered central store) — domain reference for typologies,
+  indicators, FINTRAC/FinCEN/E-23. Linked via gitignored `wiki/` symlink; query with `/wiki-query`.

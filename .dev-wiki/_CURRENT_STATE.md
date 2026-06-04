@@ -1,33 +1,43 @@
 # Project: AML Signal Engine — Vision Demo
 
-> Last updated: 2026-06-04T19:15:46 by /dev-init
+> Last updated: 2026-06-04 by /dev-debrief
 
 ## Recommended Next Action
 
-M2 complete (TBML added, engine untouched, both typologies build + validate). Next: `/dev-plan` for
-M3 (presenter polish) — keyboard nav (←/→/Esc-reset), reset control, `prefers-reduced-motion`,
-optional speaker notes, cross-browser pass. Note: keyboard nav must preserve both gates.
+M3 complete (presenter polish — keyboard nav, reset, reduced-motion; engine-only, both dist rebuilt,
+delivery accepted + committed). Next: `/dev-plan` for **M5 ship** (README, compliance self-check,
+offline smoke checklist, human sign-off) — M4 (live/pre-gen) is optional and can be skipped unless a
+live data demo is wanted. Carry-over: parameterize `tests/smoke-checklist.md` per typology;
+speaker-notes overlay is pre-scoped if presenters want on-screen prompts.
 
 ## Active Phase
 
-**[[phase-03-multi-typology|Phase 3: Multi-typology (M2)]]** (status: completed)
+**[[phase-04-presenter-polish|Phase 4: Presenter polish (M3)]]** (status: completed)
 
-Entry criteria: MET (M1 complete — engine generic against config, commit `99899ad`)
-Exit criteria: MET — 2 typologies (fentanyl, trade-based), build-time switchable, ZERO engine edits
+Entry criteria: MET (M2 complete — multi-typology build-time switchable, commit `61a9cca`)
+Exit criteria: MET — ←/→/Space/Esc nav + ↺ reset; `prefers-reduced-motion` final-state; both dist
+rebuilt + self-contained; gates hold under keyboard (verified on both dist × both motion modes).
 
-Progress: 100% — delivery accepted, milestone committed. Next active phase: M3 (run `/dev-plan`).
+Progress: 100% — delivery accepted, milestone committed. Engine-only (`config/`+`build.py` untouched).
+Next active phase: M5 ship (run `/dev-plan`).
 
 ## Active Phase Contract
 
-Phase: 3 - Multi-typology (M2)
-Tasks: 4 (see tasks.md) — author trade-based.json → build.py per-id + validation → verify TBML → regression
+Phase: 4 - Presenter polish (M3) — COMPLETED
+Tasks: 3/3 done — centralize nav + reset + keys → prefers-reduced-motion → rebuild both dist + verify
 Transition: continue
-Abort: if blocked >3 attempts, ask user: skip or abort
+Abort: n/a (phase complete)
 
 ## Recent Decisions
 
 | Decision | Confidence | Date |
 |----------|------------|------|
+| M3 is pure-engine: edit index.html for nav/reset/reduced-motion, rebuild both dist. M2 zero-diff rule was phase-specific, does not carry over | high | 2026-06-04 |
+| Keyboard nav reuses centralized advance()/back()/reset(); keys check `nextBtn.disabled` so both gates hold (programmatic .onclick() ignores the disabled attr) | high | 2026-06-04 |
+| Reduced-motion = instant FINAL state (not no-state): CSS @media query + a `reduced` guard in the JS reveal fns | high | 2026-06-04 |
+| Speaker notes DEFERRED out of M3 (would need config-driven copy + schema + both JSONs; keeps M3 a clean engine-only diff) | high | 2026-06-04 |
+| Cross-browser target = Chrome (macOS); keys-only end-to-end pass on both typologies | medium | 2026-06-04 |
+| reset() = clean Act 0 (selected→default, confirmed=false, maxReached=0), applied to both Esc and Act6 "Run again" (refines run-again, which left maxReached) | high | 2026-06-04 |
 | M2 typology = Trade-based ML (richest aml-wiki coverage, dated public advisories, data-mappable signals, flows from fentanyl) | high | 2026-06-04 |
 | M2 switch = build-time (`dist/<id>/index.html`); no runtime selector (scripted-first reliability + minimal) | high | 2026-06-04 |
 | Validate config at the build boundary (build.py fails loud on schema violation) — deterministic validator at boundary | high | 2026-06-04 |
@@ -42,14 +52,14 @@ Abort: if blocked >3 attempts, ask user: skip or abort
 
 - [OPEN] Ship as single file vs hosted page (HANDOFF §10) — presentation/branding call
 - [OPEN] Presentation mode: scripted / pre-generated / live (HANDOFF §10)
-- [OPEN] Which 2nd typology: pig-butchering and/or trade-based (M2)
 - [OPEN] Closing "what it takes to build this / the ask" slide? (HANDOFF §10)
+- [RESOLVED 2026-06-04] 2nd typology → Trade-based ML (M2 shipped)
 
 ## Key Artifacts
 
 | Path | Purpose | Last Modified |
 |------|---------|---------------|
-| index.html | Generic engine template (`__CONFIG__` injection point) — unchanged since M1 | 2026-06-04 |
+| index.html | Generic engine template (`__CONFIG__` injection point); M3 added keyboard nav + reset + reduced-motion | 2026-06-04 |
 | config/schema.md | Content-model contract | 2026-06-04 |
 | config/typologies/{fentanyl,trade-based}.json | Typology content (single source of truth per typology) | 2026-06-04 |
 | scripts/build.py | Validates config at boundary + inlines → dist/<id>/index.html | 2026-06-04 |
@@ -58,6 +68,7 @@ Abort: if blocked >3 attempts, ask user: skip or abort
 
 ## Session Journal (last 5)
 
+- [2026-06-04] M3 presenter polish: engine-only — centralized nav (advance/back/reset) + keys (←/→/Space/Esc) reusing the gate logic via the `nextBtn.disabled` guard; ↺ reset control; `prefers-reduced-motion` final-state (CSS @media + synchronous `T()`/`animVal`). Verified both shipped dist × both motion modes (gates hold, no Act 5 without confirm, 0 pending timers reduced); real Chrome 149 renders. `config/`+`build.py` byte-identical. Speaker notes deferred.
 - [2026-06-04] M2 multi-typology: added trade-based.json (TBML) from aml-wiki survey, paraphrased; build.py gained per-typology dist + build-boundary validation. TBML verified; engine untouched (zero index.html diff); fentanyl regression byte-identical.
 - [2026-06-04] M1 config-driven refactor: schema + fentanyl.json extracted; engine genericized (`__CONFIG__` injection, literals promoted); defensive rendering; stdlib build. Verified byte-identical act HTML to baseline; baseline archived.
 - [2026-06-04] M0 bootstrap: git init, project docs, baseline imported + verified, committed `c56b82e`; dev-wiki initialized.

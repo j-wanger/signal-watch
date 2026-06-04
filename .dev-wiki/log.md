@@ -7,3 +7,6 @@
 [2026-06-04T19:15:46] PLAN -- Phase 3 (M2) planned, 4 tasks, 3 decisions (TBML typology, build-time switch, build-boundary validation)
 [2026-06-04T19:15:46] IMPL -- Phase 3 (M2) all 4 tasks done; TBML added as config-only, engine untouched (zero index.html diff); fentanyl regression byte-identical
 [2026-06-04T19:15:46] DEBRIEF -- Phase 3 (M2) completed + accepted; journal 2026-06-04-m2-multi-typology; next: /dev-plan M3
+[2026-06-04] PLAN -- Phase 4 (M3) planned, 3 tasks (pure-engine: nav+reset+keys, prefers-reduced-motion, rebuild+Chrome pass); speaker notes deferred; engine edits intentional
+[2026-06-04] IMPL -- Phase 4 (M3) all 3 tasks done; engine-only (config/+build.py byte-identical); both dist rebuilt + self-contained; gates verified on both dist x both motion modes; real Chrome 149 renders
+[2026-06-04] DEBRIEF -- Phase 4 (M3) completed + accepted; journal 2026-06-04-m3-presenter-polish; next: /dev-plan M5 ship

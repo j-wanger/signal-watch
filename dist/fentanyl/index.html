@@ -187,9 +187,25 @@
   .btn.primary:disabled{opacity:.4;cursor:not-allowed;filter:none}
   .btn.ghost{background:none;border-color:transparent;color:var(--muted)}
   .btn.ghost:hover{color:var(--ink)}
+  .lgroup{display:flex;align-items:center;gap:6px}
+  .keys{color:var(--faint)}
   .ctrlhint{font-family:var(--mono);font-size:11px;color:var(--faint)}
 
   footer{font-family:var(--mono);font-size:10px;color:var(--faint);text-align:center;padding:0 0 18px;line-height:1.7}
+
+  /* Reduced motion: collapse every CSS animation/transition to a single instant frame.
+     Use duration:0s (NOT animation:none) so forwards-fill keyframes like .sig still settle
+     to their visible end state instead of stranding on the hidden opacity:0 base.
+     JS-driven reveals (advisory stream, signal extraction, build log, lift, count-ups) are
+     handled separately by the REDUCED flag below — CSS alone can't reach them. */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:.001ms!important;
+      animation-iteration-count:1!important;
+      transition-duration:.001ms!important;
+      scroll-behavior:auto!important;
+    }
+  }
 </style>
 </head>
 <body>
@@ -206,13 +222,17 @@
   <div class="stage" id="stage"></div>
 
   <div class="controls">
-    <button class="btn ghost" id="back">‹ Back</button>
+    <div class="lgroup">
+      <button class="btn ghost" id="back">‹ Back</button>
+      <button class="btn ghost" id="reset" title="Reset to start (Esc)">↺ Reset</button>
+    </div>
     <div class="ctrlhint" id="hint"></div>
     <button class="btn primary" id="next">Begin ›</button>
   </div>
 
   <footer>
     Scripted walkthrough of the target operating loop · signals &amp; figures are illustrative<br>
+    <span class="keys">←/→ navigate · Space advance · Esc reset</span><br>
     <span id="footSource"></span>
   </footer>
 </div>
@@ -505,9 +525,16 @@ function phScene(i){const name=(STEPS&&STEPS[i])||('Step '+i);
 let act=0, selected=new Set(TARGET?[TARGET.id]:[]), confirmed=false, timers=[];
 const stage=document.getElementById('stage'), stepper=document.getElementById('stepper');
 const nextBtn=document.getElementById('next'), backBtn=document.getElementById('back'), hint=document.getElementById('hint');
+const resetBtn=document.getElementById('reset');
 
+// Honor the OS "reduce motion" setting. When set, every staged reveal collapses to its
+// final state in one paint (see T() and animVal() below) — instant state, never no-state.
+const REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 function clearTimers(){timers.forEach(t=>clearTimeout(t));timers=[]}
-function T(fn,ms){const id=setTimeout(fn,ms);timers.push(id);return id}
+// Under reduced motion, run the callback synchronously: this folds all staggered timer
+// chains (advisory stream, signal list, build log, lift bars) into the current render,
+// so the browser only paints the finished act — no animated sequencing.
+function T(fn,ms){if(REDUCED){fn();return 0;}const id=setTimeout(fn,ms);timers.push(id);return id}
 
 function renderStepper(){
   stepper.innerHTML=STEPS.map((s,i)=>`<div class="step ${i<act?'done':''} ${i===act?'active':''}" data-i="${i}"><div class="sbar"></div><div class="sl">${i}· ${s}</div></div>`).join('');
@@ -568,7 +595,12 @@ function act1(){
   streamAdvisory();
 }
 function streamAdvisory(){
-  const el=document.getElementById('doctext');let html='';let i=0;
+  const el=document.getElementById('doctext');
+  if(REDUCED){  // one-shot: full advisory with its highlights, then extract — no per-word typing
+    el.innerHTML=ADVISORY.map(s=>s.hl?`<span class="hl">${s.t}</span>`:s.t).join('');
+    extractSignals();return;
+  }
+  let html='';let i=0;
   function step(){
     if(i>=ADVISORY.length){el.innerHTML=html;T(extractSignals,350);return}
     const seg=ADVISORY[i];const words=seg.t.split(' ');let w=0;
@@ -712,7 +744,9 @@ function act5(){
   T(()=>animVal('f3',0,STATS.best_combo_precision,900,'%'),400+2*650);
 }
 function animVal(id,from,to,dur,suf){
-  const el=document.getElementById(id);if(!el)return;const start=performance.now();
+  const el=document.getElementById(id);if(!el)return;
+  if(REDUCED){el.textContent=(suf===''?to.toLocaleString():to)+suf;return;}  // jump to final number
+  const start=performance.now();
   function f(now){const p=Math.min(1,(now-start)/dur);const v=Math.round(from+(to-from)*(1-Math.pow(1-p,3)));el.textContent=(suf===''?v.toLocaleString():v)+suf;if(p<1)requestAnimationFrame(f)}
   requestAnimationFrame(f);
 }
@@ -772,13 +806,35 @@ function updateControls(){
   if(act===3){nextBtn.disabled=selected.size===0;nextBtn.textContent=`Build selected (${selected.size}) ›`;}
   else nextBtn.disabled=false;
 }
-nextBtn.onclick=()=>{
-  if(act===RENDER.length-1){selected=new Set(TARGET?[TARGET.id]:[]);confirmed=false;goto(0);return;}
-  if(act===4 && !confirmed){confirmed=true;nextBtn.disabled=true;nextBtn.textContent='Building…';
+// ---- navigation primitives (buttons AND keys route through these so the gates hold once) ----
+function advance(){
+  if(nextBtn.disabled) return;              // honors gate #1 (Act 3 / 0 selected) + the Act-4 build lock
+  if(act===RENDER.length-1){reset();return;}
+  if(act===4 && !confirmed){confirmed=true;nextBtn.disabled=true;nextBtn.textContent='Building…';   // gate #2
     runBuildAfterConfirm(()=>{nextBtn.disabled=false;goto(5);});return;}
   goto(act+1);
-};
-backBtn.onclick=()=>{if(act===4)confirmed=false;goto(act-1)};
+}
+function back(){if(act===0)return;if(act===4)confirmed=false;goto(act-1);}
+function reset(){selected=new Set(TARGET?[TARGET.id]:[]);confirmed=false;maxReached=0;goto(0);}
+
+nextBtn.onclick=advance;
+backBtn.onclick=back;
+resetBtn.onclick=reset;
+
+// keyboard: ←/→ navigate, Space advances, Esc resets. Keys call advance(), which checks
+// nextBtn.disabled — so → can never bypass either human gate (programmatic .onclick() ignores
+// the disabled attribute, so the guard must live in advance()).
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target&&e.target.tagName)) return;
+  const onBtn=e.target&&e.target.tagName==='BUTTON';
+  switch(e.key){
+    case 'ArrowRight': case 'PageDown': e.preventDefault(); advance(); break;
+    case 'ArrowLeft':  case 'PageUp':   e.preventDefault(); back();    break;
+    case ' ': case 'Spacebar': if(onBtn) break; e.preventDefault(); advance(); break;  // let a focused button self-activate
+    case 'Escape': e.preventDefault(); reset(); break;
+  }
+});
 
 function setChromeText(id,txt){const el=document.getElementById(id);if(el!=null&&txt!=null)el.textContent=txt;}
 function applyChrome(){

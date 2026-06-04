@@ -2,8 +2,24 @@
 
 > Last updated: 2026-06-04T19:15:46 by /dev-plan
 
+<!-- phase:phase-04-presenter-polish -->
+<!-- gate-log:phase-04 direction=approved delivery=accepted -->
+<details>
+<summary>Phase 4: Presenter polish (M3) — COMPLETED + accepted (engine-only)</summary>
+
+Pure-engine M3: keyboard nav + reset + reduced-motion. NO config/schema edits. Speaker notes deferred. Chrome (macOS) target.
+
+- [x] T1 · Centralize nav + reset + keys — `advance()`/`back()`/`reset()`; keys (→/Space/←/Esc) honor both gates via the `nextBtn.disabled` guard; ↺ Reset control + key legend; `reset()`→clean Act 0 (`maxReached=0`), shared by Esc + Act 6 "Run again"
+- [x] T2 · prefers-reduced-motion — CSS `@media` (duration:0s, keeps `.sig` forwards-fill) + `REDUCED` flag (synchronous `T()`, `animVal` short-circuit); every reveal lands final in one paint
+- [x] T3 · Rebuild both dist + verify — `build.py all`; both self-contained; behavioral harness on both dist × both motion modes (gates hold, no Act 5 without confirm, Esc resets, 0 pending timers under reduced-motion); real Chrome 149 renders Act 0
+
+> M3 exit MET: keys-only nav, both gates intact, reduced-motion final-state, both dist self-contained. Engine intentionally edited (M2 zero-diff rule did not carry over); `config/` + `build.py` byte-identical.
+
+</details>
+
 <!-- phase:phase-03-multi-typology -->
-## Phase 3: Multi-typology (M2) — all tasks done (awaiting delivery acceptance + /dev-debrief)
+<details>
+<summary>Phase 3: Multi-typology (M2) — COMPLETED + accepted (commit 61a9cca)</summary>
 
 Second typology = **Trade-based ML (TBML)**; switch = **build-time** (`dist/<id>/index.html`). Engine untouched.
 
@@ -14,6 +30,8 @@ Second typology = **Trade-based ML (TBML)**; switch = **build-time** (`dist/<id>
 
 > M2 exit criteria met: 2 typologies, build-time switchable, **zero engine edits**. The schema generalized cleanly (one doc fix, no engine change).
 > DISCOVERY: schema doc said `hints[7]`; baseline carries 8 (trailing unused). Fixed validator to steps==7 / next_labels,hints ≥7.
+
+</details>
 
 <!-- phase:phase-02-config-driven-refactor -->
 <details>
@@ -35,7 +53,6 @@ Second typology = **Trade-based ML (TBML)**; switch = **build-time** (`dist/<id>
 <details>
 <summary>Future phases (plan when active)</summary>
 
-**Phase 4 · Presenter polish (M3)** — keyboard nav (←/→/Esc), reset, reduced-motion, speaker notes, cross-browser pass.
 **Phase 5 · Live / pre-gen mode (M4, optional)** — `scripts/pregenerate.md` + `data/signals_*.json` loader w/ fallback; optional `backend/relay.py`.
 **Phase 6 · Ship (M5)** — README complete, compliance self-check, dist verified offline, smoke checklist, human sign-off.
 

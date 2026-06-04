@@ -1,20 +1,17 @@
 # Active Phase Context
 
-Phase: 3 - Multi-typology (M2)
-Objective: Add a second typology (Trade-based ML) as config only; build-time switch to per-typology dist/<id>/index.html; prove the engine is typology-agnostic (no engine edits).
-Scope: config/typologies/*.json, scripts/build.py, dist/**
-Key constraints:
-- NO edits to index.html (the engine). Adding a typology = 1 JSON file. `git diff index.html` must be empty at phase close.
-- TBML advisory text PARAPHRASED from public sources (FinCEN Apr-2025, FATF 2024) — no verbatim copyright. All figures illustrative; badge stays.
-- Author strictly within the existing schema. If a generic field is genuinely missing, add it as OPTIONAL + backward-compatible (DISCOVERY) and rebuild fentanyl to prove no regression.
-- Switch = build-time (dist/<id>/index.html). No runtime selector.
-- build.py validates config against schema at the boundary and fails loud.
-Exit criteria:
-- config/typologies/trade-based.json authored + passes build-time validation
-- TBML builds + renders all six acts, both gates, lift; self-contained
-- fentanyl still builds byte-identical to baseline (regression); index.html untouched
-Abort: if blocked >3 attempts on any task, run /dev adjust
+Phase: 4 - Presenter polish (M3) — COMPLETED (engine-only)
+Objective: Stage-ready, keyboard-driven run — nav (←/→/Space/Esc), ↺ reset, prefers-reduced-motion — without breaking the six-act arc or the two wow beats.
+Scope: index.html, dist/** (config/ + build.py byte-identical — engine-only kept)
+Outcome:
+- Nav centralized (advance/back/reset); keys reuse the gate logic via the `nextBtn.disabled` guard.
+- reset() → clean Act 0 (selected→default, confirmed=false, maxReached=0); shared by Esc + Act 6 "Run again".
+- prefers-reduced-motion: CSS @media (duration:0s) + REDUCED flag (synchronous T(), animVal short-circuit) → final state in one paint.
+- Verified: both shipped dist × both motion modes (gates hold, no Act 5 without confirm, Esc resets, 0 pending timers reduced); real Chrome 149 renders Act 0.
+- Speaker notes DEFERRED (would need config-driven copy — later phase).
+Next: /dev-plan for M5 ship (M4 live/pre-gen optional).
+Abort: n/a (complete).
 
 Gates:
-- [x] Direction confirmed by user (TBML + build-time switch, approved 2026-06-04)
-- [x] Delivery accepted (2026-06-04 — TBML verified, engine untouched, fentanyl regression clean; debrief + commit)
+- [x] Direction confirmed by user (pure-engine M3; Chrome macOS; notes deferred — approved 2026-06-04)
+- [x] Delivery accepted (post-implementation report 2026-06-04 — accepted, committed)

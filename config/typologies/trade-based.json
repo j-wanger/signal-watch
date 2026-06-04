@@ -1,0 +1,72 @@
+{
+  "id": "trade-based",
+  "label": "Trade-based money laundering (TBML)",
+  "steps": ["The blind spot", "Read advisory", "Assess coverage", "Human review", "Agent builds", "Combination lift", "Loop closes"],
+  "next_labels": ["Begin ›", "Read the advisory ›", "Assess coverage ›", "Review candidates ›", "Build selected ›", "See the lift ›", "Close the loop ›", "Run again ↺"],
+  "hints": ["", "Agent ingests the advisory and proposes signals", "Candidates checked against our library + data", "You decide what we build — human in the loop", "You confirm the proposal — second human gate", "Why atoms beat monolithic scenarios", "The blind spot closes — and stays closed", ""],
+  "anchor": {
+    "hook_eyebrow": "The question that keeps trade-finance teams awake",
+    "hook_title": "What's hiding in the <em>trade book?</em>",
+    "hook_lead": "Here is our monitoring coverage for one threat — <b>trade-based money laundering</b>: value moved by mispricing goods, not by moving money. Green is covered by a live signal. Amber is partial. <b style=\"color:var(--rose)\">Red is a known typology we are not catching.</b> TBML is roughly <b>2% of suspicious reports but an estimated 42% of laundered value</b> — the gap hides in plain sight.",
+    "close_title": "The blind spot closes — <em>and stays closed</em>",
+    "close_delta": "▲ price-anomaly now covered · phantom-shipment queued",
+    "lift_rationale": "This is the case for <b style=\"color:var(--ink)\">atoms over monolithic scenarios</b>. A price-anomaly rule alone drowns in legitimate transfer-pricing noise. Composed with related-party trade and a high-risk corridor, it becomes a precise, explainable rule — and the engine <b style=\"color:var(--ink)\">discovers that combination</b> instead of an analyst guessing it.",
+    "coverage_noun": "TBML typologies",
+    "source": "Indicators grounded in the FinCEN Alert on fentanyl-linked trade-based laundering (Apr 2025) &amp; the FATF report on TBML trends &amp; developments (2024)"
+  },
+  "coverage": {
+    "indicators": [
+      { "id": "IND-01", "label": "Invoice price diverging from market benchmark", "status": "gap", "target": true, "sub": "over- / under-invoicing moves value without moving goods" },
+      { "id": "IND-02", "label": "Related-party / intra-group trade opacity", "status": "partial" },
+      { "id": "IND-03", "label": "Goods inconsistent with the counterparty's stated business", "status": "gap" },
+      { "id": "IND-04", "label": "Trade with high-risk / greylisted jurisdictions", "status": "covered" },
+      { "id": "IND-05", "label": "Phantom shipment — payment with no matching goods movement", "status": "gap" },
+      { "id": "IND-06", "label": "Carousel / re-invoicing of the same goods", "status": "gap" },
+      { "id": "IND-07", "label": "Settlement terms inconsistent with the goods", "status": "partial" },
+      { "id": "IND-08", "label": "Third-party payer unrelated to the trade", "status": "covered" },
+      { "id": "IND-09", "label": "Shell / front company with no operating history", "status": "partial" },
+      { "id": "IND-10", "label": "Electronics / dual-use goods tied to illicit-drug supply chains", "status": "gap" }
+    ]
+  },
+  "advisory_stream": [
+    { "t": "FinCEN Alert — Trade-Based Money Laundering Linked to Illicit-Drug Supply Chains (Apr 2025). " },
+    { "t": "TBML is roughly " },
+    { "t": "2% of suspicious reports yet an estimated 42% of laundered value", "hl": true },
+    { "t": ". Networks settle drug proceeds by trading goods — often " },
+    { "t": "consumer electronics and vaping devices", "hl": true },
+    { "t": " — rather than wiring funds. Value is moved by " },
+    { "t": "over- and under-invoicing against true market price", "hl": true },
+    { "t": ", layered through " },
+    { "t": "related-party trade and shell intermediaries", "hl": true },
+    { "t": ", and routed via " },
+    { "t": "illogical transshipment corridors", "hl": true },
+    { "t": ". Document-to-payment consistency is expected in the narrative." }
+  ],
+  "candidates": [
+    { "id": "C1", "name": "Trade with high-risk jurisdictions", "type": "entity", "cover": "covered", "data": "available" },
+    { "id": "C2", "name": "Invoice price vs market benchmark (mispricing)", "type": "entity", "cover": "gap", "data": "available", "target": true,
+      "definition": {
+        "signal_name": "S-PRICE-ANOMALY-TRADE",
+        "class": "entity · invoice-level · stateful",
+        "features": ["invoice_unit_price", "hs_code_market_median", "price_deviation_ratio", "counterparty_price_variance_90d"],
+        "logic": "unit price deviates from the HS-code market median by &gt; 40% AND counterparty price variance &gt; 0.3 over 90 days",
+        "window": "per-invoice · 90-day counterparty history",
+        "source": "Trade-finance invoices (Gold) + public HS-code price indices",
+        "route": "Tier-1 alert → gate candidate"
+      }
+    },
+    { "id": "C3", "name": "Related-party / intra-group trade", "type": "relationship", "cover": "partial", "data": "available" },
+    { "id": "C4", "name": "Third-party payer unrelated to trade", "type": "entity", "cover": "covered", "data": "available" },
+    { "id": "C5", "name": "Phantom shipment (payment, no goods movement)", "type": "entity", "cover": "gap", "data": "partial" },
+    { "id": "C6", "name": "Carousel / re-invoicing of the same goods", "type": "motif", "cover": "gap", "data": "insufficient" },
+    { "id": "C7", "name": "Settlement terms inconsistent with goods", "type": "entity", "cover": "partial", "data": "available" },
+    { "id": "C8", "name": "Goods vs counterparty's stated business", "type": "entity", "cover": "gap", "data": "available" },
+    { "id": "C9", "name": "Shell / front-company intermediary", "type": "relationship", "cover": "covered", "data": "available" }
+  ],
+  "lift": [
+    { "name": "S-PRICE-ANOMALY alone", "combo": "new signal in isolation", "value": 22, "strength": "weak" },
+    { "name": "+ Related-party trade (existing)", "combo": "S-PRICE × S-RELPARTY", "value": 58, "strength": "mid" },
+    { "name": "+ High-risk corridor (existing)", "combo": "S-PRICE × S-RELPARTY × S-CORRIDOR", "value": 81, "strength": "strong" }
+  ],
+  "stats": { "fire_count": 1860, "standalone_precision": 22, "best_combo_precision": 81 }
+}

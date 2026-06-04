@@ -22,15 +22,17 @@ AML transformation framework. Keep vocabulary consistent with it
 - Live mode is optional, isolated, off by default, always has a scripted fallback.
   Never put keys/tokens in the frontend. Copilot is NOT a web backend (HANDOFF §4.5).
 
-## Current state (M0 — bootstrap)
-- Single baseline file: `aml_vision_demo_fentanyl.html` (vanilla HTML/CSS/JS, no build).
-- M1 will extract content into `config/typologies/*.json` and add a build step that
-  inlines src + css + config → `dist/index.html` (the ship target).
+## Current state (M2 — multi-typology)
+- Generic engine: `index.html` (vanilla HTML/CSS/JS) with a single `__CONFIG__` injection point.
+- Content: `config/typologies/*.json` (fentanyl, trade-based) against `config/schema.md`.
+- Build: `scripts/build.py` validates a config against the schema (fails loud) and inlines it
+  → `dist/<id>/index.html`. Original baseline preserved in `archive/`.
+- Engine is typology-agnostic — adding a typology is one JSON file, no engine edits.
 
 ## How to run
-- Present (now): open `aml_vision_demo_fentanyl.html` directly in a browser (no server).
-- Develop: edit the file directly, or `python3 -m http.server` then open it.
-- Ship target (after M1): open `dist/index.html` — single self-contained file, offline.
+- Build: `python3 scripts/build.py <id>` (or `all`) → `dist/<id>/index.html`.
+- Present: open `dist/<id>/index.html` — single self-contained file, offline, no server.
+- Iterate: edit `index.html` / a config, rebuild. `python3 -m http.server` optional, never required.
 
 ## Knowledge wiki
 Domain reference comes from the registered **aml-wiki** (central store at

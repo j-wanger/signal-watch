@@ -17,17 +17,34 @@ reveal (why composed atoms beat monolithic scenarios).
 
 ## Run it
 
-No build, no server, no dependencies (except a Google Fonts `<link>` when online).
+Build a typology to a single self-contained file, then open it (no server, no deps
+except a Google Fonts `<link>` when online):
 
 ```
-open aml_vision_demo_fentanyl.html      # macOS — or just double-click it
+python3 scripts/build.py fentanyl      # -> dist/fentanyl/index.html
+python3 scripts/build.py trade-based   # -> dist/trade-based/index.html
+python3 scripts/build.py all           # build every typology
+
+open dist/fentanyl/index.html          # macOS — or just double-click it
 ```
 
-It runs offline from `file://`. Fonts fall back to system serif/sans/mono if offline.
+The built file runs offline from `file://`. Fonts fall back to system serif/sans/mono
+if offline. Content lives in `config/typologies/*.json`; the engine (`index.html`) is
+generic and never carries typology copy.
+
+## Add a typology
+
+1. Copy an existing `config/typologies/<id>.json`, edit it against `config/schema.md`
+   (advisory text must be **public-source and paraphrased**; figures illustrative).
+2. `python3 scripts/build.py <id>` — the build validates the config against the schema
+   and fails loud on any violation, then writes `dist/<id>/index.html`.
+
+No engine edits required.
 
 ## Present it
 
-- Open the file in the presentation browser, fullscreen.
+- Build the typology you want and open `dist/<id>/index.html` in the presentation browser,
+  fullscreen. To switch typologies on stage, open the other built file.
 - Drive it with the on-screen **Back / Next** buttons; the stepper rail at the top is
   clickable to jump to any act already reached.
 - **Act 3** (Human review) requires you to select at least one candidate before Next
@@ -54,5 +71,6 @@ Keyboard navigation, reset, and speaker-notes are planned for M3 (see HANDOFF.md
 
 ## Status
 
-**M0 — bootstrap.** Baseline demo imported and runs from the repo. Next: M1, the
-config-driven refactor (extract typology content to JSON, add the single-file build).
+**M2 — multi-typology.** Config-driven engine (M1) + two typologies: **fentanyl** and
+**trade-based ML**, switchable at build time with no engine edits. Next: M3, presenter
+polish (keyboard nav, reset, reduced-motion). See `HANDOFF.md §8` for the milestone plan.

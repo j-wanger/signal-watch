@@ -30,9 +30,9 @@ a typology = adding one JSON file + `python3 scripts/build.py <id>`. No engine e
 |-------|-----|------|-------|
 | `id` | yes | string | kebab id, matches filename stem |
 | `label` | yes | string | human label for selectors |
-| `steps` | yes | string[7] | stepper rail labels, one per act (act0…act6) |
-| `next_labels` | yes | string[8] | Next-button label per act + final "Run again" |
-| `hints` | yes | string[7] | control-bar hint per act ("" allowed) |
+| `steps` | yes | string[7] | stepper rail labels, exactly one per act (act0…act6); RENDER is fixed at 7 acts |
+| `next_labels` | yes | string[≥7] | Next-button label per act (+ conventional 8th "Run again"); engine indexes 0–6 |
+| `hints` | yes | string[≥7] | control-bar hint per act ("" allowed); engine indexes 0–6 (baseline carries a trailing 8th) |
 | `brand` | no | `{title, subtitle}` | header chrome; defaults to "Signal Engine" / "AML Detection · Vision Prototype" |
 | `badge` | no | string | always-visible trust badge; default "Illustrative data & outputs" |
 | `anchor` | yes | object | see below — typology-specific narrative copy |

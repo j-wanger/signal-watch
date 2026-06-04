@@ -4,3 +4,6 @@
 [2026-06-04T19:15:46] PLAN -- Phase 2 (M1) planned, 6 tasks, 3 decisions (minimal structure: engine template + JSON config + stdlib build inliner)
 [2026-06-04T19:15:46] IMPL -- Phase 2 (M1) all 6 tasks done; dist/index.html verified byte-identical to baseline; awaiting delivery acceptance + /dev-debrief
 [2026-06-04T19:15:46] DEBRIEF -- Phase 2 (M1) completed + accepted; journal 2026-06-04-m1-config-driven-refactor; next: /dev-plan M2
+[2026-06-04T19:15:46] PLAN -- Phase 3 (M2) planned, 4 tasks, 3 decisions (TBML typology, build-time switch, build-boundary validation)
+[2026-06-04T19:15:46] IMPL -- Phase 3 (M2) all 4 tasks done; TBML added as config-only, engine untouched (zero index.html diff); fentanyl regression byte-identical
+[2026-06-04T19:15:46] DEBRIEF -- Phase 3 (M2) completed + accepted; journal 2026-06-04-m2-multi-typology; next: /dev-plan M3

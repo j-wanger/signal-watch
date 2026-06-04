@@ -1,0 +1,29 @@
+# Never commit secrets — the browser/frontend never holds a credential (HANDOFF §4.5)
+*.key
+*.pem
+*.token
+.env
+.env.*
+secrets*.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Python (only if an optional build script / backend is added later)
+__pycache__/
+*.pyc
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Node (not used; guard only)
+node_modules/
+
+# Audit trail (forensic, not source)
+.nana/audit.jsonl

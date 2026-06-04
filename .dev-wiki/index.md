@@ -4,7 +4,7 @@
 
 ### Phases
 - [[phase-01-bootstrap|Phase 1: Bootstrap (M0)]] — completed
-- [[phase-02-config-driven-refactor|Phase 2: Config-driven refactor (M1)]] — **active**
+- [[phase-02-config-driven-refactor|Phase 2: Config-driven refactor (M1)]] — completed
 - [[phase-03-multi-typology|Phase 3: Multi-typology (M2)]] — not-started
 - [[phase-04-presenter-polish|Phase 4: Presenter polish (M3)]] — not-started
 - [[phase-05-live-pregen-mode|Phase 5: Live / pre-gen mode (M4, optional)]] — not-started
@@ -14,7 +14,7 @@
 - None yet
 
 ### Journal
-- None yet
+- [[2026-06-04-m1-config-driven-refactor|2026-06-04 · M1 config-driven refactor]]
 
 ## By Hierarchy
 

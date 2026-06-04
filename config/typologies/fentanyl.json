@@ -1,0 +1,71 @@
+{
+  "id": "fentanyl",
+  "label": "Illicit synthetic opioids (fentanyl)",
+  "steps": ["The blind spot", "Read advisory", "Assess coverage", "Human review", "Agent builds", "Combination lift", "Loop closes"],
+  "next_labels": ["Begin ›", "Read the advisory ›", "Assess coverage ›", "Review candidates ›", "Build selected ›", "See the lift ›", "Close the loop ›", "Run again ↺"],
+  "hints": ["", "Agent ingests the advisory and proposes signals", "Candidates checked against our library + data", "You decide what we build — human in the loop", "You confirm the proposal — second human gate", "Why atoms beat monolithic scenarios", "The blind spot closes — and stays closed", ""],
+  "anchor": {
+    "hook_eyebrow": "The question that keeps compliance officers awake",
+    "hook_title": "What aren't we <em>watching?</em>",
+    "hook_lead": "Here is our monitoring coverage for one threat — <b>illicit synthetic-opioid (fentanyl) laundering</b>. Green is covered by a live signal. Amber is partial. <b style=\"color:var(--rose)\">Red is a known typology we are not catching.</b> The red rows are where the next enforcement headline lives.",
+    "close_title": "The blind spot closes — <em>and stays closed</em>",
+    "close_delta": "▲ flow-through now covered · courier queued",
+    "coverage_noun": "fentanyl typologies",
+    "lift_rationale": "This is the case for <b style=\"color:var(--ink)\">atoms over monolithic scenarios</b>. A flow-through rule alone floods the queue. Composed with fan-in and account-age, it becomes a precise, explainable rule — and the engine <b style=\"color:var(--ink)\">discovers that combination</b> instead of an analyst guessing it.",
+    "source": "Indicators grounded in the FINTRAC Operational Alert on illicit synthetic opioids (Jan 2025) &amp; FinCEN FIN-2019-A006 / FIN-2024-A002"
+  },
+  "coverage": {
+    "indicators": [
+      { "id": "IND-01", "label": "Inbound e-transfer fan-in from unrelated senders", "status": "covered" },
+      { "id": "IND-02", "label": "Rapid pass-through / flow-through account", "status": "gap", "target": true, "sub": "funds in → out within days, little balance retained" },
+      { "id": "IND-03", "label": "Nominee / third-party account control", "status": "partial" },
+      { "id": "IND-04", "label": "Sub-threshold structured cash deposits", "status": "covered" },
+      { "id": "IND-05", "label": "Cross-border payments to precursor-chemical suppliers", "status": "gap" },
+      { "id": "IND-06", "label": "Pill-press / encapsulation equipment purchases", "status": "gap" },
+      { "id": "IND-07", "label": "Online-gambling processor layering", "status": "partial" },
+      { "id": "IND-08", "label": "Courier / freight payments inconsistent with profile", "status": "gap" },
+      { "id": "IND-09", "label": "Virtual-asset conversion shortly after inflows", "status": "covered" },
+      { "id": "IND-10", "label": "Front-company MCC / activity mismatch", "status": "partial" }
+    ]
+  },
+  "advisory_stream": [
+    { "t": "FINTRAC Operational Alert — Laundering the Proceeds of Illicit Synthetic Opioids (Jan 2025). " },
+    { "t": "Derived from roughly " },
+    { "t": "5,000 fentanyl-related STRs", "hl": true },
+    { "t": " filed 2020–2023. Organized groups import precursor chemicals and lab equipment from overseas suppliers. " },
+    { "t": "Proceeds are commonly moved through " },
+    { "t": "e-transfer fan-in into flow-through accounts", "hl": true },
+    { "t": ", layered via " },
+    { "t": "nominees and online-gambling processors", "hl": true },
+    { "t": ", and dispersed through " },
+    { "t": "courier and freight networks", "hl": true },
+    { "t": ". Detailed, indicator-driven narratives are expected." }
+  ],
+  "candidates": [
+    { "id": "C1", "name": "E-transfer fan-in from unrelated senders", "type": "entity", "cover": "covered", "data": "available" },
+    { "id": "C2", "name": "Rapid pass-through / flow-through", "type": "entity", "cover": "gap", "data": "available", "target": true,
+      "definition": {
+        "signal_name": "S-FLOW-THROUGH-RETAIL",
+        "class": "entity · account-level · stateful",
+        "features": ["inbound_credit_count_7d", "outbound_debit_count_7d", "retained_balance_ratio", "distinct_sender_count_7d"],
+        "logic": "inflows ≈ outflows within a short window AND retained balance ratio &lt; 0.1",
+        "window": "rolling 7 days",
+        "source": "EMT transaction features (Gold)",
+        "route": "Tier-1 alert → gate candidate"
+      }
+    },
+    { "id": "C3", "name": "Nominee / third-party control", "type": "relationship", "cover": "partial", "data": "available" },
+    { "id": "C4", "name": "Sub-threshold structured cash", "type": "entity", "cover": "covered", "data": "available" },
+    { "id": "C5", "name": "Payments to overseas chemical suppliers", "type": "entity", "cover": "gap", "data": "partial" },
+    { "id": "C6", "name": "Pill-press / lab-equipment merchant", "type": "entity", "cover": "gap", "data": "insufficient" },
+    { "id": "C7", "name": "Online-gambling processor flows", "type": "entity", "cover": "partial", "data": "available" },
+    { "id": "C8", "name": "Courier / freight vs stated business", "type": "entity", "cover": "gap", "data": "available" },
+    { "id": "C9", "name": "Conversion to virtual assets", "type": "entity", "cover": "covered", "data": "available" }
+  ],
+  "lift": [
+    { "name": "S-FLOW-THROUGH alone", "combo": "new signal in isolation", "value": 18, "strength": "weak" },
+    { "name": "+ E-transfer fan-in (existing)", "combo": "S-FLOW × S-FANIN", "value": 64, "strength": "mid" },
+    { "name": "+ Account age &lt; 90 days (existing)", "combo": "S-FLOW × S-FANIN × S-NEWACCT", "value": 83, "strength": "strong" }
+  ],
+  "stats": { "fire_count": 1240, "standalone_precision": 18, "best_combo_precision": 83 }
+}

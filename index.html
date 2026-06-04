@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AML Signal Engine — Vision Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0e12;--bg2:#10131a;--panel:#151922;--panel2:#1a1f29;
+    --line:#262c39;--line2:#333b4c;--ink:#e9ebf0;--muted:#98a2b5;--faint:#6a7388;
+    --signal:#f6a623;--teal:#4fd1c5;--blue:#5aa9ff;--rose:#ef6079;--green:#54c98a;--violet:#b08cff;
+    --accent:var(--signal);
+    --mono:'JetBrains Mono',ui-monospace,monospace;--body:'Archivo',system-ui,sans-serif;--display:'Newsreader',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1100px 560px at 84% -10%,rgba(246,166,35,.08),transparent 60%),
+      radial-gradient(820px 460px at -6% 8%,rgba(90,169,255,.06),transparent 55%),
+      var(--bg);
+    color:var(--ink);font-family:var(--body);line-height:1.5;-webkit-font-smoothing:antialiased;
+    min-height:100vh;display:flex;flex-direction:column}
+  .shell{max-width:1080px;margin:0 auto;width:100%;padding:0 22px;flex:1;display:flex;flex-direction:column}
+
+  /* header */
+  header{padding:26px 0 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:13px}
+  .brand .mark{width:34px;height:34px;border-radius:9px;border:1px solid var(--signal);display:grid;place-items:center;color:var(--signal);font-family:var(--mono);font-size:15px;box-shadow:0 0 18px -4px var(--signal) inset}
+  .brand .bt{font-family:var(--display);font-size:20px;line-height:1}
+  .brand .bs{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);margin-top:3px}
+  .badge{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--signal);border:1px solid var(--signal);border-radius:999px;padding:6px 12px;background:rgba(246,166,35,.06)}
+
+  /* stepper */
+  .stepper{display:flex;gap:4px;padding:16px 0;overflow-x:auto}
+  .step{flex:1;min-width:84px;cursor:pointer;opacity:.5;transition:.25s}
+  .step.done,.step.active{opacity:1}
+  .step .sbar{height:3px;border-radius:2px;background:var(--line2);overflow:hidden}
+  .step.done .sbar,.step.active .sbar{background:var(--signal)}
+  .step .sl{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:7px;white-space:nowrap}
+  .step.active .sl{color:var(--ink)}
+
+  /* stage */
+  .stage{flex:1;padding:24px 0 8px;min-height:430px;position:relative}
+  .scene{animation:fade .5s cubic-bezier(.2,.7,.2,1)}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--signal);margin-bottom:10px}
+  h2{font-family:var(--display);font-weight:500;font-size:clamp(24px,4vw,36px);line-height:1.08;letter-spacing:-.01em;margin-bottom:12px}
+  h2 em{font-style:italic;color:var(--muted)}
+  .lead{color:var(--muted);max-width:680px;font-size:15.5px;margin-bottom:22px}
+  .lead b{color:var(--ink)}
+
+  /* coverage map */
+  .covwrap{display:grid;grid-template-columns:1fr 230px;gap:20px;align-items:start}
+  @media(max-width:780px){.covwrap{grid-template-columns:1fr}}
+  .covgrid{display:flex;flex-direction:column;gap:6px}
+  .covrow{display:flex;align-items:center;gap:12px;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:10px 13px;transition:.4s}
+  .covrow .clabel{flex:1;font-size:13.5px}
+  .covrow .csub{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:2px}
+  .pill{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:6px;white-space:nowrap;border:1px solid currentColor}
+  .pill.covered{color:var(--green)}
+  .pill.partial{color:var(--signal)}
+  .pill.gap{color:var(--rose)}
+  .covrow.flip{border-color:var(--green);box-shadow:0 0 0 1px var(--green),0 10px 30px -16px var(--green)}
+  .covrow.target{border-color:var(--rose)}
+  .gauge{border:1px solid var(--line);background:linear-gradient(180deg,var(--panel2),var(--panel));border-radius:13px;padding:20px;text-align:center;position:sticky;top:10px}
+  .gauge .gh{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .gauge .gnum{font-family:var(--display);font-size:54px;line-height:1;margin:8px 0 2px;color:var(--signal)}
+  .gauge .gd{font-size:12px;color:var(--muted)}
+  .gauge .gbar{height:7px;border-radius:4px;background:var(--bg2);margin-top:14px;overflow:hidden;border:1px solid var(--line)}
+  .gauge .gfill{height:100%;background:linear-gradient(90deg,var(--rose),var(--signal),var(--green));transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+  .gauge .gdelta{font-family:var(--mono);font-size:11px;color:var(--green);margin-top:10px;opacity:0;transition:.5s}
+  .gauge .gdelta.show{opacity:1}
+
+  /* advisory ingest */
+  .ingest{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  @media(max-width:780px){.ingest{grid-template-columns:1fr}}
+  .doc{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:18px;position:relative}
+  .doc .docmeta{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--faint);border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px;display:flex;justify-content:space-between;gap:8px}
+  .doc .doctext{font-family:var(--display);font-size:14.5px;line-height:1.6;color:var(--muted);min-height:188px}
+  .doc .doctext .hl{color:var(--ink);background:rgba(246,166,35,.14);border-radius:3px;padding:0 2px}
+  .caret{display:inline-block;width:7px;height:15px;background:var(--signal);vertical-align:-2px;animation:blink 1s steps(2) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .extracted{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:18px}
+  .extracted .eh{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:12px;display:flex;justify-content:space-between}
+  .extracted .eh b{color:var(--signal);font-weight:500}
+  .sig{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-left:3px solid var(--signal);background:var(--bg2);border-radius:8px;padding:9px 12px;margin-bottom:7px;opacity:0;transform:translateX(8px);animation:sigin .4s forwards}
+  @keyframes sigin{to{opacity:1;transform:none}}
+  .sig .sigid{font-family:var(--mono);font-size:10px;color:var(--faint);flex:none}
+  .sig .signame{font-size:13px;flex:1}
+  .sig .sigtype{font-family:var(--mono);font-size:9px;color:var(--signal);border:1px solid var(--signal);border-radius:5px;padding:2px 6px}
+
+  /* assessment matrix */
+  .matrix{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .mrow{display:grid;grid-template-columns:1fr 150px 150px;gap:0;border-bottom:1px solid var(--line);align-items:center}
+  .mrow:last-child{border-bottom:0}
+  .mrow.head{background:var(--panel2)}
+  .mrow.head .mc{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .mc{padding:11px 14px;font-size:13px}
+  .mc.sig{font-weight:500}
+  .mc .mid{font-family:var(--mono);font-size:10px;color:var(--faint);margin-right:7px}
+  .stat{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px}
+  .dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .mrow.opportunity{background:rgba(239,96,121,.06)}
+  .mrow.opportunity .mc.sig{color:var(--ink)}
+  .flag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--rose);border:1px solid var(--rose);border-radius:5px;padding:2px 6px;margin-left:8px}
+
+  /* selection gate */
+  .gatebox{border:1px solid var(--signal);border-radius:12px;background:rgba(246,166,35,.04);padding:8px 8px;margin-bottom:18px}
+  .gatebox .gtag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--signal);padding:8px 12px 4px}
+  .selrow{display:flex;align-items:center;gap:13px;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:12px 14px;margin:8px;cursor:pointer;transition:.18s}
+  .selrow:hover{border-color:var(--line2)}
+  .selrow.on{border-color:var(--signal);box-shadow:0 0 0 1px var(--signal)}
+  .selrow.disabled{opacity:.45;cursor:not-allowed}
+  .cbox{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--line2);flex:none;display:grid;place-items:center;transition:.18s}
+  .selrow.on .cbox{background:var(--signal);border-color:var(--signal);color:#0c0e12;font-weight:700}
+  .selinfo{flex:1}
+  .selinfo .sn{font-size:14px;font-weight:600}
+  .selinfo .sd{font-size:12px;color:var(--muted)}
+  .dataflag{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;border:1px solid currentColor;border-radius:5px;padding:3px 7px;white-space:nowrap}
+  .dataflag.av{color:var(--green)}
+  .dataflag.pa{color:var(--signal)}
+  .dataflag.no{color:var(--rose)}
+
+  /* build proposal */
+  .proposal{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:start}
+  @media(max-width:780px){.proposal{grid-template-columns:1fr}}
+  .spec{border:1px solid var(--line);background:var(--panel);border-radius:12px;overflow:hidden}
+  .spec .spech{background:var(--panel2);border-bottom:1px solid var(--line);padding:12px 16px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--signal);display:flex;justify-content:space-between}
+  .specrow{display:flex;gap:12px;padding:10px 16px;border-bottom:1px dashed var(--line);font-size:12.5px}
+  .specrow:last-child{border-bottom:0}
+  .specrow .sk{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);flex:none;width:96px;padding-top:2px}
+  .specrow .sv{color:var(--ink)}
+  .specrow .sv code{font-family:var(--mono);font-size:11.5px;background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--teal)}
+  .buildside{display:flex;flex-direction:column;gap:12px}
+  .buildlog{border:1px solid var(--line);background:var(--bg2);border-radius:12px;padding:16px;min-height:160px}
+  .blstep{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--faint);padding:6px 0;transition:.3s}
+  .blstep .bi{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line2);flex:none;display:grid;place-items:center;font-size:11px}
+  .blstep.run{color:var(--ink)}
+  .blstep.run .bi{border-color:var(--signal);color:var(--signal);animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .blstep.ok{color:var(--ink)}
+  .blstep.ok .bi{border-color:var(--green);background:var(--green);color:#0c0e12}
+  .blstep.gate .bi{border-color:var(--violet);color:var(--violet)}
+  .blstep.gate.ok .bi{background:var(--violet);color:#0c0e12}
+
+  /* lift chart */
+  .liftwrap{display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start}
+  @media(max-width:780px){.liftwrap{grid-template-columns:1fr}}
+  .lift{border:1px solid var(--line);background:var(--panel);border-radius:13px;padding:22px}
+  .liftbar{margin-bottom:16px}
+  .liftbar .llabel{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px}
+  .liftbar .llabel .ln{color:var(--ink)}
+  .liftbar .llabel .ln .combo{font-family:var(--mono);font-size:10px;color:var(--faint);display:block;margin-top:2px}
+  .liftbar .llabel .lv{font-family:var(--mono);font-weight:700}
+  .track{height:14px;background:var(--bg2);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .fill{height:100%;width:0;border-radius:7px;transition:width 1.2s cubic-bezier(.2,.7,.2,1)}
+  .fill.weak{background:linear-gradient(90deg,#6a3a3a,var(--rose))}
+  .fill.mid{background:linear-gradient(90deg,#7a5a1f,var(--signal))}
+  .fill.strong{background:linear-gradient(90deg,#2f6a47,var(--green))}
+  .liftside{border:1px solid var(--line2);border-left:3px solid var(--signal);background:rgba(246,166,35,.05);border-radius:0 12px 12px 0;padding:18px}
+  .liftside .lt{font-family:var(--display);font-size:18px;font-style:italic;margin-bottom:8px}
+  .liftside p{font-size:13px;color:var(--muted)}
+  .firestat{display:flex;gap:18px;margin-bottom:20px;flex-wrap:wrap}
+  .firestat .fs{border:1px solid var(--line);border-radius:10px;padding:12px 16px;background:var(--panel)}
+  .firestat .fsn{font-family:var(--display);font-size:26px;color:var(--ink)}
+  .firestat .fsl{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:2px}
+
+  /* closing */
+  .closing{text-align:center;max-width:640px;margin:0 auto;padding-top:10px}
+  .closing .loopicon{font-size:40px;color:var(--signal);margin-bottom:10px}
+  .closing h2{margin-bottom:14px}
+  .recap{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:22px}
+  .recap span{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--line2);border-radius:999px;padding:7px 13px}
+  .recap span b{color:var(--signal);font-weight:500}
+
+  .framenote{margin-top:18px;font-size:12px;color:var(--faint);border-left:2px solid var(--line2);padding-left:12px;font-style:italic;font-family:var(--display)}
+
+  /* controls */
+  .controls{border-top:1px solid var(--line);padding:16px 0 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;position:sticky;bottom:0;background:linear-gradient(0deg,var(--bg) 60%,transparent)}
+  .btn{font-family:var(--body);font-weight:600;font-size:14px;border-radius:10px;padding:12px 22px;cursor:pointer;border:1px solid var(--line2);background:var(--panel);color:var(--ink);transition:.18s}
+  .btn:hover{background:var(--panel2)}
+  .btn.primary{background:var(--signal);color:#0c0e12;border-color:var(--signal)}
+  .btn.primary:hover{filter:brightness(1.08)}
+  .btn.primary:disabled{opacity:.4;cursor:not-allowed;filter:none}
+  .btn.ghost{background:none;border-color:transparent;color:var(--muted)}
+  .btn.ghost:hover{color:var(--ink)}
+  .ctrlhint{font-family:var(--mono);font-size:11px;color:var(--faint)}
+
+  footer{font-family:var(--mono);font-size:10px;color:var(--faint);text-align:center;padding:0 0 18px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <div class="mark">◈</div>
+      <div><div class="bt" id="brandTitle">Signal Engine</div><div class="bs" id="brandSub">AML Detection · Vision Prototype</div></div>
+    </div>
+    <div class="badge" id="badge">Illustrative data &amp; outputs</div>
+  </header>
+
+  <div class="stepper" id="stepper"></div>
+  <div class="stage" id="stage"></div>
+
+  <div class="controls">
+    <button class="btn ghost" id="back">‹ Back</button>
+    <div class="ctrlhint" id="hint"></div>
+    <button class="btn primary" id="next">Begin ›</button>
+  </div>
+
+  <footer>
+    Scripted walkthrough of the target operating loop · signals &amp; figures are illustrative<br>
+    <span id="footSource"></span>
+  </footer>
+</div>
+
+<script>
+// Typology content is injected here at build time (scripts/build.py fills the
+// placeholder below from config/typologies/<id>.json). The engine is generic — no typology copy.
+const CONFIG = __CONFIG__;
+validateConfig(CONFIG);   // fill safe defaults so the derivations below never throw on a partial config
+
+const ANCHOR = CONFIG.anchor || {};
+const STATS = Object.assign({fire_count:0, standalone_precision:0, best_combo_precision:0}, CONFIG.stats || {});
+const BRAND = CONFIG.brand || {title:'Signal Engine', subtitle:'AML Detection · Vision Prototype'};
+const BADGE = CONFIG.badge || 'Illustrative data & outputs';
+const STEPS = CONFIG.steps;
+const INDICATORS = CONFIG.coverage.indicators;
+const ADVISORY = CONFIG.advisory_stream;
+// definition → def so the act renderers keep using c.def.*
+const CANDIDATES = CONFIG.candidates.map(c => c.definition ? Object.assign({}, c, {def:c.definition}) : c);
+// value/strength → v/cls used by the lift renderer
+const LIFT = CONFIG.lift.map(l => ({name:l.name, combo:l.combo, v:l.value, cls:l.strength}));
+const NEXT_LABEL = CONFIG.next_labels;
+const HINTS = CONFIG.hints;
+const TARGET = CANDIDATES.find(c => c.target);          // Act 4 build subject (the target candidate)
+const TARGET_IND = INDICATORS.find(i => i.target);      // Act 6 now-covered indicator (the target row)
+
+const COLORS={covered:'var(--green)',partial:'var(--signal)',gap:'var(--rose)',available:'var(--green)','partial-d':'var(--signal)',insufficient:'var(--rose)'};
+
+/* ---------- defensive rendering ---------- */
+function validateConfig(c){
+  if(!c||typeof c!=='object') return;
+  if(!c.coverage||typeof c.coverage!=='object') c.coverage={};
+  if(!Array.isArray(c.coverage.indicators)) c.coverage.indicators=[];
+  if(!Array.isArray(c.candidates)) c.candidates=[];
+  if(!Array.isArray(c.lift)) c.lift=[];
+  if(!Array.isArray(c.advisory_stream)) c.advisory_stream=[];
+  if(!Array.isArray(c.steps)) c.steps=['','','','','','',''];
+  if(!Array.isArray(c.next_labels)) c.next_labels=['Begin ›','Next ›','Next ›','Next ›','Next ›','Next ›','Next ›','Run again ↺'];
+  if(!Array.isArray(c.hints)) c.hints=['','','','','','',''];
+  if(!c.anchor||typeof c.anchor!=='object') c.anchor={};
+  if(!c.stats||typeof c.stats!=='object') c.stats={};
+}
+function ph(label){return '<div style="border:1px dashed var(--line2);border-radius:10px;padding:18px;color:var(--muted);font-family:var(--mono);font-size:12px;background:var(--panel);line-height:1.6">⚠ '+label+'</div>';}
+function phScene(i){const name=(STEPS&&STEPS[i])||('Step '+i);
+  return '<div class="scene"><div class="eyebrow">'+name+'</div><h2>This step can\'t render from the current config</h2>'
+    +ph('Required data for "'+name+'" is missing or malformed — the rest of the walkthrough still works.')+'</div>';}
+
+let act=0, selected=new Set(TARGET?[TARGET.id]:[]), confirmed=false, timers=[];
+const stage=document.getElementById('stage'), stepper=document.getElementById('stepper');
+const nextBtn=document.getElementById('next'), backBtn=document.getElementById('back'), hint=document.getElementById('hint');
+
+function clearTimers(){timers.forEach(t=>clearTimeout(t));timers=[]}
+function T(fn,ms){const id=setTimeout(fn,ms);timers.push(id);return id}
+
+function renderStepper(){
+  stepper.innerHTML=STEPS.map((s,i)=>`<div class="step ${i<act?'done':''} ${i===act?'active':''}" data-i="${i}"><div class="sbar"></div><div class="sl">${i}· ${s}</div></div>`).join('');
+  stepper.querySelectorAll('.step').forEach(el=>el.onclick=()=>{const i=+el.dataset.i;if(i<=maxReached)goto(i)});
+}
+let maxReached=0;
+
+function statPill(s){const map={covered:'covered',partial:'partial',gap:'gap'};return `<span class="pill ${map[s]}">${s==='gap'?'not covered':s}</span>`}
+
+function coverageIndex(extra){
+  if(!INDICATORS.length)return 0;
+  let v=0;INDICATORS.forEach(x=>{let st=x.status;if(extra&&extra.includes(x.id))st='covered';v+=st==='covered'?1:st==='partial'?0.5:0});
+  return Math.round(v/INDICATORS.length*100);
+}
+
+/* ---------- ACT RENDERERS ---------- */
+function act0(){
+  const cov=coverageIndex();
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">${ANCHOR.hook_eyebrow||''}</div>
+    <h2>${ANCHOR.hook_title||''}</h2>
+    <p class="lead">${ANCHOR.hook_lead||''}</p>
+    <div class="covwrap">
+      <div class="covgrid" id="covgrid">${INDICATORS.map(x=>`
+        <div class="covrow ${x.target?'target':''}" data-id="${x.id}">
+          <div class="clabel">${x.label}${x.sub?`<div class="csub">${x.sub}</div>`:''}</div>
+          ${statPill(x.status)}
+        </div>`).join('')}
+      </div>
+      <div class="gauge">
+        <div class="gh">Coverage index</div>
+        <div class="gnum" id="gnum">${cov}%</div>
+        <div class="gd">of known ${ANCHOR.coverage_noun||''}</div>
+        <div class="gbar"><div class="gfill" id="gfill" style="width:${cov}%"></div></div>
+        <div class="gdelta" id="gdelta"></div>
+      </div>
+    </div>
+    <div class="framenote">This walkthrough shows how the signal engine finds and closes those red rows — end to end, with a human in the loop at every decision.</div>
+  </div>`;
+}
+
+function act1(){
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">Step 1 · Advisory → signals</div>
+    <h2>The agent reads the <em>advisory</em></h2>
+    <p class="lead">A new regulatory advisory lands. Instead of a human spending a week mapping it, the agent ingests it and proposes <b>candidate signals</b> — typed, reusable detection primitives — in seconds.</p>
+    <div class="ingest">
+      <div class="doc">
+        <div class="docmeta"><span>SOURCE DOCUMENT</span><span>ingesting…</span></div>
+        <div class="doctext" id="doctext"><span class="caret"></span></div>
+      </div>
+      <div class="extracted">
+        <div class="eh"><span>EXTRACTED CANDIDATE SIGNALS</span><b id="sigcount">0</b></div>
+        <div id="siglist"></div>
+      </div>
+    </div>
+  </div>`;
+  streamAdvisory();
+}
+function streamAdvisory(){
+  const el=document.getElementById('doctext');let html='';let i=0;
+  function step(){
+    if(i>=ADVISORY.length){el.innerHTML=html;T(extractSignals,350);return}
+    const seg=ADVISORY[i];const words=seg.t.split(' ');let w=0;
+    function word(){
+      if(w>=words.length){i++;T(step,seg.hl?180:40);return}
+      const piece=words[w]+(w<words.length-1?' ':'');
+      html+=seg.hl?`<span class="hl">${piece}</span>`:piece;
+      el.innerHTML=html+'<span class="caret"></span>';w++;T(word,seg.hl?34:18);
+    }word();
+  }step();
+}
+function extractSignals(){
+  const list=document.getElementById('siglist');const cnt=document.getElementById('sigcount');
+  document.querySelector('.docmeta span:last-child').textContent='analysed ✓';
+  CANDIDATES.forEach((c,k)=>{
+    T(()=>{
+      const d=document.createElement('div');d.className='sig';d.style.animationDelay='0s';
+      d.innerHTML=`<span class="sigid">${c.id}</span><span class="signame">${c.name}</span><span class="sigtype">${c.type}</span>`;
+      list.appendChild(d);cnt.textContent=k+1;
+    },k*230);
+  });
+}
+
+function act2(){
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">Step 2 · Coverage assessment</div>
+    <h2>Assessed against our <em>library &amp; data</em></h2>
+    <p class="lead">Each candidate is checked two ways: do we <b>already cover it</b>, and do we <b>have the data</b> to build it? The rows that light up are uncovered typologies <b style="color:var(--rose)">where we already hold the data</b> — the immediate opportunities.</p>
+    <div class="matrix">
+      <div class="mrow head"><div class="mc">Candidate signal</div><div class="mc">Library coverage</div><div class="mc">Data in repo</div></div>
+      ${CANDIDATES.map(c=>{
+        const opp=c.cover==='gap'&&c.data==='available';
+        const dCls=c.data==='available'?'available':c.data==='partial'?'partial-d':'insufficient';
+        return `<div class="mrow ${opp?'opportunity':''}">
+          <div class="mc sig"><span class="mid">${c.id}</span>${c.name}${opp?'<span class="flag">build now</span>':''}</div>
+          <div class="mc"><span class="stat"><span class="dot" style="background:${COLORS[c.cover]}"></span>${c.cover==='gap'?'not covered':c.cover}</span></div>
+          <div class="mc"><span class="stat"><span class="dot" style="background:${COLORS[dCls]}"></span>${c.data}</span></div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="framenote">This is the "missed-monitoring" radar running continuously — the same assessment, re-run automatically every time a new advisory or typology appears.</div>
+  </div>`;
+}
+
+function act3(){
+  const buildable=CANDIDATES.filter(c=>c.cover==='gap');
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">Step 3 · Human review — gate #1</div>
+    <h2>You decide what we <em>build</em></h2>
+    <p class="lead">The agent proposes; the human disposes. Here are the uncovered candidates. Those with data ready are selectable; the rest are flagged for data work first. <b>Pick what to build.</b></p>
+    <div class="gatebox">
+      <div class="gtag">◈ Human-in-the-loop — selection required before any build</div>
+      ${buildable.map(c=>{
+        const ok=c.data==='available';
+        const on=selected.has(c.id);
+        const dCls=c.data==='available'?'av':c.data==='partial'?'pa':'no';
+        return `<div class="selrow ${on?'on':''} ${ok?'':'disabled'}" data-id="${c.id}">
+          <div class="cbox">${on?'✓':''}</div>
+          <div class="selinfo"><div class="sn">${c.name}</div><div class="sd">${c.id} · ${ok?'data ready in repo':c.data==='partial'?'partial data — enrichment needed first':'insufficient data — sourcing required'}</div></div>
+          <span class="dataflag ${dCls}">${c.data} data</span>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="framenote">No signal is ever built — let alone deployed — without this explicit human selection. Every choice is logged for Model Validation.</div>
+  </div>`;
+  stage.querySelectorAll('.selrow:not(.disabled)').forEach(r=>r.onclick=()=>{
+    const id=r.dataset.id;if(selected.has(id))selected.delete(id);else selected.add(id);
+    r.classList.toggle('on');r.querySelector('.cbox').textContent=selected.has(id)?'✓':'';
+    updateControls();
+  });
+}
+
+function act4(){
+  const c=TARGET;
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">Step 4 · Agent builds — gate #2</div>
+    <h2>The agent drafts the <em>signal</em></h2>
+    <p class="lead">For the selected gap, the agent generates a full signal definition mapped to real data features — and presents it as a <b>proposal</b>. Nothing is built until you confirm.</p>
+    <div class="proposal">
+      <div class="spec">
+        <div class="spech"><span>PROPOSED · ${c.def.signal_name}</span><span>v0.1 · draft</span></div>
+        <div class="specrow"><span class="sk">Class</span><span class="sv">${c.def.class}</span></div>
+        <div class="specrow"><span class="sk">Features</span><span class="sv">${c.def.features.map(f=>`<code>${f}</code>`).join(' ')}</span></div>
+        <div class="specrow"><span class="sk">Logic</span><span class="sv">${c.def.logic}</span></div>
+        <div class="specrow"><span class="sk">Window</span><span class="sv">${c.def.window}</span></div>
+        <div class="specrow"><span class="sk">Data source</span><span class="sv">${c.def.source}</span></div>
+        <div class="specrow"><span class="sk">Initial route</span><span class="sv">${c.def.route}</span></div>
+      </div>
+      <div class="buildside">
+        <div class="buildlog" id="buildlog">
+          <div class="blstep" data-s="0"><span class="bi">1</span>Draft definition from advisory</div>
+          <div class="blstep" data-s="1"><span class="bi">2</span>Map to available data features</div>
+          <div class="blstep" data-s="2"><span class="bi">3</span>Generate proposal</div>
+          <div class="blstep gate" data-s="3"><span class="bi">◈</span>Await human confirmation</div>
+          <div class="blstep" data-s="4"><span class="bi">4</span>Backtest on population</div>
+          <div class="blstep gate" data-s="5"><span class="bi">⚖</span>Route to Model Validation</div>
+        </div>
+      </div>
+    </div>
+    <div class="framenote">The signal becomes a governed model artifact — versioned, validated under E-23 before it can ever drive a filing. Confirmation is the second human gate.</div>
+  </div>`;
+  // pre-confirmation steps auto-complete to the gate
+  const steps=[...stage.querySelectorAll('.blstep')];
+  [0,1,2].forEach((s,k)=>T(()=>markStep(steps[s],'ok'),300+k*420));
+  T(()=>{steps[3].classList.add('run');},300+3*420);
+}
+function markStep(el,cls){el.classList.remove('run');el.classList.add(cls);const bi=el.querySelector('.bi');if(cls==='ok')bi.textContent='✓';}
+function runBuildAfterConfirm(cb){
+  const steps=[...stage.querySelectorAll('.blstep')];
+  markStep(steps[3],'ok');steps[3].querySelector('.bi').textContent='✓';
+  T(()=>{steps[4].classList.add('run');T(()=>{markStep(steps[4],'ok');
+    T(()=>{steps[5].classList.add('run','gate');T(()=>{steps[5].classList.add('ok');steps[5].querySelector('.bi').textContent='✓';cb&&cb();},900);},500);
+  },1100);},250);
+}
+
+function act5(){
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">Step 5 · Assessment &amp; combination lift</div>
+    <h2>Alone it's noise. <em>Together</em> it's a case.</h2>
+    <p class="lead">The new signal runs against the population. By itself it fires too widely to act on. But the engine tests it <b>in combination with existing signals</b> — and that is where detection actually lives.</p>
+    <div class="firestat">
+      <div class="fs"><div class="fsn" id="f1">—</div><div class="fsl">accounts firing / month</div></div>
+      <div class="fs"><div class="fsn" id="f2">—</div><div class="fsl">standalone precision (est.)</div></div>
+      <div class="fs"><div class="fsn" id="f3">—</div><div class="fsl">best-combination precision</div></div>
+    </div>
+    <div class="liftwrap">
+      <div class="lift" id="lift">${LIFT.map((l,i)=>`
+        <div class="liftbar"><div class="llabel"><span class="ln">${l.name}<span class="combo">${l.combo}</span></span><span class="lv" id="lv${i}">0%</span></div>
+        <div class="track"><div class="fill ${l.cls}" id="fill${i}"></div></div></div>`).join('')}
+      </div>
+      <div class="liftside">
+        <div class="lt">Why this matters</div>
+        <p>${ANCHOR.lift_rationale||''}</p>
+      </div>
+    </div>
+    <div class="framenote">A combination this strong now enters the promotion gate — Clopper-Pearson precision floor, non-alert sampling, temporal hold-out — before it can file deterministically.</div>
+  </div>`;
+  T(()=>{animVal('f1',0,STATS.fire_count,900,'');},250);
+  LIFT.forEach((l,i)=>{T(()=>{document.getElementById('fill'+i).style.width=l.v+'%';animVal('lv'+i,0,l.v,1100,'%');},400+i*650);});
+  T(()=>animVal('f2',0,STATS.standalone_precision,700,'%'),500);
+  T(()=>animVal('f3',0,STATS.best_combo_precision,900,'%'),400+2*650);
+}
+function animVal(id,from,to,dur,suf){
+  const el=document.getElementById(id);if(!el)return;const start=performance.now();
+  function f(now){const p=Math.min(1,(now-start)/dur);const v=Math.round(from+(to-from)*(1-Math.pow(1-p,3)));el.textContent=(suf===''?v.toLocaleString():v)+suf;if(p<1)requestAnimationFrame(f)}
+  requestAnimationFrame(f);
+}
+
+function act6(){
+  const before=coverageIndex();const after=coverageIndex(TARGET_IND?[TARGET_IND.id]:[]);
+  stage.innerHTML=`<div class="scene closing">
+    <div class="loopicon">↻</div>
+    <div class="eyebrow" style="text-align:center">Step 6 · The loop closes</div>
+    <h2>${ANCHOR.close_title||''}</h2>
+    <p class="lead" style="margin:0 auto 6px">The new signal joins the library. Coverage rises automatically. And because the advisory radar runs continuously, the next gap is found before it becomes a headline.</p>
+    <div class="gauge" style="max-width:280px;margin:24px auto 0">
+      <div class="gh">Coverage index</div>
+      <div class="gnum" id="gnum2">${before}%</div>
+      <div class="gd">${ANCHOR.coverage_noun||''}</div>
+      <div class="gbar"><div class="gfill" id="gfill2" style="width:${before}%"></div></div>
+      <div class="gdelta show" id="gdelta2">${ANCHOR.close_delta||''}</div>
+    </div>
+    <div class="recap">
+      <span><b>Read</b> advisory → signals</span>
+      <span><b>Assessed</b> coverage + data</span>
+      <span><b>Human</b> selected</span>
+      <span><b>Agent</b> built</span>
+      <span><b>Human</b> confirmed</span>
+      <span><b>Combination</b> proven</span>
+      <span><b>Governed</b> &amp; closed</span>
+    </div>
+    <div class="framenote" style="text-align:left;max-width:560px;margin:22px auto 0">What you just saw is POC 5 (coverage) feeding POC 1 (signal discovery) and POC 3 (the engine) — the blueprint, made tangible. Every figure here is illustrative; the workflow and the decision points are real.</div>
+  </div>`;
+  T(()=>{document.getElementById('gnum2').textContent=after+'%';document.getElementById('gfill2').style.width=after+'%';animVal('gnum2',before,after,1000,'%');},500);
+}
+
+const RENDER=[act0,act1,act2,act3,act4,act5,act6];
+// per-act data requirement — if false, render a labeled placeholder instead of the act
+const ACT_REQUIRES=[
+  ()=>INDICATORS.length,                      // act0 coverage map
+  ()=>ADVISORY.length&&CANDIDATES.length,     // act1 advisory + extraction
+  ()=>CANDIDATES.length,                       // act2 matrix
+  ()=>CANDIDATES.some(c=>c.cover==='gap'),     // act3 selection gate
+  ()=>TARGET&&TARGET.def,                       // act4 proposal spec
+  ()=>LIFT.length,                              // act5 combination lift
+  ()=>INDICATORS.length                         // act6 close
+];
+
+function goto(i){
+  clearTimers();act=Math.max(0,Math.min(RENDER.length-1,i));maxReached=Math.max(maxReached,act);
+  renderStepper();
+  try{
+    if(ACT_REQUIRES[act] && !ACT_REQUIRES[act]()) stage.innerHTML=phScene(act);
+    else RENDER[act]();
+  }catch(e){ console.error('render act',act,e); stage.innerHTML=phScene(act); }
+  updateControls();window.scrollTo({top:0,behavior:'smooth'});
+}
+function updateControls(){
+  nextBtn.textContent=NEXT_LABEL[act];hint.textContent=HINTS[act];
+  backBtn.style.visibility=act===0?'hidden':'visible';
+  if(act===3){nextBtn.disabled=selected.size===0;nextBtn.textContent=`Build selected (${selected.size}) ›`;}
+  else nextBtn.disabled=false;
+}
+nextBtn.onclick=()=>{
+  if(act===RENDER.length-1){selected=new Set(TARGET?[TARGET.id]:[]);confirmed=false;goto(0);return;}
+  if(act===4 && !confirmed){confirmed=true;nextBtn.disabled=true;nextBtn.textContent='Building…';
+    runBuildAfterConfirm(()=>{nextBtn.disabled=false;goto(5);});return;}
+  goto(act+1);
+};
+backBtn.onclick=()=>{if(act===4)confirmed=false;goto(act-1)};
+
+function setChromeText(id,txt){const el=document.getElementById(id);if(el!=null&&txt!=null)el.textContent=txt;}
+function applyChrome(){
+  setChromeText('brandTitle',BRAND.title);
+  setChromeText('brandSub',BRAND.subtitle);
+  setChromeText('badge',BADGE);
+  const fs=document.getElementById('footSource');if(fs&&ANCHOR.source!=null)fs.innerHTML=ANCHOR.source;
+}
+
+applyChrome();
+goto(0);
+</script>
+</body>
+</html>

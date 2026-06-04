@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-04
 updated: 2026-06-04
 source: init
-status: active
+status: completed
 scope: ["config/**", "src/**", "scripts/build.*", "index.html", "dist/index.html"]
 entry_criteria: "M0 complete — baseline demo runs from the repo."
 exit_criteria: "Fentanyl demo is behaviourally equivalent but driven by config; dist/index.html runs from file://."
@@ -32,12 +32,12 @@ self-contained `dist/index.html`.
 
 ## Exit Criteria
 
-- [ ] `config/schema.md` written and validated against existing fentanyl content
-- [ ] fentanyl content extracted to `config/typologies/fentanyl.json`
-- [ ] engine renders all six acts generically from any valid config (no hardcoded copy)
-- [ ] defensive rendering: malformed/partial config degrades gracefully, never blanks the stage
-- [ ] build step inlines config → `dist/index.html`; verified opening from `file://`
-- [ ] behaviour is equivalent to the baseline (both gates + lift reveal intact)
+- [x] `config/schema.md` written and validated against existing fentanyl content
+- [x] fentanyl content extracted to `config/typologies/fentanyl.json`
+- [x] engine renders all six acts generically from any valid config (no hardcoded copy)
+- [x] defensive rendering: malformed/partial config degrades gracefully, never blanks the stage
+- [x] build step inlines config → `dist/index.html`; verified opening from `file://` (structural; visual via smoke-checklist)
+- [x] behaviour is equivalent to the baseline — byte-identical act HTML across all 7 acts
 
 ## Constraints (HANDOFF §3.2, §4)
 

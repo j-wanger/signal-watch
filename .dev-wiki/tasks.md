@@ -1,6 +1,21 @@
 # Tasks
 
-> Last updated: 2026-06-04T19:15:46 by /dev-plan
+> Last updated: 2026-06-04 by /dev-plan
+
+<!-- phase:phase-06-ship -->
+<!-- gate-log:phase-06 direction=approved delivery=accepted -->
+<details>
+<summary>Phase 6: Ship (M5) — COMPLETED + accepted (doc/verify only, zero engine edits)</summary>
+
+Finalize for stage: true-up two stale + fentanyl-only docs to post-M3 / per-typology reality, then run the compliance + offline `file://` hard gate against BOTH built dist. M4 (live/pre-gen) skipped by decision. Closing "ask" slide + rename + Playwright deferred. Human sign-off = delivery gate.
+
+- [x] T1 · Parameterize `tests/smoke-checklist.md` per typology | scope: tests/smoke-checklist.md | success: `! grep -q 'dist/index.html' tests/smoke-checklist.md && grep -qi 'reduced-motion' tests/smoke-checklist.md && grep -qi 'trade-based' tests/smoke-checklist.md` — stale single-file path gone, M3 controls now active verify items, per-typology fill table covers both typologies ✓ PASS
+- [x] T2 · Refresh `README.md` (M3 shipped, both typologies) | scope: README.md | success: `! grep -qi 'planned for M3\|Next: M3\|Next.*M3' README.md && grep -qi 'Esc' README.md && grep -qi 'trade-based' README.md` — status reflects shipped M3 controls (←/→/Space/Esc/↺/reduced-motion); compliance names both fentanyl AND trade-based advisory sources ✓ PASS
+- [x] T3 · Compliance self-check + offline `file://` verification (HARD GATE) | scope: dist/**, tests/smoke-checklist.md | success: `for f in dist/fentanyl/index.html dist/trade-based/index.html; do grep -q 'Illustrative data' "$f" || exit 1; done && ! grep -riE 'api[_-]?key|secret|token|password|sk-' dist/` — badge present every act both dist, advisories paraphrased+attributed, no secrets, no real-data patterns; both open from file:// offline, no console errors; pass/fail recorded in checklist. ✓ PASS (zero drift; runtime render carries from M3 on byte-identical dist; record in smoke-checklist.md)
+
+> Exit (HANDOFF §1.2): README run/present/add-typology · compliance self-check passes · both dist run offline from file:// · smoke-checklist parameterized · human sign-off (Jake, at delivery gate).
+
+</details>
 
 <!-- phase:phase-04-presenter-polish -->
 <!-- gate-log:phase-04 direction=approved delivery=accepted -->

@@ -7,13 +7,14 @@
 - [[phase-02-config-driven-refactor|Phase 2: Config-driven refactor (M1)]] — completed
 - [[phase-03-multi-typology|Phase 3: Multi-typology (M2)]] — completed (TBML, build-time switch)
 - [[phase-04-presenter-polish|Phase 4: Presenter polish (M3)]] — completed (engine-only: nav + reset + reduced-motion)
-- [[phase-05-live-pregen-mode|Phase 5: Live / pre-gen mode (M4, optional)]] — not-started
-- [[phase-06-ship|Phase 6: Ship (M5)]] — not-started
+- [[phase-05-live-pregen-mode|Phase 5: Live / pre-gen mode (M4, optional)]] — skipped (inert under file://)
+- [[phase-06-ship|Phase 6: Ship (M5)]] — completed + accepted (doc/verify; compliance + offline file:// hard gate PASS)
 
 ### Decisions
 - None yet
 
 ### Journal
+- [[2026-06-04-m5-ship|2026-06-04 · M5 ship]]
 - [[2026-06-04-m3-presenter-polish|2026-06-04 · M3 presenter polish]]
 - [[2026-06-04-m2-multi-typology|2026-06-04 · M2 multi-typology (TBML)]]
 - [[2026-06-04-m1-config-driven-refactor|2026-06-04 · M1 config-driven refactor]]
@@ -21,7 +22,7 @@
 ## By Hierarchy
 
 - Milestones M0 → M5 map 1:1 to Phases 1 → 6 (see HANDOFF.md §8)
-- M0–M3 done. M4 (live/pre-gen) optional; M5 (ship) is the likely next milestone.
+- M0–M3 done; M5 (ship) done + accepted. M4 (live/pre-gen) skipped by decision. **Project shipped** (HANDOFF §1.2).
 
 ## Living Documents
 
@@ -37,5 +38,6 @@
 
 ## Recent
 
+- [2026-06-04] M5 ship — completed + accepted; compliance + offline file:// hard gate PASS; project shipped
 - [2026-06-04] M3 presenter polish — engine-only keyboard nav + reset + reduced-motion; both dist rebuilt
 - [2026-06-04] dev wiki bootstrapped (retrofit from HANDOFF.md milestone plan); aml-wiki linked

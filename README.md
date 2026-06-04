@@ -45,22 +45,26 @@ No engine edits required.
 
 - Build the typology you want and open `dist/<id>/index.html` in the presentation browser,
   fullscreen. To switch typologies on stage, open the other built file.
-- Drive it with the on-screen **Back / Next** buttons; the stepper rail at the top is
-  clickable to jump to any act already reached.
+- Drive it with the on-screen **Back / Next** buttons, or the **keyboard**: **→ / Space**
+  advance, **←** goes back, **Esc** (or the on-screen **↺**) resets to a clean Act 0. The
+  stepper rail at the top is clickable to jump to any act already reached.
 - **Act 3** (Human review) requires you to select at least one candidate before Next
   enables — this is the first human gate. **Act 4** (Agent builds) waits on your
-  confirm — the second gate. Don't skip these; they are the point.
-- The final act loops back to the start (**Run again**) for a clean reset between runs.
-
-Keyboard navigation, reset, and speaker-notes are planned for M3 (see HANDOFF.md §8).
+  confirm — the second gate. Don't skip these; they are the point. The gates hold under
+  the keyboard too — advancing past them without selecting / confirming does nothing.
+- The final act loops back to the start (**Run again ↺**) for a clean reset between runs.
+- Honors **`prefers-reduced-motion`**: with the OS "reduce motion" setting on, every act
+  lands in its final state with no animation. (A speaker-notes overlay is not built.)
 
 ## Compliance
 
 - No real customer, account, or transaction data — anywhere. Coverage, population, and
   precision numbers are synthetic and illustrative.
-- The only real-world content is **public advisory material, paraphrased**: the FINTRAC
-  Operational Alert on illicit synthetic opioids (Jan 2025) and FinCEN FIN-2019-A006 /
-  FIN-2024-A002.
+- The only real-world content is **public advisory material, paraphrased** — per typology:
+  - **fentanyl** — FINTRAC Operational Alert on illicit synthetic opioids (Jan 2025);
+    FinCEN FIN-2019-A006 / FIN-2024-A002.
+  - **trade-based** — FinCEN Alert on fentanyl-linked trade-based laundering (Apr 2025);
+    FATF report on TBML trends & developments (2024).
 - The "Illustrative data & outputs" badge stays visible at all times — it is a trust
   device for a compliance audience, not a disclaimer to hide.
 
@@ -71,6 +75,8 @@ Keyboard navigation, reset, and speaker-notes are planned for M3 (see HANDOFF.md
 
 ## Status
 
-**M2 — multi-typology.** Config-driven engine (M1) + two typologies: **fentanyl** and
-**trade-based ML**, switchable at build time with no engine edits. Next: M3, presenter
-polish (keyboard nav, reset, reduced-motion). See `HANDOFF.md §8` for the milestone plan.
+**M5 — ship.** Config-driven engine (M1) + two typologies (**fentanyl**, **trade-based ML** —
+M2), switchable at build time with no engine edits, plus presenter polish (M3: keyboard nav,
+reset, `prefers-reduced-motion`). Runs offline from a single `file://` artifact per typology.
+Live / pre-generated mode (M4) is intentionally not built — scripted is the ship path. See
+`HANDOFF.md §8` for the milestone plan.

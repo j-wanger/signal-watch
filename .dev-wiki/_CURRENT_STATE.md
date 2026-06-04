@@ -4,34 +4,43 @@
 
 ## Recommended Next Action
 
-M3 complete (presenter polish — keyboard nav, reset, reduced-motion; engine-only, both dist rebuilt,
-delivery accepted + committed). Next: `/dev-plan` for **M5 ship** (README, compliance self-check,
-offline smoke checklist, human sign-off) — M4 (live/pre-gen) is optional and can be skipped unless a
-live data demo is wanted. Carry-over: parameterize `tests/smoke-checklist.md` per typology;
-speaker-notes overlay is pre-scoped if presenters want on-screen prompts.
+**M5 shipped — Phase 6 complete + accepted, committed to main.** The project now meets HANDOFF §1.2
+definition of shipped: reliable offline (single-file per-typology `dist/<id>/index.html`),
+multi-typology from config, presenter-ready (M3 controls), compliance-clean (hard gate PASS),
+documented (README + per-typology smoke-checklist). **No required work remains.** Optional follow-ups
+(all config-driven, none block, plan each with `/dev-plan` if wanted): M4 live/pre-gen (unbuilt by
+decision — inert under `file://`); a closing "ask" slide (new act → its own phase); additional
+typologies (e.g. pig-butchering — one JSON, the smoke-checklist just gains a column).
 
 ## Active Phase
 
-**[[phase-04-presenter-polish|Phase 4: Presenter polish (M3)]]** (status: completed)
+**[[phase-06-ship|Phase 6: Ship (M5)]]** (status: completed)
 
-Entry criteria: MET (M2 complete — multi-typology build-time switchable, commit `61a9cca`)
-Exit criteria: MET — ←/→/Space/Esc nav + ↺ reset; `prefers-reduced-motion` final-state; both dist
-rebuilt + self-contained; gates hold under keyboard (verified on both dist × both motion modes).
+Entry criteria: MET (M3 complete — presenter-ready, multi-typology; M4 optional, skipped by decision)
+Exit criteria (HANDOFF §1.2): MET — README run/present/add-typology · compliance self-check PASS (no
+real data, advisories paraphrased+public, badge present, no secrets) · both `dist/<id>/index.html` run
+offline from `file://` · `tests/smoke-checklist.md` parameterized per typology · human sign-off (Jake,
+accepted 2026-06-04).
 
-Progress: 100% — delivery accepted, milestone committed. Engine-only (`config/`+`build.py` untouched).
-Next active phase: M5 ship (run `/dev-plan`).
+Progress: 100% — delivery accepted, committed to main. Doc/verify only (`index.html` + `config/` +
+`scripts/` byte-identical; dist byte-identical to a fresh rebuild — zero drift).
+Next: project shipped; remaining items are optional config-driven follow-ups.
 
 ## Active Phase Contract
 
-Phase: 4 - Presenter polish (M3) — COMPLETED
-Tasks: 3/3 done — centralize nav + reset + keys → prefers-reduced-motion → rebuild both dist + verify
-Transition: continue
+Phase: 6 - Ship (M5) — COMPLETED + accepted
+Tasks: 3/3 done — T1 parameterize smoke-checklist → T2 refresh README → T3 compliance + offline gate (PASS)
+Transition: complete
 Abort: n/a (phase complete)
 
 ## Recent Decisions
 
 | Decision | Confidence | Date |
 |----------|------------|------|
+| M4 (live/pre-gen) skipped: pre-gen needs `fetch()` (breaks `file://`), so it's inert in the single-file ship artifact — always falls back to inline. Scripted IS the ship path; M5 ship is next | high | 2026-06-04 |
+| M5 is doc/verify only, zero engine edits: true-up stale README + smoke-checklist to post-M3/per-typology reality, then run compliance + offline `file://` hard gate on both dist | high | 2026-06-04 |
+| Closing "ask" slide deferred from M5 (new act → touches six-act-arc non-negotiable + config/schema; a content effort, not a ship task). Product name kept as "Signal Engine". Playwright skipped (dep against dependency-light agreement for a one-shot demo) | medium | 2026-06-04 |
+| Ship target = single self-contained `dist/<id>/index.html` per typology (the old `dist/index.html` single path is retired); hosted-vs-single [OPEN] resolved to single-file per decision-log §10 | high | 2026-06-04 |
 | M3 is pure-engine: edit index.html for nav/reset/reduced-motion, rebuild both dist. M2 zero-diff rule was phase-specific, does not carry over | high | 2026-06-04 |
 | Keyboard nav reuses centralized advance()/back()/reset(); keys check `nextBtn.disabled` so both gates hold (programmatic .onclick() ignores the disabled attr) | high | 2026-06-04 |
 | Reduced-motion = instant FINAL state (not no-state): CSS @media query + a `reduced` guard in the JS reveal fns | high | 2026-06-04 |
@@ -50,9 +59,10 @@ Abort: n/a (phase complete)
 
 ## Blockers and Open Questions
 
-- [OPEN] Ship as single file vs hosted page (HANDOFF §10) — presentation/branding call
-- [OPEN] Presentation mode: scripted / pre-generated / live (HANDOFF §10)
-- [OPEN] Closing "what it takes to build this / the ask" slide? (HANDOFF §10)
+- [RESOLVED 2026-06-04] Ship as single file vs hosted — **single self-contained file** per typology (decision-log §10 settled; M5 ships this)
+- [RESOLVED 2026-06-04] Presentation mode → **scripted** (M4 live/pre-gen skipped by decision)
+- [DEFERRED 2026-06-04] Closing "ask" slide — out of M5 (new act touches six-act-arc + needs config/schema); revisit as a config-driven follow-up
+- [OPEN] Product/name — kept as "Signal Engine" for M5; rename is a branding call if ever wanted
 - [RESOLVED 2026-06-04] 2nd typology → Trade-based ML (M2 shipped)
 
 ## Key Artifacts
@@ -68,6 +78,7 @@ Abort: n/a (phase complete)
 
 ## Session Journal (last 5)
 
+- [2026-06-04] M5 ship: doc/verify only (zero engine/config edits — `index.html`+`config/`+`scripts/` clean). Parameterized `tests/smoke-checklist.md` per typology (removed stale single-file `dist/index.html` path; per-typology fill table for the 6 values that differ; M3 controls moved deferred→active checks). Refreshed README (M2→ship; shipped M3 controls; both-typology compliance). Compliance + offline `file://` **HARD GATE PASS**: zero drift (`build.py all` byte-identical, `git status dist/` clean), badge both, self-contained (no fetch/external script; only Google Fonts), advisories paraphrased+attributed, no secrets/PII. M4 skipped (inert under file://). Runtime render carries from M3 (byte-identical dist; no fresh browser run this session). Committed to main.
 - [2026-06-04] M3 presenter polish: engine-only — centralized nav (advance/back/reset) + keys (←/→/Space/Esc) reusing the gate logic via the `nextBtn.disabled` guard; ↺ reset control; `prefers-reduced-motion` final-state (CSS @media + synchronous `T()`/`animVal`). Verified both shipped dist × both motion modes (gates hold, no Act 5 without confirm, 0 pending timers reduced); real Chrome 149 renders. `config/`+`build.py` byte-identical. Speaker notes deferred.
 - [2026-06-04] M2 multi-typology: added trade-based.json (TBML) from aml-wiki survey, paraphrased; build.py gained per-typology dist + build-boundary validation. TBML verified; engine untouched (zero index.html diff); fentanyl regression byte-identical.
 - [2026-06-04] M1 config-driven refactor: schema + fentanyl.json extracted; engine genericized (`__CONFIG__` injection, literals promoted); defensive rendering; stdlib build. Verified byte-identical act HTML to baseline; baseline archived.

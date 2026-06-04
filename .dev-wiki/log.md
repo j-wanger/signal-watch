@@ -10,3 +10,6 @@
 [2026-06-04] PLAN -- Phase 4 (M3) planned, 3 tasks (pure-engine: nav+reset+keys, prefers-reduced-motion, rebuild+Chrome pass); speaker notes deferred; engine edits intentional
 [2026-06-04] IMPL -- Phase 4 (M3) all 3 tasks done; engine-only (config/+build.py byte-identical); both dist rebuilt + self-contained; gates verified on both dist x both motion modes; real Chrome 149 renders
 [2026-06-04] DEBRIEF -- Phase 4 (M3) completed + accepted; journal 2026-06-04-m3-presenter-polish; next: /dev-plan M5 ship
+[2026-06-04] PLAN -- Phase 6 (M5 ship) planned, 3 tasks, 4 decisions; M4 (live/pre-gen) skipped (inert under file://); doc/verify only — parameterize smoke-checklist + refresh README + compliance/offline hard gate; ask-slide/rename/Playwright deferred
+[2026-06-04] IMPL -- Phase 6 (M5 ship) all 3 tasks done; doc/verify only (index.html+config/+scripts/ byte-identical); compliance + offline file:// HARD GATE PASS (zero drift, badge both dist, self-contained, advisories paraphrased+attributed, no secrets/PII)
+[2026-06-04] DEBRIEF -- Phase 6 (M5 ship) completed + accepted; journal 2026-06-04-m5-ship; project meets HANDOFF §1.2 definition of shipped; M4 + ask-slide + new typologies are optional config-driven follow-ups

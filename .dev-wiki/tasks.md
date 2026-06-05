@@ -3,9 +3,9 @@
 > Last updated: 2026-06-05 by /dev-plan
 
 <!-- phase:phase-10-fincen-corpus-crawler -->
-<!-- gate-log:phase-10 direction=approved delivery=pending -->
+<!-- gate-log:phase-10 direction=approved delivery=accepted -->
 
-## Phase 10: FinCEN corpus crawler (SCALE) — ACTIVE
+## Phase 10: FinCEN corpus crawler (SCALE) — COMPLETED + accepted (commit 0c87c47)
 
 Widen the authoring scraper from one hand-registered advisory to the **discovered FinCEN advisory corpus**. The static 1-entry `REGISTRY` in `acquire_fincen.py` becomes a **generated manifest** (`data/fincen/index.json`: `{id, title, date, type, url}`). Core value is **discovery**, not mass-download: a new authoring-only `crawl_fincen.py` with a **pure `parse_index(html)→entries`** (deterministic, `--selftest` against a saved fixture — same ethos as Phase-9 `build.py --check`) + a **thin live `fetch_index()` shell** (manual authoring run, never in smoke/CI). The committed manifest is produced by `parse_index(saved_fixture)` so it's reproducible **offline**. The widened pipe is proven on a **bounded batch (~2–3)**, not the whole corpus. Engine/ship artifact untouched; `raw/` stays gitignored; commit the manifest + only the md we derive from — no bulk-md commit. Direction approved by user 2026-06-05.
 

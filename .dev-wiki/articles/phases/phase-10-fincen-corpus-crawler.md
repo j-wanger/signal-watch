@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-05
 updated: 2026-06-05
 source: plan
-status: active
+status: completed
 ceremony: lite
 scope: ["scripts/crawl_fincen.py", "scripts/acquire_fincen.py", "data/fincen/index.json", "tests/fixtures/*", "README.md", "CLAUDE.md"]
 entry_criteria: "Phase 9 (build-drift guard) delivered + accepted (commit 33db22a). The M6 pipeline thesis is proven (Phase 7 one-advisory slice) and guarded (Phase 9). `acquire_fincen.py` carries a static 1-entry `REGISTRY` and its docstring defers the crawler to 'a LATER phase'. User chose SCALE over the smaller elder-true-up at the Phase-10 direction gate."

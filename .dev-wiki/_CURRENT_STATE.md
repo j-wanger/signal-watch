@@ -4,8 +4,8 @@
 
 ## Recommended Next Action
 
-**Phase 10 (FinCEN corpus crawler — SCALE) — DELIVERED, all 4 tasks [x], exit criteria MET in the
-working tree. READY FOR COMPLETION — awaiting the delivery gate (user acceptance + commit).**
+**Phase 10 (FinCEN corpus crawler — SCALE) — DELIVERED, accepted, committed to main `0c87c47`
+(2026-06-05). Gate flip in the follow-up commit.**
 The static 1-entry `REGISTRY` is now a generated manifest `data/fincen/index.json` (14 advisories),
 built by a new authoring-only `crawl_fincen.py` (pure `parse_index` + offline `--selftest`/`--write`,
 thin live `--fetch`). `acquire_fincen.py` reads the manifest, resolving each advisory's PDF from its
@@ -15,17 +15,19 @@ artifacts deleted per user call, regenerable). Determinism held: committed manif
 `parse_index(saved_fixture)`, re-`--write` → no diff. Engine/ship untouched (`git diff index.html`
 empty), `build.py --check all` zero drift.
 
-**Next:** accept delivery + commit (branch first — on `main`; prior phases committed phase work to
-main directly). Then the remaining forks — **elder presentation-values true-up** (carried from
-Phase 9; smoke-checklist still 2 of 3 typologies) and **automate article→signal derivation** (AUTOMATE)
-— plus optional manifest `--fetch` refresh cadence. Plan the next increment with `/dev-plan`.
+**Next — project between phases.** Plan the next increment with `/dev-plan`. Open forks:
+**elder presentation-values true-up** (carried from Phase 9; smoke-checklist still 2 of 3 typologies),
+**automate article→signal derivation** (AUTOMATE — the last M6 vision increment; manifest + corpus md
+are now a derivation surface), **re-point fentanyl to the now-discoverable `fin-2024-a002` Supplemental
+Fentanyl Advisory** (verbatim upgrade), and optional manifest `--fetch` refresh cadence. Push to main
+pending the user's separate OK.
 
 **Phase 9 (Build-drift guard) — DELIVERED, accepted, committed to main `33db22a` (2026-06-05).**
 The Phase-7 silent-drift failure mode is now a one-command `build.py --check [all|<id>]` guard.
 
 ## Active Phase
 
-**[[phase-10-fincen-corpus-crawler|Phase 10: FinCEN corpus crawler (SCALE)]]** (status: active, ~0%)
+**[[phase-10-fincen-corpus-crawler|Phase 10: FinCEN corpus crawler (SCALE)]]** (status: completed)
 
 Entry criteria: MET — Phase 9 delivered + accepted (commit 33db22a). M6 pipeline thesis proven
 (Phase 7) + guarded (Phase 9); `acquire_fincen.py` carries a static 1-entry `REGISTRY` whose docstring
@@ -36,7 +38,7 @@ Exit criteria: `crawl_fincen.py` (authoring-only, stdlib) discovers the index �
 on a bounded batch; crawler documented in docstrings + README + CLAUDE; `git diff index.html` empty;
 `raw/` still gitignored, no bulk-md commit.
 
-Progress: 0% — planned, direction approved; implementation begins at T1.
+Progress: 100% — all 4 tasks complete; delivery accepted, committed to main `0c87c47` (2026-06-05).
 
 ## Active Phase Contract
 

@@ -40,4 +40,4 @@ the 1-entry stub). Blocked >3 attempts on a task → ask user: skip or abort.
 
 Gates:
 - [x] Direction confirmed by user (SCALE: FinCEN corpus crawler over the elder true-up; discovery-manifest + bounded batch, not mass-download — 2026-06-05)
-- [ ] Delivery accepted (post-implementation report)
+- [x] Delivery accepted (post-implementation report 2026-06-05; committed 0c87c47) — PHASE COMPLETE

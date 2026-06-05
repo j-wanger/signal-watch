@@ -12,7 +12,7 @@
 - [[phase-07-pipeline-walking-skeleton|Phase 7: Pipeline walking skeleton (M6)]] — completed + accepted (FinCEN EFE FIN-2022-A002 slice; Act 1 verbatim render; Signal Watch rebrand)
 - [[phase-08-doc-true-up|Phase 8: Doc true-up + provenance fix (M6 debt)]] — completed + accepted (rebrand docs; FinCEN-verbatim non-negotiable; fentanyl provenance → FINTRAC; dist drift corrected)
 - [[phase-09-build-drift-guard|Phase 9: Build-drift guard]] — completed + accepted (in-process `build.py --check` for the zero-drift invariant; wired into smoke-checklist; commit 33db22a)
-- [[phase-10-fincen-corpus-crawler|Phase 10: FinCEN corpus crawler (SCALE)]] — active (discovery manifest `data/fincen/index.json`; authoring-only `crawl_fincen.py`, pure parser + `--selftest`; bounded batch, not mass-download)
+- [[phase-10-fincen-corpus-crawler|Phase 10: FinCEN corpus crawler (SCALE)]] — completed + accepted (discovery manifest `data/fincen/index.json`; authoring-only `crawl_fincen.py`, pure parser + `--selftest`; bounded batch, not mass-download; commit 0c87c47)
 
 ### Decisions
 - None yet
@@ -46,7 +46,7 @@
 
 ## Recent
 
-- [2026-06-05] Phase 10 (FinCEN corpus crawler — SCALE) planned + active — discovery manifest (`data/fincen/index.json`) over mass-download; authoring-only `crawl_fincen.py` (pure `parse_index` + `--selftest`); 4 lite tasks; direction approved (user chose SCALE over the elder true-up)
+- [2026-06-05] Phase 10 (FinCEN corpus crawler — SCALE) completed + accepted — discovery manifest (`data/fincen/index.json`, 14 advisories) over mass-download; authoring-only `crawl_fincen.py` (pure `parse_index` + `--selftest`); acquire REGISTRY→manifest + `resolve_pdf` detail-page hop; 4 lite tasks; commit 0c87c47 (user chose SCALE over the elder true-up)
 - [2026-06-05] Phase 9 (build-drift guard) completed + accepted — in-process `build.py --check` for the M5 zero-drift invariant (broke silently in Phase 7); commit 33db22a
 - [2026-06-04] Phase 8 (doc true-up + provenance fix) completed + accepted — rebrand docs to Signal Watch; FinCEN-verbatim non-negotiable; fentanyl provenance → FINTRAC; M6 doc staleness folded in; Phase 7 dist drift corrected; commit 042d732
 - [2026-06-04] M6 (pipeline walking skeleton) completed + accepted — FinCEN EFE FIN-2022-A002 slice; Act 1 verbatim render; Signal Watch rebrand; commit 8459dd9

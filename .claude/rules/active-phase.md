@@ -18,4 +18,4 @@ PASS ×3; guard 0 tokens. Abort: a non-flaky guard needing dist bytes to change 
 
 Gates:
 - [x] Direction confirmed by user (HARDEN-before-SCALE; in-process `--check`; keep committing dist; defer pre-commit/CI — 2026-06-05)
-- [ ] Delivery accepted
+- [x] Delivery accepted (post-implementation report 2026-06-05; committed 33db22a)

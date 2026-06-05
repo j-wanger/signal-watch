@@ -3,9 +3,9 @@
 > Last updated: 2026-06-05 by /dev-debrief
 
 <!-- phase:phase-09-build-drift-guard -->
-<!-- gate-log:phase-09 direction=approved delivery=pending -->
+<!-- gate-log:phase-09 direction=approved delivery=accepted -->
 
-## Phase 9: Build-drift guard (zero-drift invariant)
+## Phase 9: Build-drift guard (zero-drift invariant) — COMPLETED + accepted
 
 Turn the M5 zero-drift invariant (committed `dist/<id>/index.html` == fresh build) — which silently broke in Phase 7, caught only by accident in Phase 8 — into a runnable, non-mutating guard wired into the smoke-checklist. Doc + build-script-glue only; engine (`index.html`) untouched, no config changes → all 3 `dist/` stay byte-identical. Mechanism = in-process `build.py --check` (render + byte-compare vs committed dist), pure-stdlib + git-agnostic. Direction approved by user 2026-06-05.
 

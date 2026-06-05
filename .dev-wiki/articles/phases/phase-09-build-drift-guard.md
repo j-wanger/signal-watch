@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-05
 updated: 2026-06-05
 source: plan
-status: active
+status: completed
 ceremony: lite
 scope: ["scripts/build.py", "tests/smoke-checklist.md", "README.md"]
 entry_criteria: "Phase 8 (M6 doc true-up) delivered + accepted (commit 042d732). That phase's rebuild DISCOVERED the M5 zero-drift invariant (committed dist == fresh build) had silently broken in Phase 7 — caught only by accident. The invariant has no runnable guard; the smoke-checklist's zero-drift item is manual prose and undercounts typologies (says 'both dist', i.e. 2, against the shipped 3)."

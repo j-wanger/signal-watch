@@ -4,21 +4,24 @@
 
 ## Recommended Next Action
 
-**Phase 9 (Build-drift guard) COMPLETE in the working tree — READY FOR COMPLETION; awaiting the
-delivery gate + commit (2026-06-05).** All 3 lite tasks done: `build.py --check [all|<id>]` drift
-guard (`render_one`/`check_one`/`resolve_targets` refactor, pure-stdlib, git-agnostic, per-typology
-verdict); wired into the smoke-checklist (de-staled "both dist"→3 typologies + `git status
---porcelain dist/` complement); documented in the docstring + README. Exit criteria met: `--check
-all` exits 0 on clean HEAD + non-zero naming the typology on drift; build output-neutral (built
-twice → identical sha, all 3 dist byte-identical); `node --check` PASS ×3; `git diff index.html`
-empty. **Next: run the delivery gate (human sign-off) + commit Phase 9**, then `/dev-plan` the next
-increment — open fork: Phase 10 candidate = elder presentation-values true-up in the smoke-checklist
-(table + compliance attribution still cover only fentanyl + trade-based), vs the two larger M6 forks
-(FinCEN corpus crawler / automated article→signal derivation).
+**Phase 9 (Build-drift guard) — DELIVERED, accepted, committed to main `33db22a` (2026-06-05).**
+All 3 lite tasks done: `build.py --check [all|<id>]` drift guard (`render_one`/`check_one`/
+`resolve_targets` refactor, pure-stdlib, git-agnostic, per-typology verdict); wired into the
+smoke-checklist (de-staled "both dist"→3 typologies + `git status --porcelain dist/` complement);
+documented in the docstring + README. Exit criteria met: `--check all` exits 0 on clean HEAD +
+non-zero naming the typology on drift; build output-neutral (built twice → identical sha, all 3 dist
+byte-identical); `node --check` PASS ×3; `git diff index.html` empty. The Phase-7 silent-drift
+failure mode is now a one-command guard. Push to main still pending the user's separate OK.
+
+**Next — project between phases.** Plan the next increment with `/dev-plan`. Open fork: the smaller
+**Phase 10 candidate = elder presentation-values true-up** in the smoke-checklist (per-typology table
++ compliance attribution still cover only fentanyl + trade-based; elder shipped in Phase 7 has no
+walk-row), vs the two larger M6 vision forks — **FinCEN corpus crawler** (SCALE) / **automated
+article→signal derivation** (AUTOMATE). A pre-commit hook running `--check` is a deferred follow-up.
 
 ## Active Phase
 
-**[[phase-09-build-drift-guard|Phase 9: Build-drift guard]]** (status: active)
+**[[phase-09-build-drift-guard|Phase 9: Build-drift guard]]** (status: completed)
 
 Entry criteria: MET — Phase 8 delivered + accepted (commit 042d732); its rebuild DISCOVERED the M5
 zero-drift invariant had silently broken in Phase 7 (caught by accident), with no runnable guard and
@@ -29,7 +32,7 @@ smoke-checklist carries the runnable `--check all` guard, no stale "both dist"/2
 (3 typologies) + `git status --porcelain dist/` complement; `--check` documented in build.py docstring
 + README; `git diff index.html` empty.
 
-Progress: ~0% — planned, 3 tasks defined, none started.
+Progress: 100% — all 3 tasks complete; delivery accepted, committed to main `33db22a` (2026-06-05).
 
 ## Active Phase Contract
 
@@ -92,7 +95,7 @@ dist bytes (build is non-deterministic) — PAUSE and report. Blocked >3 attempt
 
 ## Session Journal (last 5)
 
-- [2026-06-05] [[2026-06-05-phase-09-build-drift-guard|Phase 9 build-drift guard]] (lite, 3 tasks, READY FOR COMPLETION — not yet committed) — turned the M5 zero-drift invariant into a runnable, non-mutating guard. `build.py` refactored: `build_one` split into `render_one(typ, template) -> str` (the SINGLE source of truth for a typology's dist bytes) + thin writer; new `check_one` (git-agnostic byte-compare of committed dist vs fresh in-memory render, per-typology verdict, invalid-config = per-typology FAIL) + `resolve_targets`; `main` gained `--check [all|<id>]`. Wired into smoke-checklist (de-staled "both dist"→3 typologies; `git status --porcelain dist/` complement noted) + documented in docstring + README. Build byte-DETERMINISTIC (built twice → identical sha), HEAD dist == fresh build, `node --check` PASS ×3, `git diff index.html` empty, zero config edits → all 3 dist byte-identical. Discovered Phase 10 candidate: elder presentation-values true-up in the smoke-checklist.
+- [2026-06-05] [[2026-06-05-phase-09-build-drift-guard|Phase 9 build-drift guard]] (lite, 3 tasks, COMPLETED + accepted, committed `33db22a`) — turned the M5 zero-drift invariant into a runnable, non-mutating guard. `build.py` refactored: `build_one` split into `render_one(typ, template) -> str` (the SINGLE source of truth for a typology's dist bytes) + thin writer; new `check_one` (git-agnostic byte-compare of committed dist vs fresh in-memory render, per-typology verdict, invalid-config = per-typology FAIL) + `resolve_targets`; `main` gained `--check [all|<id>]`. Wired into smoke-checklist (de-staled "both dist"→3 typologies; `git status --porcelain dist/` complement noted) + documented in docstring + README. Build byte-DETERMINISTIC (built twice → identical sha), HEAD dist == fresh build, `node --check` PASS ×3, `git diff index.html` empty, zero config edits → all 3 dist byte-identical. Discovered Phase 10 candidate: elder presentation-values true-up in the smoke-checklist.
 - [2026-06-04] Phase 8 doc true-up + provenance fix (M6 debt) — doc/config-string only, engine untouched, committed `042d732`. Rebrand `Signal Engine`→`Signal Watch` (4 docs; fixed a smoke-checklist header check that had been failing vs the shipped brand). Paraphrase non-negotiable amended with the FinCEN-only verbatim public-domain exception (17 USC §105, NOT FINTRAC) in CLAUDE+HANDOFF §4.4. Fentanyl provenance: removed unverifiable `FIN-2019-A006`/`FIN-2024-A002` (0 hits in aml-wiki, never the derivation surface), attributed solely to FINTRAC Jan-2025 — reframing sweep caught 2 extra bad-cite sites in smoke-checklist. M6 doc staleness folded in (user add): CLAUDE M2→M6 + pipeline + 3 typologies; README M5→M6 + elder + verbatim exception. DISCOVERY: rebuild exposed Phase 7 committed STALE `dist/{fentanyl,trade-based}` (missing engine highlights feature; only elder current) → `build.py all` didn't reproduce committed dist, M5 zero-drift invariant had broken; all fresh dist staged (user-approved), invariant restored. Guard 0 tokens ×3, `node --check` PASS ×3, `git diff index.html` empty.
 - [2026-06-04] M6 pipeline walking skeleton: proved the "Signal Watch" ingestion pipe end to end on ONE real FinCEN advisory. T1 `acquire_fincen.py` (stdlib urllib) → EFE FIN-2022-A002 PDF (824KB). T2 `pdf_to_md.py` markitdown (MIT) → `data/fincen/fin-2022-a002.md` (48KB, all 24 red flags intact; de-risk GATE passed, no fallback). Forced detour: homebrew py3.14 broken `pyexpat` → converter runs under a gitignored uv-managed py3.12 `.venv`; `build.py` stays stdlib. T3 new `advisory_full` first-class field (Act 1 SOURCE DOCUMENT panel: bounded scrollable + `.docsrc` attribution distinct from the illustrative badge; `text_file`→build-time inline keeps md as source of truth) + "Signal Engine"→"Signal Watch" rebrand (engine+dist). T4 hand-derived `elder-financial-exploitation.json` (target S-DORMANT-DRAIN-ELDER ← md line 507; all 12 financial red flags mapped, 12 behavioral excluded as non-data signals). T5 all 3 dist build clean, self-contained guard 0 tokens, `node --check` PASS. NOT committed yet; doc rebrand + provenance true-up deferred to a follow-up phase.
 - [2026-06-04] M5 ship: doc/verify only (zero engine/config edits — `index.html`+`config/`+`scripts/` clean). Parameterized `tests/smoke-checklist.md` per typology (removed stale single-file `dist/index.html` path; per-typology fill table for the 6 values that differ; M3 controls moved deferred→active checks). Refreshed README (M2→ship; shipped M3 controls; both-typology compliance). Compliance + offline `file://` **HARD GATE PASS**: zero drift (`build.py all` byte-identical, `git status dist/` clean), badge both, self-contained (no fetch/external script; only Google Fonts), advisories paraphrased+attributed, no secrets/PII. M4 skipped (inert under file://). Runtime render carries from M3 (byte-identical dist; no fresh browser run this session). Committed to main.

@@ -14,7 +14,7 @@
 - [[phase-09-build-drift-guard|Phase 9: Build-drift guard]] — completed + accepted (in-process `build.py --check` for the zero-drift invariant; wired into smoke-checklist; commit 33db22a)
 - [[phase-10-fincen-corpus-crawler|Phase 10: FinCEN corpus crawler (SCALE)]] — completed + accepted (discovery manifest `data/fincen/index.json`; authoring-only `crawl_fincen.py`, pure parser + `--selftest`; bounded batch, not mass-download; commit 0c87c47)
 - [[phase-11-automated-derivation|Phase 11: Automated derivation (LLM-drafted signal config)]] — completed + accepted (AUTOMATE; authoring-only `derive_signals.py`, deterministic `--selftest`/`--scaffold` + neural `--draft`; LLM proposes a `.draft.json`, build.py + schema + human gates dispose; variant B over A; review 9/10; commit c37dc39)
-- [[phase-12-fincen-corpus-derivation|Phase 12: FinCEN corpus derivation foundation (M7)]] — active (backend-only; deterministic spine validated on ALL 14 advisories + LLM-backend derivation proven on a 2–3 slice; LLM = this session, no API key; boundary = build-rec consistency + traceability; corpus committed; demo expansion deferred to Phase 13)
+- [[phase-12-fincen-corpus-derivation|Phase 12: FinCEN corpus derivation foundation (M7)]] — completed + accepted (backend-only; deterministic spine validated on ALL 14 → 7 CLEAN/3 LOW/4 NEEDS; LLM-backend (this session, no key) derived 2 records; boundary = cover×data matrix + traceability + shape; spine assists-not-automates; review 8/10→fixed; commit 90939b4; demo expansion = Phase 13)
 
 ### Decisions
 - None yet
@@ -34,7 +34,7 @@
 ## By Hierarchy
 
 - Milestones M0 → M5 map 1:1 to Phases 1 → 6 (see HANDOFF.md §8); M6 spans Phase 7 (pipeline slice) + Phase 8 (doc/provenance true-up) + Phase 9 (build-drift guard, HARDEN) + Phase 10 (corpus crawler, SCALE) + Phase 11 (automated derivation, AUTOMATE)
-- M0–M3 done; M5 (ship) done + accepted; **M4 (live/pre-gen) skipped** by decision. **M6 (Signal Watch ingestion pipeline) — Phases 7–11 ALL completed + accepted** — the vision arc is complete: Phase 11 (AUTOMATE) automated the manual article→signal derivation, boundary-preserving (LLM proposes, build.py + schema + 2 human gates dispose). **M7 (corpus-backed demo) — Phase 12 active**: deterministic spine validated across all 14 FinCEN advisories + LLM-backend derivation (this session, no key) proven on a slice; destination = a singular demo where the user picks an advisory (Phase 13).
+- M0–M3 done; M5 (ship) done + accepted; **M4 (live/pre-gen) skipped** by decision. **M6 (Signal Watch ingestion pipeline) — Phases 7–11 ALL completed + accepted** — the vision arc is complete: Phase 11 (AUTOMATE) automated the manual article→signal derivation, boundary-preserving (LLM proposes, build.py + schema + 2 human gates dispose). **M7 (corpus-backed demo) — Phase 12 completed + accepted**: deterministic spine validated across all 14 FinCEN advisories (7 CLEAN/3 LOW/4 NEEDS) + LLM-backend derivation (this session, no key) proven on a 2-advisory slice; spine assists-not-automates. Destination = a singular demo where the user picks an advisory (Phase 13).
 
 ## Living Documents
 

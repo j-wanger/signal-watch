@@ -1,7 +1,7 @@
 # Active Phase Context
 
-Phase: 12 - FinCEN corpus derivation foundation (deterministic spine all-14 + LLM proof slice) — M7 — COMPLETE
-(all 5 tasks [x], exit criteria MET in working tree; delivery gate pending commit). No next phase planned — run /dev-plan.
+Phase: 12 - FinCEN corpus derivation foundation (deterministic spine all-14 + LLM proof slice) — M7 — COMPLETED + accepted
+(all 5 tasks [x], exit criteria MET; impl commit 90939b4, 2026-06-05). No next phase planned — run /dev-plan.
 Objective: Backend for an expanded, singular FinCEN demo (eventual: user picks 1 of 14 advisories, watches the loop
 derive coverage → build recommendations → signal). This phase = deterministic spine validated on ALL 14 + LLM-backend
 (this session, no key) derivation proven on a 2-advisory slice. Demo expansion (selection UI + build-rec render) = Phase 13.
@@ -23,4 +23,4 @@ corpus; scale LLM-backend derivation to the remaining 5 CLEAN advisories; residu
 
 Gates:
 - [x] Direction confirmed by user (backend-only foundation; user chose it over a minimal selectable demo view — 2026-06-05)
-- [ ] Delivery accepted (post-implementation report) — flips after the commit verifiably lands (D3)
+- [x] Delivery accepted (post-implementation report 2026-06-05; impl commit 90939b4, review gate 8/10→fixed)

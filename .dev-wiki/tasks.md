@@ -3,9 +3,9 @@
 > Last updated: 2026-06-05 by /dev-plan (Phase 12)
 
 <!-- phase:phase-12-fincen-corpus-derivation -->
-<!-- gate-log:phase-12 direction=approved delivery=pending -->
+<!-- gate-log:phase-12 direction=approved delivery=accepted -->
 
-## Phase 12: FinCEN corpus derivation foundation (deterministic spine all-14 + LLM proof slice) — ACTIVE
+## Phase 12: FinCEN corpus derivation foundation (deterministic spine all-14 + LLM proof slice) — COMPLETED + accepted (impl commit 90939b4)
 
 Build the backend for an EXPANDED, singular FinCEN demo (eventual: user picks one of 14 advisories, watches the loop derive its coverage → build recommendations → signal). This phase = the **deterministic spine validated across all 14** + the **LLM-backend (this session, NO API key) derivation proven on a 2–3 advisory slice**. Boundary preserved (Phase-11 principle, extended): the LLM proposes the build recommendation + build logic; the deterministic spine disposes (schema/shape · build-rec consistency vs cover×data · traceability to a red-flag md line). The 14 corpus md's are ALREADY on disk (gitignored) + network is blocked in-session — so no acquisition; T1 commits the existing corpus. Demo expansion (advisory-selection UI + build-rec render) deferred to Phase 13. Engine `index.html` + `build.py` UNTOUCHED (backend-only). Direction approved by user 2026-06-05 (backend-only over a minimal selectable view).
 

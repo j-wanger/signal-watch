@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-05
 updated: 2026-06-05
 source: plan
-status: active
+status: completed
 ceremony: lite
 scope: ["scripts/derive_signals.py", ".gitignore", "data/fincen/*.md", "data/fincen/derived/*.json", "README.md", "CLAUDE.md"]
 entry_criteria: "M6 vision arc complete (Phases 7–11): the derivation pipeline (crawl→acquire→convert→derive) exists + is guarded + scaled, proven on the single EFE advisory. The 14-advisory FinCEN corpus is already converted to md on disk (gitignored). User wants to expand the demo scope toward a SINGULAR corpus-backed demo where the user picks an advisory; this phase builds the backend foundation (deterministic spine + LLM-derived proof slice), demo expansion deferred to Phase 13."
@@ -57,12 +57,12 @@ Engine `index.html` + `build.py` MUST stay untouched (backend-only phase). confi
 
 ## Exit Criteria
 
-- [ ] All 14 `data/fincen/<id>.md` committed (corpus un-gitignored).
-- [ ] `extract_red_flags` recognizes ≥2 FinCEN red-flag section formats beyond EFE's; `--corpus` runs across all 14 + emits a per-advisory report; EFE `--selftest` still passes (12+12).
-- [ ] Deterministic checks: build-rec consistency (cover×data matrix) + traceability (signal → md line), with a selftest; offline, stdlib.
-- [ ] LLM backend (this session, no key) derives a 2–3 advisory proof slice → committed `data/fincen/derived/<id>.json`, each passing the deterministic checks.
-- [ ] `git diff index.html` empty; `build.py --check all` zero drift; deterministic layer stdlib-only; anthropic import still LAZY.
-- [ ] Documented in docstring + README + CLAUDE.
+- [x] All 14 `data/fincen/<id>.md` committed (corpus un-gitignored).
+- [x] `extract_red_flags` recognizes ≥2 FinCEN red-flag section formats beyond EFE's; `--corpus` runs across all 14 + emits a per-advisory report; EFE `--selftest` still passes (12+12).
+- [x] Deterministic checks: build-rec consistency (cover×data matrix) + traceability (signal → md line), with a selftest; offline, stdlib.
+- [x] LLM backend (this session, no key) derives a 2–3 advisory proof slice → committed `data/fincen/derived/<id>.json`, each passing the deterministic checks.
+- [x] `git diff index.html` empty; `build.py --check all` zero drift; deterministic layer stdlib-only; anthropic import still LAZY.
+- [x] Documented in docstring + README + CLAUDE.
 
 ## Constraints (load-bearing)
 

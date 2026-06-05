@@ -39,10 +39,17 @@ AML transformation framework. Keep vocabulary consistent with it
   `parse_index` + offline `--selftest`, thin live `--fetch`) → `acquire_fincen.py` (read the manifest,
   resolve each advisory's PDF from its detail page; EFE kept as a zero-hop direct-PDF override) →
   `pdf_to_md.py` (markitdown PDF→markdown, persisted to `data/fincen/<id>.md` as the source of truth)
-  → hand-derive a schema-valid config. All authoring tools are stdlib-only (markitdown lives in a
-  gitignored uv `.venv`) and never imported by the engine or `build.py`. The elder typology renders
-  the FULL verbatim EFE advisory (FinCEN FIN-2022-A002, public domain) in Act 1 via the
-  `advisory_full` field.
+  → `derive_signals.py` (Phase 11: automate the article→signal step — a DETERMINISTIC layer
+  `--selftest`/`--scaffold` extracts the enumerated red flags + emits a schema-shaped config
+  SKELETON, and a NEURAL layer `--draft` calls the Anthropic API to PROPOSE the judgment fields
+  [indicator statuses, the single target, the signal definition]; the LLM proposes, `build.py` +
+  schema + the two human gates DISPOSE — the `.draft.json` is a gitignored scratch artifact, never
+  auto-promoted, so committed configs stay deterministic + human-reviewed) → hand-review/rename to a
+  schema-valid config. The deterministic authoring layers are stdlib-only; `markitdown` (convert) and
+  `anthropic` (`--draft`) live in a gitignored uv `.venv` and `--draft` reads `ANTHROPIC_API_KEY` from
+  the env — NO authoring tool is imported by the engine or `build.py`, and the ship artifact never
+  fetches or calls an LLM. The elder typology renders the FULL verbatim EFE advisory (FinCEN
+  FIN-2022-A002, public domain) in Act 1 via the `advisory_full` field.
 
 ## How to run
 - Build: `python3 scripts/build.py <id>` (or `all`) → `dist/<id>/index.html`.

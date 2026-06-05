@@ -59,15 +59,26 @@ python3 scripts/crawl_fincen.py --fetch       # LIVE: refresh the listing fixtur
 python3 scripts/acquire_fincen.py --list      # show the discovered advisory corpus (the manifest)
 python3 scripts/acquire_fincen.py <id>        # LIVE: download one advisory PDF -> data/fincen/raw/<id>.pdf
 .venv/bin/python scripts/pdf_to_md.py <id>    # convert PDF -> data/fincen/<id>.md (verbatim source of truth)
+python3 scripts/derive_signals.py --selftest          # offline: assert the EFE red-flag parser (12+12)
+python3 scripts/derive_signals.py --scaffold <id> <md># offline: md -> config/typologies/<id>.draft.json SKELETON
+.venv/bin/python scripts/derive_signals.py --draft <id> <md>  # LIVE: + LLM-drafted judgment (needs ANTHROPIC_API_KEY)
 ```
 
 `crawl_fincen.py` discovers the FinCEN advisories listing into the committed manifest
 `data/fincen/index.json`; `acquire_fincen.py` reads it (resolving each advisory's PDF from its
-detail page) and keeps the EFE anchor as a zero-hop direct-PDF override. These tools are stdlib-only,
-run at authoring time, and are **never** imported by the engine or `build.py` — the ship artifact
-stays single-file, offline, and never fetches. Conversion needs `markitdown` in a gitignored uv
-`.venv` (see `scripts/requirements-authoring.txt`); everything else is pure stdlib. FinCEN advisories
-are U.S. federal works in the public domain (17 U.S.C. §105).
+detail page) and keeps the EFE anchor as a zero-hop direct-PDF override. `derive_signals.py` then
+automates the article→signal step in two layers: a **deterministic** layer (stdlib, `--selftest`/
+`--scaffold`) extracts the advisory's enumerated red flags and emits a schema-shaped config
+**skeleton**, and a **neural** layer (`--draft`, build-time only) calls the Anthropic API to *propose*
+the judgment fields (indicator statuses, the single target, the signal definition). The LLM proposes;
+`build.py` + the schema + the two human gates **dispose** — the `.draft.json` is a gitignored scratch
+artifact you review and rename to `<id>.json`, never auto-promoted, so committed configs stay
+deterministic and human-reviewed. These tools are authoring-only and are **never** imported by the
+engine or `build.py` — the ship artifact stays single-file, offline, never fetches, and never calls an
+LLM. Conversion (`markitdown`) and the draft step (`anthropic`) need a gitignored uv `.venv` (see
+`scripts/requirements-authoring.txt`) and, for `--draft`, `ANTHROPIC_API_KEY` in the environment (the
+key never enters the ship file); everything else is pure stdlib. FinCEN advisories are U.S. federal
+works in the public domain (17 U.S.C. §105).
 
 ## Present it
 
@@ -112,6 +123,9 @@ M6 added a build-time authoring pipeline (acquire a FinCEN advisory PDF → conv
 hand-derive a signal) and renders the FULL verbatim EFE advisory (FinCEN FIN-2022-A002, public
 domain) in Act 1. Phase 10 widened that pipeline with a **FinCEN corpus crawler**
 (`scripts/crawl_fincen.py`) that discovers the FinCEN advisories listing into a committed manifest
-(`data/fincen/index.json`), so acquisition reads the corpus instead of a hand-kept stub. Runs offline
-from a single `file://` artifact per typology. Live / pre-generated mode (M4) is intentionally not
-built — scripted is the ship path. See `HANDOFF.md §8` for the milestone plan.
+(`data/fincen/index.json`), so acquisition reads the corpus instead of a hand-kept stub. Phase 11
+added `scripts/derive_signals.py`, which automates the article→signal derivation step: a deterministic
+scaffolder plus an authoring-only LLM-draft mode whose output is gated by `build.py` + the human review
+(the engine never calls an LLM). Runs offline from a single `file://` artifact per typology. Live /
+pre-generated mode (M4) is intentionally not built — scripted is the ship path. See `HANDOFF.md §8`
+for the milestone plan.

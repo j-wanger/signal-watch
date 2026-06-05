@@ -35,6 +35,12 @@ data/fincen/raw/
 data/fincen/*.md
 !data/fincen/fin-2022-a002.md   # backs the elder-financial-exploitation typology (Phase 7)
 
+# Authoring scratch: scaffolded config SKELETONS from scripts/derive_signals.py --scaffold
+# (Phase 11). A draft is reviewed, has its JUDGMENT fields filled, then RENAMED to
+# config/typologies/<id>.json (a committed config). The .draft.json itself is transient,
+# regenerable, and build-INVALID by design — never committed, never shipped.
+config/typologies/*.draft.json
+
 # Knowledge wiki: machine-local symlink to the central registered aml-wiki
 # (/Users/jwang/private-knowledge/aml-wiki). The association is documented in
 # CLAUDE.md; the symlink itself is per-machine and not repo content.

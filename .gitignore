@@ -25,11 +25,15 @@ venv/
 # Node (not used; guard only)
 node_modules/
 
-# FinCEN corpus: raw acquired PDFs are regenerable via scripts/acquire_fincen.py,
-# and the .md conversion (data/fincen/*.md) is the committed source of truth.
-# Keeps the repo lean as the corpus scales to many advisories. The build reads
-# the .md, never the PDF — nothing breaks without raw/.
+# FinCEN corpus: raw acquired PDFs (data/fincen/raw/) AND the full-corpus markdown
+# mirror are regenerable (scripts/crawl_fincen.py + acquire_fincen.py + pdf_to_md.py),
+# so they stay LOCAL — not committed. Keeps the repo lean as the corpus scales.
+# EXCEPTION: a .md that backs a shipped typology is committed source of truth and is
+# explicitly allow-listed below (one !-line per derived advisory — this list IS the
+# record of "commit only md actually derived from"). The build reads the .md, not the PDF.
 data/fincen/raw/
+data/fincen/*.md
+!data/fincen/fin-2022-a002.md   # backs the elder-financial-exploitation typology (Phase 7)
 
 # Knowledge wiki: machine-local symlink to the central registered aml-wiki
 # (/Users/jwang/private-knowledge/aml-wiki). The association is documented in

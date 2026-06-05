@@ -34,10 +34,15 @@ AML transformation framework. Keep vocabulary consistent with it
   `config/schema.md`.
 - Build: `scripts/build.py` validates a config against the schema (fails loud), resolves
   `text_file`→inline, and inlines everything → `dist/<id>/index.html`. Baseline preserved in `archive/`.
-- Authoring pipeline (M6, build-time ONLY — never in the ship file): `acquire_fincen.py` (fetch a
-  FinCEN advisory PDF) → `pdf_to_md.py` (markitdown PDF→markdown, persisted to `data/fincen/<id>.md`
-  as the source of truth) → hand-derive a schema-valid config. The elder typology renders the FULL
-  verbatim EFE advisory (FinCEN FIN-2022-A002, public domain) in Act 1 via the `advisory_full` field.
+- Authoring pipeline (M6, build-time ONLY — never in the ship file): `crawl_fincen.py` (Phase 10:
+  discover the FinCEN advisories listing → committed manifest `data/fincen/index.json`; pure
+  `parse_index` + offline `--selftest`, thin live `--fetch`) → `acquire_fincen.py` (read the manifest,
+  resolve each advisory's PDF from its detail page; EFE kept as a zero-hop direct-PDF override) →
+  `pdf_to_md.py` (markitdown PDF→markdown, persisted to `data/fincen/<id>.md` as the source of truth)
+  → hand-derive a schema-valid config. All authoring tools are stdlib-only (markitdown lives in a
+  gitignored uv `.venv`) and never imported by the engine or `build.py`. The elder typology renders
+  the FULL verbatim EFE advisory (FinCEN FIN-2022-A002, public domain) in Act 1 via the
+  `advisory_full` field.
 
 ## How to run
 - Build: `python3 scripts/build.py <id>` (or `all`) → `dist/<id>/index.html`.

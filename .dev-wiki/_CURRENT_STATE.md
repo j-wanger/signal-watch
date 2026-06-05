@@ -1,52 +1,61 @@
 # Project: Signal Watch — AML Vision Demo
 
-> Last updated: 2026-06-05 by /dev-debrief
+> Last updated: 2026-06-05 by /dev-plan
 
 ## Recommended Next Action
 
-**Phase 9 (Build-drift guard) — DELIVERED, accepted, committed to main `33db22a` (2026-06-05).**
-All 3 lite tasks done: `build.py --check [all|<id>]` drift guard (`render_one`/`check_one`/
-`resolve_targets` refactor, pure-stdlib, git-agnostic, per-typology verdict); wired into the
-smoke-checklist (de-staled "both dist"→3 typologies + `git status --porcelain dist/` complement);
-documented in the docstring + README. Exit criteria met: `--check all` exits 0 on clean HEAD +
-non-zero naming the typology on drift; build output-neutral (built twice → identical sha, all 3 dist
-byte-identical); `node --check` PASS ×3; `git diff index.html` empty. The Phase-7 silent-drift
-failure mode is now a one-command guard. Push to main still pending the user's separate OK.
+**Phase 10 (FinCEN corpus crawler — SCALE) — DELIVERED, all 4 tasks [x], exit criteria MET in the
+working tree. READY FOR COMPLETION — awaiting the delivery gate (user acceptance + commit).**
+The static 1-entry `REGISTRY` is now a generated manifest `data/fincen/index.json` (14 advisories),
+built by a new authoring-only `crawl_fincen.py` (pure `parse_index` + offline `--selftest`/`--write`,
+thin live `--fetch`). `acquire_fincen.py` reads the manifest, resolving each advisory's PDF from its
+detail page, EFE kept as a zero-hop direct-PDF override (backward-compatible). Widened pipe proven on
+a live batch (`fin-2021-a004` 672KB→34KB/15 indicators, `fin-2024-a002` 565KB→56KB/14 — batch
+artifacts deleted per user call, regenerable). Determinism held: committed manifest is
+`parse_index(saved_fixture)`, re-`--write` → no diff. Engine/ship untouched (`git diff index.html`
+empty), `build.py --check all` zero drift.
 
-**Next — project between phases.** Plan the next increment with `/dev-plan`. Open fork: the smaller
-**Phase 10 candidate = elder presentation-values true-up** in the smoke-checklist (per-typology table
-+ compliance attribution still cover only fentanyl + trade-based; elder shipped in Phase 7 has no
-walk-row), vs the two larger M6 vision forks — **FinCEN corpus crawler** (SCALE) / **automated
-article→signal derivation** (AUTOMATE). A pre-commit hook running `--check` is a deferred follow-up.
+**Next:** accept delivery + commit (branch first — on `main`; prior phases committed phase work to
+main directly). Then the remaining forks — **elder presentation-values true-up** (carried from
+Phase 9; smoke-checklist still 2 of 3 typologies) and **automate article→signal derivation** (AUTOMATE)
+— plus optional manifest `--fetch` refresh cadence. Plan the next increment with `/dev-plan`.
+
+**Phase 9 (Build-drift guard) — DELIVERED, accepted, committed to main `33db22a` (2026-06-05).**
+The Phase-7 silent-drift failure mode is now a one-command `build.py --check [all|<id>]` guard.
 
 ## Active Phase
 
-**[[phase-09-build-drift-guard|Phase 9: Build-drift guard]]** (status: completed)
+**[[phase-10-fincen-corpus-crawler|Phase 10: FinCEN corpus crawler (SCALE)]]** (status: active, ~0%)
 
-Entry criteria: MET — Phase 8 delivered + accepted (commit 042d732); its rebuild DISCOVERED the M5
-zero-drift invariant had silently broken in Phase 7 (caught by accident), with no runnable guard and
-a stale 2-typology smoke-checklist item.
-Exit criteria: `build.py --check all` exits 0 on clean HEAD + non-zero (naming the typology) on
-un-rebuilt drift; `build.py all && git diff --exit-code dist/` clean (output-neutral refactor);
-smoke-checklist carries the runnable `--check all` guard, no stale "both dist"/2-typology count
-(3 typologies) + `git status --porcelain dist/` complement; `--check` documented in build.py docstring
-+ README; `git diff index.html` empty.
+Entry criteria: MET — Phase 9 delivered + accepted (commit 33db22a). M6 pipeline thesis proven
+(Phase 7) + guarded (Phase 9); `acquire_fincen.py` carries a static 1-entry `REGISTRY` whose docstring
+defers the crawler to "a LATER phase". User chose SCALE over the smaller elder true-up at the gate.
+Exit criteria: `crawl_fincen.py` (authoring-only, stdlib) discovers the index → committed
+`data/fincen/index.json` (reproducible offline via `--selftest`/`parse_index(fixture)`);
+`acquire_fincen.py` reads the manifest (EFE fallback merged, backward-compatible); widened pipe proven
+on a bounded batch; crawler documented in docstrings + README + CLAUDE; `git diff index.html` empty;
+`raw/` still gitignored, no bulk-md commit.
 
-Progress: 100% — all 3 tasks complete; delivery accepted, committed to main `33db22a` (2026-06-05).
+Progress: 0% — planned, direction approved; implementation begins at T1.
 
 ## Active Phase Contract
 
-Phase: 9 - Build-drift guard (zero-drift invariant)
-Tasks: 3 (see tasks.md) — T1 `--check` mode + `render_one` extraction · T2 wire into
-smoke-checklist + fix stale prose · T3 document `--check` (docstring + README). All size S.
-Transition: continue (lite, single short session).
-Abort: if making the guard non-flaky needs the build to become deterministic in a way that CHANGES
-dist bytes (build is non-deterministic) — PAUSE and report. Blocked >3 attempts → ask user: skip or abort.
+Phase: 10 - FinCEN corpus crawler (SCALE)
+Tasks: 4 (see tasks.md) — T1 discovery probe + saved fixture · T2 `crawl_fincen.py` pure parser +
+`--selftest` + manifest writer · T3 wire `acquire_fincen.py` to the manifest (EFE fallback) ·
+T4 bounded batch proof + docs. Sizes S/M/S/S (T2 = M).
+Transition: continue (lite). May benefit from a fresh session at T2 if context is long.
+Abort: if FinCEN's index can't be deterministically parsed from a saved page (JS-rendered / auth /
+anti-scraping) — PAUSE, report, pivot to a hand-curated manifest. Blocked >3 attempts → ask user: skip or abort.
 
 ## Recent Decisions
 
 | Decision | Confidence | Date |
 |----------|------------|------|
+| Phase 10 direction = SCALE (FinCEN corpus crawler), chosen by the user over the smaller elder presentation-values true-up (which stays a Future-phase candidate). Overrides the planner's finish-before-scale recommendation — the user wants to grow the M6 vision next | high | 2026-06-05 |
+| Crawler scope = discovery-manifest + bounded batch, NOT mass-download. "Crawl all" ≠ "download all": the ship artifact is unchanged, so the reusable/testable/low-bloat core is the generated `data/fincen/index.json` manifest; downloading hundreds of PDFs adds git+network cost without improving the demo. Mirrors Phase-7 (prove the pipe on a bounded set) + Phase-9 YAGNI | high | 2026-06-05 |
+| Crawler determinism split = pure `parse_index(html)` (offline, `--selftest` against a saved fixture — Phase-9 `build.py --check` ethos) + a thin live `fetch_index()` shell (manual authoring, never in smoke/CI). Committed `index.json` is produced by `parse_index(saved_fixture)`, reproducible offline — keeps non-deterministic network out of committed state, honoring deterministic-validators-at-boundaries | high | 2026-06-05 |
+| Repo-hygiene rails held: `data/fincen/raw/` stays gitignored (PDFs regenerable); commit the manifest + only the md actually derived from (no bulk-md commit); `acquire_fincen.py` keeps the static EFE entry as a merged fallback so `fin-2022-a002` stays backward-compatible; stdlib-only crawler (no requests/bs4) | high | 2026-06-05 |
 | Phase 9 direction = HARDEN (build-drift guard) before SCALE (FinCEN crawler) or AUTOMATE (article→signal derivation). The M6 pipeline thesis is already proven by the Phase-7 walking skeleton; a corpus crawler / automated derivation don't earn their complexity for a ~3-typology demo, and automated derivation risks pulling a neural judge toward the build boundary (against deterministic-validators-at-boundaries). The guard closes a real Phase-7 invariant breach and is cheap | high | 2026-06-05 |
 | Guard mechanism = in-process `build.py --check` (render + byte-compare vs committed dist), NOT `build.py all && git diff --exit-code dist/`. Non-mutating (doesn't dirty the tree to test), git-agnostic (build.py stays pure-stdlib, works outside a checkout), per-typology drift report. `git status --porcelain dist/` documented in the smoke-checklist as the complement (catches untracked stray dist files `--check` won't) | high | 2026-06-05 |
 | Keep committing built `dist/` (rejected gitignore-dist + build-in-CI). The committed single file IS the deliverable — must open straight from the repo, offline, no Python. So guard the invariant rather than dissolve it | high | 2026-06-05 |
@@ -71,6 +80,8 @@ dist bytes (build is non-deterministic) — PAUSE and report. Blocked >3 attempt
 
 ## Blockers and Open Questions
 
+- [RESOLVED 2026-06-05 · planning] Phase-10 increment → **SCALE: FinCEN corpus crawler** (user chose over the smaller elder presentation-values true-up at the direction gate). Scoped to discovery-manifest + bounded batch, NOT mass-download. Elder true-up + automate-derivation stay Future-phase candidates
+- [OPEN · phase-10] Is FinCEN's advisories index server-rendered + deterministically scrapeable from a saved page? Resolved by the T1 probe; abort path = hand-curated manifest if not (raised 2026-06-05)
 - [RESOLVED 2026-06-05 · planning] Next-increment direction → **HARDEN (Phase 9 build-drift guard)** before SCALE (FinCEN crawler) or AUTOMATE (derivation). Closes a real Phase-7 invariant breach cheaply; the two SCALE/AUTOMATE increments stay in Future phases
 - [DEFERRED 2026-06-05] Pre-commit hook / CI enforcement of `--check` — out of Phase 9 (lite; HANDOFF "don't over-engineer"). The runnable `--check` + smoke-checklist is the home; a pre-commit hook is a clean follow-up if wanted later
 - [RESOLVED 2026-06-04] M6 anchor advisory → **FinCEN EFE FIN-2022-A002** (24 enumerated red flags, cleanest single-signal derivation; cheap to re-point later)
@@ -95,11 +106,11 @@ dist bytes (build is non-deterministic) — PAUSE and report. Blocked >3 attempt
 
 ## Session Journal (last 5)
 
+- [2026-06-05] [[2026-06-05-phase-10-fincen-corpus-crawler|Phase 10 FinCEN corpus crawler (SCALE)]] (lite, 4 tasks, READY FOR COMPLETION — delivery gate pending) — widened the authoring scraper from a 1-entry stub to the discovered FinCEN advisory corpus. New authoring-only `crawl_fincen.py` (pure `parse_index` per-`<tr>` extraction → id/title/`<time>`-ISO-date; `--selftest`/`--write`/`--list`/`--fetch`) generates `data/fincen/index.json` (14 advisories). `acquire_fincen.py` REGISTRY→manifest with `resolve_pdf` detail-page hop + EFE direct-PDF zero-hop override (backward-compatible). DISCOVERY (T1): listing yields detail-page URLs not PDF URLs (filenames unpredictable — batch proved it: `…Ransomware…_508_.pdf` vs `…Fentanyl-508C.pdf`); detail→PDF resolution at acquire time keeps the committed manifest deterministic (`parse_index(saved_fixture)`, re-write→no diff). Widened pipe proven live on `fin-2021-a004` (34KB md/15 indicators) + `fin-2024-a002` (56KB md/14); batch artifacts deleted per user call (regenerable). User chose SCALE over the elder true-up at the direction gate. Stdlib-only crawler+acquire; engine untouched; `build.py --check all` zero drift. Docs in README + CLAUDE.
 - [2026-06-05] [[2026-06-05-phase-09-build-drift-guard|Phase 9 build-drift guard]] (lite, 3 tasks, COMPLETED + accepted, committed `33db22a`) — turned the M5 zero-drift invariant into a runnable, non-mutating guard. `build.py` refactored: `build_one` split into `render_one(typ, template) -> str` (the SINGLE source of truth for a typology's dist bytes) + thin writer; new `check_one` (git-agnostic byte-compare of committed dist vs fresh in-memory render, per-typology verdict, invalid-config = per-typology FAIL) + `resolve_targets`; `main` gained `--check [all|<id>]`. Wired into smoke-checklist (de-staled "both dist"→3 typologies; `git status --porcelain dist/` complement noted) + documented in docstring + README. Build byte-DETERMINISTIC (built twice → identical sha), HEAD dist == fresh build, `node --check` PASS ×3, `git diff index.html` empty, zero config edits → all 3 dist byte-identical. Discovered Phase 10 candidate: elder presentation-values true-up in the smoke-checklist.
 - [2026-06-04] Phase 8 doc true-up + provenance fix (M6 debt) — doc/config-string only, engine untouched, committed `042d732`. Rebrand `Signal Engine`→`Signal Watch` (4 docs; fixed a smoke-checklist header check that had been failing vs the shipped brand). Paraphrase non-negotiable amended with the FinCEN-only verbatim public-domain exception (17 USC §105, NOT FINTRAC) in CLAUDE+HANDOFF §4.4. Fentanyl provenance: removed unverifiable `FIN-2019-A006`/`FIN-2024-A002` (0 hits in aml-wiki, never the derivation surface), attributed solely to FINTRAC Jan-2025 — reframing sweep caught 2 extra bad-cite sites in smoke-checklist. M6 doc staleness folded in (user add): CLAUDE M2→M6 + pipeline + 3 typologies; README M5→M6 + elder + verbatim exception. DISCOVERY: rebuild exposed Phase 7 committed STALE `dist/{fentanyl,trade-based}` (missing engine highlights feature; only elder current) → `build.py all` didn't reproduce committed dist, M5 zero-drift invariant had broken; all fresh dist staged (user-approved), invariant restored. Guard 0 tokens ×3, `node --check` PASS ×3, `git diff index.html` empty.
 - [2026-06-04] M6 pipeline walking skeleton: proved the "Signal Watch" ingestion pipe end to end on ONE real FinCEN advisory. T1 `acquire_fincen.py` (stdlib urllib) → EFE FIN-2022-A002 PDF (824KB). T2 `pdf_to_md.py` markitdown (MIT) → `data/fincen/fin-2022-a002.md` (48KB, all 24 red flags intact; de-risk GATE passed, no fallback). Forced detour: homebrew py3.14 broken `pyexpat` → converter runs under a gitignored uv-managed py3.12 `.venv`; `build.py` stays stdlib. T3 new `advisory_full` first-class field (Act 1 SOURCE DOCUMENT panel: bounded scrollable + `.docsrc` attribution distinct from the illustrative badge; `text_file`→build-time inline keeps md as source of truth) + "Signal Engine"→"Signal Watch" rebrand (engine+dist). T4 hand-derived `elder-financial-exploitation.json` (target S-DORMANT-DRAIN-ELDER ← md line 507; all 12 financial red flags mapped, 12 behavioral excluded as non-data signals). T5 all 3 dist build clean, self-contained guard 0 tokens, `node --check` PASS. NOT committed yet; doc rebrand + provenance true-up deferred to a follow-up phase.
 - [2026-06-04] M5 ship: doc/verify only (zero engine/config edits — `index.html`+`config/`+`scripts/` clean). Parameterized `tests/smoke-checklist.md` per typology (removed stale single-file `dist/index.html` path; per-typology fill table for the 6 values that differ; M3 controls moved deferred→active checks). Refreshed README (M2→ship; shipped M3 controls; both-typology compliance). Compliance + offline `file://` **HARD GATE PASS**: zero drift (`build.py all` byte-identical, `git status dist/` clean), badge both, self-contained (no fetch/external script; only Google Fonts), advisories paraphrased+attributed, no secrets/PII. M4 skipped (inert under file://). Runtime render carries from M3 (byte-identical dist; no fresh browser run this session). Committed to main.
-- [2026-06-04] M3 presenter polish: engine-only — centralized nav (advance/back/reset) + keys (←/→/Space/Esc) reusing the gate logic via the `nextBtn.disabled` guard; ↺ reset control; `prefers-reduced-motion` final-state (CSS @media + synchronous `T()`/`animVal`). Verified both shipped dist × both motion modes (gates hold, no Act 5 without confirm, 0 pending timers reduced); real Chrome 149 renders. `config/`+`build.py` byte-identical. Speaker notes deferred.
 ## Cross-References
 
 - HANDOFF.md · CLAUDE.md · README.md

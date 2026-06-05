@@ -48,6 +48,27 @@ generic and never carries typology copy.
 
 No engine edits required.
 
+## Authoring pipeline (build-time only — never in the ship file)
+
+To source a FinCEN advisory as a derivation surface for a new typology:
+
+```
+python3 scripts/crawl_fincen.py --selftest   # offline: verify the parser against the saved fixture
+python3 scripts/crawl_fincen.py --write       # offline: regenerate data/fincen/index.json from the fixture
+python3 scripts/crawl_fincen.py --fetch       # LIVE: refresh the listing fixture from fincen.gov
+python3 scripts/acquire_fincen.py --list      # show the discovered advisory corpus (the manifest)
+python3 scripts/acquire_fincen.py <id>        # LIVE: download one advisory PDF -> data/fincen/raw/<id>.pdf
+.venv/bin/python scripts/pdf_to_md.py <id>    # convert PDF -> data/fincen/<id>.md (verbatim source of truth)
+```
+
+`crawl_fincen.py` discovers the FinCEN advisories listing into the committed manifest
+`data/fincen/index.json`; `acquire_fincen.py` reads it (resolving each advisory's PDF from its
+detail page) and keeps the EFE anchor as a zero-hop direct-PDF override. These tools are stdlib-only,
+run at authoring time, and are **never** imported by the engine or `build.py` — the ship artifact
+stays single-file, offline, and never fetches. Conversion needs `markitdown` in a gitignored uv
+`.venv` (see `scripts/requirements-authoring.txt`); everything else is pure stdlib. FinCEN advisories
+are U.S. federal works in the public domain (17 U.S.C. §105).
+
 ## Present it
 
 - Build the typology you want and open `dist/<id>/index.html` in the presentation browser,
@@ -89,6 +110,8 @@ No engine edits required.
 time with no engine edits, plus presenter polish (M3: keyboard nav, reset, `prefers-reduced-motion`).
 M6 added a build-time authoring pipeline (acquire a FinCEN advisory PDF → convert to markdown →
 hand-derive a signal) and renders the FULL verbatim EFE advisory (FinCEN FIN-2022-A002, public
-domain) in Act 1. Runs offline from a single `file://` artifact per typology. Live / pre-generated
-mode (M4) is intentionally not built — scripted is the ship path. See `HANDOFF.md §8` for the
-milestone plan.
+domain) in Act 1. Phase 10 widened that pipeline with a **FinCEN corpus crawler**
+(`scripts/crawl_fincen.py`) that discovers the FinCEN advisories listing into a committed manifest
+(`data/fincen/index.json`), so acquisition reads the corpus instead of a hand-kept stub. Runs offline
+from a single `file://` artifact per typology. Live / pre-generated mode (M4) is intentionally not
+built — scripted is the ship path. See `HANDOFF.md §8` for the milestone plan.

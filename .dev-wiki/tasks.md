@@ -1,6 +1,20 @@
 # Tasks
 
-> Last updated: 2026-06-04 by /dev-debrief
+> Last updated: 2026-06-04 by /dev-plan
+
+<!-- phase:phase-08-doc-true-up -->
+<!-- gate-log:phase-08 direction=approved delivery=accepted -->
+
+## Phase 8: Doc true-up + provenance fix (M6 debt) — ACTIVE
+
+Close the three doc/provenance debts deferred from Phase 7. Unifying thread: the always-loaded docs must tell the truth about what the shipped artifact now is and cites. Doc/config-string only — engine (`index.html`) untouched (`git diff index.html` empty). Direction approved by user 2026-06-04; provenance fix = remove unverifiable FinCEN cites, attribute fentanyl to FINTRAC.
+
+- [x] T1 · Rebrand branded `Signal Engine` → `Signal Watch` in docs | scope: CLAUDE.md, HANDOFF.md, README.md, tests/smoke-checklist.md | success: `! grep -rIn 'Signal Engine' CLAUDE.md HANDOFF.md README.md tests/smoke-checklist.md` — doc H1 → "Signal Watch — AML Vision Demo"; smoke-checklist:31 header line matches the shipped "Signal Watch" brand; lowercase technical "engine" preserved (no `sed` blind replace) ✓ PASS (4 sites: CLAUDE/HANDOFF×2/README H1 + smoke-checklist:31; technical "engine" intact 4/15/4)
+- [x] T2 · Amend the paraphrase non-negotiable with the FinCEN-verbatim public-domain exception | scope: CLAUDE.md, HANDOFF.md | success: CLAUDE.md non-negotiables + HANDOFF §4.4 both state advisory text is paraphrased by default EXCEPT FinCEN federal advisories (public domain, 17 USC §105, reproduced verbatim WITH attribution, kept visually separate from the illustrative badge), and that this does NOT extend to FINTRAC (Crown copyright → still paraphrase); `grep -qi '17 USC' CLAUDE.md HANDOFF.md && grep -qi 'verbatim' CLAUDE.md HANDOFF.md` ✓ PASS (both bullets rewritten with default-rule + FinCEN-only exception + FINTRAC carve-out; CLAUDE.md cite cleared in the same rewrite)
+- [x] T3 · Fix fentanyl provenance — attribute to FINTRAC only | scope: config/typologies/fentanyl.json, CLAUDE.md, HANDOFF.md, README.md (+ tests/smoke-checklist.md via sweep) | success: `! grep -rIn 'FIN-2019-A006\|FIN-2024-A002' config/ CLAUDE.md HANDOFF.md README.md` — fentanyl attributed solely to the FINTRAC Jan-2025 Operational Alert in `anchor.source` + all three docs; plus reframing sweep for any other prose still describing the pre-verbatim/paraphrase-only world ✓ PASS (5 sites: fentanyl.json:15, HANDOFF:100+:120, README:64; DISCOVERY via sweep: 2 more bad-cite sites in tests/smoke-checklist.md:62+:75 also fixed; fentanyl.json still valid JSON. README:38/:63 paraphrase lines left intact — TRUE for the fentanyl/trade-based typologies README covers)
+- [x] T4 · Rebuild dist + verify (config content changed) | scope: dist/**, scripts/build.py | success: `python3 scripts/build.py all` clean; self-contained guard reports 0 tokens; `node --check` on the inlined engine PASS; `git diff --stat index.html` empty (engine untouched) ✓ PASS (build all 3 clean; guard 0 forbidden tokens ×3; node v22 --check PASS ×3; no external refs beyond Google Fonts; index.html diff empty). DISCOVERY (user-approved scope widen): rebuild revealed Phase 7 committed STALE dist/fentanyl + dist/trade-based (missing engine highlights/esc()/.hl/460px feature; only elder was current) → all fresh dist staged to restore the `build.py all == committed dist` invariant; noted as DISCOVERY for the commit message
+
+> Exit (phase-08): no branded "Signal Engine" in the four docs · paraphrase non-negotiable carries the FinCEN-only verbatim exception · unverifiable fentanyl FinCEN cites removed (FINTRAC sole attribution) across config + docs + smoke-checklist · all 3 dist rebuilt clean (engine drift corrected; user-approved) · engine diff empty. ALL EXIT CRITERIA MET (working tree; delivery gate pending acceptance).
 
 <!-- phase:phase-07-pipeline-walking-skeleton -->
 <!-- gate-log:phase-07 direction=approved delivery=accepted -->
@@ -83,7 +97,6 @@ Second typology = **Trade-based ML (TBML)**; switch = **build-time** (`dist/<id>
 <details>
 <summary>Future phases (plan when active)</summary>
 
-**Phase 8 · Doc true-up + provenance fix (discovered M6)** — rebrand docs (README / HANDOFF / CLAUDE.md / tests/smoke-checklist.md) "Signal Engine" → "Signal Watch"; formally amend the "paraphrased" non-negotiable to the FinCEN-verbatim public-domain exception (17 USC §105, FinCEN-only, NOT FINTRAC); fix the `fentanyl.json` `anchor.source` + CLAUDE.md provenance defect (cites FinCEN FIN-2019-A006/FIN-2024-A002, but the demo is FINTRAC-grounded — neither FinCEN cite verifiable in aml-wiki). Doc-only; engine/config untouched.
 **Phase · FinCEN corpus crawler (discovered M6)** — widen the authoring scraper from one advisory to ALL FinCEN advisories (the original vision's next increment). Builds on the proven acquire→convert pipe.
 **Phase · Automate article→signal derivation (discovered M6)** — automate the red-flag→signal step, keeping the deterministic validator at the build boundary. Manual path proven in M6 first.
 

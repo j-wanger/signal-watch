@@ -1,4 +1,4 @@
-# AML Signal Engine — Vision Demo
+# Signal Watch — AML Vision Demo
 ## Claude Code Project Handoff & Bootstrap
 
 > **Purpose of this doc:** bring a fresh Claude Code session up to speed to formally **ship** the interactive vision demo as a maintained project.
@@ -97,7 +97,7 @@ These come from the conversation that produced the demo and the enterprise envir
 1. **Scripted-first for reliability.** Live agentic pipelines fail in front of audiences. The default presentation path is fully scripted. Any live element must have a scripted fallback that triggers automatically on error/timeout.
 2. **Two wow beats are load-bearing.** The two human gates (selection + confirm) and the combination-lift reveal are the persuasion. Do not redesign the six-act narrative or remove these without an explicit ask.
 3. **"Illustrative data & outputs" badge stays, always visible.** Never present synthetic figures as real. This *increases* trust with a compliance audience; it's a feature, not a disclaimer to hide.
-4. **No real data, ever.** No customer, account, or transaction data in the repo or the demo — coverage/population/precision numbers are synthetic. The only real-world content is **public advisory text**, and it must be **paraphrased** (copyright), sourced from public FINTRAC/FinCEN material (e.g. FINTRAC Jan-2025 Operational Alert on illicit synthetic opioids; FinCEN FIN-2019-A006, FIN-2024-A002).
+4. **No real data, ever.** No customer, account, or transaction data in the repo or the demo — coverage/population/precision numbers are synthetic. The only real-world content is **public advisory text**. Default rule: **paraphrase** it (copyright) — e.g. the FINTRAC Jan-2025 Operational Alert on illicit synthetic opioids behind the fentanyl demo. **One exception:** US **FinCEN** federal advisories are **public domain (17 USC §105)** and may be reproduced **verbatim with attribution**, kept visually separate from the "Illustrative data & outputs" badge (Act 1's SOURCE DOCUMENT panel renders EFE FIN-2022-A002 this way). The verbatim exception is **FinCEN-only** — it does **not** extend to **FINTRAC** (Canadian Crown copyright → still paraphrase).
 5. **Live backend reality on the enterprise machine** (if a live mode is ever built):
    - **GitHub Copilot cannot be a web backend** — no entitled general chat API; the editor endpoint is off-limits on an enterprise machine and the CLI is disabled in this subscription.
    - **Legitimate live option:** a thin **FastAPI relay → local `llama.cpp` OpenAI-compatible endpoint** (offline, no key, no egress) or the bank's **approved LLM gateway**. JupyterHub-hosted models are reachable only via sanctioned paths (`jupyter-server-proxy` + a Hub API token) and ideally called server-side, not from the laptop browser.
@@ -117,7 +117,7 @@ The current arrays map cleanly onto a per-typology config object. Define this sc
   "label": "Illicit synthetic opioids (fentanyl)",
   "anchor": {
     "advisory_name": "Laundering the Proceeds of Illicit Synthetic Opioids",
-    "source": "FINTRAC Operational Alert, Jan 2025 (+ FinCEN FIN-2019-A006 / FIN-2024-A002)",
+    "source": "FINTRAC Operational Alert, Jan 2025",
     "hook_title": "What aren't we watching?",
     "close_title": "The blind spot closes — and stays closed"
   },
@@ -177,7 +177,7 @@ Keep this entirely separate from the scripted core; the demo must run with this 
 See `CLAUDE.md` in this repo — adapted from the skeleton below to reflect current (M0) state.
 
 ```markdown
-# AML Signal Engine — Vision Demo
+# Signal Watch — AML Vision Demo
 
 ## What this project is
 A presenter-driven, offline, browser-based VISION PROTOTYPE for AML stakeholder buy-in.

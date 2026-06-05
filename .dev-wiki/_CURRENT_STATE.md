@@ -1,51 +1,57 @@
 # Project: AML Signal Engine — Vision Demo
 
-> Last updated: 2026-06-04 by /dev-debrief
+> Last updated: 2026-06-04 by /dev-plan
 
 ## Recommended Next Action
 
-**Phase 7 (M6 — pipeline walking skeleton) shipped — delivered, accepted, and committed to main
-(2026-06-04).** The "Signal Watch" ingestion pipe is
-proven end to end on ONE real FinCEN advisory: EFE FIN-2022-A002 acquired (824KB PDF) → markitdown
-PDF→markdown (`data/fincen/fin-2022-a002.md`, 48KB, all 24 red flags intact, source of truth) →
-hand-derived schema-valid `config/typologies/elder-financial-exploitation.json` (target signal
-**S-DORMANT-DRAIN-ELDER**, all 12 financial red flags mapped; 12 behavioral red flags excluded as
-non-data signals) → Act 1's SOURCE DOCUMENT panel renders the FULL verbatim advisory (bounded
-scrollable, attributed 17 USC §105, separated from the illustrative badge) via a new `advisory_full`
-field (`text_file`→build-time inline; md stays single source of truth). "Signal Engine" → "Signal
-Watch" rebranded in engine + dist. All 3 dist build clean, self-contained guard 0 tokens, `node
---check` PASS.
+**Phase 8 (M6 doc true-up + provenance fix) — ACTIVE, direction approved 2026-06-04; implementing.**
+Closing the three doc/provenance debts deferred from Phase 7. Unifying thread: the always-loaded
+docs must tell the truth about what the shipped artifact now is and cites. Doc/config-string ONLY —
+the engine (`index.html`) is NOT touched.
 
-**Next — Phase 8 · Doc true-up + provenance fix (deferred, required):** rebrand docs to "Signal Watch";
-formally amend the "paraphrased" non-negotiable to the FinCEN-verbatim exception; fix the
-`fentanyl.json` FINTRAC-vs-FinCEN citation defect. Plan it with `/dev-plan`.
-(Commit hygiene resolved: raw PDF gitignored — regenerable via `acquire_fincen.py` — `.md` committed as source of truth.)
+Three defects: (1) **brand drift** — branded "Signal Engine" survives in CLAUDE.md/HANDOFF.md/
+README.md/tests/smoke-checklist.md (the engine self-brands "Signal Watch"; smoke-checklist:31's
+header check currently FAILS against the shipped artifact); (2) **stale non-negotiable** — the
+"must be paraphrased" rule predates the verbatim-FinCEN render now live in Act 1, so amend it with
+the FinCEN-only public-domain exception (17 USC §105, attributed, NOT FINTRAC); (3) **false fentanyl
+provenance** — `FIN-2019-A006`/`FIN-2024-A002` get 0 hits in aml-wiki and were never the derivation
+surface (the demo is FINTRAC-grounded), so remove them and attribute fentanyl solely to the FINTRAC
+Jan-2025 Operational Alert. fentanyl.json content changes → rebuild dist/fentanyl (other two stay
+byte-identical); `git diff index.html` must be empty.
+
+(Phase 7 shipped, accepted, committed to main 2026-06-04 — the Signal Watch ingestion pipe proven
+end to end on EFE FIN-2022-A002; target signal **S-DORMANT-DRAIN-ELDER**.)
 
 ## Active Phase
 
-**[[phase-07-pipeline-walking-skeleton|Phase 7: Pipeline walking skeleton (M6)]]** (status: completed)
+**[[phase-08-doc-true-up|Phase 8: Doc true-up + provenance fix]]** (status: active)
 
-Entry criteria: MET (M5 shipped — single-file per-typology dist runs offline, compliance gate PASS;
-the scripted ship artifact is the demo this slice feeds real data into)
-Exit criteria: EFE FIN-2022-A002 PDF acquired → `data/fincen/<id>.md` (source of truth) → schema-valid
-`config/typologies/elder-financial-exploitation.json` hand-derived → Act 1 renders the FULL verbatim
-advisory (attributed, scrollable, separated from the illustrative badge) → "Signal Watch" rebrand →
-all three built `dist/<id>/index.html` run offline from `file://`, no console errors. MET (delivery accepted, committed to main).
+Entry criteria: MET (Phase 7 delivered + accepted; rebrand + verbatim render live in engine/dist,
+but the always-loaded docs still describe the pre-M6 world; three debts explicitly deferred).
+Exit criteria: no branded "Signal Engine" in the four docs → CLAUDE.md+HANDOFF carry the FinCEN-only
+verbatim public-domain exception (17 USC §105, NOT FINTRAC) → unverifiable fentanyl FinCEN cites
+removed (FINTRAC sole attribution) across config + docs → fentanyl dist rebuilt clean (guard 0
+tokens, `node --check` PASS) → `git diff index.html` empty → only dist/fentanyl changed.
 
-Progress: 100% — all 5 tasks complete, delivery accepted, committed to main (2026-06-04).
-Next: project between phases — plan Phase 8 (doc true-up + provenance fix) with `/dev-plan`.
+Progress: ~0% — 4 lite tasks planned (T1 rebrand · T2 non-negotiable amend · T3 provenance fix ·
+T4 rebuild+verify); direction approved, implementing.
 
 ## Active Phase Contract
 
-Phase: 7 - Pipeline walking skeleton (M6)
-Tasks: 5 (see tasks.md) — T1 acquire PDF → T2 convert+checkpoint (de-risk gate) → T3 advisory_full field + Signal Watch rebrand → T4 hand-derive EFE config → T5 build + offline file:// verify
+Phase: 8 - Doc true-up + provenance fix (M6 debt)
+Tasks: 4 (see tasks.md) — T1 rebrand docs → T2 amend paraphrase non-negotiable (FinCEN-verbatim
+exception) → T3 fix fentanyl provenance (FINTRAC only) → T4 rebuild fentanyl dist + verify
 Transition: continue
-Abort: if T3 surfaces a defect needing engine/config change beyond the planned slice, or T2's converter output is too mangled to derive from after switching converters — PAUSE and report (converter quality is the explicit de-risk). If blocked >3 attempts, ask user: skip or abort.
+Abort: if a fix surfaces a defect needing an engine/schema/config-structure change beyond the
+doc/string slice — PAUSE and report. If blocked >3 attempts on a task, ask user: skip or abort.
 
 ## Recent Decisions
 
 | Decision | Confidence | Date |
 |----------|------------|------|
+| Phase 8 fentanyl provenance fix = REMOVE the unverifiable FinCEN cites (FIN-2019-A006/FIN-2024-A002 — 0 hits in aml-wiki, never the derivation surface) and attribute fentanyl solely to the FINTRAC Jan-2025 Operational Alert (the verified, actually-used source). Honest attribution > chasing unverifiable cites — the project's own provenance thesis applied to its docs | high | 2026-06-04 |
+| Doc H1 rebrand wording: "AML Signal Engine — Vision Demo" → "Signal Watch — AML Vision Demo" (product-name-first, matches the engine's "Signal Watch — AML …" ordering; keeps the docs' "Demo" word rather than the engine's "Prototype") | high | 2026-06-04 |
+| Phase 8 scope correction: filed as "doc-only" but defect 3's false cite lives inside `config/typologies/fentanyl.json` (`anchor.source`) → the fix touches one config string + forces a dist/fentanyl rebuild. The engine (`index.html`) still stays untouched (diff empty) | high | 2026-06-04 |
 | Phase 7 = thin vertical slice of the Signal Watch pipeline (acquire → PDF→MD persist → hand-derive one signal → render verbatim in Act 1) — prove the pipe on ONE item before widening the scraper or automating derivation (both explicitly LATER phases) | high | 2026-06-04 |
 | Project identity pivot: "hand-authored scripted dramatization" → "public-data-seeded ingestion pipeline" whose demo output is the existing frontend, designed to later take real data; upgrades buy-in via provenance | high | 2026-06-04 |
 | Non-negotiable relaxed for FinCEN ONLY: verbatim public-domain federal text (17 USC §105), attributed — NOT paraphrased. Does NOT extend to FINTRAC (Canadian Crown copyright). Needs CLAUDE.md/HANDOFF update (a doc task, not done this phase) | high | 2026-06-04 |
@@ -68,7 +74,7 @@ Abort: if T3 surfaces a defect needing engine/config change beyond the planned s
 - [RESOLVED 2026-06-04] M6 product name → **"Signal Watch"** (rebrand rides along with the pipeline slice; resolves the M5 OPEN name question)
 - [RESOLVED 2026-06-04] M6 where the verbatim advisory renders → **Act 1's existing SOURCE DOCUMENT panel** (`.doc`/`#doctext`) as a NEW top-level `advisory_full` field, bounded scrollable (max-height + overflow-y), attribution kept visually distinct from the illustrative badge (NOT Act 0, NOT an `anchor` subfield)
 - [OPEN] M6 converter choice — markitdown (MIT) evaluated first for license-cleanliness; pymupdf4llm (AGPL, authoring-only) is the quality fallback. NONE installed in env. Resolved by the T2 CHECKPOINT against the real EFE PDF; the converter is authoring-only (scripts/), never in the ship file
-- [DEFERRED 2026-06-04] CLAUDE.md/HANDOFF doc update for the FinCEN-only verbatim exception + the fentanyl-config provenance true-up — a separate doc task, NOT done in this phase
+- [IN PHASE 8 · 2026-06-04] CLAUDE.md/HANDOFF doc update for the FinCEN-only verbatim exception + the fentanyl-config provenance true-up — now the active Phase 8 (planned, direction approved); was deferred from Phase 7
 - [DEFERRED 2026-06-04] Closing "ask" slide — out of scope (new act touches six-act-arc + needs config/schema); revisit as a config-driven follow-up
 - [RESOLVED 2026-06-04] Ship as single file vs hosted — **single self-contained file** per typology
 - [RESOLVED 2026-06-04] Presentation mode → **scripted** (M4 live/pre-gen skipped by decision)

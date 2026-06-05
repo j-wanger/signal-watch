@@ -84,7 +84,8 @@
   /* advisory_full: verbatim public-domain source rendered scrollable, attribution kept distinct from the illustrative badge */
   .doc .docsrc{font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--signal);margin-bottom:10px;line-height:1.5}
   .doc .docsrc b{text-transform:uppercase;letter-spacing:.1em;font-weight:700}
-  .doc .docfull{font-family:var(--mono);font-size:11px;line-height:1.55;color:var(--muted);max-height:300px;overflow-y:auto;white-space:pre-wrap;overflow-wrap:break-word;border-top:1px solid var(--line);padding-top:12px}
+  .doc .docfull{position:relative;font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--muted);max-height:460px;overflow-y:auto;white-space:pre-wrap;overflow-wrap:break-word;border-top:1px solid var(--line);padding-top:12px}
+  .doc .docfull .hl{color:var(--ink);background:rgba(246,166,35,.16);border-radius:3px;padding:0 2px}
   .caret{display:inline-block;width:7px;height:15px;background:var(--signal);vertical-align:-2px;animation:blink 1s steps(2) infinite}
   @keyframes blink{50%{opacity:0}}
   .extracted{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:18px}
@@ -284,7 +285,7 @@ const CONFIG = {
     "close_delta": "▲ flow-through now covered · courier queued",
     "coverage_noun": "fentanyl typologies",
     "lift_rationale": "This is the case for <b style=\"color:var(--ink)\">atoms over monolithic scenarios</b>. A flow-through rule alone floods the queue. Composed with fan-in and account-age, it becomes a precise, explainable rule — and the engine <b style=\"color:var(--ink)\">discovers that combination</b> instead of an analyst guessing it.",
-    "source": "Indicators grounded in the FINTRAC Operational Alert on illicit synthetic opioids (Jan 2025) &amp; FinCEN FIN-2019-A006 / FIN-2024-A002"
+    "source": "Indicators grounded in the FINTRAC Operational Alert on illicit synthetic opioids (Jan 2025)"
   },
   "coverage": {
     "indicators": [
@@ -509,6 +510,7 @@ const TARGET = CANDIDATES.find(c => c.target);          // Act 4 build subject (
 const TARGET_IND = INDICATORS.find(i => i.target);      // Act 6 now-covered indicator (the target row)
 
 const COLORS={covered:'var(--green)',partial:'var(--signal)',gap:'var(--rose)',available:'var(--green)','partial-d':'var(--signal)',insufficient:'var(--rose)'};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 /* ---------- defensive rendering ---------- */
 function validateConfig(c){
@@ -606,10 +608,29 @@ function act1(){
   streamAdvisory();
 }
 function streamAdvisory(){
-  if(ADVISORY_FULL){  // verbatim source document: render it whole + scrollable, then extract — no typewriter
-    const el=document.getElementById('docfull');
-    if(el) el.textContent=ADVISORY_FULL.text;   // textContent keeps the gov text literal + injection-safe
-    T(extractSignals,350);return;
+  if(ADVISORY_FULL){  // verbatim source document — keep the "agent reading" beat: type a longer opening
+    const el=document.getElementById('docfull');   // (processing feel), then reveal the full text with the
+    if(!el){extractSignals();return;}              // signal-corresponding red-flag phrases highlighted, then extract
+    const full=ADVISORY_FULL.text;
+    const hls=Array.isArray(ADVISORY_FULL.highlights)?ADVISORY_FULL.highlights:[];
+    const reveal=()=>{
+      let h=esc(full);
+      hls.forEach(p=>{const ep=esc(p); if(ep) h=h.split(ep).join('<span class="hl">'+ep+'</span>');});
+      el.innerHTML=h;
+      const first=el.querySelector('.hl');          // bring the first highlighted red flag into view
+      el.scrollTop=first?Math.max(0,first.offsetTop-90):0;
+    };
+    if(REDUCED){reveal();extractSignals();return;}  // reduced motion: final state, no typing
+    const CAP=2800, head=full.slice(0,CAP);         // type a longer opening so it reads as real processing
+    let i=0;
+    (function type(){
+      if(i>=head.length){reveal();T(extractSignals,360);return;}
+      i=Math.min(head.length,i+3);
+      el.textContent=head.slice(0,i)+'▌';           // block char = caret; textContent keeps the gov text literal
+      el.scrollTop=el.scrollHeight;                 // follow the caret as it reads
+      T(type,10);
+    })();
+    return;
   }
   const el=document.getElementById('doctext');
   if(REDUCED){  // one-shot: full advisory with its highlights, then extract — no per-word typing

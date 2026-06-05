@@ -28,7 +28,7 @@ that table.
 ## Build & open
 - [ ] `python3 scripts/build.py <id>` prints `<id> -> dist/<id>/index.html` (or `all` to build every typology)
 - [ ] Open `dist/<id>/index.html` by **double-clicking the file** (true `file://`, no server)
-- [ ] Header shows **Signal Engine** / AML Detection · Vision Prototype *(shared chrome)*
+- [ ] Header shows **Signal Watch** / AML Detection · Vision Prototype *(shared chrome)*
 - [ ] The amber **"Illustrative data & outputs"** badge is visible (top-right) on **every** act *(shared chrome)*
 
 ## Walk the six-act arc (Next / Back) — read values from the table
@@ -59,7 +59,7 @@ that table.
 ## Compliance (hard gate — see T3 / HANDOFF §4)
 - [ ] Every figure is illustrative; nothing reads as a real customer/transaction number
 - [ ] Advisory text is **paraphrased + public-source**, and the footer/source line attributes it:
-  - `fentanyl`: FINTRAC Operational Alert on illicit synthetic opioids (Jan 2025) · FinCEN FIN-2019-A006 / FIN-2024-A002
+  - `fentanyl`: FINTRAC Operational Alert on illicit synthetic opioids (Jan 2025)
   - `trade-based`: FinCEN Alert on fentanyl-linked trade-based laundering (Apr 2025) · FATF TBML trends & developments (2024)
 - [ ] No secrets/keys anywhere in the shipped file
 
@@ -72,6 +72,6 @@ Deterministic gate run against both shipped `dist/<id>/index.html`. **Result: PA
 - ✅ Zero drift: `build.py all` reproduces both dist byte-identical; `git status dist/` clean (shipped = source = HEAD).
 - ✅ Badge `Illustrative data & outputs` present in both (persistent header chrome → on every act).
 - ✅ Self-contained for `file://`: no `<script src>`, no `fetch()`, no unresolved `__CONFIG__`; `const CONFIG` inlined; boot `goto(0)` present. Only external ref is the Google Fonts `<link>` (degrades to system fonts offline).
-- ✅ Advisories paraphrased + public-source, attributed in both (fentanyl: FINTRAC Jan-2025 / FinCEN FIN-2019-A006 / FIN-2024-A002 · trade-based: FinCEN Apr-2025 / FATF TBML 2024).
+- ✅ Advisories paraphrased + public-source, attributed in both (fentanyl: FINTRAC Jan-2025 · trade-based: FinCEN Apr-2025 / FATF TBML 2024).
 - ✅ No secrets/keys; no real-data/PII (no emails, no ≥9-digit runs, no card/SSN patterns). All figures are config-sourced illustrative numbers.
 - ↪ Runtime render (Act 0, no console errors) was verified on real Chrome 149 × both motion modes at **M3**; these dist bytes are unchanged since (zero drift), so that pass carries. Re-run the live walk above before any presentation.

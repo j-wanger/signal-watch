@@ -1,4 +1,4 @@
-# AML Signal Engine — Vision Demo
+# Signal Watch — AML Vision Demo
 
 ## What this project is
 A presenter-driven, offline, browser-based VISION PROTOTYPE for AML stakeholder buy-in.
@@ -17,17 +17,27 @@ AML transformation framework. Keep vocabulary consistent with it
   unless explicitly asked to change them.
 - Keep the "Illustrative data & outputs" badge always visible. Never present synthetic
   numbers as real.
-- NO real customer/transaction data, ever. Advisory text must be public-source and PARAPHRASED
-  (FINTRAC Jan-2025 Operational Alert; FinCEN FIN-2019-A006 / FIN-2024-A002).
+- NO real customer/transaction data, ever. Advisory text must be public-source and PARAPHRASED by
+  default (e.g. the FINTRAC Jan-2025 Operational Alert behind the fentanyl demo). ONE exception:
+  US FinCEN federal advisories are public domain (17 USC §105) and may be reproduced VERBATIM with
+  attribution, kept visually separate from the "Illustrative data & outputs" badge (see Act 1's
+  SOURCE DOCUMENT panel, EFE FIN-2022-A002). The verbatim exception is FinCEN-only — it does NOT
+  extend to FINTRAC (Canadian Crown copyright → still paraphrase).
 - Live mode is optional, isolated, off by default, always has a scripted fallback.
   Never put keys/tokens in the frontend. Copilot is NOT a web backend (HANDOFF §4.5).
 
-## Current state (M2 — multi-typology)
+## Current state (M6 — Signal Watch ingestion pipeline)
 - Generic engine: `index.html` (vanilla HTML/CSS/JS) with a single `__CONFIG__` injection point.
-- Content: `config/typologies/*.json` (fentanyl, trade-based) against `config/schema.md`.
-- Build: `scripts/build.py` validates a config against the schema (fails loud) and inlines it
-  → `dist/<id>/index.html`. Original baseline preserved in `archive/`.
-- Engine is typology-agnostic — adding a typology is one JSON file, no engine edits.
+  Typology-agnostic — adding a typology is one JSON file, no engine edits. Presenter controls (M3):
+  keyboard nav (←/→/Space/Esc/↺), reset, `prefers-reduced-motion`.
+- Content: `config/typologies/*.json` (fentanyl, trade-based, elder-financial-exploitation) against
+  `config/schema.md`.
+- Build: `scripts/build.py` validates a config against the schema (fails loud), resolves
+  `text_file`→inline, and inlines everything → `dist/<id>/index.html`. Baseline preserved in `archive/`.
+- Authoring pipeline (M6, build-time ONLY — never in the ship file): `acquire_fincen.py` (fetch a
+  FinCEN advisory PDF) → `pdf_to_md.py` (markitdown PDF→markdown, persisted to `data/fincen/<id>.md`
+  as the source of truth) → hand-derive a schema-valid config. The elder typology renders the FULL
+  verbatim EFE advisory (FinCEN FIN-2022-A002, public domain) in Act 1 via the `advisory_full` field.
 
 ## How to run
 - Build: `python3 scripts/build.py <id>` (or `all`) → `dist/<id>/index.html`.
@@ -42,8 +52,9 @@ symlink `wiki/ → aml-wiki` (gitignored) makes the harness auto-select it in th
 the SessionStart hook activates the knowledge-wiki framework from it.
 - Query domain knowledge before guessing: `/wiki-query <question>` (auto-scopes to aml-wiki).
 - AML insights worth keeping go back to aml-wiki via `/wiki-add` — it is the canonical home.
-- For authoring a new typology (M2), pull paraphrased advisory specifics + indicators
-  from the wiki rather than inventing them. Retrieval over parametric guessing.
+- For authoring a new typology, pull paraphrased advisory specifics + indicators from the wiki
+  rather than inventing them — or, for a FinCEN advisory, run the M6 pipeline (acquire→convert) and
+  derive from the verbatim markdown. Retrieval over parametric guessing.
 
 ## Aesthetic
 Dark "dossier" theme, amber `--signal` (#f6a623) accent; fonts Newsreader / Archivo /
@@ -51,7 +62,8 @@ JetBrains Mono. Theme lives in `:root` CSS variables. Refined, not flashy.
 
 ## Milestones
 M0 bootstrap · M1 config-driven refactor · M2 multi-typology · M3 presenter polish ·
-M4 (optional) live/pre-gen mode · M5 ship. See HANDOFF.md §8.
+M4 (skipped) live/pre-gen mode · M5 ship · M6 Signal Watch ingestion pipeline (FinCEN verbatim).
+See HANDOFF.md §8.
 
 ## Definition of done
 Reliable offline · multi-typology from config · presenter controls · compliance-clean ·

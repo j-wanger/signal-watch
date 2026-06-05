@@ -1,4 +1,4 @@
-# AML Signal Engine — Vision Demo
+# Signal Watch — AML Vision Demo
 
 A presenter-driven, offline, browser-based **vision prototype** for AML stakeholder
 buy-in. It is a scripted, reliable dramatization of a signal/atom monitoring loop —
@@ -21,11 +21,12 @@ Build a typology to a single self-contained file, then open it (no server, no de
 except a Google Fonts `<link>` when online):
 
 ```
-python3 scripts/build.py fentanyl      # -> dist/fentanyl/index.html
-python3 scripts/build.py trade-based   # -> dist/trade-based/index.html
-python3 scripts/build.py all           # build every typology
+python3 scripts/build.py fentanyl                     # -> dist/fentanyl/index.html
+python3 scripts/build.py trade-based                  # -> dist/trade-based/index.html
+python3 scripts/build.py elder-financial-exploitation # -> dist/elder-financial-exploitation/index.html
+python3 scripts/build.py all                          # build every typology
 
-open dist/fentanyl/index.html          # macOS — or just double-click it
+open dist/fentanyl/index.html                         # macOS — or just double-click it
 ```
 
 The built file runs offline from `file://`. Fonts fall back to system serif/sans/mono
@@ -35,7 +36,8 @@ generic and never carries typology copy.
 ## Add a typology
 
 1. Copy an existing `config/typologies/<id>.json`, edit it against `config/schema.md`
-   (advisory text must be **public-source and paraphrased**; figures illustrative).
+   (advisory text **public-source and paraphrased** by default; for a **FinCEN** advisory you may
+   inline the **verbatim** public-domain text via `advisory_full`, attributed; figures illustrative).
 2. `python3 scripts/build.py <id>` — the build validates the config against the schema
    and fails loud on any violation, then writes `dist/<id>/index.html`.
 
@@ -60,11 +62,13 @@ No engine edits required.
 
 - No real customer, account, or transaction data — anywhere. Coverage, population, and
   precision numbers are synthetic and illustrative.
-- The only real-world content is **public advisory material, paraphrased** — per typology:
-  - **fentanyl** — FINTRAC Operational Alert on illicit synthetic opioids (Jan 2025);
-    FinCEN FIN-2019-A006 / FIN-2024-A002.
+- The only real-world content is **public advisory material** — paraphrased by default, per typology:
+  - **fentanyl** — FINTRAC Operational Alert on illicit synthetic opioids (Jan 2025).
   - **trade-based** — FinCEN Alert on fentanyl-linked trade-based laundering (Apr 2025);
     FATF report on TBML trends & developments (2024).
+  - **elder financial exploitation** — FinCEN Advisory EFE FIN-2022-A002, reproduced **verbatim**
+    (US federal advisories are public domain, 17 USC §105; attributed, kept visually separate from
+    the illustrative badge). The verbatim exception is FinCEN-only — it does not extend to FINTRAC.
 - The "Illustrative data & outputs" badge stays visible at all times — it is a trust
   device for a compliance audience, not a disclaimer to hide.
 
@@ -75,8 +79,11 @@ No engine edits required.
 
 ## Status
 
-**M5 — ship.** Config-driven engine (M1) + two typologies (**fentanyl**, **trade-based ML** —
-M2), switchable at build time with no engine edits, plus presenter polish (M3: keyboard nav,
-reset, `prefers-reduced-motion`). Runs offline from a single `file://` artifact per typology.
-Live / pre-generated mode (M4) is intentionally not built — scripted is the ship path. See
-`HANDOFF.md §8` for the milestone plan.
+**M6 — Signal Watch ingestion pipeline.** Config-driven engine (M1) + three typologies
+(**fentanyl**, **trade-based ML** — M2; **elder financial exploitation** — M6), switchable at build
+time with no engine edits, plus presenter polish (M3: keyboard nav, reset, `prefers-reduced-motion`).
+M6 added a build-time authoring pipeline (acquire a FinCEN advisory PDF → convert to markdown →
+hand-derive a signal) and renders the FULL verbatim EFE advisory (FinCEN FIN-2022-A002, public
+domain) in Act 1. Runs offline from a single `file://` artifact per typology. Live / pre-generated
+mode (M4) is intentionally not built — scripted is the ship path. See `HANDOFF.md §8` for the
+milestone plan.

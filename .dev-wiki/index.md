@@ -13,12 +13,13 @@
 - [[phase-08-doc-true-up|Phase 8: Doc true-up + provenance fix (M6 debt)]] — completed + accepted (rebrand docs; FinCEN-verbatim non-negotiable; fentanyl provenance → FINTRAC; dist drift corrected)
 - [[phase-09-build-drift-guard|Phase 9: Build-drift guard]] — completed + accepted (in-process `build.py --check` for the zero-drift invariant; wired into smoke-checklist; commit 33db22a)
 - [[phase-10-fincen-corpus-crawler|Phase 10: FinCEN corpus crawler (SCALE)]] — completed + accepted (discovery manifest `data/fincen/index.json`; authoring-only `crawl_fincen.py`, pure parser + `--selftest`; bounded batch, not mass-download; commit 0c87c47)
-- [[phase-11-automated-derivation|Phase 11: Automated derivation (LLM-drafted signal config)]] — active (AUTOMATE; authoring-only `derive_signals.py`, deterministic `--selftest`/`--scaffold` + neural `--draft`; LLM proposes a `.draft.json`, build.py + schema + human gates dispose; variant B over A)
+- [[phase-11-automated-derivation|Phase 11: Automated derivation (LLM-drafted signal config)]] — completed + accepted (AUTOMATE; authoring-only `derive_signals.py`, deterministic `--selftest`/`--scaffold` + neural `--draft`; LLM proposes a `.draft.json`, build.py + schema + human gates dispose; variant B over A; review 9/10; commit c37dc39)
 
 ### Decisions
 - None yet
 
 ### Journal
+- [[2026-06-05-phase-11-automated-derivation|2026-06-05 · Phase 11 Automated derivation (LLM-drafted signal config)]]
 - [[2026-06-05-phase-10-fincen-corpus-crawler|2026-06-05 · Phase 10 FinCEN corpus crawler (SCALE)]]
 - [[2026-06-05-phase-09-build-drift-guard|2026-06-05 · Phase 9 build-drift guard]]
 - [[2026-06-04-phase-08-doc-true-up|2026-06-04 · Phase 8 doc true-up + provenance fix]]
@@ -31,7 +32,7 @@
 ## By Hierarchy
 
 - Milestones M0 → M5 map 1:1 to Phases 1 → 6 (see HANDOFF.md §8); M6 spans Phase 7 (pipeline slice) + Phase 8 (doc/provenance true-up) + Phase 9 (build-drift guard, HARDEN) + Phase 10 (corpus crawler, SCALE) + Phase 11 (automated derivation, AUTOMATE)
-- M0–M3 done; M5 (ship) done + accepted; **M4 (live/pre-gen) skipped** by decision. M6 (Signal Watch ingestion pipeline) — Phases 7–10 completed + accepted; **Phase 11 (AUTOMATE: LLM-drafted signal config) active** — the last M6 vision increment (automates the manual article→signal derivation, boundary-preserving).
+- M0–M3 done; M5 (ship) done + accepted; **M4 (live/pre-gen) skipped** by decision. **M6 (Signal Watch ingestion pipeline) — Phases 7–11 ALL completed + accepted** — the vision arc is complete: Phase 11 (AUTOMATE: LLM-drafted signal config) automated the manual article→signal derivation, boundary-preserving (LLM proposes, build.py + schema + 2 human gates dispose).
 
 ## Living Documents
 
@@ -47,7 +48,7 @@
 
 ## Recent
 
-- [2026-06-05] Phase 11 (Automated derivation — LLM-drafted signal config, AUTOMATE) planned + active — automates the manual Phase-7 article→signal derivation via authoring-only `derive_signals.py` (deterministic `--selftest`/`--scaffold` + neural `--draft`); LLM proposes a `.draft.json`, build.py + schema + human gates dispose; 5 lite tasks, T3 = L; user chose AUTOMATE → variant B over the elder true-up + the fentanyl re-point + the deterministic-only cut
+- [2026-06-05] Phase 11 (Automated derivation — LLM-drafted signal config, AUTOMATE) completed + accepted — authoring-only `derive_signals.py` automates the manual Phase-7 article→signal derivation (deterministic `--selftest`/`--scaffold` + neural `--draft`, lazy `anthropic`, env-keyed); LLM proposes a gitignored `.draft.json`, build.py + schema + 2 human gates dispose; Anthropic structured-output shape verified vs the claude-api reference; review gate 9/10 accept (2 MEDIUM `--draft` fixes folded in); 5 lite tasks; commit c37dc39. M6 vision arc (7–11) complete
 - [2026-06-05] Phase 10 (FinCEN corpus crawler — SCALE) completed + accepted — discovery manifest (`data/fincen/index.json`, 14 advisories) over mass-download; authoring-only `crawl_fincen.py` (pure `parse_index` + `--selftest`); acquire REGISTRY→manifest + `resolve_pdf` detail-page hop; 4 lite tasks; commit 0c87c47 (user chose SCALE over the elder true-up)
 - [2026-06-05] Phase 9 (build-drift guard) completed + accepted — in-process `build.py --check` for the M5 zero-drift invariant (broke silently in Phase 7); commit 33db22a
 - [2026-06-04] Phase 8 (doc true-up + provenance fix) completed + accepted — rebrand docs to Signal Watch; FinCEN-verbatim non-negotiable; fentanyl provenance → FINTRAC; M6 doc staleness folded in; Phase 7 dist drift corrected; commit 042d732

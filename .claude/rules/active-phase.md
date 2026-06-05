@@ -1,7 +1,7 @@
 # Active Phase Context
 
-Phase: 11 - Automated derivation (LLM-drafted signal config) — AUTOMATE — COMPLETE (all 5 tasks [x],
-exit criteria MET in working tree; delivery gate pending commit). No next phase planned — run /dev-plan.
+Phase: 11 - Automated derivation (LLM-drafted signal config) — AUTOMATE — COMPLETED + accepted
+(all 5 tasks [x], exit criteria MET; impl commit c37dc39, 2026-06-05). No next phase planned — run /dev-plan.
 Objective: Automate the article→signal derivation proven MANUALLY in Phase 7. Authoring-only
 `scripts/derive_signals.py`: DETERMINISTIC layer (`extract_red_flags` + `scaffold_config`, stdlib,
 `--selftest`/`--scaffold`, offline) + NEURAL layer (`--draft`, env-keyed) PROPOSING the judgment fields
@@ -27,4 +27,4 @@ fentanyl re-point to fin-2024-a002; manifest `--fetch` cadence.
 
 Gates:
 - [x] Direction confirmed by user (AUTOMATE → variant B; user overrode planner's finish-first + deterministic-only recs — 2026-06-05)
-- [ ] Delivery accepted (post-implementation report) — flips after the commit verifiably lands (D3)
+- [x] Delivery accepted (post-implementation report 2026-06-05; impl commit c37dc39, review gate 9/10 accept)

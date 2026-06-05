@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-05
 updated: 2026-06-05
 source: plan
-status: active
+status: completed
 ceremony: lite
 scope: ["scripts/derive_signals.py", "scripts/requirements-authoring.txt", "config/typologies/*.draft.json", "README.md", "CLAUDE.md"]
 entry_criteria: "M6 pipeline proven (Phase 7 manual EFE article→signal derivation) + guarded (Phase 9 build-drift `--check`) + scaled (Phase 10 corpus manifest). The manual article→signal derivation is the remaining M6 vision increment. User chose AUTOMATE over the elder presentation-values true-up AND the fentanyl verbatim re-point at the direction gate, then chose variant B (LLM-drafted definition NOW) over A (deterministic scaffolder only) — both USER OVERRIDES of the planner's recommendation."
@@ -67,12 +67,12 @@ Reads the committed `data/fincen/fin-2022-a002.md`. Ship artifact `index.html` a
 
 ## Exit Criteria
 
-- [ ] `derive_signals.py --selftest` extracts the known EFE red-flag counts from the committed md, exits 0 (deterministic layer, offline)
-- [ ] `--scaffold` emits a schema-shaped `<id>.draft.json` skeleton (indicators line-traced, no target/definition)
-- [ ] `--draft` (env-keyed; anthropic lazy-imported from the authoring venv) proposes the judgment fields incl. a schema-valid signal `definition`, grounded on red flags + schema + few-shot
-- [ ] the draft round-trips the deterministic boundary: build.py/schema accept a human-reviewed valid config OR reject an invalid draft (LLM proposes, validator disposes); committed configs stay deterministic + human-reviewed
-- [ ] `git diff index.html` empty; deterministic layer stdlib-only; anthropic import LAZY; tool absent from engine/build imports; ship artifact never calls an LLM
-- [ ] documented in docstring + README + CLAUDE (two-layer model + boundary + env-key)
+- [x] `derive_signals.py --selftest` extracts the known EFE red-flag counts from the committed md, exits 0 (deterministic layer, offline)
+- [x] `--scaffold` emits a schema-shaped `<id>.draft.json` skeleton (indicators line-traced, no target/definition)
+- [x] `--draft` (env-keyed; anthropic lazy-imported from the authoring venv) proposes the judgment fields incl. a schema-valid signal `definition`, grounded on red flags + schema + few-shot
+- [x] the draft round-trips the deterministic boundary: build.py/schema accept a human-reviewed valid config OR reject an invalid draft (LLM proposes, validator disposes); committed configs stay deterministic + human-reviewed
+- [x] `git diff index.html` empty; deterministic layer stdlib-only; anthropic import LAZY; tool absent from engine/build imports; ship artifact never calls an LLM
+- [x] documented in docstring + README + CLAUDE (two-layer model + boundary + env-key)
 
 ## Constraints (load-bearing)
 

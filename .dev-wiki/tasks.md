@@ -3,9 +3,9 @@
 > Last updated: 2026-06-05 by /dev-plan
 
 <!-- phase:phase-11-automated-derivation -->
-<!-- gate-log:phase-11 direction=approved delivery=pending -->
+<!-- gate-log:phase-11 direction=approved delivery=accepted -->
 
-## Phase 11: Automated derivation (LLM-drafted signal config) — AUTOMATE — ACTIVE
+## Phase 11: Automated derivation (LLM-drafted signal config) — AUTOMATE — COMPLETED + accepted (impl commit c37dc39)
 
 Automate the **article→signal derivation** step proven MANUALLY in Phase 7 (EFE md → hand-derived elder config). One new authoring-only tool `scripts/derive_signals.py`, two layers: a **deterministic layer** (stdlib-only, offline, `--selftest`/`--scaffold`) that extracts the FinCEN red flags and scaffolds a schema-shaped config SKELETON, + a **neural layer** (`--draft`, env-keyed) that proposes the judgment fields (status per indicator, exactly one `target:true` indicator + candidate, the signal `definition`) by calling the Anthropic API. **Boundary preserved:** the LLM PROPOSES a `config/typologies/<id>.draft.json`; the deterministic validator (`build.py` + schema) + the two human gates DISPOSE — no neural judge at the build boundary, committed configs stay deterministic + human-reviewed. `derive_signals.py` is NEVER imported by `index.html`/`build.py`; the ship artifact never calls an LLM (HANDOFF §4/§4.5 hold). The `anthropic` SDK lives in the gitignored authoring venv (markitdown precedent), LAZY-imported only inside `--draft`. Direction approved by user 2026-06-05 (AUTOMATE → variant B over the planner's finish-first + deterministic-only recommendations).
 

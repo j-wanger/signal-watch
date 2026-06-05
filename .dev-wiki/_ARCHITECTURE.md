@@ -1,6 +1,6 @@
 # Architecture: Signal Watch — AML Vision Demo
 
-> Last updated: 2026-06-05 by /dev-debrief (Phase 11 — automated derivation)
+> Last updated: 2026-06-05 by /dev-debrief (Phase 12 — FinCEN corpus derivation)
 
 ## Directory Layout
 
@@ -16,8 +16,10 @@ signal-watch/
     derive_signals.py             # authoring-only: md→config draft (deterministic --selftest/--scaffold + neural --draft; LLM proposes, build.py disposes)
     requirements-authoring.txt    # authoring deps (markitdown, anthropic) — uv `.venv`, gitignored
   data/fincen/
-    raw/<advisory-id>.pdf         # acquired source PDF (authoring-only)
-    <advisory-id>.md              # verbatim advisory markdown = source of truth
+    raw/<advisory-id>.pdf         # acquired source PDF (authoring-only, gitignored)
+    <advisory-id>.md              # verbatim advisory markdown = source of truth (FULL 14-advisory corpus committed as of Phase 12)
+    index.json                    # discovered advisory manifest (Phase 10)
+    derived/<advisory-id>.json    # Phase 12: LLM-backend-derived + deterministically-checked record (NOT a ship config)
   dist/<typology>/index.html      # built self-contained ship files (per typology)
   archive/                        # original baseline (equivalence reference)
   CLAUDE.md  README.md  HANDOFF.md # always-loaded non-negotiables / run / full context
@@ -32,7 +34,7 @@ backend/ + tests/ remain optional (HANDOFF §3.3); M4 live/pre-gen skipped (file
 | index.html | Generic engine template: six-act scripted walkthrough; state machine + render dispatch + animations, all inline; `__CONFIG__` injection point | `goto(0)` (bottom of `<script>`) | inlined CONFIG (per typology) + Google Fonts (online; degrades) | rendered DOM |
 | scripts/build.py | `render_one(typ, template) -> str` (validate at boundary, fails loud + resolve `text_file`→inline + inject CONFIG + self-contained guard) is the SINGLE source of truth for a typology's dist bytes; a thin writer persists it; `check_one` byte-compares a fresh render against the committed dist (non-mutating, git-agnostic drift guard); `resolve_targets` shares `all`/`<id>` logic | `python3 scripts/build.py <id>` (or `all`); `--check [all\|<id>]` (drift guard) | config JSON + referenced `.md` | `dist/<id>/index.html`; `--check`: per-typology drift verdict + exit code |
 | scripts/acquire_fincen.py, scripts/pdf_to_md.py | Authoring-only ingestion: fetch advisory PDF, convert to verbatim markdown | run manually at authoring | FinCEN advisory URL / raw PDF | `data/fincen/raw/*.pdf`, `data/fincen/*.md` |
-| scripts/derive_signals.py | Authoring-only md→config. DETERMINISTIC layer (stdlib, offline): `extract_red_flags` parses the advisory's enumerated red flags, `scaffold_config` emits a schema-shaped SKELETON (`--selftest`/`--scaffold`/`--list`). NEURAL layer (`--draft`, lazy `anthropic`, env-keyed): proposes the judgment fields (status, the one target, the signal definition) via the Anthropic API. LLM PROPOSES a `.draft.json`; build.py + schema + 2 human gates DISPOSE | `--selftest`; `--scaffold <id> <md>`; `--draft <id> <md>` | `data/fincen/<id>.md` (+ `ANTHROPIC_API_KEY` for `--draft`) | `config/typologies/<id>.draft.json` (gitignored scratch) |
+| scripts/derive_signals.py | Authoring-only. DETERMINISTIC spine (stdlib, offline): `extract_red_flags` is a corpus-wide section-FINDER (Tier-1 clean headers + explicit list-intros; Tier-2 loose-header/weak-intro fallback only when Tier-1 is empty — EFE untouched; intro-noise/header-block/citation filters); `extraction_quality` + `--corpus` classify all 14 advisories CLEAN/LOW/NEEDS; deterministic checks `build_rec_category` (cover×data matrix) + `check_record` (build-rec consistency + src_line traceability + BUILD_NOW⇒build_logic). NEURAL/AUTHORING layer: `--draft` (lazy `anthropic`, env-keyed) OR a model SESSION as backend proposes per-indicator status/data + build recommendation + build logic; `--check-derived` DISPOSES. The spine ASSISTS, it does not AUTOMATE — a complete record needs LLM-backend authoring; the 2 human gates dispose | `--selftest`; `--corpus`; `--scaffold-derived <id> <md>`; `--check-derived <rec>`; `--scaffold`/`--draft` (config draft) | `data/fincen/<id>.md` (+ `ANTHROPIC_API_KEY` for `--draft`) | `data/fincen/derived/<id>.json` (committed, checked); `config/typologies/<id>.draft.json` (gitignored scratch) |
 
 Inside `index.html`: content read from the injected CONFIG (`advisory_full` carries the verbatim
 source); state `act`/`selected`/`confirmed`; `goto(i)`, `updateControls()`, nav `advance()`/`back()`/

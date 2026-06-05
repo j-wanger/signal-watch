@@ -1,0 +1,77 @@
+{
+  "id": "fin-2022-a001",
+  "advisory": "FIN-2022-A001",
+  "source_md": "data/fincen/fin-2022-a001.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator traces to an extracted red-flag md line. Coverage/data values are ILLUSTRATIVE (vision demo).",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "financial",
+      "flag": "Transactions involving long-term government contracts consistently awarded, through an opaque selection process, to the same legal entity or entities that share similar beneficial ownership structures.36",
+      "src_line": 436,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Repeated-award + shared-beneficial-ownership patterns need external procurement records and resolved BO graphs we only hold partially; build after enriching BO + contract-award data."
+    },
+    {
+      "id": "IND-02",
+      "section": "financial",
+      "flag": "Transactions involving services provided to state-owned companies or public institutions by companies registered in high-risk jurisdictions.",
+      "src_line": 440,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Counterparty-jurisdiction risk + state-owned-entity screening already partially covered by sanctions/geo rules; enhance the existing screen with an SOE-counterparty + high-risk-jurisdiction conjunction."
+    },
+    {
+      "id": "IND-03",
+      "section": "financial",
+      "flag": "Transactions involving official embassy or foreign government business conducted through personal accounts.",
+      "src_line": 443,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Account-type vs counterparty mismatch (foreign-government / embassy business on a personal account) is uncovered, and both account class and counterparty-entity type are in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-GOVBIZ-PERSONAL-ACCT",
+        "class": "entity · account-level · stateless",
+        "features": ["account_class", "counterparty_govt_entity_flag", "counterparty_embassy_flag", "inbound_outbound_value_30d", "foreign_gov_nexus_count"],
+        "logic": "personal-class account transacts with counterparties tagged foreign-government or embassy entities, with &gt;= 2 distinct government-nexus counterparties in a 30-day window",
+        "window": "rolling 30 days",
+        "source": "Core account + counterparty features (Gold); counterparty entity-type registry",
+        "route": "Tier-1 alert → corruption/PEP review gate"
+      }
+    },
+    {
+      "id": "IND-04",
+      "section": "financial",
+      "flag": "Transactions involving public officials related to high-value assets, such as real estate or other luxury goods, that are not commensurate with the reported source of wealth for the public official or that fall outside that individual’s normal pattern of activity or lifestyle.",
+      "src_line": 446,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "PEP screening + high-value-purchase detection exist partially, but source-of-wealth commensurability needs declared-wealth + asset-valuation data we hold only partially; enhance the PEP monitor with a wealth-mismatch factor as data matures."
+    },
+    {
+      "id": "IND-05",
+      "section": "financial",
+      "flag": "Transactions involving public officials and funds moving to and from countries with which the public officials do not appear to have ties.37",
+      "src_line": 450,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "PEP cross-border flows to/from jurisdictions outside the official's documented nexus are uncovered, and PEP flag + counterparty geography + the customer's known-ties set are all in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-PEP-NO-NEXUS-CROSSBORDER",
+        "class": "relationship · entity-level · stateful",
+        "features": ["pep_flag", "counterparty_country", "customer_documented_ties_set", "cross_border_value_30d", "unexplained_jurisdiction_count"],
+        "logic": "PEP-flagged customer sends or receives cross-border funds to/from &gt;= 1 jurisdiction not in the customer's documented ties set, with aggregate cross-border value above the PEP baseline over 30 days",
+        "window": "rolling 30 days",
+        "source": "Core transaction + KYC features (Gold); PEP register; customer documented-jurisdiction nexus",
+        "route": "Tier-1 alert → corruption/PEP review gate"
+      }
+    }
+  ]
+}

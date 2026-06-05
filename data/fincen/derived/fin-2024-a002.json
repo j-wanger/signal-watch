@@ -1,0 +1,185 @@
+{
+  "id": "fin-2024-a002",
+  "advisory": "FIN-2024-A002",
+  "source_md": "data/fincen/fin-2024-a002.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator traces to an extracted red-flag md line. Coverage/data values are ILLUSTRATIVE (vision demo).",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "profile",
+      "flag": "A customer or counterparty has previous drug-related convictions or open-source reporting indicates connections to clandestine lab operations.",
+      "src_line": 542,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Adverse-media / conviction screening already partially covers this; enrich the existing screen with clandestine-lab open-source tags as that feed matures."
+    },
+    {
+      "id": "IND-02",
+      "section": "profile",
+      "flag": "A customer or counterparty is a chemical or pharmaceutical company in the PRC, Hong Kong, or another jurisdiction with a residential address or a business address shared with other similar businesses or that has no physical presence or shows other indicators of possible illicit shell company activity.52",
+      "src_line": 545,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Shell-company markers (residential/shared address, no physical presence) need registry + address-graph enrichment we hold only partially; build after enriching corporate-registry data."
+    },
+    {
+      "id": "IND-03",
+      "section": "profile",
+      "flag": "A counterparty, with no supposed affiliation with the PRC, uses a PRC-based phone number or Internet Protocol (IP) address that is affiliated with the website of a Chinese chemical or pharmaceutical company.",
+      "src_line": 550,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Phone/IP-to-company affiliation is not held in the transaction repo; source the device/website-affiliation intelligence before a rule is feasible."
+    },
+    {
+      "id": "IND-04",
+      "section": "profile",
+      "flag": "A customer or counterparty is a vendor on an e-commerce or Darknet marketplace that advertises the sale of precursor chemicals (using chemical names, abbreviations, or CAS numbers in the advertisement) and manufacturing equipment used for the synthesis of illicit fentanyl and other synthetic opioids.",
+      "src_line": 554,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Marketplace / Darknet advertisement intelligence (CAS-number listings) is external; source the marketplace feed before this is buildable."
+    },
+    {
+      "id": "IND-05",
+      "section": "profile",
+      "flag": "A customer is a Mexican company that, according to open-source and commercially available reporting, is importing shipments of fentanyl precursor chemicals and manufacturing equipment without appropriate importing licenses and registrations in Mexico.",
+      "src_line": 559,
+      "status": "partial",
+      "data": "insufficient",
+      "build_rec": "MONITOR",
+      "rationale": "Import-license / customs status is external and only partially screened today; monitor via the existing adverse-media process until licensing data can be sourced."
+    },
+    {
+      "id": "IND-06",
+      "section": "profile",
+      "flag": "A customer is a Mexican company with little or no online presence and is involved in the import of the same precursor chemicals and manufacturing equipment used in the synthesis of fentanyl.",
+      "src_line": 563,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Thin-online-presence + precursor-import nexus needs a web-presence enrichment we hold only partially; build after enriching the digital-footprint signal."
+    },
+    {
+      "id": "IND-07",
+      "section": "profile",
+      "flag": "Multiple, seemingly unrelated Mexican importing companies share phone numbers, email addresses, or physical addresses and transact with the same PRC-based chemical manufacturing and pharmaceutical companies.",
+      "src_line": 567,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "A shared-identifier importer ring transacting with a common PRC chemical counterparty is uncovered, and shared phone/email/address links plus counterparty graph are in repo — immediately buildable as a network signal.",
+      "build_logic": {
+        "signal_name": "S-SHARED-ID-IMPORTER-RING",
+        "class": "relationship · network · stateful",
+        "features": ["shared_identifier_type", "importers_sharing_identifier_count", "common_prc_chem_counterparty_count", "aggregate_value_90d", "declared_industry_code"],
+        "logic": "&gt;= 2 distinct importer entities share a phone/email/physical identifier AND transact with &gt;= 1 common PRC or Hong Kong chemical-or-pharma counterparty within a 90-day window",
+        "window": "rolling 90 days",
+        "source": "Counterparty + shared-identifier graph (Gold); corporate-identifier registry",
+        "route": "Tier-2 network alert → narcotics / TBML review gate"
+      }
+    },
+    {
+      "id": "IND-08",
+      "section": "profile",
+      "flag": "A customer is a Mexican importing company that predominantly transacts only with chemical or pharmaceutical companies in the PRC or Hong Kong for no apparent legitimate reason as compared to similar importers that transact with foreign chemical manufacturing and pharmaceutical suppliers in multiple jurisdictions.",
+      "src_line": 571,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Single-jurisdiction PRC/HK chemical-supplier concentration vs a diversified peer baseline is uncovered, and counterparty geography + peer-group baselines are in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-PRC-CHEM-CONCENTRATION",
+        "class": "entity · account-level · stateful",
+        "features": ["prc_hk_chem_counterparty_share_90d", "peer_group_median_share", "distinct_supplier_jurisdictions", "outbound_value_90d", "declared_industry_code"],
+        "logic": "an importer's share of payments to PRC/HK chemical-or-pharma counterparties exceeds the peer-group median share by a wide margin AND distinct supplier jurisdictions &lt;= 1 over 90 days",
+        "window": "rolling 90 days",
+        "source": "Counterparty features + peer-group baselines (Gold); industry registry",
+        "route": "Tier-1 alert → narcotics review gate"
+      }
+    },
+    {
+      "id": "IND-09",
+      "section": "transactional",
+      "flag": "A customer sends low-dollar or virtual currency payments for no apparent legitimate purpose to beneficiaries involved in the chemical manufacturing and pharmaceutical industries in the PRC, Hong Kong, or another jurisdiction.",
+      "src_line": 586,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Low-dollar / no-purpose payment scoring exists partially; enhance it with a PRC/HK chemical-beneficiary industry factor."
+    },
+    {
+      "id": "IND-10",
+      "section": "transactional",
+      "flag": "Multiple customers send funds for no apparent legitimate purpose to the same beneficiary involved in the chemical manufacturing and pharmaceutical industries in the PRC, Hong Kong, or another jurisdiction (i.e., many-to-one).",
+      "src_line": 590,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Many-to-one fan-in onto a single PRC/HK chemical beneficiary is uncovered, and originator-count aggregation by beneficiary is in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-MANYTOONE-CHEM-BENEFICIARY",
+        "class": "relationship · beneficiary-level · stateful",
+        "features": ["beneficiary_id", "distinct_originator_count_30d", "aggregate_value_30d", "beneficiary_chem_pharma_flag", "originator_relationship_density"],
+        "logic": "a single PRC/HK chemical-or-pharma beneficiary receives funds from &gt;= 8 distinct, otherwise-unrelated originating customers within 30 days with no apparent legitimate purpose",
+        "window": "rolling 30 days",
+        "source": "Beneficiary fan-in aggregation features (Gold); counterparty industry registry",
+        "route": "Tier-2 beneficiary fan-in alert → narcotics / TBML review gate"
+      }
+    },
+    {
+      "id": "IND-11",
+      "section": "transactional",
+      "flag": "A Mexico-based entity from an unrelated industry transacts with a PRC-based chemical or pharmaceutical company.  Alternatively, a PRC-based entity from an unrelated industry transacts with a Mexico-based chemical or pharmaceutical company.",
+      "src_line": 594,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Cross-industry counterparty mismatch is partially captured by existing industry-code rules; enhance with the specific chemical/pharma + unrelated-industry pairing."
+    },
+    {
+      "id": "IND-12",
+      "section": "transactional",
+      "flag": "A customer engages in behavior that suggests efforts to evade the Currency Transaction Report (CTR) filing requirement (e.g., the customer alters or cancels a transaction when advised a CTR would be filed or engages in structuring with multiple cash transactions for under $10,000), as well as avoiding recordkeeping requirements.53",
+      "src_line": 598,
+      "status": "covered",
+      "data": "available",
+      "build_rec": "COVERED",
+      "rationale": "CTR-evasion / sub-$10,000 structuring is a mature, already-covered detection — no new build needed."
+    },
+    {
+      "id": "IND-13",
+      "section": "transactional",
+      "flag": "A customer sends virtual currency payments to an address that is linked through blockchain analytics to beneficiaries associated with the PRC-based chemical manufacturing and pharmaceutical industries or to individuals or entities listed in DOJ indictments and OFAC designations.",
+      "src_line": 603,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "OFAC/DOJ address screening is partly covered; blockchain-analytics attribution to PRC chemical beneficiaries is only partially available — enhance as the analytics feed matures."
+    },
+    {
+      "id": "IND-14",
+      "section": "transactional",
+      "flag": "A customer is a Mexican company that does not appear to be involved in the chemical manufacturing and pharmaceutical industries despite transactional activity indicating the procurement of fentanyl precursor chemicals and associated manufacturing equipment.",
+      "src_line": 608,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Declared-industry vs actual-procurement mismatch (non-chemical company buying precursors/equipment) is uncovered, and industry code + counterparty/transaction markers are in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-INDUSTRY-MISMATCH-PRECURSOR",
+        "class": "entity · account-level · stateful",
+        "features": ["declared_industry_code", "chem_pharma_counterparty_value_share_90d", "precursor_equipment_marker_hits", "distinct_chem_counterparty_count", "outbound_value_90d"],
+        "logic": "a customer whose declared industry is not chemical/pharma directs &gt;= 40% of outbound value over 90 days to chemical/pharma counterparties carrying precursor or manufacturing-equipment transaction markers",
+        "window": "rolling 90 days",
+        "source": "KYC industry code + counterparty/transaction features (Gold)",
+        "route": "Tier-1 alert → narcotics review gate"
+      }
+    }
+  ]
+}

@@ -59,9 +59,12 @@ python3 scripts/crawl_fincen.py --fetch       # LIVE: refresh the listing fixtur
 python3 scripts/acquire_fincen.py --list      # show the discovered advisory corpus (the manifest)
 python3 scripts/acquire_fincen.py <id>        # LIVE: download one advisory PDF -> data/fincen/raw/<id>.pdf
 .venv/bin/python scripts/pdf_to_md.py <id>    # convert PDF -> data/fincen/<id>.md (verbatim source of truth)
-python3 scripts/derive_signals.py --selftest          # offline: assert the EFE red-flag parser (12+12)
+python3 scripts/derive_signals.py --selftest          # offline: EFE red-flag parser (12+12) + deterministic checks
 python3 scripts/derive_signals.py --scaffold <id> <md># offline: md -> config/typologies/<id>.draft.json SKELETON
 .venv/bin/python scripts/derive_signals.py --draft <id> <md>  # LIVE: + LLM-drafted judgment (needs ANTHROPIC_API_KEY)
+python3 scripts/derive_signals.py --corpus                       # offline: extract red flags across ALL 14 committed advisories
+python3 scripts/derive_signals.py --scaffold-derived <id> <md>   # offline: -> data/fincen/derived/<id>.json skeleton
+python3 scripts/derive_signals.py --check-derived <record.json>  # offline: dispose a derived record (matrix + traceability)
 ```
 
 `crawl_fincen.py` discovers the FinCEN advisories listing into the committed manifest
@@ -79,6 +82,27 @@ LLM. Conversion (`markitdown`) and the draft step (`anthropic`) need a gitignore
 `scripts/requirements-authoring.txt`) and, for `--draft`, `ANTHROPIC_API_KEY` in the environment (the
 key never enters the ship file); everything else is pure stdlib. FinCEN advisories are U.S. federal
 works in the public domain (17 U.S.C. §105).
+
+**Corpus derivation (the backend for a singular corpus-backed demo).** The full 14-advisory FinCEN
+corpus is committed as markdown (`data/fincen/*.md`). `derive_signals.py --corpus` runs the red-flag
+extractor across all 14 and reports each advisory **CLEAN** / **LOW-CONFIDENCE** / **NEEDS-ATTENTION** —
+the deterministic spine validated on the whole corpus, honestly flagging the heterogeneous formats it
+can't cleanly split rather than forcing a bogus count. `--scaffold-derived` then emits a derived-record
+skeleton (one indicator per extracted red flag, each `src_line`-traceable) under `data/fincen/derived/`;
+the LLM backend fills the judgment — per indicator a coverage status + data availability, a **build
+recommendation**, and **build logic** for the immediately-buildable gaps — and `--check-derived`
+**disposes**: each `build_rec` must follow the deterministic cover×data matrix (`build_rec_category`),
+every indicator must trace to a red-flag md line, and a `BUILD_NOW` indicator must carry a full signal
+definition. The LLM backend can be the Anthropic API (the `--draft` pattern) or a live model session
+acting as the backend (no key) — either way the LLM *proposes* and the deterministic checks *dispose*.
+Derived records are an LLM-derived + checked corpus dataset, **not** ship typology configs.
+
+The spine **assists**; it does not automate the derivation. Extraction is deterministic but imperfect
+(the corpus is heterogeneous — roughly half parses cleanly, the rest is flagged), so a complete,
+demo-quality derived record still requires **LLM-backend authoring**: the per-indicator status/data
+judgment, the recommendation rationale, the signal build logic, and pruning any residual extraction
+noise. The deterministic layer extracts, flags, and validates; the model session authors; the two
+human gates dispose.
 
 ## Present it
 

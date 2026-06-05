@@ -1,30 +1,26 @@
 # Active Phase Context
 
-Phase: 11 - Automated derivation (LLM-drafted signal config) — AUTOMATE — COMPLETED + accepted
-(all 5 tasks [x], exit criteria MET; impl commit c37dc39, 2026-06-05). No next phase planned — run /dev-plan.
-Objective: Automate the article→signal derivation proven MANUALLY in Phase 7. Authoring-only
-`scripts/derive_signals.py`: DETERMINISTIC layer (`extract_red_flags` + `scaffold_config`, stdlib,
-`--selftest`/`--scaffold`, offline) + NEURAL layer (`--draft`, env-keyed) PROPOSING the judgment fields
-(status, the one `target:true`, the signal `definition`) via the Anthropic API. LLM proposes a
-`.draft.json`; build.py + schema + the two human gates DISPOSE.
+Phase: 12 - FinCEN corpus derivation foundation (deterministic spine all-14 + LLM proof slice) — M7 — COMPLETE
+(all 5 tasks [x], exit criteria MET in working tree; delivery gate pending commit). No next phase planned — run /dev-plan.
+Objective: Backend for an expanded, singular FinCEN demo (eventual: user picks 1 of 14 advisories, watches the loop
+derive coverage → build recommendations → signal). This phase = deterministic spine validated on ALL 14 + LLM-backend
+(this session, no key) derivation proven on a 2-advisory slice. Demo expansion (selection UI + build-rec render) = Phase 13.
 
-Scope: scripts/derive_signals.py (new), scripts/requirements-authoring.txt, .gitignore,
-config/typologies/*.draft.json (gitignored scratch), README.md, CLAUDE.md. index.html + build.py UNTOUCHED.
+Scope: scripts/derive_signals.py, .gitignore, data/fincen/*.md (14 committed), data/fincen/derived/*.json (new),
+README.md, CLAUDE.md. Engine index.html + build.py + config/schema.md UNTOUCHED (backend-only).
 
 Delivered (verified in working tree):
-- `--selftest` extracts 24 EFE red flags (12 behavioral + 12 financial), exit 0, offline, stdlib-only.
-- `--scaffold` emits a schema-shaped `<id>.draft.json` SKELETON (indicators line-traced, no target/definition).
-- `--draft` (env-keyed; `anthropic` LAZY from the authoring venv) proposes the judgment fields; the
-  Anthropic structured-output shape (claude-opus-4-8 + `output_config.format` json_schema) verified
-  against the claude-api reference. Live network call unexercised (no key) — recorded-manual-run pattern.
-- Boundary holds: build.py REJECTS the bare skeleton naming the 2 judgment gaps; ACCEPTS a filled draft.
-- `git diff index.html` empty; `build.py --check all` zero drift; anthropic absent from engine/build imports.
-- Documented in docstring + README + CLAUDE. Review gate 9/10 accept (2 MEDIUMs on the `--draft` path).
+- 14 corpus md committed; `extract_red_flags` generalized to a section-FINDER (Tier-1 + Tier-2 fallback + filters);
+  `--corpus` validates all 14 → 7 CLEAN · 3 LOW · 4 NEEDS (2 NEEDS = FATF jurisdiction advisories = correct).
+- Deterministic checks: `build_rec_category` (cover×data matrix) + `check_record` (consistency + traceability + BUILD_NOW⇒logic), in `--selftest`.
+- LLM-backend (this session, NO key) derived 2 records: fin-2022-a001 (kleptocracy, 5 ind, 2 BUILD_NOW) + fin-2024-a002 (PRC precursors, 14 ind, 4 BUILD_NOW); both pass `--check-derived`.
+- EFE `--selftest` still 12+12; `git diff index.html` empty; `build.py --check all` zero drift; anthropic LAZY.
+- DOCUMENTED: the spine ASSISTS but does not AUTOMATE — a complete record still needs LLM-backend authoring (CLAUDE+README).
 
-Open follow-ups (Future candidates): `--draft` live-path hardening (thinking/effort + refusal/max_tokens
-handling); run `--draft` end-to-end on a NEW advisory with a real key; elder presentation-values true-up;
-fentanyl re-point to fin-2024-a002; manifest `--fetch` cadence.
+Open follow-ups (Phase 13 / Future): demo scope expansion (advisory-selection UI + build-rec render = Phase 13);
+glued-list splitting for the 2 no-blank-separator NEEDS advisories; exclude the 2 FATF advisories from the derivable
+corpus; scale LLM-backend derivation to the remaining 5 CLEAN advisories; residual extraction artifacts (intro-tail).
 
 Gates:
-- [x] Direction confirmed by user (AUTOMATE → variant B; user overrode planner's finish-first + deterministic-only recs — 2026-06-05)
-- [x] Delivery accepted (post-implementation report 2026-06-05; impl commit c37dc39, review gate 9/10 accept)
+- [x] Direction confirmed by user (backend-only foundation; user chose it over a minimal selectable demo view — 2026-06-05)
+- [ ] Delivery accepted (post-implementation report) — flips after the commit verifiably lands (D3)

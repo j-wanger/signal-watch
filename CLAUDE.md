@@ -26,7 +26,7 @@ AML transformation framework. Keep vocabulary consistent with it
 - Live mode is optional, isolated, off by default, always has a scripted fallback.
   Never put keys/tokens in the frontend. Copilot is NOT a web backend (HANDOFF §4.5).
 
-## Current state (M6 — Signal Watch ingestion pipeline)
+## Current state (M7 — corpus-backed derivation; M6 pipeline complete)
 - Generic engine: `index.html` (vanilla HTML/CSS/JS) with a single `__CONFIG__` injection point.
   Typology-agnostic — adding a typology is one JSON file, no engine edits. Presenter controls (M3):
   keyboard nav (←/→/Space/Esc/↺), reset, `prefers-reduced-motion`.
@@ -50,6 +50,28 @@ AML transformation framework. Keep vocabulary consistent with it
   the env — NO authoring tool is imported by the engine or `build.py`, and the ship artifact never
   fetches or calls an LLM. The elder typology renders the FULL verbatim EFE advisory (FinCEN
   FIN-2022-A002, public domain) in Act 1 via the `advisory_full` field.
+- Corpus derivation (Phase 12, M7 — backend for an expanded, singular corpus-backed demo where the
+  user picks one of 14 advisories): the full 14-advisory FinCEN corpus is committed as md
+  (`data/fincen/*.md`). `derive_signals.py --corpus` runs the (generalized) red-flag extractor across
+  all 14 and reports each CLEAN / LOW-CONFIDENCE / NEEDS-ATTENTION — the deterministic spine validated
+  on the whole corpus, flagging the heterogeneous non-conformers rather than forcing a count.
+  `--scaffold-derived` emits a `data/fincen/derived/<id>.json` skeleton (one indicator per extracted
+  red flag, `src_line`-traceable); the LLM backend fills the judgment (status, data, a build
+  recommendation, and build logic for the BUILD_NOW gaps) and `--check-derived` DISPOSES — `build_rec`
+  must follow the deterministic cover×data matrix (`build_rec_category`), every indicator must trace to
+  a red-flag md line, BUILD_NOW must carry a full definition. The LLM backend may be the Anthropic API
+  (`--draft`) OR a live model session acting as backend (no key); either way the LLM proposes and the
+  deterministic checks dispose. Derived records are an LLM-derived + checked corpus dataset, NOT ship
+  typology configs (the 3 hand-curated typologies stay the showcase). Demo scope expansion
+  (advisory-selection UI + build-rec render) is the next phase.
+- IMPORTANT — the spine ASSISTS, it does not AUTOMATE the derivation. `--corpus` extraction is
+  deterministic but imperfect (heterogeneous corpus: ~7/14 parse cleanly, the rest are flagged
+  LOW/NEEDS; even CLEAN extractions can carry residual artifacts like an intro-tail line). A complete,
+  demo-quality derived record still requires **LLM-backend authoring** by the model session: the
+  per-indicator status/data judgment, the build-recommendation rationale, the signal build logic, AND
+  pruning the residual extraction noise. The deterministic layer extracts + flags + validates; the LLM
+  backend authors; the two human gates dispose. Phase 12 proved the loop on a 2-advisory slice — it did
+  not (and is not meant to) auto-derive the corpus.
 
 ## How to run
 - Build: `python3 scripts/build.py <id>` (or `all`) → `dist/<id>/index.html`.

@@ -1,68 +1,67 @@
 # Project: Signal Watch — AML Vision Demo
 
-> Last updated: 2026-06-05 by /dev-debrief (Phase 11 — automated derivation)
+> Last updated: 2026-06-05 by /dev-debrief (Phase 12 — FinCEN corpus derivation)
 
 ## Recommended Next Action
 
-**Phase 11 (Automated derivation — LLM-drafted signal config) — DELIVERED + accepted (2026-06-05).**
-The article→signal derivation proven MANUALLY in Phase 7 (EFE md → hand-derived elder config) is now
-automated by authoring-only `scripts/derive_signals.py`: a **deterministic layer** (`extract_red_flags`
-+ `scaffold_config`, stdlib, `--selftest`/`--scaffold`, offline — `--selftest` extracts the 24 EFE red
-flags, 12 behavioral + 12 financial) + a **neural layer** (`--draft`, env-keyed, `anthropic` LAZY from
-the authoring venv) that PROPOSES the judgment fields (status, the one `target:true`, the signal
-`definition`) via the Anthropic API. **Boundary preserved:** the LLM proposes a `.draft.json`; build.py
-+ schema + the two human gates DISPOSE (build.py rejects the bare skeleton naming the 2 judgment gaps,
-accepts a filled draft). Engine/ship untouched (`git diff index.html` empty); `build.py --check all`
-zero drift. **Review gate 9/10 accept** — the Anthropic structured-output shape (claude-opus-4-8 +
-`output_config.format` json_schema) verified against the **claude-api reference** (not guessed); 2
-MEDIUM `--draft`-path fixes folded in pre-commit (adaptive thinking + `effort:high`; graceful
-refusal/max_tokens handling). The live network call stays unexercised (no key) — recorded-manual-run
-pattern. **M6 vision arc (Phases 7–11) complete.**
+**Phase 12 (FinCEN corpus derivation foundation — deterministic spine all-14 + LLM proof slice) —
+DELIVERED (2026-06-05).** Built the backend for an EXPANDED, **singular** FinCEN demo (eventual: the user
+picks one of 14 advisories and watches the loop derive its coverage → build recommendations → signal).
+The full 14-advisory FinCEN corpus is committed as md; `extract_red_flags` is now a corpus-wide
+**section-FINDER** (Tier-1 clean anchors + a Tier-2 loose-header/weak-intro fallback used only when Tier-1
+is empty — so EFE is untouched; + intro-noise/header-block/citation filters). `--corpus` validates all 14:
+**7 CLEAN · 3 LOW · 4 NEEDS** (2 NEEDS = FATF jurisdiction advisories with no red-flag list = correctly
+flagged). Deterministic checks `build_rec_category` (cover×data matrix) + `check_record` (consistency +
+traceability + BUILD_NOW⇒logic) DISPOSE; folded into `--selftest`. The **LLM backend = THIS session, NO
+key** derived a 2-advisory proof slice (`data/fincen/derived/fin-2022-a001.json` kleptocracy 5-ind/2-BUILD_NOW
++ `fin-2024-a002.json` PRC precursors 14-ind/4-BUILD_NOW), each passing `--check-derived`; the boundary holds
+(a tampered record is rejected). **Key framing recorded:** the spine ASSISTS but does not AUTOMATE — a
+complete, demo-quality derived record still needs LLM-backend authoring (judgment + build logic + pruning
+residual artifacts). EFE `--selftest` still 12+12; `index.html`/`build.py`/`schema.md` untouched; `--check
+all` zero drift; anthropic LAZY.
 
-**No next phase planned — run `/dev-plan`** to pick the next increment. Backlog candidates (all
-deprioritized at the Phase-11 gate, NOT dropped): **run `--draft` end-to-end on a NEW advisory with a
-real key** (the pipe is proven key-free; the manifest carries 14 advisories) · **elder
-presentation-values true-up** (smoke-checklist walk-row, carried from Phase 9) · **fentanyl re-point**
-to the manifest-discoverable `fin-2024-a002` · optional **manifest `--fetch` cadence**.
+**Next — Phase 13 (the payoff): the demo scope expansion** — advisory-selection front-end + per-indicator
+build-rec render, driven by the derived corpus. Run `/dev-plan`. Other candidates: glued-list splitting for
+the 2 NEEDS advisories; scale LLM-backend derivation to the remaining 5 CLEAN advisories; EFE-as-derived
+validation vs the hand-authored elder config; (deferred backlog) elder true-up · fentanyl re-point · `--fetch`.
 
-**Carried context:** Phase 10 (FinCEN corpus crawler — SCALE) committed `0c87c47`; Phase 9
-(build-drift guard) committed `33db22a` — both accepted (2026-06-05).
+**Carried:** M6 vision arc (Phases 7–11) complete + accepted (Phase 11 committed `c37dc39`/`7c76971`).
 
 ## Active Phase
 
-**[[phase-11-automated-derivation|Phase 11: Automated derivation (LLM-drafted signal config)]]** (status: active)
+**[[phase-12-fincen-corpus-derivation|Phase 12: FinCEN corpus derivation foundation (deterministic spine all-14 + LLM proof slice)]]** (status: active)
 
-Entry criteria: MET — M6 pipeline proven (Phase 7 manual EFE derivation) + guarded (Phase 9) +
-scaled (Phase 10 corpus manifest); the manual article→signal step is the remaining M6 vision increment.
-User chose AUTOMATE over the elder true-up AND the fentanyl re-point at the direction gate, then chose
-variant B (LLM-drafted definition NOW) over A (deterministic scaffolder only) — both USER OVERRIDES.
-Exit criteria: `derive_signals.py --selftest` extracts the known EFE red-flag counts (deterministic,
-offline) · `--scaffold` emits a schema-shaped `<id>.draft.json` skeleton (line-traced, no target/
-definition) · `--draft` (env-keyed, anthropic lazy from the authoring venv) proposes the judgment
-fields incl. a schema-valid signal `definition`, grounded on red flags + schema + few-shot · the draft
-round-trips the deterministic boundary (build.py/schema accept a human-reviewed valid config OR reject
-an invalid one) · `git diff index.html` empty; deterministic layer stdlib-only; anthropic import LAZY;
-tool absent from engine/build imports; ship artifact never calls an LLM · documented in docstring +
-README + CLAUDE.
+Entry criteria: MET — M6 vision arc complete (derivation pipeline proven on the single EFE advisory);
+the 14-advisory corpus is already converted to md on disk. User wants to expand the demo scope toward a
+singular corpus-backed demo (user picks an advisory); this phase builds the backend foundation, demo
+expansion deferred to Phase 13. Direction approved **backend-only** (over folding a minimal selectable view in).
+Exit criteria: 14 corpus md committed · `extract_red_flags` generalized (≥2 formats) + `--corpus` report
+across all 14 + EFE `--selftest` still 12+12 · deterministic build-rec-consistency + traceability checks
+w/ selftest · LLM-backend proof slice (2–3) in `data/fincen/derived/*.json`, each check-passing ·
+`git diff index.html` empty, `--check all` zero drift, deterministic layer stdlib-only, anthropic LAZY ·
+documented in docstring + README + CLAUDE.
 
 Progress: ~0% — planned, direction approved; 5 tasks, none started.
 
 ## Active Phase Contract
 
-Phase: 11 - Automated derivation (LLM-drafted signal config)
-Tasks: 5 (see tasks.md) — T1 pure `extract_red_flags` + `--selftest` (M) · T2 pure `scaffold_config`
-+ `--scaffold` write (M) · T3 LLM `draft_definition` + `--draft` mode (L) · T4 end-to-end proof +
-boundary check (S) · T5 docs (S).
-Transition: continue (lite). T3 (the single L) consults the **claude-api reference** for the current
-model id + Anthropic SDK + structured-output/tool-use — may benefit from a fresh session.
-Abort: if the LLM can't be coaxed to schema-valid output build.py accepts (after consulting claude-api)
-— fall back to variant A (deterministic scaffolder only; human fills judgment). If red flags can't be
-deterministically anchored — thinner section-bounded capture. Blocked >3 attempts → ask user: skip or abort.
+Phase: 12 - FinCEN corpus derivation foundation (deterministic spine all-14 + LLM proof slice)
+Tasks: 5 (see tasks.md) — T1 commit the 14-md corpus (S) · T2 generalize `extract_red_flags` + `--corpus`
+mode + report (L) · T3 deterministic build-rec-consistency + traceability checks (M) · T4 LLM-backend
+derivation proof slice → `data/fincen/derived/*.json` (M) · T5 docs + verify (S).
+Transition: continue (lite). Backend-only — engine/build.py untouched. LLM backend = this session (no API key).
+Abort: if the corpus formats are too heterogeneous for ≥2 deterministic extractors — narrow to a
+section-FINDER that flags non-conformers (the report is the deliverable). If a derived record can't pass
+the checks — reject it (boundary holds). Blocked >3 attempts → ask user: skip or abort.
 
 ## Recent Decisions
 
 | Decision | Confidence | Date |
 |----------|------------|------|
+| Phase 12 direction = backend-only foundation (deterministic spine validated on ALL 14 advisories + LLM-backend derivation proven on a 2–3 slice); demo scope expansion (advisory-selection front-end + per-indicator build-rec render) deferred to Phase 13. User chose backend-only over folding a minimal selectable demo view into this phase | high | 2026-06-05 |
+| Destination = a SINGULAR corpus-backed demo where the user picks a FinCEN advisory (expand demo scope), NOT 14 separate demos. Per-advisory derivation records (`data/fincen/derived/*.json`) are the analytical artifact; the 3 hand-curated ship typologies stay the showcase | high | 2026-06-05 |
+| LLM backend for derivation + build recommendation + build logic = THIS session (me), NOT an API-key `--draft` call (the Phase-11 T4 recorded-run substitution). Deterministic spine (extract + schema/shape + build-rec consistency vs cover×data + traceability) is the dispose-boundary — LLM proposes, deterministic checks dispose | high | 2026-06-05 |
+| Commit the full 14-advisory FinCEN corpus md (un-gitignore) — reverses Phase-10's no-bulk-md call, justified now that the corpus backs the demo; public-domain FinCEN (17 USC §105). Network blocked in-session but the corpus is already converted on disk, so no acquisition needed | high | 2026-06-05 |
 | Phase 11 direction = AUTOMATE (article→signal derivation), chosen by the user over the elder presentation-values true-up AND the fentanyl verbatim re-point at the direction gate. USER OVERRIDE of the planner's finish-before-scale recommendation (elder true-up stays a Future-phase candidate) | high | 2026-06-05 |
 | Within AUTOMATE, chose variant B (LLM-drafted signal definition NOW) over A (deterministic scaffolder only, LLM deferred). USER OVERRIDE of the planner's recommendation of A. The deterministic-only cut A becomes the documented fallback if the LLM can't be coaxed to schema-valid output | high | 2026-06-05 |
 | Boundary-preservation design reconciles the override with the standing Phase-9 anti-neural-judge-at-boundary principle: the LLM PROPOSES a `.draft.json`; the deterministic validator (build.py + schema) + the two human gates DISPOSE. No neural judge at the build boundary; committed configs stay deterministic + human-reviewed | high | 2026-06-05 |
@@ -100,12 +99,12 @@ deterministically anchored — thinner section-bounded capture. Blocked >3 attem
 
 ## Session Journal (last 5)
 
+- [2026-06-05] [[2026-06-05-phase-12-fincen-corpus-derivation|Phase 12 FinCEN corpus derivation foundation (M7)]] (lite, 5 tasks + 2 user refinement passes, DELIVERED) — backend for a singular corpus-backed FinCEN demo (user picks 1 of 14 advisories). Committed the full 14-advisory corpus md; rewrote `extract_red_flags` as a corpus-wide **section-FINDER** (Tier-1 clean anchors + a Tier-2 loose-header/weak-intro fallback used only when Tier-1 is empty — EFE untouched; + intro-noise/header-block/citation filters). `--corpus` → **7 CLEAN · 3 LOW · 4 NEEDS** (2 NEEDS = FATF jurisdiction advisories = correct). Deterministic checks `build_rec_category` (cover×data matrix) + `check_record` (consistency + traceability + BUILD_NOW⇒logic) in `--selftest`. LLM backend = THIS session (no key) derived 2 records (kleptocracy 5-ind/2-BUILD_NOW + PRC precursors 14-ind/4-BUILD_NOW), each `--check-derived` clean; boundary holds (tampered record rejected). RECORDED: the spine ASSISTS but does not AUTOMATE — complete records need LLM-backend authoring. EFE still 12+12; `index.html`/`build.py`/`schema` untouched; `--check all` zero drift. Opens M7.
 - [2026-06-05] [[2026-06-05-phase-11-automated-derivation|Phase 11 Automated derivation (LLM-drafted signal config)]] (lite, 5 tasks, DELIVERED + accepted) — automated the Phase-7 manual article→signal step in authoring-only `derive_signals.py`: deterministic `extract_red_flags`/`scaffold_config` (`--selftest` extracts 24 EFE flags offline, stdlib-only; form-feed `split("\n")` fix keeps md-line traceability) + neural `--draft` (lazy `anthropic`, env-keyed) PROPOSING status/the-one-target/the-signal-`definition` via the Anthropic API (claude-opus-4-8 + `output_config.format` json_schema, verified vs the **claude-api reference**, not guessed). Boundary preserved: LLM proposes a gitignored `.draft.json`; build.py + schema + 2 human gates DISPOSE (rejects the bare skeleton naming the 2 judgment gaps, accepts a filled draft). Review gate **9/10 accept**; 2 MEDIUM `--draft`-path fixes folded in (adaptive thinking + `effort:high`; refusal/max_tokens handling). Engine/ship untouched; `--check all` zero drift. **M6 vision arc (Phases 7–11) complete.**
 - [2026-06-05] [[2026-06-05-phase-10-fincen-corpus-crawler|Phase 10 FinCEN corpus crawler (SCALE)]] (lite, 4 tasks, COMPLETED + accepted, committed `0c87c47`) — widened the authoring scraper from a 1-entry stub to the discovered FinCEN corpus. New authoring-only `crawl_fincen.py` (pure `parse_index` → `data/fincen/index.json`, 14 advisories; `--selftest`/`--write`/`--list`/`--fetch`); `acquire_fincen.py` REGISTRY→manifest + `resolve_pdf` detail-page hop + EFE direct-PDF zero-hop override. Discovery over mass-download; detail→PDF resolution keeps the committed manifest deterministic. Widened pipe proven on a 2-advisory batch (deleted per user call). Stdlib-only; engine untouched; `--check all` zero drift.
 - [2026-06-05] [[2026-06-05-phase-09-build-drift-guard|Phase 9 build-drift guard]] (lite, 3 tasks, COMPLETED + accepted, committed `33db22a`) — turned the M5 zero-drift invariant into a runnable, non-mutating guard. `build.py` refactored: `build_one` split into `render_one(typ, template) -> str` (the SINGLE source of truth for a typology's dist bytes) + thin writer; new `check_one` (git-agnostic byte-compare of committed dist vs fresh in-memory render, per-typology verdict, invalid-config = per-typology FAIL) + `resolve_targets`; `main` gained `--check [all|<id>]`. Wired into smoke-checklist (de-staled "both dist"→3 typologies; `git status --porcelain dist/` complement noted) + documented in docstring + README. Build byte-DETERMINISTIC (built twice → identical sha), HEAD dist == fresh build, `node --check` PASS ×3, `git diff index.html` empty, zero config edits → all 3 dist byte-identical. Discovered Phase 10 candidate: elder presentation-values true-up in the smoke-checklist.
-- [2026-06-04] Phase 8 doc true-up + provenance fix (M6 debt) — doc/config-string only, engine untouched, committed `042d732`. Rebrand `Signal Engine`→`Signal Watch` (4 docs; fixed a smoke-checklist header check that had been failing vs the shipped brand). Paraphrase non-negotiable amended with the FinCEN-only verbatim public-domain exception (17 USC §105, NOT FINTRAC) in CLAUDE+HANDOFF §4.4. Fentanyl provenance: removed unverifiable `FIN-2019-A006`/`FIN-2024-A002` (0 hits in aml-wiki, never the derivation surface), attributed solely to FINTRAC Jan-2025 — reframing sweep caught 2 extra bad-cite sites in smoke-checklist. M6 doc staleness folded in (user add): CLAUDE M2→M6 + pipeline + 3 typologies; README M5→M6 + elder + verbatim exception. DISCOVERY: rebuild exposed Phase 7 committed STALE `dist/{fentanyl,trade-based}` (missing engine highlights feature; only elder current) → `build.py all` didn't reproduce committed dist, M5 zero-drift invariant had broken; all fresh dist staged (user-approved), invariant restored. Guard 0 tokens ×3, `node --check` PASS ×3, `git diff index.html` empty.
 
-(Earlier entries — M6 pipeline walking skeleton, M5 ship, M3/M2/M1 — see `index.md` journal list + their journal articles. Trimmed to last 4 per the _CURRENT_STATE size budget.)
+(Earlier entries — Phase 8 doc true-up, M6 pipeline walking skeleton, M5 ship, M3/M2/M1 — see `index.md` journal list + their journal articles. Trimmed to last 4 per the _CURRENT_STATE size budget.)
 
 ## Cross-References
 

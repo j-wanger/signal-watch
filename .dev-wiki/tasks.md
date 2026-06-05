@@ -1,6 +1,20 @@
 # Tasks
 
-> Last updated: 2026-06-04 by /dev-plan
+> Last updated: 2026-06-05 by /dev-debrief
+
+<!-- phase:phase-09-build-drift-guard -->
+<!-- gate-log:phase-09 direction=approved delivery=pending -->
+
+## Phase 9: Build-drift guard (zero-drift invariant)
+
+Turn the M5 zero-drift invariant (committed `dist/<id>/index.html` == fresh build) — which silently broke in Phase 7, caught only by accident in Phase 8 — into a runnable, non-mutating guard wired into the smoke-checklist. Doc + build-script-glue only; engine (`index.html`) untouched, no config changes → all 3 `dist/` stay byte-identical. Mechanism = in-process `build.py --check` (render + byte-compare vs committed dist), pure-stdlib + git-agnostic. Direction approved by user 2026-06-05.
+
+- [x] T1 · Add `--check` drift guard to build.py | scope: scripts/build.py | success: refactor extracts `render_one(typ, template) -> str` (validate + inline + self-contained guard, returns the output string) with a thin writer calling it; `main` accepts `--check` with an optional `all`/`<id>` arg; the check path byte-compares each render against the committed `dist/<id>/index.html`, prints a per-typology drift report, exits 0 when all match and non-zero on any mismatch or missing built file. VERIFY: `python3 scripts/build.py --check all` exits 0 on clean HEAD; a trivial un-rebuilt edit to one config makes it exit non-zero NAMING that typology (then revert); `python3 scripts/build.py all && git diff --exit-code dist/` clean (refactor output-neutral); `node --check` PASS on a freshly built dist | size: S
+- [x] T2 · Wire guard into smoke-checklist + fix stale prose | scope: tests/smoke-checklist.md | success: the manual zero-drift prose item (≈L72, currently "build.py all reproduces both dist byte-identical") is replaced with the runnable `python3 scripts/build.py --check all` command; the stale "both dist"/2-typology count is corrected to all 3 typologies (fentanyl, trade-based, elder-financial-exploitation); the `git status --porcelain dist/` complement is noted. VERIFY: `grep -n "build.py --check all" tests/smoke-checklist.md` hits; `grep -niE "both dist|both typolog" tests/smoke-checklist.md` returns nothing | size: S
+- [x] T3 · Document `--check` usage | scope: scripts/build.py, README.md | success: build.py module docstring Usage block lists the `--check [all|<id>]` mode with a one-line description; README "How to run" carries a one-line drift-guard command. VERIFY: `grep -n "\-\-check" scripts/build.py README.md` hits both files | size: S
+
+> Exit (phase-09): `build.py --check all` exits 0 on clean HEAD, non-zero + names the typology on un-rebuilt drift · `build.py all && git diff --exit-code dist/` clean (output-neutral) · smoke-checklist carries the runnable `--check all` guard, no stale "both dist"/2-typology count, 3 typologies + `git status --porcelain dist/` complement · `--check` in build.py docstring + README · `git diff index.html` empty.
+> Abort: if making the guard non-flaky requires the build to become deterministic in a way that CHANGES dist bytes (build is non-deterministic) — PAUSE and report; that's outside this slice. Blocked >3 attempts → ask user: skip or abort.
 
 <!-- phase:phase-08-doc-true-up -->
 <!-- gate-log:phase-08 direction=approved delivery=accepted -->
@@ -95,8 +109,9 @@ Second typology = **Trade-based ML (TBML)**; switch = **build-time** (`dist/<id>
 
 <!-- phase:future -->
 <details>
-<summary>Future phases (plan when active)</summary>
+<summary>Future phases / backlog (plan when active)</summary>
 
+**Phase 10 candidate · Elder presentation-values true-up (discovered Phase 9)** — the smoke-checklist per-typology expected-values table (≈L15, 2 columns) and compliance attribution (≈L62) still cover only fentanyl + trade-based; `elder-financial-exploitation` (shipped Phase 7) has no walk-row. Needs elder's derived values (coverage %, signal `S-DORMANT-DRAIN-ELDER`, fire-stats, lift bars, delta chip). Doc-slice work, separable from the drift guard.
 **Phase · FinCEN corpus crawler (discovered M6)** — widen the authoring scraper from one advisory to ALL FinCEN advisories (the original vision's next increment). Builds on the proven acquire→convert pipe.
 **Phase · Automate article→signal derivation (discovered M6)** — automate the red-flag→signal step, keeping the deterministic validator at the build boundary. Manual path proven in M6 first.
 

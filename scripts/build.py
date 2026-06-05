@@ -9,8 +9,13 @@ placeholder; the engine and styles already live in index.html.
 Usage:
     python3 scripts/build.py [typology_id]   # default: fentanyl
     python3 scripts/build.py all             # build every config/typologies/*.json
+    python3 scripts/build.py --check [all|<id>]  # drift guard: committed dist == fresh build?
 
-Stdlib only. Exits non-zero on a missing or schema-invalid config.
+`--check` is non-mutating and git-agnostic: it re-renders each config in memory and
+byte-compares against the committed dist/<id>/index.html, exiting non-zero (and naming the
+typology) on any drift or a missing built artifact. Run it before committing or presenting.
+
+Stdlib only. Exits non-zero on a missing or schema-invalid config, or (under --check) on drift.
 """
 import json
 import sys
@@ -173,7 +178,14 @@ def validate_config(c: dict) -> list:
     return e
 
 
-def build_one(typ: str, template: str) -> None:
+def render_one(typ: str, template: str) -> str:
+    """Validate config + inline it into the template, returning the self-contained HTML.
+
+    Pure: no disk write, no stdout. The single source of truth for what a typology's
+    `dist/<id>/index.html` *should* contain — shared by `build_one` (writes it) and
+    `check_one` (compares against the committed file). Fails loud (die) on a missing /
+    invalid config or a non-self-contained result.
+    """
     cfg_path = TYPOLOGY_DIR / f"{typ}.json"
     if not cfg_path.exists():
         die(f"config not found: {cfg_path} (have you authored config/typologies/{typ}.json?)")
@@ -211,12 +223,52 @@ def build_one(typ: str, template: str) -> None:
     if "fetch(" in out or "<script src" in out or 'type="module"' in out:
         die("ship file is not self-contained (fetch / external script / ES module present)")
 
+    return out
+
+
+def build_one(typ: str, template: str) -> None:
+    out = render_one(typ, template)
     out_dir = ROOT / "dist" / typ
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "index.html"
     out_path.write_text(out, encoding="utf-8")
-    print(f"build: {typ} -> {out_path.relative_to(ROOT)}  "
-          f"({len(out):,} bytes; config {len(config_js):,} chars)")
+    print(f"build: {typ} -> {out_path.relative_to(ROOT)}  ({len(out):,} bytes)")
+
+
+def check_one(typ: str, template: str) -> bool:
+    """Drift guard: does the committed dist/<typ>/index.html still equal a fresh render?
+
+    Non-mutating and git-agnostic (byte-compares in process). Returns True if the
+    committed artifact matches, False on drift / a missing build / a config that no
+    longer renders. Prints a per-typology verdict.
+    """
+    out_path = ROOT / "dist" / typ / "index.html"
+    rel = out_path.relative_to(ROOT)
+    try:
+        fresh = render_one(typ, template)
+    except SystemExit:
+        # render_one already printed the underlying error via die()
+        print(f"check: {typ} -> FAIL (config no longer renders; cannot reproduce {rel})", file=sys.stderr)
+        return False
+    if not out_path.exists():
+        print(f"check: {typ} -> DRIFT (missing built artifact {rel}; run `build.py {typ}`)", file=sys.stderr)
+        return False
+    if out_path.read_text(encoding="utf-8") != fresh:
+        print(f"check: {typ} -> DRIFT ({rel} differs from a fresh build of {typ}.json; "
+              f"run `build.py {typ}` and commit)", file=sys.stderr)
+        return False
+    print(f"check: {typ} -> ok ({rel} matches a fresh build)")
+    return True
+
+
+def resolve_targets(target: str) -> list:
+    """A single id, or every config/typologies/*.json for 'all' (sorted, stable)."""
+    if target == "all":
+        configs = sorted(TYPOLOGY_DIR.glob("*.json"))
+        if not configs:
+            die("no typology configs found under config/typologies/")
+        return [p.stem for p in configs]
+    return [target]
 
 
 def main() -> None:
@@ -224,15 +276,25 @@ def main() -> None:
         die(f"template not found: {TEMPLATE}")
     template = TEMPLATE.read_text(encoding="utf-8")
 
-    arg = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_TYPOLOGY
-    if arg == "all":
-        configs = sorted(TYPOLOGY_DIR.glob("*.json"))
-        if not configs:
-            die("no typology configs found under config/typologies/")
-        for p in configs:
-            build_one(p.stem, template)
-    else:
-        build_one(arg, template)
+    args = sys.argv[1:]
+    check = "--check" in args
+    positional = [a for a in args if not a.startswith("-")]
+    target = positional[0] if positional else DEFAULT_TYPOLOGY
+
+    if check:
+        # Non-mutating drift guard: committed dist == fresh build? Touches nothing on disk.
+        results = [check_one(t, template) for t in resolve_targets(target)]
+        drifted = results.count(False)
+        if drifted:
+            die(f"build-drift check FAILED: {drifted}/{len(results)} "
+                f"{'typology' if len(results) == 1 else 'typologies'} drifted "
+                f"(committed dist != fresh build). Rebuild with `python3 scripts/build.py all` "
+                f"and commit the dist.")
+        print(f"check: OK — all {len(results)} built artifact(s) match a fresh build (zero drift)")
+        return
+
+    for t in resolve_targets(target):
+        build_one(t, template)
 
     # one-time migration: remove the old single-file M1 layout if present
     stale = ROOT / "dist" / "index.html"

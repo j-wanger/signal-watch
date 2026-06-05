@@ -27,6 +27,7 @@ that table.
 
 ## Build & open
 - [ ] `python3 scripts/build.py <id>` prints `<id> -> dist/<id>/index.html` (or `all` to build every typology)
+- [ ] **Drift guard:** `python3 scripts/build.py --check all` reports **zero drift** — every committed `dist/<id>/index.html` still equals a fresh build of its config (guards all 3 shipped typologies; non-mutating). Catches a stale-dist commit before it reaches the stage. Belt-and-suspenders: `git status --porcelain dist/` is also clean (flags a stray/untracked dist file that `--check` won't)
 - [ ] Open `dist/<id>/index.html` by **double-clicking the file** (true `file://`, no server)
 - [ ] Header shows **Signal Watch** / AML Detection · Vision Prototype *(shared chrome)*
 - [ ] The amber **"Illustrative data & outputs"** badge is visible (top-right) on **every** act *(shared chrome)*
@@ -69,7 +70,7 @@ that table.
 
 Deterministic gate run against both shipped `dist/<id>/index.html`. **Result: PASS.**
 
-- ✅ Zero drift: `build.py all` reproduces both dist byte-identical; `git status dist/` clean (shipped = source = HEAD).
+- ✅ Zero drift — now an automated guard (see **Build & open** above): `build.py --check all` confirms every committed `dist/<id>/index.html` equals a fresh build; `git status --porcelain dist/` clean (shipped = source = HEAD).
 - ✅ Badge `Illustrative data & outputs` present in both (persistent header chrome → on every act).
 - ✅ Self-contained for `file://`: no `<script src>`, no `fetch()`, no unresolved `__CONFIG__`; `const CONFIG` inlined; boot `goto(0)` present. Only external ref is the Google Fonts `<link>` (degrades to system fonts offline).
 - ✅ Advisories paraphrased + public-source, attributed in both (fentanyl: FINTRAC Jan-2025 · trade-based: FinCEN Apr-2025 / FATF TBML 2024).

@@ -25,9 +25,14 @@ python3 scripts/build.py fentanyl                     # -> dist/fentanyl/index.h
 python3 scripts/build.py trade-based                  # -> dist/trade-based/index.html
 python3 scripts/build.py elder-financial-exploitation # -> dist/elder-financial-exploitation/index.html
 python3 scripts/build.py all                          # build every typology
+python3 scripts/build.py --check all                  # drift guard: committed dist == fresh build?
 
 open dist/fentanyl/index.html                         # macOS — or just double-click it
 ```
+
+`--check` re-renders every config in memory and byte-compares it against the committed
+`dist/<id>/index.html` (non-mutating); it exits non-zero and names the typology if any built
+file has drifted from its source. Run it before committing or presenting.
 
 The built file runs offline from `file://`. Fonts fall back to system serif/sans/mono
 if offline. Content lives in `config/typologies/*.json`; the engine (`index.html`) is

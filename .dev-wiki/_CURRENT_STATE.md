@@ -1,58 +1,55 @@
 # Project: Signal Watch — AML Vision Demo
 
-> Last updated: 2026-06-04 by /dev-debrief
+> Last updated: 2026-06-05 by /dev-debrief
 
 ## Recommended Next Action
 
-**Phase 8 (M6 doc true-up + provenance fix) — DELIVERED, accepted, committed to main `042d732`
-(2026-06-04).** The always-loaded docs now tell the truth about the shipped artifact: branded
-"Signal Engine"→"Signal Watch" across CLAUDE/HANDOFF/README/smoke-checklist; the paraphrase
-non-negotiable carries the FinCEN-only verbatim public-domain exception (17 USC §105, NOT FINTRAC);
-the unverifiable fentanyl FinCEN cites (`FIN-2019-A006`/`FIN-2024-A002`) removed, attributed solely
-to the FINTRAC Jan-2025 alert; M6 doc staleness (M2→M6 state, 3 typologies, pipeline) folded in.
-DISCOVERY: rebuild exposed Phase 7's committed `dist/{fentanyl,trade-based}` were STALE (missing the
-engine highlights feature) — all fresh dist staged, the `build.py all == committed dist` invariant
-restored. Engine untouched.
-
-**Next — project is between phases.** Candidate next increments (both from the M6 vision, neither
-started): (a) **FinCEN corpus crawler** — widen the authoring scraper from one advisory to all; or
-(b) **automate the article→signal derivation** step (keep the deterministic validator at the build
-boundary). Smaller follow-up worth doing first: **wire a build-drift guard** (`build.py all && git
-diff --exit-code dist/`) into the smoke-checklist to prevent the stale-dist failure mode this phase
-uncovered. Plan any of these with `/dev-plan`.
+**Phase 9 (Build-drift guard) COMPLETE in the working tree — READY FOR COMPLETION; awaiting the
+delivery gate + commit (2026-06-05).** All 3 lite tasks done: `build.py --check [all|<id>]` drift
+guard (`render_one`/`check_one`/`resolve_targets` refactor, pure-stdlib, git-agnostic, per-typology
+verdict); wired into the smoke-checklist (de-staled "both dist"→3 typologies + `git status
+--porcelain dist/` complement); documented in the docstring + README. Exit criteria met: `--check
+all` exits 0 on clean HEAD + non-zero naming the typology on drift; build output-neutral (built
+twice → identical sha, all 3 dist byte-identical); `node --check` PASS ×3; `git diff index.html`
+empty. **Next: run the delivery gate (human sign-off) + commit Phase 9**, then `/dev-plan` the next
+increment — open fork: Phase 10 candidate = elder presentation-values true-up in the smoke-checklist
+(table + compliance attribution still cover only fentanyl + trade-based), vs the two larger M6 forks
+(FinCEN corpus crawler / automated article→signal derivation).
 
 ## Active Phase
 
-**[[phase-08-doc-true-up|Phase 8: Doc true-up + provenance fix]]** (status: completed)
+**[[phase-09-build-drift-guard|Phase 9: Build-drift guard]]** (status: active)
 
-Entry criteria: MET (Phase 7 delivered + accepted; rebrand + verbatim render live in engine/dist,
-but the always-loaded docs still described the pre-M6 world; three debts explicitly deferred).
-Exit criteria: MET — no branded "Signal Engine" in the four docs; CLAUDE.md+HANDOFF carry the
-FinCEN-only verbatim public-domain exception (17 USC §105, NOT FINTRAC); unverifiable fentanyl
-FinCEN cites removed (FINTRAC sole attribution) across config + docs + smoke-checklist; all 3 dist
-rebuilt clean (guard 0 tokens, `node --check` PASS; Phase 7 dist drift corrected — user-approved);
-`git diff index.html` empty. Delivery accepted, committed to main `042d732`.
+Entry criteria: MET — Phase 8 delivered + accepted (commit 042d732); its rebuild DISCOVERED the M5
+zero-drift invariant had silently broken in Phase 7 (caught by accident), with no runnable guard and
+a stale 2-typology smoke-checklist item.
+Exit criteria: `build.py --check all` exits 0 on clean HEAD + non-zero (naming the typology) on
+un-rebuilt drift; `build.py all && git diff --exit-code dist/` clean (output-neutral refactor);
+smoke-checklist carries the runnable `--check all` guard, no stale "both dist"/2-typology count
+(3 typologies) + `git status --porcelain dist/` complement; `--check` documented in build.py docstring
++ README; `git diff index.html` empty.
 
-Progress: 100% — all 4 tasks complete (+ user-added M6 doc-staleness fold-in); delivery accepted,
-committed to main (2026-06-04).
+Progress: ~0% — planned, 3 tasks defined, none started.
 
 ## Active Phase Contract
 
-Phase: 8 - Doc true-up + provenance fix (M6 debt) — COMPLETED + accepted
-Tasks: 4 (all [x]) — T1 rebrand docs · T2 amend paraphrase non-negotiable (FinCEN-verbatim
-exception) · T3 fix fentanyl provenance (FINTRAC only) · T4 rebuild dist + verify. Plus user-added
-M6 doc-staleness fold-in (CLAUDE M2→M6, README M5→M6, 3 typologies).
-Transition: complete — project between phases; next via /dev-plan.
-Abort: (met without firing) if a fix surfaces a defect needing an engine/schema/config-structure
-change beyond the doc/string slice — PAUSE and report.
+Phase: 9 - Build-drift guard (zero-drift invariant)
+Tasks: 3 (see tasks.md) — T1 `--check` mode + `render_one` extraction · T2 wire into
+smoke-checklist + fix stale prose · T3 document `--check` (docstring + README). All size S.
+Transition: continue (lite, single short session).
+Abort: if making the guard non-flaky needs the build to become deterministic in a way that CHANGES
+dist bytes (build is non-deterministic) — PAUSE and report. Blocked >3 attempts → ask user: skip or abort.
 
 ## Recent Decisions
 
 | Decision | Confidence | Date |
 |----------|------------|------|
-| Phase 8 fentanyl provenance fix = REMOVE the unverifiable FinCEN cites (FIN-2019-A006/FIN-2024-A002 — 0 hits in aml-wiki, never the derivation surface) and attribute fentanyl solely to the FINTRAC Jan-2025 Operational Alert (the verified, actually-used source). Honest attribution > chasing unverifiable cites — the project's own provenance thesis applied to its docs | high | 2026-06-04 |
-| Doc H1 rebrand wording: "AML Signal Engine — Vision Demo" → "Signal Watch — AML Vision Demo" (product-name-first, matches the engine's "Signal Watch — AML …" ordering; keeps the docs' "Demo" word rather than the engine's "Prototype") | high | 2026-06-04 |
-| Phase 8 scope correction: filed as "doc-only" but defect 3's false cite lives inside `config/typologies/fentanyl.json` (`anchor.source`) → the fix touches one config string + forces a dist/fentanyl rebuild. The engine (`index.html`) still stays untouched (diff empty) | high | 2026-06-04 |
+| Phase 9 direction = HARDEN (build-drift guard) before SCALE (FinCEN crawler) or AUTOMATE (article→signal derivation). The M6 pipeline thesis is already proven by the Phase-7 walking skeleton; a corpus crawler / automated derivation don't earn their complexity for a ~3-typology demo, and automated derivation risks pulling a neural judge toward the build boundary (against deterministic-validators-at-boundaries). The guard closes a real Phase-7 invariant breach and is cheap | high | 2026-06-05 |
+| Guard mechanism = in-process `build.py --check` (render + byte-compare vs committed dist), NOT `build.py all && git diff --exit-code dist/`. Non-mutating (doesn't dirty the tree to test), git-agnostic (build.py stays pure-stdlib, works outside a checkout), per-typology drift report. `git status --porcelain dist/` documented in the smoke-checklist as the complement (catches untracked stray dist files `--check` won't) | high | 2026-06-05 |
+| Keep committing built `dist/` (rejected gitignore-dist + build-in-CI). The committed single file IS the deliverable — must open straight from the repo, offline, no Python. So guard the invariant rather than dissolve it | high | 2026-06-05 |
+| Pre-commit hook / CI enforcement explicitly DEFERRED (lite ceremony + HANDOFF "don't over-engineer"). The runnable `--check` + smoke-checklist is the home; a pre-commit hook running `--check` is a clean follow-up if wanted later | medium | 2026-06-05 |
+
+(Earlier Phase 7–8 decisions: see `[[phase-08-doc-true-up]]` + the 2026-06-04 journal entries.)
 | Phase 7 = thin vertical slice of the Signal Watch pipeline (acquire → PDF→MD persist → hand-derive one signal → render verbatim in Act 1) — prove the pipe on ONE item before widening the scraper or automating derivation (both explicitly LATER phases) | high | 2026-06-04 |
 | Project identity pivot: "hand-authored scripted dramatization" → "public-data-seeded ingestion pipeline" whose demo output is the existing frontend, designed to later take real data; upgrades buy-in via provenance | high | 2026-06-04 |
 | Non-negotiable relaxed for FinCEN ONLY: verbatim public-domain federal text (17 USC §105), attributed — NOT paraphrased. Does NOT extend to FINTRAC (Canadian Crown copyright). Needs CLAUDE.md/HANDOFF update (a doc task, not done this phase) | high | 2026-06-04 |
@@ -71,6 +68,8 @@ change beyond the doc/string slice — PAUSE and report.
 
 ## Blockers and Open Questions
 
+- [RESOLVED 2026-06-05 · planning] Next-increment direction → **HARDEN (Phase 9 build-drift guard)** before SCALE (FinCEN crawler) or AUTOMATE (derivation). Closes a real Phase-7 invariant breach cheaply; the two SCALE/AUTOMATE increments stay in Future phases
+- [DEFERRED 2026-06-05] Pre-commit hook / CI enforcement of `--check` — out of Phase 9 (lite; HANDOFF "don't over-engineer"). The runnable `--check` + smoke-checklist is the home; a pre-commit hook is a clean follow-up if wanted later
 - [RESOLVED 2026-06-04] M6 anchor advisory → **FinCEN EFE FIN-2022-A002** (24 enumerated red flags, cleanest single-signal derivation; cheap to re-point later)
 - [RESOLVED 2026-06-04] M6 product name → **"Signal Watch"** (rebrand rides along with the pipeline slice; resolves the M5 OPEN name question)
 - [RESOLVED 2026-06-04] M6 where the verbatim advisory renders → **Act 1's existing SOURCE DOCUMENT panel** (`.doc`/`#doctext`) as a NEW top-level `advisory_full` field, bounded scrollable (max-height + overflow-y), attribution kept visually distinct from the illustrative badge (NOT Act 0, NOT an `anchor` subfield)
@@ -93,12 +92,11 @@ change beyond the doc/string slice — PAUSE and report.
 
 ## Session Journal (last 5)
 
+- [2026-06-05] [[2026-06-05-phase-09-build-drift-guard|Phase 9 build-drift guard]] (lite, 3 tasks, READY FOR COMPLETION — not yet committed) — turned the M5 zero-drift invariant into a runnable, non-mutating guard. `build.py` refactored: `build_one` split into `render_one(typ, template) -> str` (the SINGLE source of truth for a typology's dist bytes) + thin writer; new `check_one` (git-agnostic byte-compare of committed dist vs fresh in-memory render, per-typology verdict, invalid-config = per-typology FAIL) + `resolve_targets`; `main` gained `--check [all|<id>]`. Wired into smoke-checklist (de-staled "both dist"→3 typologies; `git status --porcelain dist/` complement noted) + documented in docstring + README. Build byte-DETERMINISTIC (built twice → identical sha), HEAD dist == fresh build, `node --check` PASS ×3, `git diff index.html` empty, zero config edits → all 3 dist byte-identical. Discovered Phase 10 candidate: elder presentation-values true-up in the smoke-checklist.
 - [2026-06-04] Phase 8 doc true-up + provenance fix (M6 debt) — doc/config-string only, engine untouched, committed `042d732`. Rebrand `Signal Engine`→`Signal Watch` (4 docs; fixed a smoke-checklist header check that had been failing vs the shipped brand). Paraphrase non-negotiable amended with the FinCEN-only verbatim public-domain exception (17 USC §105, NOT FINTRAC) in CLAUDE+HANDOFF §4.4. Fentanyl provenance: removed unverifiable `FIN-2019-A006`/`FIN-2024-A002` (0 hits in aml-wiki, never the derivation surface), attributed solely to FINTRAC Jan-2025 — reframing sweep caught 2 extra bad-cite sites in smoke-checklist. M6 doc staleness folded in (user add): CLAUDE M2→M6 + pipeline + 3 typologies; README M5→M6 + elder + verbatim exception. DISCOVERY: rebuild exposed Phase 7 committed STALE `dist/{fentanyl,trade-based}` (missing engine highlights feature; only elder current) → `build.py all` didn't reproduce committed dist, M5 zero-drift invariant had broken; all fresh dist staged (user-approved), invariant restored. Guard 0 tokens ×3, `node --check` PASS ×3, `git diff index.html` empty.
 - [2026-06-04] M6 pipeline walking skeleton: proved the "Signal Watch" ingestion pipe end to end on ONE real FinCEN advisory. T1 `acquire_fincen.py` (stdlib urllib) → EFE FIN-2022-A002 PDF (824KB). T2 `pdf_to_md.py` markitdown (MIT) → `data/fincen/fin-2022-a002.md` (48KB, all 24 red flags intact; de-risk GATE passed, no fallback). Forced detour: homebrew py3.14 broken `pyexpat` → converter runs under a gitignored uv-managed py3.12 `.venv`; `build.py` stays stdlib. T3 new `advisory_full` first-class field (Act 1 SOURCE DOCUMENT panel: bounded scrollable + `.docsrc` attribution distinct from the illustrative badge; `text_file`→build-time inline keeps md as source of truth) + "Signal Engine"→"Signal Watch" rebrand (engine+dist). T4 hand-derived `elder-financial-exploitation.json` (target S-DORMANT-DRAIN-ELDER ← md line 507; all 12 financial red flags mapped, 12 behavioral excluded as non-data signals). T5 all 3 dist build clean, self-contained guard 0 tokens, `node --check` PASS. NOT committed yet; doc rebrand + provenance true-up deferred to a follow-up phase.
 - [2026-06-04] M5 ship: doc/verify only (zero engine/config edits — `index.html`+`config/`+`scripts/` clean). Parameterized `tests/smoke-checklist.md` per typology (removed stale single-file `dist/index.html` path; per-typology fill table for the 6 values that differ; M3 controls moved deferred→active checks). Refreshed README (M2→ship; shipped M3 controls; both-typology compliance). Compliance + offline `file://` **HARD GATE PASS**: zero drift (`build.py all` byte-identical, `git status dist/` clean), badge both, self-contained (no fetch/external script; only Google Fonts), advisories paraphrased+attributed, no secrets/PII. M4 skipped (inert under file://). Runtime render carries from M3 (byte-identical dist; no fresh browser run this session). Committed to main.
 - [2026-06-04] M3 presenter polish: engine-only — centralized nav (advance/back/reset) + keys (←/→/Space/Esc) reusing the gate logic via the `nextBtn.disabled` guard; ↺ reset control; `prefers-reduced-motion` final-state (CSS @media + synchronous `T()`/`animVal`). Verified both shipped dist × both motion modes (gates hold, no Act 5 without confirm, 0 pending timers reduced); real Chrome 149 renders. `config/`+`build.py` byte-identical. Speaker notes deferred.
-- [2026-06-04] M2 multi-typology: added trade-based.json (TBML) from aml-wiki survey, paraphrased; build.py gained per-typology dist + build-boundary validation. TBML verified; engine untouched (zero index.html diff); fentanyl regression byte-identical.
-
 ## Cross-References
 
 - HANDOFF.md · CLAUDE.md · README.md

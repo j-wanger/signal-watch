@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AML Signal Engine — Vision Prototype</title>
+<title>Signal Watch — AML Vision Prototype</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -81,6 +81,10 @@
   .doc .docmeta{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--faint);border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px;display:flex;justify-content:space-between;gap:8px}
   .doc .doctext{font-family:var(--display);font-size:14.5px;line-height:1.6;color:var(--muted);min-height:188px}
   .doc .doctext .hl{color:var(--ink);background:rgba(246,166,35,.14);border-radius:3px;padding:0 2px}
+  /* advisory_full: verbatim public-domain source rendered scrollable, attribution kept distinct from the illustrative badge */
+  .doc .docsrc{font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--signal);margin-bottom:10px;line-height:1.5}
+  .doc .docsrc b{text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+  .doc .docfull{font-family:var(--mono);font-size:11px;line-height:1.55;color:var(--muted);max-height:300px;overflow-y:auto;white-space:pre-wrap;overflow-wrap:break-word;border-top:1px solid var(--line);padding-top:12px}
   .caret{display:inline-block;width:7px;height:15px;background:var(--signal);vertical-align:-2px;animation:blink 1s steps(2) infinite}
   @keyframes blink{50%{opacity:0}}
   .extracted{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:18px}
@@ -213,7 +217,7 @@
   <header>
     <div class="brand">
       <div class="mark">◈</div>
-      <div><div class="bt" id="brandTitle">Signal Engine</div><div class="bs" id="brandSub">AML Detection · Vision Prototype</div></div>
+      <div><div class="bt" id="brandTitle">Signal Watch</div><div class="bs" id="brandSub">AML Detection · Vision Prototype</div></div>
     </div>
     <div class="badge" id="badge">Illustrative data &amp; outputs</div>
   </header>
@@ -491,11 +495,14 @@ validateConfig(CONFIG);   // fill safe defaults so the derivations below never t
 
 const ANCHOR = CONFIG.anchor || {};
 const STATS = Object.assign({fire_count:0, standalone_precision:0, best_combo_precision:0}, CONFIG.stats || {});
-const BRAND = CONFIG.brand || {title:'Signal Engine', subtitle:'AML Detection · Vision Prototype'};
+const BRAND = CONFIG.brand || {title:'Signal Watch', subtitle:'AML Detection · Vision Prototype'};
 const BADGE = CONFIG.badge || 'Illustrative data & outputs';
 const STEPS = CONFIG.steps;
 const INDICATORS = CONFIG.coverage.indicators;
 const ADVISORY = CONFIG.advisory_stream;
+// Optional verbatim source document (public-domain advisory). When present, Act 1's
+// SOURCE DOCUMENT panel shows it whole + scrollable instead of the paraphrased stream.
+const ADVISORY_FULL = (CONFIG.advisory_full && typeof CONFIG.advisory_full.text === 'string' && CONFIG.advisory_full.text.trim()) ? CONFIG.advisory_full : null;
 // definition → def so the act renderers keep using c.def.*
 const CANDIDATES = CONFIG.candidates.map(c => c.definition ? Object.assign({}, c, {def:c.definition}) : c);
 // value/strength → v/cls used by the lift renderer
@@ -515,6 +522,7 @@ function validateConfig(c){
   if(!Array.isArray(c.candidates)) c.candidates=[];
   if(!Array.isArray(c.lift)) c.lift=[];
   if(!Array.isArray(c.advisory_stream)) c.advisory_stream=[];
+  if(c.advisory_full && (typeof c.advisory_full!=='object' || typeof c.advisory_full.text!=='string')) c.advisory_full=null;
   if(!Array.isArray(c.steps)) c.steps=['','','','','','',''];
   if(!Array.isArray(c.next_labels)) c.next_labels=['Begin ›','Next ›','Next ›','Next ›','Next ›','Next ›','Next ›','Run again ↺'];
   if(!Array.isArray(c.hints)) c.hints=['','','','','','',''];
@@ -586,9 +594,12 @@ function act1(){
     <h2>The agent reads the <em>advisory</em></h2>
     <p class="lead">A new regulatory advisory lands. Instead of a human spending a week mapping it, the agent ingests it and proposes <b>candidate signals</b> — typed, reusable detection primitives — in seconds.</p>
     <div class="ingest">
-      <div class="doc">
+      <div class="doc">${ADVISORY_FULL?`
         <div class="docmeta"><span>SOURCE DOCUMENT</span><span>ingesting…</span></div>
-        <div class="doctext" id="doctext"><span class="caret"></span></div>
+        <div class="docsrc">${ADVISORY_FULL.source||'Public advisory'} · <b>public domain · verbatim</b></div>
+        <div class="docfull" id="docfull"></div>`:`
+        <div class="docmeta"><span>SOURCE DOCUMENT</span><span>ingesting…</span></div>
+        <div class="doctext" id="doctext"><span class="caret"></span></div>`}
       </div>
       <div class="extracted">
         <div class="eh"><span>EXTRACTED CANDIDATE SIGNALS</span><b id="sigcount">0</b></div>
@@ -599,6 +610,11 @@ function act1(){
   streamAdvisory();
 }
 function streamAdvisory(){
+  if(ADVISORY_FULL){  // verbatim source document: render it whole + scrollable, then extract — no typewriter
+    const el=document.getElementById('docfull');
+    if(el) el.textContent=ADVISORY_FULL.text;   // textContent keeps the gov text literal + injection-safe
+    T(extractSignals,350);return;
+  }
   const el=document.getElementById('doctext');
   if(REDUCED){  // one-shot: full advisory with its highlights, then extract — no per-word typing
     el.innerHTML=ADVISORY.map(s=>s.hl?`<span class="hl">${s.t}</span>`:s.t).join('');

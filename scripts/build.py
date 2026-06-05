@@ -96,6 +96,22 @@ def validate_config(c: dict) -> list:
             if not isinstance(s, dict) or "t" not in s:
                 e.append(f"advisory_stream[{i}] needs a 't' field")
 
+    # advisory_full is OPTIONAL — a verbatim public-domain source document shown in Act 1.
+    # Either inline `text`, or a `text_file` pointing at the markdown corpus (build resolves it).
+    af = c.get("advisory_full")
+    if af is not None:
+        if not isinstance(af, dict):
+            e.append("advisory_full must be an object")
+        else:
+            if not af.get("source"):
+                e.append("advisory_full.source is required (verbatim attribution)")
+            has_text = isinstance(af.get("text"), str) and af.get("text").strip()
+            tf = af.get("text_file")
+            if not has_text and not tf:
+                e.append("advisory_full needs a non-empty `text` or a `text_file`")
+            elif tf and not (ROOT / tf).exists():
+                e.append(f"advisory_full.text_file not found: {tf}")
+
     cands = c.get("candidates")
     if not isinstance(cands, list) or not cands:
         e.append("candidates must be a non-empty array")
@@ -170,6 +186,18 @@ def build_one(typ: str, template: str) -> None:
     errors = validate_config(data)
     if errors:
         die(f"{cfg_path.name} fails schema validation:\n  - " + "\n  - ".join(errors))
+
+    # Resolve a verbatim advisory_full.text_file reference into inlined text. The markdown
+    # corpus (data/fincen/<id>.md) stays the single source of truth; the build bakes its
+    # body into the offline single-file artifact (no runtime fetch). Strips the leading
+    # HTML-comment provenance header so only the advisory body is shown.
+    af = data.get("advisory_full")
+    if isinstance(af, dict) and af.get("text_file") and not af.get("text"):
+        lines = (ROOT / af["text_file"]).read_text(encoding="utf-8").splitlines()
+        while lines and (lines[0].lstrip().startswith("<!--") or not lines[0].strip()):
+            lines.pop(0)
+        af["text"] = "\n".join(lines).strip()
+        af.pop("text_file", None)
 
     n = template.count(PLACEHOLDER)
     if n != 1:

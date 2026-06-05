@@ -9,6 +9,7 @@
 - [[phase-04-presenter-polish|Phase 4: Presenter polish (M3)]] — completed (engine-only: nav + reset + reduced-motion)
 - [[phase-05-live-pregen-mode|Phase 5: Live / pre-gen mode (M4, optional)]] — skipped (inert under file://)
 - [[phase-06-ship|Phase 6: Ship (M5)]] — completed + accepted (doc/verify; compliance + offline file:// hard gate PASS)
+- [[phase-07-pipeline-walking-skeleton|Phase 7: Pipeline walking skeleton (M6)]] — active (FinCEN EFE FIN-2022-A002 slice; Act 1 verbatim render; Signal Watch rebrand)
 
 ### Decisions
 - None yet
@@ -21,8 +22,8 @@
 
 ## By Hierarchy
 
-- Milestones M0 → M5 map 1:1 to Phases 1 → 6 (see HANDOFF.md §8)
-- M0–M3 done; M5 (ship) done + accepted. M4 (live/pre-gen) skipped by decision. **Project shipped** (HANDOFF §1.2).
+- Milestones M0 → M5 map 1:1 to Phases 1 → 6 (see HANDOFF.md §8); M6 = Phase 7 (pipeline slice, post-ship)
+- M0–M3 done; M5 (ship) done + accepted; **M4 (live/pre-gen) skipped** by decision. M6 (pipeline walking skeleton) **active** — project identity pivot to a public-data-seeded ingestion pipeline.
 
 ## Living Documents
 
@@ -38,6 +39,7 @@
 
 ## Recent
 
+- [2026-06-04] M6 (pipeline walking skeleton) planned — FinCEN EFE FIN-2022-A002 slice; Act 1 verbatim render; Signal Watch rebrand; 5 tasks, 8 decisions
 - [2026-06-04] M5 ship — completed + accepted; compliance + offline file:// hard gate PASS; project shipped
 - [2026-06-04] M3 presenter polish — engine-only keyboard nav + reset + reduced-motion; both dist rebuilt
 - [2026-06-04] dev wiki bootstrapped (retrofit from HANDOFF.md milestone plan); aml-wiki linked

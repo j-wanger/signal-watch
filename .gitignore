@@ -25,6 +25,12 @@ venv/
 # Node (not used; guard only)
 node_modules/
 
+# FinCEN corpus: raw acquired PDFs are regenerable via scripts/acquire_fincen.py,
+# and the .md conversion (data/fincen/*.md) is the committed source of truth.
+# Keeps the repo lean as the corpus scales to many advisories. The build reads
+# the .md, never the PDF — nothing breaks without raw/.
+data/fincen/raw/
+
 # Knowledge wiki: machine-local symlink to the central registered aml-wiki
 # (/Users/jwang/private-knowledge/aml-wiki). The association is documented in
 # CLAUDE.md; the symlink itself is per-machine and not repo content.

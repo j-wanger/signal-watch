@@ -1,33 +1,27 @@
 # Active Phase Context
 
-Phase: 6 - Ship (M5) — ACTIVE
-Objective: Finalize for stage — true-up two stale + fentanyl-only docs to post-M3/per-typology reality,
-then run the compliance + offline `file://` hard gate on BOTH built dist. Doc/verify only.
-Scope: README.md, tests/smoke-checklist.md, dist/** (verification). NO engine/config edits expected.
-
-Tasks (in order):
-- T1 · Parameterize `tests/smoke-checklist.md` per typology — fix stale `dist/index.html` → `dist/<id>/`;
-  move M3 controls (←/→/Space/Esc/↺, reduced-motion) from "deferred" into active verify items;
-  per-typology fill table (signal id, figures, coverage delta) sourced from config/typologies/*.json.
-- T2 · Refresh `README.md` — status M2→shipping; document shipped M3 controls (drop "planned for M3");
-  Compliance section covers BOTH fentanyl (FINTRAC Jan-2025, FinCEN FIN-2019/2024) AND trade-based.
-- T3 · Compliance self-check + offline `file://` verification (HARD GATE) — badge present every act both
-  dist; advisories paraphrased+attributed; no secrets/keys; no real-data; both open offline no console
-  errors; record pass/fail. First full re-verification of post-M3 dist — NOT a formality.
+Phase: 7 - Pipeline walking skeleton (M6) — COMPLETED + accepted (committed to main 2026-06-04)
+Objective: Proved the "Signal Watch" ingestion pipe end to end on ONE FinCEN advisory (EFE FIN-2022-A002):
+acquire PDF → markitdown PDF→MD (data/fincen/ = source of truth) → hand-derive one schema-valid config →
+render the FULL verbatim advisory in Act 1's SOURCE DOCUMENT panel. "Signal Engine"→"Signal Watch" rebrand
+rode along (engine + dist; docs deferred). Target signal S-DORMANT-DRAIN-ELDER.
+Scope: data/fincen/**, scripts/**, config/typologies/*.json, config/schema.md, index.html, dist/**.
 
 Key constraints (load-bearing):
-- M4 (live/pre-gen) skipped by decision — scripted single-file IS the ship path.
-- Ship artifacts are per-typology `dist/<id>/index.html`; the old single `dist/index.html` is retired.
-- Compliance is a hard gate, not a formality (HANDOFF §4): no real data, advisories paraphrased+public,
-  "Illustrative data & outputs" badge always visible, no secrets in repo.
-- Deferred (do NOT add in M5): closing "ask" slide, rename, Playwright.
+- Authoring-time vs ship split: acquire/convert/derive are BUILD-TIME; output persisted + INLINED. Ship
+  artifact stays single-file, offline, zero runtime deps, NO fetch (HANDOFF §4 / §4.5).
+- FinCEN advisory text = verbatim public domain (17 USC §105), attributed, NOT paraphrased; FinCEN-ONLY
+  (NOT FINTRAC); kept visually SEPARATE from the "Illustrative data & outputs" badge.
 
-Exit criteria (HANDOFF §1.2): README run/present/add-typology · compliance self-check passes · both
-`dist/<id>/index.html` run offline from `file://` · smoke-checklist parameterized · human sign-off (Jake).
+Done: committed to main (raw PDF gitignored per decision — regenerable via acquire_fincen.py; .md committed as source of truth).
+Deferred → Phase 8 doc true-up (rebrand docs + amend the "paraphrased" non-negotiable + fix fentanyl FINTRAC-vs-FinCEN provenance).
 
-Abort: if T3 surfaces a defect needing an engine/config change beyond doc scope, PAUSE and report —
-M5 is doc/verify; an engine fix is a scope change, not a silent in-phase edit.
+Exit (MET in working tree, pending acceptance): EFE PDF → data/fincen/<id>.md → schema-valid
+elder-financial-exploitation.json → Act 1 verbatim render (scrollable, attributed, separated) → rebrand →
+all 3 dist self-contained + node --check PASS.
+
+Abort: if delivery review surfaces a defect needing an engine/config change beyond the slice — PAUSE and report.
 
 Gates:
-- [x] Direction confirmed by user (M5 ship, M4 skipped; 3 lite doc/verify tasks; ask-slide/rename/Playwright deferred — approved 2026-06-04)
+- [x] Direction confirmed by user (M6 pipeline slice; EFE FIN-2022-A002; Act 1 verbatim render; rebrand; 5 lite tasks — 2026-06-04)
 - [x] Delivery accepted (post-implementation report 2026-06-04 — accepted, committed to main)

@@ -33,11 +33,12 @@ a typology = adding one JSON file + `python3 scripts/build.py <id>`. No engine e
 | `steps` | yes | string[7] | stepper rail labels, exactly one per act (act0…act6); RENDER is fixed at 7 acts |
 | `next_labels` | yes | string[≥7] | Next-button label per act (+ conventional 8th "Run again"); engine indexes 0–6 |
 | `hints` | yes | string[≥7] | control-bar hint per act ("" allowed); engine indexes 0–6 (baseline carries a trailing 8th) |
-| `brand` | no | `{title, subtitle}` | header chrome; defaults to "Signal Engine" / "AML Detection · Vision Prototype" |
+| `brand` | no | `{title, subtitle}` | header chrome; defaults to "Signal Watch" / "AML Detection · Vision Prototype" |
 | `badge` | no | string | always-visible trust badge; default "Illustrative data & outputs" |
 | `anchor` | yes | object | see below — typology-specific narrative copy |
 | `coverage` | yes | `{indicators: Indicator[]}` | Act 0 map + Act 6 close; before/after derived |
 | `advisory_stream` | yes | Segment[] | Act 1 streamed advisory (paraphrased, public-source) |
+| `advisory_full` | no | object | Act 1 verbatim source document (public-domain); see below. When present, replaces the paraphrased stream in the SOURCE DOCUMENT panel |
 | `candidates` | yes | Candidate[] | Act 1 extraction, Act 2 matrix, Act 3 gate, Act 4 spec |
 | `lift` | yes | LiftBar[] | Act 5 combination-lift bars |
 | `stats` | yes | `{fire_count, standalone_precision, best_combo_precision}` | Act 5 fire-stat numbers (integers) |
@@ -64,6 +65,30 @@ built); `sub` optional mono subline.
 
 `{ t, hl? }` — `t` is a text chunk; `hl:true` highlights it. Whitespace in `t` is significant
 (segments are concatenated verbatim during the stream).
+
+### `advisory_full` (optional)
+
+`{ source, text?, text_file?, highlights? }` — a VERBATIM public-domain source document (e.g. a
+FinCEN advisory; U.S. federal works are public domain under 17 U.S.C. §105). Rendered whole and
+scrollable in Act 1's SOURCE DOCUMENT panel, with the `source` attribution shown **distinct
+from** the always-on "Illustrative data & outputs" badge — the advisory is genuine, not
+illustrative. This verbatim exception is FinCEN-only; it does NOT extend to FINTRAC (Crown copyright).
+
+- `source` — required attribution caption (e.g. `FinCEN FIN-2022-A002 · Advisory on Elder Financial Exploitation`).
+- `text` — the verbatim body inline; **or**
+- `text_file` — a repo-relative path to the markdown corpus file (e.g. `data/fincen/fin-2022-a002.md`).
+  The build reads it, strips the leading HTML-comment provenance header, and inlines the body —
+  keeping the markdown corpus the single source of truth (no duplication). Provide `text` **or** `text_file`.
+- `highlights` — optional `string[]` of EXACT substrings of the verbatim text (the red-flag phrases
+  that became signals). The engine wraps each occurrence in `<span class="hl">` and, on reveal,
+  scrolls the first highlight into view — tying the source document to the extracted signals. Use
+  single-line fragments with no curly quotes/apostrophes so the match is robust.
+
+Act 1 renders this as the "agent reading" beat: it types a capped opening (processing feel), then
+reveals the full body with `highlights` applied, then extracts the candidate signals. Body text is
+escaped + injected (highlights are the only markup); markdown line structure is preserved via
+`white-space: pre-wrap`. Absent or malformed → the panel falls back to the paraphrased
+`advisory_stream` (defensive rendering).
 
 ### `Candidate` (candidates[])
 

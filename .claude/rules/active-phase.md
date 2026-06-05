@@ -1,6 +1,6 @@
 # Active Phase Context
 
-Phase: 8 - Doc true-up + provenance fix (M6 debt) — ACTIVE (direction approved 2026-06-04)
+Phase: 8 - Doc true-up + provenance fix (M6 debt) — COMPLETED + accepted (committed to main 042d732, 2026-06-04)
 Objective: Close the three doc/provenance debts deferred from Phase 7. The always-loaded docs
 must tell the truth about what the shipped artifact now is and cites. Doc/config-string ONLY —
 the engine (index.html) is NOT touched (`git diff index.html` must be empty).

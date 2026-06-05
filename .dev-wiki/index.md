@@ -9,12 +9,15 @@
 - [[phase-04-presenter-polish|Phase 4: Presenter polish (M3)]] — completed (engine-only: nav + reset + reduced-motion)
 - [[phase-05-live-pregen-mode|Phase 5: Live / pre-gen mode (M4, optional)]] — skipped (inert under file://)
 - [[phase-06-ship|Phase 6: Ship (M5)]] — completed + accepted (doc/verify; compliance + offline file:// hard gate PASS)
-- [[phase-07-pipeline-walking-skeleton|Phase 7: Pipeline walking skeleton (M6)]] — active (FinCEN EFE FIN-2022-A002 slice; Act 1 verbatim render; Signal Watch rebrand)
+- [[phase-07-pipeline-walking-skeleton|Phase 7: Pipeline walking skeleton (M6)]] — completed + accepted (FinCEN EFE FIN-2022-A002 slice; Act 1 verbatim render; Signal Watch rebrand)
+- [[phase-08-doc-true-up|Phase 8: Doc true-up + provenance fix (M6 debt)]] — completed + accepted (rebrand docs; FinCEN-verbatim non-negotiable; fentanyl provenance → FINTRAC; dist drift corrected)
 
 ### Decisions
 - None yet
 
 ### Journal
+- [[2026-06-04-phase-08-doc-true-up|2026-06-04 · Phase 8 doc true-up + provenance fix]]
+- [[2026-06-04-m6-pipeline-walking-skeleton|2026-06-04 · M6 pipeline walking skeleton]]
 - [[2026-06-04-m5-ship|2026-06-04 · M5 ship]]
 - [[2026-06-04-m3-presenter-polish|2026-06-04 · M3 presenter polish]]
 - [[2026-06-04-m2-multi-typology|2026-06-04 · M2 multi-typology (TBML)]]
@@ -22,8 +25,8 @@
 
 ## By Hierarchy
 
-- Milestones M0 → M5 map 1:1 to Phases 1 → 6 (see HANDOFF.md §8); M6 = Phase 7 (pipeline slice, post-ship)
-- M0–M3 done; M5 (ship) done + accepted; **M4 (live/pre-gen) skipped** by decision. M6 (pipeline walking skeleton) **active** — project identity pivot to a public-data-seeded ingestion pipeline.
+- Milestones M0 → M5 map 1:1 to Phases 1 → 6 (see HANDOFF.md §8); M6 = Phase 7 (pipeline slice, post-ship) + Phase 8 (doc/provenance true-up of the M6 debt)
+- M0–M3 done; M5 (ship) done + accepted; **M4 (live/pre-gen) skipped** by decision. M6 (Signal Watch ingestion pipeline) **completed + accepted** — project identity pivot to a public-data-seeded ingestion pipeline; docs trued-up to M6 reality in Phase 8.
 
 ## Living Documents
 
@@ -39,7 +42,8 @@
 
 ## Recent
 
-- [2026-06-04] M6 (pipeline walking skeleton) planned — FinCEN EFE FIN-2022-A002 slice; Act 1 verbatim render; Signal Watch rebrand; 5 tasks, 8 decisions
+- [2026-06-04] Phase 8 (doc true-up + provenance fix) completed + accepted — rebrand docs to Signal Watch; FinCEN-verbatim non-negotiable; fentanyl provenance → FINTRAC; M6 doc staleness folded in; Phase 7 dist drift corrected; commit 042d732
+- [2026-06-04] M6 (pipeline walking skeleton) completed + accepted — FinCEN EFE FIN-2022-A002 slice; Act 1 verbatim render; Signal Watch rebrand; commit 8459dd9
 - [2026-06-04] M5 ship — completed + accepted; compliance + offline file:// hard gate PASS; project shipped
 - [2026-06-04] M3 presenter polish — engine-only keyboard nav + reset + reduced-motion; both dist rebuilt
 - [2026-06-04] dev wiki bootstrapped (retrofit from HANDOFF.md milestone plan); aml-wiki linked

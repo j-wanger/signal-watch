@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-04
 updated: 2026-06-04
 source: plan
-status: active
+status: completed
 ceremony: lite
 scope: ["CLAUDE.md", "HANDOFF.md", "README.md", "tests/smoke-checklist.md", "config/typologies/fentanyl.json", "dist/**", "scripts/build.py"]
 entry_criteria: "Phase 7 (M6 pipeline slice) delivered + accepted; the rebrand and the FinCEN-verbatim render live in the engine + dist, but the docs still describe the pre-M6 world. Three doc/provenance debts were explicitly deferred from Phase 7."

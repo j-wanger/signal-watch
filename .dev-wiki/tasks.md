@@ -5,7 +5,7 @@
 <!-- phase:phase-08-doc-true-up -->
 <!-- gate-log:phase-08 direction=approved delivery=accepted -->
 
-## Phase 8: Doc true-up + provenance fix (M6 debt) — ACTIVE
+## Phase 8: Doc true-up + provenance fix (M6 debt) — COMPLETED + accepted
 
 Close the three doc/provenance debts deferred from Phase 7. Unifying thread: the always-loaded docs must tell the truth about what the shipped artifact now is and cites. Doc/config-string only — engine (`index.html`) untouched (`git diff index.html` empty). Direction approved by user 2026-06-04; provenance fix = remove unverifiable FinCEN cites, attribute fentanyl to FINTRAC.
 

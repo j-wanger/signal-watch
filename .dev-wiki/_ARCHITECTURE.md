@@ -1,4 +1,4 @@
-# Architecture: AML Signal Engine — Vision Demo
+# Architecture: Signal Watch — AML Vision Demo
 
 > Last updated: 2026-06-04 by /dev-debrief (M6 — Signal Watch ingestion pipeline)
 

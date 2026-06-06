@@ -1,7 +1,7 @@
 # Active Phase Context
 
-Phase: 14 - Scale corpus derivation (3 more CLEAN advisories → 5/14 live) — M7 — DELIVERED, awaiting commit verification.
-(all 5 tasks [x], exit criteria MET, 2026-06-05). No next phase planned — run /dev-plan for Phase 15.
+Phase: 14 - Scale corpus derivation (3 more CLEAN advisories → 5/14 live) — M7 — DELIVERED + ACCEPTED (impl commit ce0de90, 2026-06-05).
+(all 5 tasks [x], exit criteria MET). No next phase planned — run /dev-plan for Phase 15.
 Objective: fill the corpus explorer's live menu 2/14 → 5/14 by authoring 3 more derived records — pure authoring, zero engine/spine/front-end edits.
 
 Delivered (verified in tree): 3 new --check-derived-clean records — fin-2020-a008 human trafficking (10 ind, pruned 1 intro-tail noise line, 2 BUILD_NOW) ·
@@ -18,4 +18,4 @@ combination-lift wow beat · elder true-up · fentanyl re-point · --fetch caden
 
 Gates:
 - [x] Direction confirmed by user (scale derivation; 3 advisories — trafficking/CMLN/Iran; EFE+COVID out — 2026-06-05)
-- [ ] Delivery accepted (post-implementation report)
+- [x] Delivery accepted (post-implementation report 2026-06-05; impl commit ce0de90)

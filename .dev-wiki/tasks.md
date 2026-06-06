@@ -3,7 +3,7 @@
 > Last updated: 2026-06-05 by /dev-plan (Phase 14)
 
 <!-- phase:phase-14-scale-corpus-derivation -->
-<!-- gate-log:phase-14 direction=approved delivery=pending -->
+<!-- gate-log:phase-14 direction=approved delivery=accepted -->
 
 ## Phase 14: Scale corpus derivation (3 more CLEAN advisories → 5/14 live) — M7
 

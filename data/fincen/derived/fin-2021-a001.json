@@ -1,0 +1,244 @@
+{
+  "id": "fin-2021-a001",
+  "advisory": "FIN-2021-A001",
+  "source_md": "data/fincen/fin-2021-a001.md",
+  "extraction_quality": "llm-extracted",
+  "provenance": "LLM-backend-derived + deterministic-checked (Phase 16/17 inverted boundary) — NOT a ship typology config. The LLM backend read the source and EXTRACTED the 16 enumerated financial red-flag indicators (the thematic list under 'Such financial red flag indicators may include:', NOT the upstream 'representative types of illicit activity' typology overview); the deterministic gate GROUNDS each verbatim `flag` in the source md within the red-flag region + checks the cover×data matrix. This advisory is footnote-heavy (markitdown interleaves page-break footnote runs mid-flag), so each `flag` is a CONTIGUOUS grounded span — a clause split across a footnote page break (e.g. IND-01's '(2)' continuation) is dropped, never bridged across the interruption. build_rec follows the cover×data matrix (build_rec_category). Coverage/data values are ILLUSTRATIVE (vision demo).",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "financial",
+      "flag": "After the COVID-19 public health emergency declaration, a health care service provider's account receives or continues to receive: (1) health care benefit program or health insurance payments well above the provider's estimated business transactions",
+      "src_line": 171,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Reimbursement inflows well above a provider's own business-transaction baseline are uncovered and computable directly from the reimbursement vs total-activity time series in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-REIMBURSE-ABOVE-BUSINESS-BASELINE",
+        "class": "account · time-series · stateful",
+        "features": [
+          "health_payment_value_current",
+          "estimated_business_volume_baseline",
+          "payment_to_business_ratio",
+          "post_phe_declaration_flag",
+          "provider_account_flag"
+        ],
+        "logic": "after the public health emergency declaration, a health care provider's account receives health care benefit program or insurance payments well above the provider's estimated business transaction volume — a payment-to-business ratio far beyond the provider's established baseline",
+        "window": "rolling 90 days vs trailing baseline",
+        "source": "Core reimbursement transaction + account-activity features (Gold); payer tagging",
+        "route": "Tier-1 alert → COVID health-care fraud review gate"
+      }
+    },
+    {
+      "id": "IND-02",
+      "section": "financial",
+      "flag": "A health care service provider's account receives health care benefit program or health insurance payments beyond the expected type or volume of service, based on staffing and other characteristics of the business (e.g., processing COVID-19 tests when the medical facility does not typically offer diagnostic services, or the facility is processing a high volume of tests despite only employing a few medical personnel).",
+      "src_line": 208,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Peer/profile-deviation scoring exists; enhance it with a payments-versus-staffing benchmark rather than building a standalone rule."
+    },
+    {
+      "id": "IND-03",
+      "section": "financial",
+      "flag": "A COVID-19-related health care service provider's business account has unusual transaction activities, such as payments for personal or medically irrelevant expenses (e.g., payments to automobile dealers, travel agents, or retailers of luxury goods).",
+      "src_line": 214,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Merchant-category and luxury-spend tagging partially exist; enhance the high-risk-spend screen with a health-care-business + personal/irrelevant-expense conjunction."
+    },
+    {
+      "id": "IND-04",
+      "section": "financial",
+      "flag": "Following the COVID-19 public health emergency declaration, personal or business accounts, especially ones that did not previously receive health care-related payments, begin receiving steep increases in health care benefit program or health insurance payments.",
+      "src_line": 220,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "A previously-unrelated account suddenly onboarding steep health-program payments is uncovered, and prior-payment history plus the new inflow onset are in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-DORMANT-ACCOUNT-HEALTH-ONSET",
+        "class": "account · behavioral · stateful",
+        "features": [
+          "prior_health_payment_flag",
+          "health_payment_value_30d",
+          "onset_step_ratio",
+          "post_phe_declaration_flag",
+          "account_type"
+        ],
+        "logic": "an account with no prior history of health care-related payments begins receiving steep increases in health care benefit program or insurance payments after the public health emergency declaration — a sharp onset of program inflow on a previously-unrelated personal or business account",
+        "window": "rolling 30 days vs prior-12-month history",
+        "source": "Core transaction history + payer-tagging features (Gold)",
+        "route": "Tier-1 alert → COVID health-care fraud review gate"
+      }
+    },
+    {
+      "id": "IND-05",
+      "section": "financial",
+      "flag": "A purported health care service provider's account receives health care benefit program or health insurance payments related to COVID-19 services, and then individuals immediately withdraw the funds in a manner that is not typical for health care businesses (e.g., cashier's checks, cash withdrawals, certain types of Automated Clearing House (ACH) transfers, or domestic and international wire transfers).",
+      "src_line": 224,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Program payments landing and being immediately withdrawn in atypical forms (cashier's checks, cash, wires) is an uncovered rapid-extraction pattern, and inbound payer tagging plus outbound instrument/timing are in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-COVID-PAYMENT-RAPID-WITHDRAWAL",
+        "class": "account · flow-level · stateful",
+        "features": [
+          "inbound_health_payment_value",
+          "receipt_to_withdrawal_hours",
+          "atypical_instrument_flag",
+          "withdrawal_value_match_ratio",
+          "cash_or_wire_outbound_flag"
+        ],
+        "logic": "a purported health care provider's account receives COVID-19-related program or insurance payments and shortly afterward the funds are withdrawn in forms atypical for a health care business — cashier's checks, cash withdrawals, certain ACH transfers, or domestic/international wires in matching amounts within a short window",
+        "window": "rolling 7 days",
+        "source": "Core transaction + instrument-type features (Gold); health-program payer tagging",
+        "route": "Tier-1 alert → COVID health-care fraud review gate"
+      }
+    },
+    {
+      "id": "IND-06",
+      "section": "financial",
+      "flag": "After the COVID-19 public health emergency determination, a purported health care provider's account does not receive small-dollar check deposits, payments from merchant fee servicers, or cash payments from patients that would indicate patient copayments. This may indicate the absence of actual business activity.",
+      "src_line": 230,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Detecting the ABSENCE of copay-style inflows needs merchant-fee-servicer and small-dollar-deposit categorization we hold only partially; enrich the inflow taxonomy, then build the no-copay-activity signal."
+    },
+    {
+      "id": "IND-07",
+      "section": "financial",
+      "flag": "A newly formed health care business account has a volume or type of payment that seems inconsistent with expected levels of activity for such an account.",
+      "src_line": 235,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "New-account profiling already exists; enhance it with a health-care-business expected-activity benchmark rather than a separate rule."
+    },
+    {
+      "id": "IND-08",
+      "section": "financial",
+      "flag": "The physical location of a purported medical facility receiving reimbursements for COVID-19-related health care services or relief funds is non-existent, a residential address, a commercial mail receiving agency address (e.g., a UPS Store address), or another non-office building address (e.g., a purported medical facility is listed as a laboratory, but the physical address is a vacant lot, car dealership, restaurant, or retail store).",
+      "src_line": 238,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Verifying a facility's physical address type (non-existent / residential / CMRA / non-office) is not data the institution holds; source an address-verification / business-premises feed before any detection can use it."
+    },
+    {
+      "id": "IND-09",
+      "section": "financial",
+      "flag": "The purported laboratory, health care service provider, or medical service personnel or their counterparties appear to have a minimal web presence, or one that begins around the time of the COVID-19 public health emergency declaration.",
+      "src_line": 244,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Web-presence age/footprint is an external open-source signal not held in the AML data repo; source that feed before building."
+    },
+    {
+      "id": "IND-10",
+      "section": "financial",
+      "flag": "Following the public health emergency declaration, the physical location of a purported medical facility receiving payments for health care services or relief funds is far from the physical location of the majority of its patients or the providers purported to be practicing there, unless the facility is providing appropriate telehealth services (e.g., a purported medical facility located in a western state receives payments related to patients residing on the East Coast).",
+      "src_line": 250,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "A facility-to-patient geographic mismatch needs patient/counterparty geo attribution we hold only partially; enrich with geo data, then build the distance-mismatch signal (telehealth-excepted)."
+    },
+    {
+      "id": "IND-11",
+      "section": "financial",
+      "flag": "After the COVID-19 public health emergency declaration, a health care service provider's or other business account begins having overly complex, medical-related transactions involving multiple counterparties indicative of possible structuring, layering, kickbacks, or fraudulent medical claims.",
+      "src_line": 258,
+      "status": "covered",
+      "data": "available",
+      "build_rec": "COVERED",
+      "rationale": "Complex multi-counterparty structuring/layering is already captured by mature transaction-monitoring controls; no new build needed."
+    },
+    {
+      "id": "IND-12",
+      "section": "financial",
+      "flag": "A health care service provider's account makes frequent or unusually large payments recorded as advertising or marketing expenses, or makes recurring round-dollar payments to one or multiple individuals in a manner inconsistent with its payroll-related withdrawals. The payments may reference \"director fees,\" \"consulting fees,\" \"marketing,\" or \"business process outsourcing.\"",
+      "src_line": 263,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Round-dollar payments to individuals carrying advertising/consulting memos need transaction-memo text captured only partially as structured data; enrich with memo NLP, then build the disguised-payroll/kickback signal."
+    },
+    {
+      "id": "IND-13",
+      "section": "financial",
+      "flag": "A health care service provider starts receiving payments from laboratories and health care services companies, but there is no financial documentation (e.g., operating expense payments) that the provider rendered legitimate services.",
+      "src_line": 269,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Inbound payments from labs/health-care companies with no matching operating outflow indicating real services rendered is an uncovered sham-services pattern, and inbound vs categorized-outbound flow is in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-LAB-PAYMENTS-NO-OPEX",
+        "class": "entity · flow-level · stateful",
+        "features": [
+          "inbound_lab_payment_value_90d",
+          "operating_expense_outflow_90d",
+          "opex_to_inflow_ratio",
+          "counterparty_lab_flag",
+          "service_documentation_flag"
+        ],
+        "logic": "a health care provider starts receiving payments from laboratories and health care services companies while showing no operating-expense outflow consistent with rendering legitimate services — inbound lab payments with an operating-expense-to-inflow ratio near zero",
+        "window": "rolling 90 days",
+        "source": "Core transaction features with counterparty + category tagging (Gold)",
+        "route": "Tier-1 alert → COVID health-care fraud review gate"
+      }
+    },
+    {
+      "id": "IND-14",
+      "section": "financial",
+      "flag": "An account with no previous known association with providing health care services, receives an unexpected or excessive COVID-19-related payment that appears to be the CARES Act's Provider Relief Fund or the PPP-HCEA payments.  Shortly after the account receives the deposit, an individual(s) withdraws the funds via large cash withdrawals, cashier's checks, wires to an overseas account, transfers to personal accounts, or payments for non-business expenses.",
+      "src_line": 279,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "An unrelated account receiving a relief-fund deposit then rapidly draining it to cash/overseas/personal is an uncovered relief-fund layering pattern, and the relief-payer tag, prior-association history, and outbound flow are in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-RELIEF-FUND-RAPID-LAYERING",
+        "class": "account · flow-level · stateful",
+        "features": [
+          "relief_fund_payer_flag",
+          "prior_health_association_flag",
+          "deposit_to_withdrawal_hours",
+          "outbound_cash_overseas_personal_value",
+          "withdrawal_value_match_ratio"
+        ],
+        "logic": "an account with no previous association with health care services receives an unexpected or excessive CARES Act Provider Relief Fund or PPP-HCEA payment and shortly afterward drains it via large cash withdrawals, cashier's checks, overseas wires, personal-account transfers, or non-business payments — rapid layering of relief funds",
+        "window": "rolling 10 days",
+        "source": "Core transaction features (Gold); relief-fund payer tagging; prior-association history",
+        "route": "Tier-1 alert → COVID relief-fund fraud review gate"
+      }
+    },
+    {
+      "id": "IND-15",
+      "section": "financial",
+      "flag": "An account previously associated with providing health care services but that has not been recently active or appears to be defunct, receives an unexpected or excessive COVID-19-related payment that appears to be the CARES Act's Provider Relief Fund or the PPP-HCEA payments.",
+      "src_line": 285,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Dormant-account reactivation monitoring exists; enhance it to key on a defunct provider account receiving an unexpected relief-fund payment."
+    },
+    {
+      "id": "IND-16",
+      "section": "financial",
+      "flag": "An account holder receives a substantial amount of reimbursements from health care benefit programs or health insurance companies for services rendered at the same time that the account holder receives COVID-19-related unemployment insurance payments.",
+      "src_line": 289,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Correlating provider reimbursements with the same holder drawing COVID unemployment insurance needs a cross-program UI-payment tag we hold only partially; enrich with UI-payer tagging, then build the simultaneous-program signal."
+    }
+  ]
+}

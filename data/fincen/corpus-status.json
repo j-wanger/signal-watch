@@ -1,10 +1,10 @@
 {
   "_generated_by": "scripts/derive_signals.py --corpus-status",
-  "_note": "Deterministic per-advisory manifest for the corpus-explorer build (scripts/build.py corpus reads this + data/fincen/derived/*.json). Phase 16 (inverted boundary): `derivable` = a red-flag region exists (false only for the 2 FATF advisories); `extraction` (clean/low/none) is a triage HINT, NOT the derivability authority — an advisory goes live via a gate-passing derived/<id>.json (the LLM extracts; check_record grounds). Authoring artifact, NOT a ship config. Regenerate after the corpus md set changes.",
+  "_note": "Deterministic per-advisory manifest for the corpus-explorer build (scripts/build.py corpus reads this + data/fincen/derived/*.json). `derivable` = a red-flag region exists (rf_region; false only for the 2 FATF advisories); `extraction`/`flag_count` are a cheap rf_region-bounded triage HINT (_rf_triage), NOT the derivability authority — an advisory goes live via a gate-passing derived/<id>.json (the LLM extracts; check_record grounds), and build.py ignores the manifest count for a live advisory. Authoring artifact, NOT a ship config. Regenerate after the corpus md set changes.",
   "summary": {
-    "clean": 7,
-    "low": 3,
-    "needs": 4,
+    "clean": 11,
+    "low": 1,
+    "needs": 2,
     "total": 14
   },
   "advisories": [
@@ -16,9 +16,9 @@
       "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2020-a008",
       "source": "FinCEN FIN-2020-A008 · Supplemental Advisory on Identifying and Reporting Human Trafficking and Related Activity · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 11,
+      "flag_count": 26,
       "sections": {
-        "financial": 11
+        "redflag": 26
       },
       "derivable": true
     },
@@ -41,10 +41,10 @@
       "date": "2021-02-02",
       "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2021-a001",
       "source": "FinCEN FIN-2021-A001 · Advisory on COVID-19 Health Insurance- and Health Care-Related Fraud · public domain (17 U.S.C. 105)",
-      "extraction": "low",
-      "flag_count": 2,
+      "extraction": "clean",
+      "flag_count": 47,
       "sections": {
-        "financial": 2
+        "redflag": 47
       },
       "derivable": true
     },
@@ -56,9 +56,9 @@
       "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2021-a002",
       "source": "FinCEN FIN-2021-A002 · Advisory on Financial Crimes Targeting COVID-19 Economic Impact Payments · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 7,
+      "flag_count": 22,
       "sections": {
-        "financial": 7
+        "redflag": 22
       },
       "derivable": true
     },
@@ -81,9 +81,11 @@
       "date": "2021-11-08",
       "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2021-a004",
       "source": "FinCEN FIN-2021-A004 · Advisory on Ransomware and the Use of the Financial System to Facilitate Ransom Payments · public domain (17 U.S.C. 105)",
-      "extraction": "none",
-      "flag_count": 0,
-      "sections": {},
+      "extraction": "low",
+      "flag_count": 1,
+      "sections": {
+        "redflag": 1
+      },
       "derivable": true
     },
     {
@@ -94,9 +96,9 @@
       "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2022-a001",
       "source": "FinCEN FIN-2022-A001 · Advisory on Kleptocracy and Foreign Public Corruption · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 5,
+      "flag_count": 12,
       "sections": {
-        "financial": 5
+        "redflag": 12
       },
       "derivable": true
     },
@@ -108,10 +110,9 @@
       "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2022-a002",
       "source": "FinCEN FIN-2022-A002 · Advisory on Elder Financial Exploitation · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 24,
+      "flag_count": 28,
       "sections": {
-        "behavioral": 12,
-        "financial": 12
+        "redflag": 28
       },
       "derivable": true
     },
@@ -122,10 +123,10 @@
       "date": "2024-05-08",
       "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2024-a001",
       "source": "FinCEN FIN-2024-A001 · Advisory to Counter the Financing of Iran-Backed Terrorist Organizations · public domain (17 U.S.C. 105)",
-      "extraction": "low",
-      "flag_count": 1,
+      "extraction": "clean",
+      "flag_count": 11,
       "sections": {
-        "redflag": 1
+        "redflag": 11
       },
       "derivable": true
     },
@@ -137,10 +138,9 @@
       "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2024-a002",
       "source": "FinCEN FIN-2024-A002 · Supplemental Advisory on the Procurement of Precursor Chemicals and Manufacturing Equipment Used for the Synthesis of Illicit Fentanyl and Other Synthetic Opioids · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 14,
+      "flag_count": 17,
       "sections": {
-        "profile": 8,
-        "transactional": 6
+        "redflag": 17
       },
       "derivable": true
     },
@@ -151,10 +151,10 @@
       "date": "2025-04-01",
       "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2025-a001",
       "source": "FinCEN FIN-2025-A001 · FinCEN Advisory on the Financing of the Islamic State of Iraq and Syria (ISIS) and its Global Affiliates · public domain (17 U.S.C. 105)",
-      "extraction": "low",
-      "flag_count": 2,
+      "extraction": "clean",
+      "flag_count": 12,
       "sections": {
-        "redflag": 2
+        "redflag": 12
       },
       "derivable": true
     },
@@ -166,9 +166,9 @@
       "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2025-a002",
       "source": "FinCEN FIN-2025-A002 · FinCEN Advisory on the Iranian Regime’s Illicit Oil Smuggling Activities, Shadow Banking Networks, and Weapons Procurement Efforts · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 16,
+      "flag_count": 20,
       "sections": {
-        "redflag": 16
+        "redflag": 20
       },
       "derivable": true
     },
@@ -180,9 +180,9 @@
       "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2025-a003",
       "source": "FinCEN FIN-2025-A003 · FinCEN Advisory on the Use of Chinese Money Laundering Networks by Mexico-Based Transnational Criminal Organizations to Launder Illicit Proceeds · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 18,
+      "flag_count": 21,
       "sections": {
-        "redflag": 18
+        "redflag": 21
       },
       "derivable": true
     },
@@ -193,9 +193,11 @@
       "date": "2026-03-30",
       "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2026-a001",
       "source": "FinCEN FIN-2026-A001 · FinCEN Advisory on Health Care Fraud Schemes Targeting Medicare, Medicaid, and Other Federal and State Health Care Benefit Programs · public domain (17 U.S.C. 105)",
-      "extraction": "none",
-      "flag_count": 0,
-      "sections": {},
+      "extraction": "clean",
+      "flag_count": 6,
+      "sections": {
+        "redflag": 6
+      },
       "derivable": true
     }
   ]

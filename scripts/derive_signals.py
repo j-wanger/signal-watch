@@ -1,87 +1,60 @@
 #!/usr/bin/env python3
-"""Derive a typology config from a FinCEN advisory markdown — AUTHORING-TIME ONLY.
+"""Dispose of an LLM-derived FinCEN-advisory record — AUTHORING-TIME ONLY (the GATE).
 
-Part of the Signal Watch ingestion pipeline (Phase 11 — AUTOMATE). This automates the
-article -> signal derivation step that was proven MANUALLY in Phase 7 (the EFE advisory
-markdown -> the hand-derived elder-financial-exploitation.json config):
+Part of the Signal Watch ingestion pipeline. The boundary is INVERTED (Phase 16) and the
+deterministic EXTRACTOR is now DELETED (Phase 17 — the real subtraction): the LLM EXTRACTS
+the enumerated red flags + per-indicator judgment (a generative task it does well across the
+heterogeneous + glued corpus, where structural parsing was brittle and accreted special-casing
+every phase); this module is the DETERMINISTIC GATE that DISPOSES. The pipeline:
 
     crawl_fincen.py    -> data/fincen/index.json   (manifest)
     acquire_fincen.py  -> data/fincen/raw/<id>.pdf (resolve + download)
     pdf_to_md.py       -> data/fincen/<id>.md      (verbatim source of truth)
-    derive_signals.py  -> config/typologies/<id>.draft.json   (THIS TOOL)
-    (human review)     -> config/typologies/<id>.json
-    build.py           -> dist/<id>/index.html
+    (LLM backend)      -> data/fincen/derived/<id>.json   (extract + judgment)
+    derive_signals.py  -> --check-derived DISPOSES   (THIS TOOL — the gate)
+    build.py           -> dist/corpus/index.html
 
-NON-NEGOTIABLE: nothing here ever runs in the ship artifact. The engine never imports
-this; build.py stays stdlib-only and never calls an LLM. This is a developer tool.
+NON-NEGOTIABLE: nothing here ever runs in the ship artifact. The engine never imports this;
+build.py stays stdlib-only, never calls an LLM, and never imports this tool. Developer tool.
 
-TWO LAYERS, sharing one deterministic boundary:
-  - DETERMINISTIC (stdlib-only, offline): extract_red_flags(md) parses the advisory's
-    enumerated red-flag list; scaffold_config() emits a schema-shaped config SKELETON.
-    Verified offline by `--selftest` (same runnable-check spirit as build.py --check).
-  - NEURAL (build-time only, env-keyed): `--draft` proposes the judgment fields the
-    schema flags as decisions (status, the single target, the signal definition) via the
-    Anthropic API. The `anthropic` SDK is LAZY-imported only inside --draft.
-
-The LLM PROPOSES a config/typologies/<id>.draft.json; the deterministic validator
-(build.py + schema) + the two human gates DISPOSE. Committed configs stay deterministic
-and human-reviewed — no neural judge at the build boundary.
+THE GATE (check_record) — what disposes of what the LLM proposed (no neural judge at the
+boundary): (1) each indicator's build_rec follows the cover×data matrix (build_rec_category);
+(2) GROUNDEDNESS — every indicator's verbatim `flag` is a substring of the source md under
+normalize() (the traceability authority; replaces the deleted src_line ∈ extract_red_flags
+structural parse); (3) RELEVANCE — the flag's src_line falls inside the red-flag region
+(rf_region), so a grounded-but-irrelevant quote lifted from the overview / SAR section is
+rejected; (4) a BUILD_NOW indicator carries build_logic with the full definition shape.
+The LLM backend is a live model session acting as backend (no API key) — it PROPOSES the
+extraction + judgment; the deterministic gate + the two human gates DISPOSE. Derived records
+are an LLM-derived + checked corpus dataset, NOT ship typology configs (the 3 hand-curated
+typologies stay the byte-frozen showcase).
 
 FinCEN advisories are U.S. federal works in the public domain (17 U.S.C. 105).
 
 Usage:
-    python3 scripts/derive_signals.py --selftest             # offline: EFE extraction (12+12) + checks
-    python3 scripts/derive_signals.py --list <md-path>       # offline: print the extracted red flags
-    python3 scripts/derive_signals.py --corpus               # offline: extract across ALL committed md
+    python3 scripts/derive_signals.py --selftest             # offline: gate checks (build-rec matrix
+                                                             #   + quote-grounding + relevance + shape)
+    python3 scripts/derive_signals.py --check-derived <record.json>  # offline: DISPOSE a derived record
+    python3 scripts/derive_signals.py --corpus               # offline: cheap rf_region triage across the corpus
     python3 scripts/derive_signals.py --corpus-status        # offline: emit data/fincen/corpus-status.json
-    python3 scripts/derive_signals.py --scaffold <id> <md>   # offline: md -> <id>.draft.json SKELETON
-    python3 scripts/derive_signals.py --draft <id> <md>      # LIVE (authoring): + LLM-drafted judgment
-    python3 scripts/derive_signals.py --scaffold-derived <id> <md>   # offline: -> derived/<id>.json skeleton
-    python3 scripts/derive_signals.py --check-derived <record.json>  # offline: dispose a derived record
 
-The --draft mode calls the Anthropic API (claude-opus-4-8) to PROPOSE the judgment
-fields (status per indicator, the single indicator/candidate target, the signal
-definition); it needs ANTHROPIC_API_KEY in the environment and `anthropic` installed
-in the gitignored authoring venv. The LLM proposes; build.py + schema + the two human
-gates dispose. The key NEVER enters the ship artifact — --draft is build-time only.
+TRIAGE (the rf_region-bounded counter — replaces the deleted extractor's counting role):
+  --corpus / --corpus-status are a cheap deterministic HINT, never the derivation authority. For
+  every committed advisory md they report whether a red-flag REGION exists (rf_region — false ONLY
+  for the 2 FATF jurisdiction advisories, which carry no enumerated red-flag list) and a coarse
+  flag_count from the blank-separated blocks inside that region (_rf_triage). An advisory goes
+  "live" in the explorer by the presence of a gate-passing data/fincen/derived/<id>.json — NOT by
+  this triage. The chip/count a not-yet-derived advisory shows in the explorer comes from here; a
+  derived advisory renders from its record's indicators (build.py ignores the manifest flag_count
+  for live advisories), so the counter need only be a rough hint.
 
-CORPUS DERIVATION (Phase 12 — backend for an expanded, singular corpus-backed demo):
-  --corpus runs extract_red_flags across the whole committed FinCEN corpus and reports each
-  advisory CLEAN / LOW-CONFIDENCE / NEEDS-ATTENTION — the deterministic spine validated on
-  ALL 14, flagging non-conformers (heterogeneous formats) rather than forcing a bogus count.
-  Phase 15: a mid-list footnote run at a page boundary is TRANSIENT (the list resumes after
-  it when another section follows) — see the _FOOTNOTE_STOP handling in extract_red_flags —
-  so a CLEAN advisory no longer silently drops a post-footnote flag. Glued-no-separator
-  advisories (markitdown dropped bullets AND blank lines) stay FLAGGED by --corpus, not split.
-
-  Phase 16 — the INVERTED boundary (subtraction test on the extraction spine): the LLM backend
-  EXTRACTS candidate red flags (a generative task it does well across the heterogeneous + glued
-  corpus, where structural parsing is brittle); the deterministic layer is a GATE that DISPOSES.
-  --corpus / --corpus-status are now a deterministic TRIAGE HINT, no longer the derivation
-  authority. extract_red_flags is no longer the traceability authority — it stays the EFE
-  --selftest regression anchor + the --scaffold-derived hint. Traceability moved to
-  QUOTE-GROUNDING in check_record (see normalize/rf_region): normalize(flag) ⊂ normalize(md).
-
-  --scaffold-derived emits a derived-record SKELETON (one indicator per extracted red flag,
-  src_line traceable, judgment empty) under data/fincen/derived/. The LLM backend fills the
-  judgment — per indicator a coverage status + data availability, a build recommendation, and
-  build logic for the BUILD_NOW gaps — and --check-derived DISPOSES via the deterministic
-  checks: build_rec consistency (must follow the cover×data matrix, build_rec_category) +
-  GROUNDEDNESS (Phase 16: each indicator's verbatim `flag` is a substring of the source md
-  under normalize()) + a section-cite RELEVANCE guard (src_line within the red-flag region)
-  + the BUILD_NOW build-logic shape.
-  The LLM backend may be the Anthropic API (--draft pattern) OR a live model session acting as
-  the backend (no key) — either way the LLM PROPOSES and the deterministic checks DISPOSE.
-  Derived records are an LLM-derived + checked corpus dataset, NOT ship typology configs.
-
-  --corpus-status emits data/fincen/corpus-status.json (committed): per-advisory extraction
-  quality + flag/section counts + title/date/source attribution (titles from index.json) + a
-  derivable flag. This is the deterministic data artifact the CORPUS-EXPLORER build reads
-  (scripts/build.py corpus merges it with data/fincen/derived/*.json) — build.py never imports
-  this authoring tool; it consumes the committed manifest. Regenerate after the corpus changes.
+  --corpus-status emits data/fincen/corpus-status.json (committed): per-advisory extraction hint +
+  flag/section counts + title/date/source attribution (titles from index.json) + a derivable flag.
+  This is the deterministic data artifact the CORPUS-EXPLORER build reads (scripts/build.py corpus
+  merges it with data/fincen/derived/*.json) — build.py never imports this tool; it consumes the
+  committed manifest. Regenerate after the corpus md set changes.
 """
 import json
-import os
 import re
 import sys
 from pathlib import Path
@@ -89,35 +62,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CORPUS_DIR = ROOT / "data" / "fincen"
 EFE_MD = CORPUS_DIR / "fin-2022-a002.md"
-TYPOLOGY_DIR = ROOT / "config" / "typologies"
-DERIVED_DIR = CORPUS_DIR / "derived"
 INDEX_JSON = CORPUS_DIR / "index.json"               # crawl manifest (titles/dates/urls)
 CORPUS_STATUS_JSON = CORPUS_DIR / "corpus-status.json"  # emitted manifest the corpus build reads
 
-# The committed EFE advisory enumerates exactly these red-flag counts (Phase 7: "24 red
-# flags intact"). Pinning them makes --selftest a deterministic validator at the boundary.
-_EFE_BEHAVIORAL = 12
-_EFE_FINANCIAL = 12
-
-# Generalized red-flag SECTION finder (Phase 12 — corpus-wide). FinCEN advisories
-# introduce their enumerated red-flag lists heterogeneously across the committed corpus:
-#   INTRO  : "<category> red flags [indicators] ... may include:" / "... the following
-#            red flag indicators ..." (EFE fin-2022-a002, ransomware fin-2021-a004, …)
-#   HEADER : a standalone "<Category> Red Flags" line directly followed by the list
+# Red-flag REGION anchors — the heading/intro that OPENS an advisory's enumerated red-flag
+# list. These now serve rf_region() (the relevance region the gate cites) + the _rf_triage()
+# block counter — NOT a structural parse (the extractor that consumed them was deleted in
+# Phase 17). FinCEN advisories open that list heterogeneously across the committed corpus:
+#   INTRO  : "<category> red flags [indicators] ... may include / the following ... red flags"
+#            (EFE fin-2022-a002, ransomware fin-2021-a004, kleptocracy fin-2022-a001, …)
+#   HEADER : a standalone "<Category> Red Flags" line directly above the list
 #            (fin-2024-a002 "Transactional Red Flags", …)
-# We anchor on BOTH, take the blank-line-separated blocks that follow each section up to
-# the next anchor / footnote run / major section, and FLAG advisories where no section is
-# confidently found. markitdown drops bullet glyphs + interleaves page artifacts, so we
-# group blank-separated blocks rather than trust list markers.
-#
-# INTRO: a sentence that introduces the list, with an explicit list lead-in (so a topic
-# sentence like EFE's "FinCEN has identified behavioral and financial red flags to help …"
-# is NOT mistaken for one). Two orderings recur across the corpus:
-#   forward : "<cat> red flags [indicators] ... may include / as follows / listed below"
-#             (EFE fin-2022-a002 "may include", Iran fin-2024-a001 "listed below")
-#   reverse : "... the following ... red flag [indicators] ..." (ransomware fin-2021-a004,
-#             kleptocracy fin-2022-a001). Requiring "the following"/"listed below"/"as
-#             follows"/"may include" keeps it to genuine list lead-ins.
+# Tier-1 = clean headers + explicit list-intros; the Tier-2 LOOSE header (trailing-clause
+# title) + WEAK "identified red flags" intro are the fallback for a purely-titled advisory.
 _RF_INTRO = re.compile(
     r"\bred\s+flags?(?:\s+indicators?)?\b[^.\n]{0,80}?"
     r"\b(?:may\s+include|as\s+follows|listed\s+below|described\s+below)\b"
@@ -138,45 +95,17 @@ _RF_HEADER_LOOSE = re.compile(
     r"^(?P<label>(?:[A-Z][\w’'/-]*\s+){0,3})red\s+flags?(?:\s+indicators?)?\b"
     r"(?:\s+(?:related|potentially|indicative|of|to|that|associated|targeting)\b.*)?$", re.I)
 _RF_INTRO_WEAK = re.compile(r"\bidentified\b[^.\n]{0,40}?\bred\s+flags?(?:\s+indicators?)?\b", re.I)
-# a list ends at a TRUE terminal section — a wrap-up header / SAR-filing block / numbered
-# major section. Always a hard stop: the enumerated red-flag list is over.
-_SECTION_STOP = re.compile(
-    r"^(?:\d+\s+[A-Z]|reminder of relevant|for further information|"
-    r"sar (?:filing|reporting)|frequently asked|section\s+[ivx]+\b)", re.I)
-# a footnote run (a "47. Id." line or a bare "81." marker) is handled CONDITIONALLY, not as a
-# blanket stop. Phase 15 footnote-resume: when another red-flag section follows (next_boundary
-# set), a mid-list footnote run at a page boundary is TRANSIENT — the list resumes after it
-# (fin-2025-a003 L499 escrow flag), so we SKIP the footnote line and keep collecting up to the
-# next anchor, letting _CITATION drop the footnote blocks. When there is NO next anchor (the
-# last section), the footnotes are TERMINAL — the list genuinely ends, so we stop (else the
-# span would swallow trailing footnotes + the next page's prose: fin-2020-a008 11→28 regression).
-_FOOTNOTE_STOP = re.compile(r"^\d+\.(?:\s|$)")
-# A block that is itself a footnote/citation, not a red flag (Phase-12 post-review filter):
-# a footnote-numbered line, a legal "supra note"/"Id." marker, a federal case-docket number,
-# or a block ending in a "(Mon[ DD], YYYY)" citation date. Real red flags describe behaviour;
-# they don't end in a cite or carry a docket number. Phase-15 extension: the footnote-resume
-# span (above) lets a page-boundary footnote's WRAPPED TAIL (no leading "N." marker, split off
-# by an internal blank line — fin-2025-a003 L445 "...United States v. Martinez-Reyes, 2:23-cr-258
-# (C.D. Cal. ...)", fin-2024-a002 L578 "...Liability Companies" (Nov. 2006).") reach a span, so
-# the date end-pattern now also matches a no-day "(Mon YYYY)" cite and a case-docket signature.
+# A block that is itself a footnote/citation, not a red flag (Phase-12 filter, retained for the
+# _rf_triage block counter): a footnote-numbered line, a legal "supra note"/"Id." marker, a
+# federal case-docket number, or a block ending in a "(Mon[ DD], YYYY)" citation date — real red
+# flags describe behaviour, they don't end in a cite or carry a docket number.
 _CITATION = re.compile(
     r"^\d+\.\s"
     r"|\b(?:supra\s+note|\bid\.\b|see\s+(?:also\s+)?(?:fincen|fbi|doj|ofac|fatf|cisa|dhs|u\.s\.))"
     r"|\b\d{1,2}:\d{2}-[a-z]{2,3}-\d{2,}\b"
     r"|\([A-Z][a-z]{2,8}\.?\s+(?:\d{1,2},\s+)?\d{4}\)\.?\s*$", re.I)
-# Standard FinCEN boilerplate that wraps the list intro (a multi-line sentence often bleeds
-# into the first block). Never a red flag — drop it so the list starts at the real item 1.
-_INTRO_NOISE = re.compile(
-    r"no single\b.*\b(?:determinative|red flag)"
-    r"|detecting,?\s+preventing,?\s+and reporting"
-    r"|risk-based approach to compliance"
-    r"|relevant facts and circumstances of each transaction", re.I)
-_LABEL_WORD = re.compile(r"(\w+)\s+red\s+flags?", re.I)
-_LABEL_STOPWORDS = {"the", "of", "and", "a", "an", "following", "identified",
-                    "fincen", "has", "these", "such", "associated", "additional"}
 _PAGE_NUM = re.compile(r"^\d+$")
 _RUNNING_HEADER = re.compile(r"^\s*FINCEN ADVISORY\s*")  # running header glued to content
-_BULLET = re.compile(r"^[\s•·▪◦*-]+")  # leading bullet glyphs / dashes
 
 
 def _clean(line: str) -> str:
@@ -206,106 +135,8 @@ def _blocks(section_lines):
         yield start, " ".join(buf)
 
 
-def _section_label(text: str) -> str:
-    """Normalized lowercase section label from a header/intro ('Behavioral' -> 'behavioral')."""
-    m = _LABEL_WORD.search(text)
-    word = m.group(1).lower() if m else ""
-    return word if word and word not in _LABEL_STOPWORDS else "redflag"
 
 
-def extract_red_flags(md: str) -> list[dict]:
-    """PURE: FinCEN advisory markdown -> the enumerated red-flag list (corpus-wide).
-
-    Returns [{section, n, text, line}] where `section` is the normalized red-flag section
-    label ('behavioral'/'financial' for EFE, 'transactional' for fin-2024-a002, …), `n` is
-    the 1-based index within its section, and `line` is the source line. Anchors on intro
-    sentences AND short headers (see _RF_INTRO/_RF_HEADER); returns [] when no red-flag section
-    is confidently found (the --corpus report flags those). No I/O.
-
-    Phase 16 — DEMOTED: this is no longer the traceability authority (that moved to
-    quote-grounding in check_record, which is robust to the glued/heterogeneous advisories this
-    structural parser can't enumerate). It is retained ONLY as the EFE --selftest regression
-    anchor + the --scaffold-derived / --corpus triage hint. Do NOT grow it with more per-format
-    special-casing — the LLM backend extracts; the deterministic GATE disposes.
-    """
-    # split on "\n" (NOT splitlines) so line numbers match \n-based editors/tools; the
-    # markdown carries form-feed page breaks that splitlines() would split on (drift vs L507).
-    lines = list(enumerate(md.split("\n"), 1))
-    cleaned = [(ln, _clean(raw)) for ln, raw in lines]
-
-    # 1) collect section anchors — short headers + intro sentences. Tier 1 = the reliable
-    #    signals (clean headers + explicit list-intros). Tier 2 (loose trailing-clause headers
-    #    + weak "identified red flags" intros) runs ONLY when Tier 1 finds nothing — so EFE and
-    #    the clean advisories never touch it, while a purely-titled advisory still anchors.
-    def collect(header_re, intro_re):
-        out = []
-        for ln, text in cleaned:
-            if not text:
-                continue
-            if header_re.match(text):
-                out.append({"line": ln, "label": _section_label(text), "kind": "header"})
-            elif intro_re.search(text):
-                out.append({"line": ln, "label": _section_label(text), "kind": "intro"})
-        return out
-
-    anchors = collect(_RF_HEADER, _RF_INTRO) or collect(_RF_HEADER_LOOSE, _RF_INTRO_WEAK)
-    if not anchors:
-        return []
-
-    # 2) build sections, each with `boundary` (where the PREVIOUS section ends = the first
-    #    anchor line) and `start` (where THIS list begins). A header immediately followed
-    #    (≤8 lines) by its intro coalesces: boundary stays the header, the list starts after
-    #    the intro's "may include:" lead-in (so the header line isn't mistaken for a flag).
-    sections = []
-    for a in anchors:
-        prev = sections[-1] if sections else None
-        # coalesce only a same-label header+intro pair (label-match keeps the wider window
-        # safe — EFE's "Behavioral Red Flags" header sits ~10 lines above its "may include:"
-        # intro, with a descriptive paragraph between that must NOT be read as a flag).
-        if (prev and a["kind"] == "intro" and prev["kind"] == "header"
-                and 0 < a["line"] - prev["boundary"] <= 15
-                and prev["label"] in (a["label"], "redflag")):
-            prev["start"], prev["kind"] = a["line"], "intro"
-            if prev["label"] == "redflag":
-                prev["label"] = a["label"]
-        else:
-            sections.append({"boundary": a["line"], "start": a["line"],
-                             "label": a["label"], "kind": a["kind"]})
-
-    # 3) per-section span = (after its list-start) up to the next section's boundary / a stop
-    #    line; group blank-separated blocks, dropping page artifacts + stray short fragments.
-    boundaries = [s["boundary"] for s in sections]
-    flags: list[dict] = []
-    for idx, sec in enumerate(sections):
-        next_boundary = boundaries[idx + 1] if idx + 1 < len(boundaries) else None
-        span = []
-        for ln, raw in lines:
-            if ln <= sec["start"]:
-                continue
-            if next_boundary and ln >= next_boundary:
-                break
-            c = _clean(raw)
-            if _SECTION_STOP.match(c):           # true terminal — the red-flag list is over
-                break
-            if _FOOTNOTE_STOP.match(c):
-                if next_boundary:                # transient page-break footnote run: skip it and
-                    continue                     # resume the list up to the next anchor (L499)
-                break                            # last section: the footnotes are terminal
-            span.append((ln, raw))
-        n = 0
-        for start, text in _blocks(span):
-            text = _BULLET.sub("", text).strip()
-            if len(text) < 20:               # drop stray fragments / glued page artifacts
-                continue
-            if _INTRO_NOISE.search(text):    # drop the standard FinCEN intro-caveat boilerplate
-                continue
-            if _RF_HEADER_LOOSE.match(text):  # a sub-section header captured as a block, not a flag
-                continue
-            if _CITATION.search(text):        # a footnote/citation captured as a block, not a flag
-                continue
-            n += 1
-            flags.append({"section": sec["label"], "n": n, "text": text, "line": start})
-    return flags
 
 
 def _load_md(path: Path) -> str:
@@ -314,363 +145,14 @@ def _load_md(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-# ---------------------------------------------------------------------------
-# Deterministic scaffolding: red flags -> a schema-shaped config SKELETON.
-# The skeleton fills everything MECHANICAL (the act chrome, the indicator list
-# from the financial red flags, the verbatim-source wiring) and leaves the three
-# JUDGMENT fields the schema flags as decisions — the single indicator/candidate
-# target:true and the signal definition — for the human or the --draft LLM step.
-# It is build-INVALID by construction (zero targets) so build.py + schema stay the
-# deterministic gate (see config/schema.md + scripts/build.py validate_config).
-# ---------------------------------------------------------------------------
-_STEPS = ["The blind spot", "Read advisory", "Assess coverage", "Human review",
-          "Agent builds", "Combination lift", "Loop closes"]
-_NEXT_LABELS = ["Begin ›", "Read the advisory ›", "Assess coverage ›", "Review candidates ›",
-                "Build selected ›", "See the lift ›", "Close the loop ›", "Run again ↺"]
-_HINTS = ["", "Agent ingests the advisory and proposes signals",
-          "Candidates checked against our library + data", "You decide what we build — human in the loop",
-          "You confirm the proposal — second human gate", "Why atoms beat monolithic scenarios",
-          "The blind spot closes — and stays closed", ""]
-
-
-def _todo(what: str) -> str:
-    return f"TODO: {what}"
-
-
-def _short_label(text: str, cap: int = 90) -> str:
-    """A concise indicator/candidate label from a red-flag sentence."""
-    label = text.rstrip(".").strip()
-    return label if len(label) <= cap else label[: cap - 1].rstrip() + "…"
-
-
-def scaffold_config(typ_id: str, flags: list, meta: dict) -> dict:
-    """PURE: extracted red flags + meta -> a schema-shaped config SKELETON.
-
-    One indicator + one candidate per FINANCIAL red flag (the data-signal surface; the
-    behavioral flags are non-data per the proven elder derivation). status/cover/data get
-    neutral defaults; NO target:true and NO signal definition are set — those are the
-    judgment the deterministic boundary (build.py) requires before a build can succeed.
-    """
-    adv_id = meta.get("advisory_id") or "advisory"
-    src = meta.get("source") or _todo(f"verbatim attribution for {adv_id}")
-    financial = [f for f in flags if f["section"] == "financial"]
-
-    indicators, candidates = [], []
-    for i, f in enumerate(financial, 1):
-        label = _short_label(f["text"])
-        indicators.append({
-            "id": f"IND-{i:02d}",
-            "label": label,
-            "status": "gap",  # JUDGMENT: covered | partial | gap — and mark ONE target:true
-            "sub": f"src: {adv_id} financial red flag #{f['n']} · md L{f['line']}",
-        })
-        candidates.append({
-            "id": f"C{i}",
-            "name": label,
-            "type": "entity",     # JUDGMENT: entity | relationship | motif
-            "cover": "gap",       # JUDGMENT
-            "data": "available",  # JUDGMENT — and mark ONE target:true + add its definition
-        })
-
-    return {
-        "id": typ_id,
-        "label": meta.get("label") or _todo(f"human label for {typ_id}"),
-        "steps": list(_STEPS),
-        "next_labels": list(_NEXT_LABELS),
-        "hints": list(_HINTS),
-        "anchor": {
-            "hook_eyebrow": _todo("Act 0 eyebrow"),
-            "hook_title": _todo("Act 0 headline — what aren't we watching?"),
-            "hook_lead": _todo(f"Act 0 lead naming the typology ({typ_id})"),
-            "close_title": _todo("Act 6 headline — the blind spot closes"),
-            "close_delta": _todo("Act 6 gauge delta line"),
-            "coverage_noun": meta.get("coverage_noun") or _todo("short gauge noun (e.g. 'EFE red flags')"),
-            "lift_rationale": _todo("Act 5 atoms-over-monoliths rationale naming the composed signals"),
-            "source": src,
-        },
-        "coverage": {"indicators": indicators},
-        "advisory_stream": [
-            {"t": _todo("paraphrase the advisory lead for the Act 1 stream "
-                        "(advisory_full renders the verbatim panel below)")}
-        ],
-        "advisory_full": {
-            "source": src,
-            "text_file": meta.get("text_file", ""),
-            "highlights": [],  # JUDGMENT: the exact verbatim phrases that became signals
-        },
-        "candidates": candidates,
-        "lift": [
-            {"name": _todo("target signal alone"), "combo": _todo("S-? in isolation"),
-             "value": 0, "strength": "weak"},
-            {"name": _todo("+ existing signal A"), "combo": _todo("S-? × S-A"),
-             "value": 0, "strength": "mid"},
-            {"name": _todo("+ existing signal B"), "combo": _todo("S-? × S-A × S-B"),
-             "value": 0, "strength": "strong"},
-        ],
-        "stats": {"fire_count": 0, "standalone_precision": 0, "best_combo_precision": 0},
-    }
-
-
-def _advisory_meta(md_path: Path) -> dict:
-    """Derive the source attribution + text_file path from the advisory markdown path."""
-    adv_id = md_path.stem.upper()  # fin-2022-a002 -> FIN-2022-A002
-    resolved = md_path.resolve()
-    rel = resolved.relative_to(ROOT) if resolved.is_relative_to(ROOT) else md_path
-    return {
-        "advisory_id": adv_id,
-        "source": f"FinCEN {adv_id} · public domain, 17 U.S.C. 105 — "
-                  + _todo("add advisory title + date"),
-        "text_file": str(rel),
-    }
-
-
-def write_scaffold(typ_id: str, md_arg: str) -> int:
-    md_path = Path(md_arg)
-    flags = extract_red_flags(_load_md(md_path))
-    if not flags:
-        sys.exit("no red flags extracted — cannot scaffold (check the advisory markdown / anchors)")
-    cfg = scaffold_config(typ_id, flags, _advisory_meta(md_path))
-    out = TYPOLOGY_DIR / f"{typ_id}.draft.json"
-    out.write_text(json.dumps(cfg, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    n = len(cfg["coverage"]["indicators"])
-    print(f"wrote {out} — SKELETON ({n} indicators from financial red flags)")
-    print("SCRATCH ARTIFACT (gitignored): review, fill the JUDGMENT fields, then rename to "
-          f"{typ_id}.json. Remove before `build.py all` (it globs *.json).")
-    print("JUDGMENT to fill (build.py rejects the skeleton until done): ONE indicator target:true · "
-          "ONE candidate target:true (cover:gap + data:available) + its signal definition · "
-          "anchor copy · lift/stats.")
-    return 0
-
 
 # ---------------------------------------------------------------------------
-# Neural layer (BUILD-TIME ONLY): draft the JUDGMENT fields via the Anthropic API.
-# The LLM PROPOSES; build.py + schema + the two human gates DISPOSE — committed
-# configs stay deterministic + human-reviewed (no neural judge at the build
-# boundary). `anthropic` is LAZY-imported here only; the deterministic layer above
-# never needs it. Model id + structured-output usage follow the claude-api
-# reference (consulted, not guessed): claude-opus-4-8 + output_config.format with
-# a json_schema constrains the response to schema-valid JSON.
-# ---------------------------------------------------------------------------
-_DRAFT_MODEL = "claude-opus-4-8"
-
-_STATUS_ENUM = ["covered", "partial", "gap"]
-_TYPE_ENUM = ["entity", "relationship", "motif"]
-_DATA_ENUM = ["available", "partial", "insufficient"]
-
-# JSON schema for output_config.format — keep to supported keywords (enums + nested
-# objects with additionalProperties:false; no min/maxLength or numeric constraints).
-_DRAFT_SCHEMA = {
-    "type": "object",
-    "additionalProperties": False,
-    "properties": {
-        "indicator_statuses": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "additionalProperties": False,
-                "properties": {
-                    "id": {"type": "string"},
-                    "status": {"type": "string", "enum": _STATUS_ENUM},
-                },
-                "required": ["id", "status"],
-            },
-        },
-        "indicator_target_id": {"type": "string"},
-        "candidates": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "additionalProperties": False,
-                "properties": {
-                    "id": {"type": "string"},
-                    "type": {"type": "string", "enum": _TYPE_ENUM},
-                    "cover": {"type": "string", "enum": _STATUS_ENUM},
-                    "data": {"type": "string", "enum": _DATA_ENUM},
-                },
-                "required": ["id", "type", "cover", "data"],
-            },
-        },
-        "candidate_target_id": {"type": "string"},
-        "definition": {
-            "type": "object",
-            "additionalProperties": False,
-            "properties": {
-                "signal_name": {"type": "string"},
-                "class": {"type": "string"},
-                "features": {"type": "array", "items": {"type": "string"}},
-                "logic": {"type": "string"},
-                "window": {"type": "string"},
-                "source": {"type": "string"},
-                "route": {"type": "string"},
-            },
-            "required": ["signal_name", "class", "features", "logic", "window", "source", "route"],
-        },
-    },
-    "required": ["indicator_statuses", "indicator_target_id", "candidates",
-                 "candidate_target_id", "definition"],
-}
-
-_DEFINITION_CONTRACT = (
-    "definition = { signal_name, class, features: string[], logic, window, source, route }\n"
-    "- signal_name: proposed signal id, e.g. S-DORMANT-DRAIN-ELDER\n"
-    "- class: e.g. 'entity · account-level · stateful'\n"
-    "- features: concrete, computable transaction/account features the rule reads\n"
-    "- logic: the detection rule (write a literal '<' as &lt;)\n"
-    "- window: rolling window, e.g. 'rolling 14 days'\n"
-    "- source: upstream data source, e.g. 'Core deposit + transaction features (Gold)'\n"
-    "- route: alert routing, e.g. 'Tier-1 alert → review gate'"
-)
-
-
-def _few_shot() -> str:
-    """Two hand-authored configs as grounding examples for the derivation pattern."""
-    blocks = []
-    for stem in ("fentanyl", "elder-financial-exploitation"):
-        p = TYPOLOGY_DIR / f"{stem}.json"
-        if not p.exists():
-            continue
-        c = json.loads(p.read_text(encoding="utf-8"))
-        tgt = next((x for x in c["candidates"] if x.get("target")), None)
-        blocks.append(json.dumps({
-            "id": c["id"],
-            "indicators": c["coverage"]["indicators"],
-            "candidates": c["candidates"],
-            "target_definition": tgt.get("definition") if tgt else None,
-        }, ensure_ascii=False, indent=2))
-    return "\n\n".join(blocks)
-
-
-def draft_judgment(typ_id: str, flags: list, scaffold: dict) -> dict:
-    """NEURAL: ask Claude to PROPOSE the judgment fields, grounded on the red flags.
-
-    Build-time only. Returns the validated structured object (statuses, the two
-    targets, and the signal definition). Lazy-imports anthropic; reads the key from
-    the environment; the result is applied to a draft and disposed of by build.py.
-    """
-    try:
-        import anthropic  # lazy: only the --draft path needs the SDK
-    except ImportError:
-        sys.exit("anthropic SDK not installed — run `uv pip install -r scripts/requirements-authoring.txt` "
-                 "in the gitignored authoring venv. The deterministic --selftest/--scaffold paths need no SDK.")
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        sys.exit("ANTHROPIC_API_KEY not set — --draft calls the Anthropic API at authoring time. "
-                 "Export the key first (it NEVER enters the ship artifact; --draft is build-time only).")
-
-    financial = [f for f in flags if f["section"] == "financial"]
-    indicators = scaffold["coverage"]["indicators"]
-    candidates = scaffold["candidates"]
-    flag_lines = "\n".join(
-        f"{ind['id']} / {cand['id']}: {f['text']}  (md L{f['line']})"
-        for ind, cand, f in zip(indicators, candidates, financial)
-    )
-    system = (
-        "You are an AML detection engineer in the Signal Watch authoring pipeline. From a FinCEN "
-        "advisory's enumerated FINANCIAL red flags you derive ONE candidate detection signal. Ground "
-        "every choice in the red flags provided — do not invent indicators. Your output is a DRAFT a "
-        "human reviews and a deterministic validator (build.py) checks; it is never shipped unreviewed. "
-        "Pick the single highest-value TARGET: a genuine coverage GAP that is also DATA-AVAILABLE "
-        "(buildable). The signal definition's features must be concrete, computable transaction/account "
-        "features."
-    )
-    user = (
-        f"TYPOLOGY: {typ_id}\n\n"
-        f"SIGNAL DEFINITION CONTRACT:\n{_DEFINITION_CONTRACT}\n\n"
-        f"FINANCIAL RED FLAGS (indicator id / candidate id : text):\n{flag_lines}\n\n"
-        f"TWO HAND-AUTHORED EXAMPLES (the judgment + signal style to emulate):\n{_few_shot()}\n\n"
-        "TASK: (1) assign each indicator a status (covered|partial|gap). (2) choose exactly ONE "
-        "indicator id as the target — a real gap worth building. (3) for every candidate set type "
-        "(entity|relationship|motif), cover (covered|partial|gap), data (available|partial|insufficient). "
-        "(4) choose exactly ONE candidate id as the target; it MUST be cover=gap AND data=available. "
-        "(5) draft that target candidate's signal definition. Pair the target indicator with the target "
-        "candidate (same red flag). Return only the structured object."
-    )
-    client = anthropic.Anthropic()  # resolves ANTHROPIC_API_KEY from the environment
-    resp = client.messages.create(
-        model=_DRAFT_MODEL,
-        max_tokens=8192,  # headroom: adaptive thinking shares the output budget with the JSON
-        # This is reasoning-shaped judgment (assign statuses, pick the single highest-value
-        # gap+available target, draft a computable signal). Per the claude-api reference, the
-        # request surface defaults to thinking OFF; turn on adaptive thinking + high effort for
-        # intelligence-sensitive work. effort and format coexist in one output_config.
-        thinking={"type": "adaptive"},
-        output_config={"effort": "high",
-                       "format": {"type": "json_schema", "schema": _DRAFT_SCHEMA}},
-        system=system,
-        messages=[{"role": "user", "content": user}],
-    )
-    # Fail loud with the real cause rather than a raw traceback: a refusal yields no schema-valid
-    # text; a max_tokens stop truncates the JSON mid-object so json.loads would raise.
-    if resp.stop_reason == "refusal":
-        sys.exit("draft: model refused the request — no schema-valid output to apply")
-    if resp.stop_reason == "max_tokens":
-        sys.exit("draft: response hit max_tokens (truncated JSON) — raise max_tokens and retry")
-    text = next((b.text for b in resp.content if b.type == "text"), None)
-    if not text:
-        sys.exit(f"draft: model returned no text block (stop_reason={resp.stop_reason})")
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError as e:
-        sys.exit(f"draft: model output was not valid JSON ({e}) — stop_reason={resp.stop_reason}")
-
-
-def _apply_judgment(scaffold: dict, j: dict) -> dict:
-    """Apply the LLM-proposed judgment onto the deterministic skeleton.
-
-    Deterministic guard on top of the neural output: the chosen candidate target is
-    FORCED to cover:gap + data:available because the schema/build.py require a
-    buildable target — the validator disposes of what the model proposes.
-    """
-    status_by_id = {s["id"]: s["status"] for s in j.get("indicator_statuses", [])}
-    for ind in scaffold["coverage"]["indicators"]:
-        ind.pop("target", None)
-        if ind["id"] in status_by_id:
-            ind["status"] = status_by_id[ind["id"]]
-    for ind in scaffold["coverage"]["indicators"]:
-        if ind["id"] == j.get("indicator_target_id"):
-            ind["status"] = "gap"          # a target is, by definition, the gap being built
-            ind["target"] = True
-
-    cand_by_id = {c["id"]: c for c in j.get("candidates", [])}
-    for cand in scaffold["candidates"]:
-        cand.pop("target", None)
-        cand.pop("definition", None)
-        upd = cand_by_id.get(cand["id"])
-        if upd:
-            cand["type"], cand["cover"], cand["data"] = upd["type"], upd["cover"], upd["data"]
-    for cand in scaffold["candidates"]:
-        if cand["id"] == j.get("candidate_target_id"):
-            cand["cover"], cand["data"] = "gap", "available"  # build.py requires a buildable target
-            cand["target"] = True
-            cand["definition"] = j["definition"]
-    return scaffold
-
-
-def write_draft(typ_id: str, md_arg: str) -> int:
-    md_path = Path(md_arg)
-    flags = extract_red_flags(_load_md(md_path))
-    if not flags:
-        sys.exit("no red flags extracted — cannot draft (check the advisory markdown / anchors)")
-    scaffold = scaffold_config(typ_id, flags, _advisory_meta(md_path))
-    print(f"drafting judgment via {_DRAFT_MODEL} (authoring-time Anthropic API call)…")
-    cfg = _apply_judgment(scaffold, draft_judgment(typ_id, flags, scaffold))
-    out = TYPOLOGY_DIR / f"{typ_id}.draft.json"
-    out.write_text(json.dumps(cfg, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    tgt = next((c for c in cfg["candidates"] if c.get("target")), {})
-    defn = tgt.get("definition", {})
-    print(f"wrote {out} — LLM-drafted target {tgt.get('id')} ({defn.get('signal_name')})")
-    print("SCRATCH ARTIFACT (gitignored): the LLM PROPOSED; build.py + schema + your two human gates "
-          "DISPOSE. Review, fill the anchor copy + lift/stats, then rename to "
-          f"{typ_id}.json and validate: python3 scripts/build.py {typ_id}")
-    return 0
-
-
-# ---------------------------------------------------------------------------
-# Deterministic checks on a DERIVED record (Phase 12). The LLM backend PROPOSES,
-# per indicator, a coverage status + data availability, a build recommendation, and
-# (for buildable gaps) build logic; these checks DISPOSE — a record only stands if its
-# recommendations follow the cover×data matrix and every indicator traces to a red-flag
-# line the extractor found. LLM proposes, the deterministic spine disposes — no neural
-# judge at the check boundary (the Phase-11 principle, extended to the corpus).
+# Deterministic checks on a DERIVED record. The LLM backend EXTRACTS + PROPOSES, per indicator,
+# the verbatim red-flag `flag`, a coverage status + data availability, a build recommendation,
+# and (for buildable gaps) build logic; these checks DISPOSE — a record only stands if its
+# recommendations follow the cover×data matrix and every indicator QUOTE-GROUNDS to the source
+# md (normalize(flag) ⊂ normalize(md)) inside the red-flag region. LLM proposes, the
+# deterministic gate disposes — no neural judge at the check boundary.
 # ---------------------------------------------------------------------------
 _STATUS_VALUES = ("covered", "partial", "gap")
 _DATA_VALUES = ("available", "partial", "insufficient")
@@ -732,8 +214,8 @@ def normalize(text: str) -> str:
 
 # The red-flag region ends at the first document-level terminal AFTER the first red-flag anchor —
 # the standard FinCEN closing sections, which always follow every red-flag list. Deliberately
-# NARROWER than _SECTION_STOP (no generic numbered-section match) so a numbered SUBsection inside
-# the region can't truncate it early.
+# narrow (no generic numbered-section match) so a numbered SUBsection inside the region can't
+# truncate it early.
 _RF_REGION_END = re.compile(
     r"^(?:reminder of\b|for further information|sar (?:filing|reporting)"
     r"|frequently asked|the information contained in this advisory)", re.I)
@@ -850,15 +332,21 @@ def _checks_selftest() -> list:
     # record check: a valid record passes; tampered ones fail on every axis. Phase 16: records
     # now carry the verbatim `flag` and the gate GROUNDS it (normalize(flag) in normalize(md)).
     md = _load_md(EFE_MD)
-    flags = extract_red_flags(md)
+    # Two VERBATIM EFE financial red flags (grounded inside rf_region(EFE)=(419,539)) as the gate
+    # fixture — replaces the deleted extract_red_flags, regression-pinning the GATE itself rather
+    # than a structural parse. These are the elder target's source flags (md L507/L509).
+    f0 = {"flag": "Dormant accounts with large balances begin to show constant withdrawals.",
+          "line": 507}
+    f1 = {"flag": "An older customer purchases large numbers of gift cards or prepaid access cards.",
+          "line": 509}
     good_logic = {k: (["dormancy_days_prior", "outbound_value_ratio"] if k == "features" else "x")
                   for k in _DEFN_KEYS}
     good = {"indicators": [
-        {"id": "IND-01", "section": flags[0]["section"], "flag": flags[0]["text"],
-         "src_line": flags[0]["line"], "status": "gap", "data": "available",
+        {"id": "IND-01", "section": "financial", "flag": f0["flag"],
+         "src_line": f0["line"], "status": "gap", "data": "available",
          "build_rec": "BUILD_NOW", "build_logic": good_logic},
-        {"id": "IND-02", "section": flags[1]["section"], "flag": flags[1]["text"],
-         "src_line": flags[1]["line"], "status": "covered", "data": "available",
+        {"id": "IND-02", "section": "financial", "flag": f1["flag"],
+         "src_line": f1["line"], "status": "covered", "data": "available",
          "build_rec": "COVERED"},
     ]}
     if check_record(good, md):
@@ -876,7 +364,7 @@ def _checks_selftest() -> list:
         fails.append("paraphrased (non-verbatim) flag not caught by grounding")
     # a DEGENERATE too-short prefix grounds (it IS a verbatim substring) but the length floor must reject it
     tiny = json.loads(json.dumps(good))
-    tiny["indicators"][0]["flag"] = flags[0]["text"][:12]
+    tiny["indicators"][0]["flag"] = f0["flag"][:12]
     if not check_record(tiny, md):
         fails.append("degenerate too-short flag not caught by the length floor")
     # build_logic SHAPE hole must be closed: features-as-int + empty logic must both be caught
@@ -905,58 +393,6 @@ def _checks_selftest() -> list:
             fails.append("normalize: escrow stress flag (header-glued + hyphen-wrap) not grounded")
     return fails
 
-
-# ---------------------------------------------------------------------------
-# Derived-record authoring (Phase 12). A deterministic SKELETON (one indicator per
-# extracted red flag, src_line traceable) is written to data/fincen/derived/<id>.json; the
-# LLM backend (THIS session — no API key, the Phase-11 T4 substitution) fills the judgment —
-# status, data, build_rec, rationale, and build_logic for the BUILD_NOW gaps — and
-# `--check-derived` DISPOSES via check_record. These records are an LLM-derived + checked
-# corpus dataset, NOT ship typology configs.
-# ---------------------------------------------------------------------------
-def _derived_skeleton(advisory_id: str, md_path: Path) -> dict:
-    """PURE-ish (reads md): extracted red flags -> a derived-record SKELETON (judgment empty)."""
-    md = _load_md(md_path)
-    flags = extract_red_flags(md)
-    if not flags:
-        sys.exit(f"no red-flag section found in {md_path.name} — NEEDS-ATTENTION (see --corpus)")
-    resolved = md_path.resolve()
-    rel = resolved.relative_to(ROOT) if resolved.is_relative_to(ROOT) else md_path
-    indicators = [{
-        "id": f"IND-{i:02d}",
-        "section": f["section"],
-        "flag": f["text"],
-        "src_line": f["line"],
-        "status": None,        # FILL (LLM): covered | partial | gap
-        "data": None,          # FILL (LLM): available | partial | insufficient
-        "build_rec": None,     # FILL (LLM): MUST equal build_rec_category(status, data)
-        "rationale": None,     # FILL (LLM): one line on the recommendation
-        # build_logic (FILL on BUILD_NOW only): {signal_name, class, features[], logic, window, source, route}
-    } for i, f in enumerate(flags, 1)]
-    return {
-        "id": advisory_id,
-        "advisory": md_path.stem.upper(),
-        "source_md": str(rel),
-        "extraction_quality": extraction_quality(flags),
-        "provenance": ("LLM-backend-derived (this session, no API key) + deterministic-checked — "
-                       "NOT a ship typology config. build_rec follows the cover×data matrix "
-                       "(build_rec_category); every indicator traces to an extracted red-flag md line."),
-        "indicators": indicators,
-    }
-
-
-def write_derived_scaffold(advisory_id: str, md_arg: str) -> int:
-    md_path = Path(md_arg)
-    rec = _derived_skeleton(advisory_id, md_path)
-    DERIVED_DIR.mkdir(parents=True, exist_ok=True)
-    out = DERIVED_DIR / f"{advisory_id}.json"
-    out.write_text(json.dumps(rec, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"wrote {out.relative_to(ROOT)} — SKELETON ({len(rec['indicators'])} indicators, "
-          f"extraction_quality={rec['extraction_quality']})")
-    print("FILL (LLM backend): per indicator set status/data/build_rec/rationale — build_rec MUST "
-          "equal build_rec_category(status,data); add build_logic on BUILD_NOW. Then validate: "
-          f"python3 scripts/derive_signals.py --check-derived {out.relative_to(ROOT)}")
-    return 0
 
 
 def load_and_check_derived(path_arg: str) -> int:
@@ -988,55 +424,39 @@ def load_and_check_derived(path_arg: str) -> int:
 
 
 def selftest() -> int:
-    flags = extract_red_flags(_load_md(EFE_MD))
-    behavioral = [f for f in flags if f["section"] == "behavioral"]
-    financial = [f for f in flags if f["section"] == "financial"]
-    print(f"extracted {len(flags)} red flags "
-          f"(behavioral={len(behavioral)}, financial={len(financial)})")
-    ok = (
-        len(behavioral) == _EFE_BEHAVIORAL
-        and len(financial) == _EFE_FINANCIAL
-        and all(f["text"] and f["line"] for f in flags)
-        and bool(financial) and "Dormant accounts" in financial[0]["text"]
-    )
-    if not ok:
-        print(f"SELFTEST FAIL — expected behavioral={_EFE_BEHAVIORAL}, "
-              f"financial={_EFE_FINANCIAL}; first financial must start at the "
-              f"'Dormant accounts' red flag (the elder target's source)", file=sys.stderr)
-        return 1
+    """Offline GATE regression. The deleted extractor is gone; what's pinned now is check_record —
+    it must accept a valid EFE record and reject every known tampering (matrix contradiction,
+    ungrounded / paraphrased / degenerate-too-short flag, build_logic shape hole, duplicate id) +
+    the normalizer + escrow grounding invariants (see _checks_selftest)."""
     check_fails = _checks_selftest()
     if check_fails:
         print("CHECKS SELFTEST FAIL:", *check_fails, sep="\n  ", file=sys.stderr)
         return 1
-    print("SELFTEST PASS (EFE extraction 12+12 · build-rec matrix + quote-grounding + relevance checks)")
+    print("SELFTEST PASS (build-rec matrix + quote-grounding + relevance + shape + normalizer checks)")
     return 0
 
 
-# A single extracted "flag" longer than this is almost certainly several flags glued
-# together (an advisory whose list isn't blank-line separated — markitdown dropped the
-# bullet glyphs). We FLAG that rather than report a bogus count (Phase-12 abort rule).
-# Calibrated across the committed corpus: genuine single flags top out ~573 chars
-# (fin-2025-a003); cleanly blank-separated advisories max ~490; glued blocks run 630–1300+.
-# 600 sits in the gap — above legit single flags, below the glued floor.
-_MAX_FLAG_CHARS = 600
+# Cheap rf_region-bounded triage — the ONLY counting role the deleted extract_red_flags kept.
+# An advisory reads "clean" if its red-flag region holds at least this many block-flags, else "low".
 _MIN_CLEAN_FLAGS = 3
 
 
-def extraction_quality(flags: list) -> str:
-    """Classify an extraction: 'none' | 'low' (unsplit/partial — review) | 'clean'. PURE."""
-    if not flags:
-        return "none"
-    if len(flags) < _MIN_CLEAN_FLAGS or max(len(f["text"]) for f in flags) > _MAX_FLAG_CHARS:
-        return "low"
-    return "clean"
+def _rf_triage(md: str, region) -> tuple:
+    """PURE: a coarse (extraction, flag_count, sections) HINT for one advisory. NOT an extractor.
 
-
-def _section_counts(flags: list) -> dict:
-    """PURE: per-section flag counts, in the order sections are first encountered."""
-    counts: dict[str, int] = {}
-    for f in flags:
-        counts[f["section"]] = counts.get(f["section"], 0) + 1
-    return counts
+    Reuses the already-located red-flag REGION (rf_region, passed in) and counts the blank-
+    separated blocks inside it that clear the grounding length floor and aren't citations — no
+    section-finding, no per-format special-casing (rf_region already found the list; this just
+    sizes it). The result feeds the corpus-status chip a NOT-YET-DERIVED advisory shows in the
+    explorer; a derived advisory renders from its record's indicators (build.py ignores the
+    manifest flag_count for live ones), so a rough hint suffices. region=None → not derivable.
+    """
+    if region is None:
+        return ("none", 0, {})
+    inside = [(ln, raw) for ln, raw in enumerate(md.split("\n"), 1) if region[0] < ln < region[1]]
+    n = sum(1 for _, text in _blocks(inside)
+            if len(normalize(text)) >= _MIN_FLAG_NCHARS and not _CITATION.search(text))
+    return (("clean" if n >= _MIN_CLEAN_FLAGS else "low"), n, {"redflag": n} if n else {})
 
 
 def _load_index() -> dict:
@@ -1058,16 +478,14 @@ def _load_index() -> dict:
 def corpus_status_records() -> list:
     """PURE-ish (reads corpus md + index.json): per-advisory extraction-status records.
 
-    The deterministic input the corpus-explorer build consumes. For every committed advisory
-    md: its extraction quality (clean | low | none — a triage HINT now, see below), flag count,
-    per-section counts, the title/date/url/source attribution (from index.json), and a
-    `derivable` flag. Phase 16 (inverted boundary): `derivable` = a red-flag REGION exists
-    (rf_region) — true even for advisories whose list the DETERMINISTIC extractor can't enumerate
-    (the glued ransomware/health-care advisories), since the LLM backend extracts and the gate
-    grounds; false ONLY for the 2 FATF jurisdiction advisories (no red-flag list at all). The
-    extraction quality is no longer the derivability authority — an advisory goes "live" in the
-    explorer by the presence of a gate-passing data/fincen/derived/<id>.json.
-    Deterministic: md glob is sorted and section counts keep encounter order.
+    The deterministic input the corpus-explorer build consumes. For every committed advisory md:
+    a cheap rf_region triage HINT (extraction clean|low|none + flag_count + sections via
+    _rf_triage), the title/date/url/source attribution (from index.json), and a `derivable` flag.
+    `derivable` = a red-flag REGION exists (rf_region) — true even for the glued advisories (the
+    LLM backend extracts them); false ONLY for the 2 FATF jurisdiction advisories (no red-flag
+    list at all). The triage is no longer the derivability authority — an advisory goes "live" in
+    the explorer by the presence of a gate-passing data/fincen/derived/<id>.json.
+    Deterministic: md glob is sorted; the triage reuses the calibrated rf_region span.
     """
     mds = sorted(CORPUS_DIR.glob("*.md"))
     if not mds:
@@ -1076,8 +494,8 @@ def corpus_status_records() -> list:
     records = []
     for p in mds:
         md = p.read_text(encoding="utf-8")
-        flags = extract_red_flags(md)
-        q = extraction_quality(flags)
+        region = rf_region(md)
+        extraction, flag_count, sections = _rf_triage(md, region)
         meta = index.get(p.stem, {})
         advisory_no = p.stem.upper()
         title = meta.get("title", "")
@@ -1090,14 +508,15 @@ def corpus_status_records() -> list:
             "date": meta.get("date", ""),
             "url": meta.get("url", ""),
             "source": source,
-            "extraction": q,
-            "flag_count": len(flags),
-            "sections": _section_counts(flags),
-            # Phase 16 (inverted boundary): derivable iff a red-flag REGION exists (rf_region) —
-            # true even for the glued advisories the deterministic extractor can't enumerate (the
-            # LLM backend extracts them); false ONLY for the 2 FATF advisories (no red-flag list).
-            # `extraction` (clean/low/none) is now a triage HINT, not the derivability authority.
-            "derivable": rf_region(md) is not None,
+            "extraction": extraction,
+            "flag_count": flag_count,
+            "sections": sections,
+            # derivable iff a red-flag REGION exists (rf_region) — true even for the glued
+            # advisories (the LLM backend extracts them); false ONLY for the 2 FATF advisories
+            # (no red-flag list). `extraction`/`flag_count` are a cheap triage HINT (_rf_triage),
+            # not the derivability authority — an advisory goes live via a gate-passing
+            # derived/<id>.json, and build.py ignores the manifest count for a live advisory.
+            "derivable": region is not None,
         })
     return records
 
@@ -1111,12 +530,13 @@ def write_corpus_status() -> int:
     manifest = {
         "_generated_by": "scripts/derive_signals.py --corpus-status",
         "_note": ("Deterministic per-advisory manifest for the corpus-explorer build "
-                  "(scripts/build.py corpus reads this + data/fincen/derived/*.json). Phase 16 "
-                  "(inverted boundary): `derivable` = a red-flag region exists (false only for the "
-                  "2 FATF advisories); `extraction` (clean/low/none) is a triage HINT, NOT the "
-                  "derivability authority — an advisory goes live via a gate-passing "
-                  "derived/<id>.json (the LLM extracts; check_record grounds). Authoring artifact, "
-                  "NOT a ship config. Regenerate after the corpus md set changes."),
+                  "(scripts/build.py corpus reads this + data/fincen/derived/*.json). `derivable` "
+                  "= a red-flag region exists (rf_region; false only for the 2 FATF advisories); "
+                  "`extraction`/`flag_count` are a cheap rf_region-bounded triage HINT (_rf_triage), "
+                  "NOT the derivability authority — an advisory goes live via a gate-passing "
+                  "derived/<id>.json (the LLM extracts; check_record grounds), and build.py ignores "
+                  "the manifest count for a live advisory. Authoring artifact, NOT a ship config. "
+                  "Regenerate after the corpus md set changes."),
         "summary": summary,
         "advisories": records,
     }
@@ -1128,14 +548,12 @@ def write_corpus_status() -> int:
 
 
 def corpus_report() -> int:
-    """Run extract_red_flags across the whole committed FinCEN corpus + report per advisory.
+    """Cheap rf_region triage across the whole committed FinCEN corpus + report per advisory.
 
-    Deterministic + offline. Classifies each advisory CLEAN (cleanly extracted, blank-block
-    or header format) / LOW-CONFIDENCE (a section was found but the list didn't split — an
-    unsplit giant block or too few flags, likely a non-blank-separated advisory) / NEEDS-
-    ATTENTION (no red-flag section found). This is the honest validation of the deterministic
-    spine across the heterogeneous corpus (Phase 12) — it flags non-conformers, never forces a
-    bogus count. Exit 0 always (a flagged advisory is a reported finding, not a tool failure).
+    Deterministic + offline. For each advisory: DERIVABLE (a red-flag region exists) with a coarse
+    block-flag count classified CLEAN (≥ _MIN_CLEAN_FLAGS) / LOW (fewer — e.g. a glued advisory the
+    counter sizes as one block) / or NON-DERIVABLE (no red-flag region — the 2 FATF advisories).
+    A HINT, not the derivation authority (the LLM extracts; check_record grounds). Exit 0 always.
     """
     mds = sorted(CORPUS_DIR.glob("*.md"))
     if not mds:
@@ -1143,23 +561,20 @@ def corpus_report() -> int:
     clean = low = attn = 0
     print(f"corpus: {len(mds)} advisories under {CORPUS_DIR.relative_to(ROOT)}\n")
     for p in mds:
-        flags = extract_red_flags(p.read_text(encoding="utf-8"))
-        q = extraction_quality(flags)
-        if q == "none":
-            print(f"  {p.stem:14}  NEEDS-ATTENTION   no red-flag section confidently found")
+        md = p.read_text(encoding="utf-8")
+        extraction, flag_count, _ = _rf_triage(md, rf_region(md))
+        if extraction == "none":
+            print(f"  {p.stem:14}  NON-DERIVABLE     no red-flag region (FATF jurisdiction advisory)")
             attn += 1
-            continue
-        by_section = _section_counts(flags)
-        summary = " · ".join(f"{lbl}={n}" for lbl, n in by_section.items())
-        if q == "low":
-            print(f"  {p.stem:14}  LOW-CONFIDENCE    {len(flags)} block(s) [{summary}] — review "
-                  f"(unsplit/partial; likely no blank separators)")
+        elif extraction == "low":
+            print(f"  {p.stem:14}  LOW   {flag_count:>3} block-flag(s) — review "
+                  f"(few blocks; e.g. a glued list the counter sizes as one)")
             low += 1
         else:
-            print(f"  {p.stem:14}  CLEAN  {len(flags):>3} flags   [{summary}]")
+            print(f"  {p.stem:14}  CLEAN {flag_count:>3} block-flag(s)")
             clean += 1
-    print(f"\n{clean} clean · {low} low-confidence · {attn} needs-attention  / {len(mds)} "
-          f"(deterministic spine — heterogeneous corpus, flagged not forced)")
+    print(f"\n{clean} clean · {low} low · {attn} non-derivable  / {len(mds)} "
+          f"(cheap rf_region triage — a hint; the LLM extracts + the gate grounds)")
     return 0
 
 
@@ -1174,23 +589,6 @@ def main(argv):
         return corpus_report()
     if cmd == "--corpus-status":
         return write_corpus_status()
-    if cmd == "--list":
-        path = Path(argv[1]) if len(argv) > 1 else EFE_MD
-        for f in extract_red_flags(_load_md(path)):
-            print(f"{f['section'][:4]}\t{f['n']:>2}\tL{f['line']}\t{f['text']}")
-        return 0
-    if cmd == "--scaffold":
-        if len(argv) < 3:
-            sys.exit("usage: --scaffold <id> <md-path>")
-        return write_scaffold(argv[1], argv[2])
-    if cmd == "--draft":
-        if len(argv) < 3:
-            sys.exit("usage: --draft <id> <md-path>")
-        return write_draft(argv[1], argv[2])
-    if cmd == "--scaffold-derived":
-        if len(argv) < 3:
-            sys.exit("usage: --scaffold-derived <id> <md-path>")
-        return write_derived_scaffold(argv[1], argv[2])
     if cmd == "--check-derived":
         if len(argv) < 2:
             sys.exit("usage: --check-derived <record.json>")

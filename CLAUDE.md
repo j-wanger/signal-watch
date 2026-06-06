@@ -39,30 +39,25 @@ AML transformation framework. Keep vocabulary consistent with it
   `parse_index` + offline `--selftest`, thin live `--fetch`) → `acquire_fincen.py` (read the manifest,
   resolve each advisory's PDF from its detail page; EFE kept as a zero-hop direct-PDF override) →
   `pdf_to_md.py` (markitdown PDF→markdown, persisted to `data/fincen/<id>.md` as the source of truth)
-  → `derive_signals.py` (Phase 11: automate the article→signal step — a DETERMINISTIC layer
-  `--selftest`/`--scaffold` extracts the enumerated red flags + emits a schema-shaped config
-  SKELETON, and a NEURAL layer `--draft` calls the Anthropic API to PROPOSE the judgment fields
-  [indicator statuses, the single target, the signal definition]; the LLM proposes, `build.py` +
-  schema + the two human gates DISPOSE — the `.draft.json` is a gitignored scratch artifact, never
-  auto-promoted, so committed configs stay deterministic + human-reviewed) → hand-review/rename to a
-  schema-valid config. The deterministic authoring layers are stdlib-only; `markitdown` (convert) and
-  `anthropic` (`--draft`) live in a gitignored uv `.venv` and `--draft` reads `ANTHROPIC_API_KEY` from
-  the env — NO authoring tool is imported by the engine or `build.py`, and the ship artifact never
-  fetches or calls an LLM. The elder typology renders the FULL verbatim EFE advisory (FinCEN
+  → `derive_signals.py` (the deterministic GATE — Phase 16 inverted the boundary, Phase 17 deleted the
+  old extractor: the LLM backend reads `<id>.md` and EXTRACTS the red flags + per-indicator judgment into
+  `data/fincen/derived/<id>.json`, and `--check-derived` DISPOSES — see the corpus-derivation bullet).
+  `derive_signals.py` is now stdlib-only (no `anthropic` dep); only `markitdown` (convert) lives in a
+  gitignored uv `.venv` — NO authoring tool is imported by the engine or `build.py`, and the ship artifact
+  never fetches or calls an LLM. The elder typology renders the FULL verbatim EFE advisory (FinCEN
   FIN-2022-A002, public domain) in Act 1 via the `advisory_full` field.
-- Corpus derivation (Phase 12, M7 — backend for an expanded, singular corpus-backed demo where the
+- Corpus derivation (Phase 12+, M7 — backend for an expanded, singular corpus-backed demo where the
   user picks one of 14 advisories): the full 14-advisory FinCEN corpus is committed as md
-  (`data/fincen/*.md`). `derive_signals.py --corpus` runs the (generalized) red-flag extractor across
-  all 14 and reports each CLEAN / LOW-CONFIDENCE / NEEDS-ATTENTION — the deterministic spine validated
-  on the whole corpus, flagging the heterogeneous non-conformers rather than forcing a count.
-  `--scaffold-derived` emits a `data/fincen/derived/<id>.json` skeleton (one indicator per extracted
-  red flag, `src_line`-traceable); the LLM backend fills the judgment (status, data, a build
-  recommendation, and build logic for the BUILD_NOW gaps) and `--check-derived` DISPOSES — `build_rec`
-  must follow the deterministic cover×data matrix (`build_rec_category`), every indicator must trace to
-  a red-flag md line, BUILD_NOW must carry a full definition. The LLM backend may be the Anthropic API
-  (`--draft`) OR a live model session acting as backend (no key); either way the LLM proposes and the
-  deterministic checks dispose. Derived records are an LLM-derived + checked corpus dataset, NOT ship
-  typology configs (the 3 hand-curated typologies stay the showcase).
+  (`data/fincen/*.md`). The LLM backend (a live model session, no key) reads an advisory and EXTRACTS its
+  red flags + per-indicator judgment (status, data, a build recommendation, build logic for the BUILD_NOW
+  gaps) into `data/fincen/derived/<id>.json`; `--check-derived` DISPOSES — `build_rec` must follow the
+  cover×data matrix (`build_rec_category`), every verbatim `flag` must QUOTE-GROUND in the source md
+  (`normalize(flag)` ⊂ `normalize(md)`, inside the red-flag region `rf_region`), BUILD_NOW must carry a
+  full definition. `--corpus` / `--corpus-status` are a cheap rf_region triage HINT (`derivable` = a
+  red-flag region exists, false only for the 2 FATF advisories; + a coarse block count via `_rf_triage`) —
+  never the derivation authority. The LLM proposes (extraction included); the deterministic gate + the two
+  human gates dispose. Derived records are an LLM-derived + checked corpus dataset, NOT ship typology
+  configs (the 3 hand-curated typologies stay the showcase).
 - Corpus explorer (Phase 13, M7 — the demo scope expansion): a SECOND, separate ship artifact
   `dist/corpus/index.html`, built from a standalone template `corpus.html` (owns its own copy of the
   dossier theme — the six-act engine `index.html` is left byte-untouched). A staged 4-screen flow:
@@ -73,37 +68,42 @@ AML transformation framework. Keep vocabulary consistent with it
   the extraction manifest `data/fincen/corpus-status.json` (emitted by `derive_signals.py
   --corpus-status`) + the derived records `data/fincen/derived/*.json` — merges them by id, and
   validates the derived shape at the build boundary (build_rec ∈ matrix vocabulary; BUILD_NOW ⇒ full
-  build_logic). build.py NEVER imports the authoring layer; ships with 7/14 derived (Phase 16 added
-  COVID-EIP fin-2021-a002 + ransomware fin-2021-a004 to the Phase-14 five — kleptocracy + PRC precursors +
-  human trafficking fin-2020-a008 + Chinese MLN fin-2025-a003 + Iran fin-2025-a002; ransomware is the
-  PREVIOUSLY-UNREACHABLE glued advisory, reached via the inverted loop below — the deterministic extractor
-  got 0 flags, the LLM extracted all 12 and the gate grounded them. front-end shows the full corpus
-  honestly, the remaining clean advisories scale later). No fabricated lift/stats; the always-on badge
+  build_logic). build.py NEVER imports the authoring layer; ships with **12/14 derived** (Phase 17 added
+  health-care fin-2026-a001 [glued, 24 flags] + COVID health-insurance fin-2021-a001 + Iran-terror
+  fin-2024-a001 + ISIS fin-2025-a001 + the EFE corpus record fin-2022-a002 to the Phase-16 seven). Only
+  the 2 FATF jurisdiction advisories (fin-2020-a009, fin-2021-a003 — no enumerated red-flag list) stay
+  non-derivable. The glued advisories (ransomware fin-2021-a004, health-care fin-2026-a001) were
+  unreachable by the deleted structural extractor yet ship derived via the inverted loop (the LLM reads
+  them like a human, the gate grounds each verbatim flag). No fabricated lift/stats; the always-on badge
   stays, with the verbatim public-domain source attribution kept visually distinct from it.
-- IMPORTANT — INVERTED extraction boundary (Phase 16): the **LLM EXTRACTS, the deterministic layer GATES**.
-  The earlier deterministic `extract_red_flags` accreted format special-casing every phase yet the LLM
-  still had to author/prune its output, so the subtraction test inverted it: the LLM (the model session as
-  backend) extracts the candidate red flags + per-indicator status/data judgment + build recommendation +
-  signal logic; the deterministic layer DISPOSES via `check_record` — **quote-GROUNDING** (each verbatim
-  `flag` is a substring of the source md under `normalize()`, the new traceability authority, replacing
-  src_line ∈ extractor) + a cheap section-cite RELEVANCE region (`rf_region`) + the cover×data matrix +
-  BUILD_NOW⇒full-build_logic shape. Complexity moved from brittle section-PARSING (open problem — every
-  advisory differs) to a closed-set md NORMALIZER (~3 lines) and SHRANK. `extract_red_flags` is DEMOTED:
-  kept only as the EFE `--selftest` anchor + `--corpus`/`--scaffold-derived` triage hint, no longer the
-  authority, not to be grown. The LLM proposes (now extraction too); the deterministic gate + the two human
-  gates dispose.
-- Extraction faithfulness (Phase 15): `extract_red_flags` does a **footnote-resume** — a mid-list footnote
-  run at a page boundary no longer permanently ends a section (it's transient when another red-flag section
-  follows; the list resumes after it), so a CLEAN advisory stops silently dropping a post-footnote flag
-  (fin-2025-a003 recovered its L499 escrow flag, 17→18). Two corpus formats stay deliberately FLAGGED, NOT
-  force-parsed by the DETERMINISTIC extractor: **glued-no-separator** advisories (fin-2021-a004 ransomware,
-  fin-2026-a001 health-care) where markitdown dropped both bullets AND blank lines so flags fuse into one
-  block — no safe deterministic split (sentence-splitting would over-split genuine multi-sentence flags).
-  **Phase 16 DISSOLVED the converter question**: the glued advisories are now reachable via the inverted
-  loop (the LLM reads + extracts them like a human; the gate grounds each verbatim flag) — fin-2021-a004
-  ransomware ships derived this way (extractor 0 → LLM 12), so no structure-preserving converter and no
-  post-hoc splitter were needed. Convention: derived records store RAW text;
-  corpus.html's `esc()` is the sole escaper (never pre-escape `&gt;`/`&lt;` in a record — it double-escapes).
+- IMPORTANT — INVERTED extraction boundary (Phase 16) + the SUBTRACTION (Phase 17): the **LLM EXTRACTS, the
+  deterministic layer GATES**, and the old extractor is **DELETED**. The earlier deterministic
+  `extract_red_flags` accreted format special-casing every phase yet the LLM still had to author/prune its
+  output, so the subtraction test inverted it: the LLM (the model session as backend) extracts the candidate
+  red flags + per-indicator status/data judgment + build recommendation + signal logic; the deterministic
+  layer DISPOSES via `check_record` — **quote-GROUNDING** (each verbatim `flag` is a substring of the source
+  md under `normalize()`, the traceability authority, replacing src_line ∈ extractor) + a cheap section-cite
+  RELEVANCE region (`rf_region`) + the cover×data matrix + BUILD_NOW⇒full-build_logic shape. Complexity moved
+  from brittle section-PARSING (open problem — every advisory differs) to a closed-set md NORMALIZER and
+  SHRANK. **Phase 17 then DELETED `extract_red_flags` and the whole `--scaffold` / `--draft` /
+  `--scaffold-derived` authoring stack it fed** (`derive_signals.py` ~1200 → ~600 lines), leaving exactly the
+  gate (`normalize` + `rf_region` + `check_record`) + a ~14-line `rf_region`-bounded triage counter
+  (`_rf_triage` — the only counting role the extractor kept; it reuses the already-computed region span). The
+  inverted loop is the SOLE derivation path; the LLM proposes (extraction too), the deterministic gate + the
+  two human gates dispose.
+- Extraction faithfulness (the LLM extracts; the gate grounds): faithfulness is now enforced by the gate, not
+  a structural parser — every verbatim `flag` must QUOTE-GROUND in the source md. Two heterogeneous formats
+  the deleted deterministic extractor could not parse are handled by the LLM reading like a human:
+  **footnote-interrupted** lists (a clause split across a page-break footnote run — the LLM extracts a
+  CONTIGUOUS grounded span and drops the across-the-break continuation rather than bridging it, e.g.
+  fin-2021-a001 IND-01) and **glued-no-separator** advisories (fin-2021-a004 ransomware, fin-2026-a001
+  health-care — markitdown dropped both bullets AND blank lines so flags fuse into one block; the `_rf_triage`
+  counter sizes them as a few blocks, but the LLM extracts every genuine flag, e.g. health-care 24, and the
+  gate grounds each). No structure-preserving converter and no post-hoc splitter were needed. Convention:
+  derived records store RAW text; corpus.html's `esc()` is the sole escaper (never pre-escape `&gt;`/`&lt;`
+  in a record — it double-escapes). `normalize()` drops the glued `FINCEN ADVISORY` running header and
+  collapses smart quotes / hyphen-wraps / footnote digits, so a header-glued or marker-glued flag still
+  grounds (keep an in-flag footnote marker verbatim where it falls mid-span, e.g. `NPO84`).
 
 ## How to run
 - Build: `python3 scripts/build.py <id>` (or `all`) → `dist/<id>/index.html`.

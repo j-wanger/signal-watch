@@ -61,67 +61,51 @@ python3 scripts/crawl_fincen.py --fetch       # LIVE: refresh the listing fixtur
 python3 scripts/acquire_fincen.py --list      # show the discovered advisory corpus (the manifest)
 python3 scripts/acquire_fincen.py <id>        # LIVE: download one advisory PDF -> data/fincen/raw/<id>.pdf
 .venv/bin/python scripts/pdf_to_md.py <id>    # convert PDF -> data/fincen/<id>.md (verbatim source of truth)
-python3 scripts/derive_signals.py --selftest          # offline: EFE red-flag parser (12+12) + deterministic checks
-python3 scripts/derive_signals.py --scaffold <id> <md># offline: md -> config/typologies/<id>.draft.json SKELETON
-.venv/bin/python scripts/derive_signals.py --draft <id> <md>  # LIVE: + LLM-drafted judgment (needs ANTHROPIC_API_KEY)
-python3 scripts/derive_signals.py --corpus                       # offline: extract red flags across ALL 14 committed advisories
+python3 scripts/derive_signals.py --selftest                     # offline: the deterministic GATE checks (matrix + quote-grounding + relevance + shape)
+python3 scripts/derive_signals.py --check-derived <record.json>  # offline: DISPOSE a derived record (the gate)
+python3 scripts/derive_signals.py --corpus                       # offline: cheap rf_region triage across ALL 14 committed advisories
 python3 scripts/derive_signals.py --corpus-status                # offline: emit data/fincen/corpus-status.json (the corpus-explorer manifest)
-python3 scripts/derive_signals.py --scaffold-derived <id> <md>   # offline: -> data/fincen/derived/<id>.json skeleton
-python3 scripts/derive_signals.py --check-derived <record.json>  # offline: dispose a derived record (matrix + traceability)
 ```
 
 `crawl_fincen.py` discovers the FinCEN advisories listing into the committed manifest
 `data/fincen/index.json`; `acquire_fincen.py` reads it (resolving each advisory's PDF from its
-detail page) and keeps the EFE anchor as a zero-hop direct-PDF override. `derive_signals.py` then
-automates the article→signal step in two layers: a **deterministic** layer (stdlib, `--selftest`/
-`--scaffold`) extracts the advisory's enumerated red flags and emits a schema-shaped config
-**skeleton**, and a **neural** layer (`--draft`, build-time only) calls the Anthropic API to *propose*
-the judgment fields (indicator statuses, the single target, the signal definition). The LLM proposes;
-`build.py` + the schema + the two human gates **dispose** — the `.draft.json` is a gitignored scratch
-artifact you review and rename to `<id>.json`, never auto-promoted, so committed configs stay
-deterministic and human-reviewed. These tools are authoring-only and are **never** imported by the
-engine or `build.py` — the ship artifact stays single-file, offline, never fetches, and never calls an
-LLM. Conversion (`markitdown`) and the draft step (`anthropic`) need a gitignored uv `.venv` (see
-`scripts/requirements-authoring.txt`) and, for `--draft`, `ANTHROPIC_API_KEY` in the environment (the
-key never enters the ship file); everything else is pure stdlib. FinCEN advisories are U.S. federal
-works in the public domain (17 U.S.C. §105).
+detail page) and keeps the EFE anchor as a zero-hop direct-PDF override. `pdf_to_md.py` converts each PDF
+to `data/fincen/<id>.md` (the verbatim source of truth). `derive_signals.py` is then the deterministic
+**gate**: the LLM backend (a live model session) reads an advisory's markdown and *extracts* its red flags
+plus the per-indicator judgment into `data/fincen/derived/<id>.json`, and `--check-derived` **disposes**
+(see below). These tools are authoring-only and are **never** imported by the engine or `build.py` — the
+ship artifact stays single-file, offline, never fetches, and never calls an LLM. Only PDF conversion
+(`markitdown`) needs a gitignored uv `.venv` (see `scripts/requirements-authoring.txt`); everything in
+`derive_signals.py` is pure stdlib. FinCEN advisories are U.S. federal works in the public domain
+(17 U.S.C. §105).
 
-**Corpus derivation (the backend for a singular corpus-backed demo).** The full 14-advisory FinCEN
-corpus is committed as markdown (`data/fincen/*.md`). `derive_signals.py --corpus` runs the red-flag
-extractor across all 14 and reports each advisory **CLEAN** / **LOW-CONFIDENCE** / **NEEDS-ATTENTION** —
-the deterministic spine validated on the whole corpus, honestly flagging the heterogeneous formats it
-can't cleanly split rather than forcing a bogus count. `--scaffold-derived` then emits a derived-record
-skeleton (one indicator per extracted red flag, each `src_line`-traceable) under `data/fincen/derived/`;
-the LLM backend fills the judgment — per indicator a coverage status + data availability, a **build
-recommendation**, and **build logic** for the immediately-buildable gaps — and `--check-derived`
-**disposes**: each `build_rec` must follow the deterministic cover×data matrix (`build_rec_category`),
-every indicator's verbatim flag must be **quote-grounded** in the source md (Phase 16: `normalize(flag)`
-⊂ `normalize(md)`, inside the red-flag relevance region), and a `BUILD_NOW` indicator must carry a full
-signal definition. The LLM backend can be the Anthropic API (the `--draft` pattern) or a live model
-session acting as the backend (no key) — either way the LLM *proposes* and the deterministic checks
-*dispose*. Derived records are an LLM-derived + checked corpus dataset, **not** ship typology configs.
+**Corpus derivation (the backend for a singular corpus-backed demo).** The full 14-advisory FinCEN corpus
+is committed as markdown (`data/fincen/*.md`). The LLM backend reads an advisory and *extracts* its red
+flags plus, per indicator, a coverage status + data availability, a **build recommendation**, and **build
+logic** for the immediately-buildable gaps, writing `data/fincen/derived/<id>.json`. The deterministic gate
+`--check-derived` **disposes**: each `build_rec` must follow the cover×data matrix (`build_rec_category`),
+every indicator's verbatim flag must be **quote-grounded** in the source md (`normalize(flag)` ⊂
+`normalize(md)`, inside the red-flag relevance region `rf_region`), and a `BUILD_NOW` indicator must carry a
+full signal definition. The LLM *proposes* (extraction included); the deterministic gate and the two human
+gates *dispose*. Derived records are an LLM-derived + checked corpus dataset, **not** ship typology configs.
 
-**The boundary is inverted (Phase 16): the LLM extracts; the deterministic layer gates.** The earlier
-deterministic `extract_red_flags` accreted format special-casing every phase yet only parsed ~half the
-heterogeneous corpus — and the LLM had to clean its output anyway — so the subtraction test inverted it.
-The model session (the LLM backend) now *extracts* the candidate red flags plus the per-indicator
-status/data judgment, recommendation, and build logic; the deterministic layer is a **gate** that
-*disposes* by **quote-grounding** each verbatim flag against the source md (a closed-set `normalize()`
-that collapses the page-break / hyphen-wrap / running-header artifacts a structural parser choked on),
-plus the cover×data matrix and a cheap section-cite relevance region. `extract_red_flags` is **demoted**
-to a `--selftest` anchor and `--corpus` triage hint — no longer the traceability authority, and no longer
-grown. The LLM proposes (extraction included); the deterministic gate and the two human gates dispose.
-
-The extractor does a **footnote-resume** (Phase 15): a footnote run at a page boundary mid-list is
-transient when another red-flag section follows, so the list resumes after it instead of being silently
-truncated (this recovered a dropped flag in the Chinese-MLN advisory). Two *glued-no-separator* advisories
-(ransomware, health-care fraud) — where the PDF→markdown step dropped both bullets and blank lines, fusing
-the flags into one block — defeat the *deterministic* extractor (no safe way to split them without
-over-splitting genuine multi-sentence flags). **Phase 16 dissolves the converter question**: the glued
-advisories are now derived via the inverted loop — the LLM reads and extracts them like a human, and the
-gate grounds each verbatim flag against the source — so ransomware (`fin-2021-a004`) ships derived (the
-deterministic extractor found 0 flags; the LLM found 12). No structure-preserving converter and no post-hoc
-splitter were needed.
+**The boundary is inverted — the LLM extracts; the deterministic layer gates (Phase 16) — and Phase 17
+deleted the old extractor outright.** Earlier phases carried a deterministic `extract_red_flags` that
+accreted format special-casing every phase yet only parsed ~half the heterogeneous corpus, and the LLM had
+to clean its output anyway. The subtraction test inverted the boundary (the LLM extracts; the gate disposes
+by quote-grounding), and then **Phase 17 removed `extract_red_flags` together with the whole `--scaffold` /
+`--draft` / `--scaffold-derived` authoring stack it fed** — `derive_signals.py` dropped from ~1200 to ~600
+lines, leaving exactly the gate (`normalize` + `rf_region` + `check_record`) plus a ~14-line
+`rf_region`-bounded triage counter. That counter is the only counting role the extractor kept: `--corpus` /
+`--corpus-status` reuse the already-computed red-flag region to report whether one exists (`derivable` —
+false only for the 2 FATF jurisdiction advisories) and a coarse block count, a cheap hint for a
+not-yet-derived advisory's status chip (a live advisory renders from its own record, so the count need only
+be rough). The inverted loop is now the **sole** derivation path — it reaches even the *glued-no-separator*
+advisories (ransomware, health-care fraud) whose PDF→markdown dropped both bullets and blank lines: the LLM
+reads and extracts them like a human and the gate grounds each verbatim flag, so they ship derived with no
+structure-preserving converter and no post-hoc splitter. The committed corpus ships **12 of 14 advisories
+derived** (only the 2 FATF jurisdiction advisories, which carry no enumerated red-flag list, stay
+non-derivable).
 
 ## The corpus explorer (the singular corpus-backed demo)
 
@@ -130,9 +114,10 @@ explorer**. Where the six-act typology demos each tell one scripted story, the e
 loop at the *whole public advisory corpus* — you pick one of the 14 advisories and watch it derive. It
 is a **staged 4-screen flow**:
 
-1. **Select** — all 14 advisories, each with an honest status chip: *derived* (live, clickable),
-   *clean / low* extraction (ready to derive, not yet derived), or *no red-flag list* (non-derivable,
-   e.g. the FATF jurisdiction advisories).
+1. **Select** — all 14 advisories, each with an honest status chip: *derived* (live, clickable — 12 of
+   them), or *no red-flag list* (non-derivable — the 2 FATF jurisdiction advisories). The chip also has a
+   *clean / low* extraction state (ready to derive, not yet derived) for any future advisory added to the
+   corpus before it is derived.
 2. **Coverage** — the chosen advisory's coverage gauge, derived from its indicator statuses.
 3. **Build recommendations** *(the new centerpiece)* — per red-flag indicator: coverage × data →
    one **build recommendation** (`BUILD NOW / ENHANCE / BUILD + ENRICH / SOURCE DATA / MONITOR /
@@ -148,13 +133,14 @@ merges them by advisory id, and validates the derived records' shape at the buil
 `build.py` never imports `derive_signals.py`. The advisory titles and red-flag text are verbatim public
 domain; the coverage/data/build judgments are illustrative (the "Illustrative data & outputs" badge
 stays on, with the per-advisory source attribution kept visually distinct from it). The explorer ships
-with **7 of 14** advisories derived — kleptocracy, PRC precursor chemicals, human trafficking
-(`fin-2020-a008`), Chinese money-laundering networks (`fin-2025-a003`), Iranian illicit finance
-(`fin-2025-a002`), COVID-19 EIP fraud (`fin-2021-a002`), and ransomware (`fin-2021-a004`) — a
-deliberately varied menu (the transaction-pattern-rich CMLN typology surfaces five immediately-buildable
-signals; the enrichment-hungry Iran typology leans to *build + enrich*; ransomware is the
-previously-unreachable glued advisory, reached via the Phase-16 inverted loop). The front-end shows the
-full corpus honestly, and derivation of the remaining clean advisories scales as a follow-up.
+with **12 of 14** advisories derived — only the two FATF jurisdiction advisories (which carry no
+enumerated red-flag list) stay non-derivable. The menu is deliberately varied: the transaction-pattern-rich
+Chinese money-laundering-networks typology (`fin-2025-a003`) surfaces five immediately-buildable signals;
+the enrichment-hungry Iran (`fin-2025-a002`) and Iran-backed-terror-finance (`fin-2024-a001`) typologies
+lean to *build + enrich*; the **glued-no-separator** advisories — ransomware (`fin-2021-a004`) and
+health-care fraud (`fin-2026-a001`, 24 red flags) — were unreachable by the deleted structural extractor
+yet ship derived via the inverted loop (the LLM reads them like a human, the gate grounds every verbatim
+flag). The front-end shows the full corpus honestly; the two non-derivable advisories are labelled as such.
 
 ## Present it
 
@@ -206,9 +192,11 @@ M6 added a build-time authoring pipeline (acquire a FinCEN advisory PDF → conv
 hand-derive a signal) and renders the FULL verbatim EFE advisory (FinCEN FIN-2022-A002, public
 domain) in Act 1. Phase 10 widened that pipeline with a **FinCEN corpus crawler**
 (`scripts/crawl_fincen.py`) that discovers the FinCEN advisories listing into a committed manifest
-(`data/fincen/index.json`), so acquisition reads the corpus instead of a hand-kept stub. Phase 11
-added `scripts/derive_signals.py`, which automates the article→signal derivation step: a deterministic
-scaffolder plus an authoring-only LLM-draft mode whose output is gated by `build.py` + the human review
+(`data/fincen/index.json`), so acquisition reads the corpus instead of a hand-kept stub. Phase 11 added
+`scripts/derive_signals.py` for the article→signal derivation step; Phases 12–13 extended it across the
+14-advisory corpus and built the corpus explorer; Phase 16 **inverted** the boundary (the LLM extracts, a
+deterministic gate disposes by quote-grounding) and Phase 17 **deleted** the original deterministic
+extractor plus the scaffold/draft authoring stack, leaving the gate as the whole of `derive_signals.py`
 (the engine never calls an LLM). Runs offline from a single `file://` artifact per typology. Live /
 pre-generated mode (M4) is intentionally not built — scripted is the ship path. See `HANDOFF.md §8`
 for the milestone plan.

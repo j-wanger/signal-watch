@@ -1,0 +1,189 @@
+{
+  "id": "fin-2022-a002",
+  "advisory": "FIN-2022-A002",
+  "source_md": "data/fincen/fin-2022-a002.md",
+  "extraction_quality": "llm-extracted",
+  "provenance": "LLM-backend-derived + deterministic-checked (Phase 16/17 inverted boundary) — NOT a ship typology config. EFE (FIN-2022-A002) is also the hand-curated SHOWCASE elder-financial-exploitation typology (rendered in full, including the verbatim advisory); this corpus record is the build-recommendation view over its 12 FINANCIAL red flags — the transaction-data signal surface. EFE's 12 BEHAVIORAL red flags (teller-witnessed observations: distress, caregiver coercion, contact-info changes) are observational SAR-narrative indicators, not a transaction-data signal surface, so they are out of scope for the buildable-signal derivation (the showcase typology presents them). The LLM backend EXTRACTED the 12 financial red flags; the deterministic gate GROUNDS each verbatim `flag` in the source md within the red-flag region + checks the cover×data matrix. build_rec follows the cover×data matrix (build_rec_category). Coverage/data values are ILLUSTRATIVE (vision demo).",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "financial",
+      "flag": "Dormant accounts with large balances begin to show constant withdrawals.",
+      "src_line": 507,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "The canonical EFE signal — a long-dormant large-balance account reactivating into steady drawdowns is uncovered, and account dormancy, balance, and outflow cadence are all in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-DORMANT-DRAIN-ELDER",
+        "class": "account · account-level · stateful",
+        "features": [
+          "dormancy_days_prior",
+          "account_balance_at_reactivation",
+          "withdrawal_count_30d",
+          "outbound_value_ratio",
+          "elder_customer_flag"
+        ],
+        "logic": "an elder customer's long-dormant account holding a large balance reactivates and begins showing constant withdrawals — a steady drawdown cadence on an account quiet for an extended prior period",
+        "window": "rolling 30 days vs prior dormancy",
+        "source": "Core deposit + transaction features (Gold); account dormancy state; customer age flag",
+        "route": "Tier-1 alert → elder-financial-exploitation review gate"
+      }
+    },
+    {
+      "id": "IND-02",
+      "section": "financial",
+      "flag": "An older customer purchases large numbers of gift cards or prepaid access cards.",
+      "src_line": 509,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Bulk gift-card / prepaid-access-card purchases by an older customer is a classic scam-payment pattern that is uncovered, and card-purchase merchant tagging, count, and customer age are in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-ELDER-GIFTCARD-SPIKE",
+        "class": "account · behavioral · stateful",
+        "features": [
+          "giftcard_prepaid_purchase_count_7d",
+          "giftcard_value_total_7d",
+          "elder_customer_flag",
+          "purchase_vs_baseline_ratio",
+          "distinct_merchant_count"
+        ],
+        "logic": "an older customer purchases large numbers of gift cards or prepaid access cards over a short window — a purchase count and value well above the customer's baseline, a common scam-payment instrument",
+        "window": "rolling 7 days",
+        "source": "Core transaction + merchant-category features (Gold); customer age flag",
+        "route": "Tier-1 alert → elder-financial-exploitation review gate"
+      }
+    },
+    {
+      "id": "IND-03",
+      "section": "financial",
+      "flag": "An older customer suddenly begins discussing and buying CVC.",
+      "src_line": 511,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "A sudden first-time CVC purchase by an older customer is partially covered by new-CVC-adoption screening; enhance it with an elder-customer overlay rather than building net-new."
+    },
+    {
+      "id": "IND-04",
+      "section": "financial",
+      "flag": "An older customer sends multiple checks or wire transfers with descriptors in the memo line such as \"tech support services,\" \"winnings,\" or \"taxes.\"",
+      "src_line": 513,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Scam-typical memo descriptors (tech support, winnings, taxes) need transaction memo-line text captured only partially as structured data; enrich with memo NLP plus a scam-term list, then build."
+    },
+    {
+      "id": "IND-05",
+      "section": "financial",
+      "flag": "Uncharacteristic, sudden, abnormally frequent, or significant withdrawals of cash or transfers of assets from an older customer's account.",
+      "src_line": 516,
+      "status": "covered",
+      "data": "available",
+      "build_rec": "COVERED",
+      "rationale": "Uncharacteristic sudden/large withdrawal anomalies are already captured by standing transaction-anomaly monitoring; no new build needed for this typology."
+    },
+    {
+      "id": "IND-06",
+      "section": "financial",
+      "flag": "An older customer receives and transfers money interstate or abroad to recipients with whom they have no in-person relationship, and the explanation seems suspicious or indicative of a scam or money mule scheme.",
+      "src_line": 519,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "An older customer receiving then forwarding funds interstate/abroad to no-in-person-relationship recipients is an uncovered money-mule pattern, and the receive-then-forward flow, counterparty geo, and relationship flags are in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-ELDER-MULE-NOREL-TRANSFER",
+        "class": "account · flow-level · stateful",
+        "features": [
+          "inbound_then_outbound_match_ratio",
+          "recipient_no_relationship_flag",
+          "interstate_or_foreign_flag",
+          "receipt_to_forward_hours",
+          "elder_customer_flag"
+        ],
+        "logic": "an older customer receives money and then transfers it interstate or abroad to recipients with whom they have no in-person relationship — a receive-and-forward pass-through to unrelated distant counterparties, consistent with a scam or money-mule scheme",
+        "window": "rolling 10 days",
+        "source": "Core transaction + counterparty features (Gold); counterparty-geo; relationship/beneficiary linkage; customer age flag",
+        "route": "Tier-1 alert → elder-financial-exploitation review gate"
+      }
+    },
+    {
+      "id": "IND-07",
+      "section": "financial",
+      "flag": "Frequent large withdrawals, including daily maximum currency withdrawals from an ATM.",
+      "src_line": 523,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Daily-maximum ATM withdrawal monitoring exists; enhance it with a frequent-large-withdrawal + elder-customer overlay."
+    },
+    {
+      "id": "IND-08",
+      "section": "financial",
+      "flag": "Sudden or frequent non-sufficient fund activity.",
+      "src_line": 525,
+      "status": "covered",
+      "data": "available",
+      "build_rec": "COVERED",
+      "rationale": "Non-sufficient-fund activity is already tracked by standing account monitoring; no new build needed."
+    },
+    {
+      "id": "IND-09",
+      "section": "financial",
+      "flag": "Uncharacteristic nonpayment for services, which may indicate a loss of funds or of access to funds.",
+      "src_line": 527,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Recurring-payment lapse detection partially exists; enhance it to flag uncharacteristic nonpayment as a possible loss-of-access signal for elder customers."
+    },
+    {
+      "id": "IND-10",
+      "section": "financial",
+      "flag": "Debit transactions that are inconsistent for the older customer.",
+      "src_line": 529,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Per-customer debit profiling already exists; enhance the inconsistency score with an elder-customer overlay rather than a separate rule."
+    },
+    {
+      "id": "IND-11",
+      "section": "financial",
+      "flag": "Uncharacteristic attempts to wire large sums of money.",
+      "src_line": 531,
+      "status": "covered",
+      "data": "available",
+      "build_rec": "COVERED",
+      "rationale": "Large-wire attempt monitoring is a standing control; no new build needed for this typology."
+    },
+    {
+      "id": "IND-12",
+      "section": "financial",
+      "flag": "Closing of CDs or accounts without regard to penalties.",
+      "src_line": 533,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Closing CDs or accounts while disregarding early-withdrawal penalties is an uncovered urgency/coercion signal, and CD/account closure events plus the penalty incurred are in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-ELDER-PENALTY-DISREGARD-CLOSURE",
+        "class": "account · account-level · stateful",
+        "features": [
+          "cd_or_account_closure_flag",
+          "early_withdrawal_penalty_incurred",
+          "penalty_to_balance_ratio",
+          "elder_customer_flag",
+          "closure_to_outbound_hours"
+        ],
+        "logic": "an older customer closes CDs or accounts without regard to the early-withdrawal penalties incurred — accepting a material penalty to access funds quickly, consistent with urgency or coercion",
+        "window": "event-driven (closure event)",
+        "source": "Core account-event + balance features (Gold); penalty-incurred field; customer age flag",
+        "route": "Tier-1 alert → elder-financial-exploitation review gate"
+      }
+    }
+  ]
+}

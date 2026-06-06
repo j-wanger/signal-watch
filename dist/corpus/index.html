@@ -195,7 +195,7 @@ const CORPUS = {
       "date": "2020-10-15",
       "source": "FinCEN FIN-2020-A008 · Supplemental Advisory on Identifying and Reporting Human Trafficking and Related Activity · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 11,
+      "flag_count": 26,
       "derivable": true,
       "derived": true,
       "indicators": [
@@ -347,9 +347,247 @@ const CORPUS = {
       "title": "Advisory on COVID-19 Health Insurance- and Health Care-Related Fraud",
       "date": "2021-02-02",
       "source": "FinCEN FIN-2021-A001 · Advisory on COVID-19 Health Insurance- and Health Care-Related Fraud · public domain (17 U.S.C. 105)",
-      "extraction": "low",
-      "flag_count": 2,
-      "derivable": true
+      "extraction": "clean",
+      "flag_count": 47,
+      "derivable": true,
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "financial",
+          "flag": "After the COVID-19 public health emergency declaration, a health care service provider's account receives or continues to receive: (1) health care benefit program or health insurance payments well above the provider's estimated business transactions",
+          "src_line": 171,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Reimbursement inflows well above a provider's own business-transaction baseline are uncovered and computable directly from the reimbursement vs total-activity time series in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-REIMBURSE-ABOVE-BUSINESS-BASELINE",
+            "class": "account · time-series · stateful",
+            "features": [
+              "health_payment_value_current",
+              "estimated_business_volume_baseline",
+              "payment_to_business_ratio",
+              "post_phe_declaration_flag",
+              "provider_account_flag"
+            ],
+            "logic": "after the public health emergency declaration, a health care provider's account receives health care benefit program or insurance payments well above the provider's estimated business transaction volume — a payment-to-business ratio far beyond the provider's established baseline",
+            "window": "rolling 90 days vs trailing baseline",
+            "source": "Core reimbursement transaction + account-activity features (Gold); payer tagging",
+            "route": "Tier-1 alert → COVID health-care fraud review gate"
+          }
+        },
+        {
+          "id": "IND-02",
+          "section": "financial",
+          "flag": "A health care service provider's account receives health care benefit program or health insurance payments beyond the expected type or volume of service, based on staffing and other characteristics of the business (e.g., processing COVID-19 tests when the medical facility does not typically offer diagnostic services, or the facility is processing a high volume of tests despite only employing a few medical personnel).",
+          "src_line": 208,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Peer/profile-deviation scoring exists; enhance it with a payments-versus-staffing benchmark rather than building a standalone rule."
+        },
+        {
+          "id": "IND-03",
+          "section": "financial",
+          "flag": "A COVID-19-related health care service provider's business account has unusual transaction activities, such as payments for personal or medically irrelevant expenses (e.g., payments to automobile dealers, travel agents, or retailers of luxury goods).",
+          "src_line": 214,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Merchant-category and luxury-spend tagging partially exist; enhance the high-risk-spend screen with a health-care-business + personal/irrelevant-expense conjunction."
+        },
+        {
+          "id": "IND-04",
+          "section": "financial",
+          "flag": "Following the COVID-19 public health emergency declaration, personal or business accounts, especially ones that did not previously receive health care-related payments, begin receiving steep increases in health care benefit program or health insurance payments.",
+          "src_line": 220,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A previously-unrelated account suddenly onboarding steep health-program payments is uncovered, and prior-payment history plus the new inflow onset are in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-DORMANT-ACCOUNT-HEALTH-ONSET",
+            "class": "account · behavioral · stateful",
+            "features": [
+              "prior_health_payment_flag",
+              "health_payment_value_30d",
+              "onset_step_ratio",
+              "post_phe_declaration_flag",
+              "account_type"
+            ],
+            "logic": "an account with no prior history of health care-related payments begins receiving steep increases in health care benefit program or insurance payments after the public health emergency declaration — a sharp onset of program inflow on a previously-unrelated personal or business account",
+            "window": "rolling 30 days vs prior-12-month history",
+            "source": "Core transaction history + payer-tagging features (Gold)",
+            "route": "Tier-1 alert → COVID health-care fraud review gate"
+          }
+        },
+        {
+          "id": "IND-05",
+          "section": "financial",
+          "flag": "A purported health care service provider's account receives health care benefit program or health insurance payments related to COVID-19 services, and then individuals immediately withdraw the funds in a manner that is not typical for health care businesses (e.g., cashier's checks, cash withdrawals, certain types of Automated Clearing House (ACH) transfers, or domestic and international wire transfers).",
+          "src_line": 224,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Program payments landing and being immediately withdrawn in atypical forms (cashier's checks, cash, wires) is an uncovered rapid-extraction pattern, and inbound payer tagging plus outbound instrument/timing are in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-COVID-PAYMENT-RAPID-WITHDRAWAL",
+            "class": "account · flow-level · stateful",
+            "features": [
+              "inbound_health_payment_value",
+              "receipt_to_withdrawal_hours",
+              "atypical_instrument_flag",
+              "withdrawal_value_match_ratio",
+              "cash_or_wire_outbound_flag"
+            ],
+            "logic": "a purported health care provider's account receives COVID-19-related program or insurance payments and shortly afterward the funds are withdrawn in forms atypical for a health care business — cashier's checks, cash withdrawals, certain ACH transfers, or domestic/international wires in matching amounts within a short window",
+            "window": "rolling 7 days",
+            "source": "Core transaction + instrument-type features (Gold); health-program payer tagging",
+            "route": "Tier-1 alert → COVID health-care fraud review gate"
+          }
+        },
+        {
+          "id": "IND-06",
+          "section": "financial",
+          "flag": "After the COVID-19 public health emergency determination, a purported health care provider's account does not receive small-dollar check deposits, payments from merchant fee servicers, or cash payments from patients that would indicate patient copayments. This may indicate the absence of actual business activity.",
+          "src_line": 230,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Detecting the ABSENCE of copay-style inflows needs merchant-fee-servicer and small-dollar-deposit categorization we hold only partially; enrich the inflow taxonomy, then build the no-copay-activity signal."
+        },
+        {
+          "id": "IND-07",
+          "section": "financial",
+          "flag": "A newly formed health care business account has a volume or type of payment that seems inconsistent with expected levels of activity for such an account.",
+          "src_line": 235,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "New-account profiling already exists; enhance it with a health-care-business expected-activity benchmark rather than a separate rule."
+        },
+        {
+          "id": "IND-08",
+          "section": "financial",
+          "flag": "The physical location of a purported medical facility receiving reimbursements for COVID-19-related health care services or relief funds is non-existent, a residential address, a commercial mail receiving agency address (e.g., a UPS Store address), or another non-office building address (e.g., a purported medical facility is listed as a laboratory, but the physical address is a vacant lot, car dealership, restaurant, or retail store).",
+          "src_line": 238,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Verifying a facility's physical address type (non-existent / residential / CMRA / non-office) is not data the institution holds; source an address-verification / business-premises feed before any detection can use it."
+        },
+        {
+          "id": "IND-09",
+          "section": "financial",
+          "flag": "The purported laboratory, health care service provider, or medical service personnel or their counterparties appear to have a minimal web presence, or one that begins around the time of the COVID-19 public health emergency declaration.",
+          "src_line": 244,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Web-presence age/footprint is an external open-source signal not held in the AML data repo; source that feed before building."
+        },
+        {
+          "id": "IND-10",
+          "section": "financial",
+          "flag": "Following the public health emergency declaration, the physical location of a purported medical facility receiving payments for health care services or relief funds is far from the physical location of the majority of its patients or the providers purported to be practicing there, unless the facility is providing appropriate telehealth services (e.g., a purported medical facility located in a western state receives payments related to patients residing on the East Coast).",
+          "src_line": 250,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "A facility-to-patient geographic mismatch needs patient/counterparty geo attribution we hold only partially; enrich with geo data, then build the distance-mismatch signal (telehealth-excepted)."
+        },
+        {
+          "id": "IND-11",
+          "section": "financial",
+          "flag": "After the COVID-19 public health emergency declaration, a health care service provider's or other business account begins having overly complex, medical-related transactions involving multiple counterparties indicative of possible structuring, layering, kickbacks, or fraudulent medical claims.",
+          "src_line": 258,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Complex multi-counterparty structuring/layering is already captured by mature transaction-monitoring controls; no new build needed."
+        },
+        {
+          "id": "IND-12",
+          "section": "financial",
+          "flag": "A health care service provider's account makes frequent or unusually large payments recorded as advertising or marketing expenses, or makes recurring round-dollar payments to one or multiple individuals in a manner inconsistent with its payroll-related withdrawals. The payments may reference \"director fees,\" \"consulting fees,\" \"marketing,\" or \"business process outsourcing.\"",
+          "src_line": 263,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Round-dollar payments to individuals carrying advertising/consulting memos need transaction-memo text captured only partially as structured data; enrich with memo NLP, then build the disguised-payroll/kickback signal."
+        },
+        {
+          "id": "IND-13",
+          "section": "financial",
+          "flag": "A health care service provider starts receiving payments from laboratories and health care services companies, but there is no financial documentation (e.g., operating expense payments) that the provider rendered legitimate services.",
+          "src_line": 269,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Inbound payments from labs/health-care companies with no matching operating outflow indicating real services rendered is an uncovered sham-services pattern, and inbound vs categorized-outbound flow is in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-LAB-PAYMENTS-NO-OPEX",
+            "class": "entity · flow-level · stateful",
+            "features": [
+              "inbound_lab_payment_value_90d",
+              "operating_expense_outflow_90d",
+              "opex_to_inflow_ratio",
+              "counterparty_lab_flag",
+              "service_documentation_flag"
+            ],
+            "logic": "a health care provider starts receiving payments from laboratories and health care services companies while showing no operating-expense outflow consistent with rendering legitimate services — inbound lab payments with an operating-expense-to-inflow ratio near zero",
+            "window": "rolling 90 days",
+            "source": "Core transaction features with counterparty + category tagging (Gold)",
+            "route": "Tier-1 alert → COVID health-care fraud review gate"
+          }
+        },
+        {
+          "id": "IND-14",
+          "section": "financial",
+          "flag": "An account with no previous known association with providing health care services, receives an unexpected or excessive COVID-19-related payment that appears to be the CARES Act's Provider Relief Fund or the PPP-HCEA payments.  Shortly after the account receives the deposit, an individual(s) withdraws the funds via large cash withdrawals, cashier's checks, wires to an overseas account, transfers to personal accounts, or payments for non-business expenses.",
+          "src_line": 279,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "An unrelated account receiving a relief-fund deposit then rapidly draining it to cash/overseas/personal is an uncovered relief-fund layering pattern, and the relief-payer tag, prior-association history, and outbound flow are in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-RELIEF-FUND-RAPID-LAYERING",
+            "class": "account · flow-level · stateful",
+            "features": [
+              "relief_fund_payer_flag",
+              "prior_health_association_flag",
+              "deposit_to_withdrawal_hours",
+              "outbound_cash_overseas_personal_value",
+              "withdrawal_value_match_ratio"
+            ],
+            "logic": "an account with no previous association with health care services receives an unexpected or excessive CARES Act Provider Relief Fund or PPP-HCEA payment and shortly afterward drains it via large cash withdrawals, cashier's checks, overseas wires, personal-account transfers, or non-business payments — rapid layering of relief funds",
+            "window": "rolling 10 days",
+            "source": "Core transaction features (Gold); relief-fund payer tagging; prior-association history",
+            "route": "Tier-1 alert → COVID relief-fund fraud review gate"
+          }
+        },
+        {
+          "id": "IND-15",
+          "section": "financial",
+          "flag": "An account previously associated with providing health care services but that has not been recently active or appears to be defunct, receives an unexpected or excessive COVID-19-related payment that appears to be the CARES Act's Provider Relief Fund or the PPP-HCEA payments.",
+          "src_line": 285,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Dormant-account reactivation monitoring exists; enhance it to key on a defunct provider account receiving an unexpected relief-fund payment."
+        },
+        {
+          "id": "IND-16",
+          "section": "financial",
+          "flag": "An account holder receives a substantial amount of reimbursements from health care benefit programs or health insurance companies for services rendered at the same time that the account holder receives COVID-19-related unemployment insurance payments.",
+          "src_line": 289,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Correlating provider reimbursements with the same holder drawing COVID unemployment insurance needs a cross-program UI-payment tag we hold only partially; enrich with UI-payer tagging, then build the simultaneous-program signal."
+        }
+      ]
     },
     {
       "id": "fin-2021-a002",
@@ -358,7 +596,7 @@ const CORPUS = {
       "date": "2021-02-24",
       "source": "FinCEN FIN-2021-A002 · Advisory on Financial Crimes Targeting COVID-19 Economic Impact Payments · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 7,
+      "flag_count": 22,
       "derivable": true,
       "derived": true,
       "indicators": [
@@ -440,8 +678,8 @@ const CORPUS = {
       "title": "Advisory on Ransomware and the Use of the Financial System to Facilitate Ransom Payments",
       "date": "2021-11-08",
       "source": "FinCEN FIN-2021-A004 · Advisory on Ransomware and the Use of the Financial System to Facilitate Ransom Payments · public domain (17 U.S.C. 105)",
-      "extraction": "none",
-      "flag_count": 0,
+      "extraction": "low",
+      "flag_count": 1,
       "derivable": true,
       "derived": true,
       "indicators": [
@@ -619,7 +857,7 @@ const CORPUS = {
       "date": "2022-04-14",
       "source": "FinCEN FIN-2022-A001 · Advisory on Kleptocracy and Foreign Public Corruption · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 5,
+      "flag_count": 12,
       "derivable": true,
       "derived": true,
       "indicators": [
@@ -712,8 +950,191 @@ const CORPUS = {
       "date": "2022-06-15",
       "source": "FinCEN FIN-2022-A002 · Advisory on Elder Financial Exploitation · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 24,
-      "derivable": true
+      "flag_count": 28,
+      "derivable": true,
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "financial",
+          "flag": "Dormant accounts with large balances begin to show constant withdrawals.",
+          "src_line": 507,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "The canonical EFE signal — a long-dormant large-balance account reactivating into steady drawdowns is uncovered, and account dormancy, balance, and outflow cadence are all in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-DORMANT-DRAIN-ELDER",
+            "class": "account · account-level · stateful",
+            "features": [
+              "dormancy_days_prior",
+              "account_balance_at_reactivation",
+              "withdrawal_count_30d",
+              "outbound_value_ratio",
+              "elder_customer_flag"
+            ],
+            "logic": "an elder customer's long-dormant account holding a large balance reactivates and begins showing constant withdrawals — a steady drawdown cadence on an account quiet for an extended prior period",
+            "window": "rolling 30 days vs prior dormancy",
+            "source": "Core deposit + transaction features (Gold); account dormancy state; customer age flag",
+            "route": "Tier-1 alert → elder-financial-exploitation review gate"
+          }
+        },
+        {
+          "id": "IND-02",
+          "section": "financial",
+          "flag": "An older customer purchases large numbers of gift cards or prepaid access cards.",
+          "src_line": 509,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Bulk gift-card / prepaid-access-card purchases by an older customer is a classic scam-payment pattern that is uncovered, and card-purchase merchant tagging, count, and customer age are in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-ELDER-GIFTCARD-SPIKE",
+            "class": "account · behavioral · stateful",
+            "features": [
+              "giftcard_prepaid_purchase_count_7d",
+              "giftcard_value_total_7d",
+              "elder_customer_flag",
+              "purchase_vs_baseline_ratio",
+              "distinct_merchant_count"
+            ],
+            "logic": "an older customer purchases large numbers of gift cards or prepaid access cards over a short window — a purchase count and value well above the customer's baseline, a common scam-payment instrument",
+            "window": "rolling 7 days",
+            "source": "Core transaction + merchant-category features (Gold); customer age flag",
+            "route": "Tier-1 alert → elder-financial-exploitation review gate"
+          }
+        },
+        {
+          "id": "IND-03",
+          "section": "financial",
+          "flag": "An older customer suddenly begins discussing and buying CVC.",
+          "src_line": 511,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "A sudden first-time CVC purchase by an older customer is partially covered by new-CVC-adoption screening; enhance it with an elder-customer overlay rather than building net-new."
+        },
+        {
+          "id": "IND-04",
+          "section": "financial",
+          "flag": "An older customer sends multiple checks or wire transfers with descriptors in the memo line such as \"tech support services,\" \"winnings,\" or \"taxes.\"",
+          "src_line": 513,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Scam-typical memo descriptors (tech support, winnings, taxes) need transaction memo-line text captured only partially as structured data; enrich with memo NLP plus a scam-term list, then build."
+        },
+        {
+          "id": "IND-05",
+          "section": "financial",
+          "flag": "Uncharacteristic, sudden, abnormally frequent, or significant withdrawals of cash or transfers of assets from an older customer's account.",
+          "src_line": 516,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Uncharacteristic sudden/large withdrawal anomalies are already captured by standing transaction-anomaly monitoring; no new build needed for this typology."
+        },
+        {
+          "id": "IND-06",
+          "section": "financial",
+          "flag": "An older customer receives and transfers money interstate or abroad to recipients with whom they have no in-person relationship, and the explanation seems suspicious or indicative of a scam or money mule scheme.",
+          "src_line": 519,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "An older customer receiving then forwarding funds interstate/abroad to no-in-person-relationship recipients is an uncovered money-mule pattern, and the receive-then-forward flow, counterparty geo, and relationship flags are in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-ELDER-MULE-NOREL-TRANSFER",
+            "class": "account · flow-level · stateful",
+            "features": [
+              "inbound_then_outbound_match_ratio",
+              "recipient_no_relationship_flag",
+              "interstate_or_foreign_flag",
+              "receipt_to_forward_hours",
+              "elder_customer_flag"
+            ],
+            "logic": "an older customer receives money and then transfers it interstate or abroad to recipients with whom they have no in-person relationship — a receive-and-forward pass-through to unrelated distant counterparties, consistent with a scam or money-mule scheme",
+            "window": "rolling 10 days",
+            "source": "Core transaction + counterparty features (Gold); counterparty-geo; relationship/beneficiary linkage; customer age flag",
+            "route": "Tier-1 alert → elder-financial-exploitation review gate"
+          }
+        },
+        {
+          "id": "IND-07",
+          "section": "financial",
+          "flag": "Frequent large withdrawals, including daily maximum currency withdrawals from an ATM.",
+          "src_line": 523,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Daily-maximum ATM withdrawal monitoring exists; enhance it with a frequent-large-withdrawal + elder-customer overlay."
+        },
+        {
+          "id": "IND-08",
+          "section": "financial",
+          "flag": "Sudden or frequent non-sufficient fund activity.",
+          "src_line": 525,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Non-sufficient-fund activity is already tracked by standing account monitoring; no new build needed."
+        },
+        {
+          "id": "IND-09",
+          "section": "financial",
+          "flag": "Uncharacteristic nonpayment for services, which may indicate a loss of funds or of access to funds.",
+          "src_line": 527,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Recurring-payment lapse detection partially exists; enhance it to flag uncharacteristic nonpayment as a possible loss-of-access signal for elder customers."
+        },
+        {
+          "id": "IND-10",
+          "section": "financial",
+          "flag": "Debit transactions that are inconsistent for the older customer.",
+          "src_line": 529,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Per-customer debit profiling already exists; enhance the inconsistency score with an elder-customer overlay rather than a separate rule."
+        },
+        {
+          "id": "IND-11",
+          "section": "financial",
+          "flag": "Uncharacteristic attempts to wire large sums of money.",
+          "src_line": 531,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Large-wire attempt monitoring is a standing control; no new build needed for this typology."
+        },
+        {
+          "id": "IND-12",
+          "section": "financial",
+          "flag": "Closing of CDs or accounts without regard to penalties.",
+          "src_line": 533,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Closing CDs or accounts while disregarding early-withdrawal penalties is an uncovered urgency/coercion signal, and CD/account closure events plus the penalty incurred are in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-ELDER-PENALTY-DISREGARD-CLOSURE",
+            "class": "account · account-level · stateful",
+            "features": [
+              "cd_or_account_closure_flag",
+              "early_withdrawal_penalty_incurred",
+              "penalty_to_balance_ratio",
+              "elder_customer_flag",
+              "closure_to_outbound_hours"
+            ],
+            "logic": "an older customer closes CDs or accounts without regard to the early-withdrawal penalties incurred — accepting a material penalty to access funds quickly, consistent with urgency or coercion",
+            "window": "event-driven (closure event)",
+            "source": "Core account-event + balance features (Gold); penalty-incurred field; customer age flag",
+            "route": "Tier-1 alert → elder-financial-exploitation review gate"
+          }
+        }
+      ]
     },
     {
       "id": "fin-2024-a001",
@@ -721,9 +1142,132 @@ const CORPUS = {
       "title": "Advisory to Counter the Financing of Iran-Backed Terrorist Organizations",
       "date": "2024-05-08",
       "source": "FinCEN FIN-2024-A001 · Advisory to Counter the Financing of Iran-Backed Terrorist Organizations · public domain (17 U.S.C. 105)",
-      "extraction": "low",
-      "flag_count": 1,
-      "derivable": true
+      "extraction": "clean",
+      "flag_count": 11,
+      "derivable": true,
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "financial",
+          "flag": "A customer or a customer's counterparty conducts transactions with Office of Foreign Assets Control (OFAC)-designated entities and individuals, or transactions that contain a nexus to identifiers listed for OFAC-designated entities and individuals, to include email addresses, physical addresses, phone numbers, passport numbers, or CVC addresses.",
+          "src_line": 667,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Name-based OFAC screening is a mature baseline control; enhance it to match the broader identifier nexus (email, physical address, phone, passport, CVC address) rather than building net-new."
+        },
+        {
+          "id": "IND-02",
+          "section": "financial",
+          "flag": "Information included in a transaction between customers or in a note accompanying a peer-to-peer transfer include key terms known to be associated with terrorism or terrorist organizations.",
+          "src_line": 672,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Screening P2P notes for terrorism-associated key terms needs transaction free-text captured only partially as structured data; enrich with memo NLP plus a curated term list, then build."
+        },
+        {
+          "id": "IND-03",
+          "section": "financial",
+          "flag": "A customer conducts transactions with a money services business (MSB) or other financial institution, including a VASP, that operates in jurisdictions known for, or at high risk for, terrorist activity and is reasonably believed to have lax customer identification and verification processes, opaque ownership, or otherwise fails to comply with AML/CFT best practices.",
+          "src_line": 676,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Counterparty-institution geography and risk are partially covered by existing correspondent/VASP screening; enhance with a high-risk-jurisdiction + lax-AML/CFT MSB/VASP conjunction."
+        },
+        {
+          "id": "IND-04",
+          "section": "financial",
+          "flag": "A customer conducts transactions that originate with, are directed to, or otherwise involve entities that are front companies, general \"trading companies\" with unclear business purposes, or other companies whose beneficial ownership information indicates that they may have a nexus with Iran or other Iran-supported terrorist groups.  Indicators of possible front companies include opaque ownership structures, individuals and/or entities with obscure names that direct the company, or business addresses that are residential or co-located with other companies.",
+          "src_line": 681,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Front-company detection (opaque ownership, residential/co-located addresses, Iran nexus) needs a beneficial-ownership graph and address-type enrichment we hold only partially; enrich, then build."
+        },
+        {
+          "id": "IND-05",
+          "section": "financial",
+          "flag": "A customer that is or purports to be a charitable organization or NPO84 solicits donations but does not appear to provide any charitable services or openly supports terrorist activity or operations.  In some cases, these organizations may post on social media platforms or encrypted messaging apps to solicit donations, including in CVC.",
+          "src_line": 703,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Whether a purported charity provides real services or openly supports terrorism is an external open-source / social-media signal not held in the AML repo; source that feed before any detection can use it."
+        },
+        {
+          "id": "IND-06",
+          "section": "financial",
+          "flag": "A customer receives numerous small CVC payments from many wallets, then transfers the funds to another wallet, particularly if the customer logs in using an Internet Protocol (IP) based in a jurisdiction known for, or at high risk for, terrorist activity.",
+          "src_line": 708,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Aggregating many small inbound CVC payments then forwarding, paired with a login IP in a high-risk jurisdiction, is uncovered and computable — CVC inflow fan-in, the onward transfer, and login-IP geo are all in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-SMALL-CVC-AGGREGATION-HIGHRISK-IP",
+            "class": "account · flow-level · stateful",
+            "features": [
+              "distinct_inbound_wallet_count",
+              "small_cvc_payment_count_7d",
+              "onward_transfer_value_ratio",
+              "login_ip_highrisk_jurisdiction_flag",
+              "aggregation_to_transfer_hours"
+            ],
+            "logic": "a customer receives numerous small CVC payments from many distinct wallets over a short period and then forwards the aggregated funds to another wallet, while logging in from an IP based in a jurisdiction known for or at high risk for terrorist activity",
+            "window": "rolling 7 days",
+            "source": "Core CVC transaction + wallet-graph features (Gold); login-IP geolocation; high-risk-jurisdiction list",
+            "route": "Tier-1 alert → terrorist-financing review gate"
+          }
+        },
+        {
+          "id": "IND-07",
+          "section": "financial",
+          "flag": "A customer makes money transfers to a jurisdiction known for, or at high risk for, terrorist activity that are inconsistent with their stated occupation or business purpose with vague stated purposes such as \"travel expenses,\" \"charity,\" \"aid,\" or \"gifts.",
+          "src_line": 714,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Transfers to a high-risk jurisdiction that are inconsistent with the customer's stated occupation and carry vague purposes are uncovered, and destination geo, customer occupation/profile, and stated transfer purpose are in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-VAGUE-PURPOSE-HIGHRISK-TRANSFER",
+            "class": "account · behavioral · stateful",
+            "features": [
+              "destination_highrisk_jurisdiction_flag",
+              "stated_purpose_vague_flag",
+              "transfer_value_vs_occupation_profile",
+              "occupation_business_mismatch_flag",
+              "transfer_count_90d"
+            ],
+            "logic": "a customer makes money transfers to a jurisdiction known for or at high risk for terrorist activity that are inconsistent with their stated occupation or business purpose and carry vague stated purposes such as travel expenses, charity, aid, or gifts",
+            "window": "rolling 90 days",
+            "source": "Core transaction + KYC occupation-profile features (Gold); destination-geo + high-risk-jurisdiction list; stated-purpose field",
+            "route": "Tier-1 alert → terrorist-financing review gate"
+          }
+        },
+        {
+          "id": "IND-08",
+          "section": "financial",
+          "flag": "A customer account receives large payouts from social media fundraisers or crowdfunding platforms and is then accessed from an IP address in a jurisdiction known for, or at high risk for, terrorist activity, particularly if the social media accounts that contribute to the fundraisers contain content supportive of terrorist campaigns.",
+          "src_line": 718,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Crowdfunding-payout inflow and login-IP geo are in repo, but tying the contributing social-media accounts to terrorist-supportive content needs external content enrichment we hold only partially; enrich, then build."
+        },
+        {
+          "id": "IND-09",
+          "section": "financial",
+          "flag": "A customer company is incorporated in the United States or a third-country jurisdiction, but its activities occur solely in jurisdictions known for, or at high risk for, terrorist activity and show no relationship to the company's stated business purpose.",
+          "src_line": 723,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Comparing a company's incorporation jurisdiction against where its activity actually occurs needs counterparty/transaction geo attribution and a stated-business-purpose mapping we hold only partially; enrich, then build the incorporation-vs-activity mismatch signal."
+        }
+      ]
     },
     {
       "id": "fin-2024-a002",
@@ -732,7 +1276,7 @@ const CORPUS = {
       "date": "2024-06-20",
       "source": "FinCEN FIN-2024-A002 · Supplemental Advisory on the Procurement of Precursor Chemicals and Manufacturing Equipment Used for the Synthesis of Illicit Fentanyl and Other Synthetic Opioids · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 14,
+      "flag_count": 17,
       "derivable": true,
       "derived": true,
       "indicators": [
@@ -944,9 +1488,182 @@ const CORPUS = {
       "title": "FinCEN Advisory on the Financing of the Islamic State of Iraq and Syria (ISIS) and its Global Affiliates",
       "date": "2025-04-01",
       "source": "FinCEN FIN-2025-A001 · FinCEN Advisory on the Financing of the Islamic State of Iraq and Syria (ISIS) and its Global Affiliates · public domain (17 U.S.C. 105)",
-      "extraction": "low",
-      "flag_count": 2,
-      "derivable": true
+      "extraction": "clean",
+      "flag_count": 12,
+      "derivable": true,
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "financial",
+          "flag": "One credit card or bank account is used to book travel to or accommodation and transportation in an area of known ISIS activity for several unrelated people at the same time for no known legitimate purpose.",
+          "src_line": 571,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A single instrument booking travel/accommodation for several unrelated people into an ISIS-activity area is uncovered and computable — the shared card/account, merchant-category (travel), beneficiary count, and destination geo are all in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-SHARED-INSTRUMENT-ISIS-TRAVEL",
+            "class": "account · flow-level · stateful",
+            "features": [
+              "distinct_traveler_count_per_instrument",
+              "travel_merchant_category_flag",
+              "destination_isis_area_flag",
+              "unrelated_beneficiary_flag",
+              "booking_window_hours"
+            ],
+            "logic": "one credit card or bank account books travel, accommodation, or transportation into an area of known ISIS activity for several unrelated people within a short window with no known legitimate purpose — a shared instrument funding multi-person travel to a conflict zone",
+            "window": "rolling 14 days",
+            "source": "Core transaction + merchant-category features (Gold); destination-geo / ISIS-area list; beneficiary linkage",
+            "route": "Tier-1 alert → terrorist-financing review gate"
+          }
+        },
+        {
+          "id": "IND-02",
+          "section": "financial",
+          "flag": "Fundraisers are attached to social media profiles that show support for ISIS or display ISIS-related iconography or refer to supporting the \"mujahideen\" or the \"war against kufar (non-believers),\" especially if the fundraisers are soliciting donations to fund travel to an area of known ISIS activity.  The fundraising appeal posted on social media references aid to imprisoned women and children in Iraq or Syria.",
+          "src_line": 575,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Linking a fundraiser to social-media profiles displaying ISIS iconography or rhetoric is an external open-source signal not held in the AML repo; source that feed before any detection can use it."
+        },
+        {
+          "id": "IND-03",
+          "section": "financial",
+          "flag": "A customer collects small amounts through P2P transfers, social media, or virtual currency payments over a short period of time and then sends them in a lump sum to an individual located in a region where ISIS presence is prevalent.",
+          "src_line": 595,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Collecting many small inbound P2P/CVC payments then forwarding a lump sum to an individual in an ISIS-prevalent region is uncovered and computable — inbound fan-in, the lump-sum onward transfer, and destination geo are in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-CVC-AGGREGATION-ISIS-REGION",
+            "class": "account · flow-level · stateful",
+            "features": [
+              "small_inbound_payment_count_7d",
+              "inbound_channel_mix",
+              "lumpsum_outbound_value",
+              "outbound_value_vs_aggregate_ratio",
+              "destination_isis_region_flag"
+            ],
+            "logic": "a customer collects small amounts through P2P transfers, social media, or virtual currency over a short period and then sends them as a lump sum to an individual located in a region where ISIS presence is prevalent — aggregation-then-forward to a conflict region",
+            "window": "rolling 7 days",
+            "source": "Core transaction + counterparty-geo features (Gold); ISIS-region list",
+            "route": "Tier-1 alert → terrorist-financing review gate"
+          }
+        },
+        {
+          "id": "IND-04",
+          "section": "financial",
+          "flag": "A customer sends remittances with no known legitimate purpose from the United States to multiple individuals in jurisdictions, such as Türkiye, known for ISIS facilitation activity who do not appear to have any relation to the sender.",
+          "src_line": 599,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Remittance fan-out to multiple unrelated individuals in known-facilitation jurisdictions is uncovered and computable — outbound remittance counterparties, their geo, and sender-beneficiary relationship are in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-REMITTANCE-FANOUT-ISIS-FACILITATION",
+            "class": "account · flow-level · stateful",
+            "features": [
+              "distinct_remittance_beneficiary_count",
+              "facilitation_jurisdiction_flag",
+              "beneficiary_relationship_flag",
+              "remittance_value_total_30d",
+              "stated_purpose_present_flag"
+            ],
+            "logic": "a customer sends remittances with no known legitimate purpose from the United States to multiple individuals in jurisdictions known for ISIS facilitation activity (such as Türkiye) who have no apparent relation to the sender — a fan-out of unrelated remittances to a facilitation corridor",
+            "window": "rolling 30 days",
+            "source": "Core remittance transaction + counterparty-geo features (Gold); facilitation-jurisdiction list; beneficiary linkage",
+            "route": "Tier-1 alert → terrorist-financing review gate"
+          }
+        },
+        {
+          "id": "IND-05",
+          "section": "financial",
+          "flag": "A customer attempts to purchase plane or other travel tickets after abruptly liquidating assets, closing accounts, cancelling subscriptions, or receiving large unexplained sums of cash.  A period of account dormancy following these behaviors should also be regarded as suspicious, even if the customer eventually resumes transactions within the United States.",
+          "src_line": 603,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Asset-liquidation and account-closure behaviors are partially monitored as mobilization indicators; enhance the existing screen with a liquidation-then-travel-purchase sequence plus a following dormancy window."
+        },
+        {
+          "id": "IND-06",
+          "section": "financial",
+          "flag": "A customer abruptly appears to seek as many lines of credit as possible, for example, by acquiring several credit cards and taking out one or more loans for unclear reasons, especially if the customer has not used credit cards or taken out loans in the past.  This behavior should be regarded as especially suspicious if the customer uses newly obtained credit cards either exclusively or almost exclusively for cash advances and purchases of virtual currencies but then fails to make loan or credit card payments when they come due.",
+          "src_line": 608,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "An abrupt credit-seeking burst by a customer with no credit history, used for cash advances and CVC purchases with no repayment, is an uncovered bust-out-style mobilization pattern, and credit-line openings, advance/CVC usage, and payment status are in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-CREDIT-BURST-CVC-NO-REPAY",
+            "class": "account · behavioral · stateful",
+            "features": [
+              "new_credit_lines_count_30d",
+              "prior_credit_history_flag",
+              "cash_advance_cvc_spend_ratio",
+              "missed_payment_flag",
+              "days_to_first_delinquency"
+            ],
+            "logic": "a customer with no prior credit history abruptly opens as many lines of credit as possible (several cards and loans), uses the new credit almost exclusively for cash advances and virtual-currency purchases, then fails to make payments when due — a credit-burst-then-default mobilization pattern",
+            "window": "rolling 30 days",
+            "source": "Core credit-line + transaction features (Gold); repayment/delinquency status",
+            "route": "Tier-1 alert → terrorist-financing review gate"
+          }
+        },
+        {
+          "id": "IND-07",
+          "section": "financial",
+          "flag": "A customer begins receiving a sudden influx of unexplained cash deposits, especially if that customer is unemployed or these deposits are in addition to a regular paycheck, or if the deposits come from ATMs in locations where ISIS is prevalent, but where the customer is not known to reside or have traveled.",
+          "src_line": 615,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Unexplained cash-deposit monitoring exists; enhance it with an unemployed-or-beyond-paycheck context plus an ISIS-prevalent ATM-location overlay."
+        },
+        {
+          "id": "IND-08",
+          "section": "financial",
+          "flag": "A customer suddenly adopts or increases their use of financial methods that conceal the ultimate source or end use of funds, for example P2P transfers, ATM withdrawals, third party processors, prepaid cards, virtual currency, or wire transfers.",
+          "src_line": 620,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Channel-shift detection exists; enhance it to flag a sudden adoption/increase of concealment-prone methods (P2P, prepaid, CVC, third-party processors) against the customer's own baseline."
+        },
+        {
+          "id": "IND-09",
+          "section": "financial",
+          "flag": "A customer makes deposits in an account locally which are then withdrawn from other locations, including from abroad, where the individual is not known to reside or have traveled but where ISIS is prevalent.",
+          "src_line": 624,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Local-deposit / foreign-withdrawal geographic divergence into ISIS-prevalent locations needs withdrawal-location geo plus a customer travel/residence profile we hold only partially; enrich, then build the deposit-vs-withdrawal divergence signal."
+        },
+        {
+          "id": "IND-10",
+          "section": "financial",
+          "flag": "A customer places virtual currency in a virtual currency wallet using an IP address in one location which is then withdrawn from virtual currency kiosks or converted to fiat currency by users with IP addresses in different locations where the individual is not known to reside or have traveled but where ISIS is prevalent.",
+          "src_line": 628,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Matching CVC placement-IP against kiosk/conversion withdrawal-IP in ISIS-prevalent locations needs IP-geo on both legs plus kiosk attribution we hold only partially; enrich, then build the IP-divergence signal."
+        },
+        {
+          "id": "IND-11",
+          "section": "financial",
+          "flag": "A customer's account appears to have been accessed in multiple countries at the same time or within a very short time period, particularly if the account is accessed in countries where ISIS is prevalent.",
+          "src_line": 633,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Impossible-travel / concurrent-access detection already exists from device-and-session analytics; enhance it with an ISIS-prevalent-country overlay rather than building net-new."
+        }
+      ]
     },
     {
       "id": "fin-2025-a002",
@@ -955,7 +1672,7 @@ const CORPUS = {
       "date": "2025-06-06",
       "source": "FinCEN FIN-2025-A002 · FinCEN Advisory on the Iranian Regime’s Illicit Oil Smuggling Activities, Shadow Banking Networks, and Weapons Procurement Efforts · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 16,
+      "flag_count": 20,
       "derivable": true,
       "derived": true,
       "indicators": [
@@ -1188,7 +1905,7 @@ const CORPUS = {
       "date": "2025-08-28",
       "source": "FinCEN FIN-2025-A003 · FinCEN Advisory on the Use of Chinese Money Laundering Networks by Mexico-Based Transnational Criminal Organizations to Launder Illicit Proceeds · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 18,
+      "flag_count": 21,
       "derivable": true,
       "derived": true,
       "indicators": [
@@ -1455,9 +2172,342 @@ const CORPUS = {
       "title": "FinCEN Advisory on Health Care Fraud Schemes Targeting Medicare, Medicaid, and Other Federal and State Health Care Benefit Programs",
       "date": "2026-03-30",
       "source": "FinCEN FIN-2026-A001 · FinCEN Advisory on Health Care Fraud Schemes Targeting Medicare, Medicaid, and Other Federal and State Health Care Benefit Programs · public domain (17 U.S.C. 105)",
-      "extraction": "none",
-      "flag_count": 0,
-      "derivable": true
+      "extraction": "clean",
+      "flag_count": 6,
+      "derivable": true,
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "financial",
+          "flag": "A customer with neither legal permanent residence in the United States nor significant experience in the health care industry (e.g., based on the customer's stated occupation) tries to open a bank account as the owner or employee of a recently established or purchased health care provider or supplier registered with a Health Care Benefit Program.",
+          "src_line": 316,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Onboarding KYC carries residency and stated occupation, but tying them to a freshly registered Health Care Benefit Program provider needs an entity-age + provider-registry enrichment we hold only partially; enrich, then build the new-provider onboarding screen."
+        },
+        {
+          "id": "IND-02",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier registered with a Health Care Benefit Program that has beneficial owners with prior health care or government benefits fraud convictions.",
+          "src_line": 320,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Prior fraud-conviction records on beneficial owners are not data a financial institution holds; source a criminal-history / debarment feed before any detection signal can exist."
+        },
+        {
+          "id": "IND-03",
+          "section": "financial",
+          "flag": "A customer is the nominal or beneficial owner of a health care provider or supplier registered with a Health Care Benefit Program and has familial or business affiliations with individuals with health care or government benefits fraud convictions.",
+          "src_line": 323,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Familial / business affiliation to convicted individuals needs both a relationship graph and conviction records we do not hold; source those feeds before building."
+        },
+        {
+          "id": "IND-04",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier registered with a Health Care Benefit Program, and the account is accessed through an Internet Protocol (IP) address or Device ID that is linked to multiple accounts at the financial institution or other financial institutions or connected to foreign jurisdictions.",
+          "src_line": 326,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Device/IP linkage analytics already exist for fraud-ring detection; enhance the existing screen with a health-care-provider + shared-device/foreign-IP conjunction rather than building net-new."
+        },
+        {
+          "id": "IND-05",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier registered with a Health Care Benefit Program and has nominal and beneficial owners listed on the account who also appear on bank accounts for other separate and distinct health care providers or suppliers.",
+          "src_line": 330,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Detecting shared owners across distinct provider accounts needs a beneficial-owner graph spanning accounts that we hold only partially; enrich the ownership graph, then build the shared-owner ring signal."
+        },
+        {
+          "id": "IND-06",
+          "section": "financial",
+          "flag": "A customer is a recently established or purchased health care provider or supplier registered with a Health Care Benefit Program, and there are changes in the individuals listed as beneficiaries of the corporate account without a change to the name or Tax Identification Number on the account.",
+          "src_line": 340,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Beneficiary changes with a static name/TIN need a historized signatory/beneficiary record we keep only partially; enrich with beneficiary-change history, then build."
+        },
+        {
+          "id": "IND-07",
+          "section": "financial",
+          "flag": "A customer that is a recently established or purchased health care provider or supplier receives a significant amount of reimbursements from a Health Care Benefit Program or commercial insurers and then immediately transfers those funds to other recently established companies with the same nominal or beneficial owners, little to no online presence, and other indicators of illicit shell company activity.",
+          "src_line": 344,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Reimbursements landing and immediately passing to same-owner newly-formed companies is an uncovered shell pass-through, and inbound reimbursement flow, counterparty entity age, and beneficial-owner overlap are all in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-REIMBURSE-SHELL-PASSTHROUGH",
+            "class": "entity · flow-level · stateful",
+            "features": [
+              "inbound_reimbursement_value",
+              "reimburse_to_transfer_hours",
+              "counterparty_entity_age_days",
+              "beneficial_owner_overlap_flag",
+              "outbound_value_match_ratio"
+            ],
+            "logic": "a recently established health care provider receives a significant reimbursement from a Health Care Benefit Program or commercial insurer and shortly afterward transfers an equivalent amount to other recently established companies sharing its nominal or beneficial owners — a same-owner shell pass-through of program funds",
+            "window": "rolling 14 days",
+            "source": "Core transaction + counterparty features (Gold); beneficial-owner overlap; counterparty entity-age registry",
+            "route": "Tier-1 alert → health-care fraud review gate"
+          }
+        },
+        {
+          "id": "IND-08",
+          "section": "financial",
+          "flag": "A customer is a recently established health care provider or supplier that receives a significant number of reimbursements from a Health Care Benefit Program or commercial insurers soon after starting operations.",
+          "src_line": 349,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A brand-new provider drawing heavy reimbursements right after opening is uncovered, and entity age (account-open date) plus reimbursement volume are both in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-NEWENTITY-EARLY-REIMBURSE-SURGE",
+            "class": "account · behavioral · stateful",
+            "features": [
+              "days_since_account_open",
+              "reimbursement_count_30d",
+              "reimbursement_value_30d",
+              "program_payer_flag",
+              "value_vs_peer_provider_ratio"
+            ],
+            "logic": "a health care provider account opened recently receives a significant number and value of Health Care Benefit Program or insurer reimbursements within a short window of starting operations — early-life reimbursement volume well above the peer-provider baseline",
+            "window": "rolling 30 days since account open",
+            "source": "Core reimbursement transaction + account-open features (Gold); MAC/insurer payer tagging",
+            "route": "Tier-1 alert → health-care fraud review gate"
+          }
+        },
+        {
+          "id": "IND-09",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier registered with a Health Care Benefit Program that is receiving a significant increase in reimbursements soon after a change in beneficial ownership.",
+          "src_line": 352,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Reimbursement-surge monitoring exists; enhance it to key on the conjunction with a recent beneficial-ownership change rather than standing up a separate rule."
+        },
+        {
+          "id": "IND-10",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier that suddenly has a significant increase in reimbursements from Health Care Benefit Programs or commercial insurers.",
+          "src_line": 355,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A sudden step-change in reimbursement volume against a provider's own baseline is uncovered and computable directly from the reimbursement time series in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-REIMBURSE-SUDDEN-SURGE",
+            "class": "account · time-series · stateful",
+            "features": [
+              "reimbursement_value_current_month",
+              "reimbursement_value_trailing_baseline",
+              "surge_ratio",
+              "program_payer_flag",
+              "months_active"
+            ],
+            "logic": "a health care provider's monthly reimbursement value from Health Care Benefit Programs or insurers jumps sharply above its own trailing baseline — a sudden surge ratio beyond the provider's established norm",
+            "window": "rolling 12 months (baseline) vs current month",
+            "source": "Core reimbursement transaction features (Gold); MAC/insurer payer tagging",
+            "route": "Tier-1 alert → health-care fraud review gate"
+          }
+        },
+        {
+          "id": "IND-11",
+          "section": "financial",
+          "flag": "A customer is a recently established or purchased health care provider or supplier registered with Health Care Benefit Programs or commercial insurers that receives a significant amount of reimbursements inconsistent with the customer's profile (e.g., receiving a significant amount of payments from Medicare Part A and Part B MACs for reimbursements beyond the expected activity of other similar health care providers or suppliers).",
+          "src_line": 357,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Profile/peer-deviation scoring already exists for transaction monitoring; enhance it with a provider-peer reimbursement benchmark rather than building net-new."
+        },
+        {
+          "id": "IND-12",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier that receives significant volumes of reimbursements from a Health Care Benefit Program or commercial insurers but has little to no legitimate business expenses associated with the provision of health care goods and services (e.g., receiving reimbursements from DME MACs but little to no purchases of DME).",
+          "src_line": 362,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "High inbound reimbursements with near-zero matching operating outflows (supplies, payroll, DME purchases) is an uncovered no-opex shell pattern, and inbound vs categorized-outbound flow is in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-REIMBURSE-NO-OPEX",
+            "class": "entity · flow-level · stateful",
+            "features": [
+              "reimbursement_inflow_90d",
+              "operating_expense_outflow_90d",
+              "opex_to_reimbursement_ratio",
+              "supply_purchase_count_90d",
+              "payroll_present_flag"
+            ],
+            "logic": "a health care provider receives significant reimbursement inflows but shows little to no legitimate operating outflow over the same period — operating-expense-to-reimbursement ratio near zero with no supply purchases or payroll, inconsistent with genuine provision of health care goods and services",
+            "window": "rolling 90 days",
+            "source": "Core transaction features with merchant/category tagging (Gold); reimbursement payer tagging",
+            "route": "Tier-1 alert → health-care fraud review gate"
+          }
+        },
+        {
+          "id": "IND-13",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier that receives a significant volume of reimbursements from a single Health Care Benefit Program as opposed to other customers that receive reimbursements from multiple Health Care Benefit Programs (e.g., a customer is receiving a significant amount of reimbursements from one MAC for only one type of health care good or service such as DME).",
+          "src_line": 366,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Payer concentration is computable from reimbursement source tagging already monitored for other purposes; enhance with a single-program / single-service concentration score versus peers."
+        },
+        {
+          "id": "IND-14",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier with a significant amount of transactional activity consisting of \"consulting fees,\" \"marketing fees,\" and other nondescriptive, repetitive invoices.",
+          "src_line": 371,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Flagging nondescriptive repetitive memo lines (consulting/marketing fees) needs transaction-memo text we capture only partially as structured data; enrich with memo NLP, then build the invoice-pattern signal."
+        },
+        {
+          "id": "IND-15",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier that receives a significant volume of reimbursements from a Health Care Benefit Program and transfers the funds to another company registered to a residential address.",
+          "src_line": 374,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Detecting a counterparty registered to a residential address needs an address-type / business-registry enrichment we hold only partially; enrich, then build the program-funds-to-residential-entity signal."
+        },
+        {
+          "id": "IND-16",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier that has outgoing transactions to, or expenditures related to, companies that have no apparent related nexus to the health care industry. This could include residential real estate and luxury goods such as art or jewelry.",
+          "src_line": 380,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Merchant-category and luxury-spend tagging partially exist; enhance the existing high-risk-spend screen with a health-care-provider + no-industry-nexus outflow conjunction."
+        },
+        {
+          "id": "IND-17",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier with consistently low to moderate billing for a year or more and then suddenly begins to file a large number of claims (i.e., spike billing).",
+          "src_line": 383,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A long low-billing baseline followed by an abrupt claims spike is an uncovered dormant-then-spike pattern, and the per-provider reimbursement/claims time series in repo makes it immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-DORMANT-THEN-SPIKE-BILLING",
+            "class": "account · time-series · stateful",
+            "features": [
+              "billing_baseline_12m",
+              "billing_value_current_period",
+              "spike_ratio",
+              "low_billing_months_prior",
+              "claim_count_current_period"
+            ],
+            "logic": "a health care provider sustains consistently low to moderate billing for a year or more, then abruptly files a large volume of claims — a spike ratio far above a long quiet baseline (dormant-then-spike billing)",
+            "window": "trailing 12-month baseline vs current period",
+            "source": "Core reimbursement/claims time-series features (Gold)",
+            "route": "Tier-1 alert → health-care fraud review gate"
+          }
+        },
+        {
+          "id": "IND-18",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier with a pattern of making significant cash withdrawals for no readily apparent business reason.",
+          "src_line": 385,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Significant unexplained cash withdrawals are already captured by the institution's standing cash-activity monitoring; no new build needed."
+        },
+        {
+          "id": "IND-19",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier with a significant increase in cash withdrawals correlating to a significant increase in billings (i.e., customer is potentially paying kickbacks).",
+          "src_line": 387,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "The correlation of rising cash withdrawals with rising billings (a kickback signature) is uncovered, and both cash-withdrawal and reimbursement time series are in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-CASHOUT-TRACKS-BILLING",
+            "class": "account · time-series · stateful",
+            "features": [
+              "cash_withdrawal_value_monthly",
+              "reimbursement_value_monthly",
+              "withdrawal_billing_correlation",
+              "cash_withdrawal_increase_ratio",
+              "billing_increase_ratio"
+            ],
+            "logic": "a health care provider's cash withdrawals rise in step with its billings over time — a positive correlation between increasing cash-out and increasing reimbursements, consistent with billings funding kickback cash payments",
+            "window": "rolling 6 months",
+            "source": "Core cash-activity + reimbursement time-series features (Gold)",
+            "route": "Tier-1 alert → health-care fraud review gate"
+          }
+        },
+        {
+          "id": "IND-20",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier that is transferring a significant volume of funds to individuals via high-value checks.",
+          "src_line": 389,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "High-value check monitoring exists; enhance it to surface a provider transferring significant check volume to individual payees specifically."
+        },
+        {
+          "id": "IND-21",
+          "section": "financial",
+          "flag": "Without credible explanation, a customer routinely cashes high-value checks drawn from accounts associated with a health care provider or supplier.",
+          "src_line": 391,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Routine cashing of high-value checks is already within the institution's standing check / cash monitoring; no new build needed."
+        },
+        {
+          "id": "IND-22",
+          "section": "financial",
+          "flag": "A customer that is a health care provider or supplier, or the customer's employee, engages in behavior suggesting efforts to evade the Currency Transaction Report (CTR) reporting requirement (e.g., alters or cancels a transaction when advised a CTR would be filed or engages in structuring with multiple cash transactions for under $10,000), as well as avoid recordkeeping requirements.",
+          "src_line": 393,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "CTR-evasion / structuring detection is a mature, already-deployed BSA control; no new build needed for this typology."
+        },
+        {
+          "id": "IND-23",
+          "section": "financial",
+          "flag": "A customer is a recently established or purchased health care provider or supplier registered with a Health Care Benefit Program that sends a significant amount of wire transfers to individuals and companies located in foreign jurisdictions.",
+          "src_line": 398,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Cross-border wire monitoring exists; enhance it with a new-provider + significant-foreign-wire conjunction rather than a standalone rule."
+        },
+        {
+          "id": "IND-24",
+          "section": "financial",
+          "flag": "A customer is a health care provider or supplier registered with a Health Care Benefit Program that sends money transfers to VASPs, brokerage accounts, and online betting platforms for no seemingly legitimate business reason.",
+          "src_line": 401,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Flagging transfers to VASPs / brokerages / betting platforms needs counterparty-type tagging of those destinations we hold only partially; enrich the counterparty registry, then build the out-of-pattern-destination signal."
+        }
+      ]
     }
   ]
 };

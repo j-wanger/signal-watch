@@ -7,7 +7,7 @@ parents: ["phase-18-corpus-explorer-arc"]
 created: 2026-06-06
 updated: 2026-06-06
 source: plan
-status: active
+status: completed
 scope: ["tests/**", "scripts/derive_signals.py", "README.md", "CLAUDE.md", "tests/smoke-checklist.md"]
 entry_criteria: "Phase 18 complete + accepted (impl 6d654a4 — corpus explorer 5-screen arc ships); M0–M7 roadmap + the arc complete, demo at Definition of Done."
 exit_criteria: "node arc harness exits 0 (~15 assertions, zero deps) · --selftest gains the glued _rf_triage pin · --check all zero drift + frozen set git-diff-empty · README/CLAUDE/smoke-checklist document the harness."

@@ -1,6 +1,6 @@
 # Active Phase Context
 
-Phase: 19 - Durability closeout — commit corpus-explorer test harness + pin _rf_triage (M7) — DELIVERED, all 3 lite tasks [x], exit criteria GREEN (harness 28/28, --selftest PASS, --check all 4-artifact zero drift, frozen set git-diff-empty); awaiting the delivery-accepted gate (flips on commit). At the end of the completed M0–M7 roadmap (demo at Definition of Done): locked in the corpus explorer's 5-screen behavior with a committed dep-free test harness + cleared the one named code-debt item honestly.
+Phase: 19 - Durability closeout — commit corpus-explorer test harness + pin _rf_triage (M7) — DELIVERED + accepted (2026-06-06); all 3 lite tasks [x]; impl commit ab0739a; exit criteria GREEN (harness 28/28, --selftest PASS, --check all 4-artifact zero drift, frozen set git-diff-empty). M0–M7 + the corpus-explorer arc + durability are all complete and the demo is at Definition of Done — run /dev-plan only for a net-new stakeholder ask (no remaining internal work without fabrication risk).
 Objective: T1 (M) commit a ZERO-DEP Node DOM-shim harness that reads the committed `dist/corpus/index.html`, drives the 5-screen arc, and asserts the ~15 Ph18 invariants · T2 (S) PIN + DISCLOSE `_rf_triage` (a glued-fixture `--selftest` assertion + a one-line comment, NO output change) · T3 (S) wire the harness command into README + CLAUDE + smoke-checklist.
 
 Scope (the ONLY unfreeze): `tests/**`, `scripts/derive_signals.py` (comment + selftest fixture ONLY — no output change), `README.md`, `CLAUDE.md`, `tests/smoke-checklist.md`. FROZEN byte-untouched: `index.html`, `corpus.html`, `scripts/build.py`, `config/**`, `data/fincen/**` (incl. corpus-status.json + derived/*.json), ALL of `dist/**` (the harness only READS dist/corpus/index.html).
@@ -15,4 +15,4 @@ Abort: DEGRADE to a leaner assertion set (boot + each screen renders without thr
 
 Gates:
 - [x] Direction confirmed by user (durability closeout over call-it-done / showcase-debt-true-up / new-stakeholder-ask; zero-dep Node DOM-shim; _rf_triage pin-not-rewrite — 2026-06-06)
-- [ ] Delivery accepted (post-implementation report)
+- [x] Delivery accepted (post-implementation report 2026-06-06; impl commit ab0739a; 28/28 harness, --selftest PASS, --check all 4-artifact zero drift, frozen set git-diff-empty)

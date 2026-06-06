@@ -3,7 +3,7 @@
 > Last updated: 2026-06-06 by /dev-plan (Phase 19)
 
 <!-- phase:phase-19-durability-closeout -->
-<!-- gate-log:phase-19 direction=approved delivery=pending -->
+<!-- gate-log:phase-19 direction=approved delivery=accepted -->
 
 ## Phase 19: Durability closeout — commit corpus-explorer test harness + pin _rf_triage — M7
 

@@ -201,7 +201,8 @@ const REC_LABEL={BUILD_NOW:'build now',ENHANCE:'enhance',BUILD_ENRICH:'build + e
 
 const STEPS=['Select advisory','Coverage','Build recs','Signal'];
 
-function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+// escapes text AND attribute positions (quotes included) — corpus.html interpolates into both.
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 /* ---------- defensive rendering ---------- */
 function validateCorpus(c){

@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-05
 updated: 2026-06-05
 source: plan
-status: active
+status: completed
 ceremony: lite
 scope: ["corpus.html", "scripts/build.py", "scripts/derive_signals.py", "data/fincen/corpus-status.json", "dist/corpus/index.html", "README.md", "CLAUDE.md"]
 entry_criteria: "Phase 12 complete + accepted (M7 foundation): the deterministic spine is validated across all 14 FinCEN advisories (7 CLEAN / 3 LOW / 4 NEEDS), and the LLM backend (no key) derived 2 proof-slice records (fin-2022-a001 kleptocracy 5-ind/2-BUILD_NOW + fin-2024-a002 PRC precursors 14-ind/4-BUILD_NOW), each passing --check-derived. The derived-record shape (per-indicator status/data/build_rec/rationale + build_logic on BUILD_NOW gaps) is stable. User wants the PAYOFF: render the corpus-backed demo so a stakeholder picks an advisory and watches coverage → build recommendations → signal."

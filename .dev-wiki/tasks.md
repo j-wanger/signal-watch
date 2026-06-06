@@ -3,7 +3,7 @@
 > Last updated: 2026-06-05 by /dev-plan (Phase 13)
 
 <!-- phase:phase-13-corpus-explorer -->
-<!-- gate-log:phase-13 direction=approved delivery=pending -->
+<!-- gate-log:phase-13 direction=approved delivery=accepted -->
 
 ## Phase 13: Corpus explorer (advisory-selection front-end + per-indicator build-rec render) — M7 — THE PAYOFF
 

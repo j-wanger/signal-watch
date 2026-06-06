@@ -112,17 +112,27 @@ non-derivable).
 `dist/corpus/index.html` is a **second, separate** single-file ship artifact: a FinCEN **corpus
 explorer**. Where the six-act typology demos each tell one scripted story, the explorer points the same
 loop at the *whole public advisory corpus* — you pick one of the 14 advisories and watch it derive. It
-is a **staged 4-screen flow**:
+is a **staged 5-screen arc** (Phase 18 gave it the two beats the six-act showcase has and the explorer
+lacked — a human gate and a close-the-loop payoff):
 
 1. **Select** — all 14 advisories, each with an honest status chip: *derived* (live, clickable — 12 of
    them), or *no red-flag list* (non-derivable — the 2 FATF jurisdiction advisories). The chip also has a
    *clean / low* extraction state (ready to derive, not yet derived) for any future advisory added to the
    corpus before it is derived.
 2. **Coverage** — the chosen advisory's coverage gauge, derived from its indicator statuses.
-3. **Build recommendations** *(the new centerpiece)* — per red-flag indicator: coverage × data →
-   one **build recommendation** (`BUILD NOW / ENHANCE / BUILD + ENRICH / SOURCE DATA / MONITOR /
-   COVERED`), sorted build-now-first, each row tracing to its red-flag source line.
-4. **Signal** — the full signal definition for each immediately-buildable (`BUILD NOW`) gap.
+3. **Build recommendations — the human gate** *(the centerpiece)* — per red-flag indicator: coverage ×
+   data → one **build recommendation** (`BUILD NOW / ENHANCE / BUILD + ENRICH / SOURCE DATA / MONITOR /
+   COVERED`), sorted build-now-first, each row tracing to its red-flag source line. The `BUILD NOW` rows
+   are **selectable** (div-toggles, *not* `<input>` — so the keyboard nav still works), defaulting to all
+   selected: the presenter picks what to commit. *Agent proposes, human disposes.*
+4. **Signal** — the full signal definition for each **picked** `BUILD NOW` gap (an honest empty state if
+   none are buildable, or if you deselect them all).
+5. **Close the loop** — the coverage index animates **before → after** as the gaps you committed flip
+   *gap → covered* (the same model as the showcase's Act 6). The payoff is **coverage, not a precision
+   "lift" number**: the derived records carry no precision figures, and fabricating ~12 per-advisory stats
+   to mimic the showcase's combination-lift beat would break the *never present synthetic numbers as real*
+   rule — so the explorer closes the loop on the one quantity it can honestly show. A 0-build-now advisory
+   (or deselecting everything) holds coverage flat with a note, never a fake rise.
 
 Build it with `python3 scripts/build.py corpus` (or `all`); guard it with `python3 scripts/build.py
 --check corpus` (folded into `--check all`). The build is **decoupled from the authoring layer**: it

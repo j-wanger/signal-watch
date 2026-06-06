@@ -60,10 +60,19 @@ AML transformation framework. Keep vocabulary consistent with it
   configs (the 3 hand-curated typologies stay the showcase).
 - Corpus explorer (Phase 13, M7 — the demo scope expansion): a SECOND, separate ship artifact
   `dist/corpus/index.html`, built from a standalone template `corpus.html` (owns its own copy of the
-  dossier theme — the six-act engine `index.html` is left byte-untouched). A staged 4-screen flow:
+  dossier theme — the six-act engine `index.html` is left byte-untouched). A staged 5-screen ARC
+  (Phase 18 gave the explorer the showcase's two missing beats — a human gate + a close-the-loop payoff):
   SELECT one of the 14 advisories (honest status chips: derived / clean-or-low-not-yet-derived /
-  non-derivable) → COVERAGE gauge → per-indicator BUILD RECOMMENDATIONS (the cover×data build_rec,
-  sorted BUILD_NOW-first, each row src_line-traceable) → SIGNAL spec for the BUILD_NOW gaps. Built by
+  non-derivable) → COVERAGE gauge → BUILD RECOMMENDATIONS **= the human GATE** (per-indicator cover×data
+  build_rec, sorted BUILD_NOW-first, each row src_line-traceable; the BUILD_NOW rows are SELECTABLE
+  div-toggles [NOT `<input>`, so Space/arrow nav still works] — default all-selected, "agent proposes,
+  human disposes"; non-BUILD_NOW rows read-only) → SIGNAL spec for the PICKED BUILD_NOW gaps → CLOSE THE
+  LOOP (the coverage index animates before→after as the picked gaps flip gap→covered — same model as the
+  showcase's Act 6; 0-picked / 0-BUILD_NOW holds coverage flat with a note, never a fake rise). The payoff
+  is COVERAGE, NOT precision combination-lift: the derived records carry no precision/lift numbers, so
+  porting the showcase lift beat would FABRICATE ~12 per-advisory stats — rejected (the "never present
+  synthetic numbers as real" non-negotiable); coverage is already disclosed illustrative. Phase 18 unfroze
+  ONLY `corpus.html` (the arc reuses existing data fields — no schema/data/`build.py` change). Built by
   `build.py corpus` (or `all`; guarded by `--check corpus`), which reads two COMMITTED data artifacts —
   the extraction manifest `data/fincen/corpus-status.json` (emitted by `derive_signals.py
   --corpus-status`) + the derived records `data/fincen/derived/*.json` — merges them by id, and

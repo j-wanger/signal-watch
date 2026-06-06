@@ -95,6 +95,8 @@
   .gauge .gd{font-size:12px;color:var(--muted)}
   .gauge .gbar{height:7px;border-radius:4px;background:var(--bg2);margin-top:14px;overflow:hidden;border:1px solid var(--line)}
   .gauge .gfill{height:100%;background:linear-gradient(90deg,var(--rose),var(--signal),var(--green));transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+  .gauge .gdelta{font-family:var(--mono);font-size:11px;color:var(--green);margin-top:10px;opacity:0;transition:.5s}
+  .gauge .gdelta.show{opacity:1}
 
   /* build-recommendation list (the new centerpiece) */
   .brec{display:flex;flex-direction:column;gap:8px}
@@ -109,6 +111,13 @@
   .stat{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
   .dot{width:8px;height:8px;border-radius:50%;flex:none}
   .brecrat{font-size:12px;color:var(--muted);line-height:1.5;margin-top:9px;border-top:1px dashed var(--line);padding-top:9px}
+  /* the human gate: BUILD_NOW rows are selectable via a div-toggle (NOT <input> — so Space/arrows
+     still navigate; mirrors the showcase .selrow pattern). Default all-selected; deselect to opt out. */
+  .brecrow.pickable{cursor:pointer}
+  .brecrow.pickable:hover{border-color:var(--line2)}
+  .brecrow.now.on{box-shadow:0 0 0 1px var(--green)}
+  .cbox{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--line2);flex:none;display:grid;place-items:center;transition:.18s;font-size:12px;font-weight:700;margin-top:1px}
+  .brecrow.on .cbox{background:var(--green);border-color:var(--green);color:#0c0e12}
 
   /* signal spec card (shared component) */
   .spec{border:1px solid var(--line);background:var(--panel);border-radius:12px;overflow:hidden;margin-bottom:14px}
@@ -199,7 +208,7 @@ const REC_COLOR={BUILD_NOW:'var(--green)',ENHANCE:'var(--blue)',BUILD_ENRICH:'va
 const REC_LABEL={BUILD_NOW:'build now',ENHANCE:'enhance',BUILD_ENRICH:'build + enrich',
   SOURCE_DATA:'source data',MONITOR:'monitor',COVERED:'covered'};
 
-const STEPS=['Select advisory','Coverage','Build recs','Signal'];
+const STEPS=['Select advisory','Coverage','Build recs','Signal','Close the loop'];
 
 // escapes text AND attribute positions (quotes included) — corpus.html interpolates into both.
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -227,6 +236,9 @@ function shortFlag(t,cap){cap=cap||150;t=String(t||'').replace(/\s+/g,' ').trim(
 
 /* ---------- state + chrome ---------- */
 let view='select', current=null, screen=0, maxScreen=0, timers=[];
+// the human gate: which BUILD_NOW indicators the presenter has picked to build (per-advisory,
+// reset on pick()). Drives the Signal cards and the close-the-loop coverage rise.
+let selected=new Set();
 const stage=document.getElementById('stage'), stepper=document.getElementById('stepper');
 const nextBtn=document.getElementById('next'), backBtn=document.getElementById('back');
 const resetBtn=document.getElementById('reset'), hint=document.getElementById('hint');
@@ -328,20 +340,32 @@ function renderBuildRecs(a){
     (REC_ORDER[x.build_rec]??9)-(REC_ORDER[y.build_rec]??9) || String(x.id).localeCompare(String(y.id)));
   const nb=buildNows(a).length;
   stage.innerHTML=`<div class="scene">
-    <div class="eyebrow">${esc(a.advisory||a.id)} · Build recommendations</div>
-    <h2>What to <em>build</em> — per indicator.</h2>
+    <div class="eyebrow">${esc(a.advisory||a.id)} · Build recommendations · gate</div>
+    <h2>You decide what we <em>build</em>.</h2>
     ${srcCap(a)}
-    <p class="lead">Coverage status × data availability produces a single recommendation per red flag. <b style="color:var(--green)">Build now</b> = an uncovered gap we already hold the data for. ${nb?`<b>${nb}</b> ${nb===1?'indicator is':'indicators are'} immediately buildable.`:''}</p>
+    <p class="lead">Coverage status × data availability produces a single recommendation per red flag. <b style="color:var(--green)">Build now</b> = an uncovered gap we already hold the data for. ${nb?`<b>${nb}</b> ${nb===1?'indicator is':'indicators are'} immediately buildable — <b style="color:var(--green)">pick which to commit</b>; your choice carries through to the drafted signals and the coverage you close.`:'No immediately-buildable gap on this advisory — the rest need data work first.'}</p>
     <div class="brec">${inds.map((i,k)=>brecRow(i,a,k)).join('')}</div>
-    <div class="framenote">Every recommendation is deterministic given (coverage, data): the LLM proposes the judgment, the cover×data matrix disposes it. No recommendation is invented.</div>
+    <div class="framenote">The agent proposes; the human disposes. Each recommendation is deterministic given (coverage, data) — the LLM proposes the judgment, the cover×data matrix disposes it; no recommendation is invented.</div>
   </div>`;
+  // the human gate — toggle a build-now commitment (div-click, not <input>, so keyboard nav still works)
+  stage.querySelectorAll('.brecrow.pickable').forEach(el=>el.onclick=()=>{
+    const id=el.dataset.id;
+    if(selected.has(id))selected.delete(id);else selected.add(id);
+    const on=selected.has(id);
+    el.classList.toggle('on',on);
+    el.setAttribute('aria-pressed',on);
+    const cb=el.querySelector('.cbox');if(cb)cb.textContent=on?'✓':'';
+  });
 }
 function brecRow(i,a,k){
   const rec=i.build_rec||'COVERED';
   const dCls=i.data==='available'?'available':i.data==='partial'?'partial-d':'insufficient';
   const delay=REDUCED?0:k*90;
-  return `<div class="brecrow ${rec==='BUILD_NOW'?'now':''}" style="animation-delay:${delay}ms">
+  const pickable=rec==='BUILD_NOW';            // only build-now gaps are the human gate's selectable commitments
+  const on=pickable&&selected.has(i.id);
+  return `<div class="brecrow ${pickable?'now pickable':''} ${on?'on':''}" style="animation-delay:${delay}ms"${pickable?` data-id="${esc(i.id)}" role="button" aria-pressed="${on}"`:''}>
     <div class="brectop">
+      ${pickable?`<div class="cbox">${on?'✓':''}</div>`:''}
       <div class="bflag">${esc(shortFlag(i.flag,200))}<span class="bsrc">${esc(a.advisory)} ${esc(i.section||'')} · md L${esc(i.src_line)}</span></div>
       <span class="recpill" style="color:${REC_COLOR[rec]||'var(--faint)'}">${esc(REC_LABEL[rec]||rec)}</span>
     </div>
@@ -354,14 +378,19 @@ function brecRow(i,a,k){
 }
 
 function renderSignal(a){
-  const builds=buildNows(a).filter(i=>i.build_logic && typeof i.build_logic==='object');
+  const allBuilds=buildNows(a).filter(i=>i.build_logic && typeof i.build_logic==='object');  // what COULD be built
+  const builds=allBuilds.filter(i=>selected.has(i.id));                                       // what the human committed at the gate
+  // two honest empty states: nothing buildable at all (data-limited) vs. everything deselected (a choice).
+  const emptyMsg=allBuilds.length===0
+    ? 'No immediately-buildable signal for this advisory — its gaps need data enrichment or sourcing first (see the build recommendations).'
+    : 'No build-now gaps selected — go back to the build recommendations and pick at least one to draft.';
   stage.innerHTML=`<div class="scene">
     <div class="eyebrow">${esc(a.advisory||a.id)} · Signal</div>
-    <h2>The immediately-buildable <em>signals</em>.</h2>
+    <h2>The signals you <em>committed</em>.</h2>
     ${srcCap(a)}
-    <p class="lead">For each <b style="color:var(--green)">build-now</b> gap, the agent drafts a full signal definition mapped to data features. ${builds.length?'Each is a proposal — a human confirms before any build.':''}</p>
+    <p class="lead">For each <b style="color:var(--green)">build-now</b> gap you picked, the agent drafts a full signal definition mapped to data features. ${builds.length?`<b>${builds.length}</b> of ${allBuilds.length} buildable drafted — each is a proposal a human confirms before any build.`:''}</p>
     ${builds.length?builds.map(i=>specCard(i,a)).join(''):
-      `<div class="empty">No immediately-buildable signal for this advisory — its gaps need data enrichment or sourcing first (see the build recommendations).</div>`}
+      `<div class="empty">${emptyMsg}</div>`}
     <div class="framenote">A drafted signal becomes a governed model artifact — versioned, validated under E-23 before it can drive a filing.</div>
   </div>`;
 }
@@ -379,8 +408,46 @@ function specCard(i,a){
   </div>`;
 }
 
+/* ---------- screen 4: close the loop (coverage rises on the committed builds) ---------- */
+function renderClose(a){
+  const before=coverageIndex(a.indicators);
+  const picks=buildNows(a).filter(i=>selected.has(i.id));            // the committed build-now gaps
+  const pickedIds=new Set(picks.map(i=>i.id));
+  // "after": the committed gaps flip to covered — same model as the showcase's Act 6. Coverage is the
+  // ONLY quantity and is already disclosed illustrative; no precision/lift numbers are invented. Copy
+  // each indicator (Object.assign) so a.indicators is never mutated if the screen is revisited.
+  const afterInds=a.indicators.map(i=>pickedIds.has(i.id)?Object.assign({},i,{status:'covered'}):i);
+  const after=coverageIndex(afterInds), delta=after-before, n=picks.length;
+  const closed=n
+    ? picks.map(i=>`<div class="covrow">
+        <div class="clabel">${esc(shortFlag(i.flag,150))}<div class="csub">${esc(a.advisory)} · md L${esc(i.src_line)}</div></div>
+        <span class="pill covered">gap → covered</span>
+      </div>`).join('')
+    : `<div class="empty">No build-now gap was committed at the gate — go back and pick at least one to close the loop.</div>`;
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">${esc(a.advisory||a.id)} · Close the loop</div>
+    <h2>${n?'The blind spots <em>close</em>.':'Nothing committed — coverage <em>holds</em>.'}</h2>
+    ${srcCap(a)}
+    <p class="lead">${n
+      ? `Build the <b>${n}</b> committed signal${n===1?'':'s'} and ${n===1?'that gap flips':'those gaps flip'} to covered — the coverage index rises automatically. The coverage figure is illustrative; no detection rate is claimed.`
+      : `No build-now gap was committed at the gate, so coverage is unchanged.`}</p>
+    <div class="covwrap">
+      <div class="covgrid">${closed}</div>
+      <div class="gauge">
+        <div class="gh">Coverage index</div>
+        <div class="gnum" id="gnum">${before}%</div>
+        <div class="gd">of ${a.indicators.length} red-flag indicators</div>
+        <div class="gbar"><div class="gfill" id="gfill" style="width:${before}%"></div></div>
+        <div class="gdelta ${delta>0?'show':''}" id="gdelta">${delta>0?`▲ +${delta} pts · ${n} gap${n===1?'':'s'} closed`:'coverage holds — no gap committed'}</div>
+      </div>
+    </div>
+    <div class="framenote">The advisory radar runs continuously — the next gap is found before it becomes a headline. Every figure is illustrative; the workflow and the decision points are real.</div>
+  </div>`;
+  T(()=>{const f=document.getElementById('gfill');if(f)f.style.width=after+'%';animVal('gnum',before,after,1000,'%');},300);
+}
+
 /* ---------- render dispatch ---------- */
-const DETAIL=[renderCoverage,renderBuildRecs,renderSignal];
+const DETAIL=[renderCoverage,renderBuildRecs,renderSignal,renderClose];
 function render(){
   clearTimers();
   renderStepper();
@@ -400,7 +467,9 @@ function render(){
 }
 
 /* ---------- navigation ---------- */
-function pick(id){const a=ADVISORIES.find(x=>x.id===id);if(!isLive(a))return;current=id;view='detail';screen=0;maxScreen=0;render();}
+function pick(id){const a=ADVISORIES.find(x=>x.id===id);if(!isLive(a))return;current=id;view='detail';screen=0;maxScreen=0;
+  selected=new Set(buildNows(a).map(i=>i.id));  // default: all build-now gaps selected — the presenter deselects to opt out
+  render();}
 function gotoScreen(s){screen=Math.max(0,Math.min(DETAIL.length-1,s));maxScreen=Math.max(maxScreen,screen);render();}
 function toSelect(){view='select';current=null;screen=0;maxScreen=0;render();}
 function advance(){
@@ -424,9 +493,9 @@ function updateControls(){
   backBtn.style.visibility='visible';
   resetBtn.style.visibility='visible';
   nextBtn.style.visibility='visible';
-  const backLabels=['‹ Advisories','‹ Coverage','‹ Build recs'];
-  const nextLabels=['Build recommendations ›','Signal spec ›','↺ Another advisory'];
-  const hints=['Each red flag scored against the library','Coverage × data → one recommendation per flag','Build-now gaps drafted as signal definitions'];
+  const backLabels=['‹ Advisories','‹ Coverage','‹ Build recs','‹ Signal'];
+  const nextLabels=['Build recommendations ›','Signal spec ›','Close the loop ›','↺ Another advisory'];
+  const hints=['Each red flag scored against the library','Pick the build-now gaps to commit','Drafted signals for your committed gaps','Coverage closes on what you built'];
   backBtn.textContent=backLabels[screen]||'‹ Back';
   nextBtn.textContent=nextLabels[screen]||'Next ›';
   hint.textContent=hints[screen]||'';

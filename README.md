@@ -107,6 +107,14 @@ judgment, the recommendation rationale, the signal build logic, and pruning any 
 noise. The deterministic layer extracts, flags, and validates; the model session authors; the two
 human gates dispose.
 
+The extractor does a **footnote-resume** (Phase 15): a footnote run at a page boundary mid-list is
+transient when another red-flag section follows, so the list resumes after it instead of being silently
+truncated (this recovered a dropped flag in the Chinese-MLN advisory). Two *glued-no-separator* advisories
+(ransomware, health-care fraud) — where the PDF→markdown step dropped both bullets and blank lines, fusing
+the flags into one block — stay deliberately **flagged, not force-parsed**: there is no safe deterministic
+way to split them without over-splitting genuine multi-sentence flags. Structure-preserving parsing of those
+would need a better converter, not a post-hoc splitter.
+
 ## The corpus explorer (the singular corpus-backed demo)
 
 `dist/corpus/index.html` is a **second, separate** single-file ship artifact: a FinCEN **corpus

@@ -86,6 +86,16 @@ AML transformation framework. Keep vocabulary consistent with it
   pruning the residual extraction noise. The deterministic layer extracts + flags + validates; the LLM
   backend authors; the two human gates dispose. Phase 12 proved the loop on a 2-advisory slice — it did
   not (and is not meant to) auto-derive the corpus.
+- Extraction faithfulness (Phase 15): `extract_red_flags` does a **footnote-resume** — a mid-list footnote
+  run at a page boundary no longer permanently ends a section (it's transient when another red-flag section
+  follows; the list resumes after it), so a CLEAN advisory stops silently dropping a post-footnote flag
+  (fin-2025-a003 recovered its L499 escrow flag, 17→18). Two corpus formats stay deliberately FLAGGED, NOT
+  force-parsed: **glued-no-separator** advisories (fin-2021-a004 ransomware, fin-2026-a001 health-care) where
+  markitdown dropped both bullets AND blank lines so flags fuse into one block — there is no safe
+  deterministic split (sentence-splitting would over-split genuine multi-sentence flags), so they remain
+  LOW/NEEDS. The contract is extract-or-honestly-flag; if structure-preserving parsing of those is ever
+  wanted it needs a better converter, not a post-hoc splitter. Convention: derived records store RAW text;
+  corpus.html's `esc()` is the sole escaper (never pre-escape `&gt;`/`&lt;` in a record — it double-escapes).
 
 ## How to run
 - Build: `python3 scripts/build.py <id>` (or `all`) → `dist/<id>/index.html`.

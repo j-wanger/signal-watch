@@ -431,7 +431,7 @@ const CORPUS = {
               "inbound_outbound_value_30d",
               "foreign_gov_nexus_count"
             ],
-            "logic": "personal-class account transacts with counterparties tagged foreign-government or embassy entities, with &gt;= 2 distinct government-nexus counterparties in a 30-day window",
+            "logic": "personal-class account transacts with counterparties tagged foreign-government or embassy entities, with >= 2 distinct government-nexus counterparties in a 30-day window",
             "window": "rolling 30 days",
             "source": "Core account + counterparty features (Gold); counterparty entity-type registry",
             "route": "Tier-1 alert → corruption/PEP review gate"
@@ -466,7 +466,7 @@ const CORPUS = {
               "cross_border_value_30d",
               "unexplained_jurisdiction_count"
             ],
-            "logic": "PEP-flagged customer sends or receives cross-border funds to/from &gt;= 1 jurisdiction not in the customer's documented ties set, with aggregate cross-border value above the PEP baseline over 30 days",
+            "logic": "PEP-flagged customer sends or receives cross-border funds to/from >= 1 jurisdiction not in the customer's documented ties set, with aggregate cross-border value above the PEP baseline over 30 days",
             "window": "rolling 30 days",
             "source": "Core transaction + KYC features (Gold); PEP register; customer documented-jurisdiction nexus",
             "route": "Tier-1 alert → corruption/PEP review gate"
@@ -584,7 +584,7 @@ const CORPUS = {
               "aggregate_value_90d",
               "declared_industry_code"
             ],
-            "logic": "&gt;= 2 distinct importer entities share a phone/email/physical identifier AND transact with &gt;= 1 common PRC or Hong Kong chemical-or-pharma counterparty within a 90-day window",
+            "logic": ">= 2 distinct importer entities share a phone/email/physical identifier AND transact with >= 1 common PRC or Hong Kong chemical-or-pharma counterparty within a 90-day window",
             "window": "rolling 90 days",
             "source": "Counterparty + shared-identifier graph (Gold); corporate-identifier registry",
             "route": "Tier-2 network alert → narcotics / TBML review gate"
@@ -609,7 +609,7 @@ const CORPUS = {
               "outbound_value_90d",
               "declared_industry_code"
             ],
-            "logic": "an importer's share of payments to PRC/HK chemical-or-pharma counterparties exceeds the peer-group median share by a wide margin AND distinct supplier jurisdictions &lt;= 1 over 90 days",
+            "logic": "an importer's share of payments to PRC/HK chemical-or-pharma counterparties exceeds the peer-group median share by a wide margin AND distinct supplier jurisdictions <= 1 over 90 days",
             "window": "rolling 90 days",
             "source": "Counterparty features + peer-group baselines (Gold); industry registry",
             "route": "Tier-1 alert → narcotics review gate"
@@ -644,7 +644,7 @@ const CORPUS = {
               "beneficiary_chem_pharma_flag",
               "originator_relationship_density"
             ],
-            "logic": "a single PRC/HK chemical-or-pharma beneficiary receives funds from &gt;= 8 distinct, otherwise-unrelated originating customers within 30 days with no apparent legitimate purpose",
+            "logic": "a single PRC/HK chemical-or-pharma beneficiary receives funds from >= 8 distinct, otherwise-unrelated originating customers within 30 days with no apparent legitimate purpose",
             "window": "rolling 30 days",
             "source": "Beneficiary fan-in aggregation features (Gold); counterparty industry registry",
             "route": "Tier-2 beneficiary fan-in alert → narcotics / TBML review gate"
@@ -699,7 +699,7 @@ const CORPUS = {
               "distinct_chem_counterparty_count",
               "outbound_value_90d"
             ],
-            "logic": "a customer whose declared industry is not chemical/pharma directs &gt;= 40% of outbound value over 90 days to chemical/pharma counterparties carrying precursor or manufacturing-equipment transaction markers",
+            "logic": "a customer whose declared industry is not chemical/pharma directs >= 40% of outbound value over 90 days to chemical/pharma counterparties carrying precursor or manufacturing-equipment transaction markers",
             "window": "rolling 90 days",
             "source": "KYC industry code + counterparty/transaction features (Gold)",
             "route": "Tier-1 alert → narcotics review gate"
@@ -957,7 +957,7 @@ const CORPUS = {
       "date": "2025-08-28",
       "source": "FinCEN FIN-2025-A003 · FinCEN Advisory on the Use of Chinese Money Laundering Networks by Mexico-Based Transnational Criminal Organizations to Launder Illicit Proceeds · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 17,
+      "flag_count": 18,
       "derivable": true,
       "derived": true,
       "indicators": [
@@ -1205,6 +1205,16 @@ const CORPUS = {
           "data": "partial",
           "build_rec": "BUILD_ENRICH",
           "rationale": "Hong Kong trading companies with shell-like characteristics sending funds to U.S. individuals and escrow/title companies are visible as inbound wires, but the shell-characteristic classification needs corporate-registry enrichment we hold only partially — build after enrichment."
+        },
+        {
+          "id": "IND-18",
+          "section": "redflag",
+          "flag": "A customer that is a U.S.-based escrow company receives funds from an unaffiliated, foreign- based shell company or entity in a disparate line of business that are used to purchase real estate in the United States.",
+          "src_line": 499,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "A U.S.-based escrow company receiving funds from a foreign counterparty in a disparate line of business to buy U.S. real estate is visible from the escrow account type + inbound wire + real-estate purpose, but classifying the originator as a foreign shell needs corporate-registry enrichment we hold only partially — build after enrichment."
         }
       ]
     },

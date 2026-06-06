@@ -77,8 +77,14 @@
       "build_logic": {
         "signal_name": "S-SHARED-ID-IMPORTER-RING",
         "class": "relationship · network · stateful",
-        "features": ["shared_identifier_type", "importers_sharing_identifier_count", "common_prc_chem_counterparty_count", "aggregate_value_90d", "declared_industry_code"],
-        "logic": "&gt;= 2 distinct importer entities share a phone/email/physical identifier AND transact with &gt;= 1 common PRC or Hong Kong chemical-or-pharma counterparty within a 90-day window",
+        "features": [
+          "shared_identifier_type",
+          "importers_sharing_identifier_count",
+          "common_prc_chem_counterparty_count",
+          "aggregate_value_90d",
+          "declared_industry_code"
+        ],
+        "logic": ">= 2 distinct importer entities share a phone/email/physical identifier AND transact with >= 1 common PRC or Hong Kong chemical-or-pharma counterparty within a 90-day window",
         "window": "rolling 90 days",
         "source": "Counterparty + shared-identifier graph (Gold); corporate-identifier registry",
         "route": "Tier-2 network alert → narcotics / TBML review gate"
@@ -96,8 +102,14 @@
       "build_logic": {
         "signal_name": "S-PRC-CHEM-CONCENTRATION",
         "class": "entity · account-level · stateful",
-        "features": ["prc_hk_chem_counterparty_share_90d", "peer_group_median_share", "distinct_supplier_jurisdictions", "outbound_value_90d", "declared_industry_code"],
-        "logic": "an importer's share of payments to PRC/HK chemical-or-pharma counterparties exceeds the peer-group median share by a wide margin AND distinct supplier jurisdictions &lt;= 1 over 90 days",
+        "features": [
+          "prc_hk_chem_counterparty_share_90d",
+          "peer_group_median_share",
+          "distinct_supplier_jurisdictions",
+          "outbound_value_90d",
+          "declared_industry_code"
+        ],
+        "logic": "an importer's share of payments to PRC/HK chemical-or-pharma counterparties exceeds the peer-group median share by a wide margin AND distinct supplier jurisdictions <= 1 over 90 days",
         "window": "rolling 90 days",
         "source": "Counterparty features + peer-group baselines (Gold); industry registry",
         "route": "Tier-1 alert → narcotics review gate"
@@ -125,8 +137,14 @@
       "build_logic": {
         "signal_name": "S-MANYTOONE-CHEM-BENEFICIARY",
         "class": "relationship · beneficiary-level · stateful",
-        "features": ["beneficiary_id", "distinct_originator_count_30d", "aggregate_value_30d", "beneficiary_chem_pharma_flag", "originator_relationship_density"],
-        "logic": "a single PRC/HK chemical-or-pharma beneficiary receives funds from &gt;= 8 distinct, otherwise-unrelated originating customers within 30 days with no apparent legitimate purpose",
+        "features": [
+          "beneficiary_id",
+          "distinct_originator_count_30d",
+          "aggregate_value_30d",
+          "beneficiary_chem_pharma_flag",
+          "originator_relationship_density"
+        ],
+        "logic": "a single PRC/HK chemical-or-pharma beneficiary receives funds from >= 8 distinct, otherwise-unrelated originating customers within 30 days with no apparent legitimate purpose",
         "window": "rolling 30 days",
         "source": "Beneficiary fan-in aggregation features (Gold); counterparty industry registry",
         "route": "Tier-2 beneficiary fan-in alert → narcotics / TBML review gate"
@@ -174,8 +192,14 @@
       "build_logic": {
         "signal_name": "S-INDUSTRY-MISMATCH-PRECURSOR",
         "class": "entity · account-level · stateful",
-        "features": ["declared_industry_code", "chem_pharma_counterparty_value_share_90d", "precursor_equipment_marker_hits", "distinct_chem_counterparty_count", "outbound_value_90d"],
-        "logic": "a customer whose declared industry is not chemical/pharma directs &gt;= 40% of outbound value over 90 days to chemical/pharma counterparties carrying precursor or manufacturing-equipment transaction markers",
+        "features": [
+          "declared_industry_code",
+          "chem_pharma_counterparty_value_share_90d",
+          "precursor_equipment_marker_hits",
+          "distinct_chem_counterparty_count",
+          "outbound_value_90d"
+        ],
+        "logic": "a customer whose declared industry is not chemical/pharma directs >= 40% of outbound value over 90 days to chemical/pharma counterparties carrying precursor or manufacturing-equipment transaction markers",
         "window": "rolling 90 days",
         "source": "KYC industry code + counterparty/transaction features (Gold)",
         "route": "Tier-1 alert → narcotics review gate"

@@ -180,9 +180,9 @@
       "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2025-a003",
       "source": "FinCEN FIN-2025-A003 · FinCEN Advisory on the Use of Chinese Money Laundering Networks by Mexico-Based Transnational Criminal Organizations to Launder Illicit Proceeds · public domain (17 U.S.C. 105)",
       "extraction": "clean",
-      "flag_count": 17,
+      "flag_count": 18,
       "sections": {
-        "redflag": 17
+        "redflag": 18
       },
       "derivable": true
     },

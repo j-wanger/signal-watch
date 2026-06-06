@@ -37,8 +37,14 @@
       "build_logic": {
         "signal_name": "S-GOVBIZ-PERSONAL-ACCT",
         "class": "entity · account-level · stateless",
-        "features": ["account_class", "counterparty_govt_entity_flag", "counterparty_embassy_flag", "inbound_outbound_value_30d", "foreign_gov_nexus_count"],
-        "logic": "personal-class account transacts with counterparties tagged foreign-government or embassy entities, with &gt;= 2 distinct government-nexus counterparties in a 30-day window",
+        "features": [
+          "account_class",
+          "counterparty_govt_entity_flag",
+          "counterparty_embassy_flag",
+          "inbound_outbound_value_30d",
+          "foreign_gov_nexus_count"
+        ],
+        "logic": "personal-class account transacts with counterparties tagged foreign-government or embassy entities, with >= 2 distinct government-nexus counterparties in a 30-day window",
         "window": "rolling 30 days",
         "source": "Core account + counterparty features (Gold); counterparty entity-type registry",
         "route": "Tier-1 alert → corruption/PEP review gate"
@@ -66,8 +72,14 @@
       "build_logic": {
         "signal_name": "S-PEP-NO-NEXUS-CROSSBORDER",
         "class": "relationship · entity-level · stateful",
-        "features": ["pep_flag", "counterparty_country", "customer_documented_ties_set", "cross_border_value_30d", "unexplained_jurisdiction_count"],
-        "logic": "PEP-flagged customer sends or receives cross-border funds to/from &gt;= 1 jurisdiction not in the customer's documented ties set, with aggregate cross-border value above the PEP baseline over 30 days",
+        "features": [
+          "pep_flag",
+          "counterparty_country",
+          "customer_documented_ties_set",
+          "cross_border_value_30d",
+          "unexplained_jurisdiction_count"
+        ],
+        "logic": "PEP-flagged customer sends or receives cross-border funds to/from >= 1 jurisdiction not in the customer's documented ties set, with aggregate cross-border value above the PEP baseline over 30 days",
         "window": "rolling 30 days",
         "source": "Core transaction + KYC features (Gold); PEP register; customer documented-jurisdiction nexus",
         "route": "Tier-1 alert → corruption/PEP review gate"

@@ -249,6 +249,16 @@
       "data": "partial",
       "build_rec": "BUILD_ENRICH",
       "rationale": "Hong Kong trading companies with shell-like characteristics sending funds to U.S. individuals and escrow/title companies are visible as inbound wires, but the shell-characteristic classification needs corporate-registry enrichment we hold only partially — build after enrichment."
+    },
+    {
+      "id": "IND-18",
+      "section": "redflag",
+      "flag": "A customer that is a U.S.-based escrow company receives funds from an unaffiliated, foreign- based shell company or entity in a disparate line of business that are used to purchase real estate in the United States.",
+      "src_line": 499,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "A U.S.-based escrow company receiving funds from a foreign counterparty in a disparate line of business to buy U.S. real estate is visible from the escrow account type + inbound wire + real-estate purpose, but classifying the originator as a foreign shell needs corporate-registry enrichment we hold only partially — build after enrichment."
     }
   ]
 }

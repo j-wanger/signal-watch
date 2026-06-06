@@ -49,6 +49,10 @@ CORPUS DERIVATION (Phase 12 — backend for an expanded, singular corpus-backed 
   --corpus runs extract_red_flags across the whole committed FinCEN corpus and reports each
   advisory CLEAN / LOW-CONFIDENCE / NEEDS-ATTENTION — the deterministic spine validated on
   ALL 14, flagging non-conformers (heterogeneous formats) rather than forcing a bogus count.
+  Phase 15: a mid-list footnote run at a page boundary is TRANSIENT (the list resumes after
+  it when another section follows) — see the _FOOTNOTE_STOP handling in extract_red_flags —
+  so a CLEAN advisory no longer silently drops a post-footnote flag. Glued-no-separator
+  advisories (markitdown dropped bullets AND blank lines) stay FLAGGED, not force-split.
   --scaffold-derived emits a derived-record SKELETON (one indicator per extracted red flag,
   src_line traceable, judgment empty) under data/fincen/derived/. The LLM backend fills the
   judgment — per indicator a coverage status + data availability, a build recommendation, and
@@ -123,18 +127,32 @@ _RF_HEADER_LOOSE = re.compile(
     r"^(?P<label>(?:[A-Z][\w’'/-]*\s+){0,3})red\s+flags?(?:\s+indicators?)?\b"
     r"(?:\s+(?:related|potentially|indicative|of|to|that|associated|targeting)\b.*)?$", re.I)
 _RF_INTRO_WEAK = re.compile(r"\bidentified\b[^.\n]{0,40}?\bred\s+flags?(?:\s+indicators?)?\b", re.I)
-# a list ends at a footnote run, a numbered/Roman major section, or a wrap-up header.
-# `\d+\.(?:\s|$)` catches both "47. Id." and a bare footnote marker alone on a line ("81.").
+# a list ends at a TRUE terminal section — a wrap-up header / SAR-filing block / numbered
+# major section. Always a hard stop: the enumerated red-flag list is over.
 _SECTION_STOP = re.compile(
-    r"^(?:\d+\.(?:\s|$)|\d+\s+[A-Z]|reminder of relevant|for further information|"
+    r"^(?:\d+\s+[A-Z]|reminder of relevant|for further information|"
     r"sar (?:filing|reporting)|frequently asked|section\s+[ivx]+\b)", re.I)
+# a footnote run (a "47. Id." line or a bare "81." marker) is handled CONDITIONALLY, not as a
+# blanket stop. Phase 15 footnote-resume: when another red-flag section follows (next_boundary
+# set), a mid-list footnote run at a page boundary is TRANSIENT — the list resumes after it
+# (fin-2025-a003 L499 escrow flag), so we SKIP the footnote line and keep collecting up to the
+# next anchor, letting _CITATION drop the footnote blocks. When there is NO next anchor (the
+# last section), the footnotes are TERMINAL — the list genuinely ends, so we stop (else the
+# span would swallow trailing footnotes + the next page's prose: fin-2020-a008 11→28 regression).
+_FOOTNOTE_STOP = re.compile(r"^\d+\.(?:\s|$)")
 # A block that is itself a footnote/citation, not a red flag (Phase-12 post-review filter):
-# a footnote-numbered line, a legal "supra note"/"Id." marker, or a block that ends with a
-# "(Mon DD, YYYY)" citation date. Real red flags describe behaviour; they don't end in a cite.
+# a footnote-numbered line, a legal "supra note"/"Id." marker, a federal case-docket number,
+# or a block ending in a "(Mon[ DD], YYYY)" citation date. Real red flags describe behaviour;
+# they don't end in a cite or carry a docket number. Phase-15 extension: the footnote-resume
+# span (above) lets a page-boundary footnote's WRAPPED TAIL (no leading "N." marker, split off
+# by an internal blank line — fin-2025-a003 L445 "...United States v. Martinez-Reyes, 2:23-cr-258
+# (C.D. Cal. ...)", fin-2024-a002 L578 "...Liability Companies" (Nov. 2006).") reach a span, so
+# the date end-pattern now also matches a no-day "(Mon YYYY)" cite and a case-docket signature.
 _CITATION = re.compile(
     r"^\d+\.\s"
     r"|\b(?:supra\s+note|\bid\.\b|see\s+(?:also\s+)?(?:fincen|fbi|doj|ofac|fatf|cisa|dhs|u\.s\.))"
-    r"|\([A-Z][a-z]{2,8}\.?\s+\d{1,2},\s+\d{4}\)\.?\s*$", re.I)
+    r"|\b\d{1,2}:\d{2}-[a-z]{2,3}-\d{2,}\b"
+    r"|\([A-Z][a-z]{2,8}\.?\s+(?:\d{1,2},\s+)?\d{4}\)\.?\s*$", re.I)
 # Standard FinCEN boilerplate that wraps the list intro (a multi-line sentence often bleeds
 # into the first block). Never a red flag — drop it so the list starts at the real item 1.
 _INTRO_NOISE = re.compile(
@@ -249,8 +267,13 @@ def extract_red_flags(md: str) -> list[dict]:
                 continue
             if next_boundary and ln >= next_boundary:
                 break
-            if _SECTION_STOP.match(_clean(raw)):
+            c = _clean(raw)
+            if _SECTION_STOP.match(c):           # true terminal — the red-flag list is over
                 break
+            if _FOOTNOTE_STOP.match(c):
+                if next_boundary:                # transient page-break footnote run: skip it and
+                    continue                     # resume the list up to the next anchor (L499)
+                break                            # last section: the footnotes are terminal
             span.append((ln, raw))
         n = 0
         for start, text in _blocks(span):

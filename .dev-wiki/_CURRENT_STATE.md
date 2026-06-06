@@ -1,62 +1,62 @@
 # Project: Signal Watch — AML Vision Demo
 
-> Last updated: 2026-06-05 by /dev-debrief (Phase 14 — scale corpus derivation DELIVERED + accepted)
+> Last updated: 2026-06-05 by /dev-debrief (Phase 15 — harden extraction faithfulness DELIVERED + accepted)
 
 ## Recommended Next Action
 
-**Phase 14 (Scale corpus derivation) DELIVERED + accepted — run `/dev-plan` for Phase 15.** The corpus
-explorer's live menu went 2/14 → **5/14**: 3 new LLM-backend-derived, `--check-derived`-clean records —
-`fin-2020-a008` human trafficking (10 ind / 2 BUILD_NOW), `fin-2025-a003` Chinese money-laundering networks
-(17 ind / **5 BUILD_NOW** — the most buildable typology), `fin-2025-a002` Iran illicit finance (16 ind / 4
-BUILD_NOW, **7 BUILD_ENRICH** — the enrichment-hungry contrast). PURE AUTHORING: zero engine/spine/front-end
-edits — only new `data/fincen/derived/*.json` + a `dist/corpus` rebuild + docs (build.py makes an advisory
-live by the presence of its derived record). Verified: 3× `--check-derived` clean · `build.py --check all`
-4-artifact zero drift · headless render assertions (5/14 live, each rendering coverage → build-rec → signal
-through all 4 screens) · `node --check` valid · `--selftest` 12+12. `index.html`/`corpus.html`/`config/**`/
-`scripts/**` + the 3 typology dists byte-untouched.
+**Phase 15 (Harden extraction faithfulness + fix shipped defects) DELIVERED + accepted — run `/dev-plan` for
+Phase 16.** Fixed the 2 concrete defects Phase 14 surfaced, scoped by MEASUREMENT. (1) **Footnote-resume fix**
+in `extract_red_flags` (`_SECTION_STOP` terminals always break + a new conditional `_FOOTNOTE_STOP`: a
+mid-list page-boundary footnote run is transient when another section follows → skip + resume to the next
+anchor; terminal for a last section → break) — `fin-2025-a003` recovered its silently-dropped L499 escrow flag
+(17→18), **SURGICAL: 1 genuine flag recovered, 0 collateral** (all 13 other advisories byte-identical, EFE
+12+12, 7C/3L/4N held). Two footnote-tail leaks were killed by 2 targeted `_CITATION` signatures (case-docket +
+no-day paren-date). (2) **esc() entity sweep** — `html.unescape` over the 2 Phase-12 records (`fin-2022-a001`,
+`fin-2024-a002`) → raw text; verified end-to-end in the built file. Added the escrow flag as `fin-2025-a003`'s
+18th indicator, regenerated `--corpus-status`, rebuilt `dist/corpus`, `--check all` zero drift. **Glued-no-
+separator splitting DEFERRED** (no safe deterministic split — re-confirms Phase-12 flag-don't-force).
 
-**Phase 15 candidates (run `/dev-plan`):** **extractor glued-boundary fix** in `extract_red_flags` (it
-missed a real 18th flag at `fin-2025-a003` md L499 — glued to a page-break running-header after a footnote;
-same class as the 3 LOW glued-list advisories) · **fix the pre-existing `fin-2022-a001` render bug** (stores
-`&gt;= 2` → double-escapes under `corpus.html`'s `esc()` on a shipped record; store RAW text) · scale the
-remaining CLEAN advisories (EFE corpus record, COVID EIP) + the 2 glued NEEDS after the extractor fix ·
-explicit FATF non-derivable labeling · a corpus combination-lift "wow" beat · (carried) elder presentation-
+**Phase 16 candidates (run `/dev-plan`):** scale the live menu to 6–7/14 (remaining CLEAN: EFE corpus record,
+COVID-EIP `fin-2021-a002` — derivable now, same Phase-14 loop) · a structure-preserving PDF→md converter
+(pymupdf4llm, authoring-only) if the glued ransomware/health-care flags are ever wanted — NOT a post-hoc
+splitter · FATF non-derivable labeling · corpus combination-lift "wow" beat · (carried) elder presentation-
 values true-up · fentanyl verbatim re-point · manifest `--fetch` cadence. **Carried:** M6 vision arc (Phases
-7–11) + M7 (Phases 12–14) complete; the 3 hand-curated typologies stay the byte-frozen showcase.
+7–11) + M7 (Phases 12–15) complete; the 3 hand-curated typologies stay the byte-frozen showcase.
 
 ## Active Phase
 
-**[[phase-14-scale-corpus-derivation|Phase 14: Scale corpus derivation (3 more CLEAN advisories → 5/14 live)]]** (status: active)
+**[[phase-15-harden-extraction-faithfulness|Phase 15: Harden extraction faithfulness + fix shipped defects]]** (status: active)
 
-Entry criteria: MET — Phase 13 complete + accepted: the corpus explorer (`dist/corpus/index.html` via
-`corpus.html`) ships, rendering the staged 4-screen flow off the merged corpus-status.json + derived/*.json;
-the derivation loop (`--scaffold-derived` → author → `--check-derived`) + the build/render path
-(`build.py corpus`) are proven on 2 records. The explorer shows all 14 with honest status but only 2 are
-derived/live (a stakeholder hits "not yet derived" 12 of 14 times). Direction approved **scale derivation**
-(3 advisories, EFE/COVID out) over spine-robustness / corpus-wow-beat / showcase-debt.
-Exit criteria: 3 new `--check-derived`-clean records (≥1 BUILD_NOW w/ full build_logic each, residual noise
-pruned, provenance set) · `dist/corpus/index.html` rebuilt showing 5/14 live, each rendering coverage →
-build-rec → signal through all 4 screens · `git diff index.html corpus.html` empty, config/** + the 3
-typology dists byte-untouched, `--check all` zero drift · README + CLAUDE reflect 5/14.
+Entry criteria: MET — Phase 14 complete + accepted (corpus explorer at 5/14 live). Phase 14 surfaced 2
+concrete defects: the extractor missed a real flag at `fin-2025-a003` L499 (the advisory still reports CLEAN —
+a silent faithfulness miss), and the Phase-12 `fin-2022-a001` record's `&gt;= 2` double-escapes under
+`corpus.html` esc() on a shipped record. Direction approved **harden the spine + fix defects** (footnote-resume
+fix + esc() sweep, glued-splitting deferred) over scaling further / showcase debt / a wow beat.
+Exit criteria: footnote-resume fix lands (`fin-2025-a003` 17→18, `--selftest` EFE 12+12, new flags genuine) ·
+no derived record stores pre-escaped HTML entities · `fin-2025-a003` derived record = 18 `--check-derived`-clean
+indicators · `--corpus-status` regenerated + `dist/corpus` rebuilt, `--check all` zero drift, `index.html`/
+`corpus.html`/`config/**` + 3 typology dists byte-untouched · glued-no-separator deferral documented.
 
 Progress: ~0% — planned, direction approved; 5 tasks, none started.
 
 ## Active Phase Contract
 
-Phase: 14 - Scale corpus derivation (3 more CLEAN advisories → 5/14 live)
-Tasks: 5 (see tasks.md) — T1 derive `fin-2020-a008` human trafficking (M) · T2 derive `fin-2025-a003` Chinese
-MLN (M) · T3 derive `fin-2025-a002` Iran, validate-scaffold-first + COVID-EIP swap path (M) · T4 regen
-manifest + `build.py corpus` + verify the 3 render + `--check all` zero drift (S) · T5 docs bump 2/14→5/14 (S).
-Transition: continue (lite). Pure authoring — `index.html`/`corpus.html`/`config/**`/`scripts/**` + 3 typology
-dists byte-frozen; only new `derived/*.json` + `dist/corpus` rebuild + docs.
-Abort: if ≥2 of the 3 advisories extract too noisily/unfaithfully for a demo-quality traceable record, narrow
-(quality over count) + raise a glued-list-splitting Phase-15 item, don't ship filler. Blocked >3 attempts →
-ask user: skip or abort.
+Phase: 15 - Harden extraction faithfulness + fix shipped defects
+Tasks: 5 (see tasks.md) — T1 footnote-resume fix in `extract_red_flags` (M) · T2 pre-escaped-entity sweep across
+`derived/*.json` (S) · T3 add the recovered escrow flag as `fin-2025-a003`'s 18th indicator (S) · T4 regen
+`--corpus-status` + rebuild `dist/corpus` + `--check all` zero drift (S) · T5 docs — fix + glued-deferral (S).
+Transition: continue (lite). Showcase byte-frozen — `index.html`/`corpus.html`/`config/**` + 3 typology dists
+untouched; the fix is to `scripts/derive_signals.py` + derived data + a `dist/corpus` rebuild + docs.
+Abort: if the footnote-resume fix can't capture L499 without regressing EFE 12+12 or swallowing footnote prose
+as flags, revert + keep the silent miss FLAGGED as a documented known limitation, don't ship a fragile
+heuristic. Blocked >3 attempts → ask user: skip or abort.
 
 ## Recent Decisions
 
 | Decision | Confidence | Date |
 |----------|------------|------|
+| Phase 15 = harden extraction FAITHFULNESS + fix shipped defects, scoped by MEASUREMENT — a footnote-resume fix in `extract_red_flags` (a mid-list page-boundary footnote run no longer hard-ends a section, so a CLEAN advisory stops silently dropping a real flag: `fin-2025-a003` L499) + a pre-escaped-entity sweep across `derived/*.json` (fix the `fin-2022-a001` `&gt;=` double-escape). NOT a glued-list splitter. User chose harden-spine + fix-defects over scaling further / showcase debt / a wow beat | high | 2026-06-05 |
+| Glued-no-separator splitting DEFERRED (re-confirms the Phase-12 flag-don't-force decision): measurement showed the LOW/NEEDS advisories fail for 3 distinct reasons — footnote-interruption (safely fixable), glued-no-separator (ransomware/health-care; NO safe deterministic split — markitdown dropped bullets AND blank lines, sentence-split risks over-splitting genuine multi-sentence flags), and partial/noise. The extractor's contract is extract-or-honestly-flag; only the SILENT MISS in a CLEAN advisory is a true defect. Convention recorded: derived records store RAW text, `corpus.html` esc() is the sole escaper. User approved deferring glued-splitting | high | 2026-06-05 |
 | Phase 14 = scale corpus derivation to 3 more CLEAN advisories (`fin-2020-a008` human trafficking · `fin-2025-a003` Chinese MLN · `fin-2025-a002` Iran) → corpus explorer live menu 2/14 → 5/14. PURE AUTHORING: the spine + front-end already exist; build.py makes an advisory live by the presence of `derived/<id>.json`, so ZERO engine/spine/front-end edits (only new `derived/*.json` + dist rebuild + docs). User chose scale-derivation over spine-robustness / corpus-wow-beat / showcase-debt | high | 2026-06-05 |
 | Derivation picks = the 3 strong distinct topical CLEAN advisories (trafficking · CMLN · Iran); EFE excluded (already the full showcase elder typology — a duplicate corpus record adds little for 24 indicators), COVID EIP deferred (dated; T3 swap target if Iran extracts unfaithfully). Per-advisory, validate scaffold faithfulness vs the md BEFORE authoring — quality over count, never ship filler | high | 2026-06-05 |
 | Phase 13 deliverable = a NEW standalone corpus-explorer artifact (`dist/corpus/index.html` via `corpus.html`), NOT folded into the existing `index.html` engine. Honors the "keep the six-act arc + two wow beats" non-negotiable literally, protects the 3-typology showcase from pre-demo regression, and the derived-record shape (no lift/stats/anchor) fits a coverage→build-rec→signal view. Trade accepted: corpus.html duplicates the frozen theme CSS (two independent single-file artifacts). User chose standalone over fold-into-index.html | high | 2026-06-05 |
@@ -98,11 +98,11 @@ ask user: skip or abort.
 
 ## Session Journal (last 5)
 
+- [2026-06-05] [[2026-06-05-phase-15-harden-extraction-faithfulness|Phase 15 Harden extraction faithfulness + fix shipped defects (M7)]] (lite, 5 tasks, DELIVERED + accepted) — fixed the 2 defects Phase 14 surfaced, scoped by MEASUREMENT (the LOW/NEEDS advisories fail for 3 distinct reasons, not one). **T1 footnote-resume fix** in `extract_red_flags` (3 measured iterations): split stop logic into `_SECTION_STOP` (terminals, always break) + a conditional `_FOOTNOTE_STOP` (a mid-list page-boundary footnote run is transient when another section follows → skip + resume to the next anchor; terminal for a last section → break) + 2 targeted `_CITATION` signatures (case-docket + no-day paren-date) to kill 2 footnote-tail leaks. SURGICAL: `fin-2025-a003` recovered its silently-dropped L499 escrow flag (17→18), **0 collateral** — all 13 other advisories byte-identical, EFE 12+12, summary 7C/3L/4N. **T2 esc() entity sweep** (`html.unescape` over fin-2022-a001 + fin-2024-a002 `&gt;=`/`&lt;=` → raw text; verified end-to-end in the built file). **T3** escrow IND-18 added to fin-2025-a003 (18 ind, check-clean). **T4** manifest regen + dist/corpus rebuild + `--check all` zero drift. **T5** docs (footnote-resume + glued-deferral + RAW-text/esc() convention). GLUED-NO-SEPARATOR splitting DEFERRED — no safe deterministic split (re-confirms Phase-12); needs a better converter, not a splitter. index.html/corpus.html/config/** + 3 typology dists byte-untouched. The abort rule was hit (first attempt over-captured) but resolved by the bounded next_boundary rule, not aborted. Impl commit + gate commit landed + pushed.
 - [2026-06-05] [[2026-06-05-phase-14-scale-corpus-derivation|Phase 14 Scale corpus derivation — 3 more CLEAN advisories → 5/14 live (M7)]] (lite, 5 tasks, DELIVERED + accepted) — filled the corpus explorer's live menu 2/14 → **5/14** by authoring 3 more LLM-backend-derived, `--check-derived`-clean records, PURE AUTHORING (zero engine/spine/front-end edits — build.py makes an advisory live by the presence of `data/fincen/derived/<id>.json`). **fin-2020-a008** human trafficking (10 ind; pruned 1 intro-tail noise line; 2 BUILD_NOW) · **fin-2025-a003** Chinese MLN (17 ind, clean; **5 BUILD_NOW** — most buildable typology) · **fin-2025-a002** Iran (16 ind; validate-first gate passed, no swap; 4 BUILD_NOW / **7 BUILD_ENRICH** — enrichment-hungry contrast). Authored via a matrix-merge script (preserves verbatim flag text + src_line, auto-derives build_rec from `build_rec_category`). dist/corpus rebuilt → 5/14 live; README + CLAUDE bumped. Verified: 3× --check-derived · --check all 4-artifact zero drift · headless render assertions (each new record renders coverage→build-rec→signal through all 4 screens) · node --check · --selftest 12+12. index.html/corpus.html/config/**/scripts/** + 3 typology dists byte-untouched. FINDINGS (Phase-15): extractor missed fin-2025-a003 L499 (page-break-glued flag); pre-existing fin-2022-a001 `&gt;=` esc() double-escape render bug. Impl commit + gate commit landed.
 - [2026-06-05] [[2026-06-05-phase-13-corpus-explorer|Phase 13 Corpus explorer — THE PAYOFF (M7)]] (lite, 5 tasks, DELIVERED — READY FOR COMPLETION) — rendered the Phase-12 derived records as a NEW standalone ship artifact `dist/corpus/index.html` (from `corpus.html`): a FinCEN CORPUS EXPLORER, STAGED 4-screen flow (SELECT → COVERAGE → BUILD RECOMMENDATIONS → SIGNAL SPEC), all 14 advisories with HONEST status (2 derived live, 12 "not yet derived" by --corpus status). T1 `derive_signals.py --corpus-status` → committed `corpus-status.json` (14 entries, 7-clean/3-low/4-needs summary; shared `_section_counts`/`_load_index` helpers, stdlib-only, anthropic lazy). T2 (the L) `corpus.html` — own copy of the dossier theme CSS (showcase byte-frozen), `__CORPUS__` injection, staged render JS, reduced-motion + keyboard parity, always-on illustrative badge, defensive rendering. T3 build.py `render/build/check_corpus` + `validate_corpus_data` (fail-loud: build_rec ∈ enum; BUILD_NOW ⇒ full build_logic) + "corpus" target, folded into `all`/`--check all` (now 4 artifacts); build.py NEVER imports derive_signals.py (only comment/hint mentions). T4 built end-to-end + 17 headless DOM-shim assertions + 3 browser screenshots. T5 README + CLAUDE docs, milestone → M7. Review 9/10 ACCEPT (one MEDIUM esc() quote-escaping FIXED inline + rebuilt). `index.html` + `config/**` + 3 typology dists byte-untouched; `--check all` 4-artifact zero drift; `--selftest` still 12+12; both derived records `--check-derived` clean. Impl commit `54516d4`.
 - [2026-06-05] [[2026-06-05-phase-12-fincen-corpus-derivation|Phase 12 FinCEN corpus derivation foundation (M7)]] (lite, 5 tasks + 2 user refinement passes, DELIVERED) — backend for a singular corpus-backed FinCEN demo (user picks 1 of 14 advisories). Committed the full 14-advisory corpus md; rewrote `extract_red_flags` as a corpus-wide **section-FINDER** (Tier-1 clean anchors + a Tier-2 loose-header/weak-intro fallback used only when Tier-1 is empty — EFE untouched; + intro-noise/header-block/citation filters). `--corpus` → **7 CLEAN · 3 LOW · 4 NEEDS** (2 NEEDS = FATF jurisdiction advisories = correct). Deterministic checks `build_rec_category` (cover×data matrix) + `check_record` (consistency + traceability + BUILD_NOW⇒logic) in `--selftest`. LLM backend = THIS session (no key) derived 2 records (kleptocracy 5-ind/2-BUILD_NOW + PRC precursors 14-ind/4-BUILD_NOW), each `--check-derived` clean; boundary holds (tampered record rejected). RECORDED: the spine ASSISTS but does not AUTOMATE — complete records need LLM-backend authoring. EFE still 12+12; `index.html`/`build.py`/`schema` untouched; `--check all` zero drift. Opens M7.
 - [2026-06-05] [[2026-06-05-phase-11-automated-derivation|Phase 11 Automated derivation (LLM-drafted signal config)]] (lite, 5 tasks, DELIVERED + accepted) — automated the Phase-7 manual article→signal step in authoring-only `derive_signals.py`: deterministic `extract_red_flags`/`scaffold_config` (`--selftest` extracts 24 EFE flags offline, stdlib-only; form-feed `split("\n")` fix keeps md-line traceability) + neural `--draft` (lazy `anthropic`, env-keyed) PROPOSING status/the-one-target/the-signal-`definition` via the Anthropic API (claude-opus-4-8 + `output_config.format` json_schema, verified vs the **claude-api reference**, not guessed). Boundary preserved: LLM proposes a gitignored `.draft.json`; build.py + schema + 2 human gates DISPOSE (rejects the bare skeleton naming the 2 judgment gaps, accepts a filled draft). Review gate **9/10 accept**; 2 MEDIUM `--draft`-path fixes folded in (adaptive thinking + `effort:high`; refusal/max_tokens handling). Engine/ship untouched; `--check all` zero drift. **M6 vision arc (Phases 7–11) complete.**
-- [2026-06-05] [[2026-06-05-phase-10-fincen-corpus-crawler|Phase 10 FinCEN corpus crawler (SCALE)]] (lite, 4 tasks, COMPLETED + accepted, committed `0c87c47`) — widened the authoring scraper from a 1-entry stub to the discovered FinCEN corpus. New authoring-only `crawl_fincen.py` (pure `parse_index` → `data/fincen/index.json`, 14 advisories; `--selftest`/`--write`/`--list`/`--fetch`); `acquire_fincen.py` REGISTRY→manifest + `resolve_pdf` detail-page hop + EFE direct-PDF zero-hop override. Discovery over mass-download; detail→PDF resolution keeps the committed manifest deterministic. Widened pipe proven on a 2-advisory batch (deleted per user call). Stdlib-only; engine untouched; `--check all` zero drift.
 
 (Earlier entries — Phase 9 build-drift guard, Phase 8 doc true-up, M6 pipeline walking skeleton, M5 ship, M3/M2/M1 — see `index.md` journal list + their journal articles. Trimmed to last 5 per the _CURRENT_STATE size budget.)
 

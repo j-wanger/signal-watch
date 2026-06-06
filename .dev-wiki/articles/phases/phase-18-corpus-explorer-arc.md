@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-06
 updated: 2026-06-06
 source: plan
-status: active
+status: completed
 ceremony: lite
 scope: ["corpus.html", "dist/corpus/index.html", "README.md", "CLAUDE.md"]
 entry_criteria: "Phase 17 complete + accepted (impl commit 572cd3b; reviewer ACCEPT 9/10): the corpus is 12/14 derived live and the real subtraction landed (extract_red_flags + the scaffold/draft stack deleted, derive_signals.py 1202→600, the inverted loop the SOLE derivation path). The M0–M7 roadmap is complete; a UX-research review (agentic-UX best-practice report) confirmed the demo's agentic spine was already sound and most recommendations were already shipped or didn't transfer to a presenter-driven projector demo. The one remaining net-new buy-in lever: the corpus explorer (dist/corpus/, from corpus.html) is a flat 4-screen analytical flow (Select → Coverage → Build recs → Signal) that ends on a spec card — it lacks the dramatic arc the six-act showcase has (no human-decision beat, no payoff). User chose the corpus-explorer arc over call-it-done / engineering-hygiene / showcase-true-up / deepening-the-showcase-gate."

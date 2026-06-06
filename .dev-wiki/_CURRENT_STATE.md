@@ -4,28 +4,29 @@
 
 ## Recommended Next Action
 
-**Start Phase 18 T1 — make the Build-recs BUILD_NOW rows selectable.** Phase 17 is DELIVERED + accepted (corpus
-12/14 live; the real subtraction landed). Phase 18 gives the corpus explorer (`dist/corpus/`, built from
-`corpus.html`) the dramatic ARC the six-act showcase already has — grounded ENTIRELY in existing data, NO
-fabricated numbers. NEW 5-screen arc: Select → Coverage → **Build recs/GATE** (BUILD_NOW rows become selectable
-div-toggles — the "agent proposes, human disposes" thesis, folded into the existing screen) → **Signal** (spec
-cards for the picks) → **Close the loop** (NEW screen: coverage index animates BEFORE → AFTER via the existing
-`coverageIndex()` with picked gaps flipped to covered, identical model to showcase Act 6; reduced-motion jumps to
-after; honest flat-hold for 0-BUILD_NOW/0-picked). T1: add a per-advisory selection Set (default all-BUILD_NOW
-selected, reset on `pick()`), render BUILD_NOW rows as clickable div-toggles (NOT `<input>` — preserves keyboard
-nav + determinism, the showcase `.selrow` pattern), non-BUILD_NOW rows read-only. The unfreeze is `corpus.html`
-ONLY (+ rebuild `dist/corpus` + docs).
+**Phase 18 DELIVERED + accepted — the corpus explorer now ships the 5-screen arc** (Select → Coverage →
+**Build recs/GATE** → **Signal** → **Close the loop**). The Build-recs screen is the human gate (BUILD_NOW rows
+are selectable div-toggles, default all-selected, "agent proposes, human disposes"); Signal reflects the picks
+(two honest empty states); the NEW Close-the-loop screen animates the coverage index before→after as the
+committed gaps flip gap→covered (showcase Act-6 model), with a reduced-motion branch + an honest flat-hold for
+0-picked/0-BUILD_NOW (never a fake rise). NO fabricated numbers — coverage is the payoff; precision
+combination-lift was REJECTED (records carry no precision figures → would fabricate ~12 per-advisory stats).
+Unfroze `corpus.html` ONLY; `index.html`/`build.py`/`config/**`/`data/fincen/**` + the 3 typology dists
+byte-frozen. Verified: 15/15 headless assertions, `node --check` valid, `--check all` 4-artifact zero drift.
+Impl commit 6d654a4; gate commit follows.
 
-**Honesty stance (load-bearing):** the payoff is COVERAGE close-the-loop, NOT precision combination-lift —
-precision-lift was EXPLICITLY REJECTED (corpus records carry no precision/lift numbers; porting it would
-FABRICATE ~12 per-advisory illustrative stats, violating the "never present synthetic numbers as real"
-non-negotiable). FROZEN/byte-untouched: `index.html`, `scripts/build.py`, `config/**`, `data/fincen/**`
-(corpus-status.json + derived/*.json), the 3 typology dists. M6 (Phases 7–11) + M7 backend (Phases 12–17)
-complete; the 3 hand-curated typologies stay the byte-frozen showcase.
+**NEXT:** the M0–M7 roadmap + this arc are complete and the demo is at Definition of Done — **run /dev-plan for
+Phase 19**, or call it done. Optionally `/dev-debrief` for the full Phase-18 journal/retro capture.
+
+**Phase 19 candidates (carried):** tighten the coarse `_rf_triage` counter (Phase-17 reviewer MEDIUM) · drop the
+stale `anthropic` pin from `requirements-authoring.txt` · FATF non-derivable labeling polish · the recurring
+showcase-debt true-up (elder presentation-values + fentanyl verbatim re-point — deferred Ph10/11/15/16) · corpus
+combination-lift wow beat (only with an honest, non-fabricated lift source) · manifest `--fetch` cadence. The 3
+hand-curated typologies stay the byte-frozen showcase.
 
 ## Active Phase
 
-**[[phase-18-corpus-explorer-arc|Phase 18: Corpus explorer arc — human gate + close-the-loop coverage payoff]]** (status: active)
+**[[phase-18-corpus-explorer-arc|Phase 18: Corpus explorer arc — human gate + close-the-loop coverage payoff]]** (status: completed — DELIVERED + accepted 2026-06-06)
 
 Entry criteria: MET (Phase 17 complete + accepted; impl commit 572cd3b — corpus 12/14 live, the real subtraction
 landed). Direction approved corpus-explorer arc over call-it-done / engineering-hygiene / showcase-true-up /
@@ -37,7 +38,7 @@ coverage before→after from the picks with a reduced-motion branch + an honest 
 dist/corpus rebuilt · `--check all` shows index.html/build.py/config/data/3-typology-dists byte-frozen ·
 `node --check` valid · README + CLAUDE document the arc + the coverage-not-precision honesty stance.
 
-Progress: ~0% (planned, direction approved; 5 lite tasks, 1 L = the close-the-loop screen).
+Progress: 100% — DELIVERED + accepted; all 5 tasks [x]; impl commit 6d654a4.
 
 ## Active Phase Contract
 

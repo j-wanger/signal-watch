@@ -3,7 +3,7 @@
 > Last updated: 2026-06-06 by /dev-plan (Phase 18)
 
 <!-- phase:phase-18-corpus-explorer-arc -->
-<!-- gate-log:phase-18 direction=approved delivery=pending -->
+<!-- gate-log:phase-18 direction=approved delivery=accepted -->
 
 ## Phase 18: Corpus explorer arc — human gate + close-the-loop coverage payoff — M7
 

@@ -1,6 +1,6 @@
 # Active Phase Context
 
-Phase: 18 - Corpus explorer arc — human gate + close-the-loop coverage payoff (M7) — planned, direction approved (2026-06-06). 5 lite tasks (1 L = the close-the-loop screen).
+Phase: 18 - Corpus explorer arc — human gate + close-the-loop coverage payoff (M7) — DELIVERED + accepted (2026-06-06); all 5 tasks [x]; impl commit 6d654a4. Roadmap M0–M7 + this arc complete — run /dev-plan for Phase 19 (or the demo is at Definition of Done).
 Objective: give the corpus explorer (`dist/corpus/`, from `corpus.html`) the dramatic arc the six-act showcase has — a 5-screen arc (Select → Coverage → Build recs/GATE → Signal → Close the loop), mirroring the showcase's Act 3 (human gate) + Act 6 (loop closes), grounded ENTIRELY in existing data with NO fabricated numbers.
 
 Scope (the ONLY unfreeze): `corpus.html` + `dist/corpus/index.html` (rebuild) + `README.md` + `CLAUDE.md`. Byte-frozen: `index.html`, `scripts/build.py`, `config/**`, `data/fincen/**` (corpus-status.json + derived/*.json), `dist/{fentanyl,trade-based,elder-financial-exploitation}/`.
@@ -17,4 +17,4 @@ Abort: DEGRADE to close-the-loop-only (no gate; coverage close over ALL BUILD_NO
 
 Gates:
 - [x] Direction confirmed by user (corpus-explorer arc over call-it-done / hygiene / showcase-true-up / deepen-the-gate; coverage payoff over precision-lift; corpus.html-only scope; div-toggle gate folded into Build-recs — 2026-06-06)
-- [ ] Delivery accepted
+- [x] Delivery accepted (post-implementation report 2026-06-06; impl commit 6d654a4; 15/15 headless assertions, --check all 4-artifact zero drift, frozen set intact)

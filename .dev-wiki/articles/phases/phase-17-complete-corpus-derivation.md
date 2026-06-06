@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-06
 updated: 2026-06-06
 source: plan
-status: active
+status: completed
 ceremony: lite
 scope: ["scripts/derive_signals.py", "data/fincen/derived/*.json", "data/fincen/corpus-status.json", "dist/corpus/index.html", "README.md", "CLAUDE.md"]
 entry_criteria: "Phase 16 complete + accepted (impl commit bca3612; reviewer ACCEPT 9/10): the extraction boundary INVERTED — the LLM extracts, the deterministic layer GATES (normalize(flag) ⊂ normalize(md) is the traceability authority; rf_region() the section-cite relevance guard). Correctness-path complexity SHRANK but the FILE GREW 1063→1189: decision B retained the now-demoted extract_red_flags alongside the new gate + heavy inversion docstrings. The debrief named 'delete extract_red_flags' as the top Phase-17 candidate but had the dependency backwards — extract_red_flags is off the correctness path yet is the SOLE producer of the extraction/flag_count triage the byte-frozen corpus.html renders for every not-yet-derived advisory. User chose scale-to-complete (7/14 → 12/14) + the real subtraction (delete the dead extractor + the dead --scaffold/--draft/--scaffold-derived authoring stack), unblocked by a cheap rf_region-bounded triage counter, over scale-only / lean-freeze-and-delete."

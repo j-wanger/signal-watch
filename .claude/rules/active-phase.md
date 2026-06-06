@@ -9,4 +9,4 @@ Deferred (Phase-18 candidates): tighten the coarse `_rf_triage` counter (the rev
 
 Gates:
 - [x] Direction confirmed by user (scale-to-complete + delete; counter bridge; may-grow-later → no lean freeze — 2026-06-06)
-- [ ] Delivery accepted
+- [x] Delivery accepted (post-implementation report 2026-06-06; impl commit 572cd3b)

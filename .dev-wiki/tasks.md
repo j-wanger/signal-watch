@@ -3,7 +3,7 @@
 > Last updated: 2026-06-06 by /dev-plan (Phase 17)
 
 <!-- phase:phase-17-complete-corpus-derivation -->
-<!-- gate-log:phase-17 direction=approved delivery=pending -->
+<!-- gate-log:phase-17 direction=approved delivery=accepted -->
 
 ## Phase 17: Complete corpus derivation + delete extract_red_flags (the real subtraction) — M7
 

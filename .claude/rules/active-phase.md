@@ -1,7 +1,7 @@
 # Active Phase Context
 
-Phase: 15 - Harden extraction faithfulness + fix shipped defects — M7 — DELIVERED, awaiting commit verification.
-(all 5 tasks [x], exit criteria MET, 2026-06-05). No next phase planned — run /dev-plan for Phase 16.
+Phase: 15 - Harden extraction faithfulness + fix shipped defects — M7 — DELIVERED + ACCEPTED (impl commit 62f7c1d, 2026-06-05).
+(all 5 tasks [x], exit criteria MET). No next phase planned — run /dev-plan for Phase 16.
 Objective: fix the 2 concrete defects Phase 14 surfaced, scoped by MEASUREMENT — a CLEAN advisory's silent miss (fin-2025-a003 L499) + the fin-2022-a001 esc() double-escape.
 
 Delivered (verified in tree): footnote-resume fix in extract_red_flags (split stop logic — _SECTION_STOP terminals always break + a NEW conditional _FOOTNOTE_STOP:
@@ -21,4 +21,4 @@ converter for the glued advisories · FATF non-derivable labeling · corpus comb
 
 Gates:
 - [x] Direction confirmed by user (harden spine + fix defects; footnote-resume + esc() sweep; glued-splitting deferred — 2026-06-05)
-- [ ] Delivery accepted (post-implementation report)
+- [x] Delivery accepted (post-implementation report 2026-06-05; impl commit 62f7c1d)

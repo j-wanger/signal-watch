@@ -3,7 +3,7 @@
 > Last updated: 2026-06-05 by /dev-plan (Phase 15)
 
 <!-- phase:phase-15-harden-extraction-faithfulness -->
-<!-- gate-log:phase-15 direction=approved delivery=pending -->
+<!-- gate-log:phase-15 direction=approved delivery=accepted -->
 
 ## Phase 15: Harden extraction faithfulness + fix shipped defects — M7
 

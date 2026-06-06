@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-06
 updated: 2026-06-06
 source: plan
-status: active
+status: completed
 ceremony: lite
 scope: ["scripts/derive_signals.py", "data/fincen/derived/*.json", "data/fincen/corpus-status.json", "dist/corpus/index.html", "README.md", "CLAUDE.md"]
 entry_criteria: "Phase 15 complete + accepted (impl commit 62f7c1d): corpus explorer at 5/14 live; extract_red_flags hardened (footnote-resume + 2 citation signatures). But the spine has accreted ~130 lines of _SECTION_STOP/_FOOTNOTE_STOP/_CITATION format special-casing across Phases 11–15 and still only cleanly parses 7/14; the project already concedes the spine ASSISTS, it does not AUTOMATE — complete records need LLM authoring (it stitches the page-broken/hyphen-truncated/header-glued flags the regex cannot, e.g. fin-2025-a003 raw L499). User chose to INVERT the architecture (LLM extracts, deterministic groundedness gate disposes) + scale as proof, over pure breadth-scaling or a structure-preserving converter."

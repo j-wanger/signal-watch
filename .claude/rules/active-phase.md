@@ -1,6 +1,6 @@
 # Active Phase Context
 
-Phase: 16 - Invert extraction (LLM extracts, deterministic groundedness gate disposes) + scale to 7/14 — M7 — DELIVERED (all 5 tasks [x], exit criteria MET, reviewer ACCEPT 9/10; awaiting commit at the delivery gate, 2026-06-06).
+Phase: 16 - Invert extraction (LLM extracts, deterministic groundedness gate disposes) + scale to 7/14 — M7 — DELIVERED + ACCEPTED (all 5 tasks [x], exit criteria MET, reviewer ACCEPT 9/10; impl commit bca3612, 2026-06-06). No next phase planned — run /dev-plan for Phase 17.
 Objective: subtraction test on the extraction spine — relocate complexity from brittle section-PARSING (open) to md NORMALIZATION (closed). The LLM extracts
 candidate red flags; the deterministic layer became a GROUNDEDNESS GATE (`normalize(flag) ⊂ normalize(md)`, replacing src_line∈extractor-output as the
 traceability authority) + a coarse `rf_region()` section-cite relevance guard. Then scale as PROOF: 2 new records incl. ≥1 previously-unreachable advisory → corpus 5/14 → 7/14.
@@ -20,4 +20,4 @@ derivable=true/not-yet-derived = easiest; LOW advisories ISIS fin-2025-a001 + Ir
 
 Gates:
 - [x] Direction confirmed by user (invert extraction + scale as proof; groundedness gate + section-cite; demote extractor; converter dissolved — 2026-06-06)
-- [ ] Delivery accepted
+- [x] Delivery accepted (post-implementation report 2026-06-06; impl commit bca3612)

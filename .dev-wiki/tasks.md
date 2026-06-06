@@ -3,7 +3,7 @@
 > Last updated: 2026-06-06 by /dev-plan (Phase 16)
 
 <!-- phase:phase-16-invert-extraction -->
-<!-- gate-log:phase-16 direction=approved delivery=pending -->
+<!-- gate-log:phase-16 direction=approved delivery=accepted -->
 
 ## Phase 16: Invert extraction (LLM extracts, deterministic gate disposes) + scale as proof — M7
 

@@ -8,8 +8,14 @@ placeholder; the engine and styles already live in index.html.
 
 Usage:
     python3 scripts/build.py [typology_id]   # default: fentanyl
-    python3 scripts/build.py all             # build every config/typologies/*.json
-    python3 scripts/build.py --check [all|<id>]  # drift guard: committed dist == fresh build?
+    python3 scripts/build.py corpus          # build the FinCEN corpus explorer (dist/corpus/)
+    python3 scripts/build.py all             # build every typology + the corpus explorer
+    python3 scripts/build.py --check [all|corpus|<id>]  # drift guard: committed dist == fresh build?
+
+The corpus explorer (Phase 13) is a separate single-file artifact built from corpus.html +
+the committed data/fincen/corpus-status.json (extraction manifest) + data/fincen/derived/*.json
+(LLM-derived records). build.py reads those committed data artifacts and NEVER imports the
+authoring layer (derive_signals.py); the derived records' shape is validated at this boundary.
 
 `--check` is non-mutating and git-agnostic: it re-renders each config in memory and
 byte-compares against the committed dist/<id>/index.html, exiting non-zero (and naming the
@@ -26,6 +32,17 @@ TEMPLATE = ROOT / "index.html"
 TYPOLOGY_DIR = ROOT / "config" / "typologies"
 PLACEHOLDER = "__CONFIG__"
 DEFAULT_TYPOLOGY = "fentanyl"
+
+# Corpus explorer (Phase 13) — a SEPARATE ship artifact: its own template + data sources,
+# built alongside the typologies. build.py reads the committed data artifacts (the extraction
+# manifest + the LLM-derived records) and NEVER imports the authoring layer (derive_signals.py).
+CORPUS_TEMPLATE = ROOT / "corpus.html"
+CORPUS_STATUS = ROOT / "data" / "fincen" / "corpus-status.json"
+DERIVED_DIR = ROOT / "data" / "fincen" / "derived"
+CORPUS_PLACEHOLDER = "__CORPUS__"
+# the cover×data build-recommendation vocabulary (mirrors derive_signals.py _REC_MATRIX values;
+# re-declared here so build.py's boundary check stays independent of the authoring tool).
+BUILD_RECS = {"COVERED", "BUILD_NOW", "BUILD_ENRICH", "SOURCE_DATA", "ENHANCE", "MONITOR"}
 
 STATUS = {"covered", "partial", "gap"}
 CAND_TYPE = {"entity", "relationship", "motif"}
@@ -261,6 +278,154 @@ def check_one(typ: str, template: str) -> bool:
     return True
 
 
+def validate_corpus_data(advisories: list) -> list:
+    """Deterministic boundary check on the merged corpus dataset. Returns error strings.
+
+    SHAPE only — build.py stays decoupled from the authoring layer: a derived advisory's
+    indicators must each carry a valid status/data and a build_rec in the matrix vocabulary,
+    and a BUILD_NOW indicator must carry build_logic with the full definition shape. Traceability
+    (every indicator -> a red-flag md line) is the authoring gate's job — run
+    `derive_signals.py --check-derived` before committing a derived record.
+    """
+    e = []
+    if not isinstance(advisories, list) or not advisories:
+        return ["corpus has no advisories[]"]
+    for a in advisories:
+        aid = a.get("id", "?")
+        if not a.get("id"):
+            e.append("an advisory is missing id")
+        if "indicators" not in a:
+            continue  # a non-derived advisory carries only status metadata — nothing to validate
+        inds = a.get("indicators")
+        if not isinstance(inds, list) or not inds:
+            e.append(f"{aid}: derived advisory has an empty/invalid indicators array")
+            continue
+        for i in inds:
+            iid = i.get("id", "?")
+            if not i.get("id"):
+                e.append(f"{aid}: an indicator is missing id")
+            if i.get("status") not in STATUS:
+                e.append(f"{aid}/{iid}: status invalid: {i.get('status')}")
+            if i.get("data") not in DATA:
+                e.append(f"{aid}/{iid}: data invalid: {i.get('data')}")
+            rec = i.get("build_rec")
+            if rec not in BUILD_RECS:
+                e.append(f"{aid}/{iid}: build_rec invalid: {rec!r} (not in {sorted(BUILD_RECS)})")
+            logic = i.get("build_logic")
+            if rec == "BUILD_NOW":
+                if not isinstance(logic, dict):
+                    e.append(f"{aid}/{iid}: BUILD_NOW requires build_logic (the signal definition)")
+                else:
+                    missing = DEF_KEYS - set(logic)
+                    if missing:
+                        e.append(f"{aid}/{iid}: build_logic missing keys {sorted(missing)}")
+                    feats = logic.get("features")
+                    if not isinstance(feats, list) or not feats:
+                        e.append(f"{aid}/{iid}: build_logic.features must be a non-empty array")
+    return e
+
+
+def render_corpus(template: str) -> str:
+    """Validate + assemble the corpus dataset and inline it into corpus.html.
+
+    Reads the committed extraction-status manifest (data/fincen/corpus-status.json) and the
+    LLM-derived records (data/fincen/derived/*.json), merges them by advisory id, validates the
+    derived records at the boundary (validate_corpus_data — fail loud), and injects the result
+    at __CORPUS__. Pure: no disk write, no stdout — the single source of truth for what
+    dist/corpus/index.html should contain (shared by build_corpus + check_corpus). build.py
+    stays decoupled from derive_signals.py: it consumes committed data, never imports the tool.
+    """
+    if not CORPUS_STATUS.exists():
+        die(f"corpus status manifest not found: {CORPUS_STATUS.relative_to(ROOT)} "
+            f"(run `python3 scripts/derive_signals.py --corpus-status`)")
+    try:
+        manifest = json.loads(CORPUS_STATUS.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as ex:
+        die(f"invalid JSON in {CORPUS_STATUS.name}: {ex}")
+    advisories = manifest.get("advisories")
+    if not isinstance(advisories, list) or not advisories:
+        die(f"{CORPUS_STATUS.name}: 'advisories' must be a non-empty array "
+            f"(regenerate with `derive_signals.py --corpus-status`)")
+
+    # load the LLM-derived records by advisory id (sorted glob → deterministic merge)
+    derived = {}
+    for p in sorted(DERIVED_DIR.glob("*.json")):
+        try:
+            rec = json.loads(p.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as ex:
+            die(f"invalid JSON in derived record {p.name}: {ex}")
+        if not rec.get("id"):
+            die(f"derived record {p.name} has no 'id'")
+        derived[rec["id"]] = rec
+
+    manifest_ids = {a.get("id") for a in advisories if isinstance(a, dict)}
+    orphan = sorted(i for i in derived if i not in manifest_ids)
+    if orphan:
+        die(f"derived record(s) {orphan} have no entry in {CORPUS_STATUS.name} "
+            f"(regenerate the manifest: `derive_signals.py --corpus-status`)")
+
+    # project to the fields corpus.html renders + attach the derived indicators where present
+    merged = []
+    for a in advisories:
+        if not isinstance(a, dict) or not a.get("id"):
+            die(f"{CORPUS_STATUS.name}: every advisory needs an id")
+        entry = {k: a.get(k) for k in
+                 ("id", "advisory", "title", "date", "source", "extraction", "flag_count", "derivable")}
+        rec = derived.get(a["id"])
+        if rec is not None:
+            entry["derived"] = True
+            entry["indicators"] = rec.get("indicators")
+        merged.append(entry)
+
+    errors = validate_corpus_data(merged)
+    if errors:
+        die(f"corpus data fails boundary validation:\n  - " + "\n  - ".join(errors))
+
+    corpus = {
+        "brand": {"title": "Signal Watch", "subtitle": "FinCEN Corpus Explorer · Vision Prototype"},
+        "badge": "Illustrative data & outputs",
+        "advisories": merged,
+    }
+
+    n = template.count(CORPUS_PLACEHOLDER)
+    if n != 1:
+        die(f"expected exactly one {CORPUS_PLACEHOLDER} placeholder in corpus.html, found {n}")
+    out = template.replace(CORPUS_PLACEHOLDER, json.dumps(corpus, ensure_ascii=False, indent=2))
+    if CORPUS_PLACEHOLDER in out:
+        die("corpus placeholder survived substitution")
+    if "fetch(" in out or "<script src" in out or 'type="module"' in out:
+        die("corpus ship file is not self-contained (fetch / external script / ES module present)")
+    return out
+
+
+def build_corpus(template: str) -> None:
+    out = render_corpus(template)
+    out_dir = ROOT / "dist" / "corpus"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "index.html"
+    out_path.write_text(out, encoding="utf-8")
+    print(f"build: corpus -> {out_path.relative_to(ROOT)}  ({len(out):,} bytes)")
+
+
+def check_corpus(template: str) -> bool:
+    """Drift guard for the corpus artifact: committed dist/corpus == a fresh render?"""
+    out_path = ROOT / "dist" / "corpus" / "index.html"
+    rel = out_path.relative_to(ROOT)
+    try:
+        fresh = render_corpus(template)
+    except SystemExit:
+        print(f"check: corpus -> FAIL (corpus data no longer renders; cannot reproduce {rel})", file=sys.stderr)
+        return False
+    if not out_path.exists():
+        print(f"check: corpus -> DRIFT (missing built artifact {rel}; run `build.py corpus`)", file=sys.stderr)
+        return False
+    if out_path.read_text(encoding="utf-8") != fresh:
+        print(f"check: corpus -> DRIFT ({rel} differs from a fresh build; run `build.py corpus` and commit)", file=sys.stderr)
+        return False
+    print(f"check: corpus -> ok ({rel} matches a fresh build)")
+    return True
+
+
 def resolve_targets(target: str) -> list:
     """A single id, or every config/typologies/*.json for 'all' (sorted, stable)."""
     if target == "all":
@@ -281,20 +446,35 @@ def main() -> None:
     positional = [a for a in args if not a.startswith("-")]
     target = positional[0] if positional else DEFAULT_TYPOLOGY
 
+    # 'corpus' = only the corpus explorer; 'all' = every typology + the corpus; else a typology.
+    want_corpus = target in ("corpus", "all")
+    want_typologies = target != "corpus"
+    corpus_template = None
+    if want_corpus:
+        if not CORPUS_TEMPLATE.exists():
+            die(f"corpus template not found: {CORPUS_TEMPLATE}")
+        corpus_template = CORPUS_TEMPLATE.read_text(encoding="utf-8")
+
     if check:
         # Non-mutating drift guard: committed dist == fresh build? Touches nothing on disk.
-        results = [check_one(t, template) for t in resolve_targets(target)]
+        results = []
+        if want_typologies:
+            results += [check_one(t, template) for t in resolve_targets(target)]
+        if want_corpus:
+            results.append(check_corpus(corpus_template))
         drifted = results.count(False)
         if drifted:
-            die(f"build-drift check FAILED: {drifted}/{len(results)} "
-                f"{'typology' if len(results) == 1 else 'typologies'} drifted "
+            die(f"build-drift check FAILED: {drifted}/{len(results)} artifact(s) drifted "
                 f"(committed dist != fresh build). Rebuild with `python3 scripts/build.py all` "
                 f"and commit the dist.")
         print(f"check: OK — all {len(results)} built artifact(s) match a fresh build (zero drift)")
         return
 
-    for t in resolve_targets(target):
-        build_one(t, template)
+    if want_typologies:
+        for t in resolve_targets(target):
+            build_one(t, template)
+    if want_corpus:
+        build_corpus(corpus_template)
 
     # one-time migration: remove the old single-file M1 layout if present
     stale = ROOT / "dist" / "index.html"

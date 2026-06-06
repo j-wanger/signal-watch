@@ -24,10 +24,12 @@ except a Google Fonts `<link>` when online):
 python3 scripts/build.py fentanyl                     # -> dist/fentanyl/index.html
 python3 scripts/build.py trade-based                  # -> dist/trade-based/index.html
 python3 scripts/build.py elder-financial-exploitation # -> dist/elder-financial-exploitation/index.html
-python3 scripts/build.py all                          # build every typology
+python3 scripts/build.py corpus                       # -> dist/corpus/index.html (FinCEN corpus explorer)
+python3 scripts/build.py all                          # build every typology + the corpus explorer
 python3 scripts/build.py --check all                  # drift guard: committed dist == fresh build?
 
 open dist/fentanyl/index.html                         # macOS — or just double-click it
+open dist/corpus/index.html                           # the corpus explorer
 ```
 
 `--check` re-renders every config in memory and byte-compares it against the committed
@@ -63,6 +65,7 @@ python3 scripts/derive_signals.py --selftest          # offline: EFE red-flag pa
 python3 scripts/derive_signals.py --scaffold <id> <md># offline: md -> config/typologies/<id>.draft.json SKELETON
 .venv/bin/python scripts/derive_signals.py --draft <id> <md>  # LIVE: + LLM-drafted judgment (needs ANTHROPIC_API_KEY)
 python3 scripts/derive_signals.py --corpus                       # offline: extract red flags across ALL 14 committed advisories
+python3 scripts/derive_signals.py --corpus-status                # offline: emit data/fincen/corpus-status.json (the corpus-explorer manifest)
 python3 scripts/derive_signals.py --scaffold-derived <id> <md>   # offline: -> data/fincen/derived/<id>.json skeleton
 python3 scripts/derive_signals.py --check-derived <record.json>  # offline: dispose a derived record (matrix + traceability)
 ```
@@ -104,6 +107,34 @@ judgment, the recommendation rationale, the signal build logic, and pruning any 
 noise. The deterministic layer extracts, flags, and validates; the model session authors; the two
 human gates dispose.
 
+## The corpus explorer (the singular corpus-backed demo)
+
+`dist/corpus/index.html` is a **second, separate** single-file ship artifact: a FinCEN **corpus
+explorer**. Where the six-act typology demos each tell one scripted story, the explorer points the same
+loop at the *whole public advisory corpus* — you pick one of the 14 advisories and watch it derive. It
+is a **staged 4-screen flow**:
+
+1. **Select** — all 14 advisories, each with an honest status chip: *derived* (live, clickable),
+   *clean / low* extraction (ready to derive, not yet derived), or *no red-flag list* (non-derivable,
+   e.g. the FATF jurisdiction advisories).
+2. **Coverage** — the chosen advisory's coverage gauge, derived from its indicator statuses.
+3. **Build recommendations** *(the new centerpiece)* — per red-flag indicator: coverage × data →
+   one **build recommendation** (`BUILD NOW / ENHANCE / BUILD + ENRICH / SOURCE DATA / MONITOR /
+   COVERED`), sorted build-now-first, each row tracing to its red-flag source line.
+4. **Signal** — the full signal definition for each immediately-buildable (`BUILD NOW`) gap.
+
+Build it with `python3 scripts/build.py corpus` (or `all`); guard it with `python3 scripts/build.py
+--check corpus` (folded into `--check all`). The build is **decoupled from the authoring layer**: it
+reads two committed data artifacts — the extraction manifest `data/fincen/corpus-status.json` (emitted
+by `derive_signals.py --corpus-status`) and the LLM-derived records `data/fincen/derived/*.json` —
+merges them by advisory id, and validates the derived records' shape at the build boundary (every
+`build_rec` in the matrix vocabulary; a `BUILD NOW` indicator must carry a full signal definition).
+`build.py` never imports `derive_signals.py`. The advisory titles and red-flag text are verbatim public
+domain; the coverage/data/build judgments are illustrative (the "Illustrative data & outputs" badge
+stays on, with the per-advisory source attribution kept visually distinct from it). The explorer ships
+with **2 of 14** advisories derived; the front-end shows the full corpus honestly, and derivation
+scales as a follow-up.
+
 ## Present it
 
 - Build the typology you want and open `dist/<id>/index.html` in the presentation browser,
@@ -139,6 +170,13 @@ human gates dispose.
 - `CLAUDE.md` — always-loaded project memory / non-negotiables for the agent.
 
 ## Status
+
+**M7 — corpus-backed demo.** Phase 12 built the derivation backend (the deterministic red-flag spine
+validated across all 14 advisories + an LLM-derived, deterministically-checked proof slice in
+`data/fincen/derived/`); Phase 13 added the **corpus explorer** (`dist/corpus/index.html`) — a second
+single-file artifact with an advisory-selection front-end and the per-indicator build-recommendation
+render, built from `corpus.html` + the committed corpus manifest + derived records, with the six-act
+showcase engine left byte-untouched. The earlier arc still stands:
 
 **M6 — Signal Watch ingestion pipeline.** Config-driven engine (M1) + three typologies
 (**fentanyl**, **trade-based ML** — M2; **elder financial exploitation** — M6), switchable at build

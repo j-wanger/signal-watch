@@ -33,6 +33,7 @@ Usage:
     python3 scripts/derive_signals.py --selftest             # offline: EFE extraction (12+12) + checks
     python3 scripts/derive_signals.py --list <md-path>       # offline: print the extracted red flags
     python3 scripts/derive_signals.py --corpus               # offline: extract across ALL committed md
+    python3 scripts/derive_signals.py --corpus-status        # offline: emit data/fincen/corpus-status.json
     python3 scripts/derive_signals.py --scaffold <id> <md>   # offline: md -> <id>.draft.json SKELETON
     python3 scripts/derive_signals.py --draft <id> <md>      # LIVE (authoring): + LLM-drafted judgment
     python3 scripts/derive_signals.py --scaffold-derived <id> <md>   # offline: -> derived/<id>.json skeleton
@@ -57,6 +58,12 @@ CORPUS DERIVATION (Phase 12 — backend for an expanded, singular corpus-backed 
   The LLM backend may be the Anthropic API (--draft pattern) OR a live model session acting as
   the backend (no key) — either way the LLM PROPOSES and the deterministic checks DISPOSE.
   Derived records are an LLM-derived + checked corpus dataset, NOT ship typology configs.
+
+  --corpus-status emits data/fincen/corpus-status.json (committed): per-advisory extraction
+  quality + flag/section counts + title/date/source attribution (titles from index.json) + a
+  derivable flag. This is the deterministic data artifact the CORPUS-EXPLORER build reads
+  (scripts/build.py corpus merges it with data/fincen/derived/*.json) — build.py never imports
+  this authoring tool; it consumes the committed manifest. Regenerate after the corpus changes.
 """
 import json
 import os
@@ -69,6 +76,8 @@ CORPUS_DIR = ROOT / "data" / "fincen"
 EFE_MD = CORPUS_DIR / "fin-2022-a002.md"
 TYPOLOGY_DIR = ROOT / "config" / "typologies"
 DERIVED_DIR = CORPUS_DIR / "derived"
+INDEX_JSON = CORPUS_DIR / "index.json"               # crawl manifest (titles/dates/urls)
+CORPUS_STATUS_JSON = CORPUS_DIR / "corpus-status.json"  # emitted manifest the corpus build reads
 
 # The committed EFE advisory enumerates exactly these red-flag counts (Phase 7: "24 red
 # flags intact"). Pinning them makes --selftest a deterministic validator at the boundary.
@@ -874,6 +883,88 @@ def extraction_quality(flags: list) -> str:
     return "clean"
 
 
+def _section_counts(flags: list) -> dict:
+    """PURE: per-section flag counts, in the order sections are first encountered."""
+    counts: dict[str, int] = {}
+    for f in flags:
+        counts[f["section"]] = counts.get(f["section"], 0) + 1
+    return counts
+
+
+def _load_index() -> dict:
+    """advisory id -> {title, date, url, …} from the committed crawl manifest (best-effort).
+
+    Missing/malformed index.json degrades to empty metadata (titles blank) rather than failing
+    — the extraction status is the load-bearing data; titles are presentation polish.
+    """
+    if not INDEX_JSON.exists():
+        return {}
+    try:
+        entries = json.loads(INDEX_JSON.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    return {e["id"]: e for e in entries if isinstance(e, dict) and e.get("id")} \
+        if isinstance(entries, list) else {}
+
+
+def corpus_status_records() -> list:
+    """PURE-ish (reads corpus md + index.json): per-advisory extraction-status records.
+
+    The deterministic input the corpus-explorer build consumes. For every committed advisory
+    md: its extraction quality (clean | low | none), flag count, per-section counts, the
+    title/date/url/source attribution (from index.json), and a `derivable` flag (a red-flag
+    section was confidently found — none ⇒ non-derivable, e.g. the FATF jurisdiction advisories).
+    Deterministic: md glob is sorted and section counts keep encounter order.
+    """
+    mds = sorted(CORPUS_DIR.glob("*.md"))
+    if not mds:
+        sys.exit(f"no corpus md under {CORPUS_DIR.relative_to(ROOT)} — acquire/convert first")
+    index = _load_index()
+    records = []
+    for p in mds:
+        flags = extract_red_flags(p.read_text(encoding="utf-8"))
+        q = extraction_quality(flags)
+        meta = index.get(p.stem, {})
+        advisory_no = p.stem.upper()
+        title = meta.get("title", "")
+        source = f"FinCEN {advisory_no}" + (f" · {title}" if title else "") \
+            + " · public domain (17 U.S.C. 105)"
+        records.append({
+            "id": p.stem,
+            "advisory": advisory_no,
+            "title": title,
+            "date": meta.get("date", ""),
+            "url": meta.get("url", ""),
+            "source": source,
+            "extraction": q,
+            "flag_count": len(flags),
+            "sections": _section_counts(flags),
+            "derivable": q != "none",
+        })
+    return records
+
+
+def write_corpus_status() -> int:
+    """Emit data/fincen/corpus-status.json — the committed manifest the corpus build reads."""
+    records = corpus_status_records()
+    summary = {"clean": 0, "low": 0, "needs": 0, "total": len(records)}
+    for r in records:
+        summary[{"clean": "clean", "low": "low", "none": "needs"}[r["extraction"]]] += 1
+    manifest = {
+        "_generated_by": "scripts/derive_signals.py --corpus-status",
+        "_note": ("Deterministic extraction-status manifest for the corpus-explorer build "
+                  "(scripts/build.py corpus reads this + data/fincen/derived/*.json). Authoring "
+                  "artifact, NOT a ship config. Regenerate after the corpus md set changes."),
+        "summary": summary,
+        "advisories": records,
+    }
+    CORPUS_STATUS_JSON.write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(f"wrote {CORPUS_STATUS_JSON.relative_to(ROOT)} — {len(records)} advisories "
+          f"({summary['clean']} clean · {summary['low']} low · {summary['needs']} needs)")
+    return 0
+
+
 def corpus_report() -> int:
     """Run extract_red_flags across the whole committed FinCEN corpus + report per advisory.
 
@@ -896,9 +987,7 @@ def corpus_report() -> int:
             print(f"  {p.stem:14}  NEEDS-ATTENTION   no red-flag section confidently found")
             attn += 1
             continue
-        by_section: dict[str, int] = {}
-        for f in flags:
-            by_section[f["section"]] = by_section.get(f["section"], 0) + 1
+        by_section = _section_counts(flags)
         summary = " · ".join(f"{lbl}={n}" for lbl, n in by_section.items())
         if q == "low":
             print(f"  {p.stem:14}  LOW-CONFIDENCE    {len(flags)} block(s) [{summary}] — review "
@@ -921,6 +1010,8 @@ def main(argv):
         return selftest()
     if cmd == "--corpus":
         return corpus_report()
+    if cmd == "--corpus-status":
+        return write_corpus_status()
     if cmd == "--list":
         path = Path(argv[1]) if len(argv) > 1 else EFE_MD
         for f in extract_red_flags(_load_md(path)):

@@ -1,26 +1,29 @@
 # Architecture: Signal Watch — AML Vision Demo
 
-> Last updated: 2026-06-05 by /dev-debrief (Phase 12 — FinCEN corpus derivation)
+> Last updated: 2026-06-05 by /dev-plan (Phase 13 — corpus explorer)
 
 ## Directory Layout
 
 signal-watch/
-  index.html                      # generic engine template (`__CONFIG__` injection point; vanilla HTML/CSS/JS)
+  index.html                      # generic engine template (`__CONFIG__` injection point; vanilla HTML/CSS/JS) — six-act showcase, BYTE-FROZEN
+  corpus.html                     # Phase 13: standalone CORPUS EXPLORER template (`__CORPUS__` injection; OWN copy of theme CSS, staged 4-screen flow)
   config/
     schema.md                     # content-model contract (incl. `advisory_full`)
     typologies/*.json             # per-typology content (fentanyl, trade-based, elder-financial-exploitation)
   scripts/
-    build.py                      # stdlib: render_one (validate+inline = dist-bytes source of truth) + writer; --check drift guard
+    build.py                      # stdlib: render_one (validate+inline = dist-bytes source of truth) + writer; --check drift guard; Phase 13: render/build/check_corpus + special "corpus" target (reads committed data, does NOT import derive_signals.py)
     acquire_fincen.py             # authoring-only: stdlib urllib fetch of a FinCEN advisory PDF
     pdf_to_md.py                  # authoring-only: markitdown PDF→markdown
-    derive_signals.py             # authoring-only: md→config draft (deterministic --selftest/--scaffold + neural --draft; LLM proposes, build.py disposes)
+    derive_signals.py             # authoring-only: md→config draft (deterministic --selftest/--scaffold + neural --draft; LLM proposes, build.py disposes); Phase 13: --corpus-status emits corpus-status.json
     requirements-authoring.txt    # authoring deps (markitdown, anthropic) — uv `.venv`, gitignored
   data/fincen/
     raw/<advisory-id>.pdf         # acquired source PDF (authoring-only, gitignored)
     <advisory-id>.md              # verbatim advisory markdown = source of truth (FULL 14-advisory corpus committed as of Phase 12)
     index.json                    # discovered advisory manifest (Phase 10)
-    derived/<advisory-id>.json    # Phase 12: LLM-backend-derived + deterministically-checked record (NOT a ship config)
-  dist/<typology>/index.html      # built self-contained ship files (per typology)
+    corpus-status.json            # Phase 13: committed per-advisory status manifest (id, advisory_no, title, source, status, flag_count, derivable) — emitted by derive_signals.py --corpus-status
+    derived/<advisory-id>.json    # Phase 12: LLM-backend-derived + deterministically-checked record (NOT a ship config); drives the corpus explorer
+  dist/<typology>/index.html      # built self-contained ship files (per typology); BYTE-FROZEN by Phase 13
+  dist/corpus/index.html          # Phase 13: built self-contained CORPUS EXPLORER ship file (committed)
   archive/                        # original baseline (equivalence reference)
   CLAUDE.md  README.md  HANDOFF.md # always-loaded non-negotiables / run / full context
   .dev-wiki/                      # lifecycle tracking (this wiki)
@@ -31,8 +34,9 @@ backend/ + tests/ remain optional (HANDOFF §3.3); M4 live/pre-gen skipped (file
 
 | Module | Purpose | Key Entry Points | Inputs | Outputs |
 |--------|---------|-----------------|--------|---------|
-| index.html | Generic engine template: six-act scripted walkthrough; state machine + render dispatch + animations, all inline; `__CONFIG__` injection point | `goto(0)` (bottom of `<script>`) | inlined CONFIG (per typology) + Google Fonts (online; degrades) | rendered DOM |
-| scripts/build.py | `render_one(typ, template) -> str` (validate at boundary, fails loud + resolve `text_file`→inline + inject CONFIG + self-contained guard) is the SINGLE source of truth for a typology's dist bytes; a thin writer persists it; `check_one` byte-compares a fresh render against the committed dist (non-mutating, git-agnostic drift guard); `resolve_targets` shares `all`/`<id>` logic | `python3 scripts/build.py <id>` (or `all`); `--check [all\|<id>]` (drift guard) | config JSON + referenced `.md` | `dist/<id>/index.html`; `--check`: per-typology drift verdict + exit code |
+| index.html | Generic engine template: six-act scripted walkthrough; state machine + render dispatch + animations, all inline; `__CONFIG__` injection point. BYTE-FROZEN (Phase 13 adds a separate corpus artifact, never edits this) | `goto(0)` (bottom of `<script>`) | inlined CONFIG (per typology) + Google Fonts (online; degrades) | rendered DOM |
+| corpus.html (Phase 13) | Standalone CORPUS EXPLORER template: OWN copy of the dossier theme CSS (no shared include — showcase stays frozen) + `__CORPUS__` injection point + render JS for the staged 4-screen flow (SELECT → COVERAGE → BUILD RECOMMENDATIONS → SIGNAL SPEC); reduced-motion + keyboard parity; always-on illustrative badge; defensive rendering | the staged-flow entry (bottom of `<script>`) | inlined CORPUS data (corpus-status.json + derived records) | rendered DOM |
+| scripts/build.py | `render_one(typ, template) -> str` (validate at boundary, fails loud + resolve `text_file`→inline + inject CONFIG + self-contained guard) is the SINGLE source of truth for a typology's dist bytes; a thin writer persists it; `check_one` byte-compares a fresh render against the committed dist (non-mutating, git-agnostic drift guard); `resolve_targets` shares `all`/`<id>` logic. Phase 13: `render_corpus`/`build_corpus`/`check_corpus` + special "corpus" target resolution + a corpus-data boundary validator (build_rec ∈ enum; BUILD_NOW ⇒ full build_logic shape); assembles `__CORPUS__` from committed corpus-status.json + derived/*.json — does NOT import derive_signals.py | `python3 scripts/build.py <id>` (or `all`); `--check [all\|<id>]`; `corpus` / `--check corpus` | config JSON + referenced `.md`; corpus: corpus-status.json + derived/*.json + corpus.html | `dist/<id>/index.html`, `dist/corpus/index.html`; `--check`: per-target drift verdict + exit code |
 | scripts/acquire_fincen.py, scripts/pdf_to_md.py | Authoring-only ingestion: fetch advisory PDF, convert to verbatim markdown | run manually at authoring | FinCEN advisory URL / raw PDF | `data/fincen/raw/*.pdf`, `data/fincen/*.md` |
 | scripts/derive_signals.py | Authoring-only. DETERMINISTIC spine (stdlib, offline): `extract_red_flags` is a corpus-wide section-FINDER (Tier-1 clean headers + explicit list-intros; Tier-2 loose-header/weak-intro fallback only when Tier-1 is empty — EFE untouched; intro-noise/header-block/citation filters); `extraction_quality` + `--corpus` classify all 14 advisories CLEAN/LOW/NEEDS; deterministic checks `build_rec_category` (cover×data matrix) + `check_record` (build-rec consistency + src_line traceability + BUILD_NOW⇒build_logic). NEURAL/AUTHORING layer: `--draft` (lazy `anthropic`, env-keyed) OR a model SESSION as backend proposes per-indicator status/data + build recommendation + build logic; `--check-derived` DISPOSES. The spine ASSISTS, it does not AUTOMATE — a complete record needs LLM-backend authoring; the 2 human gates dispose | `--selftest`; `--corpus`; `--scaffold-derived <id> <md>`; `--check-derived <rec>`; `--scaffold`/`--draft` (config draft) | `data/fincen/<id>.md` (+ `ANTHROPIC_API_KEY` for `--draft`) | `data/fincen/derived/<id>.json` (committed, checked); `config/typologies/<id>.draft.json` (gitignored scratch) |
 

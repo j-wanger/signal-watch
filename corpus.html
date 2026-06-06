@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signal Watch — FinCEN Corpus Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* Theme is shared with the six-act showcase (index.html) by deliberate copy: this is a
+     SEPARATE single-file ship artifact (dist/corpus/), and the showcase stays byte-frozen —
+     so corpus.html owns its own copy of the dossier theme rather than a build-time include. */
+  :root{
+    --bg:#0c0e12;--bg2:#10131a;--panel:#151922;--panel2:#1a1f29;
+    --line:#262c39;--line2:#333b4c;--ink:#e9ebf0;--muted:#98a2b5;--faint:#6a7388;
+    --signal:#f6a623;--teal:#4fd1c5;--blue:#5aa9ff;--rose:#ef6079;--green:#54c98a;--violet:#b08cff;
+    --accent:var(--signal);
+    --mono:'JetBrains Mono',ui-monospace,monospace;--body:'Archivo',system-ui,sans-serif;--display:'Newsreader',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1100px 560px at 84% -10%,rgba(246,166,35,.08),transparent 60%),
+      radial-gradient(820px 460px at -6% 8%,rgba(90,169,255,.06),transparent 55%),
+      var(--bg);
+    color:var(--ink);font-family:var(--body);line-height:1.5;-webkit-font-smoothing:antialiased;
+    min-height:100vh;display:flex;flex-direction:column}
+  .shell{max-width:1080px;margin:0 auto;width:100%;padding:0 22px;flex:1;display:flex;flex-direction:column}
+
+  /* header (shared chrome) */
+  header{padding:26px 0 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:13px}
+  .brand .mark{width:34px;height:34px;border-radius:9px;border:1px solid var(--signal);display:grid;place-items:center;color:var(--signal);font-family:var(--mono);font-size:15px;box-shadow:0 0 18px -4px var(--signal) inset}
+  .brand .bt{font-family:var(--display);font-size:20px;line-height:1}
+  .brand .bs{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);margin-top:3px}
+  .badge{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--signal);border:1px solid var(--signal);border-radius:999px;padding:6px 12px;background:rgba(246,166,35,.06)}
+
+  /* stepper (shared) */
+  .stepper{display:flex;gap:4px;padding:16px 0;overflow-x:auto}
+  .step{flex:1;min-width:84px;cursor:pointer;opacity:.5;transition:.25s}
+  .step.done,.step.active{opacity:1}
+  .step .sbar{height:3px;border-radius:2px;background:var(--line2);overflow:hidden}
+  .step.done .sbar,.step.active .sbar{background:var(--signal)}
+  .step .sl{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:7px;white-space:nowrap}
+  .step.active .sl{color:var(--ink)}
+
+  /* stage (shared) */
+  .stage{flex:1;padding:24px 0 8px;min-height:430px;position:relative}
+  .scene{animation:fade .5s cubic-bezier(.2,.7,.2,1)}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--signal);margin-bottom:10px}
+  h2{font-family:var(--display);font-weight:500;font-size:clamp(24px,4vw,36px);line-height:1.08;letter-spacing:-.01em;margin-bottom:12px}
+  h2 em{font-style:italic;color:var(--muted)}
+  .lead{color:var(--muted);max-width:680px;font-size:15.5px;margin-bottom:22px}
+  .lead b{color:var(--ink)}
+  /* source attribution — verbatim public-domain advisory, kept visually distinct from the
+     always-on "illustrative" badge (the red-flag text is genuine; the judgment is illustrative). */
+  .srccap{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--teal);border-left:2px solid var(--teal);padding:4px 0 4px 11px;margin-bottom:20px;line-height:1.5}
+  .srccap b{color:var(--ink);font-weight:500}
+
+  /* selection grid */
+  .selhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .selhead .sct{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.04em}
+  .advgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:780px){.advgrid{grid-template-columns:1fr}}
+  .advcard{border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:14px 15px;display:flex;flex-direction:column;gap:7px;transition:.18s;position:relative}
+  .advcard.live{cursor:pointer;border-left:3px solid var(--signal)}
+  .advcard.live:hover{border-color:var(--line2);border-left-color:var(--signal);background:var(--panel2);transform:translateY(-1px)}
+  .advcard.inert{opacity:.62}
+  .advcard .actop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .advcard .acno{font-family:var(--mono);font-size:11px;color:var(--signal);letter-spacing:.04em}
+  .advcard .actitle{font-size:13.5px;line-height:1.35;color:var(--ink)}
+  .advcard .acmeta{font-family:var(--mono);font-size:10px;color:var(--faint)}
+  .chip{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:6px;white-space:nowrap;border:1px solid currentColor}
+  .chip.derived{color:var(--green)}
+  .chip.clean{color:var(--blue)}
+  .chip.low{color:var(--signal)}
+  .chip.none{color:var(--faint)}
+
+  /* coverage map (shared component) */
+  .covwrap{display:grid;grid-template-columns:1fr 230px;gap:20px;align-items:start}
+  @media(max-width:780px){.covwrap{grid-template-columns:1fr}}
+  .covgrid{display:flex;flex-direction:column;gap:6px}
+  .covrow{display:flex;align-items:center;gap:12px;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:10px 13px}
+  .covrow .clabel{flex:1;font-size:13px;line-height:1.4}
+  .covrow .csub{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:3px}
+  .pill{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:6px;white-space:nowrap;border:1px solid currentColor}
+  .pill.covered{color:var(--green)}
+  .pill.partial{color:var(--signal)}
+  .pill.gap{color:var(--rose)}
+  .gauge{border:1px solid var(--line);background:linear-gradient(180deg,var(--panel2),var(--panel));border-radius:13px;padding:20px;text-align:center;position:sticky;top:10px}
+  .gauge .gh{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .gauge .gnum{font-family:var(--display);font-size:54px;line-height:1;margin:8px 0 2px;color:var(--signal)}
+  .gauge .gd{font-size:12px;color:var(--muted)}
+  .gauge .gbar{height:7px;border-radius:4px;background:var(--bg2);margin-top:14px;overflow:hidden;border:1px solid var(--line)}
+  .gauge .gfill{height:100%;background:linear-gradient(90deg,var(--rose),var(--signal),var(--green));transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+
+  /* build-recommendation list (the new centerpiece) */
+  .brec{display:flex;flex-direction:column;gap:8px}
+  .brecrow{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:12px 14px;opacity:0;transform:translateX(8px);animation:brin .4s forwards}
+  @keyframes brin{to{opacity:1;transform:none}}
+  .brecrow.now{border-left:3px solid var(--green);background:rgba(84,201,138,.05)}
+  .brectop{display:flex;align-items:flex-start;gap:12px}
+  .brectop .bflag{flex:1;font-size:13px;line-height:1.45;color:var(--ink)}
+  .brectop .bflag .bsrc{font-family:var(--mono);font-size:9.5px;color:var(--faint);display:block;margin-top:4px}
+  .recpill{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:6px;white-space:nowrap;border:1px solid currentColor;font-weight:700}
+  .brecmeta{display:flex;gap:16px;margin-top:9px;flex-wrap:wrap}
+  .stat{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .brecrat{font-size:12px;color:var(--muted);line-height:1.5;margin-top:9px;border-top:1px dashed var(--line);padding-top:9px}
+
+  /* signal spec card (shared component) */
+  .spec{border:1px solid var(--line);background:var(--panel);border-radius:12px;overflow:hidden;margin-bottom:14px}
+  .spec .spech{background:var(--panel2);border-bottom:1px solid var(--line);padding:12px 16px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--signal);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .spec .spech .sfrom{color:var(--faint)}
+  .specrow{display:flex;gap:12px;padding:10px 16px;border-bottom:1px dashed var(--line);font-size:12.5px}
+  .specrow:last-child{border-bottom:0}
+  .specrow .sk{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);flex:none;width:96px;padding-top:2px}
+  .specrow .sv{color:var(--ink);line-height:1.5}
+  .specrow .sv code{font-family:var(--mono);font-size:11.5px;background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--teal);display:inline-block;margin:1px 0}
+
+  .framenote{margin-top:20px;font-size:12px;color:var(--faint);border-left:2px solid var(--line2);padding-left:12px;font-style:italic;font-family:var(--display)}
+  .empty{border:1px dashed var(--line2);border-radius:10px;padding:20px;color:var(--muted);font-family:var(--mono);font-size:12px;background:var(--panel);line-height:1.6}
+
+  /* controls (shared) */
+  .controls{border-top:1px solid var(--line);padding:16px 0 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;position:sticky;bottom:0;background:linear-gradient(0deg,var(--bg) 60%,transparent)}
+  .btn{font-family:var(--body);font-weight:600;font-size:14px;border-radius:10px;padding:12px 22px;cursor:pointer;border:1px solid var(--line2);background:var(--panel);color:var(--ink);transition:.18s}
+  .btn:hover{background:var(--panel2)}
+  .btn.primary{background:var(--signal);color:#0c0e12;border-color:var(--signal)}
+  .btn.primary:hover{filter:brightness(1.08)}
+  .btn.primary:disabled{opacity:.4;cursor:not-allowed;filter:none}
+  .btn.ghost{background:none;border-color:transparent;color:var(--muted)}
+  .btn.ghost:hover{color:var(--ink)}
+  .lgroup{display:flex;align-items:center;gap:6px}
+  .keys{color:var(--faint)}
+  .ctrlhint{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  footer{font-family:var(--mono);font-size:10px;color:var(--faint);text-align:center;padding:0 0 18px;line-height:1.7}
+
+  /* Reduced motion: collapse CSS animation/transition to one instant frame. duration:0s (NOT
+     animation:none) so forwards-fill keyframes (.brecrow) settle to their visible end state. */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:.001ms!important;
+      animation-iteration-count:1!important;
+      transition-duration:.001ms!important;
+      scroll-behavior:auto!important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <div class="mark">◈</div>
+      <div><div class="bt" id="brandTitle">Signal Watch</div><div class="bs" id="brandSub">FinCEN Corpus Explorer · Vision Prototype</div></div>
+    </div>
+    <div class="badge" id="badge">Illustrative data &amp; outputs</div>
+  </header>
+
+  <div class="stepper" id="stepper"></div>
+  <div class="stage" id="stage"></div>
+
+  <div class="controls">
+    <div class="lgroup">
+      <button class="btn ghost" id="back">‹ Back</button>
+      <button class="btn ghost" id="reset" title="Back to advisory list (Esc)">↺ Advisories</button>
+    </div>
+    <div class="ctrlhint" id="hint"></div>
+    <button class="btn primary" id="next">Next ›</button>
+  </div>
+
+  <footer>
+    Corpus-backed walkthrough · advisory text is verbatim public-domain (FinCEN, 17 U.S.C. §105); coverage &amp; build judgments are illustrative<br>
+    <span class="keys">←/→ navigate · Space advance · Esc back to list</span>
+  </footer>
+</div>
+
+<script>
+// The corpus dataset is injected here at build time (scripts/build.py corpus fills the
+// placeholder from data/fincen/corpus-status.json + data/fincen/derived/*.json). The engine
+// is generic — no advisory copy lives in code.
+const CORPUS = __CORPUS__;
+validateCorpus(CORPUS);
+
+const BRAND = (CORPUS.brand && typeof CORPUS.brand==='object') ? CORPUS.brand : {};
+const BADGE = CORPUS.badge || 'Illustrative data & outputs';
+const ADVISORIES = CORPUS.advisories;
+
+// status/data dot colors (shared vocabulary with the showcase engine)
+const COLORS={covered:'var(--green)',partial:'var(--signal)',gap:'var(--rose)',
+  available:'var(--green)','partial-d':'var(--signal)',insufficient:'var(--rose)'};
+// the cover×data → build-recommendation vocabulary (mirrors derive_signals.py _REC_MATRIX);
+// sort priority puts the immediately-buildable wins first.
+const REC_ORDER={BUILD_NOW:0,ENHANCE:1,BUILD_ENRICH:2,SOURCE_DATA:3,MONITOR:4,COVERED:5};
+const REC_COLOR={BUILD_NOW:'var(--green)',ENHANCE:'var(--blue)',BUILD_ENRICH:'var(--signal)',
+  SOURCE_DATA:'var(--violet)',MONITOR:'var(--muted)',COVERED:'var(--faint)'};
+const REC_LABEL={BUILD_NOW:'build now',ENHANCE:'enhance',BUILD_ENRICH:'build + enrich',
+  SOURCE_DATA:'source data',MONITOR:'monitor',COVERED:'covered'};
+
+const STEPS=['Select advisory','Coverage','Build recs','Signal'];
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ---------- defensive rendering ---------- */
+function validateCorpus(c){
+  if(!c||typeof c!=='object'){return;}
+  if(!Array.isArray(c.advisories)) c.advisories=[];
+  // an advisory is LIVE only if it carries a well-formed indicator list; otherwise it renders
+  // as a status row in the picker (never a half-broken detail view).
+  c.advisories.forEach(a=>{
+    if(!a||typeof a!=='object') return;
+    if(!Array.isArray(a.indicators)) a.indicators=null;
+  });
+}
+function isLive(a){return !!(a && Array.isArray(a.indicators) && a.indicators.length);}
+function buildNows(a){return isLive(a)?a.indicators.filter(i=>i.build_rec==='BUILD_NOW'):[];}
+
+function coverageIndex(indicators){
+  if(!indicators||!indicators.length) return 0;
+  let v=0;indicators.forEach(i=>{v+=i.status==='covered'?1:i.status==='partial'?0.5:0;});
+  return Math.round(v/indicators.length*100);
+}
+function shortFlag(t,cap){cap=cap||150;t=String(t||'').replace(/\s+/g,' ').trim();return t.length<=cap?t:t.slice(0,cap-1).trimEnd()+'…';}
+
+/* ---------- state + chrome ---------- */
+let view='select', current=null, screen=0, maxScreen=0, timers=[];
+const stage=document.getElementById('stage'), stepper=document.getElementById('stepper');
+const nextBtn=document.getElementById('next'), backBtn=document.getElementById('back');
+const resetBtn=document.getElementById('reset'), hint=document.getElementById('hint');
+
+const REDUCED=!!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+function clearTimers(){timers.forEach(t=>clearTimeout(t));timers=[];}
+// under reduced motion run the callback synchronously — fold staged reveals into one paint.
+function T(fn,ms){if(REDUCED){fn();return 0;}const id=setTimeout(fn,ms);timers.push(id);return id;}
+
+function curAdv(){return ADVISORIES.find(a=>a.id===current)||null;}
+function stepIndex(){return view==='select'?0:screen+1;}  // Select=0, Coverage=1, Build=2, Signal=3
+
+function renderStepper(){
+  const at=stepIndex();
+  stepper.innerHTML=STEPS.map((s,i)=>
+    `<div class="step ${i<at?'done':''} ${i===at?'active':''}" data-i="${i}"><div class="sbar"></div><div class="sl">${i}· ${s}</div></div>`
+  ).join('');
+  stepper.querySelectorAll('.step').forEach(el=>el.onclick=()=>{
+    const i=+el.dataset.i;
+    if(i===0){toSelect();return;}                 // step 0 always returns to the picker
+    if(view==='detail' && i-1<=maxScreen) gotoScreen(i-1);  // only reached detail screens
+  });
+}
+
+/* ---------- screen 0: advisory selection ---------- */
+function renderSelect(){
+  // derived (live) first, then derivable-not-derived (clean/low), then non-derivable.
+  const rank=a=>isLive(a)?0:a.derivable?(a.extraction==='clean'?1:2):3;
+  const list=ADVISORIES.slice().sort((x,y)=>rank(x)-rank(y) || String(x.id).localeCompare(String(y.id)));
+  const live=ADVISORIES.filter(isLive).length;
+  const ready=ADVISORIES.filter(a=>a.derivable && !isLive(a)).length;
+  const nd=ADVISORIES.filter(a=>!a.derivable).length;
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">FinCEN advisory corpus</div>
+    <h2>Pick an advisory. <em>Watch the loop derive it.</em></h2>
+    <p class="lead">The same signal engine, pointed at the public FinCEN advisory corpus. Choose a <b>derived</b> advisory and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
+    <div class="selhead">
+      <span class="sct">${ADVISORIES.length} advisories · ${live} derived · ${ready} ready to derive · ${nd} no red-flag list</span>
+    </div>
+    <div class="advgrid">${list.map(a=>advCard(a)).join('')}</div>
+    <div class="framenote">Coverage and data-availability are illustrative; the advisory titles and red-flag text are verbatim from the public-domain source documents.</div>
+  </div>`;
+  stage.querySelectorAll('.advcard.live').forEach(el=>el.onclick=()=>pick(el.dataset.id));
+}
+function advCard(a){
+  const live=isLive(a);
+  let chip, sub;
+  if(live){
+    const nb=buildNows(a).length;
+    chip=`<span class="chip derived">derived · ${a.indicators.length} ind${nb?` · ${nb} build-now`:''}</span>`;
+    sub=`${esc(a.date||'')}${a.date?' · ':''}${a.indicators.length} indicators`;
+  } else if(a.derivable){
+    const cls=a.extraction==='clean'?'clean':'low';
+    chip=`<span class="chip ${cls}">${esc(a.extraction)} · ${a.flag_count||0} flags · not yet derived</span>`;
+    sub=`${esc(a.date||'')}${a.date?' · ':''}extraction: ${esc(a.extraction)}`;
+  } else {
+    chip=`<span class="chip none">no red-flag list</span>`;
+    sub=`${esc(a.date||'')}${a.date?' · ':''}not derivable`;
+  }
+  return `<div class="advcard ${live?'live':'inert'}" data-id="${esc(a.id)}">
+    <div class="actop"><span class="acno">${esc(a.advisory||a.id)}</span>${chip}</div>
+    <div class="actitle">${esc(a.title||a.id)}</div>
+    <div class="acmeta">${sub}</div>
+  </div>`;
+}
+
+/* ---------- detail screens (1-3) for a chosen advisory ---------- */
+function srcCap(a){return `<div class="srccap"><b>Source.</b> ${esc(a.source||a.advisory||a.id)}</div>`;}
+
+function renderCoverage(a){
+  const inds=a.indicators, cov=coverageIndex(inds);
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">${esc(a.advisory||a.id)} · Coverage</div>
+    <h2>Where are we <em>blind</em> on this advisory?</h2>
+    ${srcCap(a)}
+    <p class="lead">Each enumerated red flag, scored against our existing detection library: do we already cover it? The coverage index is derived from those statuses.</p>
+    <div class="covwrap">
+      <div class="covgrid">${inds.map(i=>`
+        <div class="covrow">
+          <div class="clabel">${esc(shortFlag(i.flag,170))}<div class="csub">${esc(a.advisory)} ${esc(i.section||'')} · md L${esc(i.src_line)}</div></div>
+          <span class="pill ${i.status||'gap'}">${i.status==='gap'?'not covered':esc(i.status||'gap')}</span>
+        </div>`).join('')}
+      </div>
+      <div class="gauge">
+        <div class="gh">Coverage index</div>
+        <div class="gnum" id="gnum">${cov}%</div>
+        <div class="gd">of ${inds.length} red-flag indicators</div>
+        <div class="gbar"><div class="gfill" id="gfill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="framenote">${inds.filter(i=>i.status==='gap').length} of ${inds.length} indicators are uncovered gaps — the next screen recommends what to build for each.</div>
+  </div>`;
+  T(()=>{const f=document.getElementById('gfill');if(f)f.style.width=cov+'%';animVal('gnum',0,cov,900,'%');},250);
+}
+
+function renderBuildRecs(a){
+  // BUILD_NOW first; each indicator's recommendation follows the cover×data matrix (derived + checked).
+  const inds=a.indicators.slice().sort((x,y)=>
+    (REC_ORDER[x.build_rec]??9)-(REC_ORDER[y.build_rec]??9) || String(x.id).localeCompare(String(y.id)));
+  const nb=buildNows(a).length;
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">${esc(a.advisory||a.id)} · Build recommendations</div>
+    <h2>What to <em>build</em> — per indicator.</h2>
+    ${srcCap(a)}
+    <p class="lead">Coverage status × data availability produces a single recommendation per red flag. <b style="color:var(--green)">Build now</b> = an uncovered gap we already hold the data for. ${nb?`<b>${nb}</b> ${nb===1?'indicator is':'indicators are'} immediately buildable.`:''}</p>
+    <div class="brec">${inds.map((i,k)=>brecRow(i,a,k)).join('')}</div>
+    <div class="framenote">Every recommendation is deterministic given (coverage, data): the LLM proposes the judgment, the cover×data matrix disposes it. No recommendation is invented.</div>
+  </div>`;
+}
+function brecRow(i,a,k){
+  const rec=i.build_rec||'COVERED';
+  const dCls=i.data==='available'?'available':i.data==='partial'?'partial-d':'insufficient';
+  const delay=REDUCED?0:k*90;
+  return `<div class="brecrow ${rec==='BUILD_NOW'?'now':''}" style="animation-delay:${delay}ms">
+    <div class="brectop">
+      <div class="bflag">${esc(shortFlag(i.flag,200))}<span class="bsrc">${esc(a.advisory)} ${esc(i.section||'')} · md L${esc(i.src_line)}</span></div>
+      <span class="recpill" style="color:${REC_COLOR[rec]||'var(--faint)'}">${esc(REC_LABEL[rec]||rec)}</span>
+    </div>
+    <div class="brecmeta">
+      <span class="stat"><span class="dot" style="background:${COLORS[i.status]||'var(--faint)'}"></span>coverage: ${i.status==='gap'?'not covered':esc(i.status||'—')}</span>
+      <span class="stat"><span class="dot" style="background:${COLORS[dCls]||'var(--faint)'}"></span>data: ${esc(i.data||'—')}</span>
+    </div>
+    ${i.rationale?`<div class="brecrat">${esc(i.rationale)}</div>`:''}
+  </div>`;
+}
+
+function renderSignal(a){
+  const builds=buildNows(a).filter(i=>i.build_logic && typeof i.build_logic==='object');
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">${esc(a.advisory||a.id)} · Signal</div>
+    <h2>The immediately-buildable <em>signals</em>.</h2>
+    ${srcCap(a)}
+    <p class="lead">For each <b style="color:var(--green)">build-now</b> gap, the agent drafts a full signal definition mapped to data features. ${builds.length?'Each is a proposal — a human confirms before any build.':''}</p>
+    ${builds.length?builds.map(i=>specCard(i,a)).join(''):
+      `<div class="empty">No immediately-buildable signal for this advisory — its gaps need data enrichment or sourcing first (see the build recommendations).</div>`}
+    <div class="framenote">A drafted signal becomes a governed model artifact — versioned, validated under E-23 before it can drive a filing.</div>
+  </div>`;
+}
+function specCard(i,a){
+  const d=i.build_logic;
+  const feats=Array.isArray(d.features)?d.features.map(f=>`<code>${esc(f)}</code>`).join(' '):esc(d.features);
+  return `<div class="spec">
+    <div class="spech"><span>PROPOSED · ${esc(d.signal_name||'signal')}</span><span class="sfrom">from ${esc(a.advisory)} · md L${esc(i.src_line)}</span></div>
+    <div class="specrow"><span class="sk">Class</span><span class="sv">${esc(d.class)}</span></div>
+    <div class="specrow"><span class="sk">Features</span><span class="sv">${feats}</span></div>
+    <div class="specrow"><span class="sk">Logic</span><span class="sv">${esc(d.logic)}</span></div>
+    <div class="specrow"><span class="sk">Window</span><span class="sv">${esc(d.window)}</span></div>
+    <div class="specrow"><span class="sk">Data source</span><span class="sv">${esc(d.source)}</span></div>
+    <div class="specrow"><span class="sk">Initial route</span><span class="sv">${esc(d.route)}</span></div>
+  </div>`;
+}
+
+/* ---------- render dispatch ---------- */
+const DETAIL=[renderCoverage,renderBuildRecs,renderSignal];
+function render(){
+  clearTimers();
+  renderStepper();
+  try{
+    if(view==='select'){ renderSelect(); }
+    else {
+      const a=curAdv();
+      if(!isLive(a)){ toSelect(); return; }   // defensive: never strand on a non-live detail view
+      DETAIL[screen](a);
+    }
+  }catch(e){
+    console.error('corpus render',view,screen,e);
+    stage.innerHTML='<div class="scene"><div class="eyebrow">Corpus explorer</div><h2>This view can\'t render</h2><div class="empty">The data for this screen is missing or malformed — return to the advisory list.</div></div>';
+  }
+  updateControls();
+  window.scrollTo({top:0,behavior:REDUCED?'auto':'smooth'});
+}
+
+/* ---------- navigation ---------- */
+function pick(id){const a=ADVISORIES.find(x=>x.id===id);if(!isLive(a))return;current=id;view='detail';screen=0;maxScreen=0;render();}
+function gotoScreen(s){screen=Math.max(0,Math.min(DETAIL.length-1,s));maxScreen=Math.max(maxScreen,screen);render();}
+function toSelect(){view='select';current=null;screen=0;maxScreen=0;render();}
+function advance(){
+  if(view==='select')return;            // pick by clicking a card
+  if(screen>=DETAIL.length-1){toSelect();return;}
+  gotoScreen(screen+1);
+}
+function back(){
+  if(view==='select')return;
+  if(screen<=0){toSelect();return;}
+  gotoScreen(screen-1);
+}
+function updateControls(){
+  if(view==='select'){
+    backBtn.style.visibility='hidden';
+    resetBtn.style.visibility='hidden';
+    nextBtn.style.visibility='hidden';
+    hint.textContent='Pick a derived advisory to explore →';
+    return;
+  }
+  backBtn.style.visibility='visible';
+  resetBtn.style.visibility='visible';
+  nextBtn.style.visibility='visible';
+  const backLabels=['‹ Advisories','‹ Coverage','‹ Build recs'];
+  const nextLabels=['Build recommendations ›','Signal spec ›','↺ Another advisory'];
+  const hints=['Each red flag scored against the library','Coverage × data → one recommendation per flag','Build-now gaps drafted as signal definitions'];
+  backBtn.textContent=backLabels[screen]||'‹ Back';
+  nextBtn.textContent=nextLabels[screen]||'Next ›';
+  hint.textContent=hints[screen]||'';
+}
+
+function animVal(id,from,to,dur,suf){
+  const el=document.getElementById(id);if(!el)return;
+  if(REDUCED){el.textContent=(suf===''?to.toLocaleString():to)+suf;return;}
+  const start=performance.now();
+  function f(now){const p=Math.min(1,(now-start)/dur);const v=Math.round(from+(to-from)*(1-Math.pow(1-p,3)));el.textContent=(suf===''?v.toLocaleString():v)+suf;if(p<1)requestAnimationFrame(f);}
+  requestAnimationFrame(f);
+}
+
+nextBtn.onclick=advance;
+backBtn.onclick=back;
+resetBtn.onclick=toSelect;
+// keyboard: ←/→ navigate, Space advances, Esc → back to the list. Mirrors the showcase engine.
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target&&e.target.tagName))return;
+  const onBtn=e.target&&e.target.tagName==='BUTTON';
+  switch(e.key){
+    case 'ArrowRight':case 'PageDown':e.preventDefault();advance();break;
+    case 'ArrowLeft':case 'PageUp':e.preventDefault();back();break;
+    case ' ':case 'Spacebar':if(onBtn)break;e.preventDefault();advance();break;
+    case 'Escape':e.preventDefault();toSelect();break;
+  }
+});
+
+function setChromeText(id,txt){const el=document.getElementById(id);if(el!=null&&txt!=null)el.textContent=txt;}
+function applyChrome(){
+  if(BRAND.title)setChromeText('brandTitle',BRAND.title);
+  if(BRAND.subtitle)setChromeText('brandSub',BRAND.subtitle);
+  setChromeText('badge',BADGE);
+}
+
+applyChrome();
+render();
+</script>
+</body>
+</html>

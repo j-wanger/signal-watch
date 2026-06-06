@@ -1,26 +1,18 @@
 # Active Phase Context
 
-Phase: 12 - FinCEN corpus derivation foundation (deterministic spine all-14 + LLM proof slice) — M7 — COMPLETED + accepted
-(all 5 tasks [x], exit criteria MET; impl commit 90939b4, 2026-06-05). No next phase planned — run /dev-plan.
-Objective: Backend for an expanded, singular FinCEN demo (eventual: user picks 1 of 14 advisories, watches the loop
-derive coverage → build recommendations → signal). This phase = deterministic spine validated on ALL 14 + LLM-backend
-(this session, no key) derivation proven on a 2-advisory slice. Demo expansion (selection UI + build-rec render) = Phase 13.
+Phase: 13 - Corpus explorer (advisory-selection front-end + per-indicator build-rec render) — M7 — ACTIVE (planned 2026-06-05)
+Objective: The PAYOFF — render the Phase-12 derived records as a NEW standalone ship artifact `dist/corpus/index.html` (built from corpus.html): a FinCEN CORPUS EXPLORER, staged 4-screen flow SELECT (14, honest status, 2 derived live) → COVERAGE (gauge) → BUILD RECOMMENDATIONS (cover×data→build_rec matrix, BUILD_NOW-first, src_line-traceable) → SIGNAL SPEC (BUILD_NOW cards from build_logic).
 
-Scope: scripts/derive_signals.py, .gitignore, data/fincen/*.md (14 committed), data/fincen/derived/*.json (new),
-README.md, CLAUDE.md. Engine index.html + build.py + config/schema.md UNTOUCHED (backend-only).
+Scope: corpus.html (NEW), scripts/build.py, scripts/derive_signals.py, data/fincen/corpus-status.json (NEW), dist/corpus/index.html (NEW), README.md, CLAUDE.md. UNTOUCHED: index.html, config/**, dist/{fentanyl,trade-based,elder-financial-exploitation}/.
 
-Delivered (verified in working tree):
-- 14 corpus md committed; `extract_red_flags` generalized to a section-FINDER (Tier-1 + Tier-2 fallback + filters);
-  `--corpus` validates all 14 → 7 CLEAN · 3 LOW · 4 NEEDS (2 NEEDS = FATF jurisdiction advisories = correct).
-- Deterministic checks: `build_rec_category` (cover×data matrix) + `check_record` (consistency + traceability + BUILD_NOW⇒logic), in `--selftest`.
-- LLM-backend (this session, NO key) derived 2 records: fin-2022-a001 (kleptocracy, 5 ind, 2 BUILD_NOW) + fin-2024-a002 (PRC precursors, 14 ind, 4 BUILD_NOW); both pass `--check-derived`.
-- EFE `--selftest` still 12+12; `git diff index.html` empty; `build.py --check all` zero drift; anthropic LAZY.
-- DOCUMENTED: the spine ASSISTS but does not AUTOMATE — a complete record still needs LLM-backend authoring (CLAUDE+README).
+Key constraints:
+- NEW standalone artifact; showcase stays BYTE-FROZEN. corpus.html owns its own theme CSS (no shared include).
+- Single self-contained file, offline — no fetch / ES module / external script. Honest data, no fabricated lift/stats; "Illustrative data & outputs" badge + reduced-motion + keyboard parity stay.
+- build.py reads committed data (corpus-status.json + derived/*.json); MUST NOT import derive_signals.py.
 
-Open follow-ups (Phase 13 / Future): demo scope expansion (advisory-selection UI + build-rec render = Phase 13);
-glued-list splitting for the 2 no-blank-separator NEEDS advisories; exclude the 2 FATF advisories from the derivable
-corpus; scale LLM-backend derivation to the remaining 5 CLEAN advisories; residual extraction artifacts (intro-tail).
+Exit: dist/corpus self-contained offline 4-screen explorer · --corpus-status emits the 14-entry manifest · build.py corpus/--check corpus work + decoupled · git diff index.html empty + --check all zero drift · README+CLAUDE updated.
+Abort: if the derived shape needs an engine edit to render — re-implement standalone in corpus.html, don't touch index.html.
 
 Gates:
-- [x] Direction confirmed by user (backend-only foundation; user chose it over a minimal selectable demo view — 2026-06-05)
-- [x] Delivery accepted (post-implementation report 2026-06-05; impl commit 90939b4, review gate 8/10→fixed)
+- [x] Direction confirmed by user (standalone corpus artifact + staged 4-screen flow + all-14 honest status — approved 2026-06-05)
+- [ ] Delivery accepted (post-implementation report)

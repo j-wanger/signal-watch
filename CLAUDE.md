@@ -62,8 +62,20 @@ AML transformation framework. Keep vocabulary consistent with it
   a red-flag md line, BUILD_NOW must carry a full definition. The LLM backend may be the Anthropic API
   (`--draft`) OR a live model session acting as backend (no key); either way the LLM proposes and the
   deterministic checks dispose. Derived records are an LLM-derived + checked corpus dataset, NOT ship
-  typology configs (the 3 hand-curated typologies stay the showcase). Demo scope expansion
-  (advisory-selection UI + build-rec render) is the next phase.
+  typology configs (the 3 hand-curated typologies stay the showcase).
+- Corpus explorer (Phase 13, M7 — the demo scope expansion): a SECOND, separate ship artifact
+  `dist/corpus/index.html`, built from a standalone template `corpus.html` (owns its own copy of the
+  dossier theme — the six-act engine `index.html` is left byte-untouched). A staged 4-screen flow:
+  SELECT one of the 14 advisories (honest status chips: derived / clean-or-low-not-yet-derived /
+  non-derivable) → COVERAGE gauge → per-indicator BUILD RECOMMENDATIONS (the cover×data build_rec,
+  sorted BUILD_NOW-first, each row src_line-traceable) → SIGNAL spec for the BUILD_NOW gaps. Built by
+  `build.py corpus` (or `all`; guarded by `--check corpus`), which reads two COMMITTED data artifacts —
+  the extraction manifest `data/fincen/corpus-status.json` (emitted by `derive_signals.py
+  --corpus-status`) + the derived records `data/fincen/derived/*.json` — merges them by id, and
+  validates the derived shape at the build boundary (build_rec ∈ matrix vocabulary; BUILD_NOW ⇒ full
+  build_logic). build.py NEVER imports the authoring layer; ships with 2/14 derived (front-end shows
+  the full corpus honestly, derivation scales later). No fabricated lift/stats; the always-on badge
+  stays, with the verbatim public-domain source attribution kept visually distinct from it.
 - IMPORTANT — the spine ASSISTS, it does not AUTOMATE the derivation. `--corpus` extraction is
   deterministic but imperfect (heterogeneous corpus: ~7/14 parse cleanly, the rest are flagged
   LOW/NEEDS; even CLEAN extractions can carry residual artifacts like an intro-tail line). A complete,
@@ -75,8 +87,12 @@ AML transformation framework. Keep vocabulary consistent with it
 
 ## How to run
 - Build: `python3 scripts/build.py <id>` (or `all`) → `dist/<id>/index.html`.
-- Present: open `dist/<id>/index.html` — single self-contained file, offline, no server.
-- Iterate: edit `index.html` / a config, rebuild. `python3 -m http.server` optional, never required.
+- Corpus explorer: `python3 scripts/build.py corpus` → `dist/corpus/index.html` (from `corpus.html` +
+  `data/fincen/corpus-status.json` + `data/fincen/derived/*.json`). Regenerate the manifest with
+  `python3 scripts/derive_signals.py --corpus-status` after the corpus md set changes, then rebuild.
+- Present: open `dist/<id>/index.html` (or `dist/corpus/index.html`) — single self-contained file,
+  offline, no server. Drift guard before presenting: `python3 scripts/build.py --check all`.
+- Iterate: edit `index.html` / `corpus.html` / a config, rebuild. `python3 -m http.server` optional, never required.
 
 ## Knowledge wiki
 Domain reference comes from the registered **aml-wiki** (central store at
@@ -96,7 +112,8 @@ JetBrains Mono. Theme lives in `:root` CSS variables. Refined, not flashy.
 
 ## Milestones
 M0 bootstrap · M1 config-driven refactor · M2 multi-typology · M3 presenter polish ·
-M4 (skipped) live/pre-gen mode · M5 ship · M6 Signal Watch ingestion pipeline (FinCEN verbatim).
+M4 (skipped) live/pre-gen mode · M5 ship · M6 Signal Watch ingestion pipeline (FinCEN verbatim) ·
+M7 corpus-backed demo (Phase 12 derivation backend + Phase 13 corpus explorer `dist/corpus/`).
 See HANDOFF.md §8.
 
 ## Definition of done

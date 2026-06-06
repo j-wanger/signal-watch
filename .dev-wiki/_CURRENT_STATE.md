@@ -1,78 +1,73 @@
 # Project: Signal Watch — AML Vision Demo
 
-> Last updated: 2026-06-05 by /dev-debrief (Phase 12 — FinCEN corpus derivation)
+> Last updated: 2026-06-05 by /dev-plan (Phase 13 — corpus explorer)
 
 ## Recommended Next Action
 
-**Phase 12 (FinCEN corpus derivation foundation — deterministic spine all-14 + LLM proof slice) —
-DELIVERED (2026-06-05).** Built the backend for an EXPANDED, **singular** FinCEN demo (eventual: the user
-picks one of 14 advisories and watches the loop derive its coverage → build recommendations → signal).
-The full 14-advisory FinCEN corpus is committed as md; `extract_red_flags` is now a corpus-wide
-**section-FINDER** (Tier-1 clean anchors + a Tier-2 loose-header/weak-intro fallback used only when Tier-1
-is empty — so EFE is untouched; + intro-noise/header-block/citation filters). `--corpus` validates all 14:
-**7 CLEAN · 3 LOW · 4 NEEDS** (2 NEEDS = FATF jurisdiction advisories with no red-flag list = correctly
-flagged). Deterministic checks `build_rec_category` (cover×data matrix) + `check_record` (consistency +
-traceability + BUILD_NOW⇒logic) DISPOSE; folded into `--selftest`. The **LLM backend = THIS session, NO
-key** derived a 2-advisory proof slice (`data/fincen/derived/fin-2022-a001.json` kleptocracy 5-ind/2-BUILD_NOW
-+ `fin-2024-a002.json` PRC precursors 14-ind/4-BUILD_NOW), each passing `--check-derived`; the boundary holds
-(a tampered record is rejected). **Key framing recorded:** the spine ASSISTS but does not AUTOMATE — a
-complete, demo-quality derived record still needs LLM-backend authoring (judgment + build logic + pruning
-residual artifacts). EFE `--selftest` still 12+12; `index.html`/`build.py`/`schema.md` untouched; `--check
-all` zero drift; anthropic LAZY.
+**Phase 13 (Corpus explorer — advisory-selection front-end + per-indicator build-rec render) — PLANNED,
+direction approved (2026-06-05).** The PAYOFF for M7: render the Phase-12 derived records as a NEW
+standalone ship artifact `dist/corpus/index.html` (built from `corpus.html`) — a FinCEN CORPUS EXPLORER
+where a stakeholder picks 1 of 14 advisories and watches the loop derive coverage → per-indicator build
+recommendations → signal. Single self-contained file, offline, no fetch (same non-negotiable as the
+showcase). A STAGED 4-screen flow: **SELECT** (14 advisories, honest status chips — DERIVED live ·
+CLEAN/LOW/NEEDS "not yet derived" · FATF non-derivable; the 2 derived advisories clickable) → **COVERAGE**
+(gauge covered=1/partial=0.5/gap=0 + indicator list) → **BUILD RECOMMENDATIONS** (the new centerpiece —
+per-indicator cover×data → build_rec matrix, BUILD_NOW-first, src_line-traceable) → **SIGNAL SPEC**
+(BUILD_NOW cards from build_logic). The six-act `index.html`, the 3 typology configs, and their dists stay
+**byte-untouched** (corpus.html owns its own theme CSS). build.py stays **decoupled** — reads committed data
+(corpus-status.json + derived/*.json), never imports derive_signals.py. No fabricated lift/stats; the
+always-on "Illustrative data & outputs" badge stays.
 
-**Next — Phase 13 (the payoff): the demo scope expansion** — advisory-selection front-end + per-indicator
-build-rec render, driven by the derived corpus. Run `/dev-plan`. Other candidates: glued-list splitting for
-the 2 NEEDS advisories; scale LLM-backend derivation to the remaining 5 CLEAN advisories; EFE-as-derived
-validation vs the hand-authored elder config; (deferred backlog) elder true-up · fentanyl re-point · `--fetch`.
-
-**Carried:** M6 vision arc (Phases 7–11) complete + accepted (Phase 11 committed `c37dc39`/`7c76971`).
+**Next:** T1 (`--corpus-status` manifest) → T2 (corpus.html template, the L) → T3 (build.py corpus path) →
+T4 (build + verify) → T5 (docs); then `/dev-debrief`. Follow-ups (not in scope): scale derivation to the 5
+remaining CLEAN advisories; glued-list splitting for the 2 NEEDS; exclude the 2 FATF advisories; (deferred)
+elder true-up · fentanyl re-point · `--fetch`. **Carried:** M6 vision arc (7–11) + M7 foundation (Phase 12,
+commit `90939b4`/`348ba81`) complete + accepted — the spine + 2 derived proof-slice records this phase renders.
 
 ## Active Phase
 
-**[[phase-12-fincen-corpus-derivation|Phase 12: FinCEN corpus derivation foundation (deterministic spine all-14 + LLM proof slice)]]** (status: active)
+**[[phase-13-corpus-explorer|Phase 13: Corpus explorer (advisory-selection front-end + per-indicator build-rec render)]]** (status: active)
 
-Entry criteria: MET — M6 vision arc complete (derivation pipeline proven on the single EFE advisory);
-the 14-advisory corpus is already converted to md on disk. User wants to expand the demo scope toward a
-singular corpus-backed demo (user picks an advisory); this phase builds the backend foundation, demo
-expansion deferred to Phase 13. Direction approved **backend-only** (over folding a minimal selectable view in).
-Exit criteria: 14 corpus md committed · `extract_red_flags` generalized (≥2 formats) + `--corpus` report
-across all 14 + EFE `--selftest` still 12+12 · deterministic build-rec-consistency + traceability checks
-w/ selftest · LLM-backend proof slice (2–3) in `data/fincen/derived/*.json`, each check-passing ·
-`git diff index.html` empty, `--check all` zero drift, deterministic layer stdlib-only, anthropic LAZY ·
-documented in docstring + README + CLAUDE.
+Entry criteria: MET — Phase 12 complete + accepted: the deterministic spine is validated on all 14 advisories
+(7 CLEAN / 3 LOW / 4 NEEDS) and the LLM backend (no key) derived 2 check-passing proof-slice records
+(fin-2022-a001 5-ind/2-BUILD_NOW + fin-2024-a002 14-ind/4-BUILD_NOW). The derived-record shape is stable.
+User wants the payoff: render the corpus-backed demo. Direction approved **standalone artifact + staged
+4-screen flow + all-14 honest status** (over fold-into-index.html / dashboard / only-2-derived).
+Exit criteria: `dist/corpus/index.html` = a NEW self-contained offline 4-screen explorer (SELECT → COVERAGE
+→ BUILD RECOMMENDATIONS → SIGNAL SPEC) · `--corpus-status` emits the committed 14-entry manifest · `build.py
+corpus`/`--check corpus` work, build.py does NOT import derive_signals.py · "Illustrative data & outputs"
+badge + reduced-motion + keyboard parity present · `git diff index.html` empty, config/** + the 3 typology
+dists byte-untouched, `--check all` zero drift · documented in README + CLAUDE.
 
 Progress: ~0% — planned, direction approved; 5 tasks, none started.
 
 ## Active Phase Contract
 
-Phase: 12 - FinCEN corpus derivation foundation (deterministic spine all-14 + LLM proof slice)
-Tasks: 5 (see tasks.md) — T1 commit the 14-md corpus (S) · T2 generalize `extract_red_flags` + `--corpus`
-mode + report (L) · T3 deterministic build-rec-consistency + traceability checks (M) · T4 LLM-backend
-derivation proof slice → `data/fincen/derived/*.json` (M) · T5 docs + verify (S).
-Transition: continue (lite). Backend-only — engine/build.py untouched. LLM backend = this session (no API key).
-Abort: if the corpus formats are too heterogeneous for ≥2 deterministic extractors — narrow to a
-section-FINDER that flags non-conformers (the report is the deliverable). If a derived record can't pass
-the checks — reject it (boundary holds). Blocked >3 attempts → ask user: skip or abort.
+Phase: 13 - Corpus explorer (advisory-selection front-end + per-indicator build-rec render)
+Tasks: 5 (see tasks.md) — T1 `--corpus-status` → committed corpus-status.json, 14 entries (M) · T2 corpus.html
+standalone 4-screen explorer template, own theme CSS + `__CORPUS__` + render JS (L) · T3 build.py corpus path
+(render/build/check_corpus + special target + boundary validator, decoupled) (M) · T4 build + verify (S) · T5 docs (S).
+Transition: continue (lite). Showcase byte-frozen (index.html/config/** + 3 typology dists untouched).
+Abort: if the derived shape needs an engine edit to render — re-implement the component standalone in
+corpus.html, don't touch index.html. Blocked >3 attempts → ask user: skip or abort.
 
 ## Recent Decisions
 
 | Decision | Confidence | Date |
 |----------|------------|------|
-| Phase 12 direction = backend-only foundation (deterministic spine validated on ALL 14 advisories + LLM-backend derivation proven on a 2–3 slice); demo scope expansion (advisory-selection front-end + per-indicator build-rec render) deferred to Phase 13. User chose backend-only over folding a minimal selectable demo view into this phase | high | 2026-06-05 |
+| Phase 13 deliverable = a NEW standalone corpus-explorer artifact (`dist/corpus/index.html` via `corpus.html`), NOT folded into the existing `index.html` engine. Honors the "keep the six-act arc + two wow beats" non-negotiable literally, protects the 3-typology showcase from pre-demo regression, and the derived-record shape (no lift/stats/anchor) fits a coverage→build-rec→signal view. Trade accepted: corpus.html duplicates the frozen theme CSS (two independent single-file artifacts). User chose standalone over fold-into-index.html | high | 2026-06-05 |
+| Corpus scope = all 14 advisories shown in selection with HONEST status — the 2 already-derived are live/explorable, the other 12 show their --corpus extraction status (CLEAN/LOW/NEEDS) as "not yet derived", FATF advisories shown non-derivable. Tells the 14-corpus story without faking content; derivation scales as a follow-up. User chose this over "only the 2 derived" and "derive ~5 more first" | high | 2026-06-05 |
+| Corpus view = a STAGED 4-screen flow (select → coverage → build-recs → signal-spec), NOT a single dense dashboard. The project is a vision-prototype-for-stakeholder-buy-in (pitch artifact), so staged theatre fits better than an analyst dashboard; reuses the existing act-staging muscle. User chose staged over dashboard | high | 2026-06-05 |
+| build.py stays decoupled from the authoring layer: it reads committed data artifacts (corpus-status.json + derived/*.json) and never imports derive_signals.py; the deterministic status manifest is emitted by `derive_signals.py --corpus-status`. Preserves the standing "no authoring tool imported by engine or build.py" non-negotiable; build.py re-implements only a light renderable-shape check at its boundary | high | 2026-06-05 |
+| Phase 12 direction = backend-only foundation (deterministic spine validated on ALL 14 advisories + LLM-backend derivation proven on a 2–3 slice); demo scope expansion deferred to Phase 13. User chose backend-only over folding a minimal selectable demo view into Phase 12 | high | 2026-06-05 |
 | Destination = a SINGULAR corpus-backed demo where the user picks a FinCEN advisory (expand demo scope), NOT 14 separate demos. Per-advisory derivation records (`data/fincen/derived/*.json`) are the analytical artifact; the 3 hand-curated ship typologies stay the showcase | high | 2026-06-05 |
-| LLM backend for derivation + build recommendation + build logic = THIS session (me), NOT an API-key `--draft` call (the Phase-11 T4 recorded-run substitution). Deterministic spine (extract + schema/shape + build-rec consistency vs cover×data + traceability) is the dispose-boundary — LLM proposes, deterministic checks dispose | high | 2026-06-05 |
-| Commit the full 14-advisory FinCEN corpus md (un-gitignore) — reverses Phase-10's no-bulk-md call, justified now that the corpus backs the demo; public-domain FinCEN (17 USC §105). Network blocked in-session but the corpus is already converted on disk, so no acquisition needed | high | 2026-06-05 |
-| Phase 11 direction = AUTOMATE (article→signal derivation), chosen by the user over the elder presentation-values true-up AND the fentanyl verbatim re-point at the direction gate. USER OVERRIDE of the planner's finish-before-scale recommendation (elder true-up stays a Future-phase candidate) | high | 2026-06-05 |
-| Within AUTOMATE, chose variant B (LLM-drafted signal definition NOW) over A (deterministic scaffolder only, LLM deferred). USER OVERRIDE of the planner's recommendation of A. The deterministic-only cut A becomes the documented fallback if the LLM can't be coaxed to schema-valid output | high | 2026-06-05 |
-| Boundary-preservation design reconciles the override with the standing Phase-9 anti-neural-judge-at-boundary principle: the LLM PROPOSES a `.draft.json`; the deterministic validator (build.py + schema) + the two human gates DISPOSE. No neural judge at the build boundary; committed configs stay deterministic + human-reviewed | high | 2026-06-05 |
-| Two-layer split in one authoring-only tool: deterministic layer (stdlib-only, `--selftest`, offline, importable without anthropic via LAZY import) + neural layer (`--draft`, ANTHROPIC_API_KEY from env, anthropic in the gitignored authoring venv per the markitdown precedent, added to requirements-authoring.txt, never a ship dep). derive_signals.py never imported by engine/build.py; ship artifact never calls an LLM | high | 2026-06-05 |
-| T3 consults the **claude-api reference** for the current Claude model id + Anthropic Python SDK + structured-output/tool-use pattern rather than guessing from training data (Nana retrieval-over-parametric + standing claude-api lookup instruction) | medium | 2026-06-05 |
-| Phase 10 (SCALE) + Phase 9 (HARDEN) decisions — discovery-manifest not mass-download; pure `parse_index` + offline `--selftest` determinism split; in-process `build.py --check` guard, non-mutating + git-agnostic; keep committing built `dist/`; pre-commit/CI deferred (see `[[phase-10-fincen-corpus-crawler]]` + journal) | high | 2026-06-05 |
+| LLM backend for derivation + build recommendation + build logic = THIS session, NOT an API-key `--draft` call. Deterministic spine (extract + schema/shape + build-rec consistency vs cover×data + traceability) is the dispose-boundary — LLM proposes, deterministic checks dispose | high | 2026-06-05 |
 
-(Earlier Phase 7–10 decisions: see `[[phase-10-fincen-corpus-crawler]]`, `[[phase-08-doc-true-up]]` + the 2026-06-04 journal entries. Load-bearing carry-overs: authoring-time vs ship-artifact split — scraper/converter/derivation are build-time tools, the ship file stays single-file/offline/no-fetch (HANDOFF §4/§4.5); validate config at the build boundary — deterministic validator, fail loud; FinCEN-only verbatim public-domain exception (17 USC §105, NOT FINTRAC); lite ceremony.)
+(Earlier Phase 7–11 decisions: see `[[phase-11-automated-derivation]]`, `[[phase-10-fincen-corpus-crawler]]`, `[[phase-08-doc-true-up]]` + journal. Load-bearing carry-overs: Phase 11 AUTOMATE → variant B (LLM-drafted signal NOW), boundary-preserving (LLM proposes a `.draft.json`; build.py + schema + 2 human gates dispose), two-layer authoring tool (deterministic stdlib `--selftest` + lazy-anthropic `--draft`, never a ship dep, never imported by engine/build.py); authoring-time vs ship-artifact split (build-time tools; ship file stays single-file/offline/no-fetch, HANDOFF §4/§4.5); validate at the build boundary (deterministic validator, fail loud); FinCEN-only verbatim public-domain exception (17 USC §105, NOT FINTRAC); lite ceremony.)
 
 ## Blockers and Open Questions
 
+- [RESOLVED 2026-06-05 · planning] Phase-13 demo scope expansion → **a NEW standalone corpus-explorer artifact (`dist/corpus/index.html` via `corpus.html`), STAGED 4-screen flow (select → coverage → build-recs → signal-spec), all 14 advisories shown with HONEST status (2 derived live, the rest "not yet derived"/non-derivable)**. User chose standalone over fold-into-index.html (showcase byte-frozen); staged over a dense dashboard; all-14-honest over only-2-derived or derive-5-more-first. build.py reads committed data (corpus-status.json + derived/*.json), never imports derive_signals.py. Open sub-question, resolved at impl: can the Act-0 gauge / Act-2 matrix / Act-4 spec-card markup be re-implemented in corpus.html without an engine edit? Abort path = keep corpus.html fully standalone (re-implement the renderable component in its own CSS/JS), never touch index.html
 - [RESOLVED 2026-06-05 · planning] Phase-11 increment → **AUTOMATE: article→signal derivation, variant B (LLM-drafted signal definition NOW)**. User overrode the planner's finish-the-elder-true-up-first recommendation AND its deterministic-only (variant A) recommendation at the direction gate. The elder presentation-values true-up + fentanyl verbatim re-point + manifest `--fetch` cadence stay Future-phase candidates (deprioritized, not dropped). Variant A (deterministic scaffolder only) is the documented fallback if the LLM can't hit schema-valid output
 - [OPEN · phase-11] Can the LLM be coaxed (via the claude-api structured-output/tool-use pattern) to emit a schema-valid signal `definition` that build.py accepts? Resolved by T3/T4; abort path = fall back to variant A deterministic scaffolder. Sub-question: can the post-markitdown EFE red-flag list be deterministically anchored on the section headers (Behavioral L454 / Financial L505)? Resolved at T1; thinner section-bounded capture if not (raised 2026-06-05)
 - [KNOWLEDGE GAP · phase-11, T3] Current Anthropic model id + Anthropic Python SDK structured-output/tool-use pattern — filled at T3 by consulting the claude-api reference (implementation lookup, not a blocking planning gap)

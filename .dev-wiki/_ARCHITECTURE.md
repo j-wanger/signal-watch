@@ -1,6 +1,6 @@
 # Architecture: Signal Watch — AML Vision Demo
 
-> Last updated: 2026-06-06 by /dev-debrief (Phase 18 — corpus explorer 4→5-screen arc: BUILD_NOW human gate via div-toggles + close-the-loop coverage payoff in corpus.html; no other structural change)
+> Last updated: 2026-06-06 by /dev-plan (Phase 19 planned — durability closeout: a committed zero-dep `tests/` harness for the corpus explorer; corrected two stale facts — the `anthropic` pin is DEAD (`requirements-authoring.txt` does not exist, Ph17 deleted it) and `tests/` is no longer optional)
 
 ## Directory Layout
 
@@ -14,8 +14,11 @@ signal-watch/
     build.py                      # stdlib: render_one (validate+inline = dist-bytes source of truth) + writer; --check drift guard; Phase 13: render/build/check_corpus + special "corpus" target (reads committed data, does NOT import derive_signals.py)
     acquire_fincen.py             # authoring-only: stdlib urllib fetch of a FinCEN advisory PDF
     pdf_to_md.py                  # authoring-only: markitdown PDF→markdown
-    derive_signals.py             # authoring-only, STDLIB-ONLY (Phase 17: 1202→600): inverted loop — LLM extracts → gate disposes (quote-grounding `normalize(flag) ⊂ normalize(md)` + `rf_region` + `_rf_triage` counter); --corpus-status / --check-derived / --selftest (gate-only). extract_red_flags + the --scaffold/--draft/--scaffold-derived stack DELETED
-    requirements-authoring.txt    # authoring deps (markitdown[pdf], convert only) — uv `.venv`, gitignored
+    derive_signals.py             # authoring-only, STDLIB-ONLY (Phase 17: 1202→600): inverted loop — LLM extracts → gate disposes (quote-grounding `normalize(flag) ⊂ normalize(md)` + `rf_region` + `_rf_triage` counter); --corpus-status / --check-derived / --selftest (gate-only, Phase 19 adds a glued `_rf_triage` pin). extract_red_flags + the --scaffold/--draft/--scaffold-derived stack DELETED
+  tests/
+    corpus-explorer.test.mjs      # Phase 19: ZERO-DEP Node DOM-shim harness — reads the committed dist/corpus/index.html, drives the 5-screen arc, asserts the ~15 Ph18 invariants (NO jsdom; file:// offline ethos)
+    fixtures/fincen-index.html    # saved listing fixture (crawl_fincen.py --selftest, Phase 10)
+    smoke-checklist.md            # manual pre-present checklist (Phase 19 references the automated arc test)
   data/fincen/
     raw/<advisory-id>.pdf         # acquired source PDF (authoring-only, gitignored)
     <advisory-id>.md              # verbatim advisory markdown = source of truth (FULL 14-advisory corpus committed as of Phase 12)
@@ -28,7 +31,7 @@ signal-watch/
   CLAUDE.md  README.md  HANDOFF.md # always-loaded non-negotiables / run / full context
   .dev-wiki/                      # lifecycle tracking (this wiki)
 
-backend/ + tests/ remain optional (HANDOFF §3.3); M4 live/pre-gen skipped (file:// trap).
+backend/ remains optional (HANDOFF §3.3); M4 live/pre-gen skipped (file:// trap). `tests/` is now a committed zero-dep harness (Phase 19) — node arc test + the manual smoke-checklist + a saved listing fixture.
 
 ## Module Responsibilities
 
@@ -51,7 +54,7 @@ keyboard nav (←/→/Space/Esc/↺) + `prefers-reduced-motion`. Theme in `:root
 |---------|---------|------|
 | (none, ship) | — | Ship artifact has no build/runtime deps. Google Fonts via `<link>`, degrades to system fonts offline. |
 | markitdown[pdf] (MIT) | authoring-only | PDF→markdown converter. Confined to `scripts/`, runs in a gitignored uv-managed py3.12 `.venv` (homebrew py3.14 `pyexpat` is broken). NEVER in the ship file. |
-| anthropic | UNUSED (Phase 17) | Was `derive_signals.py --draft` only (lazy). The `--draft`/`--scaffold` authoring stack was DELETED under the inverted loop (the model SESSION is the backend, no API key); derive_signals.py no longer imports it (now stdlib-only). Still pinned in requirements-authoring.txt — a stale pin (cleanup candidate). The ship artifact never called an LLM. |
+| anthropic | GONE (Phase 17) | Was `derive_signals.py --draft` only (lazy). The `--draft`/`--scaffold` authoring stack was DELETED under the inverted loop (the model SESSION is the backend, no API key); derive_signals.py no longer imports it (now stdlib-only). Phase 19 confirmed the "stale pin" is DEAD — `requirements-authoring.txt` does not exist (Ph17's deletion already took it). The ship artifact never called an LLM. |
 
 ## Authoring Pipeline (M6 — build-time only, NEVER in the ship artifact)
 
@@ -83,7 +86,8 @@ zero runtime deps, no `fetch` (HANDOFF §4 / §4.5). FinCEN advisory text is ver
 | Category | Tool | Config Path | Status |
 |----------|------|-------------|--------|
 | Build System | scripts/build.py (stdlib; validates config + inlines → dist/<id>/index.html; `--check` zero-drift guard) | scripts/build.py | detected |
-| Authoring deps | markitdown[pdf] (MIT, convert only) in a uv-managed py3.12 .venv (gitignored); `anthropic` now UNUSED (derive_signals.py stdlib-only Phase 17) but still pinned in the requirements file (stale) | scripts/requirements-authoring.txt | detected (authoring-only) |
+| Authoring deps | markitdown[pdf] (MIT, convert only) in a uv-managed py3.12 .venv (gitignored); `anthropic` GONE since Phase 17 (derive_signals.py stdlib-only); no `requirements-authoring.txt` on disk (Ph17's deletion took it — confirmed Phase 19) | gitignored uv `.venv` | detected (authoring-only) |
+| Test harness | node (system) — `tests/corpus-explorer.test.mjs` zero-dep DOM-shim arc test (Phase 19); `derive_signals.py --selftest`; `build.py --check all` drift guard | tests/corpus-explorer.test.mjs | detected (Phase 19) |
 | Dev Server | python3 -m http.server (optional, iteration only) | — | optional (never required) |
 | Version Control | git | .git/ | detected |
 

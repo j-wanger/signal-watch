@@ -391,6 +391,20 @@ def _checks_selftest() -> list:
                   "business that are used to purchase real estate in the United States.")
         if normalize(escrow) not in normalize(a003.read_text(encoding="utf-8")):
             fails.append("normalize: escrow stress flag (header-glued + hyphen-wrap) not grounded")
+    # _rf_triage is a COARSE hint, NOT a flag-accurate count — pin that it tracks blank-line
+    # SEPARATORS, not flags (the Phase-17 reviewer-MEDIUM footgun, disclosed not fixed: an accurate
+    # glued count would reintroduce the deleted parser). The SAME three red flags read 'low·1' when
+    # glued-no-separator (one fused block) vs 'clean·3' when blank-separated; pinning both directions
+    # stops a future "fix" from silently changing the documented behavior.
+    rf = ["A customer makes structured cash deposits just below the reporting threshold across multiple branches in a single day.",
+          "A customer's account receives many small incoming transfers that are immediately aggregated and wired offshore.",
+          "A customer uses a business account with no apparent commercial purpose to move funds rapidly in and out."]
+    glued = "\n".join(["# Advisory", "", "Financial Red Flags", *rf, "", "Reminder of Regulatory Obligations", "", "SAR text."])
+    sep = "\n".join(["# Advisory", "", "Financial Red Flags", "", rf[0], "", rf[1], "", rf[2], "", "Reminder of Regulatory Obligations", "", "SAR text."])
+    if _rf_triage(glued, rf_region(glued)) != ("low", 1, {"redflag": 1}):
+        fails.append("_rf_triage glued pin drifted (3 glued flags must read coarse-undercount ('low', 1))")
+    if _rf_triage(sep, rf_region(sep)) != ("clean", 3, {"redflag": 3}):
+        fails.append("_rf_triage separated pin drifted (the same 3 blank-separated flags must read ('clean', 3))")
     return fails
 
 
@@ -450,6 +464,12 @@ def _rf_triage(md: str, region) -> tuple:
     sizes it). The result feeds the corpus-status chip a NOT-YET-DERIVED advisory shows in the
     explorer; a derived advisory renders from its record's indicators (build.py ignores the
     manifest flag_count for live ones), so a rough hint suffices. region=None → not derivable.
+
+    COARSE HINT, NOT a flag-accurate count: the count tracks blank-line SEPARATORS, so a
+    GLUED-no-separator advisory (markitdown dropped its blank lines) UNDERCOUNTS — N fused flags
+    read as one block (pinned both ways in --selftest). An accurate glued count would reintroduce
+    the per-flag parser Phase 17 deleted; the inverted loop has the LLM read glued advisories
+    instead, and no live (derived) record depends on this number — so the coarse hint is by design.
     """
     if region is None:
         return ("none", 0, {})

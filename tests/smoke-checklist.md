@@ -1,9 +1,11 @@
 # Smoke Checklist — stage rehearsal
 
 Run before any presentation, **per typology you intend to present**. Automated checks cover
-structure / schema / self-containment (`scripts/build.py` validates the config at the build
-boundary and fails loud); this checklist covers what only a human eye can confirm: live visuals,
-animation, pacing, keyboard control, and compliance framing.
+structure / schema / self-containment (`scripts/build.py --check` validates the config at the build
+boundary and fails loud) and the corpus explorer's 5-screen arc behavior
+(`node tests/corpus-explorer.test.mjs` — see the corpus-explorer note below); this checklist covers
+what only a human eye can confirm: live visuals, animation, pacing, keyboard control, and compliance
+framing.
 
 Engine chrome (header, badge, the six-act arc, both human gates, the gate labels) is **identical
 across typologies** — it lives in the generic engine, not the config. Only the six values in the
@@ -31,6 +33,17 @@ that table.
 - [ ] Open `dist/<id>/index.html` by **double-clicking the file** (true `file://`, no server)
 - [ ] Header shows **Signal Watch** / AML Detection · Vision Prototype *(shared chrome)*
 - [ ] The amber **"Illustrative data & outputs"** badge is visible (top-right) on **every** act *(shared chrome)*
+
+## Corpus explorer (`dist/corpus/`) — automated arc check + human walk
+- [ ] **Automated arc (structural pre-present check):** `node tests/corpus-explorer.test.mjs` exits **0** —
+  drives the committed `dist/corpus/index.html` through the 5-screen arc under a dep-free DOM shim and
+  asserts the invariants (the human gate's div-toggle selection, the two honest Signal empty states, the
+  close-the-loop coverage math + no indicator mutation, reduced-motion single-paint, 0-picked flat-hold).
+  Run it after any `corpus.html` edit + rebuild; it doubles as a build-output smoke test for the corpus dist.
+- [ ] Open `dist/corpus/index.html` (`file://`): pick a **derived** advisory → walk **Select → Coverage →
+  Build recs (gate) → Signal → Close the loop**; deselect a build-now row and confirm the Signal cards +
+  the closing coverage rise both shrink to match (the automated check pins this, but eyeball it on the
+  presentation browser).
 
 ## Walk the six-act arc (Next / Back) — read values from the table
 - [ ] **Act 0 — Blind spot:** coverage map renders; gauge animates to the **table value**; red (not-covered) rows visible

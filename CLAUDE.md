@@ -121,6 +121,11 @@ AML transformation framework. Keep vocabulary consistent with it
   `python3 scripts/derive_signals.py --corpus-status` after the corpus md set changes, then rebuild.
 - Present: open `dist/<id>/index.html` (or `dist/corpus/index.html`) — single self-contained file,
   offline, no server. Drift guard before presenting: `python3 scripts/build.py --check all`.
+- Test (all dep-free, no install): `node tests/corpus-explorer.test.mjs` drives the corpus explorer's
+  5-screen arc against the committed `dist/corpus/index.html` (gate toggle, Signal empty states,
+  close-the-loop coverage math, reduced-motion) · `python3 scripts/derive_signals.py --selftest` runs
+  the derivation GATE checks. Pre-present sequence: `--check all` (drift) → `node tests/…` (arc) → walk
+  `tests/smoke-checklist.md` (the human-eye checks).
 - Iterate: edit `index.html` / `corpus.html` / a config, rebuild. `python3 -m http.server` optional, never required.
 
 ## Knowledge wiki

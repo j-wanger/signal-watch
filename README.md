@@ -40,6 +40,24 @@ The built file runs offline from `file://`. Fonts fall back to system serif/sans
 if offline. Content lives in `config/typologies/*.json`; the engine (`index.html`) is
 generic and never carries typology copy.
 
+## Test
+
+All checks are dep-free (no `npm install`, no test framework — they match the build's offline ethos):
+
+```
+python3 scripts/build.py --check all       # drift: every committed dist == a fresh build
+node tests/corpus-explorer.test.mjs        # corpus-explorer 5-screen arc, against the committed dist
+python3 scripts/derive_signals.py --selftest   # the derivation GATE checks (matrix + quote-grounding + shape)
+```
+
+`tests/corpus-explorer.test.mjs` loads `dist/corpus/index.html`, runs its inline script under a
+hand-rolled DOM shim (no jsdom), and asserts the arc invariants — the human gate's div-toggle
+selection, the two honest Signal empty states, the close-the-loop coverage math (and that the
+indicator set is never mutated), reduced-motion landing in one paint, and the 0-picked flat-hold.
+Loading the committed dist makes it a build-output smoke test too. Before any presentation, run the
+three checks above, then walk `tests/smoke-checklist.md` (the live-visual / pacing / compliance checks
+only a human eye can confirm).
+
 ## Add a typology
 
 1. Copy an existing `config/typologies/<id>.json`, edit it against `config/schema.md`

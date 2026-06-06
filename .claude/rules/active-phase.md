@@ -1,20 +1,18 @@
 # Active Phase Context
 
-Phase: 18 - Corpus explorer arc — human gate + close-the-loop coverage payoff (M7) — DELIVERED + accepted (2026-06-06); all 5 tasks [x]; impl commit 6d654a4. Roadmap M0–M7 + this arc complete — run /dev-plan for Phase 19 (or the demo is at Definition of Done).
-Objective: give the corpus explorer (`dist/corpus/`, from `corpus.html`) the dramatic arc the six-act showcase has — a 5-screen arc (Select → Coverage → Build recs/GATE → Signal → Close the loop), mirroring the showcase's Act 3 (human gate) + Act 6 (loop closes), grounded ENTIRELY in existing data with NO fabricated numbers.
+Phase: 19 - Durability closeout — commit corpus-explorer test harness + pin _rf_triage (M7) — DELIVERED, all 3 lite tasks [x], exit criteria GREEN (harness 28/28, --selftest PASS, --check all 4-artifact zero drift, frozen set git-diff-empty); awaiting the delivery-accepted gate (flips on commit). At the end of the completed M0–M7 roadmap (demo at Definition of Done): locked in the corpus explorer's 5-screen behavior with a committed dep-free test harness + cleared the one named code-debt item honestly.
+Objective: T1 (M) commit a ZERO-DEP Node DOM-shim harness that reads the committed `dist/corpus/index.html`, drives the 5-screen arc, and asserts the ~15 Ph18 invariants · T2 (S) PIN + DISCLOSE `_rf_triage` (a glued-fixture `--selftest` assertion + a one-line comment, NO output change) · T3 (S) wire the harness command into README + CLAUDE + smoke-checklist.
 
-Scope (the ONLY unfreeze): `corpus.html` + `dist/corpus/index.html` (rebuild) + `README.md` + `CLAUDE.md`. Byte-frozen: `index.html`, `scripts/build.py`, `config/**`, `data/fincen/**` (corpus-status.json + derived/*.json), `dist/{fentanyl,trade-based,elder-financial-exploitation}/`.
+Scope (the ONLY unfreeze): `tests/**`, `scripts/derive_signals.py` (comment + selftest fixture ONLY — no output change), `README.md`, `CLAUDE.md`, `tests/smoke-checklist.md`. FROZEN byte-untouched: `index.html`, `corpus.html`, `scripts/build.py`, `config/**`, `data/fincen/**` (incl. corpus-status.json + derived/*.json), ALL of `dist/**` (the harness only READS dist/corpus/index.html).
 
 Key constraints:
-- NO fabricated precision/lift numbers — the payoff is COVERAGE close-the-loop (existing `coverageIndex()`, already disclosed illustrative). Precision-lift EXPLICITLY REJECTED (records carry no precision/lift numbers).
-- The human gate uses div-toggles, NOT `<input>` (preserves Space/arrow keyboard nav + determinism — the showcase `.selrow` pattern).
-- The gate FOLDS into the existing Build-recs screen (subtraction test — no separate gate screen); default all-BUILD_NOW-selected, non-BUILD_NOW read-only, reset on `pick()`.
-- The arc reuses existing data fields (status→coverage, build_rec→BUILD_NOW, build_logic→spec card) → NO schema/data/build.py change.
-- Defensive 0-BUILD_NOW / 0-picked → honest flat-hold + note (never a fake rise); reduced-motion reaches the same final state.
+- ZERO runtime deps — hand-rolled Node DOM-shim, NEVER jsdom (file:// offline ethos + the dep-free `--selftest`/`--check` idiom). The harness loads the COMMITTED dist so it doubles as a build-output smoke test.
+- The `_rf_triage` item is PIN + DISCLOSE, NOT a counting rewrite — an accurate glued counter would reintroduce the Phase-17-deleted parser (anti-subtraction); harmless today (12 live render from records; build.py ignores flag_count for live; the 2 FATF show count 0).
+- NO behavioral change to any shipped artifact — corpus-status.json + dist/** stay byte-identical; `--check all` must still show zero drift + the frozen set git-diff-empty.
 
-Exit criteria: 5-screen arc ships · BUILD_NOW recs selectable (div-toggle gate, default all-selected, keyboard-safe, non-BUILD_NOW read-only) · Signal reflects the picks (honest empty state) · close-the-loop animates coverage before→after from the picks with a reduced-motion branch + honest 0-BUILD_NOW flat-hold · dist/corpus rebuilt · `--check all` shows index.html/build.py/config/data/3-typology-dists byte-frozen · `node --check` valid · README + CLAUDE document the arc + the coverage-not-precision honesty stance.
-Abort: DEGRADE to close-the-loop-only (no gate; coverage close over ALL BUILD_NOW) if interactive selection can't be made keyboard-safe/deterministic without growing complex; keep the close screen informational if the math can't be honest; NEVER fabricate precision/lift. Blocked >3 attempts → ask user: skip or abort.
+Exit criteria (all MET): `node tests/corpus-explorer.test.mjs` exits 0 (28 arc assertions, zero npm deps, no jsdom) · `derive_signals.py --selftest` gained the bidirectional glued `_rf_triage` pin + the "coarse hint, not authoritative for glued" docstring and passes · `build.py --check all` zero drift across 4 artifacts + frozen set git-diff-empty (corpus-status.json + dist/** byte-identical) · README + CLAUDE + smoke-checklist each name the harness command.
+Abort: DEGRADE to a leaner assertion set (boot + each screen renders without throwing + the coverage-math unit, skipping event-driven toggles) if the DOM-shim can't drive the arc without a real DOM lib — NEVER pull jsdom into a file:// offline demo. Blocked >3 attempts on a task → ask the user: skip or abort.
 
 Gates:
-- [x] Direction confirmed by user (corpus-explorer arc over call-it-done / hygiene / showcase-true-up / deepen-the-gate; coverage payoff over precision-lift; corpus.html-only scope; div-toggle gate folded into Build-recs — 2026-06-06)
-- [x] Delivery accepted (post-implementation report 2026-06-06; impl commit 6d654a4; 15/15 headless assertions, --check all 4-artifact zero drift, frozen set intact)
+- [x] Direction confirmed by user (durability closeout over call-it-done / showcase-debt-true-up / new-stakeholder-ask; zero-dep Node DOM-shim; _rf_triage pin-not-rewrite — 2026-06-06)
+- [ ] Delivery accepted (post-implementation report)

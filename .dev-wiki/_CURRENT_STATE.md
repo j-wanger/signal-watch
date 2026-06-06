@@ -1,60 +1,75 @@
 # Project: Signal Watch — AML Vision Demo
 
-> Last updated: 2026-06-05 by /dev-debrief (Phase 15 — harden extraction faithfulness DELIVERED + accepted)
+> Last updated: 2026-06-06 by /dev-debrief (Phase 16 — invert extraction; DELIVERED, all 5 tasks [x], exit criteria MET; awaiting commit at the delivery gate)
 
 ## Recommended Next Action
 
-**Phase 15 (Harden extraction faithfulness + fix shipped defects) DELIVERED + accepted — run `/dev-plan` for
-Phase 16.** Fixed the 2 concrete defects Phase 14 surfaced, scoped by MEASUREMENT. (1) **Footnote-resume fix**
-in `extract_red_flags` (`_SECTION_STOP` terminals always break + a new conditional `_FOOTNOTE_STOP`: a
-mid-list page-boundary footnote run is transient when another section follows → skip + resume to the next
-anchor; terminal for a last section → break) — `fin-2025-a003` recovered its silently-dropped L499 escrow flag
-(17→18), **SURGICAL: 1 genuine flag recovered, 0 collateral** (all 13 other advisories byte-identical, EFE
-12+12, 7C/3L/4N held). Two footnote-tail leaks were killed by 2 targeted `_CITATION` signatures (case-docket +
-no-day paren-date). (2) **esc() entity sweep** — `html.unescape` over the 2 Phase-12 records (`fin-2022-a001`,
-`fin-2024-a002`) → raw text; verified end-to-end in the built file. Added the escrow flag as `fin-2025-a003`'s
-18th indicator, regenerated `--corpus-status`, rebuilt `dist/corpus`, `--check all` zero drift. **Glued-no-
-separator splitting DEFERRED** (no safe deterministic split — re-confirms Phase-12 flag-don't-force).
+**Phase 16 (Invert extraction — LLM extracts, deterministic groundedness gate disposes — + scale to 7/14)
+DELIVERED, all 5 tasks [x], exit criteria MET, reviewer ACCEPT 9/10. Commit + push at the delivery gate, then
+run /dev-plan for Phase 17.** The extraction boundary INVERTED: traceability authority moved from `src_line ∈
+extract_red_flags(md)` (a structural parse) to QUOTE-GROUNDING (`normalize(flag) ⊂ normalize(md)`). The
+subtraction won — ONE `normalize()` rule absorbs the entire closed FinCEN-md artifact set; the escrow STRESS
+case grounds without special-casing; correctness-path complexity SHRANK. The 5 committed records migrated
+near-free (gate-pass unedited). PROOF landed: ransomware `fin-2021-a004` (0 deterministic flags, glued-no-
+separator — previously unreachable) → LLM extracted all 12, every one grounds verbatim, NO converter/splitter
+(Phase-15 glued-deferral DISSOLVED); COVID-EIP `fin-2021-a002` consolidated 7 sub-clause blocks → 3 indicators.
+Corpus explorer **5/14 → 7/14 live**. `dist/corpus` rebuilt, `--check all` 4-artifact zero drift, showcase +
+`corpus.html` byte-frozen, `--selftest` EFE 12+12. 2 MEDIUM reviewer findings fixed inline (`_MIN_FLAG_NCHARS=24`
+floor + regression-pin selftest cases).
 
-**Phase 16 candidates (run `/dev-plan`):** scale the live menu to 6–7/14 (remaining CLEAN: EFE corpus record,
-COVID-EIP `fin-2021-a002` — derivable now, same Phase-14 loop) · a structure-preserving PDF→md converter
-(pymupdf4llm, authoring-only) if the glued ransomware/health-care flags are ever wanted — NOT a post-hoc
-splitter · FATF non-derivable labeling · corpus combination-lift "wow" beat · (carried) elder presentation-
-values true-up · fentanyl verbatim re-point · manifest `--fetch` cadence. **Carried:** M6 vision arc (Phases
-7–11) + M7 (Phases 12–15) complete; the 3 hand-curated typologies stay the byte-frozen showcase.
+**Top Phase-17 candidate — the REAL subtraction:** `derive_signals.py` GREW 1063→1189 (decision B retained the
+demoted `extract_red_flags` alongside the new gate + heavy inversion docstrings). The correctness-path complexity
+shrank but the file didn't. Phase 17 could DELETE `extract_red_flags` outright (re-home the EFE selftest anchor +
+the `--corpus`/`--scaffold-derived` triage hint) for the genuine line-count shrink. Plus: scale the live menu
+further via the same inverted loop (glued health-care `fin-2026-a001` is now `derivable=true`/not-yet-derived =
+the easiest target; the LOW advisories ISIS `fin-2025-a001`, Iran-terror `fin-2024-a001`; the EFE corpus record)
+· optionally tighten the coarse `rf_region` relevance guard if scaling widely.
+
+**Carried (later phases):** FATF non-derivable labeling polish · corpus combination-lift wow beat · elder
+presentation-values true-up · fentanyl verbatim re-point · manifest `--fetch` cadence. M6 vision arc
+(Phases 7–11) + M7 backend (Phases 12–16) complete; the 3 hand-curated typologies stay the byte-frozen showcase.
 
 ## Active Phase
 
-**[[phase-15-harden-extraction-faithfulness|Phase 15: Harden extraction faithfulness + fix shipped defects]]** (status: active)
+**[[phase-16-invert-extraction|Phase 16: Invert extraction (LLM extracts, deterministic gate disposes) + scale as proof]]** (status: active)
 
-Entry criteria: MET — Phase 14 complete + accepted (corpus explorer at 5/14 live). Phase 14 surfaced 2
-concrete defects: the extractor missed a real flag at `fin-2025-a003` L499 (the advisory still reports CLEAN —
-a silent faithfulness miss), and the Phase-12 `fin-2022-a001` record's `&gt;= 2` double-escapes under
-`corpus.html` esc() on a shipped record. Direction approved **harden the spine + fix defects** (footnote-resume
-fix + esc() sweep, glued-splitting deferred) over scaling further / showcase debt / a wow beat.
-Exit criteria: footnote-resume fix lands (`fin-2025-a003` 17→18, `--selftest` EFE 12+12, new flags genuine) ·
-no derived record stores pre-escaped HTML entities · `fin-2025-a003` derived record = 18 `--check-derived`-clean
-indicators · `--corpus-status` regenerated + `dist/corpus` rebuilt, `--check all` zero drift, `index.html`/
-`corpus.html`/`config/**` + 3 typology dists byte-untouched · glued-no-separator deferral documented.
+Entry criteria: MET — Phase 15 complete + accepted (impl commit 62f7c1d; corpus explorer at 5/14 live; extractor
+hardened with footnote-resume + 2 citation signatures). But the spine has accreted ~130 lines of format
+special-casing across Phases 11–15 and still only cleanly parses 7/14; the project already concedes the spine
+ASSISTS, it does not AUTOMATE. Direction approved **invert the architecture** (LLM extracts, deterministic
+groundedness gate disposes) + scale as proof, over pure breadth-scaling / a structure-preserving converter.
+Exit criteria: groundedness gate + normalizer land (escrow STRESS case grounds, fabricated flag rejected,
+`--selftest` EFE 12+12) · 5 existing records migrate + pass under the new gate · extractor DEMOTED to
+selftest-anchor + hint, `--corpus-status` semantics shifted with SHAPE preserved (FATF non-derivable,
+build.py/corpus.html byte-untouched) · 2 new records (incl. ≥1 previously-unreachable) gate-pass → 7/14 live ·
+`dist/corpus` rebuilt, `--check all` zero drift, showcase byte-frozen · docs record the inverted architecture +
+the honesty shift.
 
 Progress: ~0% — planned, direction approved; 5 tasks, none started.
 
 ## Active Phase Contract
 
-Phase: 15 - Harden extraction faithfulness + fix shipped defects
-Tasks: 5 (see tasks.md) — T1 footnote-resume fix in `extract_red_flags` (M) · T2 pre-escaped-entity sweep across
-`derived/*.json` (S) · T3 add the recovered escrow flag as `fin-2025-a003`'s 18th indicator (S) · T4 regen
-`--corpus-status` + rebuild `dist/corpus` + `--check all` zero drift (S) · T5 docs — fix + glued-deferral (S).
+Phase: 16 - Invert extraction (LLM extracts, deterministic gate disposes) + scale as proof
+Tasks: 5 (see tasks.md) — T1 groundedness gate + md normalizer in `derive_signals.py` (L) · T2 migrate the 5
+committed `derived/*.json` records to the new gate (M) · T3 demote `extract_red_flags` to selftest-anchor +
+shift corpus-status semantics, SHAPE preserved (M) · T4 scale as proof — derive 2 records incl. ≥1
+previously-unreachable (M) · T5 rebuild `dist/corpus` (7/14) + drift guard + docs (S).
 Transition: continue (lite). Showcase byte-frozen — `index.html`/`corpus.html`/`config/**` + 3 typology dists
-untouched; the fix is to `scripts/derive_signals.py` + derived data + a `dist/corpus` rebuild + docs.
-Abort: if the footnote-resume fix can't capture L499 without regressing EFE 12+12 or swallowing footnote prose
-as flags, revert + keep the silent miss FLAGGED as a documented known limitation, don't ship a fragile
-heuristic. Blocked >3 attempts → ask user: skip or abort.
+untouched (`corpus.html` frozen because `corpus-status.json` keeps its shape); the work is to
+`scripts/derive_signals.py` + derived data + a `dist/corpus` rebuild + docs.
+Abort: if the normalizer can't ground the escrow/glued cases without becoming as complex as the extractor it
+replaces (complexity merely MOVES, not shrinks — the subtraction test FAILS), STOP — keep quote-grounding for the
+clean records, leave `extract_red_flags` as-is for the rest, narrow breadth to COVID-EIP only. Don't trade one
+brittle component for another. Blocked >3 attempts → ask user: skip or abort.
 
 ## Recent Decisions
 
 | Decision | Confidence | Date |
 |----------|------------|------|
+| Phase 16 = INVERT the extraction architecture — the LLM (this session) EXTRACTS candidate red flags, the deterministic layer becomes a GROUNDEDNESS GATE (normalized verbatim `flag` ∈ normalized md, replacing src_line∈extractor-output as the traceability authority). Subtraction test applied to the ~130-line accreted `extract_red_flags` machinery; complexity relocates from brittle section-parsing (open problem) to a closed-problem md normalizer (running headers, form-feeds, hyphen-breaks, smart quotes, whitespace). User reframed the dev-plan menu toward this (away from pure breadth-scaling / a converter), naming the fear that "in the end we still rely on LLM authoring" — so make the deterministic layer a GATE, not a neural-overridden extractor. "Deterministic validators at boundaries over neural judges at the end" — LLM at the start (generative), validator at the boundary | high | 2026-06-06 |
+| Relevance trade (decision A) = groundedness gate + a CHEAP section-cite check (quote falls within the cited red-flag section's span), NOT pure groundedness (which would pass a grounded-but-irrelevant quote) and NOT a full structural parser. Keeps "real AND a genuine red flag" mostly deterministic; the two human gates dispose on residual relevance. The named trade: groundedness proves a quote is REAL TEXT, not a GENUINE red flag | high | 2026-06-06 |
+| `extract_red_flags` DEMOTED not deleted (decision B) — kept as the EFE `--selftest` regression anchor + an optional scaffold hint; no longer the correctness/traceability authority, stops growing. `corpus-status.json` keeps its SHAPE EXACTLY (`build.py` + `corpus.html` byte-untouched) but semantics shift: `live` = a gate-passing committed record; `derivable: false` = the 2 FATF advisories (fin-2020-a009, fin-2021-a003 — no enumerated red-flag list); CLEAN/LOW/NEEDS = informational hint only | high | 2026-06-06 |
+| Breadth (decision C) = 2 new records as PROOF over count — COVID-EIP fin-2021-a002 (clean) + ≥1 previously-LOW/glued advisory (ISIS fin-2025-a001 OR ransomware fin-2021-a004) → 7/14 live. The pymupdf4llm structure-preserving-converter option is DISSOLVED (the LLM reads the glued md like a human; the gate verifies the quote is real) | high | 2026-06-06 |
 | Phase 15 = harden extraction FAITHFULNESS + fix shipped defects, scoped by MEASUREMENT — a footnote-resume fix in `extract_red_flags` (a mid-list page-boundary footnote run no longer hard-ends a section, so a CLEAN advisory stops silently dropping a real flag: `fin-2025-a003` L499) + a pre-escaped-entity sweep across `derived/*.json` (fix the `fin-2022-a001` `&gt;=` double-escape). NOT a glued-list splitter. User chose harden-spine + fix-defects over scaling further / showcase debt / a wow beat | high | 2026-06-05 |
 | Glued-no-separator splitting DEFERRED (re-confirms the Phase-12 flag-don't-force decision): measurement showed the LOW/NEEDS advisories fail for 3 distinct reasons — footnote-interruption (safely fixable), glued-no-separator (ransomware/health-care; NO safe deterministic split — markitdown dropped bullets AND blank lines, sentence-split risks over-splitting genuine multi-sentence flags), and partial/noise. The extractor's contract is extract-or-honestly-flag; only the SILENT MISS in a CLEAN advisory is a true defect. Convention recorded: derived records store RAW text, `corpus.html` esc() is the sole escaper. User approved deferring glued-splitting | high | 2026-06-05 |
 | Phase 14 = scale corpus derivation to 3 more CLEAN advisories (`fin-2020-a008` human trafficking · `fin-2025-a003` Chinese MLN · `fin-2025-a002` Iran) → corpus explorer live menu 2/14 → 5/14. PURE AUTHORING: the spine + front-end already exist; build.py makes an advisory live by the presence of `derived/<id>.json`, so ZERO engine/spine/front-end edits (only new `derived/*.json` + dist rebuild + docs). User chose scale-derivation over spine-robustness / corpus-wow-beat / showcase-debt | high | 2026-06-05 |
@@ -71,6 +86,7 @@ heuristic. Blocked >3 attempts → ask user: skip or abort.
 
 ## Blockers and Open Questions
 
+- [RESOLVED 2026-06-06 · planning] Phase-16 direction → **INVERT the extraction architecture** (the LLM extracts candidate red flags; the deterministic layer becomes a GROUNDEDNESS GATE — normalized `flag` ∈ normalized md replaces src_line∈extractor-output as the traceability authority — + a cheap section-cite relevance guard) **+ scale as proof to 7/14** (COVID-EIP fin-2021-a002 + ≥1 previously-LOW/glued advisory). User chose this over pure breadth-scaling / a structure-preserving converter (DISSOLVED). Decisions A (groundedness + section-cite, not pure-groundedness, not a full parser), B (demote `extract_red_flags`, preserve corpus-status SHAPE, derivable false only for the 2 FATF advisories), C (2 records as proof over count) confirmed. Open sub-question, resolved at impl: can `normalize()` ground the escrow STRESS case (header-glued + hyphen-truncated raw L499) without becoming as complex as the extractor it replaces? Abort path = keep quote-grounding for the clean records, leave `extract_red_flags` as-is for the rest, narrow breadth to COVID-EIP only (subtraction test must SHRINK complexity, not move it)
 - [RESOLVED 2026-06-05 · planning] Phase-13 demo scope expansion → **a NEW standalone corpus-explorer artifact (`dist/corpus/index.html` via `corpus.html`), STAGED 4-screen flow (select → coverage → build-recs → signal-spec), all 14 advisories shown with HONEST status (2 derived live, the rest "not yet derived"/non-derivable)**. User chose standalone over fold-into-index.html (showcase byte-frozen); staged over a dense dashboard; all-14-honest over only-2-derived or derive-5-more-first. build.py reads committed data (corpus-status.json + derived/*.json), never imports derive_signals.py. Open sub-question, resolved at impl: can the Act-0 gauge / Act-2 matrix / Act-4 spec-card markup be re-implemented in corpus.html without an engine edit? Abort path = keep corpus.html fully standalone (re-implement the renderable component in its own CSS/JS), never touch index.html
 - [RESOLVED 2026-06-05 · planning] Phase-11 increment → **AUTOMATE: article→signal derivation, variant B (LLM-drafted signal definition NOW)**. User overrode the planner's finish-the-elder-true-up-first recommendation AND its deterministic-only (variant A) recommendation at the direction gate. The elder presentation-values true-up + fentanyl verbatim re-point + manifest `--fetch` cadence stay Future-phase candidates (deprioritized, not dropped). Variant A (deterministic scaffolder only) is the documented fallback if the LLM can't hit schema-valid output
 - [OPEN · phase-11] Can the LLM be coaxed (via the claude-api structured-output/tool-use pattern) to emit a schema-valid signal `definition` that build.py accepts? Resolved by T3/T4; abort path = fall back to variant A deterministic scaffolder. Sub-question: can the post-markitdown EFE red-flag list be deterministically anchored on the section headers (Behavioral L454 / Financial L505)? Resolved at T1; thinner section-bounded capture if not (raised 2026-06-05)
@@ -98,13 +114,12 @@ heuristic. Blocked >3 attempts → ask user: skip or abort.
 
 ## Session Journal (last 5)
 
+- [2026-06-06] [[2026-06-06-phase-16-invert-extraction|Phase 16 Invert extraction (LLM extracts, deterministic gate disposes) + scale to 7/14 (M7)]] (lite, 5 tasks, DELIVERED — READY FOR COMPLETION at the gate; reviewer ACCEPT 9/10) — INVERTED the extraction boundary per the user's reframe (subtraction test on the ~130-line accreted extractor; "make the deterministic layer a GATE, not a neural-overridden extractor"). Traceability authority moved from `src_line ∈ extract_red_flags(md)` → QUOTE-GROUNDING (`normalize(flag) ⊂ normalize(md)`). **T1** the subtraction won decisively: ONE rule `normalize(text)=re.sub(r'[^a-z0-9]+','',text.lower()).replace('fincenadvisory','')` absorbs the WHOLE closed FinCEN-md artifact set (line wraps, word-wrap hyphens, smart quotes, footnote digits, AND the page-break running header → droppable token); the header-glued escrow STRESS case (fin-2025-a003 L499) grounds WITHOUT special-casing; `check_record` rewired to grounding + a coarse `rf_region()` relevance guard; ~3-line normalizer + ~12-line region REPLACE the src_line traceability that depended on the ~130-line extractor — correctness complexity SHRANK. **T2** all 5 committed records migrated NEAR-FREE (gate-pass unedited; only a raw-text provenance swap). **T3** `extract_red_flags` DEMOTED to EFE selftest-anchor + triage hint; `--corpus-status` SHAPE preserved, `derivable` rebased on `rf_region(md) is not None` (false only for the 2 FATF advisories; the 2 glued advisories correctly flip false→true). **T4** THE PROOF: ransomware **fin-2021-a004** (0 deterministic flags, glued-no-separator, previously unreachable) → LLM extracted all 12, every one grounds verbatim, NO converter/splitter (Phase-15 glued-deferral DISSOLVED); COVID-EIP **fin-2021-a002** consolidated 7 sub-clause blocks → 3 ind; 7/7 derived → corpus **5/14 → 7/14 live**. **T5** dist/corpus rebuilt (95,188→109,937 B), `--check all` 4-artifact ZERO DRIFT, README + CLAUDE document the inverted architecture + the honesty shift. 2 MEDIUM reviewer findings fixed inline (`_MIN_FLAG_NCHARS=24` floor + 2 regression-pin selftest cases). DISCOVERY (refines T1): broadened `_RF_REGION_END` so ransomware's "Reminder of Regulatory Obligations" terminates its region — no regression. index.html/corpus.html/config/** + 3 typology dists byte-frozen; `--selftest` EFE 12+12. SOFT OBS (Phase-17): the file GREW 1063→1189 (decision B retained the demoted extractor) — the real subtraction is deleting it.
 - [2026-06-05] [[2026-06-05-phase-15-harden-extraction-faithfulness|Phase 15 Harden extraction faithfulness + fix shipped defects (M7)]] (lite, 5 tasks, DELIVERED + accepted) — fixed the 2 defects Phase 14 surfaced, scoped by MEASUREMENT (the LOW/NEEDS advisories fail for 3 distinct reasons, not one). **T1 footnote-resume fix** in `extract_red_flags` (3 measured iterations): split stop logic into `_SECTION_STOP` (terminals, always break) + a conditional `_FOOTNOTE_STOP` (a mid-list page-boundary footnote run is transient when another section follows → skip + resume to the next anchor; terminal for a last section → break) + 2 targeted `_CITATION` signatures (case-docket + no-day paren-date) to kill 2 footnote-tail leaks. SURGICAL: `fin-2025-a003` recovered its silently-dropped L499 escrow flag (17→18), **0 collateral** — all 13 other advisories byte-identical, EFE 12+12, summary 7C/3L/4N. **T2 esc() entity sweep** (`html.unescape` over fin-2022-a001 + fin-2024-a002 `&gt;=`/`&lt;=` → raw text; verified end-to-end in the built file). **T3** escrow IND-18 added to fin-2025-a003 (18 ind, check-clean). **T4** manifest regen + dist/corpus rebuild + `--check all` zero drift. **T5** docs (footnote-resume + glued-deferral + RAW-text/esc() convention). GLUED-NO-SEPARATOR splitting DEFERRED — no safe deterministic split (re-confirms Phase-12); needs a better converter, not a splitter. index.html/corpus.html/config/** + 3 typology dists byte-untouched. The abort rule was hit (first attempt over-captured) but resolved by the bounded next_boundary rule, not aborted. Impl commit + gate commit landed + pushed.
 - [2026-06-05] [[2026-06-05-phase-14-scale-corpus-derivation|Phase 14 Scale corpus derivation — 3 more CLEAN advisories → 5/14 live (M7)]] (lite, 5 tasks, DELIVERED + accepted) — filled the corpus explorer's live menu 2/14 → **5/14** by authoring 3 more LLM-backend-derived, `--check-derived`-clean records, PURE AUTHORING (zero engine/spine/front-end edits — build.py makes an advisory live by the presence of `data/fincen/derived/<id>.json`). **fin-2020-a008** human trafficking (10 ind; pruned 1 intro-tail noise line; 2 BUILD_NOW) · **fin-2025-a003** Chinese MLN (17 ind, clean; **5 BUILD_NOW** — most buildable typology) · **fin-2025-a002** Iran (16 ind; validate-first gate passed, no swap; 4 BUILD_NOW / **7 BUILD_ENRICH** — enrichment-hungry contrast). Authored via a matrix-merge script (preserves verbatim flag text + src_line, auto-derives build_rec from `build_rec_category`). dist/corpus rebuilt → 5/14 live; README + CLAUDE bumped. Verified: 3× --check-derived · --check all 4-artifact zero drift · headless render assertions (each new record renders coverage→build-rec→signal through all 4 screens) · node --check · --selftest 12+12. index.html/corpus.html/config/**/scripts/** + 3 typology dists byte-untouched. FINDINGS (Phase-15): extractor missed fin-2025-a003 L499 (page-break-glued flag); pre-existing fin-2022-a001 `&gt;=` esc() double-escape render bug. Impl commit + gate commit landed.
 - [2026-06-05] [[2026-06-05-phase-13-corpus-explorer|Phase 13 Corpus explorer — THE PAYOFF (M7)]] (lite, 5 tasks, DELIVERED — READY FOR COMPLETION) — rendered the Phase-12 derived records as a NEW standalone ship artifact `dist/corpus/index.html` (from `corpus.html`): a FinCEN CORPUS EXPLORER, STAGED 4-screen flow (SELECT → COVERAGE → BUILD RECOMMENDATIONS → SIGNAL SPEC), all 14 advisories with HONEST status (2 derived live, 12 "not yet derived" by --corpus status). T1 `derive_signals.py --corpus-status` → committed `corpus-status.json` (14 entries, 7-clean/3-low/4-needs summary; shared `_section_counts`/`_load_index` helpers, stdlib-only, anthropic lazy). T2 (the L) `corpus.html` — own copy of the dossier theme CSS (showcase byte-frozen), `__CORPUS__` injection, staged render JS, reduced-motion + keyboard parity, always-on illustrative badge, defensive rendering. T3 build.py `render/build/check_corpus` + `validate_corpus_data` (fail-loud: build_rec ∈ enum; BUILD_NOW ⇒ full build_logic) + "corpus" target, folded into `all`/`--check all` (now 4 artifacts); build.py NEVER imports derive_signals.py (only comment/hint mentions). T4 built end-to-end + 17 headless DOM-shim assertions + 3 browser screenshots. T5 README + CLAUDE docs, milestone → M7. Review 9/10 ACCEPT (one MEDIUM esc() quote-escaping FIXED inline + rebuilt). `index.html` + `config/**` + 3 typology dists byte-untouched; `--check all` 4-artifact zero drift; `--selftest` still 12+12; both derived records `--check-derived` clean. Impl commit `54516d4`.
 - [2026-06-05] [[2026-06-05-phase-12-fincen-corpus-derivation|Phase 12 FinCEN corpus derivation foundation (M7)]] (lite, 5 tasks + 2 user refinement passes, DELIVERED) — backend for a singular corpus-backed FinCEN demo (user picks 1 of 14 advisories). Committed the full 14-advisory corpus md; rewrote `extract_red_flags` as a corpus-wide **section-FINDER** (Tier-1 clean anchors + a Tier-2 loose-header/weak-intro fallback used only when Tier-1 is empty — EFE untouched; + intro-noise/header-block/citation filters). `--corpus` → **7 CLEAN · 3 LOW · 4 NEEDS** (2 NEEDS = FATF jurisdiction advisories = correct). Deterministic checks `build_rec_category` (cover×data matrix) + `check_record` (consistency + traceability + BUILD_NOW⇒logic) in `--selftest`. LLM backend = THIS session (no key) derived 2 records (kleptocracy 5-ind/2-BUILD_NOW + PRC precursors 14-ind/4-BUILD_NOW), each `--check-derived` clean; boundary holds (tampered record rejected). RECORDED: the spine ASSISTS but does not AUTOMATE — complete records need LLM-backend authoring. EFE still 12+12; `index.html`/`build.py`/`schema` untouched; `--check all` zero drift. Opens M7.
-- [2026-06-05] [[2026-06-05-phase-11-automated-derivation|Phase 11 Automated derivation (LLM-drafted signal config)]] (lite, 5 tasks, DELIVERED + accepted) — automated the Phase-7 manual article→signal step in authoring-only `derive_signals.py`: deterministic `extract_red_flags`/`scaffold_config` (`--selftest` extracts 24 EFE flags offline, stdlib-only; form-feed `split("\n")` fix keeps md-line traceability) + neural `--draft` (lazy `anthropic`, env-keyed) PROPOSING status/the-one-target/the-signal-`definition` via the Anthropic API (claude-opus-4-8 + `output_config.format` json_schema, verified vs the **claude-api reference**, not guessed). Boundary preserved: LLM proposes a gitignored `.draft.json`; build.py + schema + 2 human gates DISPOSE (rejects the bare skeleton naming the 2 judgment gaps, accepts a filled draft). Review gate **9/10 accept**; 2 MEDIUM `--draft`-path fixes folded in (adaptive thinking + `effort:high`; refusal/max_tokens handling). Engine/ship untouched; `--check all` zero drift. **M6 vision arc (Phases 7–11) complete.**
-
-(Earlier entries — Phase 9 build-drift guard, Phase 8 doc true-up, M6 pipeline walking skeleton, M5 ship, M3/M2/M1 — see `index.md` journal list + their journal articles. Trimmed to last 5 per the _CURRENT_STATE size budget.)
+(Earlier entries — Phase 11 automated derivation, Phase 9 build-drift guard, Phase 8 doc true-up, M6 pipeline walking skeleton, M5 ship, M3/M2/M1 — see `index.md` journal list + their journal articles. Trimmed to last 5 per the _CURRENT_STATE size budget.)
 
 ## Cross-References
 

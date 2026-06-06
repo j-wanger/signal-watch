@@ -1,6 +1,6 @@
 {
   "_generated_by": "scripts/derive_signals.py --corpus-status",
-  "_note": "Deterministic extraction-status manifest for the corpus-explorer build (scripts/build.py corpus reads this + data/fincen/derived/*.json). Authoring artifact, NOT a ship config. Regenerate after the corpus md set changes.",
+  "_note": "Deterministic per-advisory manifest for the corpus-explorer build (scripts/build.py corpus reads this + data/fincen/derived/*.json). Phase 16 (inverted boundary): `derivable` = a red-flag region exists (false only for the 2 FATF advisories); `extraction` (clean/low/none) is a triage HINT, NOT the derivability authority — an advisory goes live via a gate-passing derived/<id>.json (the LLM extracts; check_record grounds). Authoring artifact, NOT a ship config. Regenerate after the corpus md set changes.",
   "summary": {
     "clean": 7,
     "low": 3,
@@ -84,7 +84,7 @@
       "extraction": "none",
       "flag_count": 0,
       "sections": {},
-      "derivable": false
+      "derivable": true
     },
     {
       "id": "fin-2022-a001",
@@ -196,7 +196,7 @@
       "extraction": "none",
       "flag_count": 0,
       "sections": {},
-      "derivable": false
+      "derivable": true
     }
   ]
 }

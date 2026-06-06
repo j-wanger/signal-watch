@@ -1,24 +1,23 @@
 # Active Phase Context
 
-Phase: 15 - Harden extraction faithfulness + fix shipped defects — M7 — DELIVERED + ACCEPTED (impl commit 62f7c1d, 2026-06-05).
-(all 5 tasks [x], exit criteria MET). No next phase planned — run /dev-plan for Phase 16.
-Objective: fix the 2 concrete defects Phase 14 surfaced, scoped by MEASUREMENT — a CLEAN advisory's silent miss (fin-2025-a003 L499) + the fin-2022-a001 esc() double-escape.
+Phase: 16 - Invert extraction (LLM extracts, deterministic groundedness gate disposes) + scale to 7/14 — M7 — DELIVERED (all 5 tasks [x], exit criteria MET, reviewer ACCEPT 9/10; awaiting commit at the delivery gate, 2026-06-06).
+Objective: subtraction test on the extraction spine — relocate complexity from brittle section-PARSING (open) to md NORMALIZATION (closed). The LLM extracts
+candidate red flags; the deterministic layer became a GROUNDEDNESS GATE (`normalize(flag) ⊂ normalize(md)`, replacing src_line∈extractor-output as the
+traceability authority) + a coarse `rf_region()` section-cite relevance guard. Then scale as PROOF: 2 new records incl. ≥1 previously-unreachable advisory → corpus 5/14 → 7/14.
 
-Delivered (verified in tree): footnote-resume fix in extract_red_flags (split stop logic — _SECTION_STOP terminals always break + a NEW conditional _FOOTNOTE_STOP:
-a mid-list page-boundary footnote run is transient when another red-flag section follows [next_boundary set] → skip + resume to the next anchor; terminal for a last
-section → break) + 2 targeted _CITATION signatures (federal case-docket + no-day "(Mon YYYY)" paren-date) to kill 2 footnote-tail leaks. SURGICAL: fin-2025-a003
-recovered its silently-dropped L499 escrow flag (17→18), 0 collateral — all 13 other advisories BYTE-IDENTICAL, EFE 12+12, summary 7C/3L/4N. esc() entity sweep
-(html.unescape over fin-2022-a001 + fin-2024-a002 `&gt;=`/`&lt;=` → raw text, verified end-to-end in the built file: data holds raw ">= 2", old "&gt;=" gone). Escrow
-IND-18 added to fin-2025-a003 (18 ind, --check-derived clean). Manifest regen (a003 17→18) + dist/corpus rebuilt + --check all 4-artifact ZERO DRIFT.
-BYTE-FROZEN: index.html, corpus.html, config/**, dist/{fentanyl,trade-based,elder-financial-exploitation}/ (git diff empty). --selftest 12+12.
+Delivered (verified in tree): T1 ONE `normalize()` rule absorbs the whole closed FinCEN-md artifact set (the escrow STRESS case fin-2025-a003 L499 grounds without
+special-casing); `check_record` rewired to grounding + `rf_region()` + a `_MIN_FLAG_NCHARS=24` floor — correctness complexity SHRANK. T2 all 5 committed records migrated
+NEAR-FREE (gate-pass unedited). T3 `extract_red_flags` DEMOTED to the EFE selftest-anchor + triage hint; `--corpus-status` SHAPE preserved, `derivable` rebased on
+`rf_region(md) is not None` (false only for the 2 FATF advisories; the 2 glued advisories flip false→true). T4 THE PROOF — ransomware fin-2021-a004 (0 deterministic flags,
+glued-no-separator, previously unreachable) → LLM extracted all 12, every one grounds verbatim, NO converter/splitter (Phase-15 glued-deferral DISSOLVED); COVID-EIP
+fin-2021-a002 → 3 ind → corpus 5/14 → 7/14 live. T5 dist/corpus rebuilt (~95K→~110K B), `--check all` 4-artifact ZERO DRIFT, README + CLAUDE document the inverted
+architecture + honesty shift. 2 MEDIUM reviewer findings fixed inline (length floor + 2 regression-pin selftest cases). `--selftest` EFE 12+12. index.html/corpus.html/config/** + 3 typology dists BYTE-FROZEN.
 
-Deferred (investigated, re-confirmed Phase-12): glued-no-separator splitting (fin-2021-a004 ransomware, fin-2026-a001 health-care) — markitdown dropped bullets AND
-blank lines; no safe deterministic split. Stays FLAGGED; needs a structure-preserving converter (pymupdf4llm, authoring-only), not a post-hoc splitter. ISIS
-fin-2025-a001 stays LOW (single-section, footnotes terminal) — correctly flagged, not a regression.
-
-Phase-16 candidates: scale live menu to 6–7/14 (remaining CLEAN: EFE corpus record, COVID-EIP fin-2021-a002 — derivable now, same Phase-14 loop) · structure-preserving
-converter for the glued advisories · FATF non-derivable labeling · corpus combination-lift wow beat · (carried) elder true-up · fentanyl re-point · --fetch cadence.
+Deferred (Phase-17 candidates): DELETE `extract_red_flags` outright (re-home the EFE selftest anchor + triage hint) — the REAL line-count subtraction (decision B retained it,
+so derive_signals.py GREW 1063→~1200; correctness shrank, the file didn't) · scale the live menu further via the inverted loop (glued health-care fin-2026-a001 now
+derivable=true/not-yet-derived = easiest; LOW advisories ISIS fin-2025-a001 + Iran-terror fin-2024-a001; EFE corpus record) · tighten the coarse `rf_region` if scaling widely ·
+(carried) FATF non-derivable labeling polish · corpus combination-lift wow beat · elder presentation-values true-up · fentanyl verbatim re-point.
 
 Gates:
-- [x] Direction confirmed by user (harden spine + fix defects; footnote-resume + esc() sweep; glued-splitting deferred — 2026-06-05)
-- [x] Delivery accepted (post-implementation report 2026-06-05; impl commit 62f7c1d)
+- [x] Direction confirmed by user (invert extraction + scale as proof; groundedness gate + section-cite; demote extractor; converter dissolved — 2026-06-06)
+- [ ] Delivery accepted

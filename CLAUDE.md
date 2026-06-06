@@ -73,28 +73,36 @@ AML transformation framework. Keep vocabulary consistent with it
   the extraction manifest `data/fincen/corpus-status.json` (emitted by `derive_signals.py
   --corpus-status`) + the derived records `data/fincen/derived/*.json` — merges them by id, and
   validates the derived shape at the build boundary (build_rec ∈ matrix vocabulary; BUILD_NOW ⇒ full
-  build_logic). build.py NEVER imports the authoring layer; ships with 5/14 derived (Phase 14 scaled the
-  2-record proof slice to 5 — kleptocracy + PRC precursors + human trafficking fin-2020-a008 + Chinese MLN
-  fin-2025-a003 + Iran fin-2025-a002; front-end shows the full corpus honestly, the remaining clean
-  advisories scale later). No fabricated lift/stats; the always-on badge
+  build_logic). build.py NEVER imports the authoring layer; ships with 7/14 derived (Phase 16 added
+  COVID-EIP fin-2021-a002 + ransomware fin-2021-a004 to the Phase-14 five — kleptocracy + PRC precursors +
+  human trafficking fin-2020-a008 + Chinese MLN fin-2025-a003 + Iran fin-2025-a002; ransomware is the
+  PREVIOUSLY-UNREACHABLE glued advisory, reached via the inverted loop below — the deterministic extractor
+  got 0 flags, the LLM extracted all 12 and the gate grounded them. front-end shows the full corpus
+  honestly, the remaining clean advisories scale later). No fabricated lift/stats; the always-on badge
   stays, with the verbatim public-domain source attribution kept visually distinct from it.
-- IMPORTANT — the spine ASSISTS, it does not AUTOMATE the derivation. `--corpus` extraction is
-  deterministic but imperfect (heterogeneous corpus: ~7/14 parse cleanly, the rest are flagged
-  LOW/NEEDS; even CLEAN extractions can carry residual artifacts like an intro-tail line). A complete,
-  demo-quality derived record still requires **LLM-backend authoring** by the model session: the
-  per-indicator status/data judgment, the build-recommendation rationale, the signal build logic, AND
-  pruning the residual extraction noise. The deterministic layer extracts + flags + validates; the LLM
-  backend authors; the two human gates dispose. Phase 12 proved the loop on a 2-advisory slice — it did
-  not (and is not meant to) auto-derive the corpus.
+- IMPORTANT — INVERTED extraction boundary (Phase 16): the **LLM EXTRACTS, the deterministic layer GATES**.
+  The earlier deterministic `extract_red_flags` accreted format special-casing every phase yet the LLM
+  still had to author/prune its output, so the subtraction test inverted it: the LLM (the model session as
+  backend) extracts the candidate red flags + per-indicator status/data judgment + build recommendation +
+  signal logic; the deterministic layer DISPOSES via `check_record` — **quote-GROUNDING** (each verbatim
+  `flag` is a substring of the source md under `normalize()`, the new traceability authority, replacing
+  src_line ∈ extractor) + a cheap section-cite RELEVANCE region (`rf_region`) + the cover×data matrix +
+  BUILD_NOW⇒full-build_logic shape. Complexity moved from brittle section-PARSING (open problem — every
+  advisory differs) to a closed-set md NORMALIZER (~3 lines) and SHRANK. `extract_red_flags` is DEMOTED:
+  kept only as the EFE `--selftest` anchor + `--corpus`/`--scaffold-derived` triage hint, no longer the
+  authority, not to be grown. The LLM proposes (now extraction too); the deterministic gate + the two human
+  gates dispose.
 - Extraction faithfulness (Phase 15): `extract_red_flags` does a **footnote-resume** — a mid-list footnote
   run at a page boundary no longer permanently ends a section (it's transient when another red-flag section
   follows; the list resumes after it), so a CLEAN advisory stops silently dropping a post-footnote flag
   (fin-2025-a003 recovered its L499 escrow flag, 17→18). Two corpus formats stay deliberately FLAGGED, NOT
-  force-parsed: **glued-no-separator** advisories (fin-2021-a004 ransomware, fin-2026-a001 health-care) where
-  markitdown dropped both bullets AND blank lines so flags fuse into one block — there is no safe
-  deterministic split (sentence-splitting would over-split genuine multi-sentence flags), so they remain
-  LOW/NEEDS. The contract is extract-or-honestly-flag; if structure-preserving parsing of those is ever
-  wanted it needs a better converter, not a post-hoc splitter. Convention: derived records store RAW text;
+  force-parsed by the DETERMINISTIC extractor: **glued-no-separator** advisories (fin-2021-a004 ransomware,
+  fin-2026-a001 health-care) where markitdown dropped both bullets AND blank lines so flags fuse into one
+  block — no safe deterministic split (sentence-splitting would over-split genuine multi-sentence flags).
+  **Phase 16 DISSOLVED the converter question**: the glued advisories are now reachable via the inverted
+  loop (the LLM reads + extracts them like a human; the gate grounds each verbatim flag) — fin-2021-a004
+  ransomware ships derived this way (extractor 0 → LLM 12), so no structure-preserving converter and no
+  post-hoc splitter were needed. Convention: derived records store RAW text;
   corpus.html's `esc()` is the sole escaper (never pre-escape `&gt;`/`&lt;` in a record — it double-escapes).
 
 ## How to run

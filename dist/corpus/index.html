@@ -359,7 +359,70 @@ const CORPUS = {
       "source": "FinCEN FIN-2021-A002 · Advisory on Financial Crimes Targeting COVID-19 Economic Impact Payments · public domain (17 U.S.C. 105)",
       "extraction": "clean",
       "flag_count": 7,
-      "derivable": true
+      "derivable": true,
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "financial",
+          "flag": "An account holder attempts to deposit one or more checks that appear to be issued by the U.S. Treasury, but are fraudulent or counterfeit checks.",
+          "src_line": 152,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Distinguishing a genuine U.S. Treasury EIP check from a fraudulent or counterfeit one needs Treasury check-authentication data (the Treasury Check Verification System) we hold only partially; build the deposit-time check-validity signal after wiring that enrichment."
+        },
+        {
+          "id": "IND-02",
+          "section": "financial",
+          "flag": "An existing account receives, or an account holder makes, multiple EIP-related deposits for individuals other than the account holder(s), and the individuals named on the checks reside outside the geographic region of the account holder, or do not have a history at the account holder’s purported address.",
+          "src_line": 164,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Multiple EIP deposits payable to non-account-holders with a geographic / address-history mismatch is an uncovered funnel-account pattern, and deposit payee names, addresses, and geography are all in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-EIP-FUNNEL-NONHOLDER-DEPOSITS",
+            "class": "account · relationship-level · stateful",
+            "features": [
+              "eip_deposit_count_30d",
+              "nonaccountholder_payee_count",
+              "payee_geo_mismatch_count",
+              "payee_no_address_history_count",
+              "distinct_payee_states_30d"
+            ],
+            "logic": "an account receives several EIP-type deposits (U.S. Treasury check, ACH, or prepaid card) payable to individuals other than the account holder, where at least three named payees reside outside the account holder's geographic region or have no history at the account address — a funnel-account pattern",
+            "window": "rolling 30 days",
+            "source": "Core deposit + payee name/address features (Gold); EIP / U.S. Treasury check deposit typing",
+            "route": "Tier-1 alert → EIP-fraud / money-mule review gate"
+          }
+        },
+        {
+          "id": "IND-03",
+          "section": "financial",
+          "flag": "An existing account receives an excessive number of EIPs via U.S. Treasury check or deposits related to a prepaid debit card linked to the same address.",
+          "src_line": 171,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "An excessive count of EIP deposits aggregating to one address relative to the customer's profile is uncovered, and inbound EIP counts, address-cluster linkage, and the CDD expected-activity baseline are all in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-EIP-SAME-ADDRESS-AGGREGATION",
+            "class": "account · address-cluster · stateful",
+            "features": [
+              "eip_inbound_count_30d",
+              "shared_address_account_count",
+              "eip_inbound_value_30d",
+              "profile_expected_eip_count",
+              "prepaid_card_link_flag"
+            ],
+            "logic": "one account, or a cluster of accounts linked to a single physical address, receives an excessive number of EIPs by U.S. Treasury check or prepaid-debit-card deposit — more inbound EIPs than the customer's due-diligence profile and expected activity predict",
+            "window": "rolling 30 days",
+            "source": "Core deposit features (Gold); address-cluster linkage; CDD expected-activity baseline",
+            "route": "Tier-1 alert → EIP-fraud review gate"
+          }
+        }
+      ]
     },
     {
       "id": "fin-2021-a003",
@@ -379,7 +442,175 @@ const CORPUS = {
       "source": "FinCEN FIN-2021-A004 · Advisory on Ransomware and the Use of the Financial System to Facilitate Ransom Payments · public domain (17 U.S.C. 105)",
       "extraction": "none",
       "flag_count": 0,
-      "derivable": false
+      "derivable": true,
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "financial",
+          "flag": "A financial institution or its customer detects IT enterprise activity that is connected to ransomware cyber indicators or known cyber threat actors. Malicious cyber activity may be evident in system log files, network traffic, or file information.",
+          "src_line": 290,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "IT-enterprise cyber telemetry (system logs, network traffic, file IOCs) lives in the SOC / IT security stack, not the AML data repo; source that feed before a detection signal can exist."
+        },
+        {
+          "id": "IND-02",
+          "section": "financial",
+          "flag": "When opening a new account or during other interactions with the financial institution, a customer provides information that a payment is in response to a ransomware incident.",
+          "src_line": 293,
+          "status": "partial",
+          "data": "insufficient",
+          "build_rec": "MONITOR",
+          "rationale": "A customer volunteering that a payment is a ransom is captured only as unstructured onboarding / interaction notes; monitor via case review until the disclosure is a structured field, not a buildable rule."
+        },
+        {
+          "id": "IND-03",
+          "section": "financial",
+          "flag": "A customer’s CVC address, or an address with which a customer conducts transactions is connected to ransomware variants,35 payments, or related activity. These connections may appear in open sources or commercial or government analyses.",
+          "src_line": 295,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Tying a CVC address to ransomware variants/payments needs blockchain-analytics + threat-intel attribution we hold only partially; build the address-reputation signal after enriching with a CVC-analytics feed."
+        },
+        {
+          "id": "IND-04",
+          "section": "financial",
+          "flag": "An irregular transaction occurs between an organization, especially an organization from a sector at high risk for targeting by ransomware (e.g., government, financial, educational, healthcare) and a DFIR or CIC, especially one known to facilitate ransomware payments.",
+          "src_line": 298,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Flagging a high-risk-sector org paying a DFIR/CIC (digital-forensics / cyber-incident-response firm) needs a counterparty registry of those firms plus sector tagging we hold only partially; enrich, then build."
+        },
+        {
+          "id": "IND-05",
+          "section": "financial",
+          "flag": "A DFIR or CIC customer receives funds from a counterparty and shortly after receipt of funds sends equivalent amounts to a CVC exchange.",
+          "src_line": 319,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A DFIR/CIC customer passing inbound funds straight to a CVC exchange in matching amounts is an uncovered ransom-payment pass-through, and transaction flow, counterparty type, and CVC-exchange tagging are in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-DFIR-PASSTHROUGH-CVC-EXCHANGE",
+            "class": "entity · flow-level · stateful",
+            "features": [
+              "counterparty_dfir_cic_flag",
+              "inbound_value",
+              "outbound_cvc_exchange_value",
+              "inbound_outbound_match_ratio",
+              "receipt_to_send_hours"
+            ],
+            "logic": "a customer tagged as a DFIR or CIC receives funds from a counterparty and shortly afterward sends an equivalent amount to a CVC exchange — inbound and outbound values match closely within a short window, a ransom-payment pass-through",
+            "window": "rolling 7 days",
+            "source": "Core transaction + counterparty features (Gold); DFIR/CIC customer tagging; CVC-exchange counterparty registry",
+            "route": "Tier-1 alert → ransomware / CVC review gate"
+          }
+        },
+        {
+          "id": "IND-06",
+          "section": "financial",
+          "flag": "A customer shows limited knowledge of CVC during onboarding or via other interactions with the financial institution, yet inquires about or purchases CVC (particularly if in a large amount or rush requests), which may indicate the customer is a victim of ransomware.",
+          "src_line": 321,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Onboarding CVC-literacy notes plus CVC purchase records are in repo and partially monitored; enhance the victim-detection screen with a low-literacy + large/rush-purchase conjunction."
+        },
+        {
+          "id": "IND-07",
+          "section": "financial",
+          "flag": "A customer that has no or limited history of CVC transactions sends a large CVC transaction, particularly when outside a company’s normal business practices.",
+          "src_line": 324,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A first-time / rare CVC user sending a large CVC transaction outside its profile is uncovered, and CVC transaction history, value, and the customer business profile are all in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-NOHISTORY-LARGE-CVC",
+            "class": "account · behavioral · stateful",
+            "features": [
+              "cvc_txn_count_lifetime",
+              "cvc_txn_value",
+              "customer_business_profile",
+              "cvc_value_vs_profile_ratio",
+              "days_since_first_cvc"
+            ],
+            "logic": "a customer with no or limited prior CVC transaction history initiates a large CVC transaction outside the customer's normal business practices — first-time or rare CVC use at a value well above the customer's profile baseline",
+            "window": "rolling 90 days",
+            "source": "Core CVC transaction history + KYC business-profile features (Gold)",
+            "route": "Tier-1 alert → ransomware / CVC review gate"
+          }
+        },
+        {
+          "id": "IND-08",
+          "section": "financial",
+          "flag": "A customer that has not identified itself to the CVC exchanger, or registered with FinCEN as a money transmitter, appears to be using the liquidity provided by the exchange to execute large numbers of offsetting transactions between various CVCs, which may indicate that the customer is acting as an unregistered MSB.",
+          "src_line": 326,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Detecting an unregistered-MSB pattern needs a FinCEN money-transmitter registration check plus offsetting-trade analytics we hold only partially; enrich with the registration lookup, then build the offsetting-volume signal."
+        },
+        {
+          "id": "IND-09",
+          "section": "financial",
+          "flag": "A customer uses a foreign-located CVC exchanger in a high-risk jurisdiction lacking, or known to have inadequate, AML/CFT regulations for CVC entities.",
+          "src_line": 330,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Counterparty geography and exchanger risk are partially covered by existing sanctions/geo screening; enhance it with a foreign-CVC-exchanger + high-risk-AML/CFT-jurisdiction conjunction."
+        },
+        {
+          "id": "IND-10",
+          "section": "financial",
+          "flag": "A customer receives CVC from an external wallet, and immediately initiates multiple, rapid trades among multiple CVCs, especially AECs, with no apparent related purpose, followed by a transaction off the platform. This may be indicative of attempts to break the chain of custody on the respective blockchains or further obfuscate the transaction.",
+          "src_line": 332,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Rapid multi-CVC trading into anonymity-enhanced coins after an external-wallet deposit, then a move off-platform, is an uncovered chain-hopping pattern, and CVC trade sequences, AEC tagging, and external-wallet flags are all in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-RAPID-AEC-CHAINHOP",
+            "class": "account · sequence-level · stateful",
+            "features": [
+              "external_wallet_inbound_flag",
+              "distinct_cvc_count_24h",
+              "aec_trade_count_24h",
+              "trades_before_offplatform",
+              "intertrade_minutes_median"
+            ],
+            "logic": "a customer receives CVC from an external wallet and immediately initiates several rapid trades among multiple CVCs — especially anonymity-enhanced coins — with no apparent related purpose, followed by a transfer off the platform, consistent with breaking the chain of custody",
+            "window": "rolling 24 hours",
+            "source": "Core CVC trade-sequence features (Gold); AEC asset tagging; external-wallet deposit flags",
+            "route": "Tier-1 alert → ransomware / CVC obfuscation review gate"
+          }
+        },
+        {
+          "id": "IND-11",
+          "section": "financial",
+          "flag": "A customer initiates a transfer of funds involving a mixing service.",
+          "src_line": 336,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Identifying a transfer that touches a CVC mixing/tumbling service needs blockchain-analytics mixer attribution we hold only partially; build the mixer-exposure signal after wiring that feed."
+        },
+        {
+          "id": "IND-12",
+          "section": "financial",
+          "flag": "A customer uses an encrypted network (e.g., the onion router) or an unidentified web portal to communicate with the recipient of the CVC transaction.",
+          "src_line": 337,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "The customer's communication channel (Tor / unidentified web portal) is not data a financial institution holds; source that signal externally before any detection can use it."
+        }
+      ]
     },
     {
       "id": "fin-2022-a001",
@@ -1226,7 +1457,7 @@ const CORPUS = {
       "source": "FinCEN FIN-2026-A001 · FinCEN Advisory on Health Care Fraud Schemes Targeting Medicare, Medicaid, and Other Federal and State Health Care Benefit Programs · public domain (17 U.S.C. 105)",
       "extraction": "none",
       "flag_count": 0,
-      "derivable": false
+      "derivable": true
     }
   ]
 };

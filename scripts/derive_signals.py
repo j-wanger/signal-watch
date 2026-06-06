@@ -52,13 +52,24 @@ CORPUS DERIVATION (Phase 12 — backend for an expanded, singular corpus-backed 
   Phase 15: a mid-list footnote run at a page boundary is TRANSIENT (the list resumes after
   it when another section follows) — see the _FOOTNOTE_STOP handling in extract_red_flags —
   so a CLEAN advisory no longer silently drops a post-footnote flag. Glued-no-separator
-  advisories (markitdown dropped bullets AND blank lines) stay FLAGGED, not force-split.
+  advisories (markitdown dropped bullets AND blank lines) stay FLAGGED by --corpus, not split.
+
+  Phase 16 — the INVERTED boundary (subtraction test on the extraction spine): the LLM backend
+  EXTRACTS candidate red flags (a generative task it does well across the heterogeneous + glued
+  corpus, where structural parsing is brittle); the deterministic layer is a GATE that DISPOSES.
+  --corpus / --corpus-status are now a deterministic TRIAGE HINT, no longer the derivation
+  authority. extract_red_flags is no longer the traceability authority — it stays the EFE
+  --selftest regression anchor + the --scaffold-derived hint. Traceability moved to
+  QUOTE-GROUNDING in check_record (see normalize/rf_region): normalize(flag) ⊂ normalize(md).
+
   --scaffold-derived emits a derived-record SKELETON (one indicator per extracted red flag,
   src_line traceable, judgment empty) under data/fincen/derived/. The LLM backend fills the
   judgment — per indicator a coverage status + data availability, a build recommendation, and
   build logic for the BUILD_NOW gaps — and --check-derived DISPOSES via the deterministic
   checks: build_rec consistency (must follow the cover×data matrix, build_rec_category) +
-  traceability (every indicator -> a red-flag md line) + the BUILD_NOW build-logic shape.
+  GROUNDEDNESS (Phase 16: each indicator's verbatim `flag` is a substring of the source md
+  under normalize()) + a section-cite RELEVANCE guard (src_line within the red-flag region)
+  + the BUILD_NOW build-logic shape.
   The LLM backend may be the Anthropic API (--draft pattern) OR a live model session acting as
   the backend (no key) — either way the LLM PROPOSES and the deterministic checks DISPOSE.
   Derived records are an LLM-derived + checked corpus dataset, NOT ship typology configs.
@@ -207,9 +218,15 @@ def extract_red_flags(md: str) -> list[dict]:
 
     Returns [{section, n, text, line}] where `section` is the normalized red-flag section
     label ('behavioral'/'financial' for EFE, 'transactional' for fin-2024-a002, …), `n` is
-    the 1-based index within its section, and `line` is the source line (traceability).
-    Anchors on intro sentences AND short headers (see _RF_INTRO/_RF_HEADER); returns [] when
-    no red-flag section is confidently found (the --corpus report flags those). No I/O.
+    the 1-based index within its section, and `line` is the source line. Anchors on intro
+    sentences AND short headers (see _RF_INTRO/_RF_HEADER); returns [] when no red-flag section
+    is confidently found (the --corpus report flags those). No I/O.
+
+    Phase 16 — DEMOTED: this is no longer the traceability authority (that moved to
+    quote-grounding in check_record, which is robust to the glued/heterogeneous advisories this
+    structural parser can't enumerate). It is retained ONLY as the EFE --selftest regression
+    anchor + the --scaffold-derived / --corpus triage hint. Do NOT grow it with more per-format
+    special-casing — the LLM backend extracts; the deterministic GATE disposes.
     """
     # split on "\n" (NOT splitlines) so line numbers match \n-based editors/tools; the
     # markdown carries form-feed page breaks that splitlines() would split on (drift vs L507).
@@ -687,35 +704,117 @@ def check_build_rec(status: str, data: str, rec: str) -> str:
     return "" if rec == expected else f"build_rec {rec!r} contradicts ({status},{data}); must be {expected!r}"
 
 
+# ---------------------------------------------------------------------------
+# Phase 16 — the INVERTED boundary. The LLM EXTRACTS candidate red flags (a generative task it
+# does well across the heterogeneous corpus, where structural parsing is brittle); the
+# deterministic layer is a GATE that DISPOSES. Traceability moved from src_line ∈
+# extract_red_flags() (a structural parse that accreted special-casing every phase, yet whose
+# output the LLM already overrode) to QUOTE-GROUNDING: a record's verbatim `flag` must be a
+# substring of the source md under normalize(), which collapses the CLOSED set of md artifacts.
+# Plus a cheap section-cite RELEVANCE guard (the flag's src_line must sit inside the red-flag
+# region), so a grounded-but-irrelevant quote (lifted from the overview or the SAR section) is
+# rejected. Grounding proves the text is REAL; the region proves it's a RED FLAG; the LLM
+# extracts; the deterministic gate + the two human gates dispose.
+# ---------------------------------------------------------------------------
+def normalize(text: str) -> str:
+    """PURE: collapse text to lowercase alphanumerics for position-free quote-grounding.
+
+    One rule absorbs every md artifact at once — line wraps, word-wrap hyphens
+    ('foreign-\\nbased' == 'foreign-based'), smart quotes, punctuation, footnote-ref digits, and
+    the page-break running header ('FINCEN ADVISORY' and the letter-spaced
+    'F I N C E N A D V I S O R Y' both collapse to 'fincenadvisory', which we drop). The gate
+    checks normalize(flag) in normalize(md). Far simpler than parsing structure — the complexity
+    that used to live in extract_red_flags' section-finding collapses to this closed normalizer.
+    """
+    collapsed = re.sub(r"[^a-z0-9]+", "", text.lower())
+    return collapsed.replace("fincenadvisory", "")
+
+
+# The red-flag region ends at the first document-level terminal AFTER the first red-flag anchor —
+# the standard FinCEN closing sections, which always follow every red-flag list. Deliberately
+# NARROWER than _SECTION_STOP (no generic numbered-section match) so a numbered SUBsection inside
+# the region can't truncate it early.
+_RF_REGION_END = re.compile(
+    r"^(?:reminder of\b|for further information|sar (?:filing|reporting)"
+    r"|frequently asked|the information contained in this advisory)", re.I)
+
+
+def rf_region(md: str):
+    """PURE: (start_line, end_line) bounding the red-flag region, or None if no anchor found.
+
+    Coarse + robust: the FIRST red-flag heading/intro anchor (reusing the calibrated _RF_*
+    patterns) up to the first _RF_REGION_END terminal after it (else EOF). One start anchor + one
+    terminal — no per-flag parsing. Used ONLY for the section-cite relevance guard (decision A),
+    so over-inclusiveness is safe; the strong guarantee is grounding.
+    """
+    lines = [(ln, _clean(raw)) for ln, raw in enumerate(md.split("\n"), 1)]
+    start = None
+    for ln, t in lines:
+        if t and (_RF_HEADER.match(t) or _RF_HEADER_LOOSE.match(t)
+                  or _RF_INTRO.search(t) or _RF_INTRO_WEAK.search(t)):
+            start = ln
+            break
+    if start is None:
+        return None
+    for ln, t in lines:
+        if ln > start and t and _RF_REGION_END.match(t):
+            return (start, ln)
+    return (start, (lines[-1][0] + 1) if lines else start + 1)
+
+
+# A grounded `flag` must clear a minimum normalized length — a too-short generic span (e.g.
+# "a customer") would trivially substring-match the md and pass. Real red flags are full sentences;
+# 24 normalized chars (~4–5 words) cleanly separates them from a degenerate fragment. Mirrors the
+# extractor's old `len(text) < 20` stray-fragment floor, recomputed on whitespace-stripped text.
+_MIN_FLAG_NCHARS = 24
+
+
 def check_record(record: dict, md: str) -> list:
     """PURE: run all deterministic checks on a derived record; return violations ([] = OK).
 
-    Disposes of what the LLM backend proposed: (1) each indicator's build_rec follows the
-    cover×data matrix; (2) every indicator's src_line is a line the extractor flagged
-    (traceability to the deterministic extraction); (3) a BUILD_NOW indicator carries
-    build_logic with the full definition shape, and COVERED/SOURCE_DATA carry none.
+    Disposes of what the LLM backend proposed (Phase 16 — inverted boundary, the LLM extracts):
+    (1) each indicator's build_rec follows the cover×data matrix; (2) GROUNDEDNESS — every
+    indicator's verbatim `flag` is a substring of the source md under normalize() (the
+    traceability authority, replacing the old src_line ∈ extract_red_flags() structural parse);
+    (3) RELEVANCE — the flag's src_line falls inside the advisory's red-flag region, so a grounded
+    quote lifted from the overview / SAR section is rejected (the cheap section-cite guard);
+    (4) a BUILD_NOW indicator carries build_logic with the full definition shape, COVERED/
+    SOURCE_DATA carry none.
     """
     violations: list = []
     inds = record.get("indicators")
     if not isinstance(inds, list) or not inds:
         return ["record has no indicators[]"]
-    # indicator ids must be unique, and each must trace to a DISTINCT red flag (no collapsing
-    # many indicators onto one line — membership alone would let that through).
+    # indicator ids must be unique, and each must trace to a DISTINCT red flag — no two indicators
+    # may carry the same grounded text (membership alone would let a collapsed duplicate through).
     ids = [ind.get("id") for ind in inds]
     if len(ids) != len(set(ids)):
         violations.append(f"duplicate indicator id(s): {sorted({i for i in ids if ids.count(i) > 1})}")
-    src_lines = [ind.get("src_line") for ind in inds]
-    dup_lines = sorted({l for l in src_lines if l is not None and src_lines.count(l) > 1})
-    if dup_lines:
-        violations.append(f"multiple indicators share src_line(s) {dup_lines} — each must trace to a distinct red flag")
-    flag_lines = {f["line"] for f in extract_red_flags(md)}
+    norms = [normalize(ind.get("flag") or "") for ind in inds]
+    dups = sorted({n[:48] for n in norms if n and norms.count(n) > 1})
+    if dups:
+        violations.append(f"{len(dups)} flag text(s) repeated across indicators — each must trace to a distinct red flag")
+    nmd = normalize(md)
+    region = rf_region(md)
+    if region is None:
+        violations.append("no red-flag region found in source md — advisory not cleanly derivable (relevance gate)")
     for ind in inds:
         iid = ind.get("id", "?")
         v = check_build_rec(ind.get("status"), ind.get("data"), ind.get("build_rec"))
         if v:
             violations.append(f"{iid}: {v}")
-        if ind.get("src_line") not in flag_lines:
-            violations.append(f"{iid}: src_line {ind.get('src_line')!r} is not an extracted red-flag line")
+        flag = ind.get("flag")
+        nflag = normalize(flag) if isinstance(flag, str) else ""
+        if not (isinstance(flag, str) and flag.strip()):
+            violations.append(f"{iid}: missing flag text — cannot ground")
+        elif len(nflag) < _MIN_FLAG_NCHARS:
+            violations.append(f"{iid}: flag too short ({len(nflag)} normalized chars < {_MIN_FLAG_NCHARS}) — a degenerate/generic span, not a red flag")
+        elif nflag not in nmd:
+            violations.append(f"{iid}: flag not grounded in source md (not a verbatim red-flag span)")
+        elif region is not None:
+            sl = ind.get("src_line")
+            if not (isinstance(sl, int) and region[0] <= sl < region[1]):
+                violations.append(f"{iid}: src_line {sl!r} outside the red-flag region {region} (relevance)")
         rec, logic = ind.get("build_rec"), ind.get("build_logic")
         if rec == "BUILD_NOW":
             if not isinstance(logic, dict):
@@ -748,36 +847,62 @@ def _checks_selftest() -> list:
         fails.append("consistency check missed covered→BUILD_NOW contradiction")
     if check_build_rec("gap", "available", "BUILD_NOW"):
         fails.append("consistency check rejected a valid gap+available→BUILD_NOW")
-    # record check: a valid record passes; tampered ones fail on every axis
+    # record check: a valid record passes; tampered ones fail on every axis. Phase 16: records
+    # now carry the verbatim `flag` and the gate GROUNDS it (normalize(flag) in normalize(md)).
     md = _load_md(EFE_MD)
     flags = extract_red_flags(md)
     good_logic = {k: (["dormancy_days_prior", "outbound_value_ratio"] if k == "features" else "x")
                   for k in _DEFN_KEYS}
     good = {"indicators": [
-        {"id": "IND-01", "status": "gap", "data": "available", "build_rec": "BUILD_NOW",
-         "src_line": flags[0]["line"], "build_logic": good_logic},
-        {"id": "IND-02", "status": "covered", "data": "available", "build_rec": "COVERED",
-         "src_line": flags[1]["line"]},
+        {"id": "IND-01", "section": flags[0]["section"], "flag": flags[0]["text"],
+         "src_line": flags[0]["line"], "status": "gap", "data": "available",
+         "build_rec": "BUILD_NOW", "build_logic": good_logic},
+        {"id": "IND-02", "section": flags[1]["section"], "flag": flags[1]["text"],
+         "src_line": flags[1]["line"], "status": "covered", "data": "available",
+         "build_rec": "COVERED"},
     ]}
     if check_record(good, md):
         fails.append(f"valid record rejected: {check_record(good, md)}")
+    # tampered: a matrix contradiction + a FABRICATED (ungrounded) flag must both be caught
     bad = json.loads(json.dumps(good))
     bad["indicators"][0]["build_rec"] = "COVERED"   # contradicts gap+available
-    bad["indicators"][1]["src_line"] = 10 ** 9      # untraceable
+    bad["indicators"][1]["flag"] = "this sentence appears nowhere in the advisory source text"
     if len(check_record(bad, md)) < 2:
-        fails.append("tampered record not caught (expected ≥2 violations)")
+        fails.append("tampered record not caught (matrix contradiction + ungrounded flag — expected ≥2)")
+    # a PARAPHRASE (real meaning, reworded — NOT a verbatim span) must be rejected: grounding is verbatim
+    para = json.loads(json.dumps(good))
+    para["indicators"][0]["flag"] = "the customer reactivates a long dormant account and quickly drains the balance"
+    if not check_record(para, md):
+        fails.append("paraphrased (non-verbatim) flag not caught by grounding")
+    # a DEGENERATE too-short prefix grounds (it IS a verbatim substring) but the length floor must reject it
+    tiny = json.loads(json.dumps(good))
+    tiny["indicators"][0]["flag"] = flags[0]["text"][:12]
+    if not check_record(tiny, md):
+        fails.append("degenerate too-short flag not caught by the length floor")
     # build_logic SHAPE hole must be closed: features-as-int + empty logic must both be caught
     shape_bad = json.loads(json.dumps(good))
     shape_bad["indicators"][0]["build_logic"]["features"] = 123
     shape_bad["indicators"][0]["build_logic"]["logic"] = ""
     if len(check_record(shape_bad, md)) < 2:
         fails.append("build_logic-shape hole not caught (features-as-int + empty logic)")
-    # duplicate ids / collapsed src_lines must be caught
+    # a duplicate indicator id must be caught
     dup = json.loads(json.dumps(good))
     dup["indicators"][1]["id"] = "IND-01"
-    dup["indicators"][1]["src_line"] = flags[0]["line"]
     if not check_record(dup, md):
-        fails.append("duplicate id / collapsed src_line not caught")
+        fails.append("duplicate indicator id not caught")
+    # Phase-16 normalizer invariants (the closed artifact set) + the escrow grounding STRESS case
+    # (header-glued 'FINCEN ADVISORY' prefix + a 'foreign-\nbased' word-wrap hyphen at src L499).
+    if normalize("foreign-\nbased") != normalize("foreign-based"):
+        fails.append("normalize: word-wrap hyphen not collapsed")
+    if normalize("a customer FINCEN ADVISORY pays") != normalize("a customer pays"):
+        fails.append("normalize: page-break running header not stripped")
+    a003 = CORPUS_DIR / "fin-2025-a003.md"
+    if a003.exists():
+        escrow = ("A customer that is a U.S.-based escrow company receives funds from an "
+                  "unaffiliated, foreign- based shell company or entity in a disparate line of "
+                  "business that are used to purchase real estate in the United States.")
+        if normalize(escrow) not in normalize(a003.read_text(encoding="utf-8")):
+            fails.append("normalize: escrow stress flag (header-glued + hyphen-wrap) not grounded")
     return fails
 
 
@@ -858,7 +983,7 @@ def load_and_check_derived(path_arg: str) -> int:
         by_rec[i["build_rec"]] = by_rec.get(i["build_rec"], 0) + 1
     spread = " · ".join(f"{k}={v}" for k, v in sorted(by_rec.items()))
     print(f"CHECK OK — {path.name}: {len(inds)} indicators, all build_recs matrix-consistent + "
-          f"traceable; {len(builds)} BUILD_NOW w/ build_logic. [{spread}]")
+          f"quote-grounded; {len(builds)} BUILD_NOW w/ build_logic. [{spread}]")
     return 0
 
 
@@ -883,7 +1008,7 @@ def selftest() -> int:
     if check_fails:
         print("CHECKS SELFTEST FAIL:", *check_fails, sep="\n  ", file=sys.stderr)
         return 1
-    print("SELFTEST PASS (EFE extraction 12+12 · deterministic build-rec + traceability checks)")
+    print("SELFTEST PASS (EFE extraction 12+12 · build-rec matrix + quote-grounding + relevance checks)")
     return 0
 
 
@@ -934,9 +1059,14 @@ def corpus_status_records() -> list:
     """PURE-ish (reads corpus md + index.json): per-advisory extraction-status records.
 
     The deterministic input the corpus-explorer build consumes. For every committed advisory
-    md: its extraction quality (clean | low | none), flag count, per-section counts, the
-    title/date/url/source attribution (from index.json), and a `derivable` flag (a red-flag
-    section was confidently found — none ⇒ non-derivable, e.g. the FATF jurisdiction advisories).
+    md: its extraction quality (clean | low | none — a triage HINT now, see below), flag count,
+    per-section counts, the title/date/url/source attribution (from index.json), and a
+    `derivable` flag. Phase 16 (inverted boundary): `derivable` = a red-flag REGION exists
+    (rf_region) — true even for advisories whose list the DETERMINISTIC extractor can't enumerate
+    (the glued ransomware/health-care advisories), since the LLM backend extracts and the gate
+    grounds; false ONLY for the 2 FATF jurisdiction advisories (no red-flag list at all). The
+    extraction quality is no longer the derivability authority — an advisory goes "live" in the
+    explorer by the presence of a gate-passing data/fincen/derived/<id>.json.
     Deterministic: md glob is sorted and section counts keep encounter order.
     """
     mds = sorted(CORPUS_DIR.glob("*.md"))
@@ -945,7 +1075,8 @@ def corpus_status_records() -> list:
     index = _load_index()
     records = []
     for p in mds:
-        flags = extract_red_flags(p.read_text(encoding="utf-8"))
+        md = p.read_text(encoding="utf-8")
+        flags = extract_red_flags(md)
         q = extraction_quality(flags)
         meta = index.get(p.stem, {})
         advisory_no = p.stem.upper()
@@ -962,7 +1093,11 @@ def corpus_status_records() -> list:
             "extraction": q,
             "flag_count": len(flags),
             "sections": _section_counts(flags),
-            "derivable": q != "none",
+            # Phase 16 (inverted boundary): derivable iff a red-flag REGION exists (rf_region) —
+            # true even for the glued advisories the deterministic extractor can't enumerate (the
+            # LLM backend extracts them); false ONLY for the 2 FATF advisories (no red-flag list).
+            # `extraction` (clean/low/none) is now a triage HINT, not the derivability authority.
+            "derivable": rf_region(md) is not None,
         })
     return records
 
@@ -975,9 +1110,13 @@ def write_corpus_status() -> int:
         summary[{"clean": "clean", "low": "low", "none": "needs"}[r["extraction"]]] += 1
     manifest = {
         "_generated_by": "scripts/derive_signals.py --corpus-status",
-        "_note": ("Deterministic extraction-status manifest for the corpus-explorer build "
-                  "(scripts/build.py corpus reads this + data/fincen/derived/*.json). Authoring "
-                  "artifact, NOT a ship config. Regenerate after the corpus md set changes."),
+        "_note": ("Deterministic per-advisory manifest for the corpus-explorer build "
+                  "(scripts/build.py corpus reads this + data/fincen/derived/*.json). Phase 16 "
+                  "(inverted boundary): `derivable` = a red-flag region exists (false only for the "
+                  "2 FATF advisories); `extraction` (clean/low/none) is a triage HINT, NOT the "
+                  "derivability authority — an advisory goes live via a gate-passing "
+                  "derived/<id>.json (the LLM extracts; check_record grounds). Authoring artifact, "
+                  "NOT a ship config. Regenerate after the corpus md set changes."),
         "summary": summary,
         "advisories": records,
     }

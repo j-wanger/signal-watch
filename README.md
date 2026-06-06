@@ -95,25 +95,33 @@ skeleton (one indicator per extracted red flag, each `src_line`-traceable) under
 the LLM backend fills the judgment — per indicator a coverage status + data availability, a **build
 recommendation**, and **build logic** for the immediately-buildable gaps — and `--check-derived`
 **disposes**: each `build_rec` must follow the deterministic cover×data matrix (`build_rec_category`),
-every indicator must trace to a red-flag md line, and a `BUILD_NOW` indicator must carry a full signal
-definition. The LLM backend can be the Anthropic API (the `--draft` pattern) or a live model session
-acting as the backend (no key) — either way the LLM *proposes* and the deterministic checks *dispose*.
-Derived records are an LLM-derived + checked corpus dataset, **not** ship typology configs.
+every indicator's verbatim flag must be **quote-grounded** in the source md (Phase 16: `normalize(flag)`
+⊂ `normalize(md)`, inside the red-flag relevance region), and a `BUILD_NOW` indicator must carry a full
+signal definition. The LLM backend can be the Anthropic API (the `--draft` pattern) or a live model
+session acting as the backend (no key) — either way the LLM *proposes* and the deterministic checks
+*dispose*. Derived records are an LLM-derived + checked corpus dataset, **not** ship typology configs.
 
-The spine **assists**; it does not automate the derivation. Extraction is deterministic but imperfect
-(the corpus is heterogeneous — roughly half parses cleanly, the rest is flagged), so a complete,
-demo-quality derived record still requires **LLM-backend authoring**: the per-indicator status/data
-judgment, the recommendation rationale, the signal build logic, and pruning any residual extraction
-noise. The deterministic layer extracts, flags, and validates; the model session authors; the two
-human gates dispose.
+**The boundary is inverted (Phase 16): the LLM extracts; the deterministic layer gates.** The earlier
+deterministic `extract_red_flags` accreted format special-casing every phase yet only parsed ~half the
+heterogeneous corpus — and the LLM had to clean its output anyway — so the subtraction test inverted it.
+The model session (the LLM backend) now *extracts* the candidate red flags plus the per-indicator
+status/data judgment, recommendation, and build logic; the deterministic layer is a **gate** that
+*disposes* by **quote-grounding** each verbatim flag against the source md (a closed-set `normalize()`
+that collapses the page-break / hyphen-wrap / running-header artifacts a structural parser choked on),
+plus the cover×data matrix and a cheap section-cite relevance region. `extract_red_flags` is **demoted**
+to a `--selftest` anchor and `--corpus` triage hint — no longer the traceability authority, and no longer
+grown. The LLM proposes (extraction included); the deterministic gate and the two human gates dispose.
 
 The extractor does a **footnote-resume** (Phase 15): a footnote run at a page boundary mid-list is
 transient when another red-flag section follows, so the list resumes after it instead of being silently
 truncated (this recovered a dropped flag in the Chinese-MLN advisory). Two *glued-no-separator* advisories
 (ransomware, health-care fraud) — where the PDF→markdown step dropped both bullets and blank lines, fusing
-the flags into one block — stay deliberately **flagged, not force-parsed**: there is no safe deterministic
-way to split them without over-splitting genuine multi-sentence flags. Structure-preserving parsing of those
-would need a better converter, not a post-hoc splitter.
+the flags into one block — defeat the *deterministic* extractor (no safe way to split them without
+over-splitting genuine multi-sentence flags). **Phase 16 dissolves the converter question**: the glued
+advisories are now derived via the inverted loop — the LLM reads and extracts them like a human, and the
+gate grounds each verbatim flag against the source — so ransomware (`fin-2021-a004`) ships derived (the
+deterministic extractor found 0 flags; the LLM found 12). No structure-preserving converter and no post-hoc
+splitter were needed.
 
 ## The corpus explorer (the singular corpus-backed demo)
 
@@ -140,12 +148,13 @@ merges them by advisory id, and validates the derived records' shape at the buil
 `build.py` never imports `derive_signals.py`. The advisory titles and red-flag text are verbatim public
 domain; the coverage/data/build judgments are illustrative (the "Illustrative data & outputs" badge
 stays on, with the per-advisory source attribution kept visually distinct from it). The explorer ships
-with **5 of 14** advisories derived — kleptocracy, PRC precursor chemicals, human trafficking
-(`fin-2020-a008`), Chinese money-laundering networks (`fin-2025-a003`), and Iranian illicit finance
-(`fin-2025-a002`) — a deliberately varied menu (the transaction-pattern-rich CMLN typology surfaces
-five immediately-buildable signals; the enrichment-hungry Iran typology leans to *build + enrich*). The
-front-end shows the full corpus honestly, and derivation of the remaining clean advisories scales as a
-follow-up.
+with **7 of 14** advisories derived — kleptocracy, PRC precursor chemicals, human trafficking
+(`fin-2020-a008`), Chinese money-laundering networks (`fin-2025-a003`), Iranian illicit finance
+(`fin-2025-a002`), COVID-19 EIP fraud (`fin-2021-a002`), and ransomware (`fin-2021-a004`) — a
+deliberately varied menu (the transaction-pattern-rich CMLN typology surfaces five immediately-buildable
+signals; the enrichment-hungry Iran typology leans to *build + enrich*; ransomware is the
+previously-unreachable glued advisory, reached via the Phase-16 inverted loop). The front-end shows the
+full corpus honestly, and derivation of the remaining clean advisories scales as a follow-up.
 
 ## Present it
 

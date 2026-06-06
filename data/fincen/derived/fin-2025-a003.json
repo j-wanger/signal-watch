@@ -3,7 +3,7 @@
   "advisory": "FIN-2025-A003",
   "source_md": "data/fincen/fin-2025-a003.md",
   "extraction_quality": "clean",
-  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator traces to an extracted red-flag md line. Coverage/data values are ILLUSTRATIVE (vision demo).",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo).",
   "indicators": [
     {
       "id": "IND-01",

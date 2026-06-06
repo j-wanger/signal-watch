@@ -1,6 +1,6 @@
 # Architecture: Signal Watch — AML Vision Demo
 
-> Last updated: 2026-06-06 by /dev-debrief (Phase 17 — deleted extract_red_flags + the scaffold/draft authoring stack; derive_signals.py 1202→600, stdlib-only; inverted loop the sole derivation path)
+> Last updated: 2026-06-06 by /dev-debrief (Phase 18 — corpus explorer 4→5-screen arc: BUILD_NOW human gate via div-toggles + close-the-loop coverage payoff in corpus.html; no other structural change)
 
 ## Directory Layout
 

@@ -196,7 +196,140 @@ const CORPUS = {
       "source": "FinCEN FIN-2020-A008 · Supplemental Advisory on Identifying and Reporting Human Trafficking and Related Activity · public domain (17 U.S.C. 105)",
       "extraction": "clean",
       "flag_count": 11,
-      "derivable": true
+      "derivable": true,
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "financial",
+          "flag": "Customers frequently appear to move through, and transact from, different geographic locations in the United States.  These transactions can be combined with travel and transactions in and to foreign countries that are significant conduits for human trafficking.33",
+          "src_line": 385,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Geographic-mobility patterns are computable from transaction-location data, but classifying the foreign leg as a human-trafficking conduit needs an external corridor list (e.g. TIP-report jurisdictions) we hold only partially — build after enriching the conduit-country reference."
+        },
+        {
+          "id": "IND-02",
+          "section": "financial",
+          "flag": "Transactions are inconsistent with a customer’s expected activity and/or line of business in an apparent effort to cover trafficking victims’ living costs, including housing (e.g., hotel, motel, short-term rentals, or residential accommodations), transportation (e.g., airplane, taxi, limousine, or rideshare services), medical expenses, pharmacies, clothing, grocery stores, and restaurants, to include fast food eateries.",
+          "src_line": 389,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A basket of victim-maintenance spend (lodging, ride-share, pharmacy, grocery, fast-food) inconsistent with the customer's expected activity is uncovered today, and MCC-coded card data plus the KYC expected-activity baseline are both in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-VICTIM-MAINTENANCE-BASKET",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "maintenance_mcc_set_30d",
+              "expected_activity_baseline",
+              "maintenance_mcc_txn_count_30d",
+              "third_party_funded_share",
+              "distinct_maintenance_categories"
+            ],
+            "logic": "account funds a recurring basket of victim-maintenance MCCs (lodging / short-term rental, ride-share / taxi, pharmacy, grocery, fast-food) inconsistent with the customer's expected activity or stated line of business, spanning at least three distinct maintenance categories in the window",
+            "window": "rolling 30 days",
+            "source": "Core card / merchant features (MCC-coded, Gold); KYC expected-activity baseline",
+            "route": "Tier-1 alert → human-trafficking review gate"
+          }
+        },
+        {
+          "id": "IND-03",
+          "section": "financial",
+          "flag": "Transactional activity largely occurs outside of normal business operating hours (e.g., an establishment that operates during the day has a large number of transactions at night), is almost always made in cash, and deposits are larger than what is expected for the business and the size of its operations.",
+          "src_line": 395,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Cash-intensive-business monitoring already covers the oversized-cash-for-business-size dimension; enhance the existing model with a deposit-timestamp / off-hours feature to capture the night-activity pattern."
+        },
+        {
+          "id": "IND-04",
+          "section": "financial",
+          "flag": "A customer frequently makes cash deposits with no Automated Clearing House (ACH) payments.",
+          "src_line": 400,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A funnel profile — frequent cash deposits with no offsetting ACH / electronic disbursement — is not a standard signal today, and channel-tagged deposit and ACH features are in repo; immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-CASHIN-NO-ELECTRONIC-OUT",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "cash_deposit_count_30d",
+              "cash_deposit_value_30d",
+              "ach_debit_count_30d",
+              "electronic_disbursement_value_30d",
+              "cash_in_to_total_in_ratio"
+            ],
+            "logic": "account shows frequent cash deposits dominating inflows with near-absent ACH and electronic disbursements out over the window — a funnel-account profile where cash in is not matched by electronic outflow",
+            "window": "rolling 30 days",
+            "source": "Core deposit + channel-tagged transaction features (Gold)",
+            "route": "Tier-1 alert → human-trafficking / funnel-account review gate"
+          }
+        },
+        {
+          "id": "IND-05",
+          "section": "financial",
+          "flag": "An individual frequently purchases and uses prepaid access cards.",
+          "src_line": 402,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Prepaid-access-card purchase and use as a trafficking indicator is uncovered; on-us prepaid loads are visible but third-party prepaid-program lifecycle data is partial — build after enriching prepaid coverage."
+        },
+        {
+          "id": "IND-06",
+          "section": "financial",
+          "flag": "A customer’s account shares common identifiers, such as a telephone number, email, and social media handle, or address, associated with escort agency websites and commercial sex advertisements.",
+          "src_line": 404,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Linking an account's shared identifiers (phone, email, social handle, address) to escort-agency sites and commercial-sex ads requires external adverse-media / ad-corpus linkage we do not source today — acquire the data before building."
+        },
+        {
+          "id": "IND-07",
+          "section": "financial",
+          "flag": "Frequent transactions with online classified sites that are based in foreign jurisdictions.",
+          "src_line": 408,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Counterparty / merchant transactions can be classified, but identifying foreign-based online-classified sites needs an enriched merchant-classification list we hold only partially — build after enrichment."
+        },
+        {
+          "id": "IND-08",
+          "section": "financial",
+          "flag": "A customer frequently sends or receives funds via cryptocurrency to or from darknet markets or services known to be associated with illicit activity.  This may include services that host advertising content for illicit services, sell illicit content, or financial institutions that allow prepaid cards to pay for cryptocurrencies without appropriate risk mitigation controls.",
+          "src_line": 410,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Existing crypto-exposure screening partially covers darknet-cluster counterparties via chain analytics; enhance with broader illicit-service cluster tagging and prepaid-to-crypto on-ramp features."
+        },
+        {
+          "id": "IND-09",
+          "section": "financial",
+          "flag": "Frequent transactions using third-party payment processors that conceal the originators and/ or beneficiaries of the transactions.",
+          "src_line": 415,
+          "status": "partial",
+          "data": "insufficient",
+          "build_rec": "MONITOR",
+          "rationale": "Third-party payment-processor transactions are visible, but the concealed underlying originator / beneficiary is not attributable from current data — monitor; attribution is data-insufficient for a precise signal."
+        },
+        {
+          "id": "IND-10",
+          "section": "financial",
+          "flag": "A customer avoids transactions that require identification documents or that trigger reporting requirements.",
+          "src_line": 418,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Avoidance of identification / CTR-triggering transactions is structuring — already covered by mature sub-threshold / structuring detection controls."
+        }
+      ]
     },
     {
       "id": "fin-2020-a009",
@@ -592,7 +725,230 @@ const CORPUS = {
       "source": "FinCEN FIN-2025-A002 · FinCEN Advisory on the Iranian Regime’s Illicit Oil Smuggling Activities, Shadow Banking Networks, and Weapons Procurement Efforts · public domain (17 U.S.C. 105)",
       "extraction": "clean",
       "flag_count": 16,
-      "derivable": true
+      "derivable": true,
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "Documentation associated with a customer’s oil shipping-related transactions is inconsistent with information contained in maritime database entries used for conducting due diligence. For example, a maritime database may indicate that a vessel called in an Iranian port, even though this information is not included in the shipping documents submitted to financial institutions for payment processing.63",
+          "src_line": 328,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Shipping documents are captured in trade-finance data, but reconciling them against vessel port-call history requires a maritime database we hold only partially — build the doc-vs-maritime reconciliation after enriching the maritime feed."
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "Documentation associated with a customer’s oil-related transactions makes reference to vessels that, according to maritime databases, have undergone recent or multiple name or flag changes, or transfer of ownership or operation to another person following OFAC’s designation of its owner or operator, but the designated owner or operator appears to maintain an interest in the vessel.",
+          "src_line": 334,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Name/flag-change and post-OFAC ownership-transfer history live in maritime vessel databases we hold only partially; the referenced-vessel data is in the trade docs — build after enriching vessel-history."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "Documentation associated with a customer’s oil-related transactions makes reference to vessels that claim an International Maritime Organization (IMO) number that, on examination of maritime databases, belong to a different vessel or to vessels that have previously been scrapped.",
+          "src_line": 340,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Validating a claimed IMO number against the registry of real / scrapped vessels needs maritime-database enrichment we hold only partially, paired with the trade-doc vessel reference we do hold — build after enrichment."
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "Documentation associated with a customer’s oil-related transactions makes reference to “Malaysian blend” oil, particularly if the vessel is bound for China by way of Southeast Asia and if maritime databases indicate that the vessel displayed AIS irregularities during its voyage or reveal evidence of a ship-to-ship transfer in proximity to Southeast Asia.",
+          "src_line": 345,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting 'Malaysian blend' relabeling plus AIS irregularities and ship-to-ship transfers requires vessel AIS-track data we do not source today — acquire AIS / voyage data before building."
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "Transactions involving a petroleum or shipping company reveal that it does business with counterparties that have ties to Iran or transports goods using vessels that have ties to Iran or that maritime databases indicate have made stops at Iranian ports.",
+          "src_line": 350,
+          "status": "partial",
+          "data": "insufficient",
+          "build_rec": "MONITOR",
+          "rationale": "Counterparty ties to Iran are partially covered by sanctions / adverse-media screening, but confirming a vessel made Iranian-port stops needs maritime data we lack — monitor rather than alert until the data exists."
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "A customer makes oil-related transactions and wire transfers involving vessels that have been previously linked to suspicious financial activities or that include documentation, such as bills of lading or shipping invoices, with no consignees, that appear to be falsified, or that omit key information, in an attempt to hide the Iranian nexus.",
+          "src_line": 354,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Bills of lading or shipping invoices that omit the consignee or key fields on an oil-related payment are checkable from structured trade-finance document fields in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-OILDOC-MISSING-CONSIGNEE",
+            "class": "entity · trade-finance · transaction-level",
+            "features": [
+              "oil_related_flag",
+              "bill_of_lading_consignee_present",
+              "shipping_doc_field_completeness",
+              "vessel_watchlist_hit_flag",
+              "counterparty_iran_adjacency_score"
+            ],
+            "logic": "an oil-related payment is supported by bills of lading or shipping invoices that omit the consignee or other key fields, or reference a vessel on the suspicious-activity watchlist, consistent with concealing an Iranian nexus",
+            "window": "per transaction (trade event)",
+            "source": "Trade-finance document fields (Gold); internal vessel watchlist",
+            "route": "Tier-1 alert → trade-finance sanctions review gate"
+          }
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "A customer makes transactions that move through multiple exchange houses and/or trading companies, adding additional fees and costs as the transactions progress, where the fees, number of transactions, and pattern of transactions do not reflect standard and customary commercial practices.",
+          "src_line": 361,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Funds moving through multiple exchange houses / trading companies with fee-stacking and a non-commercial pattern is an uncovered layering shape computable from the transfer chain and counterparty types in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-EXCHANGEHOUSE-LAYERING",
+            "class": "entity · network · windowed",
+            "features": [
+              "exchange_house_hop_count",
+              "trading_company_hop_count",
+              "cumulative_fee_ratio",
+              "chain_value_decay",
+              "noncommercial_pattern_score"
+            ],
+            "logic": "funds move through multiple exchange houses or trading companies, accruing fees and hops that do not reflect standard commercial practice, consistent with shadow-banking layering",
+            "window": "rolling 30 days",
+            "source": "Core transfer-chain + counterparty-type features (Gold)",
+            "route": "Tier-1 alert → Iranian shadow-banking review gate"
+          }
+        },
+        {
+          "id": "IND-08",
+          "section": "redflag",
+          "flag": "An exchange house or trading company in a jurisdiction in close geographical proximity to Iran uses forged or falsified documents to conceal the identity of parties involved in transactions that will utilize regional banks’ correspondent banking relationships with U.S. financial institutions to access U.S. dollars.",
+          "src_line": 366,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Forged documents concealing party identity behind a regional bank's correspondent relationship hide the underlying party from us — the identity we would key on is not in our data; acquire correspondent / document-integrity data before building."
+        },
+        {
+          "id": "IND-09",
+          "section": "redflag",
+          "flag": "A customer receives wire transfers or deposits that do not contain any information about the source of funds, contain incomplete information about the source of funds, or do not match the customer’s line of business, especially if they involve entities in a high-risk jurisdiction for Iranian illicit finance-related activity.",
+          "src_line": 373,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Wire transfers or deposits with missing or incomplete source-of-funds information are already covered by established wire information-quality / Travel-Rule controls."
+        },
+        {
+          "id": "IND-10",
+          "section": "redflag",
+          "flag": "A general trading company registered in a commercial free trade zone in the UAE with opaque ownership and whose trading counterparties are companies mostly located in Singapore and Hong Kong has bank accounts at multiple UAE financial institutions.",
+          "src_line": 378,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "UAE free-trade-zone registration and opaque ownership need corporate-registry enrichment we hold only partially, though the Singapore/Hong Kong counterparty geography and multi-bank pattern are in repo — build after enrichment."
+        },
+        {
+          "id": "IND-11",
+          "section": "redflag",
+          "flag": "A company based in Hong Kong, that banks using a Chinese non-resident account, has little to no web presence, is co-located with numerous other similar companies, or is recently incorporated yet transmitting large payments with no adequate explanation for the source of funds, makes numerous payments in large figures to UAE general trading companies with no clear business purpose.",
+          "src_line": 382,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Payment flows to UAE trading companies are visible, but web-presence, co-location, incorporation-recency and Chinese-non-resident-account context need external enrichment we hold only partially — build after enrichment."
+        },
+        {
+          "id": "IND-12",
+          "section": "redflag",
+          "flag": "A customer makes transactions involving companies that originate with, or are directed to, entities that are general trading companies, suspected front companies, or companies that have a nexus with Iran.  Other indicators of possible front companies include opaque ownership structures, individuals/entities with obscure names that direct the company, or business addresses that are residential or co-located with other companies, especially companies that have been previously sanctioned.",
+          "src_line": 390,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Front-company nexus is partially covered by sanctions / adverse-media screening; enhance with the opaque-ownership, obscure-name, and residential / co-located-address indicators."
+        },
+        {
+          "id": "IND-13",
+          "section": "redflag",
+          "flag": "A customer declares information about the nature of its business that is inconsistent with other available information, such as previous transaction history or associated transactional information, particularly if trade data indicates that they have a history of facilitating shipments to and from Iran and if they transact predominantly with technology companies or chemical suppliers.",
+          "src_line": 397,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Declared-vs-actual business inconsistency is computable from transaction history, but corroborating an Iran-shipment trade history and tech/chemical-supplier nexus needs external trade-data enrichment we hold only partially — build after enrichment."
+        },
+        {
+          "id": "IND-14",
+          "section": "redflag",
+          "flag": "A customer makes transactions that are directed to companies that operate in unrelated businesses, and which do not seem to align with the customer due diligence (CDD) and other customer identification information collected during client onboarding and subsequent updates.  For example, and of note with regard to illicit Iranian financial activity, customers that primarily receive funds from commodities trading companies, but send funds primarily to electronics suppliers.",
+          "src_line": 403,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A mismatch between CDD-declared business and counterparty sectors — e.g. receiving from commodities traders but sending to electronics suppliers — is computable from counterparty industry codes and stated business in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-CDD-SECTOR-FLOW-MISMATCH",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "cdd_declared_business",
+              "inbound_counterparty_sector_mix",
+              "outbound_counterparty_sector_mix",
+              "sector_flow_mismatch_score",
+              "unrelated_business_share"
+            ],
+            "logic": "an account's counterparties operate in businesses unrelated to its CDD-declared activity — for example receiving funds primarily from commodities traders while sending primarily to electronics suppliers — a procurement-layering profile",
+            "window": "rolling 90 days",
+            "source": "KYC declared-business + counterparty industry-code features (Gold)",
+            "route": "Tier-1 alert → Iranian procurement review gate"
+          }
+        },
+        {
+          "id": "IND-15",
+          "section": "redflag",
+          "flag": "Multiple companies incorporated at roughly the same time share counterparties, addresses, owners, or name similarities and demonstrate similar transaction profiles.  Such companies may have little to no web presence and transact in large, recurring amounts.",
+          "src_line": 410,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A cluster of companies sharing addresses, owners, or counterparties with near-identical recurring transaction profiles is computable from the entity-resolution graph and transaction features in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-SHELL-CLUSTER-NETWORK",
+            "class": "entity · network · windowed",
+            "features": [
+              "shared_address_company_count",
+              "shared_owner_company_count",
+              "shared_counterparty_overlap",
+              "incorporation_time_proximity",
+              "recurring_amount_similarity"
+            ],
+            "logic": "multiple companies sharing addresses, owners, or counterparties and showing near-identical recurring transaction profiles form a cluster consistent with a coordinated front-company network",
+            "window": "rolling 90 days",
+            "source": "KYC entity-resolution graph + core transaction features (Gold)",
+            "route": "Tier-1 alert → front-company network review gate"
+          }
+        },
+        {
+          "id": "IND-16",
+          "section": "redflag",
+          "flag": "A company based in the Middle East with links to Iran or that shows indications of being a front company receives payments primarily from petroleum companies and then makes payments primarily to electronics companies based in Hong Kong and China.",
+          "src_line": 414,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "The petroleum-in / electronics-out sector-flow is computable, but classifying the Middle East counterparty as Iran-linked or a front company needs corporate-registry / adverse-media enrichment we hold only partially — build after enrichment."
+        }
+      ]
     },
     {
       "id": "fin-2025-a003",
@@ -602,7 +958,255 @@ const CORPUS = {
       "source": "FinCEN FIN-2025-A003 · FinCEN Advisory on the Use of Chinese Money Laundering Networks by Mexico-Based Transnational Criminal Organizations to Launder Illicit Proceeds · public domain (17 U.S.C. 105)",
       "extraction": "clean",
       "flag_count": 17,
-      "derivable": true
+      "derivable": true,
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "A customer, especially a customer who presented a Chinese passport as identification during the onboarding process, regularly receives funds that are not commensurate with the reported occupation or income, and the source of the funds cannot be attributed to payroll or other legitimate sources of income (i.e., unexplained wealth).43",
+          "src_line": 452,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Receiving funds out of line with reported occupation/income (unexplained wealth) is partially covered by income-vs-activity profiling; enhance with the onboarding-passport-nationality and source-attribution features."
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "During the onboarding process, a customer presents a Chinese passport and a visa that contain the same photograph despite being allegedly issued years apart.44",
+          "src_line": 457,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting a passport and visa that share one photo despite years-apart issuance needs identity-document image forensics we do not hold today — acquire document-integrity data before building."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "A customer, especially a Chinese national, creates an account at a financial institution and reports their occupation as a student during the onboarding process.  This customer then regularly deposits cash into their account or receives wire transfers notated as “tuition” or “living expenses” that are not commensurate with the reported information.  After receiving the funds, the customer may subsequently initiate wire transfers or P2P transactions to unknown individuals who are unrelated to the purpose of the wire transfers or may make credit or debit card payments.",
+          "src_line": 460,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A student-occupation account taking tuition/living-expense-memo inflows then forwarding them via P2P/wire to unrelated parties is uncovered, and occupation, deposit, wire-memo and P2P features are all in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-STUDENT-MULE-FUNNEL",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "onboarding_occupation",
+              "inbound_cash_value_30d",
+              "wire_memo_tuition_living_flag",
+              "outbound_p2p_to_unrelated_count_30d",
+              "inflow_to_stated_income_ratio"
+            ],
+            "logic": "account opened with a student occupation receives recurring cash deposits or wires memo-tagged tuition / living-expenses out of line with stated income, then forwards the funds via P2P or wire to unrelated parties in the window",
+            "window": "rolling 30 days",
+            "source": "KYC occupation + core deposit / wire / P2P features (Gold); wire-memo text tags",
+            "route": "Tier-1 alert → CMLN money-mule review gate"
+          }
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "A customer, especially a Chinese national, reports their occupation during customer onboarding as a student, retiree, housewife, or other low-income occupation but has unexplained wealth.",
+          "src_line": 468,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "A low-income stated occupation (student/retiree/housewife) paired with unexplained wealth is the same occupation-vs-wealth mismatch — partially covered; enhance the profile with the stated-occupation band feature."
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "A customer, especially a Chinese national with unexplained wealth, initiates a wire transfer related to a real estate purchase or purchases cashier’s checks made payable to a real estate company.  The customer may be accompanied by a real estate agent at the time of purchasing the cashier’s checks.",
+          "src_line": 472,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Unexplained-wealth wires for real estate or cashier's checks payable to a real-estate company are visible, but classifying the payee as a real-estate company and the realtor-accompaniment context needs payee enrichment we hold only partially — build after enrichment."
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "A customer, especially a Chinese national, regularly deposits large volumes of cash or cashier’s checks, or receives multiple wire, ACH, or P2P transfers for no business or apparent lawful purpose.  The customer then subsequently uses the funds to purchase a cashier’s check or disperses the funds to other individuals using P2P and wire transfers, often to other high- risk jurisdictions.",
+          "src_line": 477,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Aggregating large cash / cashier's-check and wire/ACH/P2P inflows with no apparent purpose then dispersing to high-risk jurisdictions is uncovered, and deposit, cashier's-check, P2P, wire and jurisdiction features are all in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-CASH-LAYER-HIGHRISK-DISPERSAL",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "inbound_cash_cashiers_value_30d",
+              "inbound_wire_ach_p2p_count_30d",
+              "cashiers_check_purchase_count_30d",
+              "outbound_highrisk_jurisdiction_value_30d",
+              "no_business_purpose_flag"
+            ],
+            "logic": "account aggregates large cash or cashier's-check deposits and multiple wire / ACH / P2P inflows with no apparent business purpose, then disperses the funds by purchasing cashier's checks or sending P2P / wire transfers to high-risk jurisdictions",
+            "window": "rolling 30 days",
+            "source": "Core deposit + cashier's-check + wire / P2P features (Gold); high-risk-jurisdiction reference list",
+            "route": "Tier-1 alert → CMLN layering review gate"
+          }
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "A customer’s account, especially a Chinese national, receives numerous transfers or deposits, and has a significant number of withdrawals or transfers, none of which appear to be related to routine payroll, living expenses, or customer’s stated expected activity.",
+          "src_line": 483,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "An account churning numerous deposits and withdrawals unrelated to payroll, living expenses, or expected activity is classic pass-through behaviour already covered by existing velocity / pass-through monitoring."
+        },
+        {
+          "id": "IND-08",
+          "section": "redflag",
+          "flag": "A customer, especially a Chinese national, has large amounts of cash funding cashier’s checks, which are then deposited at another financial institution.",
+          "src_line": 487,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Large cash funding cashier's checks is visible on the issuance side, but the subsequent deposit at another institution is outside our view — build on the issuance pattern after enriching with cashier's-check clearing data."
+        },
+        {
+          "id": "IND-09",
+          "section": "redflag",
+          "flag": "A customer, especially a Chinese national, is reluctant or refuses to provide information regarding the source of funds deposited or transferred into their account or acts evasive when questioned about the purpose of a transaction or may explain it as repayment of a loan.",
+          "src_line": 490,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Reluctance or evasiveness about source of funds is an interaction observation captured in RFI / case notes, not structured transaction data — source the investigator-note signal before building."
+        },
+        {
+          "id": "IND-10",
+          "section": "redflag",
+          "flag": "A business45 owned by a Chinese national regularly receives deposits from online marketplaces, but rarely, or never, engages in transactions that indicate the purchase of goods to maintain inventory.",
+          "src_line": 505,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A business taking recurring online-marketplace deposits with little or no offsetting inventory purchasing is uncovered, and deposit-source tagging plus supplier / inventory-MCC features are in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-MARKETPLACE-INCOME-NO-INVENTORY",
+            "class": "entity · business-account · windowed",
+            "features": [
+              "marketplace_source_deposit_value_30d",
+              "inventory_purchase_mcc_value_30d",
+              "inventory_to_revenue_ratio",
+              "outbound_supplier_payment_count_30d",
+              "business_age_months"
+            ],
+            "logic": "a business account receives recurring deposits sourced from online marketplaces but shows little or no offsetting inventory or supplier purchasing, so revenue is not matched by the goods purchases a genuine reseller would make",
+            "window": "rolling 30 days",
+            "source": "Core deposit-source tagging + merchant / supplier payment features (Gold)",
+            "route": "Tier-1 alert → CMLN TBML review gate"
+          }
+        },
+        {
+          "id": "IND-11",
+          "section": "redflag",
+          "flag": "A business owned by a Chinese national regularly receives wire transfers indicating the export of goods to foreign countries including Mexico, China, Hong Kong, and the United Arab Emirates, but rarely, or never, engages in transactions that indicate the purchase of goods to maintain inventory.",
+          "src_line": 509,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Export-indicating wire inflows with no inventory purchasing point to TBML, but reading 'export of goods' intent from wire narrative needs memo parsing we hold only partially — build after enriching wire-narrative classification."
+        },
+        {
+          "id": "IND-12",
+          "section": "redflag",
+          "flag": "A small U.S.-based business in the electronics or real estate industry receives wires from Mexico, China, Hong Kong, and the United Arab Emirates and has no known nexus to these countries.",
+          "src_line": 514,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Wires from Mexico/China/Hong Kong/UAE with no business nexus are partially covered by cross-border high-risk-geography monitoring; enhance with the no-known-nexus business-profile feature."
+        },
+        {
+          "id": "IND-13",
+          "section": "redflag",
+          "flag": "A customer, especially a Chinese national, regularly receives P2P or wire transfers from unknown individuals and subsequently uses those funds to make a substantial credit card payment.  If questioned about the source of the funds, the customer may state that the transfers are from U.S.-based family members of Chinese citizens who are sending the customer funds to purchase goods.",
+          "src_line": 518,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Aggregating P2P/wire inflows from unknown individuals to settle a substantial credit-card payment is an uncovered mirror / value-transfer pattern, and inbound-transfer and card-payment features are both in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-INBOUND-AGG-CARD-MIRROR",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "inbound_p2p_wire_from_unknown_count_30d",
+              "inbound_value_30d",
+              "credit_card_payment_value_30d",
+              "distinct_inbound_counterparties_30d",
+              "inbound_to_card_payment_ratio"
+            ],
+            "logic": "account regularly receives P2P or wire transfers from numerous unknown individuals and applies the aggregated funds to a substantial credit-card payment — a mirror / value-transfer pattern where many third-party inflows settle one card",
+            "window": "rolling 30 days",
+            "source": "Core P2P / wire inbound + credit-card payment features (Gold)",
+            "route": "Tier-1 alert → CMLN value-transfer review gate"
+          }
+        },
+        {
+          "id": "IND-14",
+          "section": "redflag",
+          "flag": "A customer, especially a Chinese national, regularly uses a credit card to purchase large volumes of electronics or other luxury goods.",
+          "src_line": 524,
+          "status": "partial",
+          "data": "insufficient",
+          "build_rec": "MONITOR",
+          "rationale": "Heavy credit-card spend on electronics or luxury goods is mostly legitimate; absent corroborating context the data is insufficient to separate illicit purchasing-agent activity — monitor rather than alert."
+        },
+        {
+          "id": "IND-15",
+          "section": "redflag",
+          "flag": "A business that sells electronics or other luxury goods has income that is not commensurate with the size and scale of the business.",
+          "src_line": 527,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Business income not commensurate with its size and scale is a revenue-anomaly already partially covered by expected-activity baselines; enhance with the goods-resale sector benchmark."
+        },
+        {
+          "id": "IND-16",
+          "section": "redflag",
+          "flag": "A business that sells electronics or other luxury goods makes payments for multiple credit cards associated with various individuals, who are seemingly unrelated to the business.",
+          "src_line": 530,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A goods-reselling business paying down multiple unrelated individuals' credit cards is an uncovered third-party-card-settlement pattern, and outbound-payment and card-account linkage features are in repo — immediately buildable.",
+          "build_logic": {
+            "signal_name": "S-BIZ-PAYS-THIRDPARTY-CARDS",
+            "class": "entity · business-account · windowed",
+            "features": [
+              "outbound_card_payment_count_30d",
+              "distinct_cardholders_paid_30d",
+              "cardholder_business_link_flag",
+              "outbound_card_payment_value_30d",
+              "goods_resale_mcc_share"
+            ],
+            "logic": "a goods-reselling business makes payments toward multiple credit-card accounts held by various individuals with no apparent relationship to the business, settling third-party card debt rather than its own obligations",
+            "window": "rolling 30 days",
+            "source": "Core outbound-payment + card-account linkage features (Gold)",
+            "route": "Tier-1 alert → CMLN TBML review gate"
+          }
+        },
+        {
+          "id": "IND-17",
+          "section": "redflag",
+          "flag": "Hong Kong registered trading companies with shell-like characteristics send funds to Chinese nationals residing in the United States, real estate escrow or title insurance companies, and other international destinations with no apparent business or economic purpose.",
+          "src_line": 533,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Hong Kong trading companies with shell-like characteristics sending funds to U.S. individuals and escrow/title companies are visible as inbound wires, but the shell-characteristic classification needs corporate-registry enrichment we hold only partially — build after enrichment."
+        }
+      ]
     },
     {
       "id": "fin-2026-a001",

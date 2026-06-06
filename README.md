@@ -132,8 +132,12 @@ merges them by advisory id, and validates the derived records' shape at the buil
 `build.py` never imports `derive_signals.py`. The advisory titles and red-flag text are verbatim public
 domain; the coverage/data/build judgments are illustrative (the "Illustrative data & outputs" badge
 stays on, with the per-advisory source attribution kept visually distinct from it). The explorer ships
-with **2 of 14** advisories derived; the front-end shows the full corpus honestly, and derivation
-scales as a follow-up.
+with **5 of 14** advisories derived — kleptocracy, PRC precursor chemicals, human trafficking
+(`fin-2020-a008`), Chinese money-laundering networks (`fin-2025-a003`), and Iranian illicit finance
+(`fin-2025-a002`) — a deliberately varied menu (the transaction-pattern-rich CMLN typology surfaces
+five immediately-buildable signals; the enrichment-hungry Iran typology leans to *build + enrich*). The
+front-end shows the full corpus honestly, and derivation of the remaining clean advisories scales as a
+follow-up.
 
 ## Present it
 

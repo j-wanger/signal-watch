@@ -1,20 +1,21 @@
 # Active Phase Context
 
-Phase: 13 - Corpus explorer (advisory-selection front-end + per-indicator build-rec render) — M7 — DELIVERED, READY FOR COMPLETION
-(all 5 tasks [x], exit criteria MET; impl commit 54516d4, 2026-06-05; post-review esc() fix uncommitted in tree). No next phase planned — run /dev-plan.
-Objective: render the Phase-12 derived records as a NEW standalone ship artifact dist/corpus/index.html (from corpus.html) — a FinCEN CORPUS
-EXPLORER, staged 4-screen flow: SELECT (14, honest status, 2 derived live) → COVERAGE (gauge) → BUILD RECOMMENDATIONS (cover×data→build_rec matrix, BUILD_NOW-first, src_line-traceable) → SIGNAL SPEC (BUILD_NOW cards).
+Phase: 14 - Scale corpus derivation (3 more CLEAN advisories → 5/14 live) — M7 — DELIVERED, awaiting commit verification.
+(all 5 tasks [x], exit criteria MET, 2026-06-05). No next phase planned — run /dev-plan for Phase 15.
+Objective: fill the corpus explorer's live menu 2/14 → 5/14 by authoring 3 more derived records — pure authoring, zero engine/spine/front-end edits.
 
-Scope: corpus.html (NEW), scripts/build.py, scripts/derive_signals.py, data/fincen/corpus-status.json (NEW), dist/corpus/index.html (NEW), README.md, CLAUDE.md.
-UNTOUCHED (byte-frozen): index.html, config/**, dist/{fentanyl,trade-based,elder-financial-exploitation}/.
+Delivered (verified in tree): 3 new --check-derived-clean records — fin-2020-a008 human trafficking (10 ind, pruned 1 intro-tail noise line, 2 BUILD_NOW) ·
+fin-2025-a003 Chinese MLN (17 ind, clean, 5 BUILD_NOW — most buildable) · fin-2025-a002 Iran (16 ind, validate-first passed/no swap, 4 BUILD_NOW · 7 BUILD_ENRICH —
+enrichment-hungry contrast). Authored via a matrix-merge script (verbatim flag text + src_line preserved, build_rec auto-derived from build_rec_category).
+dist/corpus rebuilt → 5/14 live (each new record renders coverage→build-rec→signal through all 4 screens); README + CLAUDE bumped 2/14→5/14.
+Verified: 3× --check-derived · build.py --check all 4-artifact ZERO DRIFT · headless render assertions · node --check · --selftest 12+12.
+BYTE-FROZEN: index.html, corpus.html, config/**, scripts/**, dist/{fentanyl,trade-based,elder-financial-exploitation}/ (git diff empty).
 
-Delivered (verified in tree): corpus.html (own theme CSS + __CORPUS__ + staged render JS, reduced-motion/keyboard parity, illustrative badge, defensive render);
---corpus-status → committed corpus-status.json (14 + 7c/3l/4n summary, stdlib-only, anthropic lazy); build.py render/build/check_corpus + validate_corpus_data
-(build_rec ∈ enum; BUILD_NOW ⇒ full build_logic) + "corpus" target, folded into all/--check all (4 artifacts), NOT importing derive_signals.py; dist/corpus built + verified
-(17 headless assertions + 3 screenshots). index.html + config/** + 3 typology dists byte-untouched; --check all zero drift; --selftest 12+12. Review 9/10 ACCEPT (1 MEDIUM esc() fix folded in).
-
-Follow-ups (Phase 14): scale derivation to ~5 remaining CLEAN advisories; glued-list splitting for 3 LOW; exclude/label 2 FATF advisories; (carried) elder true-up · fentanyl re-point · --fetch cadence. Abort (if reopened): if the derived shape needs an engine edit to render — re-implement standalone in corpus.html, don't touch index.html.
+Findings (Phase 15): (1) extractor missed a real 18th flag at fin-2025-a003 md L499 — glued to a page-break running-header after a footnote block (same class
+as the 3 LOW glued lists); (2) pre-existing fin-2022-a001 record stores `&gt;= 2` → double-escapes under corpus.html esc() on a shipped record (store RAW text).
+Carried Phase-15 candidates: remaining CLEAN (EFE corpus record, COVID EIP) + 2 glued NEEDS after the extractor fix · FATF non-derivable labeling · corpus
+combination-lift wow beat · elder true-up · fentanyl re-point · --fetch cadence.
 
 Gates:
-- [x] Direction confirmed by user (standalone artifact + staged 4-screen flow + all-14 honest status — 2026-06-05)
-- [x] Delivery accepted (post-implementation report 2026-06-05; impl commit 54516d4, review 9/10 ACCEPT)
+- [x] Direction confirmed by user (scale derivation; 3 advisories — trafficking/CMLN/Iran; EFE+COVID out — 2026-06-05)
+- [ ] Delivery accepted (post-implementation report)

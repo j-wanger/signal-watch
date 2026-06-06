@@ -1,0 +1,139 @@
+{
+  "id": "fin-2020-a008",
+  "advisory": "FIN-2020-A008",
+  "source_md": "data/fincen/fin-2020-a008.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator traces to an extracted red-flag md line. Coverage/data values are ILLUSTRATIVE (vision demo).",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "financial",
+      "flag": "Customers frequently appear to move through, and transact from, different geographic locations in the United States.  These transactions can be combined with travel and transactions in and to foreign countries that are significant conduits for human trafficking.33",
+      "src_line": 385,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Geographic-mobility patterns are computable from transaction-location data, but classifying the foreign leg as a human-trafficking conduit needs an external corridor list (e.g. TIP-report jurisdictions) we hold only partially — build after enriching the conduit-country reference."
+    },
+    {
+      "id": "IND-02",
+      "section": "financial",
+      "flag": "Transactions are inconsistent with a customer’s expected activity and/or line of business in an apparent effort to cover trafficking victims’ living costs, including housing (e.g., hotel, motel, short-term rentals, or residential accommodations), transportation (e.g., airplane, taxi, limousine, or rideshare services), medical expenses, pharmacies, clothing, grocery stores, and restaurants, to include fast food eateries.",
+      "src_line": 389,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "A basket of victim-maintenance spend (lodging, ride-share, pharmacy, grocery, fast-food) inconsistent with the customer's expected activity is uncovered today, and MCC-coded card data plus the KYC expected-activity baseline are both in repo — immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-VICTIM-MAINTENANCE-BASKET",
+        "class": "entity · account-level · windowed",
+        "features": [
+          "maintenance_mcc_set_30d",
+          "expected_activity_baseline",
+          "maintenance_mcc_txn_count_30d",
+          "third_party_funded_share",
+          "distinct_maintenance_categories"
+        ],
+        "logic": "account funds a recurring basket of victim-maintenance MCCs (lodging / short-term rental, ride-share / taxi, pharmacy, grocery, fast-food) inconsistent with the customer's expected activity or stated line of business, spanning at least three distinct maintenance categories in the window",
+        "window": "rolling 30 days",
+        "source": "Core card / merchant features (MCC-coded, Gold); KYC expected-activity baseline",
+        "route": "Tier-1 alert → human-trafficking review gate"
+      }
+    },
+    {
+      "id": "IND-03",
+      "section": "financial",
+      "flag": "Transactional activity largely occurs outside of normal business operating hours (e.g., an establishment that operates during the day has a large number of transactions at night), is almost always made in cash, and deposits are larger than what is expected for the business and the size of its operations.",
+      "src_line": 395,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Cash-intensive-business monitoring already covers the oversized-cash-for-business-size dimension; enhance the existing model with a deposit-timestamp / off-hours feature to capture the night-activity pattern."
+    },
+    {
+      "id": "IND-04",
+      "section": "financial",
+      "flag": "A customer frequently makes cash deposits with no Automated Clearing House (ACH) payments.",
+      "src_line": 400,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "A funnel profile — frequent cash deposits with no offsetting ACH / electronic disbursement — is not a standard signal today, and channel-tagged deposit and ACH features are in repo; immediately buildable.",
+      "build_logic": {
+        "signal_name": "S-CASHIN-NO-ELECTRONIC-OUT",
+        "class": "entity · account-level · windowed",
+        "features": [
+          "cash_deposit_count_30d",
+          "cash_deposit_value_30d",
+          "ach_debit_count_30d",
+          "electronic_disbursement_value_30d",
+          "cash_in_to_total_in_ratio"
+        ],
+        "logic": "account shows frequent cash deposits dominating inflows with near-absent ACH and electronic disbursements out over the window — a funnel-account profile where cash in is not matched by electronic outflow",
+        "window": "rolling 30 days",
+        "source": "Core deposit + channel-tagged transaction features (Gold)",
+        "route": "Tier-1 alert → human-trafficking / funnel-account review gate"
+      }
+    },
+    {
+      "id": "IND-05",
+      "section": "financial",
+      "flag": "An individual frequently purchases and uses prepaid access cards.",
+      "src_line": 402,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Prepaid-access-card purchase and use as a trafficking indicator is uncovered; on-us prepaid loads are visible but third-party prepaid-program lifecycle data is partial — build after enriching prepaid coverage."
+    },
+    {
+      "id": "IND-06",
+      "section": "financial",
+      "flag": "A customer’s account shares common identifiers, such as a telephone number, email, and social media handle, or address, associated with escort agency websites and commercial sex advertisements.",
+      "src_line": 404,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Linking an account's shared identifiers (phone, email, social handle, address) to escort-agency sites and commercial-sex ads requires external adverse-media / ad-corpus linkage we do not source today — acquire the data before building."
+    },
+    {
+      "id": "IND-07",
+      "section": "financial",
+      "flag": "Frequent transactions with online classified sites that are based in foreign jurisdictions.",
+      "src_line": 408,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Counterparty / merchant transactions can be classified, but identifying foreign-based online-classified sites needs an enriched merchant-classification list we hold only partially — build after enrichment."
+    },
+    {
+      "id": "IND-08",
+      "section": "financial",
+      "flag": "A customer frequently sends or receives funds via cryptocurrency to or from darknet markets or services known to be associated with illicit activity.  This may include services that host advertising content for illicit services, sell illicit content, or financial institutions that allow prepaid cards to pay for cryptocurrencies without appropriate risk mitigation controls.",
+      "src_line": 410,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Existing crypto-exposure screening partially covers darknet-cluster counterparties via chain analytics; enhance with broader illicit-service cluster tagging and prepaid-to-crypto on-ramp features."
+    },
+    {
+      "id": "IND-09",
+      "section": "financial",
+      "flag": "Frequent transactions using third-party payment processors that conceal the originators and/ or beneficiaries of the transactions.",
+      "src_line": 415,
+      "status": "partial",
+      "data": "insufficient",
+      "build_rec": "MONITOR",
+      "rationale": "Third-party payment-processor transactions are visible, but the concealed underlying originator / beneficiary is not attributable from current data — monitor; attribution is data-insufficient for a precise signal."
+    },
+    {
+      "id": "IND-10",
+      "section": "financial",
+      "flag": "A customer avoids transactions that require identification documents or that trigger reporting requirements.",
+      "src_line": 418,
+      "status": "covered",
+      "data": "available",
+      "build_rec": "COVERED",
+      "rationale": "Avoidance of identification / CTR-triggering transactions is structuring — already covered by mature sub-threshold / structuring detection controls."
+    }
+  ]
+}

@@ -73,8 +73,10 @@ AML transformation framework. Keep vocabulary consistent with it
   the extraction manifest `data/fincen/corpus-status.json` (emitted by `derive_signals.py
   --corpus-status`) + the derived records `data/fincen/derived/*.json` — merges them by id, and
   validates the derived shape at the build boundary (build_rec ∈ matrix vocabulary; BUILD_NOW ⇒ full
-  build_logic). build.py NEVER imports the authoring layer; ships with 2/14 derived (front-end shows
-  the full corpus honestly, derivation scales later). No fabricated lift/stats; the always-on badge
+  build_logic). build.py NEVER imports the authoring layer; ships with 5/14 derived (Phase 14 scaled the
+  2-record proof slice to 5 — kleptocracy + PRC precursors + human trafficking fin-2020-a008 + Chinese MLN
+  fin-2025-a003 + Iran fin-2025-a002; front-end shows the full corpus honestly, the remaining clean
+  advisories scale later). No fabricated lift/stats; the always-on badge
   stays, with the verbatim public-domain source attribution kept visually distinct from it.
 - IMPORTANT — the spine ASSISTS, it does not AUTOMATE the derivation. `--corpus` extraction is
   deterministic but imperfect (heterogeneous corpus: ~7/14 parse cleanly, the rest are flagged

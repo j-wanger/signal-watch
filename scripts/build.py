@@ -78,7 +78,9 @@ CORPUS_SOURCES = [
 # re-declared here so build.py's boundary check stays independent of the authoring tool).
 BUILD_RECS = {"COVERED", "BUILD_NOW", "BUILD_ENRICH", "SOURCE_DATA", "ENHANCE", "MONITOR"}
 # Phase 25 — red_flag (the natural AML-term translation beside the verbatim flag) is shape-checked
-# at this boundary too (build stays decoupled from the authoring gate; mirrors derive_signals.py).
+# at this boundary too (build stays decoupled from the authoring gate; mirrors derive_signals.py's
+# _MIN/_MAX_RED_FLAG_CHARS so the two checks stay in parity).
+MIN_RED_FLAG_CHARS = 12
 MAX_RED_FLAG_CHARS = 240
 
 STATUS = {"covered", "partial", "gap"}
@@ -368,8 +370,8 @@ def validate_corpus_data(advisories: list) -> list:
                 e.append(f"{aid}/{iid}: missing red_flag (the natural AML-term translation)")
             elif isinstance(i.get("flag"), str) and rf.strip() == i.get("flag").strip():
                 e.append(f"{aid}/{iid}: red_flag is identical to the verbatim flag (must be a rephrase)")
-            elif len(rf.strip()) > MAX_RED_FLAG_CHARS:
-                e.append(f"{aid}/{iid}: red_flag too long ({len(rf.strip())} > {MAX_RED_FLAG_CHARS} chars)")
+            elif not (MIN_RED_FLAG_CHARS <= len(rf.strip()) <= MAX_RED_FLAG_CHARS):
+                e.append(f"{aid}/{iid}: red_flag length {len(rf.strip())} outside [{MIN_RED_FLAG_CHARS}, {MAX_RED_FLAG_CHARS}] chars")
     return e
 
 

@@ -1,0 +1,135 @@
+{
+  "id": "fin-2025-alert001",
+  "advisory": "FIN-2025-ALERT001",
+  "source_md": "data/fincen-alerts/fin-2025-alert001.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "Red Flags for Depository Institutions",
+      "flag": "A large volume of cash is delivered to a U.S.-based financial institution via an ACS on\nbehalf of a customer who operates a Mexico-based business, a business located near the\nU.S. southwest border, or a U.S.-based company with an affiliated Mexico-based business.\nFollowing the delivery, the customer then rapidly moves the funds to a financial institution\nbased in Mexico, makes transfers to another business in the United States they own and\noperate, or purchases a large volume of goods.",
+      "src_line": 276,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "ACS-originated bulk cash credits followed by rapid pass-through to Mexico are visible in deposit, account-ownership, and outbound-wire data the bank already holds, but no funnel-velocity signal correlates them today.",
+      "build_logic": {
+        "signal_name": "S-acs-cash-passthrough",
+        "class": "entity · account-level · windowed",
+        "features": ["acs_cash_credit_amount", "days_to_outbound_transfer", "mexico_corridor_share", "affiliated_mx_business_flag", "outbound_wire_count"],
+        "logic": "Flag accounts receiving large ACS-delivered cash credits where >70% of credited value exits within the window via wires to Mexico-domiciled institutions, intra-owner business transfers, or large goods purchases, given an affiliated/border Mexico-based business profile.",
+        "window": "rolling 30 days",
+        "source": "deposit ledger + account ownership/KYC + outbound wire log",
+        "route": "Tier-1 alert → BSA pass-through review gate"
+      }
+    },
+    {
+      "id": "IND-02",
+      "section": "Red Flags for Depository Institutions",
+      "flag": "Large volumes of cash are transported by an ACS or passenger vehicles to an U.S.-based MSB\nlocated along the southwest border and rapidly transferred to Mexico.",
+      "src_line": 283,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "An MSB sees its own large cash-in then rapid Mexico transmittal, but tying the inflow to ACS/vehicle transport and southwest-border geography needs corridor/transport context the institution only partly holds.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-03",
+      "section": "Red Flags for Depository Institutions",
+      "flag": "A customer that owns a Mexico-based business, or a customer with an affiliated Mexico-based\nbusiness, receives a large credit from a U.S.-based ACS into their account at a U.S.-based\nfinancial institution.",
+      "src_line": 286,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Large ACS-sourced account credits tied to a Mexico-based or affiliated business profile are fully in deposit + KYC ownership data, but the ACS-source × MX-ownership join is not alerted on today.",
+      "build_logic": {
+        "signal_name": "S-acs-credit-mx-owner",
+        "class": "entity · account-level · windowed",
+        "features": ["acs_source_credit_amount", "mexico_business_ownership_flag", "affiliated_mx_business_flag", "credit_to_revenue_ratio"],
+        "logic": "Flag accounts whose owner has a Mexico-based or affiliated Mexico-based business and that receive ACS-sourced credits materially exceeding the business's expected legitimate cash revenue within the window.",
+        "window": "rolling 30 days",
+        "source": "deposit/credit ledger + account ownership/KYC profile",
+        "route": "Tier-1 alert → BSA enhanced-due-diligence review gate"
+      }
+    },
+    {
+      "id": "IND-04",
+      "section": "Red Flags for Depository Institutions",
+      "flag": "A customer that owns a Mexico-based business receives a large credit into their account\nat a U.S.-based financial institution after depositing bulk cash into the U.S.-based financial\ninstitution’s vault at a U.S.-based ACS secure storage facility.",
+      "src_line": 290,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "The vault-credit-after-bulk-cash-deposit pattern is in the bank's ledger and ACS vault-rental records, so an existing control can be sharpened with the MX-ownership join rather than built from scratch.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-05",
+      "section": "Red Flags for Depository Institutions",
+      "flag": "A customer that owns a Mexico-based business receives a large cross-border wire transfer to\ntheir account at a U.S.-based financial institution from a Canada-based financial institution.",
+      "src_line": 294,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Inbound cross-border wires are visible, but resolving the Canada-origin corridor and tying it to Mexico-based business ownership as a smuggling-repatriation route needs partial cross-institution corridor context.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-06",
+      "section": "Red Flags for Armored Car Services",
+      "flag": "A business in Mexico, near the southwest border of the United States, organizes the transportation\nof a large volume of cash to multiple locations throughout the United States by an ACS or air\ntransport, for no business or apparent lawful purpose, before it is finally delivered to a U.S.-based\nfinancial institution or a Federal Reserve Bank location.",
+      "src_line": 299,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Detecting a multi-location ACS routing pattern with no apparent lawful purpose requires cross-carrier transport-leg data and corporate attribution a single U.S. financial institution does not hold.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-07",
+      "section": "Red Flags for Armored Car Services",
+      "flag": "A Mexico-based business transporting cash into the United States is reluctant to provide\ninformation, or provides inconsistent information, on who is the currency originator or where\nthe funds are destined in Part II of a FinCEN Form 105 (CMIR).",
+      "src_line": 306,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "CMIR (Form 105) originator/destination fields are structured data, but flagging reluctance/inconsistency requires enriching the record with the filing's free-text and cross-filing comparison the institution only partly captures.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-08",
+      "section": "Red Flags for Armored Car Services",
+      "flag": "A non-bank Mexico-based business organizes the transport of large volumes of USD into the\nUnited States, that are not commensurate with the size of the business or the business profile.",
+      "src_line": 310,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Judging transported USD volume against a non-bank Mexico-based business's size and profile needs external corporate-registry and business-profile data outside the institution's holdings.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-09",
+      "section": "Red Flags for Armored Car Services",
+      "flag": "A shipment of bulk cash is delivered via a Mexico or Canada-based ACS to a U.S.-based ACS\nwithout accompanying instructions or explanation for the purpose of the transaction.  The\nU.S.-based ACS then receives a request to transport the funds to a financial institution.",
+      "src_line": 313,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "An ACS-to-ACS hand-off lacking purpose followed by a deliver-to-FI request is visible in transport manifests, but linking the two legs across carriers needs partial cross-institution enrichment.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-10",
+      "section": "Red Flags for Armored Car Services",
+      "flag": "A Mexico-based business or individual requests that bulk cash be transported or accepted by a\nU.S. financial institution but does not provide a clear explanation of the source of the funds.",
+      "src_line": 317,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Unexplained source-of-funds on a bulk-cash acceptance request is captured in onboarding/KYC and transaction-documentation data, so an existing SOF control can be enhanced for this corridor.",
+      "build_logic": null
+    }
+  ]
+}

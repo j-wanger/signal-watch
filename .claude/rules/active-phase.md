@@ -11,7 +11,7 @@ Key constraints:
 
 Exit criteria (all MET): registry merges per-source corpus-status.json + derived/*.json into one __CORPUS__ · ≥4 alert records --check-derived clean (6 delivered, 72 ind / 19 BUILD_NOW) · unified menu + honest type chips · --check all zero drift + frozen set git-diff-empty · README + CLAUDE document the registry + Alerts source #2 + OFAC-next.
 
-Next: phase complete (committed c9de677 + pushed). Follow-on (cheap, NOT a phase): incremental derivation of the 11 derivable-not-yet-derived alerts. OFAC source #3 needs a verbatim-non-negotiable extension (compliance sign-off, not taken). Run /dev-plan only for a net-new stakeholder ask.
+Next: phase complete (committed c9de677 + pushed). Post-phase follow-on DONE — the 11 remaining derivable alerts were derived (corpus now 29/33 derived: 12 advisories + 17 alerts; only the 2 FATF advisories + 2 alerts with no enumerated red-flag list stay non-derivable). OFAC source #3 needs a verbatim-non-negotiable extension (compliance sign-off, not taken). Run /dev-plan only for a net-new stakeholder ask.
 Abort: n/a (phase delivered). Blocked >3 attempts on any follow-on task → ask the user: skip or abort.
 
 Gates:

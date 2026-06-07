@@ -141,9 +141,10 @@ and watch it derive. It is a **staged 5-screen arc** (Phase 18 gave it the two b
 has and the explorer lacked — a human gate and a close-the-loop payoff):
 
 1. **Select** — all 33 FinCEN publications (14 advisories + 19 alerts), each with an honest `doc_type`
-   chip (*Advisory* / *Alert*) and a status chip: *derived* (live, clickable — 18 of them), *ready to
-   derive* (clean / low — extracted but not yet derived, 11), or *no red-flag list* (non-derivable — 4:
-   the 2 FATF jurisdiction advisories + 2 alerts with no enumerated red-flag list).
+   chip (*Advisory* / *Alert*) and a status chip: *derived* (live, clickable — 29 of them), or *no
+   enumerated red-flag list* (non-derivable — the 4 remaining: the 2 FATF jurisdiction advisories + 2
+   alerts whose text mentions red flags but carries no anchorable enumerated list). The *clean / low*
+   "ready to derive, not yet derived" chip state remains for any future publication added before it is derived.
 2. **Coverage** — the chosen advisory's coverage gauge, derived from its indicator statuses.
 3. **Build recommendations — the human gate** *(the centerpiece)* — per red-flag indicator: coverage ×
    data → one **build recommendation** (`BUILD NOW / ENHANCE / BUILD + ENRICH / SOURCE DATA / MONITOR /
@@ -168,8 +169,8 @@ derived records' shape at the build boundary (every `build_rec` in the matrix vo
 indicator must carry a full signal definition). `build.py` never imports `derive_signals.py`. The titles
 and red-flag text are verbatim public domain; the coverage/data/build judgments are illustrative (the
 "Illustrative data & outputs" badge stays on, with the per-document source attribution kept visually
-distinct from it). The explorer ships with **18 derived across 33 FinCEN publications** (12 of 14
-advisories + 6 of 19 alerts) — the non-derivable documents (the 2 FATF advisories + 2 alerts with no
+distinct from it). The explorer ships with **29 derived across 33 FinCEN publications** (12 of 14
+advisories + 17 of 19 alerts) — the non-derivable documents (the 2 FATF advisories + 2 alerts with no
 enumerated red-flag list) are labelled as such. The menu is deliberately varied: the transaction-pattern-rich
 Chinese money-laundering-networks typology (`fin-2025-a003`) surfaces five immediately-buildable signals;
 the enrichment-hungry Iran (`fin-2025-a002`) and Iran-backed-terror-finance (`fin-2024-a001`) typologies
@@ -181,7 +182,7 @@ flag). The front-end shows the full corpus honestly; the non-derivable documents
 **Multi-source (Phase 20) — beyond advisories, still verbatim FinCEN.** A thin `CORPUS_SOURCES` registry
 in `build.py` maps each FinCEN publication *type* to its own committed `corpus-status.json` +
 `derived/*.json`, and `render_corpus` merges them into one menu with an honest `doc_type` chip per card.
-**FinCEN Alerts** are the second source (`data/fincen-alerts/` — 19 alert markdown files, 6 derived):
+**FinCEN Alerts** are the second source (`data/fincen-alerts/` — 19 alert markdown files, 17 derived):
 `crawl_fincen.py --alerts` discovers them from the FinCEN alerts hub (each PDF is linked directly — a
 zero-hop download), then `acquire_fincen.py` / `pdf_to_md.py --source data/fincen-alerts` convert them,
 and they derive through the **same inverted loop and the same gate** — nothing about the derivation

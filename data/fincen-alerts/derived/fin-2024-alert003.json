@@ -1,0 +1,94 @@
+{
+  "id": "fin-2024-alert003",
+  "advisory": "FIN-2024-ALERT003",
+  "source_md": "data/fincen-alerts/fin-2024-alert003.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "redflag",
+      "flag": "A customer or a customer’s counterparty conducts transactions with entities and individuals that OFAC has designated due to their connection with Hizballah, or conducts transactions that contain a nexus to identifiers listed for OFAC-designated entities and individuals affiliated with Hizballah, to include email addresses, physical addresses, phone numbers, passport numbers, or convertible virtual currency addresses.",
+      "src_line": 377,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Name-list screening exists, but matching the long-tail identifiers (email/phone/passport/CVC addresses) tied to OFAC-designated Hizballah entities needs an enriched sanctions-network identifier feed the bank does not hold."
+    },
+    {
+      "id": "IND-02",
+      "section": "redflag",
+      "flag": "A customer or a customer’s counterparty utilizes the services of foreign financial institutions that have been identified as being of “primary money laundering concern” under section 311 of the USA PATRIOT Act referencing their association with, or use by, Hizballah.",
+      "src_line": 383,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Correspondent and wire counterparties are in core data and the section 311 list is maintainable, but routing-through-intermediary chains are only partially resolved today, so screening should be enhanced rather than rebuilt."
+    },
+    {
+      "id": "IND-03",
+      "section": "redflag",
+      "flag": "A customer conducts transactions with an MSB or other financial institution, including one that offers services in convertible virtual currency, that operates in jurisdictions known for, or at high risk for, Hizballah terrorist financing activity, such as the tri-border region of South America, the Middle East, or West Africa, and has opaque ownership or whose beneficial owners are known associates of Hizballah.",
+      "src_line": 387,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "The MSB counterparty and high-risk jurisdiction are visible in wire/MSB data, but resolving opaque ownership and beneficial-owner-to-Hizballah association needs cross-institution beneficial-ownership enrichment."
+    },
+    {
+      "id": "IND-04",
+      "section": "redflag",
+      "flag": "A customer conducts transactions that originate with, are directed to, or otherwise involve entities that are known or suspected front companies or other companies whose beneficial ownership information indicates that they may have a nexus with Hizballah.  Indicators of possible front companies include opaque ownership structures or business addresses that are residential or co-located with other companies.",
+      "src_line": 393,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Identifying front companies and a Hizballah beneficial-ownership nexus requires external corporate-registry and front-company attribution data the bank does not natively source."
+    },
+    {
+      "id": "IND-05",
+      "section": "redflag",
+      "flag": "Invoices—particularly for shipments of electronics leaving the United States for the tri-border region of South America or the PRC, or used cars being shipped from the United States to West Africa—appear to over- or under-charge the recipient, especially if the goods do not appear to correspond with the counterparty’s stated line of business and/or if the payments for those goods are facilitated by a Lebanese or Hizballah-connected financial firm, or a branch of a Lebanese or Hizballah-connected financial firm located abroad.",
+      "src_line": 399,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Trade-finance invoice amounts, shipped-goods descriptions, counterparty line of business, and corridor are all in the bank's own trade and payment data, so an invoice over/under-pricing signal on the electronics→tri-border and used-cars→West-Africa corridors is directly buildable.",
+      "build_logic": {
+        "signal_name": "S-tbml-invoice-mispricing",
+        "class": "entity · account-level · windowed",
+        "features": [
+          "invoice_unit_price_vs_corridor_benchmark_ratio",
+          "goods_category_code",
+          "counterparty_stated_line_of_business_match",
+          "ship_to_corridor_risk_flag",
+          "facilitating_fi_lebanon_nexus_flag"
+        ],
+        "logic": "Flag trade-finance invoices whose unit price deviates beyond a band from the corridor/goods benchmark (over- or under-pricing) when goods category does not correspond to the counterparty's stated line of business, escalating when the corridor is electronics→tri-border/PRC or used-cars→West Africa or the payment is facilitated by a Lebanese/Hizballah-connected financial firm or its foreign branch.",
+        "window": "rolling 30 days",
+        "source": "trade-finance invoice records, payment instructions, counterparty KYC line-of-business, shipment corridor",
+        "route": "Tier-1 alert → trade-finance AML review gate"
+      }
+    },
+    {
+      "id": "IND-06",
+      "section": "redflag",
+      "flag": "Transactions and wire transfers refer to underlying commercial activity that involves bills of lading with no consignees or involves vessels that have been previously linked to suspicious financial activities or registered to sanctioned entities connected with Hizballah, the Houthis, the IRGC-QF, or the Syrian regime.  Documentation, such as bills of lading and shipping invoices, appears to be falsified or omits key information, or there are inconsistencies between shipping related documents and maritime database entries.",
+      "src_line": 414,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Linking vessels to prior suspicious activity or sanctioned entities and reconciling shipping documents against maritime database entries requires external maritime-intelligence data the bank does not hold."
+    },
+    {
+      "id": "IND-07",
+      "section": "redflag",
+      "flag": "A customer, domestic or foreign, with businesses in the real estate, import/export, construction, diamonds and precious stones, or high-value art sectors with numerous international counterparties in high-risk jurisdictions for Hizballah financing, makes an unusually high number of cash deposits in business accounts, transfers funds from business to personal accounts or vice versa, or uses personal accounts or personal credit cards to make business payments.",
+      "src_line": 421,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Unusual business-account cash deposits and business↔personal fund commingling are visible in core account data and partly caught by structuring rules, but tying the pattern to the named high-value sectors and high-risk corridors warrants enhancing the existing monitoring."
+    }
+  ]
+}

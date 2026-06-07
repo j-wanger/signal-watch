@@ -1,0 +1,184 @@
+{
+  "id": "fin-2026-alert001",
+  "advisory": "FIN-2026-ALERT001",
+  "source_md": "data/fincen-alerts/fin-2026-alert001.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "redflag",
+      "flag": "A customer is a company or NPO serving as a sponsor for a government benefit program that\nsuddenly receives and disburses a significant number of reimbursements in a short timeframe\ninconsistent with the customer profile of other similar entities.",
+      "src_line": 186,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Government-reimbursement inflows followed by rapid same-window disbursements are fully visible in account and ACH/wire data; banks rarely run this pass-through velocity check against a peer baseline.",
+      "build_logic": {
+        "signal_name": "S-sponsor-reimbursement-passthrough",
+        "class": "entity · account-level · windowed",
+        "features": ["gov_reimbursement_inflow_amount", "disbursement_outflow_amount", "passthrough_ratio_30d", "inflow_to_outflow_lag_days", "peer_profile_deviation_zscore"],
+        "logic": "Flag a sponsor/NPO account where total government-reimbursement inflows and subsequent disbursements within the same rolling window both spike, the passthrough ratio (outflow/inflow) approaches 1, and the velocity deviates materially from the peer baseline for similar registered sponsors.",
+        "window": "rolling 30 days",
+        "source": "core account ledger + ACH/wire inflow-outflow records + government-grant deposit tags",
+        "route": "Tier-1 alert → enhanced-due-diligence review gate"
+      }
+    },
+    {
+      "id": "IND-02",
+      "section": "redflag",
+      "flag": "A customer is a recently established company or NPO enrolled in a government benefit\nprogram that is suddenly receiving a significant amount of Federal payments soon after\nstarting its operations.",
+      "src_line": 190,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Account-open date and Federal-payment inflow timing/amount are core data; the early-large-Federal-inflow pattern for a young account is directly buildable but not a standard rule.",
+      "build_logic": {
+        "signal_name": "S-young-account-federal-inflow",
+        "class": "entity · account-level · windowed",
+        "features": ["account_age_days", "federal_payment_inflow_amount", "federal_inflow_count_30d", "days_to_first_federal_payment"],
+        "logic": "Flag accounts opened within a short window that receive a large or rapidly recurring volume of Federal benefit-program payments soon after opening, where inflow magnitude is high relative to the account's brief operating history.",
+        "window": "rolling 30 days",
+        "source": "core account-opening records + Federal-payment deposit tags",
+        "route": "Tier-1 alert → new-account fraud review gate"
+      }
+    },
+    {
+      "id": "IND-03",
+      "section": "redflag",
+      "flag": "A customer is a recently established company or NPO enrolled in a government benefit\nprogram receiving payments to their accounts that are inconsistent with their customer\nprofile.",
+      "src_line": 194,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Banks already run profile-deviation monitoring; tuning it for recently established government-benefit enrollees against expected program volume is an enhancement, not a net-new build.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-04",
+      "section": "redflag",
+      "flag": "A customer is a company or NPO enrolled in a government benefit program but is unable to\nverify its status to the financial institution or its customer profile is not commensurate with\nother similar entities.",
+      "src_line": 198,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Profile-commensurability is computable from KYC, but verifying enrollment status against the benefit program requires nonprofit-sector / program-registry enrichment the bank does not natively hold.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-05",
+      "section": "redflag",
+      "flag": "A customer is a company or NPO enrolled in a government benefit program that is receiving a\nsignificant amount of reimbursements despite limited operations.",
+      "src_line": 202,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Reimbursement inflows are visible, but inferring 'limited operations' needs payroll/vendor/operational-footprint signals that are only partially available without external sector data.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-06",
+      "section": "redflag",
+      "flag": "A customer is a recently established company or NPO enrolled in a government benefit\nprogram with a limited online presence.",
+      "src_line": 205,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Online-presence attribution for a shell-like entity is an external open-source/web-footprint signal the bank does not hold and must source.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-07",
+      "section": "redflag",
+      "flag": "A customer is a company or NPO enrolled in a government benefit program that has minimal\nto no operating costs other than payments for “consulting fees” and nondescriptive, repetitive\ninvoices (i.e. food supplies).",
+      "src_line": 208,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Outflow composition — sparse operating costs dominated by 'consulting fee' payments and repetitive same-amount invoice payments — is fully derivable from transaction memos and counterparties.",
+      "build_logic": {
+        "signal_name": "S-consulting-fee-expense-concentration",
+        "class": "entity · account-level · windowed",
+        "features": ["operating_cost_outflow_ratio", "consulting_fee_payment_share", "repetitive_invoice_amount_count", "distinct_vendor_count"],
+        "logic": "Flag an enrolled entity whose outflows are concentrated in 'consulting fee' payments and repetitive fixed-amount invoices to few counterparties, with little to no genuine operating-cost spend (payroll, utilities, diversified suppliers) relative to inflow volume.",
+        "window": "rolling 30 days",
+        "source": "core transaction ledger + payment memo/descriptor + counterparty data",
+        "route": "Tier-1 alert → transaction-analysis review gate"
+      }
+    },
+    {
+      "id": "IND-08",
+      "section": "redflag",
+      "flag": "A customer that is a company or NPO enrolled in a government benefit program makes a\nsignificant amount of cash withdrawals.",
+      "src_line": 212,
+      "status": "covered",
+      "data": "available",
+      "build_rec": "COVERED",
+      "rationale": "High-value cash withdrawal monitoring is a baseline BSA control already in production at any mid-size US bank.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-09",
+      "section": "redflag",
+      "flag": "A customer with previous fraud convictions is an employee of a company or NPO enrolled in\na government benefit program.",
+      "src_line": 215,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Linking employees to prior fraud convictions requires external criminal-record/adverse-media attribution the bank must source; not in core transaction data.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-10",
+      "section": "redflag",
+      "flag": "A customer is an employee of a company or NPO enrolled in a government benefit program\nthat is frequently purchasing or redeeming cashier’s checks for no clear purpose.",
+      "src_line": 218,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Cashier's-check purchase/redemption activity is captured today; sharpening frequency-and-no-clear-purpose detection for benefit-program-linked individuals is an enhancement to existing monitoring.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-11",
+      "section": "redflag",
+      "flag": "A customer that is a company or NPO, enrolled in a government benefit program, or\nthe customer’s employee, engages in behavior suggesting efforts to evade the Currency\nTransaction Report (CTR) reporting requirement (e.g., alters or cancels a transaction when\nadvised a CTR would be filed or engages in structuring with multiple cash transactions for\nunder $10,000), as well as avoiding recordkeeping requirements.16",
+      "src_line": 221,
+      "status": "covered",
+      "data": "available",
+      "build_rec": "COVERED",
+      "rationale": "Structuring / CTR-evasion detection (sub-$10k clustering, abandoned transactions on CTR notice) is a mature, mandated control already running.",
+      "build_logic": null
+    },
+    {
+      "id": "IND-12",
+      "section": "redflag",
+      "flag": "A customer is a company or NPO enrolled in a government benefit program meant for U.S.\ncitizens and lawful permanent residents that is sending a significant amount of wire transfers\nto individuals and companies located in foreign jurisdictions.",
+      "src_line": 231,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Domestic-purpose program funds flowing out as significant foreign wires is fully visible in wire data; a US-benefit-inflow-to-foreign-outflow signal is buildable and not standard.",
+      "build_logic": {
+        "signal_name": "S-domestic-benefit-to-foreign-wire",
+        "class": "entity · account-level · windowed",
+        "features": ["federal_benefit_inflow_amount", "foreign_wire_outflow_amount", "foreign_wire_count", "domestic_to_foreign_outflow_ratio", "distinct_foreign_jurisdiction_count"],
+        "logic": "Flag an entity funded by a domestic-purpose Federal benefit program that sends a significant volume of outbound wire transfers to individuals and companies in foreign jurisdictions, where foreign-bound outflow is a high share of program inflow.",
+        "window": "rolling 30 days",
+        "source": "core wire-transfer records + counterparty jurisdiction + Federal-benefit deposit tags",
+        "route": "Tier-1 alert → cross-border wire review gate"
+      }
+    },
+    {
+      "id": "IND-13",
+      "section": "redflag",
+      "flag": "A customer is a company or NPO enrolled in a government benefit program that is sending\npayments abroad for residential and commercial real estate, vehicles, aircraft, airline tickets,\nand designer clothing.",
+      "src_line": 235,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Cross-border payment amounts are visible, but classifying outflows as real estate / aircraft / luxury-goods purchases needs merchant/MCC or counterparty-category enrichment that is only partially available.",
+      "build_logic": null
+    }
+  ]
+}

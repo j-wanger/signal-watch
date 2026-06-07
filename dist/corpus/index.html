@@ -2543,7 +2543,98 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 13,
       "derivable": true,
-      "doc_type": "Alert"
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "Promises of high or guaranteed investment or donation returns for payments made to\naccounts with which you have no prior business relationship.",
+          "src_line": 50,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Outbound payments to counterparties with no prior business relationship are visible in core account/transaction data, but a mid-size bank does not flag them on a 'guaranteed-returns' scam pattern.",
+          "build_logic": {
+            "signal_name": "S-no-prior-relationship-outbound",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "first_payment_to_counterparty",
+              "no_prior_inbound_from_counterparty",
+              "outbound_to_new_payee_count",
+              "counterparty_account_age_days"
+            ],
+            "logic": "Flag outbound payments to a counterparty with which the account holder has no prior bidirectional transaction history, weighting first-ever payees and recently-opened destination accounts.",
+            "window": "rolling 30 days",
+            "source": "core transaction ledger + payee/counterparty graph",
+            "route": "Tier-1 alert → no-prior-relationship payment review gate"
+          }
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "Communications, including social media posts, soliciting payments with misspellings\nor messages out of profile for the counterparty, soliciting payments from individuals or\norganizations with whom you have no prior existing business relationship, including\ncelebrities or public figures.",
+          "src_line": 53,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting misspelled or out-of-profile social-media solicitations requires an external social-content and linguistic-anomaly corpus the bank does not hold."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "Solicitations requesting donations via social media where the solicitor is not affiliated with a\nreputable organization.",
+          "src_line": 58,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Verifying a solicitor's affiliation with a reputable organization needs an external charity/org registry and adverse-media corpus outside core banking data."
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "Social media posts that solicit donations or advertise give-aways that appear from accounts\nthat are not “verified” through the social media platform account verification processes or that\nmisspell the celebrity or financial institution’s name.",
+          "src_line": 61,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Linking a payment to an unverified or name-misspelling social account is partly serviceable via a scam-domain/handle feed but needs enrichment beyond core data."
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "Multiple social media accounts communicating the same message soliciting funds for an\nunknown purpose or to an unknown account.",
+          "src_line": 65,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "The bank can partly see fan-in — many originators paying one destination — in transaction data, and can enhance the existing rule rather than build new.",
+          "build_logic": {
+            "signal_name": "S-coordinated-fanin-to-destination",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "distinct_originator_count",
+              "destination_account_id",
+              "originators_previously_unaffiliated",
+              "inbound_volume_short_window"
+            ],
+            "logic": "Detect a single destination account receiving a high volume of payments in a short window from many previously-unaffiliated originators, mirroring the alert's coordinated-solicitation fan-in.",
+            "window": "rolling 30 days",
+            "source": "core transaction ledger + originator/destination graph",
+            "route": "Tier-1 alert → coordinated fan-in review gate"
+          }
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "Communications, including social media posts, that provide the same CVC address across\nmultiple celebrity or prominent financial institution social media accounts.",
+          "src_line": 68,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Correlating a shared CVC address across solicitations needs crypto chain-analytics / VASP exposure enrichment on top of any transaction record."
+        }
+      ]
     },
     {
       "id": "fin-2022-alert001",
@@ -2779,7 +2870,320 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 3,
       "derivable": true,
-      "doc_type": "Alert"
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "A customer in the maritime industry transports commodities of concern and uses trade\ncorridors known to serve as possible transshipment points21 for exports to Russia and Belarus.",
+          "src_line": 209,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Detecting that a maritime customer routes commodities of concern through transshipment corridors needs trade-document and customs routing data the bank only partially holds."
+        },
+        {
+          "id": "IND-02",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "The nature of a customer’s underlying business (specifically military or government-related\nwork), type of service(s) or product(s) offered, and geographical presence pose additional\nrisks of unintentional involvement in the evasion of export controls for Russia and Belarus.",
+          "src_line": 239,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Customer business-nature and geography are partly captured at KYC but military/government-relatedness needs external attribution to score reliably."
+        },
+        {
+          "id": "IND-03",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "A customer acquires new vessels for no apparent economic or business purpose or for use in\nshipping corridors involving one or more of the identified transshipment countries.",
+          "src_line": 242,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Vessel acquisition with no economic purpose is detectable from payment patterns but linking it to identified shipping corridors needs partial trade-routing data."
+        },
+        {
+          "id": "IND-04",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "A customer purchases or sells vessels or other properties and goods identified as having been\ninvolved with or being blocked property under U.S. or partner country sanctions.",
+          "src_line": 244,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Screening counterparties and property against sanctions/blocked-property lists is already standard coverage at a mid-size US bank."
+        },
+        {
+          "id": "IND-05",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Transactions involving entities with little to no web presence.",
+          "src_line": 246,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Web-presence assessment of counterparties requires external open-source enrichment the bank does not currently hold."
+        },
+        {
+          "id": "IND-06",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Transactions involving a change in shipments or payments that were previously scheduled to\ngo to Russia or Belarus, or a company located in Russia or Belarus, but that are now going to a\ndifferent country/company.",
+          "src_line": 247,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A rerouting of previously Russia/Belarus-bound payments to a new country/company is detectable from the bank's own wire-payment history.",
+          "build_logic": {
+            "signal_name": "S-payment-destination-reroute",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "prior_beneficiary_country",
+              "current_beneficiary_country",
+              "beneficiary_entity_change_flag",
+              "russia_belarus_prior_destination_flag",
+              "destination_change_recency_days"
+            ],
+            "logic": "Flag a customer whose recent outbound payments redirect a previously scheduled Russia/Belarus (or Russia/Belarus-located company) destination to a different country or company within the lookback window.",
+            "window": "rolling 30 days",
+            "source": "outbound wire/payment messages + historical beneficiary ledger",
+            "route": "Tier-1 alert → trade-finance sanctions review gate"
+          }
+        },
+        {
+          "id": "IND-07",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Transactions involving payments being made from entities located in third-party countries not\notherwise involved with the transactions and known to be a potential transshipment point for\nexports to Russia and Belarus.",
+          "src_line": 250,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Payments originating from unrelated third-party entities in known transshipment-point countries are visible in the bank's own payment-originator data.",
+          "build_logic": {
+            "signal_name": "S-third-party-transshipment-payer",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "payer_country_code",
+              "transshipment_country_list_match",
+              "payer_unrelated_to_trade_parties_flag",
+              "payment_count_window",
+              "payment_amount_window"
+            ],
+            "logic": "Flag transactions where the paying entity sits in a known transshipment-point country and is not otherwise a party to the underlying trade relationship.",
+            "window": "rolling 30 days",
+            "source": "inbound payment originator records + transshipment-country reference list",
+            "route": "Tier-1 alert → export-evasion review gate"
+          }
+        },
+        {
+          "id": "IND-08",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Last-minute changes to transactions associated with an originator or beneficiary located in\nRussia or Belarus.",
+          "src_line": 253,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Late amendments to transactions tied to a Russia/Belarus originator or beneficiary are observable directly from payment-message versioning the bank already records.",
+          "build_logic": {
+            "signal_name": "S-late-amend-ru-by-party",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "amendment_count",
+              "amendment_to_settlement_lag_hours",
+              "originator_country_ru_by_flag",
+              "beneficiary_country_ru_by_flag",
+              "amended_field_set"
+            ],
+            "logic": "Flag transactions carrying last-minute amendments where the originator or beneficiary is located in Russia or Belarus.",
+            "window": "rolling 30 days",
+            "source": "payment-message amendment/version log + party country attributes",
+            "route": "Tier-1 alert → sanctions amendment review gate"
+          }
+        },
+        {
+          "id": "IND-09",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Parties to transactions with addresses that do not appear consistent with the business or are\notherwise problematic (e.g., either the physical address does not exist, or it is residential).",
+          "src_line": 255,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Party addresses are held by the bank and partly screened today; enhancing residential/non-existent-address detection sharpens an existing control."
+        },
+        {
+          "id": "IND-10",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Transactions involving consolidated shipments of luxury goods that previously would have\nbeen destined for Russia or Belarus, but are now destined for a transshipment country or a\ncountry without restrictions on exports/re-exports to Russia or Belarus.",
+          "src_line": 257,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Identifying consolidated luxury-goods shipments rerouted away from Russia/Belarus needs trade-document and goods-classification data the bank only partially holds."
+        },
+        {
+          "id": "IND-11",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Rapid shifts to new purchasers of transactions involving restricted luxury goods.",
+          "src_line": 260,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A rapid turnover of purchasers on restricted-luxury-goods transactions is detectable from the bank's own counterparty and transaction history.",
+          "build_logic": {
+            "signal_name": "S-rapid-purchaser-churn-luxury",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "distinct_purchaser_count_window",
+              "new_purchaser_ratio",
+              "restricted_luxury_goods_flag",
+              "purchaser_change_velocity",
+              "transaction_value_window"
+            ],
+            "logic": "Flag accounts whose restricted-luxury-goods transactions show an abnormally high rate of switching to new purchasers within the window.",
+            "window": "rolling 30 days",
+            "source": "transaction counterparty ledger + merchant/goods category tags",
+            "route": "Tier-1 alert → luxury-goods evasion review gate"
+          }
+        },
+        {
+          "id": "IND-12",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Transactions involving freight-forwarding firms22 that are also listed as the product’s final end\ncustomer, especially items going to traditional Russian transshipment hubs.",
+          "src_line": 261,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Detecting a freight-forwarder posing as the final end customer needs trade-document end-user data the bank only partially holds."
+        },
+        {
+          "id": "IND-13",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Transactions associated with atypical shipping routes for a product and destination.",
+          "src_line": 263,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Judging a shipping route as atypical for a product/destination requires trade-routing and customs data the bank only partially holds."
+        },
+        {
+          "id": "IND-14",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Transactions involving entities whose website or business registration states the entities work\non “special purpose projects.”23",
+          "src_line": 264,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Reading a counterparty's website or business registration for 'special purpose projects' language requires external registry/open-source attribution the bank lacks."
+        },
+        {
+          "id": "IND-15",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Transactions involving companies that display a certificate from the Federal Security Service\nof the Russian Federation (FSB RF), which allows these companies to work on projects\nclassified as a state secret.24",
+          "src_line": 266,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting an FSB RF state-secret certificate displayed by a company depends on external open-source/website attribution unavailable in bank data."
+        },
+        {
+          "id": "IND-16",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Transactions involving companies that are physically co-located with or have shared\nownership with an entity on the BIS Entity List25 or the Department of the Treasury’s Specially\nDesignated Nationals and Blocked Persons List.26",
+          "src_line": 277,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "SDN/Entity List screening is in place, but co-location and shared-ownership linkage needs external corporate-registry data only partially available."
+        },
+        {
+          "id": "IND-17",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "New or existing accounts and transactions by individuals with previous convictions for\nviolating U.S. export control laws, particularly if appearing to involve export and import\nactivities or services.",
+          "src_line": 280,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Tying account holders to prior export-control convictions requires external enforcement/conviction records the bank does not hold."
+        },
+        {
+          "id": "IND-18",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "When combined with other derogatory information, large dollar or volume purchases,\nincluding through the use of business credit cards, of items designated as EAR99 (or large\nvolume or dollar purchases at wholesale electrical/industrial merchants, electrical parts and\nequipment providers, or electronic parts providers), in the United States or abroad, especially\nif paired with purchases at shipping companies.",
+          "src_line": 283,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Large-volume electrical/industrial-parts purchases on business cards paired with shipping-company spend are fully visible in the bank's own card and merchant-category data.",
+          "build_logic": {
+            "signal_name": "S-ear99-electronics-card-spend",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "electrical_parts_mcc_spend_window",
+              "wholesale_industrial_mcc_spend_window",
+              "shipping_company_mcc_spend_flag",
+              "large_purchase_count_window",
+              "purchase_value_window"
+            ],
+            "logic": "Flag accounts with large-volume or large-dollar purchases at electrical/industrial/electronic-parts merchants paired with shipping-company spend in the same window.",
+            "window": "rolling 30 days",
+            "source": "card transaction stream + merchant category codes",
+            "route": "Tier-1 alert → export-procurement review gate"
+          }
+        },
+        {
+          "id": "IND-19",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Companies or individuals with links to Russian state-owned corporations (including\nshared ownership, as well as branches of, subsidiaries of, or shareholders in such\nstate-owned corporations) involved in export-related transactions or the provision of\nexport-related services.27",
+          "src_line": 288,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Establishing ownership/shareholder links to Russian state-owned corporations requires external corporate-registry and beneficial-ownership data the bank lacks."
+        },
+        {
+          "id": "IND-20",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Export transactions identified through correspondent banking activities involving non-\nU.S. parties that have shared owners or addresses with Russian state-owned entities or\ndesignated companies.",
+          "src_line": 292,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Correspondent-banking export flows are visible, but shared-owner/address linkage to Russian state-owned entities needs partial external registry enrichment."
+        },
+        {
+          "id": "IND-21",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Use of business checking or foreign exchange accounts by U.S.-based merchants involved in\nthe import and export of electronic equipment where transactions are conducted with third-\ncountry-based electronics and aerospace firms that also have offices in Russia or Belarus.",
+          "src_line": 295,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Business-checking/FX account flows of US electronics merchants transacting with third-country firms are observable in the bank's own account and counterparty data.",
+          "build_logic": {
+            "signal_name": "S-electronics-merchant-fx-third-country",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "merchant_electronics_industry_flag",
+              "fx_account_activity_window",
+              "third_country_counterparty_flag",
+              "counterparty_aerospace_electronics_flag",
+              "ru_by_office_linked_counterparty_flag"
+            ],
+            "logic": "Flag US-based electronics import/export merchants whose business-checking or FX account activity is concentrated with third-country electronics/aerospace counterparties that also maintain Russia/Belarus offices.",
+            "window": "rolling 30 days",
+            "source": "business-checking + FX account transactions and counterparty profiles",
+            "route": "Tier-1 alert → export-evasion review gate"
+          }
+        },
+        {
+          "id": "IND-22",
+          "section": "Transactional and Behavioral Red Flags",
+          "flag": "Transactions identified through correspondent banking activities connected to Russian\npetroleum-related firms or firms that resell electronics and other similar items to Russian firms.",
+          "src_line": 298,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Correspondent-banking activity is visible, but attributing counterparties as Russian-petroleum or electronics-reseller firms needs partial external classification data."
+        }
+      ]
     },
     {
       "id": "fin-2023-alert001",
@@ -2915,7 +3319,114 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 14,
       "derivable": true,
-      "doc_type": "Alert"
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "The use of a private investment vehicle that is based offshore to purchase CRE and that\nincludes PEPs or other foreign nationals (particularly family members or close associates of\nsanctioned Russian elites and their proxies) as investors.",
+          "src_line": 325,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "A bank can flag offshore investment-vehicle counterparties, but tying them to PEP/sanctioned-elite proxies needs beneficial-ownership enrichment it only partially holds."
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "When asked questions about the ultimate beneficial owners or controllers of a legal entity or\narrangement, customers decline to provide information.",
+          "src_line": 329,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Refusal-to-provide-UBO is a standard CDD onboarding/EDD checkpoint already captured in KYC workflows at a mid-size bank."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "Multiple limited liability companies, corporations, partnerships, or trusts are involved in a\ntransaction with ties to sanctioned Russian elites and their proxies, and the entities have slight\nname variations.",
+          "src_line": 332,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Slight-name-variation clusters of counterparty entities transacting together are detectable from the bank's own counterparty-name and wire data via fuzzy-match — a defensible build-now transaction pattern.",
+          "build_logic": {
+            "signal_name": "S-CRE-NAME-VARIANT-CLUSTER",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "counterparty_name_fuzzy_cluster_size",
+              "shared_address_or_signatory_count",
+              "cre_transaction_flag",
+              "intra_cluster_transfer_volume"
+            ],
+            "logic": "Cluster counterparty legal entities (LLC/corp/partnership/trust) by normalized-name edit-distance and shared address/signatory; alert when ≥3 slight-name-variant entities co-transact in a single CRE-coded financing within the window.",
+            "window": "rolling 30 days",
+            "source": "counterparty master + wire/ACH ledger + CRE loan-coding",
+            "route": "Tier-1 alert → enhanced-due-diligence analyst review gate"
+          }
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "The use of legal entities or arrangements, such as trusts, to purchase CRE that involves\nfriends, associates, family members, or others with a close connection to sanctioned Russian\nelites and their proxies.",
+          "src_line": 336,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Establishing a close personal connection between an entity's parties and sanctioned elites requires external sanctions-network/relationship attribution the bank does not hold."
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "Ownership of CRE through legal entities in multiple jurisdictions (often involving a trust\nbased outside the United States) without a clear business purpose.",
+          "src_line": 340,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Multi-jurisdiction ownership layering is visible only with beneficial-ownership/corporate-registry enrichment beyond core transaction data."
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "Transfers of assets from a PEP or Russian elite to a family member, business associate, or\nassociated trust in close temporal proximity to a legal event such as an arrest or an OFAC\ndesignation.",
+          "src_line": 343,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Transfer-timing relative to an OFAC designation is computable, but identifying the originator as a PEP/elite and the recipient relationship needs external designation-feed and relationship enrichment."
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "Implementation of legal instruments (e.g., deeds of exclusion) that are intended to transfer\nan interest in CRE from a PEP or Russian elite to a family member, business associate, or\nassociated trust following a legal event such as an arrest or an OFAC designation of that\nperson.",
+          "src_line": 347,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Deed-of-exclusion and CRE-title instruments live in external asset/property registries the bank does not ingest."
+        },
+        {
+          "id": "IND-08",
+          "section": "redflag",
+          "flag": "Private investment funds or other companies that submit revised ownership disclosures to\nfinancial institutions showing sanctioned individuals or PEPs that previously owned more\nthan 50 percent of a fund changing their ownership to less than 50 percent.",
+          "src_line": 352,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Revised ownership-disclosure deltas across the 50 percent threshold are in the bank's KYC-refresh records; enhancing existing disclosure-change monitoring catches them."
+        },
+        {
+          "id": "IND-09",
+          "section": "redflag",
+          "flag": "There is limited discernable business value in the CRE investment or the investment is outside\nof the client’s normal business operations.",
+          "src_line": 356,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Out-of-profile / no-apparent-business-purpose activity is already part of transaction-monitoring scenarios; enhancing the client-profile model sharpens it."
+        }
+      ]
     },
     {
       "id": "fin-2023-alert003",
@@ -3106,7 +3617,142 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 55,
       "derivable": true,
-      "doc_type": "Alert"
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "Transactions\trelated\tto\tpayments\tfor\tdefense\tor\tdual-use\tproducts\tfrom\ta\tcompany\nincorporated\tafter\tFebruary\t24,\t2022,\tand\tbased\tin\ta\tnon-GECC\tcountry.",
+          "src_line": 452,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "The bank sees the payment and counterparty country, but tying a payment to defense/dual-use goods and confirming the counterparty's incorporation date needs trade-document and external registry enrichment."
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "A\tnew\tcustomer\twhose\tline\tof\tbusiness\tis\tin\ttrade\tof\tproducts\tassociated\twith\tthe\tnine\tHS\ncodes,\tis\tbased\tin\ta\tnon-GECC\tcountry,\tand\twas\tincorporated\tafter\tFebruary\t24,\t2022.",
+          "src_line": 455,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Resolving a new customer's HS-code product line and post-Feb-2022 incorporation depends on external corporate-registry and goods-classification data the bank does not hold at onboarding."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "An\texisting\tcustomer\twho\tdid\tnot\treceive\texports\tassociated\twith\tthe\tnine\tHS\tcodes\tprior\tto\nFebruary\t24,\t2022,\tbut\twho\tis\treceiving\tsuch\titems\tnow.",
+          "src_line": 458,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "The bank holds the customer's full trade-payment history, so a first-appearance of nine-HS-code activity after a fixed cutoff date is directly computable from internal data.",
+          "build_logic": {
+            "signal_name": "S-HS-CODE-FIRST-APPEARANCE",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "hs_code_set_pre_cutoff",
+              "hs_code_set_current_window",
+              "first_appearance_flag",
+              "trade_payment_count_current"
+            ],
+            "logic": "For each customer, compute the set of the nine high-priority HS codes seen in trade payments before 2022-02-24; flag when one or more of those HS codes appears in the current window with no pre-cutoff history.",
+            "window": "rolling 30 days",
+            "source": "trade-finance payment records + commercial-invoice HS-code tags",
+            "route": "Tier-1 alert → trade-finance compliance review gate"
+          }
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "An\texisting\tcustomer,\tbased\toutside\tthe\tUnited\tStates,\treceived\texports\tassociated\twith\tone\tor\nmore\tof\tthe\tnine\tHS\tcodes\tprior\tto\tFebruary\t24,\t2022,\tand\trequested\tor\treceived\ta\tsignificant\nincrease\tin\texports\twith\tthose\tsame\tcodes\tthereafter.",
+          "src_line": 461,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A post-cutoff volume spike against a customer's own pre-cutoff baseline for the same HS codes is a windowed comparison fully derivable from internal trade-payment history.",
+          "build_logic": {
+            "signal_name": "S-HS-CODE-VOLUME-SPIKE",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "hs_code_volume_pre_cutoff_baseline",
+              "hs_code_volume_current_window",
+              "volume_ratio_to_baseline",
+              "customer_country_non_us"
+            ],
+            "logic": "For non-US customers with pre-2022-02-24 activity in any of the nine HS codes, compute the ratio of current-window export volume to the pre-cutoff baseline for those same codes; flag when the ratio exceeds a configurable spike threshold.",
+            "window": "rolling 30 days",
+            "source": "trade-finance payment records with HS-code tags + customer domicile from KYC",
+            "route": "Tier-1 alert → trade-finance compliance review gate"
+          }
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "A\tcustomer\tlacks\tor\trefuses\tto\tprovide\tdetails\tto\tbanks,\tshippers,\tor\tthird\tparties,\tincluding\nabout\tend\tusers,\tintended\tend-use,\tor\tcompany\townership.",
+          "src_line": 465,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Refusal-to-provide is partly captured in KYC/EDD case notes but end-user and ownership gaps need document-request workflow and external attribution to fully assess."
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "Transactions\tinvolving\tsmaller-volume\tpayments\tfrom\tthe\tsame\tend\tuser’s\tforeign\tbank\naccount\tto\tmultiple,\tsimilar\tsuppliers\tof\tdual-use\tproducts.",
+          "src_line": 468,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Fan-out of small payments from one foreign account to many similar suppliers is a structuring-style graph pattern computable from wire and payment data the bank already processes.",
+          "build_logic": {
+            "signal_name": "S-SUPPLIER-FANOUT-SMURFING",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "source_account_id",
+              "distinct_supplier_count",
+              "mean_payment_amount",
+              "supplier_business_similarity_score"
+            ],
+            "logic": "Aggregate outbound payments by source foreign bank account over the window; flag accounts dispersing below-threshold payments to a count of distinct, business-similar suppliers above a configurable fan-out threshold.",
+            "window": "rolling 30 days",
+            "source": "wire and correspondent-banking payment records + supplier MCC/line-of-business tags",
+            "route": "Tier-1 alert → AML transaction-monitoring review gate"
+          }
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "Parties\tto\ttransactions\tlisted\tas\tultimate\tconsignees\tor\tlisted\tin\tthe\t“consign\tto”\tfield\tdo\tnot\ntypically\tengage\tin\tbusiness\tconsistent\twith\tconsuming\tor\totherwise\tusing\tcommodities\t(e.g.,\nother\tfinancial\tinstitutions,\tmail\tcenters,\tor\tlogistics\tcompanies).",
+          "src_line": 471,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "The consignee fields live on trade documents the bank handles but classifying whether the consignee's business is consistent with consuming the goods needs document parsing and entity-type enrichment."
+        },
+        {
+          "id": "IND-08",
+          "section": "redflag",
+          "flag": "The\tcustomer\tis\tsignificantly\toverpaying\tfor\ta\tcommodity\tbased\ton\tknown\tmarket\tprices.",
+          "src_line": 475,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "The invoiced price is in the trade-payment record, but detecting significant overpayment requires an external market-price reference for the commodity to benchmark against."
+        },
+        {
+          "id": "IND-09",
+          "section": "redflag",
+          "flag": "The\tcustomer\tor\tits\taddress\tis\tsimilar\tto\tone\tof\tthe\tparties\ton\ta\tproscribed\tparties\tlist,\tsuch\tas\tthe\nBIS\tEntity\tList,\tthe\tSDN\tList,\tor\tthe\tU.S.\tDepartment\tof\tState’s\tStatutorily\tDebarred\tParties\tList.33",
+          "src_line": 477,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Name and address fuzzy-matching against the SDN, BIS Entity, and debarred-parties lists is standard sanctions-screening that a mid-size US bank already runs at onboarding and on transactions."
+        }
+      ]
     },
     {
       "id": "fin-2023-alert005",
@@ -3331,7 +3977,95 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 13,
       "derivable": true,
-      "doc_type": "Alert"
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "A customer or a customer’s counterparty conducts transactions with OFAC-designated entities and individuals, or transactions that contain a nexus to identifiers listed for OFAC-designated entities and individuals, to include, email addresses, physical addresses, phone numbers, or passport numbers, or virtual currency addresses.",
+          "src_line": 87,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "OFAC sanctions screening against designated-entity identifiers is a baseline control a mid-size US bank already runs on payment and account data."
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "Information included in a transaction between customers indicates support for terrorist campaigns.",
+          "src_line": 92,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting terrorist-campaign support encoded in free-text memo or messaging fields requires external interpretation context that core structured transaction data does not supply."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "A customer conducts transactions with a Money Services Business (MSB) or other financial institution, including one that offers services in virtual currency, operates in higher-risk jurisdictions tied to Hamas activity, and is reasonably believed or suspected to have lax customer due diligence (CDD) requirements, opaque ownership, or otherwise fails to comply with anti-money laundering/combatting the financing of terrorism (AML/CFT) best practices.",
+          "src_line": 95,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Counterparty-MSB and high-risk-jurisdiction flags are partly visible in wire routing, but judging another institution's CDD quality and opaque ownership needs cross-institution attribution the bank only partly holds."
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "A customer conducts transactions that originate with, are directed to, or otherwise involve entities that are shell corporations, general “trading companies,” or other companies that have a nexus with Iran or other Iran-supported terrorist groups, such as Hizballah and Palestine Islamic Jihad.8",
+          "src_line": 121,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Attributing a counterparty as a shell or front company with an Iran/Hizballah/PIJ nexus depends on external sanctions-network and adverse-media intelligence not present in transaction data."
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "A customer that is a charitable organization or nonprofit organization (NPO)9 solicits donations but does not appear to provide any charitable services or openly supports Hamas’s terrorist activity or operations.  In some cases, these organizations may post on social media platforms or encrypted messaging apps to solicit donations, including in virtual currency.",
+          "src_line": 126,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Establishing that an NPO solicits but provides no services or openly backs Hamas requires external NPO-sector and social-media adverse-media attribution outside the bank's data."
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "A customer that is a charitable organization or NPO receives large donations from an unknown source over a short period of time and then sends significant wire transfers or checks to other charitable organizations or NPOs.",
+          "src_line": 131,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "The rapid large-inflow-then-pass-through-to-other-NPOs pattern is a pure velocity-and-flow signature fully observable in the bank's own wire and check data, yet is not flagged by today's rules.",
+          "build_logic": {
+            "signal_name": "S-NPO-PASSTHROUGH-VELOCITY",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "inbound_donation_total",
+              "distinct_inbound_source_count",
+              "outbound_to_npo_ratio",
+              "inflow_to_outflow_days",
+              "npo_customer_flag"
+            ],
+            "logic": "On an NPO-classified account, flag when large aggregate inbound donations from a small/unknown set of sources are followed within the window by significant outbound wires or checks to other NPO/charity counterparties, where outbound-to-NPO ratio exceeds threshold and dwell time is short.",
+            "window": "rolling 30 days",
+            "source": "core wire transfer + check clearing + account-classification (NPO) data",
+            "route": "Tier-1 alert → NPO pass-through review gate"
+          }
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "A customer conducts transactions with known or suspected virtual currency addresses tied to terrorism or terrorist financing donation campaigns.",
+          "src_line": 135,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Matching transactions to virtual-currency addresses tied to terror-financing campaigns needs crypto chain-analytics enrichment layered on top of the bank's own on/off-ramp records."
+        }
+      ]
     },
     {
       "id": "fin-2023-alert007",
@@ -3342,7 +4076,198 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 11,
       "derivable": true,
-      "doc_type": "Alert"
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "A business account receives more than one ERC check deposit over multiple days.",
+          "src_line": 380,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Repeated Treasury ERC check deposits to one business account over a short window are fully observable in core deposit data but few banks model the ERC-specific multi-deposit pattern.",
+          "build_logic": {
+            "signal_name": "S-ERC-MULTI-DEPOSIT",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "erc_check_deposit_count",
+              "distinct_deposit_days",
+              "treasury_check_form_code",
+              "business_account_flag"
+            ],
+            "logic": "Flag a business account with two or more Treasury ERC check deposits (identified by F-941/F-943/F-944/F-7200 form codes) posted across multiple days within the window.",
+            "window": "rolling 30 days",
+            "source": "core deposit ledger + Treasury check metadata (form code / lower-left tax quarter)",
+            "route": "Tier-1 alert → BSA analyst review gate"
+          }
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "Small business accounts receive an ERC check deposit that is not commensurate with the size\nof the business, the number of employees, and the volume of transactions.37",
+          "src_line": 382,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "An ERC deposit disproportionate to the account's payroll/employee/transaction footprint is computable from existing account history, but the size-commensurate ratio is rarely operationalized as a signal.",
+          "build_logic": {
+            "signal_name": "S-ERC-SIZE-MISMATCH",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "erc_deposit_amount",
+              "trailing_payroll_volume",
+              "estimated_employee_count",
+              "trailing_transaction_count"
+            ],
+            "logic": "Flag when an ERC check deposit amount exceeds a multiple of the account's trailing payroll/transaction volume relative to its estimated headcount, indicating a credit not commensurate with business size.",
+            "window": "rolling 30 days",
+            "source": "core deposit ledger + 12-month account transaction history",
+            "route": "Tier-1 alert → BSA analyst review gate"
+          }
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "A large ERC is deposited into a business account and is subsequently transferred using P2P\nservices or to an online banking institution, or withdrawn as cash at an ATM.  Funds may be\nsubsequently transferred from the account into separate accounts or payments may be made\nto new businesses that a customer has not had transactions with prior to receiving an ERC\ncheck deposit.",
+          "src_line": 385,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Banks already run rapid-movement-of-funds detection; the enhancement is anchoring the disbursement window specifically to an ERC check deposit event and the novel-counterparty leg.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "The account receiving an ERC check deposit has no deposits other than Treasury-issued\nchecks, or the account has no regular business transactions.38",
+          "src_line": 391,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Whether an account's only inflows are Treasury checks (no genuine business activity) is directly derivable from the deposit ledger yet is not a standard funnel-account signal.",
+          "build_logic": {
+            "signal_name": "S-ERC-SOLE-FUNDING",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "treasury_check_deposit_share",
+              "non_treasury_deposit_count",
+              "regular_business_txn_count",
+              "account_inflow_diversity"
+            ],
+            "logic": "Flag a business account whose deposit history is composed solely (or near-solely) of Treasury-issued checks, or that shows no recurring business transactions, around an ERC check deposit.",
+            "window": "rolling 30 days",
+            "source": "core deposit ledger + account transaction history",
+            "route": "Tier-1 alert → BSA analyst review gate"
+          }
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "A customer attempts to deposit an altered Treasury ERC check, or financial institutions are\nunable to verify the validity of the checks that customers attempt to deposit.39",
+          "src_line": 394,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Altered-check and check-validity detection is a mature, established control at the deposit boundary in most mid-size banks.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "The ERC check is deposited into a new business account that did not exist in 2020 or 2021.",
+          "src_line": 397,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Account-open date versus the eligibility period is a known KYC field; banks flag new accounts but rarely tie account-age to the ERC eligibility window specifically.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "A new business account is created for an established business, but no other business activity\noccurs in the account except the deposit of the ERC.  This may be indicative of identity theft,\nwhere the established business was used as a fraudulent front to file for the ERC.",
+          "src_line": 399,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A newly opened account for an established entity whose only activity is the ERC deposit is fully observable in account-open and ledger data but is not a stock signal.",
+          "build_logic": {
+            "signal_name": "S-ERC-FRONT-ACCOUNT",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "account_age_days",
+              "established_business_indicator",
+              "post_open_txn_count",
+              "erc_only_activity_flag"
+            ],
+            "logic": "Flag a recently opened business account tied to an otherwise established business whose only post-opening activity is an ERC check deposit, consistent with an identity-theft front.",
+            "window": "rolling 30 days",
+            "source": "account-open record + KYC business-age data + post-open transaction ledger",
+            "route": "Tier-1 alert → BSA analyst review gate"
+          }
+        },
+        {
+          "id": "IND-08",
+          "section": "redflag",
+          "flag": "A dormant business account suddenly receives an ERC check deposit.",
+          "src_line": 403,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Sudden reactivation of a dormant account by an ERC deposit is computable from inactivity history, but dormancy-reactivation tied to the ERC event is not a standard signal.",
+          "build_logic": {
+            "signal_name": "S-ERC-DORMANT-REACTIVATION",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "days_since_last_activity",
+              "dormancy_flag",
+              "erc_deposit_event",
+              "pre_deposit_balance"
+            ],
+            "logic": "Flag a business account that has been dormant (no activity beyond a long inactivity threshold) and is reactivated by an incoming Treasury ERC check deposit.",
+            "window": "rolling 30 days",
+            "source": "account activity history (dormancy state) + core deposit ledger",
+            "route": "Tier-1 alert → BSA analyst review gate"
+          }
+        },
+        {
+          "id": "IND-09",
+          "section": "redflag",
+          "flag": "An ERC is deposited into a business account with no payroll history.",
+          "src_line": 405,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "The ERC is a payroll-retention credit, so a deposit into an account that has never run payroll is a strong contradiction that is directly checkable against transaction history but rarely modeled.",
+          "build_logic": {
+            "signal_name": "S-ERC-NO-PAYROLL",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "payroll_disbursement_count",
+              "payroll_history_months",
+              "erc_deposit_event",
+              "ach_payroll_indicator"
+            ],
+            "logic": "Flag a business account that receives an ERC check deposit while showing no prior payroll disbursements, contradicting the payroll-retention basis of the credit.",
+            "window": "rolling 30 days",
+            "source": "ACH/payroll disbursement history + core deposit ledger",
+            "route": "Tier-1 alert → BSA analyst review gate"
+          }
+        },
+        {
+          "id": "IND-10",
+          "section": "redflag",
+          "flag": "A customer reports or provides documents indicating that their ERC was obtained by a third-\nparty firm whose credentials cannot be verified or is the subject of adverse media.",
+          "src_line": 419,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Attribution to an unverifiable or adverse-media third-party ERC promoter depends on external adverse-media and preparer-network intelligence the bank does not hold internally.",
+          "build_logic": null
+        }
+      ]
     },
     {
       "id": "fin-2024-alert003",
@@ -3353,7 +4278,95 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 15,
       "derivable": true,
-      "doc_type": "Alert"
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "A customer or a customer’s counterparty conducts transactions with entities and individuals that OFAC has designated due to their connection with Hizballah, or conducts transactions that contain a nexus to identifiers listed for OFAC-designated entities and individuals affiliated with Hizballah, to include email addresses, physical addresses, phone numbers, passport numbers, or convertible virtual currency addresses.",
+          "src_line": 377,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Name-list screening exists, but matching the long-tail identifiers (email/phone/passport/CVC addresses) tied to OFAC-designated Hizballah entities needs an enriched sanctions-network identifier feed the bank does not hold."
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "A customer or a customer’s counterparty utilizes the services of foreign financial institutions that have been identified as being of “primary money laundering concern” under section 311 of the USA PATRIOT Act referencing their association with, or use by, Hizballah.",
+          "src_line": 383,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Correspondent and wire counterparties are in core data and the section 311 list is maintainable, but routing-through-intermediary chains are only partially resolved today, so screening should be enhanced rather than rebuilt."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "A customer conducts transactions with an MSB or other financial institution, including one that offers services in convertible virtual currency, that operates in jurisdictions known for, or at high risk for, Hizballah terrorist financing activity, such as the tri-border region of South America, the Middle East, or West Africa, and has opaque ownership or whose beneficial owners are known associates of Hizballah.",
+          "src_line": 387,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "The MSB counterparty and high-risk jurisdiction are visible in wire/MSB data, but resolving opaque ownership and beneficial-owner-to-Hizballah association needs cross-institution beneficial-ownership enrichment."
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "A customer conducts transactions that originate with, are directed to, or otherwise involve entities that are known or suspected front companies or other companies whose beneficial ownership information indicates that they may have a nexus with Hizballah.  Indicators of possible front companies include opaque ownership structures or business addresses that are residential or co-located with other companies.",
+          "src_line": 393,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Identifying front companies and a Hizballah beneficial-ownership nexus requires external corporate-registry and front-company attribution data the bank does not natively source."
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "Invoices—particularly for shipments of electronics leaving the United States for the tri-border region of South America or the PRC, or used cars being shipped from the United States to West Africa—appear to over- or under-charge the recipient, especially if the goods do not appear to correspond with the counterparty’s stated line of business and/or if the payments for those goods are facilitated by a Lebanese or Hizballah-connected financial firm, or a branch of a Lebanese or Hizballah-connected financial firm located abroad.",
+          "src_line": 399,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Trade-finance invoice amounts, shipped-goods descriptions, counterparty line of business, and corridor are all in the bank's own trade and payment data, so an invoice over/under-pricing signal on the electronics→tri-border and used-cars→West-Africa corridors is directly buildable.",
+          "build_logic": {
+            "signal_name": "S-tbml-invoice-mispricing",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "invoice_unit_price_vs_corridor_benchmark_ratio",
+              "goods_category_code",
+              "counterparty_stated_line_of_business_match",
+              "ship_to_corridor_risk_flag",
+              "facilitating_fi_lebanon_nexus_flag"
+            ],
+            "logic": "Flag trade-finance invoices whose unit price deviates beyond a band from the corridor/goods benchmark (over- or under-pricing) when goods category does not correspond to the counterparty's stated line of business, escalating when the corridor is electronics→tri-border/PRC or used-cars→West Africa or the payment is facilitated by a Lebanese/Hizballah-connected financial firm or its foreign branch.",
+            "window": "rolling 30 days",
+            "source": "trade-finance invoice records, payment instructions, counterparty KYC line-of-business, shipment corridor",
+            "route": "Tier-1 alert → trade-finance AML review gate"
+          }
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "Transactions and wire transfers refer to underlying commercial activity that involves bills of lading with no consignees or involves vessels that have been previously linked to suspicious financial activities or registered to sanctioned entities connected with Hizballah, the Houthis, the IRGC-QF, or the Syrian regime.  Documentation, such as bills of lading and shipping invoices, appears to be falsified or omits key information, or there are inconsistencies between shipping related documents and maritime database entries.",
+          "src_line": 414,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Linking vessels to prior suspicious activity or sanctioned entities and reconciling shipping documents against maritime database entries requires external maritime-intelligence data the bank does not hold."
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "A customer, domestic or foreign, with businesses in the real estate, import/export, construction, diamonds and precious stones, or high-value art sectors with numerous international counterparties in high-risk jurisdictions for Hizballah financing, makes an unusually high number of cash deposits in business accounts, transfers funds from business to personal accounts or vice versa, or uses personal accounts or personal credit cards to make business payments.",
+          "src_line": 421,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Unusual business-account cash deposits and business↔personal fund commingling are visible in core account data and partly caught by structuring rules, but tying the pattern to the named high-value sectors and high-risk corridors warrants enhancing the existing monitoring."
+        }
+      ]
     },
     {
       "id": "fin-2024-alert004",
@@ -3511,7 +4524,256 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 23,
       "derivable": true,
-      "doc_type": "Alert"
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "Red Flag Indicators for BOI Reporting Scams",
+          "flag": "A\tcustomer\tintending\tto\tfile\ttheir\tBOI\tdirectly\twith\tFinCEN\tmakes\tan\tonline\tpayment. 36",
+          "src_line": 456,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A bank sees the outbound online payment and can know the customer is in a BOI-filing context, but no signal today flags a payment when filing directly with FinCEN is free.",
+          "build_logic": {
+            "signal_name": "S-BOI-DIRECT-FILING-PAYMENT",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "payment_memo_boi_filing",
+              "payee_resembles_government_filing_service",
+              "online_card_or_ach_payment",
+              "no_prior_government_fee_history"
+            ],
+            "logic": "Flag when a customer makes an online/card/ACH payment whose memo, payee, or stated purpose references BOI / beneficial-ownership filing, since direct BOI e-filing with FinCEN carries no fee — any such payment is presumptively to a fraudulent intermediary.",
+            "window": "rolling 30 days",
+            "source": "card/ACH payment rail + payment memo/purpose field + payee enrichment",
+            "route": "Tier-1 alert → BOI-scam review gate"
+          }
+        },
+        {
+          "id": "IND-02",
+          "section": "Red Flag Indicators for BOI Reporting Scams",
+          "flag": "A\tcustomer\tmakes\tan\tonline\tpayment\tto\tfile\ttheir\tBOI\twith\ta\tthird-party\tfiling\tcompany\tor\nservice\tprovider\tthrough\ta\twebsite\tdomain\tthat\tis\tregistered\tin\ta\tforeign\tlocation.",
+          "src_line": 458,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "The payment is visible but attributing a payee's website domain to a foreign-registered scam site requires external WHOIS/domain-attribution data the bank does not hold."
+        },
+        {
+          "id": "IND-03",
+          "section": "Red Flag Indicators for BOI Reporting Scams",
+          "flag": "A\tcustomer\tsends\ta\tpayment\tto\tfile\ttheir\tBOI\tthrough\ta\tthird-party\tfiling\tcompany\tor\tservice\nprovider\twith\tlittle\tto\tno\tonline\tpresence\tor\ta\tname\tsimilar\tto\tlegitimate\tcompanies\tor\ngovernment\tentities.",
+          "src_line": 470,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "The payment and payee name are in transaction data, but judging 'little online presence' or name-confusability with government entities needs external entity-reputation enrichment."
+        },
+        {
+          "id": "IND-04",
+          "section": "Red Flag Indicators for BOI Reporting Scams",
+          "flag": "A\tcustomer\tuncharacteristically\tsends\ta\tpayment\tto\ta\tcounterparty\tand\ttells\tthe\tfinancial\ninstitution\tthat\tthe\tfunds\tmust\tbe\tsent\timmediately\tto\tFinCEN\tor\trisk\ta\tfine,\tpenalty,\tor\tlegal\naction\tfor\tfailure\tto\tfile\ttheir\tBOI.",
+          "src_line": 474,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "An out-of-pattern urgent payment is partly detectable from transaction history, but the coercive 'must pay FinCEN or risk a fine' narrative is customer-stated context only partially captured."
+        },
+        {
+          "id": "IND-05",
+          "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+          "flag": "A\tcompany\tannounces\tits\t“license”\tor\t“approval”\tfrom\tFinCEN\tas\tan\tMSB\tvia\ta\tpress\trelease\nthrough\ta\tnews\twire\tservice,\ton\tits\twebsite,\tor\tsocial\tmedia.",
+          "src_line": 480,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting a company's public 'approved by FinCEN' claim in press releases or social media depends on external media/web monitoring the bank does not ingest."
+        },
+        {
+          "id": "IND-06",
+          "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+          "flag": "A\tcompany\thas\tbeen\tflagged\tby\ta\tstate\tfinancial\tregulator\tas\tpotentially\tfraudulent\tor\tfor\thaving\nexploited\tvictims\tin\tthe\tpast.",
+          "src_line": 483,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "State-regulator fraud flags can be ingested as a watchlist enrichment but are not consistently available across all states, so coverage is partial against partial data."
+        },
+        {
+          "id": "IND-07",
+          "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+          "flag": "A\tcompany\tis\tregistered\tas\tan\tMSB\twith\tFinCEN\tbut\tis\tnot\tlicensed\tas\tan\tMSB\twith\tany\tU.S.\nstate\tor\tterritorial\tfinancial\tregulatory\tauthority\twhere\tthey\tclaim\tto\toperate. 37",
+          "src_line": 486,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "FinCEN MSB-registration status is public, but cross-checking against per-state NMLS licensing requires joining external state-licensing data the bank must enrich in."
+        },
+        {
+          "id": "IND-08",
+          "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+          "flag": "A\tcompany\twith\ta\tlimited\tonline\tpresence\tprominently\thighlights\ttheir\tMSB\tregistration\twith\nFinCEN\tor\tclaims\tto\tbe\tlicensed\tby\tFinCEN\talongside\tunverified\ttestimonials\tand\tpromotions\tof\nrisk-free\thigh-investment\treturns,\toften\ton\tits\twebsite,\ta\tnews\twire\tservice,\tor\ta\tsocial\tmedia\tpost.",
+          "src_line": 489,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "This is entirely an external web/marketing-content signal (limited online presence, risk-free-return promotions) with no transaction-data footprint at the bank."
+        },
+        {
+          "id": "IND-09",
+          "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+          "flag": "An\tMSB\tregistered\twith\tFinCEN\tshares\ta\tstreet\taddress\twith\tother\trecently\tregistered\tMSBs.",
+          "src_line": 493,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "FinCEN's MSB registrant data carries registration street addresses, so a deterministic address-collision check across recent registrations is buildable from available data.",
+          "build_logic": {
+            "signal_name": "S-MSB-SHARED-ADDRESS-CLUSTER",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "normalized_registration_street_address",
+              "msb_registration_date",
+              "shared_address_registrant_count",
+              "registration_recency_bucket"
+            ],
+            "logic": "Cluster MSB-registered counterparties by normalized registration street address and flag when a registrant shares an address with multiple other recently registered MSBs, a hallmark of shell-MSB farms.",
+            "window": "rolling 30 days",
+            "source": "FinCEN MSB Registrant data + counterparty registration enrichment",
+            "route": "Tier-1 alert → MSB-fraud review gate"
+          }
+        },
+        {
+          "id": "IND-10",
+          "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+          "flag": "VASPs\tor\tother\tfinancial\tinstitutions\tprovide\ta\tuser\twith\ta\tvirtual\tcurrency\tdeposit\taddress\tthat\nhas\tbeen\tflagged\tas\tpotentially\tfraudulent\tby\tblockchain\texplorers\tor\tblockchain\tanalytic\ttools.",
+          "src_line": 495,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A VASP or crypto-enabled bank holds the destination virtual-currency address and can screen it against blockchain-analytics fraud labels at transaction time.",
+          "build_logic": {
+            "signal_name": "S-VC-DEPOSIT-ADDRESS-FRAUD-FLAG",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "destination_virtual_currency_address",
+              "blockchain_analytics_risk_label",
+              "outbound_crypto_transfer_amount",
+              "address_first_seen_age"
+            ],
+            "logic": "Screen each outbound virtual-currency deposit address against blockchain-analytics fraud/scam labels and flag transfers to addresses tagged potentially fraudulent before settlement.",
+            "window": "rolling 30 days",
+            "source": "crypto withdrawal rail + blockchain-analytics address-risk feed",
+            "route": "Tier-1 alert → crypto-fraud review gate"
+          }
+        },
+        {
+          "id": "IND-11",
+          "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+          "flag": "An\tMSB\tclaims\tthat\tits\tAML\tProgram\tor\t“know\tyour\tcustomer”\tpolicies,\tprocedures,\tor\ninternal\tcontrols\thave\tbeen\tformally\tapproved\tor\totherwise\tvetted\tby\tFinCEN.",
+          "src_line": 498,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "A counterparty's public claim of FinCEN-vetted AML controls is marketing/attestation content external to the bank, not present in transaction data."
+        },
+        {
+          "id": "IND-12",
+          "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+          "flag": "An\tindividual\tor\tentity\tclaims\tthat\ttheir\tMSB\tregistration\twith\tFinCEN\tis\teither\ta\n“recommendation,”\t“certification\tof\tlegitimacy,”\t“approval,”\tor\t“endorsement”\tby\tFinCEN,\nTreasury,\tor\tthe\tU.S.\tgovernment,\tor\tany\tU.S.\tgovernment\tofficial.",
+          "src_line": 501,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Like the prior claim, this is an external representation about registration status that the bank cannot observe from its own data."
+        },
+        {
+          "id": "IND-13",
+          "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+          "flag": "An\tindividual\tor\tentity\tclaims\tthat\ttheir\tMSB\tregistration\twith\tFinCEN\tequates\tto\tU.S.\ngovernment\tapproval\tto\toperate\tin\tthe\tUnited\tStates.",
+          "src_line": 505,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting this false 'registration equals approval' claim again depends on external public-statement monitoring, not internal transaction data."
+        },
+        {
+          "id": "IND-14",
+          "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+          "flag": "An\tMSB\tsuggests\tthat\tusers\tneed\tto\tpay\tan\t AML-related\tprocessing\t“fee”\tor\ta\t“FinCEN\tfee”\nto\tuse\tits\tservices,\tincluding\tto\tdeposit\tor\twithdraw\tfunds\tfrom\tits\tplatform.",
+          "src_line": 508,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "A bank may see a customer's payment of an 'AML/FinCEN fee' to a platform, but tying it to the counterparty MSB's fee solicitation needs payee-context enrichment."
+        },
+        {
+          "id": "IND-15",
+          "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+          "flag": "A\tcompany\tis\tregistered\tas\tan\tMSB\twith\tthe\tsame\tor\tvery\tsimilar\tname\tof\ta\tlarge,\twell-known\nfinancial\tinstitution\tthat\tappears\tto\tlack\tan\tMSB\tregistration\trequirement,\tsuch\tas\ta\tbank,\ncredit\tunion,\tor\tbroker-dealer,\tand\tappears\tto\thave\tno\tofficial\taffiliation\twith\tthat\tlarge,\twell-\nknown\tfinancial\tinstitution.",
+          "src_line": 515,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "MSB registrant names are public, but fuzzy-matching them to well-known FI names and confirming no affiliation needs an external FI-name reference set to enrich against."
+        },
+        {
+          "id": "IND-16",
+          "section": "Red Flag Indicators for FinCEN Imposter Schemes",
+          "flag": "A\tcustomer\tsends\ta\tpayment\tpurportedly\tto\tFinCEN\tor\tin\tconnection\twith\tan\tapparent\tpenalty\nowed\tto\tFinCEN,\twith\tthe\tmemo\tline\tdenoting\t“tax,”\t“fee,”\t“debt,”\t“prize,”\t“lien,”\tor\t“grant.”",
+          "src_line": 522,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "The payment memo/purpose field is in the bank's own transaction data, so a deterministic memo-pattern signal for 'pay FinCEN' plus tax/fee/debt/prize/lien/grant terms is directly buildable.",
+          "build_logic": {
+            "signal_name": "S-FINCEN-IMPOSTER-PAYMENT-MEMO",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "payment_memo_text",
+              "memo_mentions_fincen_or_treasury",
+              "memo_fee_penalty_grant_terms",
+              "payee_unrecognized_government_lookalike"
+            ],
+            "logic": "Flag outbound payments whose memo line references FinCEN/Treasury alongside coercive or reward terms (tax, fee, debt, prize, lien, grant), since FinCEN never collects payments from the public.",
+            "window": "rolling 30 days",
+            "source": "payment memo/purpose field across wire/ACH/card rails",
+            "route": "Tier-1 alert → imposter-scam review gate"
+          }
+        },
+        {
+          "id": "IND-17",
+          "section": "Red Flag Indicators for FinCEN Imposter Schemes",
+          "flag": "A\tcustomer\tuncharacteristically\tsends\tpayments\tto\ta\tnew\tcounterparty\tand\tindicates\tto\tthe\nfinancial\tinstitution\tthat\tthe\tfunds\tmust\tbe\tsent\timmediately\tto\tpay\tFinCEN\tfor\ta\tsupposed\n“AML/CFT\tviolation,”\t“outstanding\tdebt,”\tor\ta\t“Treasury\tgrant.”",
+          "src_line": 525,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Uncharacteristic new-counterparty payments are detectable from transaction history; layering the customer-stated urgent 'pay FinCEN' reason enhances an existing anomaly signal."
+        },
+        {
+          "id": "IND-18",
+          "section": "Red Flag Indicators for FinCEN Imposter Schemes",
+          "flag": "A\tcustomer\tindicates\tthat\tthey\treceived\ta\tphone\tcall,\ttext\tmessage,\temail,\tor\tU.S.\tMail\tfrom\nFinCEN\tdemanding\timmediate\tpayment.",
+          "src_line": 529,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "This depends on victim-reported contact (call/text/email/mail from 'FinCEN'), which the bank only learns through customer disclosure, not its transaction data."
+        },
+        {
+          "id": "IND-19",
+          "section": "Red Flag Indicators for FinCEN Imposter Schemes",
+          "flag": "A\tcustomer\tpresents\ta\tletter\tsupposedly\tfrom\tthe\tFinCEN\tDirector,\tDeputy\tDirector,\tor\tany\nother\tFinCEN\tor\tTreasury\tofficial\trequesting\timmediate\tpayment.",
+          "src_line": 532,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "A fake FinCEN-official demand letter is physical evidence a customer presents; it surfaces through branch/disclosure channels rather than transaction data, so enrichment is required."
+        }
+      ]
     },
     {
       "id": "fin-2025-alert001",
@@ -3522,7 +4784,147 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 13,
       "derivable": true,
-      "doc_type": "Alert"
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "Red Flags for Depository Institutions",
+          "flag": "A large volume of cash is delivered to a U.S.-based financial institution via an ACS on\nbehalf of a customer who operates a Mexico-based business, a business located near the\nU.S. southwest border, or a U.S.-based company with an affiliated Mexico-based business.\nFollowing the delivery, the customer then rapidly moves the funds to a financial institution\nbased in Mexico, makes transfers to another business in the United States they own and\noperate, or purchases a large volume of goods.",
+          "src_line": 276,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "ACS-originated bulk cash credits followed by rapid pass-through to Mexico are visible in deposit, account-ownership, and outbound-wire data the bank already holds, but no funnel-velocity signal correlates them today.",
+          "build_logic": {
+            "signal_name": "S-acs-cash-passthrough",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "acs_cash_credit_amount",
+              "days_to_outbound_transfer",
+              "mexico_corridor_share",
+              "affiliated_mx_business_flag",
+              "outbound_wire_count"
+            ],
+            "logic": "Flag accounts receiving large ACS-delivered cash credits where >70% of credited value exits within the window via wires to Mexico-domiciled institutions, intra-owner business transfers, or large goods purchases, given an affiliated/border Mexico-based business profile.",
+            "window": "rolling 30 days",
+            "source": "deposit ledger + account ownership/KYC + outbound wire log",
+            "route": "Tier-1 alert → BSA pass-through review gate"
+          }
+        },
+        {
+          "id": "IND-02",
+          "section": "Red Flags for Depository Institutions",
+          "flag": "Large volumes of cash are transported by an ACS or passenger vehicles to an U.S.-based MSB\nlocated along the southwest border and rapidly transferred to Mexico.",
+          "src_line": 283,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "An MSB sees its own large cash-in then rapid Mexico transmittal, but tying the inflow to ACS/vehicle transport and southwest-border geography needs corridor/transport context the institution only partly holds.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-03",
+          "section": "Red Flags for Depository Institutions",
+          "flag": "A customer that owns a Mexico-based business, or a customer with an affiliated Mexico-based\nbusiness, receives a large credit from a U.S.-based ACS into their account at a U.S.-based\nfinancial institution.",
+          "src_line": 286,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Large ACS-sourced account credits tied to a Mexico-based or affiliated business profile are fully in deposit + KYC ownership data, but the ACS-source × MX-ownership join is not alerted on today.",
+          "build_logic": {
+            "signal_name": "S-acs-credit-mx-owner",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "acs_source_credit_amount",
+              "mexico_business_ownership_flag",
+              "affiliated_mx_business_flag",
+              "credit_to_revenue_ratio"
+            ],
+            "logic": "Flag accounts whose owner has a Mexico-based or affiliated Mexico-based business and that receive ACS-sourced credits materially exceeding the business's expected legitimate cash revenue within the window.",
+            "window": "rolling 30 days",
+            "source": "deposit/credit ledger + account ownership/KYC profile",
+            "route": "Tier-1 alert → BSA enhanced-due-diligence review gate"
+          }
+        },
+        {
+          "id": "IND-04",
+          "section": "Red Flags for Depository Institutions",
+          "flag": "A customer that owns a Mexico-based business receives a large credit into their account\nat a U.S.-based financial institution after depositing bulk cash into the U.S.-based financial\ninstitution’s vault at a U.S.-based ACS secure storage facility.",
+          "src_line": 290,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "The vault-credit-after-bulk-cash-deposit pattern is in the bank's ledger and ACS vault-rental records, so an existing control can be sharpened with the MX-ownership join rather than built from scratch.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-05",
+          "section": "Red Flags for Depository Institutions",
+          "flag": "A customer that owns a Mexico-based business receives a large cross-border wire transfer to\ntheir account at a U.S.-based financial institution from a Canada-based financial institution.",
+          "src_line": 294,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Inbound cross-border wires are visible, but resolving the Canada-origin corridor and tying it to Mexico-based business ownership as a smuggling-repatriation route needs partial cross-institution corridor context.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-06",
+          "section": "Red Flags for Armored Car Services",
+          "flag": "A business in Mexico, near the southwest border of the United States, organizes the transportation\nof a large volume of cash to multiple locations throughout the United States by an ACS or air\ntransport, for no business or apparent lawful purpose, before it is finally delivered to a U.S.-based\nfinancial institution or a Federal Reserve Bank location.",
+          "src_line": 299,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting a multi-location ACS routing pattern with no apparent lawful purpose requires cross-carrier transport-leg data and corporate attribution a single U.S. financial institution does not hold.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-07",
+          "section": "Red Flags for Armored Car Services",
+          "flag": "A Mexico-based business transporting cash into the United States is reluctant to provide\ninformation, or provides inconsistent information, on who is the currency originator or where\nthe funds are destined in Part II of a FinCEN Form 105 (CMIR).",
+          "src_line": 306,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "CMIR (Form 105) originator/destination fields are structured data, but flagging reluctance/inconsistency requires enriching the record with the filing's free-text and cross-filing comparison the institution only partly captures.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-08",
+          "section": "Red Flags for Armored Car Services",
+          "flag": "A non-bank Mexico-based business organizes the transport of large volumes of USD into the\nUnited States, that are not commensurate with the size of the business or the business profile.",
+          "src_line": 310,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Judging transported USD volume against a non-bank Mexico-based business's size and profile needs external corporate-registry and business-profile data outside the institution's holdings.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-09",
+          "section": "Red Flags for Armored Car Services",
+          "flag": "A shipment of bulk cash is delivered via a Mexico or Canada-based ACS to a U.S.-based ACS\nwithout accompanying instructions or explanation for the purpose of the transaction.  The\nU.S.-based ACS then receives a request to transport the funds to a financial institution.",
+          "src_line": 313,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "An ACS-to-ACS hand-off lacking purpose followed by a deliver-to-FI request is visible in transport manifests, but linking the two legs across carriers needs partial cross-institution enrichment.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-10",
+          "section": "Red Flags for Armored Car Services",
+          "flag": "A Mexico-based business or individual requests that bulk cash be transported or accepted by a\nU.S. financial institution but does not provide a clear explanation of the source of the funds.",
+          "src_line": 317,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Unexplained source-of-funds on a bulk-cash acceptance request is captured in onboarding/KYC and transaction-documentation data, so an existing SOF control can be enhanced for this corridor.",
+          "build_logic": null
+        }
+      ]
     },
     {
       "id": "fin-2025-alert002",
@@ -3768,7 +5170,207 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 17,
       "derivable": true,
-      "doc_type": "Alert"
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "A customer is a company or NPO serving as a sponsor for a government benefit program that\nsuddenly receives and disburses a significant number of reimbursements in a short timeframe\ninconsistent with the customer profile of other similar entities.",
+          "src_line": 186,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Government-reimbursement inflows followed by rapid same-window disbursements are fully visible in account and ACH/wire data; banks rarely run this pass-through velocity check against a peer baseline.",
+          "build_logic": {
+            "signal_name": "S-sponsor-reimbursement-passthrough",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "gov_reimbursement_inflow_amount",
+              "disbursement_outflow_amount",
+              "passthrough_ratio_30d",
+              "inflow_to_outflow_lag_days",
+              "peer_profile_deviation_zscore"
+            ],
+            "logic": "Flag a sponsor/NPO account where total government-reimbursement inflows and subsequent disbursements within the same rolling window both spike, the passthrough ratio (outflow/inflow) approaches 1, and the velocity deviates materially from the peer baseline for similar registered sponsors.",
+            "window": "rolling 30 days",
+            "source": "core account ledger + ACH/wire inflow-outflow records + government-grant deposit tags",
+            "route": "Tier-1 alert → enhanced-due-diligence review gate"
+          }
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "A customer is a recently established company or NPO enrolled in a government benefit\nprogram that is suddenly receiving a significant amount of Federal payments soon after\nstarting its operations.",
+          "src_line": 190,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Account-open date and Federal-payment inflow timing/amount are core data; the early-large-Federal-inflow pattern for a young account is directly buildable but not a standard rule.",
+          "build_logic": {
+            "signal_name": "S-young-account-federal-inflow",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "account_age_days",
+              "federal_payment_inflow_amount",
+              "federal_inflow_count_30d",
+              "days_to_first_federal_payment"
+            ],
+            "logic": "Flag accounts opened within a short window that receive a large or rapidly recurring volume of Federal benefit-program payments soon after opening, where inflow magnitude is high relative to the account's brief operating history.",
+            "window": "rolling 30 days",
+            "source": "core account-opening records + Federal-payment deposit tags",
+            "route": "Tier-1 alert → new-account fraud review gate"
+          }
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "A customer is a recently established company or NPO enrolled in a government benefit\nprogram receiving payments to their accounts that are inconsistent with their customer\nprofile.",
+          "src_line": 194,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Banks already run profile-deviation monitoring; tuning it for recently established government-benefit enrollees against expected program volume is an enhancement, not a net-new build.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "A customer is a company or NPO enrolled in a government benefit program but is unable to\nverify its status to the financial institution or its customer profile is not commensurate with\nother similar entities.",
+          "src_line": 198,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Profile-commensurability is computable from KYC, but verifying enrollment status against the benefit program requires nonprofit-sector / program-registry enrichment the bank does not natively hold.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "A customer is a company or NPO enrolled in a government benefit program that is receiving a\nsignificant amount of reimbursements despite limited operations.",
+          "src_line": 202,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Reimbursement inflows are visible, but inferring 'limited operations' needs payroll/vendor/operational-footprint signals that are only partially available without external sector data.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "A customer is a recently established company or NPO enrolled in a government benefit\nprogram with a limited online presence.",
+          "src_line": 205,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Online-presence attribution for a shell-like entity is an external open-source/web-footprint signal the bank does not hold and must source.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "A customer is a company or NPO enrolled in a government benefit program that has minimal\nto no operating costs other than payments for “consulting fees” and nondescriptive, repetitive\ninvoices (i.e. food supplies).",
+          "src_line": 208,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Outflow composition — sparse operating costs dominated by 'consulting fee' payments and repetitive same-amount invoice payments — is fully derivable from transaction memos and counterparties.",
+          "build_logic": {
+            "signal_name": "S-consulting-fee-expense-concentration",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "operating_cost_outflow_ratio",
+              "consulting_fee_payment_share",
+              "repetitive_invoice_amount_count",
+              "distinct_vendor_count"
+            ],
+            "logic": "Flag an enrolled entity whose outflows are concentrated in 'consulting fee' payments and repetitive fixed-amount invoices to few counterparties, with little to no genuine operating-cost spend (payroll, utilities, diversified suppliers) relative to inflow volume.",
+            "window": "rolling 30 days",
+            "source": "core transaction ledger + payment memo/descriptor + counterparty data",
+            "route": "Tier-1 alert → transaction-analysis review gate"
+          }
+        },
+        {
+          "id": "IND-08",
+          "section": "redflag",
+          "flag": "A customer that is a company or NPO enrolled in a government benefit program makes a\nsignificant amount of cash withdrawals.",
+          "src_line": 212,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "High-value cash withdrawal monitoring is a baseline BSA control already in production at any mid-size US bank.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-09",
+          "section": "redflag",
+          "flag": "A customer with previous fraud convictions is an employee of a company or NPO enrolled in\na government benefit program.",
+          "src_line": 215,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Linking employees to prior fraud convictions requires external criminal-record/adverse-media attribution the bank must source; not in core transaction data.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-10",
+          "section": "redflag",
+          "flag": "A customer is an employee of a company or NPO enrolled in a government benefit program\nthat is frequently purchasing or redeeming cashier’s checks for no clear purpose.",
+          "src_line": 218,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Cashier's-check purchase/redemption activity is captured today; sharpening frequency-and-no-clear-purpose detection for benefit-program-linked individuals is an enhancement to existing monitoring.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-11",
+          "section": "redflag",
+          "flag": "A customer that is a company or NPO, enrolled in a government benefit program, or\nthe customer’s employee, engages in behavior suggesting efforts to evade the Currency\nTransaction Report (CTR) reporting requirement (e.g., alters or cancels a transaction when\nadvised a CTR would be filed or engages in structuring with multiple cash transactions for\nunder $10,000), as well as avoiding recordkeeping requirements.16",
+          "src_line": 221,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Structuring / CTR-evasion detection (sub-$10k clustering, abandoned transactions on CTR notice) is a mature, mandated control already running.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-12",
+          "section": "redflag",
+          "flag": "A customer is a company or NPO enrolled in a government benefit program meant for U.S.\ncitizens and lawful permanent residents that is sending a significant amount of wire transfers\nto individuals and companies located in foreign jurisdictions.",
+          "src_line": 231,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Domestic-purpose program funds flowing out as significant foreign wires is fully visible in wire data; a US-benefit-inflow-to-foreign-outflow signal is buildable and not standard.",
+          "build_logic": {
+            "signal_name": "S-domestic-benefit-to-foreign-wire",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "federal_benefit_inflow_amount",
+              "foreign_wire_outflow_amount",
+              "foreign_wire_count",
+              "domestic_to_foreign_outflow_ratio",
+              "distinct_foreign_jurisdiction_count"
+            ],
+            "logic": "Flag an entity funded by a domestic-purpose Federal benefit program that sends a significant volume of outbound wire transfers to individuals and companies in foreign jurisdictions, where foreign-bound outflow is a high share of program inflow.",
+            "window": "rolling 30 days",
+            "source": "core wire-transfer records + counterparty jurisdiction + Federal-benefit deposit tags",
+            "route": "Tier-1 alert → cross-border wire review gate"
+          }
+        },
+        {
+          "id": "IND-13",
+          "section": "redflag",
+          "flag": "A customer is a company or NPO enrolled in a government benefit program that is sending\npayments abroad for residential and commercial real estate, vehicles, aircraft, airline tickets,\nand designer clothing.",
+          "src_line": 235,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Cross-border payment amounts are visible, but classifying outflows as real estate / aircraft / luxury-goods purchases needs merchant/MCC or counterparty-category enrichment that is only partially available.",
+          "build_logic": null
+        }
+      ]
     },
     {
       "id": "fin-2026-alert002",
@@ -3779,7 +5381,180 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 43,
       "derivable": true,
-      "doc_type": "Alert"
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "Oil Smuggling-Related Red Flags",
+          "flag": "Shipping Companies with Iranian Counterparties.  Transactions involving a petroleum or shipping company reveal that it does business with counterparties that have ties to Iran or transport goods using “shadow fleet” vessels that have ties to Iran or that maritime databases indicate have made stops at Iranian ports.",
+          "src_line": 421,
+          "status": "partial",
+          "data": "insufficient",
+          "build_rec": "MONITOR",
+          "rationale": "A bank sees the petroleum/shipping counterparty but Iran-nexus ties and shadow-fleet/port-call attribution live in external maritime-intelligence databases the bank does not hold."
+        },
+        {
+          "id": "IND-02",
+          "section": "Oil Smuggling-Related Red Flags",
+          "flag": "Irregularities in Shipping Documentation that may be Intended to Hide Activities\nInvolving Iran.  A customer makes oil-related transactions and wire transfers involving\nvessels that have been previously linked to suspicious financial activities or that include\ndocumentation, such as bills of lading or shipping invoices, with no consignees, that appear to\nbe falsified, or that omit key information, to obfuscate the Iranian nexus.",
+          "src_line": 430,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Trade-finance documentation is partly captured but consignee/falsification anomalies need document-parsing enrichment most transaction-monitoring stacks lack."
+        },
+        {
+          "id": "IND-03",
+          "section": "Oil Smuggling-Related Red Flags",
+          "flag": "Efforts to Disguise Vessel Information and Ownership.  Documentation associated with a\ncustomer’s oil-related transactions references vessels that, according to maritime databases,\nhave undergone recent or multiple name or flag changes, or transfer of ownership or\noperation to another person following OFAC’s designation of its owner or operator, but the\ndesignated owner or operator appears to maintain an interest in the vessel.",
+          "src_line": 440,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Vessel name/flag/ownership-change history and post-designation control require external maritime registries and OFAC-linkage data the bank must source."
+        },
+        {
+          "id": "IND-04",
+          "section": "Oil Smuggling-Related Red Flags",
+          "flag": "Efforts to Disguise Oil Origins.  Documentation associated with a customer’s oil-related\ntransactions references “Malaysian blend” oil, particularly if the vessel is bound for China by\nway of Southeast Asia and if maritime databases indicate that the vessel displayed Automatic\nInformation System (AIS) irregularities during its voyage or reveal evidence of a ship-to-ship\ntransfer in geographic areas of concern or without commercial need.",
+          "src_line": 456,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "\"Malaysian blend\" relabeling plus AIS irregularities and ship-to-ship transfers are detectable only with external AIS/maritime-tracking feeds the bank does not natively hold."
+        },
+        {
+          "id": "IND-05",
+          "section": "Shadow Banking and Front Company Abuse-Related Red Flags",
+          "flag": "Unclear Sources of Funds.  A customer receives wire transfers or deposits that do not contain\nany information about the source of funds, contain incomplete information about the source of\nfunds, or do not match the customer’s line of business, and they involve entities in a high-risk\njurisdiction for Iranian illicit finance-related activity.",
+          "src_line": 468,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Wire/deposit messages, source-of-funds fields, the customer's declared line of business, and counterparty jurisdiction are all core payment data the bank already holds — the missing-SOF + business-mismatch + high-risk-jurisdiction conjunction is directly buildable.",
+          "build_logic": {
+            "signal_name": "S-unclear-sof-highrisk-jurisdiction",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "missing_or_incomplete_source_of_funds_flag",
+              "counterparty_high_risk_jurisdiction_match",
+              "line_of_business_mismatch_score",
+              "inbound_wire_deposit_count",
+              "inbound_value_sum"
+            ],
+            "logic": "Flag an account when inbound wires/deposits with missing or incomplete source-of-funds details co-occur with a high-risk-jurisdiction (Iranian illicit-finance) counterparty AND the credited activity does not match the customer's declared line of business, over the window.",
+            "window": "rolling 30 days",
+            "source": "wire/payment messages, deposit records, KYC line-of-business profile, jurisdiction risk list",
+            "route": "Tier-1 alert → sanctions/enhanced-due-diligence review gate"
+          }
+        },
+        {
+          "id": "IND-06",
+          "section": "Shadow Banking and Front Company Abuse-Related Red Flags",
+          "flag": "Use of Company Types and Jurisdictions at High-Risk for IRGC Abuse.  A general trading\ncompany with opaque ownership registered in a commercial free trade zone in the UAE or\nother location and whose trading counterparties are companies mostly located in jurisdictions\nsuch as Singapore and Hong Kong has bank accounts at multiple financial institutions in\nlocations such as China, Hong Kong, Oman, or the UAE.",
+          "src_line": 477,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Counterparty jurisdictions and account locations are visible, but opaque beneficial ownership and free-trade-zone registration require corporate-registry enrichment beyond core bank data."
+        },
+        {
+          "id": "IND-07",
+          "section": "Shadow Banking and Front Company Abuse-Related Red Flags",
+          "flag": "Likely Front Companies that Exhibit Transaction Patterns Typical of IRGC Shadow\nBanking.  A company registered in Hong Kong that banks using a Chinese non-resident\naccount has little to no web presence, is co-located with numerous other similar companies,\nor is recently incorporated yet transmitting large, round dollar payments with no adequate\nexplanation for the source of funds, or makes numerous payments in large figures to UAE\ngeneral trading companies or commercial free trade zone-based intermediaries with no clear\nbusiness purpose.",
+          "src_line": 487,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Round-dollar large payments and counterparty clustering are in transaction data, but web-presence, co-location, and recent-incorporation signals need external corporate-footprint enrichment."
+        },
+        {
+          "id": "IND-08",
+          "section": "Shadow Banking and Front Company Abuse-Related Red Flags",
+          "flag": "Unusual Use of Exchange Houses.  A customer makes transactions that move through\nmultiple exchange houses and/or trading companies, adding additional fees and costs as the\ntransactions progress, where the fees, number of transactions, or pattern of transactions do not\nreflect standard and customary commercial practices.",
+          "src_line": 500,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Layering through multiple exchange houses with escalating fees is observable in payment chains the bank already monitors; existing layering detection can be tuned for this exchange-house fee-accretion pattern."
+        },
+        {
+          "id": "IND-09",
+          "section": "Digital Assets-Related Red Flags",
+          "flag": "Unusual Digital Asset Payments by Petroleum, Shipping, Trading, or Trust Companies.\nA company engaged in a line of business with potential exposure to Iranian oil smuggling\ndeviates from normal business practices to send or receive payments using digital assets.",
+          "src_line": 513,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Digital-asset payment activity by a commercial-sector customer is partly visible at the fiat on/off-ramp, but tying it to Iranian-oil exposure needs line-of-business and chain-exposure enrichment."
+        },
+        {
+          "id": "IND-10",
+          "section": "Digital Assets-Related Red Flags",
+          "flag": "Stablecoin Payments with an Unclear Source of Funds.  A customer in a high-risk\njurisdiction for Iranian illicit finance-related activities receives a stablecoin payment that does\nnot match the customer’s line of business and fails to provide information about the source of\nfunds or provides documentation indicating a potential link to Iranian illicit finance.",
+          "src_line": 521,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Stablecoin receipts at the institution are partly captured, but matching them to business profile and Iranian-illicit-finance documentation needs chain-analytics and KYC enrichment."
+        },
+        {
+          "id": "IND-11",
+          "section": "Digital Assets-Related Red Flags",
+          "flag": "Unusual Stablecoin Account Activity.  A customer of a stablecoin issuer, particularly a foreign\nentity such as an overseas purported trust company, opens an account and subsequently engages\nin mint activity requiring multiple rate/limit increases in a short period of time, or otherwise\ntransacts in a manner that does not appear consistent with its reported business profile.",
+          "src_line": 530,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "A stablecoin issuer sees mint/limit-increase activity but cross-referencing rapid rate/limit escalations against the customer's reported business profile needs onboarding-data enrichment to enhance existing monitoring."
+        },
+        {
+          "id": "IND-12",
+          "section": "Digital Assets-Related Red Flags",
+          "flag": "Payments to or from an Iran-located DASP.  Blockchain analysis indicates that a customer\naccount transacted directly or indirectly with a digital asset address attributed to an Iranian entity.",
+          "src_line": 539,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Attributing a digital-asset address to an Iran-located DASP, including indirect hops, depends on external blockchain-analytics attribution data the bank must source."
+        },
+        {
+          "id": "IND-13",
+          "section": "Digital Assets-Related Red Flags",
+          "flag": "Iran-related Cyber Indicators.  Authentication and account activity indicates that a user\nmay be conducting digital asset transactions from Iran. For example, activity logs may show\nconnections from Iranian IP addresses, or sharing IP addresses or common devices with users\npreviously identified as having an Iranian nexus, authentication using an Iranian email service\nor Iranian telephone number, or use of a device with time zone, language, and other settings\nconsistent with a location in Iran.",
+          "src_line": 546,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Authentication logs, IP addresses, device fingerprints, email/phone attributes, and device locale are first-party access data the institution already collects — the Iran-geolocation conjunction is directly buildable.",
+          "build_logic": {
+            "signal_name": "S-iran-auth-cyber-indicators",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "iranian_ip_connection_flag",
+              "shared_ip_or_device_with_iran_nexus_user",
+              "iranian_email_or_phone_domain_match",
+              "device_locale_timezone_iran_consistent",
+              "auth_session_count"
+            ],
+            "logic": "Flag an account when authentication/session activity shows connections from Iranian IP addresses, shared IPs/devices with previously identified Iran-nexus users, Iranian email/telephone attributes, or device locale/time-zone consistent with Iran, over the window.",
+            "window": "rolling 30 days",
+            "source": "authentication logs, session/device telemetry, account contact attributes",
+            "route": "Tier-1 alert → cyber/sanctions review gate"
+          }
+        },
+        {
+          "id": "IND-14",
+          "section": "Digital Assets-Related Red Flags",
+          "flag": "Unregistered P2P Exchangers, Foreign-Located MSBs, and Nested DASPs.  Account activity\nindicates that a customer may operate as an unregistered P2P exchanger, foreign-located MSB,\nor nested DASP that provides services in Iran. For example, a customer of a DASP who is\nlocated in a high-risk jurisdiction for Iranian illicit finance-related activity appears to be using\nliquidity provided by the DASP to execute large numbers of offsetting transactions.",
+          "src_line": 568,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Large offsetting-transaction patterns are visible in account activity, but classifying the customer as an unregistered P2P/nested-DASP operator needs VASP-exposure and registration enrichment."
+        }
+      ]
     }
   ]
 };

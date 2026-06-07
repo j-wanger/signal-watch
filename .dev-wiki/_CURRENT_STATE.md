@@ -4,18 +4,18 @@
 
 ## Recommended Next Action
 
-**Commit Phase 20, then flip the delivery gate.** The multi-source spine is delivered and accepted (unified
-reviewer 9/10 ACCEPT, two MEDIUM both addressed) but NOT yet committed (commit-only-when-asked) — so the delivery
-gate stays pending until the commit verifiably lands. After committing, mark `delivery=accepted` in tasks.md +
-flip the active-phase.md delivery gate to `[x]`. **No remaining internal work without fabrication risk:** M0–M7 +
-the corpus-explorer arc + durability + the multi-source spine are all complete; the demo is at Definition of Done.
-The natural FOLLOW-ON (cheap, NOT a phase) is incremental derivation of the 11 derivable-but-not-yet-derived alerts
-via the inverted loop (LLM extracts → `--check-derived` disposes) — no new architecture. The documented NEXT
-SOURCE is OFAC (US-federal, also 17 USC §105), but adopting it requires extending the verbatim non-negotiable from
-FinCEN-only to US-federal-public-domain — a compliance sign-off, flagged not taken. Run `/dev-plan` only for a
-net-new stakeholder ask or once the OFAC sign-off lands; the carried showcase-debt true-up stays deferred (declined
-at 5+ gates — see the Phase-20 retro). NEVER fabricate; the always-on "Illustrative data & outputs" badge + the
-verbatim public-domain attribution stay.
+**Phase 20 committed (c9de677) + pushed (f2eb4f0); delivery gate accepted.** The multi-source spine shipped
+(unified reviewer 9/10 ACCEPT, two MEDIUM both addressed). The post-phase FOLLOW-ON is also DONE — the 11
+remaining derivable alerts were derived via the inverted loop (each `--check-derived` clean, independently
+re-checked, `--check all` zero drift, no code change, frozen set byte-clean): **the corpus is now 29/33 derived
+(12 advisories + 17 alerts); only the 2 FATF advisories + 2 alerts with no enumerated red-flag list stay
+non-derivable.** **No remaining internal work without fabrication risk:** M0–M7 + the corpus-explorer arc +
+durability + the multi-source spine are all complete and the FinCEN corpus is fully derived; the demo is at
+Definition of Done. The documented NEXT SOURCE is OFAC (US-federal, also 17 USC §105), but adopting it requires
+extending the verbatim non-negotiable from FinCEN-only to US-federal-public-domain — a compliance sign-off,
+flagged not taken. Run `/dev-plan` only for a net-new stakeholder ask or once the OFAC sign-off lands; the carried
+showcase-debt true-up stays deferred (declined at 5+ gates — see the Phase-20 retro). NEVER fabricate; the
+always-on "Illustrative data & outputs" badge + the verbatim public-domain attribution stay.
 
 ## Active Phase
 
@@ -86,7 +86,7 @@ NEVER fabricate. If blocked >3 attempts, ask user: skip or abort.
 | index.html + config/{schema.md, typologies/*.json} | Six-act showcase engine (`__CONFIG__` injection, M3 keyboard nav) + content-model contract + 3 hand-curated typologies (fentanyl, trade-based, elder) | 2026-06-04 |
 | scripts/build.py | Validates config + corpus data at boundary; Phase 20 `CORPUS_SOURCES` registry merges per-source manifests + derived → dist/<id> + dist/corpus | 2026-06-06 |
 | scripts/{derive_signals,crawl_fincen,acquire_fincen,pdf_to_md}.py | Authoring pipeline (stdlib) — quote-grounding gate (source-AGNOSTIC, reused unchanged) + `--corpus[-status] [dir]`/`--check-derived`/`--selftest`; Ph20 generalized: `--alerts` + `parse_alerts` (zero-hop) + `--source <dir>` | 2026-06-06 |
-| corpus.html + dist/corpus/index.html | Standalone corpus-explorer template + built ship file (33 FinCEN publications, 18 derived live = 12 adv + 6 alert; unified menu, Advisory/Alert chips) | 2026-06-06 |
+| corpus.html + dist/corpus/index.html | Standalone corpus-explorer template + built ship file (33 FinCEN publications, 29 derived live = 12 adv + 17 alert; unified menu, Advisory/Alert chips) | 2026-06-06 |
 | data/fincen/ + data/fincen-alerts/ | Source #1 `fincen-advisories` (14 md + 12 derived, BYTE-FROZEN by Ph20) + source #2 `fincen-alerts` (19 md + 6 derived; raw/ gitignored); each {*.md, derived/*.json, corpus-status.json} | 2026-06-06 |
 | tests/corpus-explorer.test.mjs | Zero-dep Node DOM-shim arc harness — Phase 20 extended to 40 assertions (multi-source menu + an alert walking the 5-screen arc) | 2026-06-06 |
 

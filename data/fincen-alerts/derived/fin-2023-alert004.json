@@ -1,0 +1,141 @@
+{
+  "id": "fin-2023-alert004",
+  "advisory": "FIN-2023-ALERT004",
+  "source_md": "data/fincen-alerts/fin-2023-alert004.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "redflag",
+      "flag": "Transactions\trelated\tto\tpayments\tfor\tdefense\tor\tdual-use\tproducts\tfrom\ta\tcompany\nincorporated\tafter\tFebruary\t24,\t2022,\tand\tbased\tin\ta\tnon-GECC\tcountry.",
+      "src_line": 452,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "The bank sees the payment and counterparty country, but tying a payment to defense/dual-use goods and confirming the counterparty's incorporation date needs trade-document and external registry enrichment."
+    },
+    {
+      "id": "IND-02",
+      "section": "redflag",
+      "flag": "A\tnew\tcustomer\twhose\tline\tof\tbusiness\tis\tin\ttrade\tof\tproducts\tassociated\twith\tthe\tnine\tHS\ncodes,\tis\tbased\tin\ta\tnon-GECC\tcountry,\tand\twas\tincorporated\tafter\tFebruary\t24,\t2022.",
+      "src_line": 455,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Resolving a new customer's HS-code product line and post-Feb-2022 incorporation depends on external corporate-registry and goods-classification data the bank does not hold at onboarding."
+    },
+    {
+      "id": "IND-03",
+      "section": "redflag",
+      "flag": "An\texisting\tcustomer\twho\tdid\tnot\treceive\texports\tassociated\twith\tthe\tnine\tHS\tcodes\tprior\tto\nFebruary\t24,\t2022,\tbut\twho\tis\treceiving\tsuch\titems\tnow.",
+      "src_line": 458,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "The bank holds the customer's full trade-payment history, so a first-appearance of nine-HS-code activity after a fixed cutoff date is directly computable from internal data.",
+      "build_logic": {
+        "signal_name": "S-HS-CODE-FIRST-APPEARANCE",
+        "class": "entity · account-level · windowed",
+        "features": [
+          "hs_code_set_pre_cutoff",
+          "hs_code_set_current_window",
+          "first_appearance_flag",
+          "trade_payment_count_current"
+        ],
+        "logic": "For each customer, compute the set of the nine high-priority HS codes seen in trade payments before 2022-02-24; flag when one or more of those HS codes appears in the current window with no pre-cutoff history.",
+        "window": "rolling 30 days",
+        "source": "trade-finance payment records + commercial-invoice HS-code tags",
+        "route": "Tier-1 alert → trade-finance compliance review gate"
+      }
+    },
+    {
+      "id": "IND-04",
+      "section": "redflag",
+      "flag": "An\texisting\tcustomer,\tbased\toutside\tthe\tUnited\tStates,\treceived\texports\tassociated\twith\tone\tor\nmore\tof\tthe\tnine\tHS\tcodes\tprior\tto\tFebruary\t24,\t2022,\tand\trequested\tor\treceived\ta\tsignificant\nincrease\tin\texports\twith\tthose\tsame\tcodes\tthereafter.",
+      "src_line": 461,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "A post-cutoff volume spike against a customer's own pre-cutoff baseline for the same HS codes is a windowed comparison fully derivable from internal trade-payment history.",
+      "build_logic": {
+        "signal_name": "S-HS-CODE-VOLUME-SPIKE",
+        "class": "entity · account-level · windowed",
+        "features": [
+          "hs_code_volume_pre_cutoff_baseline",
+          "hs_code_volume_current_window",
+          "volume_ratio_to_baseline",
+          "customer_country_non_us"
+        ],
+        "logic": "For non-US customers with pre-2022-02-24 activity in any of the nine HS codes, compute the ratio of current-window export volume to the pre-cutoff baseline for those same codes; flag when the ratio exceeds a configurable spike threshold.",
+        "window": "rolling 30 days",
+        "source": "trade-finance payment records with HS-code tags + customer domicile from KYC",
+        "route": "Tier-1 alert → trade-finance compliance review gate"
+      }
+    },
+    {
+      "id": "IND-05",
+      "section": "redflag",
+      "flag": "A\tcustomer\tlacks\tor\trefuses\tto\tprovide\tdetails\tto\tbanks,\tshippers,\tor\tthird\tparties,\tincluding\nabout\tend\tusers,\tintended\tend-use,\tor\tcompany\townership.",
+      "src_line": 465,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Refusal-to-provide is partly captured in KYC/EDD case notes but end-user and ownership gaps need document-request workflow and external attribution to fully assess."
+    },
+    {
+      "id": "IND-06",
+      "section": "redflag",
+      "flag": "Transactions\tinvolving\tsmaller-volume\tpayments\tfrom\tthe\tsame\tend\tuser’s\tforeign\tbank\naccount\tto\tmultiple,\tsimilar\tsuppliers\tof\tdual-use\tproducts.",
+      "src_line": 468,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Fan-out of small payments from one foreign account to many similar suppliers is a structuring-style graph pattern computable from wire and payment data the bank already processes.",
+      "build_logic": {
+        "signal_name": "S-SUPPLIER-FANOUT-SMURFING",
+        "class": "entity · account-level · windowed",
+        "features": [
+          "source_account_id",
+          "distinct_supplier_count",
+          "mean_payment_amount",
+          "supplier_business_similarity_score"
+        ],
+        "logic": "Aggregate outbound payments by source foreign bank account over the window; flag accounts dispersing below-threshold payments to a count of distinct, business-similar suppliers above a configurable fan-out threshold.",
+        "window": "rolling 30 days",
+        "source": "wire and correspondent-banking payment records + supplier MCC/line-of-business tags",
+        "route": "Tier-1 alert → AML transaction-monitoring review gate"
+      }
+    },
+    {
+      "id": "IND-07",
+      "section": "redflag",
+      "flag": "Parties\tto\ttransactions\tlisted\tas\tultimate\tconsignees\tor\tlisted\tin\tthe\t“consign\tto”\tfield\tdo\tnot\ntypically\tengage\tin\tbusiness\tconsistent\twith\tconsuming\tor\totherwise\tusing\tcommodities\t(e.g.,\nother\tfinancial\tinstitutions,\tmail\tcenters,\tor\tlogistics\tcompanies).",
+      "src_line": 471,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "The consignee fields live on trade documents the bank handles but classifying whether the consignee's business is consistent with consuming the goods needs document parsing and entity-type enrichment."
+    },
+    {
+      "id": "IND-08",
+      "section": "redflag",
+      "flag": "The\tcustomer\tis\tsignificantly\toverpaying\tfor\ta\tcommodity\tbased\ton\tknown\tmarket\tprices.",
+      "src_line": 475,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "The invoiced price is in the trade-payment record, but detecting significant overpayment requires an external market-price reference for the commodity to benchmark against."
+    },
+    {
+      "id": "IND-09",
+      "section": "redflag",
+      "flag": "The\tcustomer\tor\tits\taddress\tis\tsimilar\tto\tone\tof\tthe\tparties\ton\ta\tproscribed\tparties\tlist,\tsuch\tas\tthe\nBIS\tEntity\tList,\tthe\tSDN\tList,\tor\tthe\tU.S.\tDepartment\tof\tState’s\tStatutorily\tDebarred\tParties\tList.33",
+      "src_line": 477,
+      "status": "covered",
+      "data": "available",
+      "build_rec": "COVERED",
+      "rationale": "Name and address fuzzy-matching against the SDN, BIS Entity, and debarred-parties lists is standard sanctions-screening that a mid-size US bank already runs at onboarding and on transactions."
+    }
+  ]
+}

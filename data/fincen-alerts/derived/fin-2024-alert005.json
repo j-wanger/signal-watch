@@ -1,0 +1,255 @@
+{
+  "id": "fin-2024-alert005",
+  "advisory": "FIN-2024-ALERT005",
+  "source_md": "data/fincen-alerts/fin-2024-alert005.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "Red Flag Indicators for BOI Reporting Scams",
+      "flag": "A\tcustomer\tintending\tto\tfile\ttheir\tBOI\tdirectly\twith\tFinCEN\tmakes\tan\tonline\tpayment. 36",
+      "src_line": 456,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "A bank sees the outbound online payment and can know the customer is in a BOI-filing context, but no signal today flags a payment when filing directly with FinCEN is free.",
+      "build_logic": {
+        "signal_name": "S-BOI-DIRECT-FILING-PAYMENT",
+        "class": "entity · account-level · windowed",
+        "features": [
+          "payment_memo_boi_filing",
+          "payee_resembles_government_filing_service",
+          "online_card_or_ach_payment",
+          "no_prior_government_fee_history"
+        ],
+        "logic": "Flag when a customer makes an online/card/ACH payment whose memo, payee, or stated purpose references BOI / beneficial-ownership filing, since direct BOI e-filing with FinCEN carries no fee — any such payment is presumptively to a fraudulent intermediary.",
+        "window": "rolling 30 days",
+        "source": "card/ACH payment rail + payment memo/purpose field + payee enrichment",
+        "route": "Tier-1 alert → BOI-scam review gate"
+      }
+    },
+    {
+      "id": "IND-02",
+      "section": "Red Flag Indicators for BOI Reporting Scams",
+      "flag": "A\tcustomer\tmakes\tan\tonline\tpayment\tto\tfile\ttheir\tBOI\twith\ta\tthird-party\tfiling\tcompany\tor\nservice\tprovider\tthrough\ta\twebsite\tdomain\tthat\tis\tregistered\tin\ta\tforeign\tlocation.",
+      "src_line": 458,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "The payment is visible but attributing a payee's website domain to a foreign-registered scam site requires external WHOIS/domain-attribution data the bank does not hold."
+    },
+    {
+      "id": "IND-03",
+      "section": "Red Flag Indicators for BOI Reporting Scams",
+      "flag": "A\tcustomer\tsends\ta\tpayment\tto\tfile\ttheir\tBOI\tthrough\ta\tthird-party\tfiling\tcompany\tor\tservice\nprovider\twith\tlittle\tto\tno\tonline\tpresence\tor\ta\tname\tsimilar\tto\tlegitimate\tcompanies\tor\ngovernment\tentities.",
+      "src_line": 470,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "The payment and payee name are in transaction data, but judging 'little online presence' or name-confusability with government entities needs external entity-reputation enrichment."
+    },
+    {
+      "id": "IND-04",
+      "section": "Red Flag Indicators for BOI Reporting Scams",
+      "flag": "A\tcustomer\tuncharacteristically\tsends\ta\tpayment\tto\ta\tcounterparty\tand\ttells\tthe\tfinancial\ninstitution\tthat\tthe\tfunds\tmust\tbe\tsent\timmediately\tto\tFinCEN\tor\trisk\ta\tfine,\tpenalty,\tor\tlegal\naction\tfor\tfailure\tto\tfile\ttheir\tBOI.",
+      "src_line": 474,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "An out-of-pattern urgent payment is partly detectable from transaction history, but the coercive 'must pay FinCEN or risk a fine' narrative is customer-stated context only partially captured."
+    },
+    {
+      "id": "IND-05",
+      "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+      "flag": "A\tcompany\tannounces\tits\t“license”\tor\t“approval”\tfrom\tFinCEN\tas\tan\tMSB\tvia\ta\tpress\trelease\nthrough\ta\tnews\twire\tservice,\ton\tits\twebsite,\tor\tsocial\tmedia.",
+      "src_line": 480,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Detecting a company's public 'approved by FinCEN' claim in press releases or social media depends on external media/web monitoring the bank does not ingest."
+    },
+    {
+      "id": "IND-06",
+      "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+      "flag": "A\tcompany\thas\tbeen\tflagged\tby\ta\tstate\tfinancial\tregulator\tas\tpotentially\tfraudulent\tor\tfor\thaving\nexploited\tvictims\tin\tthe\tpast.",
+      "src_line": 483,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "State-regulator fraud flags can be ingested as a watchlist enrichment but are not consistently available across all states, so coverage is partial against partial data."
+    },
+    {
+      "id": "IND-07",
+      "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+      "flag": "A\tcompany\tis\tregistered\tas\tan\tMSB\twith\tFinCEN\tbut\tis\tnot\tlicensed\tas\tan\tMSB\twith\tany\tU.S.\nstate\tor\tterritorial\tfinancial\tregulatory\tauthority\twhere\tthey\tclaim\tto\toperate. 37",
+      "src_line": 486,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "FinCEN MSB-registration status is public, but cross-checking against per-state NMLS licensing requires joining external state-licensing data the bank must enrich in."
+    },
+    {
+      "id": "IND-08",
+      "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+      "flag": "A\tcompany\twith\ta\tlimited\tonline\tpresence\tprominently\thighlights\ttheir\tMSB\tregistration\twith\nFinCEN\tor\tclaims\tto\tbe\tlicensed\tby\tFinCEN\talongside\tunverified\ttestimonials\tand\tpromotions\tof\nrisk-free\thigh-investment\treturns,\toften\ton\tits\twebsite,\ta\tnews\twire\tservice,\tor\ta\tsocial\tmedia\tpost.",
+      "src_line": 489,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "This is entirely an external web/marketing-content signal (limited online presence, risk-free-return promotions) with no transaction-data footprint at the bank."
+    },
+    {
+      "id": "IND-09",
+      "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+      "flag": "An\tMSB\tregistered\twith\tFinCEN\tshares\ta\tstreet\taddress\twith\tother\trecently\tregistered\tMSBs.",
+      "src_line": 493,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "FinCEN's MSB registrant data carries registration street addresses, so a deterministic address-collision check across recent registrations is buildable from available data.",
+      "build_logic": {
+        "signal_name": "S-MSB-SHARED-ADDRESS-CLUSTER",
+        "class": "entity · account-level · windowed",
+        "features": [
+          "normalized_registration_street_address",
+          "msb_registration_date",
+          "shared_address_registrant_count",
+          "registration_recency_bucket"
+        ],
+        "logic": "Cluster MSB-registered counterparties by normalized registration street address and flag when a registrant shares an address with multiple other recently registered MSBs, a hallmark of shell-MSB farms.",
+        "window": "rolling 30 days",
+        "source": "FinCEN MSB Registrant data + counterparty registration enrichment",
+        "route": "Tier-1 alert → MSB-fraud review gate"
+      }
+    },
+    {
+      "id": "IND-10",
+      "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+      "flag": "VASPs\tor\tother\tfinancial\tinstitutions\tprovide\ta\tuser\twith\ta\tvirtual\tcurrency\tdeposit\taddress\tthat\nhas\tbeen\tflagged\tas\tpotentially\tfraudulent\tby\tblockchain\texplorers\tor\tblockchain\tanalytic\ttools.",
+      "src_line": 495,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "A VASP or crypto-enabled bank holds the destination virtual-currency address and can screen it against blockchain-analytics fraud labels at transaction time.",
+      "build_logic": {
+        "signal_name": "S-VC-DEPOSIT-ADDRESS-FRAUD-FLAG",
+        "class": "entity · account-level · windowed",
+        "features": [
+          "destination_virtual_currency_address",
+          "blockchain_analytics_risk_label",
+          "outbound_crypto_transfer_amount",
+          "address_first_seen_age"
+        ],
+        "logic": "Screen each outbound virtual-currency deposit address against blockchain-analytics fraud/scam labels and flag transfers to addresses tagged potentially fraudulent before settlement.",
+        "window": "rolling 30 days",
+        "source": "crypto withdrawal rail + blockchain-analytics address-risk feed",
+        "route": "Tier-1 alert → crypto-fraud review gate"
+      }
+    },
+    {
+      "id": "IND-11",
+      "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+      "flag": "An\tMSB\tclaims\tthat\tits\tAML\tProgram\tor\t“know\tyour\tcustomer”\tpolicies,\tprocedures,\tor\ninternal\tcontrols\thave\tbeen\tformally\tapproved\tor\totherwise\tvetted\tby\tFinCEN.",
+      "src_line": 498,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "A counterparty's public claim of FinCEN-vetted AML controls is marketing/attestation content external to the bank, not present in transaction data."
+    },
+    {
+      "id": "IND-12",
+      "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+      "flag": "An\tindividual\tor\tentity\tclaims\tthat\ttheir\tMSB\tregistration\twith\tFinCEN\tis\teither\ta\n“recommendation,”\t“certification\tof\tlegitimacy,”\t“approval,”\tor\t“endorsement”\tby\tFinCEN,\nTreasury,\tor\tthe\tU.S.\tgovernment,\tor\tany\tU.S.\tgovernment\tofficial.",
+      "src_line": 501,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Like the prior claim, this is an external representation about registration status that the bank cannot observe from its own data."
+    },
+    {
+      "id": "IND-13",
+      "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+      "flag": "An\tindividual\tor\tentity\tclaims\tthat\ttheir\tMSB\tregistration\twith\tFinCEN\tequates\tto\tU.S.\ngovernment\tapproval\tto\toperate\tin\tthe\tUnited\tStates.",
+      "src_line": 505,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Detecting this false 'registration equals approval' claim again depends on external public-statement monitoring, not internal transaction data."
+    },
+    {
+      "id": "IND-14",
+      "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+      "flag": "An\tMSB\tsuggests\tthat\tusers\tneed\tto\tpay\tan\t AML-related\tprocessing\t“fee”\tor\ta\t“FinCEN\tfee”\nto\tuse\tits\tservices,\tincluding\tto\tdeposit\tor\twithdraw\tfunds\tfrom\tits\tplatform.",
+      "src_line": 508,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "A bank may see a customer's payment of an 'AML/FinCEN fee' to a platform, but tying it to the counterparty MSB's fee solicitation needs payee-context enrichment."
+    },
+    {
+      "id": "IND-15",
+      "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
+      "flag": "A\tcompany\tis\tregistered\tas\tan\tMSB\twith\tthe\tsame\tor\tvery\tsimilar\tname\tof\ta\tlarge,\twell-known\nfinancial\tinstitution\tthat\tappears\tto\tlack\tan\tMSB\tregistration\trequirement,\tsuch\tas\ta\tbank,\ncredit\tunion,\tor\tbroker-dealer,\tand\tappears\tto\thave\tno\tofficial\taffiliation\twith\tthat\tlarge,\twell-\nknown\tfinancial\tinstitution.",
+      "src_line": 515,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "MSB registrant names are public, but fuzzy-matching them to well-known FI names and confirming no affiliation needs an external FI-name reference set to enrich against."
+    },
+    {
+      "id": "IND-16",
+      "section": "Red Flag Indicators for FinCEN Imposter Schemes",
+      "flag": "A\tcustomer\tsends\ta\tpayment\tpurportedly\tto\tFinCEN\tor\tin\tconnection\twith\tan\tapparent\tpenalty\nowed\tto\tFinCEN,\twith\tthe\tmemo\tline\tdenoting\t“tax,”\t“fee,”\t“debt,”\t“prize,”\t“lien,”\tor\t“grant.”",
+      "src_line": 522,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "The payment memo/purpose field is in the bank's own transaction data, so a deterministic memo-pattern signal for 'pay FinCEN' plus tax/fee/debt/prize/lien/grant terms is directly buildable.",
+      "build_logic": {
+        "signal_name": "S-FINCEN-IMPOSTER-PAYMENT-MEMO",
+        "class": "entity · account-level · windowed",
+        "features": [
+          "payment_memo_text",
+          "memo_mentions_fincen_or_treasury",
+          "memo_fee_penalty_grant_terms",
+          "payee_unrecognized_government_lookalike"
+        ],
+        "logic": "Flag outbound payments whose memo line references FinCEN/Treasury alongside coercive or reward terms (tax, fee, debt, prize, lien, grant), since FinCEN never collects payments from the public.",
+        "window": "rolling 30 days",
+        "source": "payment memo/purpose field across wire/ACH/card rails",
+        "route": "Tier-1 alert → imposter-scam review gate"
+      }
+    },
+    {
+      "id": "IND-17",
+      "section": "Red Flag Indicators for FinCEN Imposter Schemes",
+      "flag": "A\tcustomer\tuncharacteristically\tsends\tpayments\tto\ta\tnew\tcounterparty\tand\tindicates\tto\tthe\nfinancial\tinstitution\tthat\tthe\tfunds\tmust\tbe\tsent\timmediately\tto\tpay\tFinCEN\tfor\ta\tsupposed\n“AML/CFT\tviolation,”\t“outstanding\tdebt,”\tor\ta\t“Treasury\tgrant.”",
+      "src_line": 525,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Uncharacteristic new-counterparty payments are detectable from transaction history; layering the customer-stated urgent 'pay FinCEN' reason enhances an existing anomaly signal."
+    },
+    {
+      "id": "IND-18",
+      "section": "Red Flag Indicators for FinCEN Imposter Schemes",
+      "flag": "A\tcustomer\tindicates\tthat\tthey\treceived\ta\tphone\tcall,\ttext\tmessage,\temail,\tor\tU.S.\tMail\tfrom\nFinCEN\tdemanding\timmediate\tpayment.",
+      "src_line": 529,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "This depends on victim-reported contact (call/text/email/mail from 'FinCEN'), which the bank only learns through customer disclosure, not its transaction data."
+    },
+    {
+      "id": "IND-19",
+      "section": "Red Flag Indicators for FinCEN Imposter Schemes",
+      "flag": "A\tcustomer\tpresents\ta\tletter\tsupposedly\tfrom\tthe\tFinCEN\tDirector,\tDeputy\tDirector,\tor\tany\nother\tFinCEN\tor\tTreasury\tofficial\trequesting\timmediate\tpayment.",
+      "src_line": 532,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "A fake FinCEN-official demand letter is physical evidence a customer presents; it surfaces through branch/disclosure channels rather than transaction data, so enrichment is required."
+    }
+  ]
+}

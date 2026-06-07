@@ -90,10 +90,11 @@ AML transformation framework. Keep vocabulary consistent with it
   A thin `CORPUS_SOURCES` registry in `build.py` (source-id → {status, derived dir, doc_type}) lets
   `render_corpus` merge each FinCEN publication TYPE's committed `corpus-status.json` + `derived/*.json` by
   id into one `__CORPUS__`; the SELECT menu lists all of them with an honest `doc_type` chip (Advisory /
-  Alert). FinCEN ALERTS are source #2 (`data/fincen-alerts/` — 19 alert md, 6 derived): acquired by
+  Alert). FinCEN ALERTS are source #2 (`data/fincen-alerts/` — 19 alert md, 17 derived): acquired by
   `crawl_fincen.py --alerts` (the alerts hub lists each PDF DIRECTLY → zero-hop download) →
   `acquire_fincen.py`/`pdf_to_md.py --source data/fincen-alerts` → derived via the SAME inverted loop +
-  gate. Ships **18 derived across 33 FinCEN publications** (12 advisories + 6 alerts). STILL FinCEN, STILL
+  gate. Ships **29 derived across 33 FinCEN publications** (12 advisories + 17 alerts; only the 2 FATF
+  advisories + 2 alerts with no enumerated red-flag list stay non-derivable). STILL FinCEN, STILL
   verbatim, STILL public-domain (17 U.S.C. 105) — so NO non-negotiable changed; the quote-grounding gate
   (`check_record`/`rf_region`/`normalize`) is source-agnostic and reused UNCHANGED. `data/fincen/` (the
   advisories source) stays byte-frozen — multi-source via the MERGE, not a migration. OFAC (also US-federal
@@ -167,7 +168,7 @@ JetBrains Mono. Theme lives in `:root` CSS variables. Refined, not flashy.
 M0 bootstrap · M1 config-driven refactor · M2 multi-typology · M3 presenter polish ·
 M4 (skipped) live/pre-gen mode · M5 ship · M6 Signal Watch ingestion pipeline (FinCEN verbatim) ·
 M7 corpus-backed demo (Phase 12 derivation backend + Phase 13 corpus explorer `dist/corpus/` +
-Phase 20 multi-source: FinCEN advisories + alerts, 18 derived across 33 publications).
+Phase 20 multi-source: FinCEN advisories + alerts, 29 derived across 33 publications).
 See HANDOFF.md §8.
 
 ## Definition of done

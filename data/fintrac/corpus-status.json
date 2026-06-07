@@ -2,12 +2,110 @@
   "_generated_by": "scripts/derive_signals.py --corpus-status",
   "_note": "Deterministic per-advisory manifest for the corpus-explorer build (scripts/build.py corpus reads this + data/fintrac/derived/*.json). `derivable` = a red-flag region exists (rf_region; false only for the 2 FATF advisories); `extraction`/`flag_count` are a cheap rf_region-bounded triage HINT (_rf_triage), NOT the derivability authority — an advisory goes live via a gate-passing derived/<id>.json (the LLM extracts; check_record grounds), and build.py ignores the manifest count for a live advisory. Authoring artifact, NOT a ship config. Regenerate after the corpus md set changes.",
   "summary": {
-    "clean": 3,
+    "clean": 10,
     "low": 0,
     "needs": 0,
-    "total": 3
+    "total": 10
   },
   "advisories": [
+    {
+      "id": "fintrac-cannabis",
+      "advisory": "FINTRAC-CANNABIS",
+      "title": "Operational Alert: Laundering of proceeds from illicit cannabis",
+      "date": "2022-09",
+      "url": "https://fintrac-canafe.canada.ca/intel/operation/cannabis-eng.pdf",
+      "source": "FINTRAC-CANNABIS · Operational Alert: Laundering of proceeds from illicit cannabis · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 34,
+      "sections": {
+        "redflag": 34
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-human-trafficking",
+      "advisory": "FINTRAC-HUMAN-TRAFFICKING",
+      "title": "Operational Alert: Laundering of the proceeds of human trafficking for sexual exploitation",
+      "date": "2021-07",
+      "url": "https://fintrac-canafe.canada.ca/intel/operation/oai-hts-2021-eng.pdf",
+      "source": "FINTRAC-HUMAN-TRAFFICKING · Operational Alert: Laundering of the proceeds of human trafficking for sexual exploitation · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 145,
+      "sections": {
+        "redflag": 145
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-illegal-wildlife",
+      "advisory": "FINTRAC-ILLEGAL-WILDLIFE",
+      "title": "Operational Alert: Laundering the proceeds of crime from illegal wildlife trade",
+      "date": "2024-03",
+      "url": "https://fintrac-canafe.canada.ca/intel/operation/oai-wildlife-eng.pdf",
+      "source": "FINTRAC-ILLEGAL-WILDLIFE · Operational Alert: Laundering the proceeds of crime from illegal wildlife trade · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 47,
+      "sections": {
+        "redflag": 47
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-online-child-exploitation",
+      "advisory": "FINTRAC-ONLINE-CHILD-EXPLOITATION",
+      "title": "Operational Alert: Laundering the proceeds of online child sexual exploitation",
+      "date": "2025-11",
+      "url": "https://fintrac-canafe.canada.ca/intel/operation/exploitation-eng.pdf",
+      "source": "FINTRAC-ONLINE-CHILD-EXPLOITATION · Operational Alert: Laundering the proceeds of online child sexual exploitation · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 92,
+      "sections": {
+        "redflag": 92
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-professional-ml",
+      "advisory": "FINTRAC-PROFESSIONAL-ML",
+      "title": "Operational Alert: Professional money laundering through trade and money services businesses",
+      "date": "2021-12",
+      "url": "https://fintrac-canafe.canada.ca/intel/operation/oai-ml-eng.pdf",
+      "source": "FINTRAC-PROFESSIONAL-ML · Operational Alert: Professional money laundering through trade and money services businesses · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 33,
+      "sections": {
+        "redflag": 33
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-real-estate",
+      "advisory": "FINTRAC-REAL-ESTATE",
+      "title": "Operational Brief: Indicators of money laundering in financial transactions related to real estate",
+      "date": "2016-07",
+      "url": "https://fintrac-canafe.canada.ca/intel/operation/real-eng.pdf",
+      "source": "FINTRAC-REAL-ESTATE · Operational Brief: Indicators of money laundering in financial transactions related to real estate · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 113,
+      "sections": {
+        "redflag": 113
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-romance-fraud",
+      "advisory": "FINTRAC-ROMANCE-FRAUD",
+      "title": "Operational Alert: Laundering of the proceeds of romance fraud",
+      "date": "2021-02",
+      "url": "https://fintrac-canafe.canada.ca/intel/operation/rf-eng.pdf",
+      "source": "FINTRAC-ROMANCE-FRAUD · Operational Alert: Laundering of the proceeds of romance fraud · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 28,
+      "sections": {
+        "redflag": 28
+      },
+      "derivable": true
+    },
     {
       "id": "fintrac-synthetic-opioids",
       "advisory": "FINTRAC-SYNTHETIC-OPIOIDS",

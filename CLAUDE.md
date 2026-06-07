@@ -164,6 +164,29 @@ AML transformation framework. Keep vocabulary consistent with it
   indicator-dense than FinCEN advisories (house norm ≤24; new range 16-57) — honest, the demo shows real
   depth. build.py + corpus.html UNCHANGED (the 4-type menu/chips/counts are data-driven). The always-on
   badge + source-aware Crown-copyright attribution stay.
+- CROSS-CORPUS SYNTHESIS (Phase 24, M7 — the corpus becomes ANALYTICAL; NO new source/non-negotiable change):
+  the explorer can now GROUP the 42 derived docs by money-laundering TYPOLOGY and show COMBINED coverage across
+  a cross-jurisdiction cluster — the new insight being **no single advisory covers a typology; the combined
+  corpus does** (uniquely possible once the corpus spans FinCEN + OFAC + FINTRAC, US + Canada). THE OVERLAY is a
+  SEPARATE committed artifact `data/typology-map.json` (doc-id → ONE closed-vocabulary typology; 22-term vocab;
+  jurisdiction is NOT stored — it's derived from the source registry: FinCEN/OFAC = US, FINTRAC = Canada) — NOT
+  edits to the 42 derived records, so all 4 source dirs + the grounding core `derive_signals.py` stay
+  BYTE-FROZEN. Validated at the BUILD BOUNDARY in `build.py` (`load_typology_map` + `validate_typology` —
+  closed vocab + referential integrity + total live-doc coverage, FAIL-LOUD, where derived-shape validation
+  already lives; the grounding gate is untouched): agent proposes the map, the deterministic gate disposes, the
+  human reviews. `build.py` merges `typology` + `jurisdiction` + the typology vocab into `__CORPUS__`;
+  `corpus.html` adds a Documents/Typologies toggle on Select → a typology's cross-jurisdiction cluster +
+  combined coverage + per-jurisdiction contribution → drill-through into each doc's existing 5-screen per-doc
+  arc (the per-doc arc is the spine, unchanged; the lens is ADDITIVE). 5 cross-jurisdiction clusters
+  (terrorist-financing, synthetic-opioids, human-trafficking, professional-money-laundering,
+  romance-and-investment-fraud) + 2 cross-AGENCY US clusters (sanctions-evasion across Advisory/Alert/OFAC,
+  public-benefits-fraud). HONESTY (ties to the Phase-18 precision-lift rejection): combined coverage is honest
+  UNION arithmetic over the existing per-indicator status (disclosed-illustrative under the always-on badge),
+  per-jurisdiction is an honest COUNT, every clustered indicator stays traceable to its source doc +
+  jurisdiction — NO similarity / overlap / lift number is computed or claimed; indicators are NOT de-duplicated
+  or matched across regulators (that would need fabricated matching). Harness 74 → 98 (24 synthesis asserts).
+  index.html + config/** + the 3 typology dists + the 4 source dirs + 42 derived records + the showcase stay
+  byte-frozen; NO non-negotiable change.
 - IMPORTANT — INVERTED extraction boundary (Phase 16) + the SUBTRACTION (Phase 17): the **LLM EXTRACTS, the
   deterministic layer GATES**, and the old extractor is **DELETED**. The earlier deterministic
   `extract_red_flags` accreted format special-casing every phase yet the LLM still had to author/prune its
@@ -209,7 +232,10 @@ AML transformation framework. Keep vocabulary consistent with it
   5-screen arc against the committed `dist/corpus/index.html` (gate toggle, Signal empty states,
   close-the-loop coverage math, reduced-motion) + the multi-source menu (advisories + alerts + OFAC +
   FINTRAC, doc_type chips; an alert, an OFAC advisory, AND a FINTRAC OA each walk the arc; the FINTRAC
-  source panel shows its Crown-copyright basis, not US public domain) · `python3 scripts/derive_signals.py --selftest` runs
+  source panel shows its Crown-copyright basis, not US public domain) + the cross-corpus synthesis view
+  (Phase 24: typology-mode picker, a cross-jurisdiction cluster's combined coverage = honest union over
+  the pooled indicators, the no-similarity/overlap/lift honesty gate, drill-through + Back-to-cluster);
+  98 assertions · `python3 scripts/derive_signals.py --selftest` runs
   the derivation GATE checks. Pre-present sequence: `--check all` (drift) → `node tests/…` (arc) → walk
   `tests/smoke-checklist.md` (the human-eye checks).
 - Iterate: edit `index.html` / `corpus.html` / a config, rebuild. `python3 -m http.server` optional, never required.
@@ -236,7 +262,9 @@ M4 (skipped) live/pre-gen mode · M5 ship · M6 Signal Watch ingestion pipeline 
 M7 corpus-backed demo (Phase 12 derivation backend + Phase 13 corpus explorer `dist/corpus/` +
 Phase 20 multi-source: FinCEN advisories + alerts; Phase 21: OFAC source #3; Phase 22: FINTRAC source #4
 (first cross-jurisdiction, Crown-copyright non-commercial licence); Phase 23: FINTRAC depth 3→10 (OAs +
-the real-estate Operational Brief; inverted-anchor widening) — 42 derived across 46 publications, 4 sources).
+the real-estate Operational Brief; inverted-anchor widening) — 42 derived across 46 publications, 4 sources;
+Phase 24: cross-corpus synthesis — a `data/typology-map.json` overlay groups the corpus by typology + shows
+combined coverage across cross-jurisdiction clusters (honest union arithmetic, no fabricated cross-corpus metric)).
 See HANDOFF.md §8.
 
 ## Definition of done

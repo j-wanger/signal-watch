@@ -80,6 +80,20 @@
   .chip.low{color:var(--signal)}
   .chip.none{color:var(--faint)}
   .chip.doc{color:var(--muted)}
+  /* cross-corpus synthesis (Phase 24) — jurisdiction + cluster chips, the Documents/Typologies
+     toggle, and clickable cluster rows. Reuses .advcard / .covrow / .gauge components. */
+  .chip.jur.us{color:var(--blue)}
+  .chip.jur.ca{color:var(--teal)}
+  .chip.jur.xx{color:var(--muted)}
+  .chip.xjuris{color:var(--green)}
+  .chip.xagency{color:var(--blue)}
+  .modetoggle{display:flex;gap:4px}
+  .modetoggle button{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;border:1px solid var(--line2);background:var(--panel);color:var(--muted);cursor:pointer;transition:.18s}
+  .modetoggle button:hover{color:var(--ink)}
+  .modetoggle button.on{background:var(--signal);color:#0c0e12;border-color:var(--signal)}
+  .covrow .acleft{display:flex;gap:6px;align-items:center;flex:none}
+  .covrow.synthrow{cursor:pointer;transition:.18s}
+  .covrow.synthrow:hover{border-color:var(--line2);background:var(--panel2);transform:translateY(-1px)}
 
   /* coverage map (shared component) */
   .covwrap{display:grid;grid-template-columns:1fr 230px;gap:20px;align-items:start}
@@ -237,8 +251,32 @@ function coverageIndex(indicators){
 }
 function shortFlag(t,cap){cap=cap||150;t=String(t||'').replace(/\s+/g,' ').trim();return t.length<=cap?t:t.slice(0,cap-1).trimEnd()+'…';}
 
+/* ---------- cross-corpus typology synthesis (Phase 24) ---------- */
+// typology -> human-readable description (injected by build.py from data/typology-map.json).
+const TYPOLOGY_DESC=(CORPUS.typologies && typeof CORPUS.typologies==='object')?CORPUS.typologies:{};
+function typoLabel(t){return String(t||'').replace(/-/g,' ');}
+function clusterFor(t){return ADVISORIES.filter(a=>isLive(a) && a.typology===t);}
+// build the cluster list: one entry per typology over the LIVE docs, with jurisdictions/doc-types/
+// pooled indicator count. Sorted cross-jurisdiction first, then cross-agency, then size — the
+// multi-source clusters (the payoff) lead. jurisdiction comes from the source registry (build.py).
+function clusters(){
+  const m=new Map();
+  ADVISORIES.forEach(a=>{ if(!isLive(a)||!a.typology) return;
+    if(!m.has(a.typology)) m.set(a.typology,[]); m.get(a.typology).push(a); });
+  return [...m.entries()].map(([t,docs])=>{
+    const juris=[...new Set(docs.map(a=>a.jurisdiction||'—'))].sort();
+    const types=[...new Set(docs.map(a=>a.doc_type||'—'))];
+    const inds=docs.reduce((n,a)=>n+a.indicators.length,0);
+    return {t,docs,juris,types,inds,xj:juris.length>=2,xa:juris.length<2&&types.length>=2};
+  }).sort((a,b)=> (a.xj?0:1)-(b.xj?0:1) || (a.xa?0:1)-(b.xa?0:1) || b.docs.length-a.docs.length || a.t.localeCompare(b.t));
+}
+function jchip(j){const cls=j==='Canada'?'ca':j==='US'?'us':'xx';return `<span class="chip jur ${cls}">${esc(j)}</span>`;}
+
 /* ---------- state + chrome ---------- */
 let view='select', current=null, screen=0, maxScreen=0, timers=[];
+let selMode='doc';          // Select picker mode: 'doc' (by document) | 'typology' (by typology)
+let currentTypology=null;   // the active cluster when view==='synthesis'
+let fromTypology=null;      // the cluster a doc was drilled from (so Back returns to it)
 // the human gate: which BUILD_NOW indicators the presenter has picked to build (per-advisory,
 // reset on pick()). Drives the Signal cards and the close-the-loop coverage rise.
 let selected=new Set();
@@ -252,7 +290,7 @@ function clearTimers(){timers.forEach(t=>clearTimeout(t));timers=[];}
 function T(fn,ms){if(REDUCED){fn();return 0;}const id=setTimeout(fn,ms);timers.push(id);return id;}
 
 function curAdv(){return ADVISORIES.find(a=>a.id===current)||null;}
-function stepIndex(){return view==='select'?0:screen+1;}  // Select=0, Coverage=1, Build=2, Signal=3
+function stepIndex(){return (view==='select'||view==='synthesis')?0:screen+1;}  // Select/synthesis=0, Coverage=1, Build=2, Signal=3
 
 function renderStepper(){
   const at=stepIndex();
@@ -277,17 +315,93 @@ function renderSelect(){
   const alertN=ADVISORIES.filter(a=>a.doc_type==='Alert').length;
   const ofacN=ADVISORIES.filter(a=>a.doc_type==='OFAC').length;
   const fintracN=ADVISORIES.filter(a=>a.doc_type==='FINTRAC').length;
+  const cl=clusters();
+  const xjN=cl.filter(c=>c.xj).length;
+  const byTyp=selMode==='typology';
+  const toggle=`<div class="modetoggle">
+      <button data-mode="doc" class="${byTyp?'':'on'}">Documents</button>
+      <button data-mode="typology" class="${byTyp?'on':''}">Typologies</button>
+    </div>`;
+  const count = byTyp
+    ? `<span class="sct">${cl.length} typologies · ${xjN} cross-jurisdiction · ${live} derived documents</span>`
+    : `<span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${fintracN} FINTRAC · ${live} derived · ${nd} non-derivable</span>`;
+  const lead = byTyp
+    ? `Group the corpus by money-laundering typology and see the <b>combined</b> picture: the same typology often appears across regulators and jurisdictions, and no single advisory enumerates it all. <b>${xjN}</b> typolog${xjN===1?'y spans':'ies span'} both the US and Canada. Pick a typology to see its cluster and combined coverage, then drill into any document's loop.`
+    : `The same signal engine, pointed at a multi-jurisdiction public corpus — US-federal FinCEN advisories + alerts and OFAC sanctions advisories (public domain, 17 U.S.C. §105), plus Canadian <b>FINTRAC</b> operational alerts (Crown copyright, reproduced for non-commercial use with attribution). Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.`;
+  const note = byTyp
+    ? `Documents are grouped by their typology (a closed-vocabulary overlay, traceable to each document's stated subject). Combined coverage is honest union arithmetic over the existing per-indicator statuses — no similarity, overlap, or lift between regulators is computed or claimed.`
+    : `Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the cited source documents (each carries its own public-source attribution).`;
+  const grid = byTyp ? cl.map(typoCard).join('') : list.map(a=>advCard(a)).join('');
   stage.innerHTML=`<div class="scene">
     <div class="eyebrow">FinCEN + OFAC + FINTRAC corpus</div>
-    <h2>Pick a document. <em>Watch the loop derive it.</em></h2>
-    <p class="lead">The same signal engine, pointed at a multi-jurisdiction public corpus — US-federal FinCEN advisories + alerts and OFAC sanctions advisories (public domain, 17 U.S.C. §105), plus Canadian <b>FINTRAC</b> operational alerts (Crown copyright, reproduced for non-commercial use with attribution). Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
+    <h2>${byTyp?'Pick a typology. <em>See the corpus combine.</em>':'Pick a document. <em>Watch the loop derive it.</em>'}</h2>
+    <p class="lead">${lead}</p>
     <div class="selhead">
-      <span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${fintracN} FINTRAC · ${live} derived · ${nd} non-derivable</span>
+      ${count}
+      ${toggle}
     </div>
-    <div class="advgrid">${list.map(a=>advCard(a)).join('')}</div>
-    <div class="framenote">Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the cited source documents (each carries its own public-source attribution).</div>
+    <div class="advgrid">${grid}</div>
+    <div class="framenote">${note}</div>
   </div>`;
-  stage.querySelectorAll('.advcard.live').forEach(el=>el.onclick=()=>pick(el.dataset.id));
+  stage.querySelectorAll('.modetoggle button').forEach(b=>b.onclick=()=>{selMode=b.dataset.mode;render();});
+  if(byTyp) stage.querySelectorAll('.advcard.typo').forEach(el=>el.onclick=()=>enterSynthesis(el.dataset.typ));
+  else stage.querySelectorAll('.advcard.live').forEach(el=>el.onclick=()=>pick(el.dataset.id));
+}
+// a typology cluster card (typology mode of the picker) — reuses .advcard styling.
+function typoCard(c){
+  const flag=c.xj?`<span class="chip xjuris">cross-jurisdiction</span>`
+           :c.xa?`<span class="chip xagency">cross-agency</span>`:'';
+  return `<div class="advcard live typo" data-typ="${esc(c.t)}">
+    <div class="actop"><span class="acleft"><span class="acno">${esc(typoLabel(c.t))}</span></span>${flag}</div>
+    <div class="actitle">${esc(TYPOLOGY_DESC[c.t]||'')}</div>
+    <div class="acmeta">${c.docs.length} document${c.docs.length===1?'':'s'} · ${c.inds} indicators · ${c.juris.map(esc).join(' + ')}</div>
+  </div>`;
+}
+
+/* ---------- cross-corpus synthesis screen (one typology cluster) ---------- */
+function renderSynthesis(t){
+  const docs=clusterFor(t).slice().sort((x,y)=>
+    String(x.jurisdiction||'').localeCompare(String(y.jurisdiction||'')) || String(x.id).localeCompare(String(y.id)));
+  if(!docs.length){toSelect();return;}
+  const pool=docs.reduce((acc,a)=>acc.concat(a.indicators),[]);   // union of every regulator's enumerated flags
+  const cov=coverageIndex(pool);
+  const juris=[...new Set(docs.map(a=>a.jurisdiction||'—'))].sort();
+  const xj=juris.length>=2;
+  // per-jurisdiction contribution — honest counts of what each jurisdiction enumerates; NO overlap claimed.
+  const byJ={}; docs.forEach(a=>{const j=a.jurisdiction||'—';(byJ[j]=byJ[j]||{d:0,i:0});byJ[j].d++;byJ[j].i+=a.indicators.length;});
+  const contrib=Object.keys(byJ).sort().map(j=>`<b>${esc(j)}</b> ${byJ[j].i} indicators across ${byJ[j].d} doc${byJ[j].d===1?'':'s'}`).join(' · ');
+  const rows=docs.map(a=>{
+    const c=coverageIndex(a.indicators);
+    return `<div class="covrow synthrow" data-id="${esc(a.id)}" role="button">
+      <div class="clabel">${esc(a.title||a.id)}<div class="csub">${esc(a.advisory||a.id)} · ${a.indicators.length} indicators · coverage ${c}%</div></div>
+      <span class="acleft">${jchip(a.jurisdiction||'—')}<span class="chip doc">${esc(a.doc_type||'')}</span></span>
+    </div>`;
+  }).join('');
+  const head = xj ? `No single regulator enumerates all of <em>${esc(typoLabel(t))}</em>.`
+            : docs.length>1 ? `The corpus on <em>${esc(typoLabel(t))}</em>, combined.`
+            : `One corpus document covers <em>${esc(typoLabel(t))}</em>.`;
+  const lead = xj
+    ? `<b>${docs.length}</b> documents across <b>${juris.map(esc).join(' + ')}</b> each enumerate red flags for this typology — a bank scoping one regulator sees only that regulator's list. The combined corpus surfaces all <b>${pool.length}</b> indicators. ${contrib}.`
+    : docs.length>1
+      ? `<b>${docs.length}</b> documents in the corpus enumerate <b>${pool.length}</b> indicators for this typology. ${contrib}.`
+      : `<b>1</b> corpus document enumerates <b>${pool.length}</b> indicators for this typology. ${contrib}.`;
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">Cross-corpus synthesis · ${esc(typoLabel(t))}</div>
+    <h2>${head}</h2>
+    <p class="lead">${lead}</p>
+    <div class="covwrap">
+      <div class="covgrid">${rows}</div>
+      <div class="gauge">
+        <div class="gh">Combined coverage</div>
+        <div class="gnum" id="gnum">${cov}%</div>
+        <div class="gd">of ${pool.length} indicators · ${docs.length} doc${docs.length===1?'':'s'}</div>
+        <div class="gbar"><div class="gfill" id="gfill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="framenote">Combined coverage is the union of each regulator's enumerated red flags — counted as enumerated, NOT de-duplicated or matched across regulators (no similarity or overlap is computed or claimed). Coverage is illustrative; pick any document to walk its own loop.</div>
+  </div>`;
+  stage.querySelectorAll('.synthrow').forEach(el=>el.onclick=()=>pick(el.dataset.id,t));
+  T(()=>{const f=document.getElementById('gfill');if(f)f.style.width=cov+'%';animVal('gnum',0,cov,900,'%');},250);
 }
 function advCard(a){
   const live=isLive(a);
@@ -459,6 +573,10 @@ function render(){
   renderStepper();
   try{
     if(view==='select'){ renderSelect(); }
+    else if(view==='synthesis'){
+      if(!currentTypology){ toSelect(); return; }
+      renderSynthesis(currentTypology);
+    }
     else {
       const a=curAdv();
       if(!isLive(a)){ toSelect(); return; }   // defensive: never strand on a non-live detail view
@@ -473,19 +591,22 @@ function render(){
 }
 
 /* ---------- navigation ---------- */
-function pick(id){const a=ADVISORIES.find(x=>x.id===id);if(!isLive(a))return;current=id;view='detail';screen=0;maxScreen=0;
+// `from` (optional) = the typology cluster a doc was drilled from, so Back returns there (Phase 24).
+function pick(id,from){const a=ADVISORIES.find(x=>x.id===id);if(!isLive(a))return;fromTypology=from||null;current=id;view='detail';screen=0;maxScreen=0;
   selected=new Set(buildNows(a).map(i=>i.id));  // default: all build-now gaps selected — the presenter deselects to opt out
   render();}
+function enterSynthesis(t){currentTypology=t;view='synthesis';screen=0;maxScreen=0;render();}
 function gotoScreen(s){screen=Math.max(0,Math.min(DETAIL.length-1,s));maxScreen=Math.max(maxScreen,screen);render();}
-function toSelect(){view='select';current=null;screen=0;maxScreen=0;render();}
+function toSelect(){view='select';current=null;currentTypology=null;fromTypology=null;screen=0;maxScreen=0;render();}
 function advance(){
-  if(view==='select')return;            // pick by clicking a card
+  if(view==='select'||view==='synthesis')return;   // pick by clicking a card / cluster row
   if(screen>=DETAIL.length-1){toSelect();return;}
   gotoScreen(screen+1);
 }
 function back(){
+  if(view==='synthesis'){toSelect();return;}                  // cluster → the picker
   if(view==='select')return;
-  if(screen<=0){toSelect();return;}
+  if(screen<=0){ if(fromTypology){enterSynthesis(fromTypology);return;} toSelect();return; }  // drilled from a cluster → back to it
   gotoScreen(screen-1);
 }
 function updateControls(){
@@ -493,7 +614,14 @@ function updateControls(){
     backBtn.style.visibility='hidden';
     resetBtn.style.visibility='hidden';
     nextBtn.style.visibility='hidden';
-    hint.textContent='Pick a derived document to explore →';
+    hint.textContent=selMode==='typology'?'Pick a typology to see the corpus combine →':'Pick a derived document to explore →';
+    return;
+  }
+  if(view==='synthesis'){
+    backBtn.style.visibility='visible'; backBtn.textContent='‹ Typologies';
+    resetBtn.style.visibility='visible';
+    nextBtn.style.visibility='hidden';
+    hint.textContent='Pick a document to walk its loop →';
     return;
   }
   backBtn.style.visibility='visible';
@@ -502,7 +630,8 @@ function updateControls(){
   const backLabels=['‹ Advisories','‹ Coverage','‹ Build recs','‹ Signal'];
   const nextLabels=['Build recommendations ›','Signal spec ›','Close the loop ›','↺ Another document'];
   const hints=['Each red flag scored against the library','Pick the build-now gaps to commit','Drafted signals for your committed gaps','Coverage closes on what you built'];
-  backBtn.textContent=backLabels[screen]||'‹ Back';
+  // when drilled from a typology cluster, Back from Coverage returns to that cluster (not the picker)
+  backBtn.textContent=(screen===0 && fromTypology)?('‹ '+typoLabel(fromTypology)):(backLabels[screen]||'‹ Back');
   nextBtn.textContent=nextLabels[screen]||'Next ›';
   hint.textContent=hints[screen]||'';
 }

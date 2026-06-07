@@ -8,7 +8,9 @@
 // (Select → Coverage → Build recs/GATE → Signal → Close the loop) and asserts the Phase-18 invariants
 // + the multi-source menu (Phase 20 FinCEN advisories + alerts, Phase 21 OFAC, Phase 22 FINTRAC — 4
 // source types, honest doc_type chips; an alert, an OFAC advisory, AND a FINTRAC operational alert each
-// walk the full arc; the FINTRAC source panel carries the Crown-copyright basis, not US public domain).
+// walk the full arc; the FINTRAC source panel carries the Crown-copyright basis, not US public domain)
+// + the cross-corpus SYNTHESIS view (Phase 24: group by typology, combined coverage across a
+// cross-jurisdiction cluster as honest union arithmetic — no similarity/overlap/lift — with drill-through).
 //
 // Why a vm + shim instead of a third-party DOM library: the ship artifact is a single file:// offline
 // HTML; the project's whole test idiom is dep-free (derive_signals.py --selftest, build.py --check).
@@ -141,9 +143,12 @@ function makeEnv(reduced) {
 }
 
 // Run the script in a fresh vm context; the epilogue hands the internals back via __capture.
-const EPILOGUE = `;__capture({coverageIndex,buildNows,isLive,curAdv,pick,gotoScreen,toSelect,render,renderClose,renderSignal,ADVISORIES,
+const EPILOGUE = `;__capture({coverageIndex,buildNows,isLive,curAdv,pick,gotoScreen,toSelect,back,render,renderClose,renderSignal,ADVISORIES,
+  clusters,clusterFor,enterSynthesis,renderSelect,
   get selected(){return selected}, set selected(v){selected=v},
-  get view(){return view}, get screen(){return screen}});`;
+  get view(){return view}, get screen(){return screen},
+  get currentTypology(){return currentTypology}, get fromTypology(){return fromTypology},
+  get selMode(){return selMode}, set selMode(v){selMode=v}});`;
 function boot(reduced) {
   const env = makeEnv(reduced);
   vm.createContext(env);
@@ -368,6 +373,72 @@ apiB.gotoScreen(3);
 ok(/· Close the loop/.test(envB.__stage._html), 'fintrac-brief: Close-the-loop screen renders');
 eq(numText(envB, 'gnum'), afterB, 'fintrac-brief: close gauge lands on the recomputed after-coverage');
 ok(envB.__errors.length === 0, 'fintrac-brief: full 5-screen arc walked with no console errors');
+
+// ---- the CROSS-CORPUS SYNTHESIS view (Phase 24): group documents by typology, show COMBINED coverage
+//      across a cross-jurisdiction cluster as honest UNION arithmetic (NO similarity/overlap/lift — the
+//      Ph18 precision-lift rejection), with drill-through into each doc's existing per-doc arc and a
+//      Back that returns to the origin cluster. ----
+const envS = boot(true);
+const apiS = envS.__api;
+
+// (S1) the Documents/Typologies toggle + the typology-grouped picker
+apiS.selMode = 'typology'; apiS.renderSelect();
+const cl = apiS.clusters();
+ok(cl.length > 0, `clusters() groups the corpus by typology (${cl.length} typologies)`);
+const xj = cl.filter(c => c.xj);
+ok(xj.length >= 2, `≥2 typologies are cross-jurisdiction US+Canada (${xj.length}: ${xj.map(c => c.t).join(', ')})`);
+const typoCards = (envS.__stage._html.match(/class="advcard live typo"/g) || []).length;
+eq(typoCards, cl.length, 'typology mode renders one cluster card per typology');
+ok(/cross-jurisdiction/.test(envS.__stage._html), 'typology mode flags cross-jurisdiction clusters');
+ok(envS.__errors.length === 0, 'typology-mode picker rendered with no console errors');
+
+// (S2) a cross-jurisdiction cluster's synthesis screen — combined coverage is the honest union
+const cluster = xj[0];                                  // clusters() sorts cross-jurisdiction first
+apiS.enterSynthesis(cluster.t);
+eq(apiS.view, 'synthesis', 'enterSynthesis() enters the synthesis view');
+eq(apiS.currentTypology, cluster.t, 'currentTypology is the chosen cluster');
+const cdocs = apiS.clusterFor(cluster.t);
+const synthrows = (envS.__stage._html.match(/class="covrow synthrow"/g) || []).length;
+eq(synthrows, cdocs.length, 'synthesis lists one clickable row per cluster document');
+const pool = cdocs.reduce((a, d) => a.concat(d.indicators), []);
+eq(numText(envS, 'gnum'), apiS.coverageIndex(pool),
+  'combined coverage = coverageIndex over the UNION of every cluster doc’s indicators (honest set arithmetic)');
+ok(/chip jur us/.test(envS.__stage._html) && /chip jur ca/.test(envS.__stage._html),
+  'a cross-jurisdiction cluster shows BOTH US and Canada jurisdiction chips');
+ok(/No single regulator enumerates all of/.test(envS.__stage._html), 'the cross-jurisdiction headline lands');
+
+// (S2b) HONESTY GATE — no fabricated cross-corpus metric; the de-dup disclaimer is present
+ok(/NOT de-duplicated or matched across regulators/.test(envS.__stage._html),
+  'honesty note: indicators are NOT de-duplicated/matched across regulators');
+ok(!/\d+\s*%\s*(similar|overlap|match)/i.test(envS.__stage._html) && !/\blift\b/i.test(envS.__stage._html),
+  'synthesis claims NO similarity/overlap/lift metric');
+
+// (S3) every clustered indicator stays traceable to its source document (data-id on each row)
+ok(cdocs.every(d => envS.__stage._html.includes(`data-id="${d.id}"`)),
+  'each cluster row is traceable to its source document (data-id)');
+ok(envS.__errors.length === 0, 'synthesis screen rendered with no console errors');
+
+// (S4) drill-through into a doc's per-doc arc, and Back returns to the origin cluster (not the picker)
+apiS.pick(cdocs[0].id, cluster.t);
+eq(apiS.view, 'detail', 'clicking a cluster row drills into the per-doc arc');
+eq(apiS.fromTypology, cluster.t, 'the drilled doc remembers its origin cluster');
+ok(/· Coverage/.test(envS.__stage._html), 'drill lands on the doc’s own Coverage screen');
+apiS.back();
+eq(apiS.view, 'synthesis', 'Back from Coverage returns to the origin cluster (not the picker)');
+eq(apiS.currentTypology, cluster.t, 'Back lands on the same cluster');
+
+// (S5) a singleton typology still renders honestly (one document, no fabricated combine)
+const single = cl.find(c => c.docs.length === 1);
+if (single) {
+  apiS.enterSynthesis(single.t);
+  ok(/One corpus document covers/.test(envS.__stage._html), `a singleton cluster renders honestly (${single.t})`);
+}
+
+// (S6) toSelect() fully resets the synthesis state
+apiS.toSelect();
+eq(apiS.view, 'select', 'toSelect() returns to the picker');
+ok(apiS.currentTypology === null && apiS.fromTypology === null, 'toSelect() clears the synthesis state');
+ok(envS.__errors.length === 0, 'the full synthesis flow produced no console errors');
 
 /* ============================ report ============================ */
 console.log(`\n${pass} passed, ${fails.length} failed`);

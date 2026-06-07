@@ -80,6 +80,20 @@
   .chip.low{color:var(--signal)}
   .chip.none{color:var(--faint)}
   .chip.doc{color:var(--muted)}
+  /* cross-corpus synthesis (Phase 24) — jurisdiction + cluster chips, the Documents/Typologies
+     toggle, and clickable cluster rows. Reuses .advcard / .covrow / .gauge components. */
+  .chip.jur.us{color:var(--blue)}
+  .chip.jur.ca{color:var(--teal)}
+  .chip.jur.xx{color:var(--muted)}
+  .chip.xjuris{color:var(--green)}
+  .chip.xagency{color:var(--blue)}
+  .modetoggle{display:flex;gap:4px}
+  .modetoggle button{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;border:1px solid var(--line2);background:var(--panel);color:var(--muted);cursor:pointer;transition:.18s}
+  .modetoggle button:hover{color:var(--ink)}
+  .modetoggle button.on{background:var(--signal);color:#0c0e12;border-color:var(--signal)}
+  .covrow .acleft{display:flex;gap:6px;align-items:center;flex:none}
+  .covrow.synthrow{cursor:pointer;transition:.18s}
+  .covrow.synthrow:hover{border-color:var(--line2);background:var(--panel2);transform:translateY(-1px)}
 
   /* coverage map (shared component) */
   .covwrap{display:grid;grid-template-columns:1fr 230px;gap:20px;align-items:start}
@@ -210,6 +224,7 @@ const CORPUS = {
       "flag_count": 26,
       "derivable": true,
       "doc_type": "Advisory",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -342,7 +357,8 @@ const CORPUS = {
           "build_rec": "COVERED",
           "rationale": "Avoidance of identification / CTR-triggering transactions is structuring — already covered by mature sub-threshold / structuring detection controls."
         }
-      ]
+      ],
+      "typology": "human-trafficking"
     },
     {
       "id": "fin-2020-a009",
@@ -353,7 +369,8 @@ const CORPUS = {
       "extraction": "none",
       "flag_count": 0,
       "derivable": false,
-      "doc_type": "Advisory"
+      "doc_type": "Advisory",
+      "jurisdiction": "US"
     },
     {
       "id": "fin-2021-a001",
@@ -365,6 +382,7 @@ const CORPUS = {
       "flag_count": 47,
       "derivable": true,
       "doc_type": "Advisory",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -602,7 +620,8 @@ const CORPUS = {
           "build_rec": "BUILD_ENRICH",
           "rationale": "Correlating provider reimbursements with the same holder drawing COVID unemployment insurance needs a cross-program UI-payment tag we hold only partially; enrich with UI-payer tagging, then build the simultaneous-program signal."
         }
-      ]
+      ],
+      "typology": "healthcare-fraud"
     },
     {
       "id": "fin-2021-a002",
@@ -614,6 +633,7 @@ const CORPUS = {
       "flag_count": 22,
       "derivable": true,
       "doc_type": "Advisory",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -676,7 +696,8 @@ const CORPUS = {
             "route": "Tier-1 alert → EIP-fraud review gate"
           }
         }
-      ]
+      ],
+      "typology": "public-benefits-fraud"
     },
     {
       "id": "fin-2021-a003",
@@ -687,7 +708,8 @@ const CORPUS = {
       "extraction": "none",
       "flag_count": 0,
       "derivable": false,
-      "doc_type": "Advisory"
+      "doc_type": "Advisory",
+      "jurisdiction": "US"
     },
     {
       "id": "fin-2021-a004",
@@ -699,6 +721,7 @@ const CORPUS = {
       "flag_count": 1,
       "derivable": true,
       "doc_type": "Advisory",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -866,7 +889,8 @@ const CORPUS = {
           "build_rec": "SOURCE_DATA",
           "rationale": "The customer's communication channel (Tor / unidentified web portal) is not data a financial institution holds; source that signal externally before any detection can use it."
         }
-      ]
+      ],
+      "typology": "ransomware"
     },
     {
       "id": "fin-2022-a001",
@@ -878,6 +902,7 @@ const CORPUS = {
       "flag_count": 12,
       "derivable": true,
       "doc_type": "Advisory",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -960,7 +985,8 @@ const CORPUS = {
             "route": "Tier-1 alert → corruption/PEP review gate"
           }
         }
-      ]
+      ],
+      "typology": "corruption"
     },
     {
       "id": "fin-2022-a002",
@@ -972,6 +998,7 @@ const CORPUS = {
       "flag_count": 28,
       "derivable": true,
       "doc_type": "Advisory",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -1154,7 +1181,8 @@ const CORPUS = {
             "route": "Tier-1 alert → elder-financial-exploitation review gate"
           }
         }
-      ]
+      ],
+      "typology": "elder-financial-exploitation"
     },
     {
       "id": "fin-2024-a001",
@@ -1166,6 +1194,7 @@ const CORPUS = {
       "flag_count": 11,
       "derivable": true,
       "doc_type": "Advisory",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -1288,7 +1317,8 @@ const CORPUS = {
           "build_rec": "BUILD_ENRICH",
           "rationale": "Comparing a company's incorporation jurisdiction against where its activity actually occurs needs counterparty/transaction geo attribution and a stated-business-purpose mapping we hold only partially; enrich, then build the incorporation-vs-activity mismatch signal."
         }
-      ]
+      ],
+      "typology": "terrorist-financing"
     },
     {
       "id": "fin-2024-a002",
@@ -1300,6 +1330,7 @@ const CORPUS = {
       "flag_count": 17,
       "derivable": true,
       "doc_type": "Advisory",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -1502,7 +1533,8 @@ const CORPUS = {
             "route": "Tier-1 alert → narcotics review gate"
           }
         }
-      ]
+      ],
+      "typology": "synthetic-opioids"
     },
     {
       "id": "fin-2025-a001",
@@ -1514,6 +1546,7 @@ const CORPUS = {
       "flag_count": 12,
       "derivable": true,
       "doc_type": "Advisory",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -1686,7 +1719,8 @@ const CORPUS = {
           "build_rec": "ENHANCE",
           "rationale": "Impossible-travel / concurrent-access detection already exists from device-and-session analytics; enhance it with an ISIS-prevalent-country overlay rather than building net-new."
         }
-      ]
+      ],
+      "typology": "terrorist-financing"
     },
     {
       "id": "fin-2025-a002",
@@ -1698,6 +1732,7 @@ const CORPUS = {
       "flag_count": 20,
       "derivable": true,
       "doc_type": "Advisory",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -1920,7 +1955,8 @@ const CORPUS = {
           "build_rec": "BUILD_ENRICH",
           "rationale": "The petroleum-in / electronics-out sector-flow is computable, but classifying the Middle East counterparty as Iran-linked or a front company needs corporate-registry / adverse-media enrichment we hold only partially — build after enrichment."
         }
-      ]
+      ],
+      "typology": "sanctions-evasion"
     },
     {
       "id": "fin-2025-a003",
@@ -1932,6 +1968,7 @@ const CORPUS = {
       "flag_count": 21,
       "derivable": true,
       "doc_type": "Advisory",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -2189,7 +2226,8 @@ const CORPUS = {
           "build_rec": "BUILD_ENRICH",
           "rationale": "A U.S.-based escrow company receiving funds from a foreign counterparty in a disparate line of business to buy U.S. real estate is visible from the escrow account type + inbound wire + real-estate purpose, but classifying the originator as a foreign shell needs corporate-registry enrichment we hold only partially — build after enrichment."
         }
-      ]
+      ],
+      "typology": "professional-money-laundering"
     },
     {
       "id": "fin-2026-a001",
@@ -2201,6 +2239,7 @@ const CORPUS = {
       "flag_count": 6,
       "derivable": true,
       "doc_type": "Advisory",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -2533,7 +2572,8 @@ const CORPUS = {
           "build_rec": "BUILD_ENRICH",
           "rationale": "Flagging transfers to VASPs / brokerages / betting platforms needs counterparty-type tagging of those destinations we hold only partially; enrich the counterparty registry, then build the out-of-pattern-destination signal."
         }
-      ]
+      ],
+      "typology": "healthcare-fraud"
     },
     {
       "id": "fin-2020-alert001",
@@ -2545,6 +2585,7 @@ const CORPUS = {
       "flag_count": 13,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -2635,7 +2676,8 @@ const CORPUS = {
           "build_rec": "BUILD_ENRICH",
           "rationale": "Correlating a shared CVC address across solicitations needs crypto chain-analytics / VASP exposure enrichment on top of any transaction record."
         }
-      ]
+      ],
+      "typology": "virtual-currency-scam"
     },
     {
       "id": "fin-2022-alert001",
@@ -2646,7 +2688,8 @@ const CORPUS = {
       "extraction": "none",
       "flag_count": 0,
       "derivable": false,
-      "doc_type": "Alert"
+      "doc_type": "Alert",
+      "jurisdiction": "US"
     },
     {
       "id": "fin-2022-alert002",
@@ -2658,6 +2701,7 @@ const CORPUS = {
       "flag_count": 36,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -2860,7 +2904,8 @@ const CORPUS = {
           "build_rec": "MONITOR",
           "rationale": "Linking transportation-service companies to a sanctioned-elite nexus depends on external ownership and logistics attribution we do not hold."
         }
-      ]
+      ],
+      "typology": "sanctions-evasion"
     },
     {
       "id": "fin-2022-alert003",
@@ -2872,6 +2917,7 @@ const CORPUS = {
       "flag_count": 3,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -3184,7 +3230,8 @@ const CORPUS = {
           "build_rec": "BUILD_ENRICH",
           "rationale": "Correspondent-banking activity is visible, but attributing counterparties as Russian-petroleum or electronics-reseller firms needs partial external classification data."
         }
-      ]
+      ],
+      "typology": "export-control-evasion"
     },
     {
       "id": "fin-2023-alert001",
@@ -3196,6 +3243,7 @@ const CORPUS = {
       "flag_count": 45,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -3309,7 +3357,8 @@ const CORPUS = {
           "build_rec": "SOURCE_DATA",
           "rationale": "Cash purchases of real estate and other high-value assets largely settle outside the institution's accounts; detecting this pattern requires external real-estate/title-registry and asset-ownership data the bank does not hold, so data must be sourced before a signal is feasible."
         }
-      ]
+      ],
+      "typology": "human-smuggling"
     },
     {
       "id": "fin-2023-alert002",
@@ -3321,6 +3370,7 @@ const CORPUS = {
       "flag_count": 14,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -3427,7 +3477,8 @@ const CORPUS = {
           "build_rec": "ENHANCE",
           "rationale": "Out-of-profile / no-apparent-business-purpose activity is already part of transaction-monitoring scenarios; enhancing the client-profile model sharpens it."
         }
-      ]
+      ],
+      "typology": "sanctions-evasion"
     },
     {
       "id": "fin-2023-alert003",
@@ -3439,6 +3490,7 @@ const CORPUS = {
       "flag_count": 21,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -3607,7 +3659,8 @@ const CORPUS = {
           "rationale": "Teller-line non-customer check cashing is logged, but the suspicious-explanation judgment is qualitative and the non-customer's wider activity sits outside the bank's data.",
           "build_logic": null
         }
-      ]
+      ],
+      "typology": "check-fraud"
     },
     {
       "id": "fin-2023-alert004",
@@ -3619,6 +3672,7 @@ const CORPUS = {
       "flag_count": 55,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -3753,7 +3807,8 @@ const CORPUS = {
           "build_rec": "COVERED",
           "rationale": "Name and address fuzzy-matching against the SDN, BIS Entity, and debarred-parties lists is standard sanctions-screening that a mid-size US bank already runs at onboarding and on transactions."
         }
-      ]
+      ],
+      "typology": "export-control-evasion"
     },
     {
       "id": "fin-2023-alert005",
@@ -3765,6 +3820,7 @@ const CORPUS = {
       "flag_count": 19,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -3967,7 +4023,8 @@ const CORPUS = {
           "build_rec": "BUILD_ENRICH",
           "rationale": "The receive-ether → convert-to-TRX → rapid-outflow laundering chain is a chain-analytics pattern observable only with partial VASP/blockchain exposure, so it needs chain enrichment before it is buildable."
         }
-      ]
+      ],
+      "typology": "romance-and-investment-fraud"
     },
     {
       "id": "fin-2023-alert006",
@@ -3979,6 +4036,7 @@ const CORPUS = {
       "flag_count": 13,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -4066,7 +4124,8 @@ const CORPUS = {
           "build_rec": "BUILD_ENRICH",
           "rationale": "Matching transactions to virtual-currency addresses tied to terror-financing campaigns needs crypto chain-analytics enrichment layered on top of the bank's own on/off-ramp records."
         }
-      ]
+      ],
+      "typology": "terrorist-financing"
     },
     {
       "id": "fin-2023-alert007",
@@ -4078,6 +4137,7 @@ const CORPUS = {
       "flag_count": 11,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -4268,7 +4328,8 @@ const CORPUS = {
           "rationale": "Attribution to an unverifiable or adverse-media third-party ERC promoter depends on external adverse-media and preparer-network intelligence the bank does not hold internally.",
           "build_logic": null
         }
-      ]
+      ],
+      "typology": "public-benefits-fraud"
     },
     {
       "id": "fin-2024-alert003",
@@ -4280,6 +4341,7 @@ const CORPUS = {
       "flag_count": 15,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -4367,7 +4429,8 @@ const CORPUS = {
           "build_rec": "ENHANCE",
           "rationale": "Unusual business-account cash deposits and business↔personal fund commingling are visible in core account data and partly caught by structuring rules, but tying the pattern to the named high-value sectors and high-risk corridors warrants enhancing the existing monitoring."
         }
-      ]
+      ],
+      "typology": "terrorist-financing"
     },
     {
       "id": "fin-2024-alert004",
@@ -4379,6 +4442,7 @@ const CORPUS = {
       "flag_count": 46,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -4514,7 +4578,8 @@ const CORPUS = {
           },
           "rationale": "Account age, transaction velocity, payee risk classification, and chargeback/return data all live in the core ledger, so this rapid-risky-flow pattern is buildable now and is the strongest transaction-pattern signal in the alert."
         }
-      ]
+      ],
+      "typology": "impersonation-fraud"
     },
     {
       "id": "fin-2024-alert005",
@@ -4526,6 +4591,7 @@ const CORPUS = {
       "flag_count": 23,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -4774,7 +4840,8 @@ const CORPUS = {
           "build_rec": "BUILD_ENRICH",
           "rationale": "A fake FinCEN-official demand letter is physical evidence a customer presents; it surfaces through branch/disclosure channels rather than transaction data, so enrichment is required."
         }
-      ]
+      ],
+      "typology": "impersonation-fraud"
     },
     {
       "id": "fin-2025-alert001",
@@ -4786,6 +4853,7 @@ const CORPUS = {
       "flag_count": 13,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -4925,7 +4993,8 @@ const CORPUS = {
           "rationale": "Unexplained source-of-funds on a bulk-cash acceptance request is captured in onboarding/KYC and transaction-documentation data, so an existing SOF control can be enhanced for this corridor.",
           "build_logic": null
         }
-      ]
+      ],
+      "typology": "transnational-organized-crime"
     },
     {
       "id": "fin-2025-alert002",
@@ -4937,6 +5006,7 @@ const CORPUS = {
       "flag_count": 22,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -5149,7 +5219,8 @@ const CORPUS = {
           "rationale": "The customer's transactions are in core data, but tying counterparties and beneficial owners to Cartel activity depends on OFAC designations, indictments, and open-source attribution the bank must source externally.",
           "build_logic": null
         }
-      ]
+      ],
+      "typology": "transnational-organized-crime"
     },
     {
       "id": "fin-2025-alert003",
@@ -5160,7 +5231,8 @@ const CORPUS = {
       "extraction": "none",
       "flag_count": 0,
       "derivable": false,
-      "doc_type": "Alert"
+      "doc_type": "Alert",
+      "jurisdiction": "US"
     },
     {
       "id": "fin-2026-alert001",
@@ -5172,6 +5244,7 @@ const CORPUS = {
       "flag_count": 17,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -5371,7 +5444,8 @@ const CORPUS = {
           "rationale": "Cross-border payment amounts are visible, but classifying outflows as real estate / aircraft / luxury-goods purchases needs merchant/MCC or counterparty-category enrichment that is only partially available.",
           "build_logic": null
         }
-      ]
+      ],
+      "typology": "public-benefits-fraud"
     },
     {
       "id": "fin-2026-alert002",
@@ -5383,6 +5457,7 @@ const CORPUS = {
       "flag_count": 43,
       "derivable": true,
       "doc_type": "Alert",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -5555,7 +5630,8 @@ const CORPUS = {
           "build_rec": "BUILD_ENRICH",
           "rationale": "Large offsetting-transaction patterns are visible in account activity, but classifying the customer as an unregistered P2P/nested-DASP operator needs VASP-exposure and registration enrichment."
         }
-      ]
+      ],
+      "typology": "sanctions-evasion"
     },
     {
       "id": "ofac-maritime-shipping",
@@ -5567,6 +5643,7 @@ const CORPUS = {
       "flag_count": 38,
       "derivable": true,
       "doc_type": "OFAC",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -5654,7 +5731,8 @@ const CORPUS = {
             "route": "enhanced due diligence / sanctions-evasion review queue"
           }
         }
-      ]
+      ],
+      "typology": "sanctions-evasion"
     },
     {
       "id": "ofac-sham-transactions",
@@ -5666,6 +5744,7 @@ const CORPUS = {
       "flag_count": 26,
       "derivable": true,
       "doc_type": "OFAC",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -5766,7 +5845,8 @@ const CORPUS = {
           "build_rec": "MONITOR",
           "rationale": "Evasive or non-responsive answers during diligence are qualitative human-judgment signals not captured in structured transaction data, so they are monitored rather than systematically built."
         }
-      ]
+      ],
+      "typology": "sanctions-evasion"
     },
     {
       "id": "ofac-virtual-currency",
@@ -5778,6 +5858,7 @@ const CORPUS = {
       "flag_count": 13,
       "derivable": true,
       "doc_type": "OFAC",
+      "jurisdiction": "US",
       "derived": true,
       "indicators": [
         {
@@ -5844,7 +5925,8 @@ const CORPUS = {
           "build_rec": "ENHANCE",
           "rationale": "Matching a counterparty virtual-currency address to a blocked person or sanctioned jurisdiction requires blockchain chain-analytics exposure data that is only partially deployed, so existing screening can be enhanced but not fully closed from core data."
         }
-      ]
+      ],
+      "typology": "sanctions-evasion"
     },
     {
       "id": "fintrac-cannabis",
@@ -5856,6 +5938,7 @@ const CORPUS = {
       "flag_count": 34,
       "derivable": true,
       "doc_type": "FINTRAC",
+      "jurisdiction": "Canada",
       "derived": true,
       "indicators": [
         {
@@ -6181,7 +6264,8 @@ const CORPUS = {
           "build_rec": "BUILD_ENRICH",
           "rationale": "Large outbound purchases are visible in transaction data, but classifying merchants as candy/kitchenware stores and judging them outside expected business activity depends on merchant-category tagging plus KYC expected-activity context that needs enrichment."
         }
-      ]
+      ],
+      "typology": "cannabis"
     },
     {
       "id": "fintrac-human-trafficking",
@@ -6193,6 +6277,7 @@ const CORPUS = {
       "flag_count": 145,
       "derivable": true,
       "doc_type": "FINTRAC",
+      "jurisdiction": "Canada",
       "derived": true,
       "indicators": [
         {
@@ -7017,7 +7102,8 @@ const CORPUS = {
             "route": "Tier-1 alert → AML analyst review gate"
           }
         }
-      ]
+      ],
+      "typology": "human-trafficking"
     },
     {
       "id": "fintrac-illegal-wildlife",
@@ -7029,6 +7115,7 @@ const CORPUS = {
       "flag_count": 47,
       "derivable": true,
       "doc_type": "FINTRAC",
+      "jurisdiction": "Canada",
       "derived": true,
       "indicators": [
         {
@@ -7220,7 +7307,8 @@ const CORPUS = {
           "build_rec": "ENHANCE",
           "rationale": "Inbound payments from animal-related businesses (aquarium, zoo, pet store) are partly observable via counterparty tags, but the 'inconsistent with the client's profile' judgment relies on KYC expected-activity data that is only partially structured, so an existing profile-mismatch control can be enhanced."
         }
-      ]
+      ],
+      "typology": "illegal-wildlife-trade"
     },
     {
       "id": "fintrac-online-child-exploitation",
@@ -7232,6 +7320,7 @@ const CORPUS = {
       "flag_count": 92,
       "derivable": true,
       "doc_type": "FINTRAC",
+      "jurisdiction": "Canada",
       "derived": true,
       "indicators": [
         {
@@ -7734,7 +7823,8 @@ const CORPUS = {
           "build_rec": "BUILD_ENRICH",
           "rationale": "The purchases are observable, but tying clothing/accessory/toy spend specifically to a doll-related context requires merchant/product enrichment the bank does not natively carry."
         }
-      ]
+      ],
+      "typology": "child-sexual-exploitation"
     },
     {
       "id": "fintrac-professional-ml",
@@ -7746,6 +7836,7 @@ const CORPUS = {
       "flag_count": 33,
       "derivable": true,
       "doc_type": "FINTRAC",
+      "jurisdiction": "Canada",
       "derived": true,
       "indicators": [
         {
@@ -8113,7 +8204,8 @@ const CORPUS = {
           "build_rec": "BUILD_ENRICH",
           "rationale": "Large inbound EFTs from Iran, the UAE, Kuwait, Hong Kong and China are visible with country attribution, but tying them to a stated purpose of 'living costs, expenses or spare parts' inconsistent with an import/export business profile needs purpose-field and business-profile enrichment before the signal is reliable."
         }
-      ]
+      ],
+      "typology": "professional-money-laundering"
     },
     {
       "id": "fintrac-real-estate",
@@ -8125,6 +8217,7 @@ const CORPUS = {
       "flag_count": 113,
       "derivable": true,
       "doc_type": "FINTRAC",
+      "jurisdiction": "Canada",
       "derived": true,
       "indicators": [
         {
@@ -8547,7 +8640,8 @@ const CORPUS = {
           "build_rec": "SOURCE_DATA",
           "rationale": "An off-book mortgage assumption between individuals with no financial institution involved leaves no record in the bank's systems by definition, so detecting it requires external registry/title data the FI does not hold."
         }
-      ]
+      ],
+      "typology": "real-estate"
     },
     {
       "id": "fintrac-romance-fraud",
@@ -8559,6 +8653,7 @@ const CORPUS = {
       "flag_count": 28,
       "derivable": true,
       "doc_type": "FINTRAC",
+      "jurisdiction": "Canada",
       "derived": true,
       "indicators": [
         {
@@ -8917,7 +9012,8 @@ const CORPUS = {
           "build_rec": "ENHANCE",
           "rationale": "Inbound payments from payment processors are identifiable from counterparty tags, but the 'inconsistent with profile' judgment depends on KYC expected-activity profiles that are only partially structured, so an existing profile-deviation control can be enhanced."
         }
-      ]
+      ],
+      "typology": "romance-and-investment-fraud"
     },
     {
       "id": "fintrac-synthetic-opioids",
@@ -8929,6 +9025,7 @@ const CORPUS = {
       "flag_count": 130,
       "derivable": true,
       "doc_type": "FINTRAC",
+      "jurisdiction": "Canada",
       "derived": true,
       "indicators": [
         {
@@ -9139,7 +9236,8 @@ const CORPUS = {
           "build_rec": "ENHANCE",
           "rationale": "Cash usage and the bank's own prepaid-product loads/spend are visible in account data and partially monitored, but a standing 'predominantly cash/prepaid' profile signal is only partially instrumented — an enhancement on data already held."
         }
-      ]
+      ],
+      "typology": "synthetic-opioids"
     },
     {
       "id": "fintrac-terrorist-financing",
@@ -9151,6 +9249,7 @@ const CORPUS = {
       "flag_count": 64,
       "derivable": true,
       "doc_type": "FINTRAC",
+      "jurisdiction": "Canada",
       "derived": true,
       "indicators": [
         {
@@ -9330,7 +9429,8 @@ const CORPUS = {
           "build_rec": "SOURCE_DATA",
           "rationale": "Attributing inbound transfers as originating 'in or in the vicinity of a conflict zone' requires external originator-location and conflict-zone geographic data the bank does not natively hold; the receipt is observable but the conflict-zone attribution must be sourced."
         }
-      ]
+      ],
+      "typology": "terrorist-financing"
     },
     {
       "id": "fintrac-underground-banking",
@@ -9342,6 +9442,7 @@ const CORPUS = {
       "flag_count": 43,
       "derivable": true,
       "doc_type": "FINTRAC",
+      "jurisdiction": "Canada",
       "derived": true,
       "indicators": [
         {
@@ -9541,9 +9642,34 @@ const CORPUS = {
           "build_rec": "ENHANCE",
           "rationale": "Cash deposits inconsistent with stated occupation then routed to a legal professional are partly observable, but the occupation-consistency judgment and 'no clear relationship' assessment depend on KYC profile and relationship context that is only partially structured, so the existing occupation-mismatch control can be enhanced."
         }
-      ]
+      ],
+      "typology": "underground-banking"
     }
-  ]
+  ],
+  "typologies": {
+    "terrorist-financing": "Financing of terrorist organizations and activity",
+    "synthetic-opioids": "Fentanyl / synthetic-opioid trafficking and precursor procurement",
+    "human-trafficking": "Human trafficking and forced/sexual-exploitation proceeds",
+    "professional-money-laundering": "Third-party / professional money-laundering networks and controllers",
+    "romance-and-investment-fraud": "Romance-baited and confidence investment fraud (incl. pig butchering)",
+    "sanctions-evasion": "Evasion of financial sanctions via shell/sham/maritime/CVC channels",
+    "export-control-evasion": "Evasion of US export controls on dual-use goods (BIS)",
+    "transnational-organized-crime": "Cartel / TCO bulk-cash and commodity-smuggling proceeds",
+    "healthcare-fraud": "Health-insurance and health-care benefit-program fraud",
+    "public-benefits-fraud": "Pandemic-relief and federal benefit-program fraud (EIP, ERC, child nutrition)",
+    "impersonation-fraud": "Deepfake and government/agency impersonation fraud",
+    "virtual-currency-scam": "Convertible virtual currency giveaway / account-takeover scams",
+    "check-fraud": "Mail-theft-related check fraud",
+    "corruption": "Kleptocracy and foreign public corruption",
+    "ransomware": "Ransomware payment facilitation",
+    "elder-financial-exploitation": "Financial exploitation of older adults",
+    "human-smuggling": "Migrant-smuggling proceeds",
+    "real-estate": "Money laundering through real-estate transactions",
+    "cannabis": "Laundering of illicit-cannabis proceeds",
+    "illegal-wildlife-trade": "Laundering of illegal-wildlife-trade proceeds",
+    "child-sexual-exploitation": "Laundering of online child sexual exploitation proceeds",
+    "underground-banking": "Informal value transfer / underground banking schemes"
+  }
 };
 validateCorpus(CORPUS);
 
@@ -9588,8 +9714,32 @@ function coverageIndex(indicators){
 }
 function shortFlag(t,cap){cap=cap||150;t=String(t||'').replace(/\s+/g,' ').trim();return t.length<=cap?t:t.slice(0,cap-1).trimEnd()+'…';}
 
+/* ---------- cross-corpus typology synthesis (Phase 24) ---------- */
+// typology -> human-readable description (injected by build.py from data/typology-map.json).
+const TYPOLOGY_DESC=(CORPUS.typologies && typeof CORPUS.typologies==='object')?CORPUS.typologies:{};
+function typoLabel(t){return String(t||'').replace(/-/g,' ');}
+function clusterFor(t){return ADVISORIES.filter(a=>isLive(a) && a.typology===t);}
+// build the cluster list: one entry per typology over the LIVE docs, with jurisdictions/doc-types/
+// pooled indicator count. Sorted cross-jurisdiction first, then cross-agency, then size — the
+// multi-source clusters (the payoff) lead. jurisdiction comes from the source registry (build.py).
+function clusters(){
+  const m=new Map();
+  ADVISORIES.forEach(a=>{ if(!isLive(a)||!a.typology) return;
+    if(!m.has(a.typology)) m.set(a.typology,[]); m.get(a.typology).push(a); });
+  return [...m.entries()].map(([t,docs])=>{
+    const juris=[...new Set(docs.map(a=>a.jurisdiction||'—'))].sort();
+    const types=[...new Set(docs.map(a=>a.doc_type||'—'))];
+    const inds=docs.reduce((n,a)=>n+a.indicators.length,0);
+    return {t,docs,juris,types,inds,xj:juris.length>=2,xa:juris.length<2&&types.length>=2};
+  }).sort((a,b)=> (a.xj?0:1)-(b.xj?0:1) || (a.xa?0:1)-(b.xa?0:1) || b.docs.length-a.docs.length || a.t.localeCompare(b.t));
+}
+function jchip(j){const cls=j==='Canada'?'ca':j==='US'?'us':'xx';return `<span class="chip jur ${cls}">${esc(j)}</span>`;}
+
 /* ---------- state + chrome ---------- */
 let view='select', current=null, screen=0, maxScreen=0, timers=[];
+let selMode='doc';          // Select picker mode: 'doc' (by document) | 'typology' (by typology)
+let currentTypology=null;   // the active cluster when view==='synthesis'
+let fromTypology=null;      // the cluster a doc was drilled from (so Back returns to it)
 // the human gate: which BUILD_NOW indicators the presenter has picked to build (per-advisory,
 // reset on pick()). Drives the Signal cards and the close-the-loop coverage rise.
 let selected=new Set();
@@ -9603,7 +9753,7 @@ function clearTimers(){timers.forEach(t=>clearTimeout(t));timers=[];}
 function T(fn,ms){if(REDUCED){fn();return 0;}const id=setTimeout(fn,ms);timers.push(id);return id;}
 
 function curAdv(){return ADVISORIES.find(a=>a.id===current)||null;}
-function stepIndex(){return view==='select'?0:screen+1;}  // Select=0, Coverage=1, Build=2, Signal=3
+function stepIndex(){return (view==='select'||view==='synthesis')?0:screen+1;}  // Select/synthesis=0, Coverage=1, Build=2, Signal=3
 
 function renderStepper(){
   const at=stepIndex();
@@ -9628,17 +9778,93 @@ function renderSelect(){
   const alertN=ADVISORIES.filter(a=>a.doc_type==='Alert').length;
   const ofacN=ADVISORIES.filter(a=>a.doc_type==='OFAC').length;
   const fintracN=ADVISORIES.filter(a=>a.doc_type==='FINTRAC').length;
+  const cl=clusters();
+  const xjN=cl.filter(c=>c.xj).length;
+  const byTyp=selMode==='typology';
+  const toggle=`<div class="modetoggle">
+      <button data-mode="doc" class="${byTyp?'':'on'}">Documents</button>
+      <button data-mode="typology" class="${byTyp?'on':''}">Typologies</button>
+    </div>`;
+  const count = byTyp
+    ? `<span class="sct">${cl.length} typologies · ${xjN} cross-jurisdiction · ${live} derived documents</span>`
+    : `<span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${fintracN} FINTRAC · ${live} derived · ${nd} non-derivable</span>`;
+  const lead = byTyp
+    ? `Group the corpus by money-laundering typology and see the <b>combined</b> picture: the same typology often appears across regulators and jurisdictions, and no single advisory enumerates it all. <b>${xjN}</b> typolog${xjN===1?'y spans':'ies span'} both the US and Canada. Pick a typology to see its cluster and combined coverage, then drill into any document's loop.`
+    : `The same signal engine, pointed at a multi-jurisdiction public corpus — US-federal FinCEN advisories + alerts and OFAC sanctions advisories (public domain, 17 U.S.C. §105), plus Canadian <b>FINTRAC</b> operational alerts (Crown copyright, reproduced for non-commercial use with attribution). Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.`;
+  const note = byTyp
+    ? `Documents are grouped by their typology (a closed-vocabulary overlay, traceable to each document's stated subject). Combined coverage is honest union arithmetic over the existing per-indicator statuses — no similarity, overlap, or lift between regulators is computed or claimed.`
+    : `Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the cited source documents (each carries its own public-source attribution).`;
+  const grid = byTyp ? cl.map(typoCard).join('') : list.map(a=>advCard(a)).join('');
   stage.innerHTML=`<div class="scene">
     <div class="eyebrow">FinCEN + OFAC + FINTRAC corpus</div>
-    <h2>Pick a document. <em>Watch the loop derive it.</em></h2>
-    <p class="lead">The same signal engine, pointed at a multi-jurisdiction public corpus — US-federal FinCEN advisories + alerts and OFAC sanctions advisories (public domain, 17 U.S.C. §105), plus Canadian <b>FINTRAC</b> operational alerts (Crown copyright, reproduced for non-commercial use with attribution). Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
+    <h2>${byTyp?'Pick a typology. <em>See the corpus combine.</em>':'Pick a document. <em>Watch the loop derive it.</em>'}</h2>
+    <p class="lead">${lead}</p>
     <div class="selhead">
-      <span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${fintracN} FINTRAC · ${live} derived · ${nd} non-derivable</span>
+      ${count}
+      ${toggle}
     </div>
-    <div class="advgrid">${list.map(a=>advCard(a)).join('')}</div>
-    <div class="framenote">Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the cited source documents (each carries its own public-source attribution).</div>
+    <div class="advgrid">${grid}</div>
+    <div class="framenote">${note}</div>
   </div>`;
-  stage.querySelectorAll('.advcard.live').forEach(el=>el.onclick=()=>pick(el.dataset.id));
+  stage.querySelectorAll('.modetoggle button').forEach(b=>b.onclick=()=>{selMode=b.dataset.mode;render();});
+  if(byTyp) stage.querySelectorAll('.advcard.typo').forEach(el=>el.onclick=()=>enterSynthesis(el.dataset.typ));
+  else stage.querySelectorAll('.advcard.live').forEach(el=>el.onclick=()=>pick(el.dataset.id));
+}
+// a typology cluster card (typology mode of the picker) — reuses .advcard styling.
+function typoCard(c){
+  const flag=c.xj?`<span class="chip xjuris">cross-jurisdiction</span>`
+           :c.xa?`<span class="chip xagency">cross-agency</span>`:'';
+  return `<div class="advcard live typo" data-typ="${esc(c.t)}">
+    <div class="actop"><span class="acleft"><span class="acno">${esc(typoLabel(c.t))}</span></span>${flag}</div>
+    <div class="actitle">${esc(TYPOLOGY_DESC[c.t]||'')}</div>
+    <div class="acmeta">${c.docs.length} document${c.docs.length===1?'':'s'} · ${c.inds} indicators · ${c.juris.map(esc).join(' + ')}</div>
+  </div>`;
+}
+
+/* ---------- cross-corpus synthesis screen (one typology cluster) ---------- */
+function renderSynthesis(t){
+  const docs=clusterFor(t).slice().sort((x,y)=>
+    String(x.jurisdiction||'').localeCompare(String(y.jurisdiction||'')) || String(x.id).localeCompare(String(y.id)));
+  if(!docs.length){toSelect();return;}
+  const pool=docs.reduce((acc,a)=>acc.concat(a.indicators),[]);   // union of every regulator's enumerated flags
+  const cov=coverageIndex(pool);
+  const juris=[...new Set(docs.map(a=>a.jurisdiction||'—'))].sort();
+  const xj=juris.length>=2;
+  // per-jurisdiction contribution — honest counts of what each jurisdiction enumerates; NO overlap claimed.
+  const byJ={}; docs.forEach(a=>{const j=a.jurisdiction||'—';(byJ[j]=byJ[j]||{d:0,i:0});byJ[j].d++;byJ[j].i+=a.indicators.length;});
+  const contrib=Object.keys(byJ).sort().map(j=>`<b>${esc(j)}</b> ${byJ[j].i} indicators across ${byJ[j].d} doc${byJ[j].d===1?'':'s'}`).join(' · ');
+  const rows=docs.map(a=>{
+    const c=coverageIndex(a.indicators);
+    return `<div class="covrow synthrow" data-id="${esc(a.id)}" role="button">
+      <div class="clabel">${esc(a.title||a.id)}<div class="csub">${esc(a.advisory||a.id)} · ${a.indicators.length} indicators · coverage ${c}%</div></div>
+      <span class="acleft">${jchip(a.jurisdiction||'—')}<span class="chip doc">${esc(a.doc_type||'')}</span></span>
+    </div>`;
+  }).join('');
+  const head = xj ? `No single regulator enumerates all of <em>${esc(typoLabel(t))}</em>.`
+            : docs.length>1 ? `The corpus on <em>${esc(typoLabel(t))}</em>, combined.`
+            : `One corpus document covers <em>${esc(typoLabel(t))}</em>.`;
+  const lead = xj
+    ? `<b>${docs.length}</b> documents across <b>${juris.map(esc).join(' + ')}</b> each enumerate red flags for this typology — a bank scoping one regulator sees only that regulator's list. The combined corpus surfaces all <b>${pool.length}</b> indicators. ${contrib}.`
+    : docs.length>1
+      ? `<b>${docs.length}</b> documents in the corpus enumerate <b>${pool.length}</b> indicators for this typology. ${contrib}.`
+      : `<b>1</b> corpus document enumerates <b>${pool.length}</b> indicators for this typology. ${contrib}.`;
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">Cross-corpus synthesis · ${esc(typoLabel(t))}</div>
+    <h2>${head}</h2>
+    <p class="lead">${lead}</p>
+    <div class="covwrap">
+      <div class="covgrid">${rows}</div>
+      <div class="gauge">
+        <div class="gh">Combined coverage</div>
+        <div class="gnum" id="gnum">${cov}%</div>
+        <div class="gd">of ${pool.length} indicators · ${docs.length} doc${docs.length===1?'':'s'}</div>
+        <div class="gbar"><div class="gfill" id="gfill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="framenote">Combined coverage is the union of each regulator's enumerated red flags — counted as enumerated, NOT de-duplicated or matched across regulators (no similarity or overlap is computed or claimed). Coverage is illustrative; pick any document to walk its own loop.</div>
+  </div>`;
+  stage.querySelectorAll('.synthrow').forEach(el=>el.onclick=()=>pick(el.dataset.id,t));
+  T(()=>{const f=document.getElementById('gfill');if(f)f.style.width=cov+'%';animVal('gnum',0,cov,900,'%');},250);
 }
 function advCard(a){
   const live=isLive(a);
@@ -9810,6 +10036,10 @@ function render(){
   renderStepper();
   try{
     if(view==='select'){ renderSelect(); }
+    else if(view==='synthesis'){
+      if(!currentTypology){ toSelect(); return; }
+      renderSynthesis(currentTypology);
+    }
     else {
       const a=curAdv();
       if(!isLive(a)){ toSelect(); return; }   // defensive: never strand on a non-live detail view
@@ -9824,19 +10054,22 @@ function render(){
 }
 
 /* ---------- navigation ---------- */
-function pick(id){const a=ADVISORIES.find(x=>x.id===id);if(!isLive(a))return;current=id;view='detail';screen=0;maxScreen=0;
+// `from` (optional) = the typology cluster a doc was drilled from, so Back returns there (Phase 24).
+function pick(id,from){const a=ADVISORIES.find(x=>x.id===id);if(!isLive(a))return;fromTypology=from||null;current=id;view='detail';screen=0;maxScreen=0;
   selected=new Set(buildNows(a).map(i=>i.id));  // default: all build-now gaps selected — the presenter deselects to opt out
   render();}
+function enterSynthesis(t){currentTypology=t;view='synthesis';screen=0;maxScreen=0;render();}
 function gotoScreen(s){screen=Math.max(0,Math.min(DETAIL.length-1,s));maxScreen=Math.max(maxScreen,screen);render();}
-function toSelect(){view='select';current=null;screen=0;maxScreen=0;render();}
+function toSelect(){view='select';current=null;currentTypology=null;fromTypology=null;screen=0;maxScreen=0;render();}
 function advance(){
-  if(view==='select')return;            // pick by clicking a card
+  if(view==='select'||view==='synthesis')return;   // pick by clicking a card / cluster row
   if(screen>=DETAIL.length-1){toSelect();return;}
   gotoScreen(screen+1);
 }
 function back(){
+  if(view==='synthesis'){toSelect();return;}                  // cluster → the picker
   if(view==='select')return;
-  if(screen<=0){toSelect();return;}
+  if(screen<=0){ if(fromTypology){enterSynthesis(fromTypology);return;} toSelect();return; }  // drilled from a cluster → back to it
   gotoScreen(screen-1);
 }
 function updateControls(){
@@ -9844,7 +10077,14 @@ function updateControls(){
     backBtn.style.visibility='hidden';
     resetBtn.style.visibility='hidden';
     nextBtn.style.visibility='hidden';
-    hint.textContent='Pick a derived document to explore →';
+    hint.textContent=selMode==='typology'?'Pick a typology to see the corpus combine →':'Pick a derived document to explore →';
+    return;
+  }
+  if(view==='synthesis'){
+    backBtn.style.visibility='visible'; backBtn.textContent='‹ Typologies';
+    resetBtn.style.visibility='visible';
+    nextBtn.style.visibility='hidden';
+    hint.textContent='Pick a document to walk its loop →';
     return;
   }
   backBtn.style.visibility='visible';
@@ -9853,7 +10093,8 @@ function updateControls(){
   const backLabels=['‹ Advisories','‹ Coverage','‹ Build recs','‹ Signal'];
   const nextLabels=['Build recommendations ›','Signal spec ›','Close the loop ›','↺ Another document'];
   const hints=['Each red flag scored against the library','Pick the build-now gaps to commit','Drafted signals for your committed gaps','Coverage closes on what you built'];
-  backBtn.textContent=backLabels[screen]||'‹ Back';
+  // when drilled from a typology cluster, Back from Coverage returns to that cluster (not the picker)
+  backBtn.textContent=(screen===0 && fromTypology)?('‹ '+typoLabel(fromTypology)):(backLabels[screen]||'‹ Back');
   nextBtn.textContent=nextLabels[screen]||'Next ›';
   hint.textContent=hints[screen]||'';
 }

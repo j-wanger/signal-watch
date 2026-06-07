@@ -241,6 +241,27 @@ EMT / cheque / cash / utility patterns) — and FINTRAC alerts run far denser th
 explorer's source panel renders each document's own basis, so a FINTRAC document shows its Crown-copyright
 attribution, never the US public-domain line.
 
+**Cross-corpus synthesis (Phase 24) — the corpus becomes analytical.** Once the corpus spans two
+jurisdictions, the same money-laundering typology often shows up under more than one regulator — and no
+single advisory enumerates it all. The explorer's **Select** screen now has a **Documents / Typologies**
+toggle: in typology mode you pick a typology and see its **cross-jurisdiction cluster** — every corpus
+document on that typology, across FinCEN, OFAC, and FINTRAC — with a **combined coverage** gauge and each
+jurisdiction's contribution, then drill into any document's own 5-screen loop (Back returns to the
+cluster). The point it makes: *no single regulator covers a typology; the combined corpus does.* Five
+typologies span both the US and Canada (terrorist financing, synthetic opioids, human trafficking,
+professional money laundering, romance-and-investment fraud); two more span US agencies (sanctions evasion
+across FinCEN advisories + alerts + OFAC; public-benefits fraud). The honesty rule is the same one that
+ruled out a fabricated "lift" number in [§ close-the-loop](#the-corpus-explorer-the-singular-corpus-backed-demo):
+**combined coverage is honest union arithmetic** over the existing per-indicator statuses (illustrative,
+under the always-on badge), per-jurisdiction figures are honest counts, and every clustered indicator stays
+traceable to its source document — **no similarity, overlap, or "lift" between regulators is computed or
+claimed**, and indicators are *not* de-duplicated or matched across regulators (that would require
+fabricated matching). The typology label is a **separate committed overlay** (`data/typology-map.json`,
+doc-id → one closed-vocabulary typology), so the 42 derived records and the grounding core stay
+byte-frozen; `build.py` validates it at the build boundary (closed vocabulary + referential integrity +
+total live-document coverage, fail-loud) — agent proposes the map, the deterministic gate disposes. No
+non-negotiable changed.
+
 ## Present it
 
 - Build the typology you want and open `dist/<id>/index.html` in the presentation browser,

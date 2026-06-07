@@ -41,28 +41,36 @@ DEFAULT_TYPOLOGY = "fentanyl"
 # (derive_signals.py).
 CORPUS_TEMPLATE = ROOT / "corpus.html"
 CORPUS_PLACEHOLDER = "__CORPUS__"
+# Phase 24: the cross-corpus typology overlay — a SEPARATE committed artifact mapping each LIVE
+# (derived) doc-id to one closed-vocabulary typology, so the explorer can group documents across
+# sources/jurisdictions. Kept separate from the 42 derived records (which stay byte-frozen); validated
+# at the build boundary (validate_typology — closed vocab + referential integrity + total coverage).
+TYPOLOGY_MAP = ROOT / "data" / "typology-map.json"
 # Multi-source corpus registry (Phase 20): each source is one FinCEN publication TYPE with its own
 # committed corpus-status.json + derived/*.json; render_corpus merges them by id into one __CORPUS__.
 # Decoupling source-id from storage dir means adding the Nth FinCEN source (or, later, OFAC — also
 # public domain under 17 U.S.C. 105) is a registry entry, not a code change. `doc_type` is the honest
 # human label the explorer's menu chip shows per document. The quote-grounding gate (derive_signals.py)
-# is source-agnostic; build.py only consumes the committed per-source artifacts.
+# is source-agnostic; build.py only consumes the committed per-source artifacts. `jurisdiction` (Phase 24)
+# is the country whose regime the source belongs to — US (FinCEN + OFAC, US Treasury) or Canada (FINTRAC);
+# the cross-corpus synthesis groups documents by typology ACROSS jurisdictions, so each merged entry carries
+# it. It is source-level (not per-doc), so it lives here in the registry, not in the typology overlay.
 CORPUS_SOURCES = [
-    {"id": "fincen-advisories", "doc_type": "Advisory",
+    {"id": "fincen-advisories", "doc_type": "Advisory", "jurisdiction": "US",
      "status": ROOT / "data" / "fincen" / "corpus-status.json",
      "derived": ROOT / "data" / "fincen" / "derived"},
-    {"id": "fincen-alerts", "doc_type": "Alert",
+    {"id": "fincen-alerts", "doc_type": "Alert", "jurisdiction": "US",
      "status": ROOT / "data" / "fincen-alerts" / "corpus-status.json",
      "derived": ROOT / "data" / "fincen-alerts" / "derived"},
     # Phase 21: OFAC (US Treasury) — a second US-federal agency, also public domain under 17 U.S.C. 105.
-    {"id": "ofac-advisories", "doc_type": "OFAC",
+    {"id": "ofac-advisories", "doc_type": "OFAC", "jurisdiction": "US",
      "status": ROOT / "data" / "ofac" / "corpus-status.json",
      "derived": ROOT / "data" / "ofac" / "derived"},
     # Phase 22: FINTRAC (Canada's FIU) — the FIRST CROSS-JURISDICTION source. NOT US public domain:
     # Canadian Crown copyright, reproduced verbatim for NON-COMMERCIAL use with attribution per FINTRAC's
     # Terms & Conditions (the `source` attribution string each record carries states this distinct basis;
     # the corpus.html source panel renders it verbatim, so FINTRAC never shows the US "public domain" line).
-    {"id": "fintrac-advisories", "doc_type": "FINTRAC",
+    {"id": "fintrac-advisories", "doc_type": "FINTRAC", "jurisdiction": "Canada",
      "status": ROOT / "data" / "fintrac" / "corpus-status.json",
      "derived": ROOT / "data" / "fintrac" / "derived"},
 ]
@@ -351,6 +359,53 @@ def validate_corpus_data(advisories: list) -> list:
     return e
 
 
+def load_typology_map() -> tuple:
+    """Load + shape-check the cross-corpus typology overlay (data/typology-map.json).
+
+    Returns (vocabulary: set[str], mapping: dict[str, str]). Fails loud on a missing/invalid file
+    or a malformed shape. The overlay is a SEPARATE committed artifact (the derived records stay
+    byte-frozen); referential integrity + coverage against the live corpus are checked in
+    validate_typology once the merged corpus is known.
+    """
+    rel = TYPOLOGY_MAP.relative_to(ROOT)
+    if not TYPOLOGY_MAP.exists():
+        die(f"typology overlay not found: {rel}")
+    try:
+        doc = json.loads(TYPOLOGY_MAP.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as ex:
+        die(f"invalid JSON in {rel}: {ex}")
+    vocab = doc.get("vocabulary")
+    mapping = doc.get("map")
+    if not isinstance(vocab, dict) or not vocab:
+        die(f"{rel}: 'vocabulary' must be a non-empty object {{typology: description}}")
+    if not isinstance(mapping, dict) or not mapping:
+        die(f"{rel}: 'map' must be a non-empty object {{doc-id: typology}}")
+    return vocab, mapping
+
+
+def validate_typology(advisories: list, vocab: dict, mapping: dict) -> list:
+    """Boundary check on the typology overlay against the merged corpus. Returns error strings.
+
+    Three deterministic checks (the build-boundary GATE for the overlay — the map is agent-proposed,
+    this disposes):
+      1. closed vocab   — every mapped typology is a declared vocabulary term;
+      2. referential    — every mapped doc-id is a LIVE (derived) doc in the corpus (no dangling);
+      3. total coverage — every LIVE (derived) doc carries a typology (no gaps).
+    Non-derived docs (no indicators → nothing to combine in synthesis) are NOT required to be mapped
+    and MUST NOT appear in the map (a map entry for one would be a dangling reference, caught by #2).
+    """
+    e = []
+    live = {a["id"] for a in advisories if a.get("derived") and a.get("id")}
+    for doc_id, typ in mapping.items():
+        if typ not in vocab:
+            e.append(f"{doc_id}: typology {typ!r} not in the declared vocabulary")
+        if doc_id not in live:
+            e.append(f"{doc_id}: mapped doc-id is not a live (derived) corpus document")
+    for doc_id in sorted(live - set(mapping)):
+        e.append(f"{doc_id}: live (derived) document has no typology in the overlay")
+    return e
+
+
 def _load_source(source: dict) -> list:
     """Merge ONE corpus source's committed status manifest with its derived records.
 
@@ -398,6 +453,7 @@ def _load_source(source: dict) -> list:
         entry = {k: a.get(k) for k in
                  ("id", "advisory", "title", "date", "source", "extraction", "flag_count", "derivable")}
         entry["doc_type"] = source["doc_type"]   # honest menu label (Advisory / Alert)
+        entry["jurisdiction"] = source["jurisdiction"]   # US / Canada — for cross-corpus grouping
         rec = derived.get(a["id"])
         if rec is not None:
             entry["derived"] = True
@@ -424,10 +480,20 @@ def render_corpus(template: str) -> str:
     if errors:
         die(f"corpus data fails boundary validation:\n  - " + "\n  - ".join(errors))
 
+    # Phase 24: overlay the cross-corpus typology onto each live (derived) doc, gated at the boundary.
+    vocab, tmap = load_typology_map()
+    terrors = validate_typology(merged, vocab, tmap)
+    if terrors:
+        die("typology overlay fails boundary validation:\n  - " + "\n  - ".join(terrors))
+    for entry in merged:
+        if entry.get("derived") and entry["id"] in tmap:
+            entry["typology"] = tmap[entry["id"]]
+
     corpus = {
         "brand": {"title": "Signal Watch", "subtitle": "FinCEN Corpus Explorer · Vision Prototype"},
         "badge": "Illustrative data & outputs",
         "advisories": merged,
+        "typologies": vocab,   # closed-vocab typology -> description (for the cross-corpus synthesis view)
     }
 
     n = template.count(CORPUS_PLACEHOLDER)

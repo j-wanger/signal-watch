@@ -34,7 +34,7 @@
     {
       "id": "IND-02",
       "section": "financial",
-      "flag": "A health care service provider's account receives health care benefit program or health insurance payments beyond the expected type or volume of service, based on staffing and other characteristics of the business (e.g., processing COVID-19 tests when the medical facility does not typically offer diagnostic services, or the facility is processing a high volume of tests despite only employing a few medical personnel).",
+      "flag": "A health care service provider's account receives health care benefit program or health insurance payments beyond the expected type or volume of service, based on staffing and other characteristics of the business",
       "red_flag": "Reimbursements beyond service type/volume for staffing profile",
       "src_line": 208,
       "status": "partial",
@@ -45,7 +45,7 @@
     {
       "id": "IND-03",
       "section": "financial",
-      "flag": "A COVID-19-related health care service provider's business account has unusual transaction activities, such as payments for personal or medically irrelevant expenses (e.g., payments to automobile dealers, travel agents, or retailers of luxury goods).",
+      "flag": "A COVID-19-related health care service provider's business account has unusual transaction activities, such as payments for personal or medically irrelevant expenses",
       "red_flag": "Provider outflows to personal / non-medical merchants (auto, travel, luxury)",
       "src_line": 214,
       "status": "partial",
@@ -82,7 +82,7 @@
     {
       "id": "IND-05",
       "section": "financial",
-      "flag": "A purported health care service provider's account receives health care benefit program or health insurance payments related to COVID-19 services, and then individuals immediately withdraw the funds in a manner that is not typical for health care businesses (e.g., cashier's checks, cash withdrawals, certain types of Automated Clearing House (ACH) transfers, or domestic and international wire transfers).",
+      "flag": "A purported health care service provider's account receives health care benefit program or health insurance payments related to COVID-19 services, and then individuals immediately withdraw the funds in a manner that is not typical for health care businesses",
       "red_flag": "Rapid withdrawal of program inflows via atypical instruments",
       "src_line": 224,
       "status": "gap",
@@ -108,7 +108,7 @@
     {
       "id": "IND-06",
       "section": "financial",
-      "flag": "After the COVID-19 public health emergency determination, a purported health care provider's account does not receive small-dollar check deposits, payments from merchant fee servicers, or cash payments from patients that would indicate patient copayments. This may indicate the absence of actual business activity.",
+      "flag": "After the COVID-19 public health emergency determination, a purported health care provider's account does not receive small-dollar check deposits, payments from merchant fee servicers, or cash payments from patients that would indicate patient copayments",
       "red_flag": "Absence of patient-copayment inflows (no real business activity)",
       "src_line": 230,
       "status": "gap",
@@ -130,7 +130,7 @@
     {
       "id": "IND-08",
       "section": "financial",
-      "flag": "The physical location of a purported medical facility receiving reimbursements for COVID-19-related health care services or relief funds is non-existent, a residential address, a commercial mail receiving agency address (e.g., a UPS Store address), or another non-office building address (e.g., a purported medical facility is listed as a laboratory, but the physical address is a vacant lot, car dealership, restaurant, or retail store).",
+      "flag": "The physical location of a purported medical facility receiving reimbursements for COVID-19-related health care services or relief funds is non-existent, a residential address, a commercial mail receiving agency address",
       "red_flag": "Reimbursed facility at non-existent / residential / CMRA address",
       "src_line": 238,
       "status": "gap",
@@ -152,7 +152,7 @@
     {
       "id": "IND-10",
       "section": "financial",
-      "flag": "Following the public health emergency declaration, the physical location of a purported medical facility receiving payments for health care services or relief funds is far from the physical location of the majority of its patients or the providers purported to be practicing there, unless the facility is providing appropriate telehealth services (e.g., a purported medical facility located in a western state receives payments related to patients residing on the East Coast).",
+      "flag": "the physical location of a purported medical facility receiving payments for health care services or relief funds is far from the physical location of the majority of its patients or the providers purported to be practicing there, unless the facility is providing appropriate telehealth services",
       "red_flag": "Facility-to-patient geographic mismatch (non-telehealth)",
       "src_line": 250,
       "status": "gap",
@@ -163,7 +163,7 @@
     {
       "id": "IND-11",
       "section": "financial",
-      "flag": "After the COVID-19 public health emergency declaration, a health care service provider's or other business account begins having overly complex, medical-related transactions involving multiple counterparties indicative of possible structuring, layering, kickbacks, or fraudulent medical claims.",
+      "flag": "a health care service provider's or other business account begins having overly complex, medical-related transactions involving multiple counterparties indicative of possible structuring, layering, kickbacks, or fraudulent medical claims",
       "red_flag": "Complex multi-counterparty medical structuring / layering",
       "src_line": 258,
       "status": "covered",
@@ -174,7 +174,7 @@
     {
       "id": "IND-12",
       "section": "financial",
-      "flag": "A health care service provider's account makes frequent or unusually large payments recorded as advertising or marketing expenses, or makes recurring round-dollar payments to one or multiple individuals in a manner inconsistent with its payroll-related withdrawals. The payments may reference \"director fees,\" \"consulting fees,\" \"marketing,\" or \"business process outsourcing.\"",
+      "flag": "A health care service provider's account makes frequent or unusually large payments recorded as advertising or marketing expenses, or makes recurring round-dollar payments to one or multiple individuals in a manner inconsistent with its payroll-related withdrawals",
       "red_flag": "Round-dollar payments to individuals inconsistent with payroll (advertising / consulting memos)",
       "src_line": 263,
       "status": "gap",

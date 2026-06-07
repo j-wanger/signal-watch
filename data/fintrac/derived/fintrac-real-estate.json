@@ -171,7 +171,7 @@
     {
       "id": "IND-15",
       "section": "transaction-speed",
-      "flag": "Client shows strong interest in quickly completing the transaction without good cause, or without interest in property characteristics, price negotiations, risks, commissions or other related details, or may offer unusually high bids relative to current value/industry standard.",
+      "flag": "Client shows strong interest in quickly completing the transaction without good cause",
       "red_flag": "Rushed close / over-market bid with no interest in deal details",
       "src_line": 443,
       "status": "gap",
@@ -277,7 +277,7 @@
     {
       "id": "IND-23",
       "section": "structuring",
-      "flag": "Multiple transactions involving payments in cash or in negotiable instruments (for example, bank drafts) which do not state the true payer and where the accumulated amount is considered to be significant in relation to the total amount of the transaction.",
+      "flag": "Multiple transactions involving payments in cash or in negotiable instruments (for example, bank drafts) which do not state the true payer",
       "red_flag": "Structured cash / bank-draft funding with no true payer named",
       "src_line": 495,
       "status": "gap",

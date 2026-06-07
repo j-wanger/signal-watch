@@ -8,7 +8,7 @@
     {
       "id": "IND-01",
       "section": "redflag",
-      "flag": "Documentation associated with a customer’s oil shipping-related transactions is inconsistent with information contained in maritime database entries used for conducting due diligence. For example, a maritime database may indicate that a vessel called in an Iranian port, even though this information is not included in the shipping documents submitted to financial institutions for payment processing.63",
+      "flag": "Documentation associated with a customer’s oil shipping-related transactions is inconsistent with information contained in maritime database entries used for conducting due diligence",
       "red_flag": "Shipping docs inconsistent with maritime database — Iranian port call omitted",
       "src_line": 328,
       "status": "gap",
@@ -19,7 +19,7 @@
     {
       "id": "IND-02",
       "section": "redflag",
-      "flag": "Documentation associated with a customer’s oil-related transactions makes reference to vessels that, according to maritime databases, have undergone recent or multiple name or flag changes, or transfer of ownership or operation to another person following OFAC’s designation of its owner or operator, but the designated owner or operator appears to maintain an interest in the vessel.",
+      "flag": "vessels that, according to maritime databases, have undergone recent or multiple name or flag changes, or transfer of ownership or operation to another person following OFAC’s designation of its owner or operator, but the designated owner or operator appears to maintain an interest in the vessel",
       "red_flag": "Vessel name/flag changes or post-OFAC ownership transfer with designated owner retaining interest",
       "src_line": 334,
       "status": "gap",
@@ -30,7 +30,7 @@
     {
       "id": "IND-03",
       "section": "redflag",
-      "flag": "Documentation associated with a customer’s oil-related transactions makes reference to vessels that claim an International Maritime Organization (IMO) number that, on examination of maritime databases, belong to a different vessel or to vessels that have previously been scrapped.",
+      "flag": "vessels that claim an International Maritime Organization (IMO) number that, on examination of maritime databases, belong to a different vessel or to vessels that have previously been scrapped",
       "red_flag": "Spoofed IMO number — belongs to another or scrapped vessel",
       "src_line": 340,
       "status": "gap",
@@ -41,7 +41,7 @@
     {
       "id": "IND-04",
       "section": "redflag",
-      "flag": "Documentation associated with a customer’s oil-related transactions makes reference to “Malaysian blend” oil, particularly if the vessel is bound for China by way of Southeast Asia and if maritime databases indicate that the vessel displayed AIS irregularities during its voyage or reveal evidence of a ship-to-ship transfer in proximity to Southeast Asia.",
+      "flag": "Malaysian blend” oil, particularly if the vessel is bound for China by way of Southeast Asia and if maritime databases indicate that the vessel displayed AIS irregularities during its voyage or reveal evidence of a ship-to-ship transfer in proximity to Southeast Asia",
       "red_flag": "\"Malaysian blend\" oil reference with AIS irregularities / ship-to-ship transfer",
       "src_line": 345,
       "status": "gap",
@@ -52,7 +52,7 @@
     {
       "id": "IND-05",
       "section": "redflag",
-      "flag": "Transactions involving a petroleum or shipping company reveal that it does business with counterparties that have ties to Iran or transports goods using vessels that have ties to Iran or that maritime databases indicate have made stops at Iranian ports.",
+      "flag": "does business with counterparties that have ties to Iran or transports goods using vessels that have ties to Iran or that maritime databases indicate have made stops at Iranian ports",
       "red_flag": "Counterparties or vessels tied to Iran / Iranian-port stops",
       "src_line": 350,
       "status": "partial",
@@ -63,7 +63,7 @@
     {
       "id": "IND-06",
       "section": "redflag",
-      "flag": "A customer makes oil-related transactions and wire transfers involving vessels that have been previously linked to suspicious financial activities or that include documentation, such as bills of lading or shipping invoices, with no consignees, that appear to be falsified, or that omit key information, in an attempt to hide the Iranian nexus.",
+      "flag": "vessels that have been previously linked to suspicious financial activities or that include documentation, such as bills of lading or shipping invoices, with no consignees, that appear to be falsified, or that omit key information, in an attempt to hide the Iranian nexus",
       "red_flag": "Vessel previously linked to suspicious activity, or falsified / no-consignee shipping docs concealing Iranian nexus",
       "src_line": 354,
       "status": "gap",
@@ -89,7 +89,7 @@
     {
       "id": "IND-07",
       "section": "redflag",
-      "flag": "A customer makes transactions that move through multiple exchange houses and/or trading companies, adding additional fees and costs as the transactions progress, where the fees, number of transactions, and pattern of transactions do not reflect standard and customary commercial practices.",
+      "flag": "move through multiple exchange houses and/or trading companies, adding additional fees and costs as the transactions progress, where the fees, number of transactions, and pattern of transactions do not reflect standard and customary commercial practices",
       "red_flag": "Multi-hop exchange-house / trading-company layering with fee-stacking",
       "src_line": 361,
       "status": "gap",
@@ -126,7 +126,7 @@
     {
       "id": "IND-09",
       "section": "redflag",
-      "flag": "A customer receives wire transfers or deposits that do not contain any information about the source of funds, contain incomplete information about the source of funds, or do not match the customer’s line of business, especially if they involve entities in a high-risk jurisdiction for Iranian illicit finance-related activity.",
+      "flag": "receives wire transfers or deposits that do not contain any information about the source of funds, contain incomplete information about the source of funds, or do not match the customer’s line of business",
       "red_flag": "Missing / incomplete source-of-funds, or inflows inconsistent with line of business",
       "src_line": 373,
       "status": "covered",
@@ -159,7 +159,7 @@
     {
       "id": "IND-12",
       "section": "redflag",
-      "flag": "A customer makes transactions involving companies that originate with, or are directed to, entities that are general trading companies, suspected front companies, or companies that have a nexus with Iran.  Other indicators of possible front companies include opaque ownership structures, individuals/entities with obscure names that direct the company, or business addresses that are residential or co-located with other companies, especially companies that have been previously sanctioned.",
+      "flag": "transactions involving companies that originate with, or are directed to, entities that are general trading companies, suspected front companies, or companies that have a nexus with Iran",
       "red_flag": "Front-company / Iran-nexus counterparties — opaque ownership, obscure directors, co-located addresses",
       "src_line": 390,
       "status": "partial",
@@ -170,7 +170,7 @@
     {
       "id": "IND-13",
       "section": "redflag",
-      "flag": "A customer declares information about the nature of its business that is inconsistent with other available information, such as previous transaction history or associated transactional information, particularly if trade data indicates that they have a history of facilitating shipments to and from Iran and if they transact predominantly with technology companies or chemical suppliers.",
+      "flag": "declares information about the nature of its business that is inconsistent with other available information, such as previous transaction history or associated transactional information, particularly if trade data indicates that they have a history of facilitating shipments to and from Iran and if they transact predominantly with technology companies or chemical suppliers",
       "red_flag": "Declared business inconsistent with Iran-shipment and tech/chemical-supplier transaction history",
       "src_line": 397,
       "status": "gap",
@@ -181,7 +181,7 @@
     {
       "id": "IND-14",
       "section": "redflag",
-      "flag": "A customer makes transactions that are directed to companies that operate in unrelated businesses, and which do not seem to align with the customer due diligence (CDD) and other customer identification information collected during client onboarding and subsequent updates.  For example, and of note with regard to illicit Iranian financial activity, customers that primarily receive funds from commodities trading companies, but send funds primarily to electronics suppliers.",
+      "flag": "transactions that are directed to companies that operate in unrelated businesses, and which do not seem to align with the customer due diligence (CDD) and other customer identification information collected during client onboarding and subsequent updates",
       "red_flag": "CDD–sector flow mismatch (commodities-in / electronics-out)",
       "src_line": 403,
       "status": "gap",
@@ -207,7 +207,7 @@
     {
       "id": "IND-15",
       "section": "redflag",
-      "flag": "Multiple companies incorporated at roughly the same time share counterparties, addresses, owners, or name similarities and demonstrate similar transaction profiles.  Such companies may have little to no web presence and transact in large, recurring amounts.",
+      "flag": "Multiple companies incorporated at roughly the same time share counterparties, addresses, owners, or name similarities and demonstrate similar transaction profiles",
       "red_flag": "Company cluster — shared addresses/owners/counterparties, same-time incorporation, recurring amounts",
       "src_line": 410,
       "status": "gap",

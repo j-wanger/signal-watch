@@ -33,7 +33,7 @@
     {
       "id": "IND-02",
       "section": "redflag",
-      "flag": "Communications, including social media posts, soliciting payments with misspellings\nor messages out of profile for the counterparty, soliciting payments from individuals or\norganizations with whom you have no prior existing business relationship, including\ncelebrities or public figures.",
+      "flag": "Communications, including social media posts, soliciting payments with misspellings\nor messages out of profile for the counterparty",
       "red_flag": "Misspelled / out-of-profile payment solicitations from no-relationship counterparties",
       "src_line": 53,
       "status": "gap",

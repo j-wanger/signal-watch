@@ -137,9 +137,12 @@ non-derivable).
 `dist/corpus/index.html` is a **second, separate** single-file ship artifact: a FinCEN **corpus
 explorer**. Where the six-act typology demos each tell one scripted story, the explorer points the same
 loop at the *whole public corpus* — FinCEN advisories + alerts, OFAC, and FINTRAC — you pick one of the 46 publications
-and watch it derive. Phase 26 elevated it to the showcase's bar: a story-driven **landing** as the entry,
-red flags re-translated to the showcase's terse mechanism-named AML-indicator **register**, a progressive
-"agent reading" article render, and the showcase's build-log + combination-lift **wow beats**. It opens on a
+and watch it derive. Phase 26 elevated it to the showcase's bar; **Phase 27 made it shippable** — an assessment
+workflow showed the remaining weakness was *presentation, not the grounding system*, so the Read-advisory source
+is now **markitdown-cleaned** (no running headers / tab-soup), highlighting **normalizes both sides** to land
+~every grounded phrase, the build-log runs in a proper proposal grid, the "agent reading" types the **whole**
+article, and 121 over-long verbatim quotes were **tightened to crisp grounded sub-spans** (faithfulness-guarded —
+genuinely-long advisory indicators are kept whole). It opens on a
 **landing** (frames the multi-jurisdiction public corpus → one signal loop; an "Enter the corpus" CTA), then
 runs a **staged 6-screen per-doc arc** (Phase 18 gave it the human gate + the close-the-loop payoff; Phase 25
 added the article-processing "read advisory" beat; Phase 26 added the combination-lift beat):

@@ -8,7 +8,7 @@
     {
       "id": "IND-01",
       "section": "financial",
-      "flag": "A financial institution or its customer detects IT enterprise activity that is connected to ransomware cyber indicators or known cyber threat actors. Malicious cyber activity may be evident in system log files, network traffic, or file information.",
+      "flag": "A financial institution or its customer detects IT enterprise activity that is connected to ransomware cyber indicators or known cyber threat actors",
       "red_flag": "IT activity tied to ransomware IOCs or known cyber threat actors",
       "src_line": 290,
       "status": "gap",
@@ -78,7 +78,7 @@
     {
       "id": "IND-06",
       "section": "financial",
-      "flag": "A customer shows limited knowledge of CVC during onboarding or via other interactions with the financial institution, yet inquires about or purchases CVC (particularly if in a large amount or rush requests), which may indicate the customer is a victim of ransomware.",
+      "flag": "A customer shows limited knowledge of CVC during onboarding or via other interactions with the financial institution, yet inquires about or purchases CVC (particularly if in a large amount or rush requests",
       "red_flag": "Low-CVC-literacy customer makes a large or rush CVC purchase",
       "src_line": 321,
       "status": "partial",
@@ -115,7 +115,7 @@
     {
       "id": "IND-08",
       "section": "financial",
-      "flag": "A customer that has not identified itself to the CVC exchanger, or registered with FinCEN as a money transmitter, appears to be using the liquidity provided by the exchange to execute large numbers of offsetting transactions between various CVCs, which may indicate that the customer is acting as an unregistered MSB.",
+      "flag": "A customer that has not identified itself to the CVC exchanger, or registered with FinCEN as a money transmitter, appears to be using the liquidity provided by the exchange to execute large numbers of offsetting transactions between various CVCs",
       "red_flag": "Unregistered-MSB offsetting CVC trades on exchange liquidity",
       "src_line": 326,
       "status": "gap",
@@ -137,7 +137,7 @@
     {
       "id": "IND-10",
       "section": "financial",
-      "flag": "A customer receives CVC from an external wallet, and immediately initiates multiple, rapid trades among multiple CVCs, especially AECs, with no apparent related purpose, followed by a transaction off the platform. This may be indicative of attempts to break the chain of custody on the respective blockchains or further obfuscate the transaction.",
+      "flag": "A customer receives CVC from an external wallet, and immediately initiates multiple, rapid trades among multiple CVCs, especially AECs, with no apparent related purpose, followed by a transaction off the platform",
       "red_flag": "External-wallet deposit → rapid multi-CVC / AEC chain-hopping off-platform",
       "src_line": 332,
       "status": "gap",

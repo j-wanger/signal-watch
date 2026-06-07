@@ -8,7 +8,7 @@
     {
       "id": "IND-01",
       "section": "redflag",
-      "flag": "Commercially unreasonable transactions.  Transfers of property in which a blocked person once held an interest on terms that are not commercially reasonable, lacking adequate consideration, or otherwise not suggestive of an arm’s length transaction may indicate that the blocked person still retains an interest in the property.",
+      "flag": "Commercially unreasonable transactions.  Transfers of property in which a blocked person once held an interest on terms that are not commercially reasonable, lacking adequate consideration, or otherwise not suggestive of an arm’s length transaction",
       "red_flag": "Non-arm's-length transfer lacking adequate consideration",
       "src_line": 95,
       "status": "partial",
@@ -55,7 +55,7 @@
     {
       "id": "IND-04",
       "section": "redflag",
-      "flag": "Unduly  complex  corporate  structures  involving  higher-risk  jurisdictions.    The  presence  of unnecessarily  complex  legal  structures  without  a  discernible  legitimate  purpose—such  as  certain multi-layered limited liability companies, partnerships, or trusts—may indicate an effort to conceal an ownership interest.",
+      "flag": "Unduly  complex  corporate  structures  involving  higher-risk  jurisdictions.    The  presence  of unnecessarily  complex  legal  structures  without  a  discernible  legitimate  purpose—such  as  certain multi-layered limited liability companies, partnerships, or trusts",
       "red_flag": "Multi-layered LLC / trust structures in higher-risk jurisdictions concealing ownership",
       "src_line": 132,
       "status": "gap",
@@ -66,7 +66,7 @@
     {
       "id": "IND-05",
       "section": "redflag",
-      "flag": "Continued involvement of a blocked person.  Facts or circumstances suggesting a blocked person remains involved in the use, management, or disposition of property—including through proxies or intermediaries—may indicate that the blocked person continues to retain an interest in property.",
+      "flag": "Continued involvement of a blocked person.  Facts or circumstances suggesting a blocked person remains involved in the use, management, or disposition of property—including through proxies or intermediaries",
       "red_flag": "Blocked person retains control via proxies or intermediaries",
       "src_line": 139,
       "status": "gap",
@@ -102,7 +102,7 @@
     {
       "id": "IND-07",
       "section": "redflag",
-      "flag": "Evasive  responses  regarding  a  blocked  person’s  involvement.    Evasive  or  vague  responses,  or failures to respond to questions from counterparties, key intermediaries, or gatekeepers regarding a blocked person’s involvement in property may be evidence of intent to conceal a continuing interest.",
+      "flag": "Evasive  responses  regarding  a  blocked  person’s  involvement.    Evasive  or  vague  responses,  or failures to respond to questions from counterparties, key intermediaries, or gatekeepers regarding a blocked person’s involvement in property",
       "red_flag": "Evasive / non-responsive answers on a blocked person's involvement",
       "src_line": 156,
       "status": "partial",

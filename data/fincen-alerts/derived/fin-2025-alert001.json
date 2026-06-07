@@ -84,7 +84,7 @@
     {
       "id": "IND-06",
       "section": "Red Flags for Armored Car Services",
-      "flag": "A business in Mexico, near the southwest border of the United States, organizes the transportation\nof a large volume of cash to multiple locations throughout the United States by an ACS or air\ntransport, for no business or apparent lawful purpose, before it is finally delivered to a U.S.-based\nfinancial institution or a Federal Reserve Bank location.",
+      "flag": "A business in Mexico, near the southwest border of the United States, organizes the transportation\nof a large volume of cash to multiple locations throughout the United States by an ACS or air\ntransport, for no business or apparent lawful purpose",
       "red_flag": "Border-business cash routed multi-location by ACS/air, no lawful purpose",
       "src_line": 299,
       "status": "gap",

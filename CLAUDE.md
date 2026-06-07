@@ -235,6 +235,30 @@ AML transformation framework. Keep vocabulary consistent with it
   harness 108 → 139. Scope was the 42 `derived/*.json` (`red_flag` VALUES only) + `corpus.html` + `dist/corpus` + tests +
   docs; FROZEN byte-clean: the showcase (index.html + config/** + the 3 typology dists), every source md, every
   corpus-status.json, data/typology-map.json, and the grounding core `derive_signals.py`. NO non-negotiable change.
+- SHIPPABILITY FIXES (Phase 27, M7 — corpus OUTPUT QUALITY raised to SHIPPABLE; NO new source / non-negotiable
+  change): the user reviewed the BUILT Phase-26 corpus and judged it NOT shippable — the Read-advisory
+  extract/translate beat "brutally bad", the build animation "not in place". A READ-ONLY assessment (a 44-agent
+  workflow + deterministic metrics) DISPOSED the framing: the brutality was PRESENTATION, not the grounding
+  system (39/42 docs PRESENTATION_ONLY; register already held; the verbatim flags real). Fixes, evidence-led:
+  (1) `cleanArticle()` (corpus.html) markitdown-sanitizes the DISPLAYED source — strips page-break form-feeds,
+  running headers (FINCEN ADVISORY/ALERT, letter-spaced "F I N C E N", FINTRAC OPERATIONAL), bare page-numbers,
+  tab-between-every-word soup — a DISPLAY transform only (source md + grounding byte-untouched; footnote-ref
+  digits KEPT so the cleaned text still grounds 1:1). (2) `highlightArticle` rewritten to NORMALIZE BOTH SIDES
+  (the gate's own `normalize()`) + an index map back to source positions → 634/634 flags highlight (100%, from
+  95.3% raw; the literal matcher would've REGRESSED on cleaned text — so the cleaner + matcher are coupled).
+  (3) the Signal build-log ports the showcase Act-4 ".run working-pulse" rhythm in a proposal grid + the
+  combination-lift gets a lift-side rationale panel, `firestat` OMITTED (its stats would be fabricated). (4) the
+  progressive "agent reading" types the WHOLE article (no 1600-char cap; length-scaled ~6s) — the demo's first
+  wow, now complete. (5) a faithfulness-guarded re-extraction (a 72-agent tighten→verify workflow + a
+  deterministic applier) tightened 121 over-long verbatim flags to crisp CONTIGUOUS SUB-SPANS of the current
+  flag — grounding is transitive (a sub-span of an already-grounded quote can't fabricate), gated by
+  `normalize(new) ⊂ normalize(current)` + ≥24 chars + red_flag-distinct, byte-surgical (only flag lines change);
+  genuinely-long single-sentence advisory indicators KEPT WHOLE (forcing them crisp would drop the qualifying
+  condition = fabricated brevity, rejected). (6) `fin-2022-a001`'s 2 prose-y red_flags re-translated to the
+  mechanism-named register. dist/corpus 2.17MB → 2.15MB; harness 139 → 148; all 42 records `--check-derived`
+  clean; `--check all` 4/4 ZERO DRIFT. FROZEN byte-clean: the showcase (index.html + config/** + the 3 typology
+  dists), every source md, every corpus-status.json, data/typology-map.json, the grounding core `derive_signals.py`
+  (the gate logic byte-UNCHANGED — re-extraction only shrank flag VALUES). NO non-negotiable change.
 - IMPORTANT — INVERTED extraction boundary (Phase 16) + the SUBTRACTION (Phase 17): the **LLM EXTRACTS, the
   deterministic layer GATES**, and the old extractor is **DELETED**. The earlier deterministic
   `extract_red_flags` accreted format special-casing every phase yet the LLM still had to author/prune its
@@ -286,8 +310,11 @@ AML transformation framework. Keep vocabulary consistent with it
   the pooled indicators, the no-similarity/overlap/lift honesty gate, drill-through + Back-to-cluster)
   + the Phase-26 register beats (the story landing as entry; Select grouped by source / newest-first;
   red-flag section sub-grouping on Coverage; the Act-4 build-log + the Act-5 combination-lift with its LOUD
-  "illustrative · pending calibration" honest-illustrative gate — a generic template, never per-doc fabricated);
-  139 assertions · `python3 scripts/derive_signals.py --selftest` runs
+  "illustrative · pending calibration" honest-illustrative gate — a generic template, never per-doc fabricated)
+  + the Phase-27 shippability fixes (the Read-advisory source panel is markitdown-CLEANED — no running
+  headers / letter-spaced headers / tab-soup; normalize-both-sides highlighting lands ~every grounded flag;
+  the Signal build-log runs in a proposal grid + the combination-lift carries a lift-side panel with firestat
+  OMITTED; the whole-article progressive "agent reading"); 148 assertions · `python3 scripts/derive_signals.py --selftest` runs
   the derivation GATE checks. Pre-present sequence: `--check all` (drift) → `node tests/…` (arc) → walk
   `tests/smoke-checklist.md` (the human-eye checks).
 - Iterate: edit `index.html` / `corpus.html` / a config, rebuild. `python3 -m http.server` optional, never required.
@@ -324,7 +351,13 @@ Phase 26: showcase-quality elevation — all 42 `red_flag`s re-translated to the
 (via a dynamic translate→adversarial-verify workflow; verbatim + grounding byte-unchanged), progressive "agent reading"
 article render, Select grouped by source / newest-first + red-flag section sub-grouping, the Act-4 build-log + an Act-5
 combination-lift wow beat (generic illustrative template, loud "pending calibration" tag — never per-doc fabricated),
-and a story-driven landing as the entry (NO non-negotiable change)).
+and a story-driven landing as the entry (NO non-negotiable change);
+Phase 27: shippability fixes — an assessment workflow disposed the framing (the brutality was PRESENTATION not
+the grounding system), then markitdown-cleaned the Read-advisory source + normalize-both-sides highlighting (100%)
++ the Act-4 build-log in a proposal grid + a combination-lift lift-side panel (firestat omitted) + the whole-article
+progressive read + a faithfulness-guarded re-extraction tightening 121 over-long verbatim flags to crisp grounded
+sub-spans (grounding transitive; long single-sentence indicators kept whole) — corpus made SHIPPABLE, gate logic
+byte-unchanged, NO non-negotiable change).
 See HANDOFF.md §8.
 
 ## Definition of done

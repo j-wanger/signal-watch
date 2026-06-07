@@ -8,7 +8,7 @@
     {
       "id": "IND-01",
       "section": "redflag",
-      "flag": "A customer, especially a customer who presented a Chinese passport as identification during the onboarding process, regularly receives funds that are not commensurate with the reported occupation or income, and the source of the funds cannot be attributed to payroll or other legitimate sources of income (i.e., unexplained wealth).43",
+      "flag": "regularly receives funds that are not commensurate with the reported occupation or income, and the source of the funds cannot be attributed to payroll or other legitimate sources of income (i.e., unexplained wealth",
       "red_flag": "Unexplained-wealth inflows inconsistent with stated occupation/income",
       "src_line": 452,
       "status": "partial",
@@ -30,7 +30,7 @@
     {
       "id": "IND-03",
       "section": "redflag",
-      "flag": "A customer, especially a Chinese national, creates an account at a financial institution and reports their occupation as a student during the onboarding process.  This customer then regularly deposits cash into their account or receives wire transfers notated as “tuition” or “living expenses” that are not commensurate with the reported information.  After receiving the funds, the customer may subsequently initiate wire transfers or P2P transactions to unknown individuals who are unrelated to the purpose of the wire transfers or may make credit or debit card payments.",
+      "flag": "creates an account at a financial institution and reports their occupation as a student during the onboarding process.  This customer then regularly deposits cash into their account or receives wire transfers notated as “tuition” or “living expenses” that are not commensurate with the reported information.  After receiving the funds, the customer may subsequently initiate wire transfers or P2P transactions to unknown individuals who are unrelated to the purpose of the wire transfers",
       "red_flag": "Student-account tuition/living-expense inflows then forward to unrelated parties (mule funnel)",
       "src_line": 460,
       "status": "gap",
@@ -67,7 +67,7 @@
     {
       "id": "IND-05",
       "section": "redflag",
-      "flag": "A customer, especially a Chinese national with unexplained wealth, initiates a wire transfer related to a real estate purchase or purchases cashier’s checks made payable to a real estate company.  The customer may be accompanied by a real estate agent at the time of purchasing the cashier’s checks.",
+      "flag": "initiates a wire transfer related to a real estate purchase or purchases cashier’s checks made payable to a real estate company",
       "red_flag": "Unexplained-wealth funds to real estate via wire or cashier's check",
       "src_line": 472,
       "status": "gap",
@@ -78,7 +78,7 @@
     {
       "id": "IND-06",
       "section": "redflag",
-      "flag": "A customer, especially a Chinese national, regularly deposits large volumes of cash or cashier’s checks, or receives multiple wire, ACH, or P2P transfers for no business or apparent lawful purpose.  The customer then subsequently uses the funds to purchase a cashier’s check or disperses the funds to other individuals using P2P and wire transfers, often to other high- risk jurisdictions.",
+      "flag": "regularly deposits large volumes of cash or cashier’s checks, or receives multiple wire, ACH, or P2P transfers for no business or apparent lawful purpose.  The customer then subsequently uses the funds to purchase a cashier’s check or disperses the funds to other individuals using P2P and wire transfers, often to other high- risk jurisdictions",
       "red_flag": "Cash/cashier's-check + multi-rail inflows layered out to high-risk jurisdictions",
       "src_line": 477,
       "status": "gap",
@@ -104,7 +104,7 @@
     {
       "id": "IND-07",
       "section": "redflag",
-      "flag": "A customer’s account, especially a Chinese national, receives numerous transfers or deposits, and has a significant number of withdrawals or transfers, none of which appear to be related to routine payroll, living expenses, or customer’s stated expected activity.",
+      "flag": "receives numerous transfers or deposits, and has a significant number of withdrawals or transfers, none of which appear to be related to routine payroll, living expenses, or customer’s stated expected activity",
       "red_flag": "High-velocity pass-through unrelated to payroll or expected activity",
       "src_line": 483,
       "status": "covered",
@@ -126,7 +126,7 @@
     {
       "id": "IND-09",
       "section": "redflag",
-      "flag": "A customer, especially a Chinese national, is reluctant or refuses to provide information regarding the source of funds deposited or transferred into their account or acts evasive when questioned about the purpose of a transaction or may explain it as repayment of a loan.",
+      "flag": "is reluctant or refuses to provide information regarding the source of funds deposited or transferred into their account or acts evasive when questioned about the purpose of a transaction or may explain it as repayment of a loan",
       "red_flag": "Evasive / refused source-of-funds, explained as loan repayment",
       "src_line": 490,
       "status": "gap",
@@ -163,7 +163,7 @@
     {
       "id": "IND-11",
       "section": "redflag",
-      "flag": "A business owned by a Chinese national regularly receives wire transfers indicating the export of goods to foreign countries including Mexico, China, Hong Kong, and the United Arab Emirates, but rarely, or never, engages in transactions that indicate the purchase of goods to maintain inventory.",
+      "flag": "regularly receives wire transfers indicating the export of goods to foreign countries including Mexico, China, Hong Kong, and the United Arab Emirates, but rarely, or never, engages in transactions that indicate the purchase of goods to maintain inventory",
       "red_flag": "Export-indicating wires with no offsetting inventory purchasing",
       "src_line": 509,
       "status": "gap",
@@ -185,7 +185,7 @@
     {
       "id": "IND-13",
       "section": "redflag",
-      "flag": "A customer, especially a Chinese national, regularly receives P2P or wire transfers from unknown individuals and subsequently uses those funds to make a substantial credit card payment.  If questioned about the source of the funds, the customer may state that the transfers are from U.S.-based family members of Chinese citizens who are sending the customer funds to purchase goods.",
+      "flag": "regularly receives P2P or wire transfers from unknown individuals and subsequently uses those funds to make a substantial credit card payment",
       "red_flag": "Aggregated third-party inflows settling one credit card (mirror transfer)",
       "src_line": 518,
       "status": "gap",

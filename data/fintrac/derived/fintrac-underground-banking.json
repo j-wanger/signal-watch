@@ -92,7 +92,7 @@
     {
       "id": "IND-07",
       "section": "redflag",
-      "flag": "Cash deposit(s) are followed by funds sent to a real estate party (e.g., real estate agent/brokerage) with indications suggesting the purpose of payment is for a real estate-related transaction (such as memos referencing the same address repeatedly).",
+      "flag": "Cash deposit(s) are followed by funds sent to a real estate party (e.g., real estate agent/brokerage",
       "red_flag": "Cash placement then real-estate-party payout (repeated same-address memos)",
       "src_line": 273,
       "status": "gap",
@@ -114,7 +114,7 @@
     {
       "id": "IND-09",
       "section": "redflag",
-      "flag": "Incoming funds from individuals/entities located in China, notably in Hong Kong, are used to purchase shorter-term investment products (such as Guaranteed Investment Certificates), which are then redeemed before the term date, despite incurring a penalty.",
+      "flag": "purchase shorter-term investment products (such as Guaranteed Investment Certificates), which are then redeemed before the term date, despite incurring a penalty",
       "red_flag": "Penalty-incurring early GIC redemption of China/HK-funded term product",
       "src_line": 290,
       "status": "gap",

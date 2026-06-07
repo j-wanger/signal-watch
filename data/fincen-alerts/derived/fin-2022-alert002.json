@@ -105,7 +105,7 @@
     {
       "id": "IND-09",
       "section": "redflag · Artworks",
-      "flag": "Artwork-related transactions involving persons with suspected ties to sanctioned Russian elites and their proxies who (i) are not concerned with recouping their initial investment or paying a substantially higher price than the notational value of the work, and/or (ii) conduct transactions that exceed the expected sales value of the work.",
+      "flag": "Artwork-related transactions involving persons with suspected ties to sanctioned Russian elites and their proxies who (i) are not concerned with recouping their initial investment or paying a substantially higher price than the notational value of the work",
       "red_flag": "Art purchase indifferent to recouping value / overpayment (sanctioned-elite ties)",
       "src_line": 185,
       "status": "gap",

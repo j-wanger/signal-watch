@@ -83,7 +83,7 @@
     {
       "id": "IND-07",
       "section": "redflag",
-      "flag": "Implementation of legal instruments (e.g., deeds of exclusion) that are intended to transfer\nan interest in CRE from a PEP or Russian elite to a family member, business associate, or\nassociated trust following a legal event such as an arrest or an OFAC designation of that\nperson.",
+      "flag": "legal instruments (e.g., deeds of exclusion) that are intended to transfer\nan interest in CRE from a PEP or Russian elite to a family member, business associate, or\nassociated trust following a legal event such as an arrest or an OFAC designation",
       "red_flag": "Title-instrument transfer of CRE interest post-arrest / OFAC designation",
       "src_line": 347,
       "status": "gap",
@@ -94,7 +94,7 @@
     {
       "id": "IND-08",
       "section": "redflag",
-      "flag": "Private investment funds or other companies that submit revised ownership disclosures to\nfinancial institutions showing sanctioned individuals or PEPs that previously owned more\nthan 50 percent of a fund changing their ownership to less than 50 percent.",
+      "flag": "submit revised ownership disclosures to\nfinancial institutions showing sanctioned individuals or PEPs that previously owned more\nthan 50 percent of a fund changing their ownership to less than 50 percent",
       "red_flag": "Revised disclosure dropping sanctioned / PEP owner below 50%",
       "src_line": 352,
       "status": "partial",

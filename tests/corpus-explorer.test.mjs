@@ -566,6 +566,41 @@ env26b.__flush();                                            // run the deferred
 eq(numText(env26b, 'lv2'), 83, 'animated: lift count-up reaches the template value after the timer flush');
 ok(env26b.__errors.length === 0, 'animated combination-lift produced no console errors');
 
+/* ===================== Phase 27 — presentation fixes (T2 cleaner / T3 highlight / T4 build-beat) ===================== */
+const env27 = boot(true);
+const api27 = env27.__api;
+// (P27-1) T2: the displayed source is markitdown-CLEANED — a header-dirty FinCEN advisory's doc panel
+// carries no running header / letter-spaced header / tab-soup. (T3) normalize-both-sides highlighting
+// lands on ~every grounded flag — not the old best-effort literal match.
+const dirty27 = api27.ADVISORIES.find(a => a.id === 'FIN-2020-A008' && api27.isLive(a))
+  || api27.ADVISORIES.filter(api27.isLive).find(a => typeof a.article_text === 'string' && /FINCEN ADVISORY/.test(a.article_text));
+ok(dirty27, `found a header-dirty live advisory for the T2 cleaner check (${dirty27 && dirty27.id})`);
+api27.pick(dirty27.id);
+const doc27 = (env27.__stage._html.match(/<div class="doc"[^>]*>([\s\S]*?)<\/div>/) || [])[1] || '';
+ok(doc27.length > 100 && !/FINCEN ADVISORY|FINCEN ALERT|F I N C E N/.test(doc27) && !doc27.includes('\t'),
+  'T2: cleaned article panel carries no running-header / letter-spaced / tab-soup markitdown artifacts');
+const hl27 = (env27.__stage._html.match(/class="hl"/g) || []).length;
+ok(hl27 >= Math.ceil(dirty27.indicators.length * 0.8),
+  `T3: normalize-both-sides highlighting lands on ≥80% of grounded flags (${hl27}/${dirty27.indicators.length})`);
+ok(env27.__errors.length === 0, 'T2/T3: cleaned + highlighted article rendered with no console errors');
+// (P27-2) T4: the build-log renders in a proposal grid (spec | buildside) with the 6-step sequence; the
+// Combination-lift carries the lift-side rationale panel and OMITS firestat (no fabricated stats).
+const buildable27 = api27.ADVISORIES.filter(api27.isLive)
+  .find(a => api27.buildNows(a).some(i => i.build_logic && typeof i.build_logic === 'object'));
+api27.pick(buildable27.id);
+api27.selected = new Set(api27.buildNows(buildable27).map(i => i.id));
+api27.gotoScreen(3);
+ok(/class="proposal"/.test(env27.__stage._html) && /class="buildside"/.test(env27.__stage._html),
+  'T4: Signal renders the build-log in a proposal grid (spec | buildside)');
+eq((env27.__stage._html.match(/class="blstep/g) || []).length, 6,
+  'T4: the build-log carries the 6-step agent-build sequence');
+api27.gotoScreen(4);
+ok(/class="liftwrap"/.test(env27.__stage._html) && /class="liftside"/.test(env27.__stage._html),
+  'T4: Combination-lift renders the lift-side rationale panel (liftwrap grid)');
+ok(!/firestat/.test(env27.__stage._html),
+  'T4: lift OMITS firestat (no fabricated fire-count / precision stats — only the badged illustrative template)');
+ok(env27.__errors.length === 0, 'T4: Signal build-log + lift rendered with no console errors');
+
 /* ============================ report ============================ */
 console.log(`\n${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.log('FAILURES:\n  - ' + fails.join('\n  - ')); process.exit(1); }

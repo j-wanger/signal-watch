@@ -33,6 +33,7 @@
 - None yet
 
 ### Journal
+- [[2026-06-07-phase-27-corpus-shippability|Phase 27: Make the corpus demo shippable — assess → presentation fixes → faithfulness-guarded re-extraction (M7)]] — assess-only-first disposed the framing (PRESENTATION not the grounding system); cleanArticle + normalize-both-sides highlight (100%) + Act-4 build-log/lift-side beats + whole-article progressive read + a 72-agent re-extraction tightening 121 over-long flags to crisp grounded sub-spans (transitive grounding; 36 long-but-faithful kept whole) + fin-2022-a001 re-translate; --check all 4/4, harness 139→148, gate byte-unchanged, SHIPPABLE
 - [[2026-06-07-phase-25-corpus-translation|2026-06-07 · Phase 25 Corpus output quality — extract → translate (natural AML red flags) + the article-processing screen (M7)]]
 - [[2026-06-07-phase-24-cross-corpus-synthesis|2026-06-07 · Phase 24 Cross-corpus synthesis — a typology lens over the multi-source corpus (M7)]]
 - [[2026-06-06-phase-19-durability-closeout|2026-06-06 · Phase 19 Durability closeout — corpus-explorer test harness + pin _rf_triage (M7)]]

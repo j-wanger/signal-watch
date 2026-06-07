@@ -8,7 +8,7 @@
     {
       "id": "IND-01",
       "section": "financial",
-      "flag": "A customer or a customer's counterparty conducts transactions with Office of Foreign Assets Control (OFAC)-designated entities and individuals, or transactions that contain a nexus to identifiers listed for OFAC-designated entities and individuals, to include email addresses, physical addresses, phone numbers, passport numbers, or CVC addresses.",
+      "flag": "A customer or a customer's counterparty conducts transactions with Office of Foreign Assets Control (OFAC)-designated entities and individuals",
       "red_flag": "OFAC-designated counterparty or identifier-nexus match (email / address / phone / passport / CVC address)",
       "src_line": 667,
       "status": "partial",
@@ -30,7 +30,7 @@
     {
       "id": "IND-03",
       "section": "financial",
-      "flag": "A customer conducts transactions with a money services business (MSB) or other financial institution, including a VASP, that operates in jurisdictions known for, or at high risk for, terrorist activity and is reasonably believed to have lax customer identification and verification processes, opaque ownership, or otherwise fails to comply with AML/CFT best practices.",
+      "flag": "money services business (MSB) or other financial institution, including a VASP, that operates in jurisdictions known for, or at high risk for, terrorist activity and is reasonably believed to have lax customer identification",
       "red_flag": "MSB / VASP counterparty in high-risk-for-terrorism jurisdiction with lax CDD / opaque ownership",
       "src_line": 676,
       "status": "partial",
@@ -41,7 +41,7 @@
     {
       "id": "IND-04",
       "section": "financial",
-      "flag": "A customer conducts transactions that originate with, are directed to, or otherwise involve entities that are front companies, general \"trading companies\" with unclear business purposes, or other companies whose beneficial ownership information indicates that they may have a nexus with Iran or other Iran-supported terrorist groups.  Indicators of possible front companies include opaque ownership structures, individuals and/or entities with obscure names that direct the company, or business addresses that are residential or co-located with other companies.",
+      "flag": "front companies, general \"trading companies\" with unclear business purposes, or other companies whose beneficial ownership information indicates that they may have a nexus with Iran or other Iran-supported terrorist groups",
       "red_flag": "Front-company / vague \"trading company\" with Iran-terror nexus (opaque ownership, residential / co-located address)",
       "src_line": 681,
       "status": "gap",
@@ -52,7 +52,7 @@
     {
       "id": "IND-05",
       "section": "financial",
-      "flag": "A customer that is or purports to be a charitable organization or NPO84 solicits donations but does not appear to provide any charitable services or openly supports terrorist activity or operations.  In some cases, these organizations may post on social media platforms or encrypted messaging apps to solicit donations, including in CVC.",
+      "flag": "A customer that is or purports to be a charitable organization or NPO84 solicits donations but does not appear to provide any charitable services or openly supports terrorist activity or operations",
       "red_flag": "Sham charity / NPO soliciting donations (incl. CVC) with no services or open terror support",
       "src_line": 703,
       "status": "gap",
@@ -89,7 +89,7 @@
     {
       "id": "IND-07",
       "section": "financial",
-      "flag": "A customer makes money transfers to a jurisdiction known for, or at high risk for, terrorist activity that are inconsistent with their stated occupation or business purpose with vague stated purposes such as \"travel expenses,\" \"charity,\" \"aid,\" or \"gifts.",
+      "flag": "A customer makes money transfers to a jurisdiction known for, or at high risk for, terrorist activity that are inconsistent with their stated occupation or business purpose",
       "red_flag": "Vague-purpose transfers to high-risk-terror jurisdiction, occupation-inconsistent",
       "src_line": 714,
       "status": "gap",
@@ -115,7 +115,7 @@
     {
       "id": "IND-08",
       "section": "financial",
-      "flag": "A customer account receives large payouts from social media fundraisers or crowdfunding platforms and is then accessed from an IP address in a jurisdiction known for, or at high risk for, terrorist activity, particularly if the social media accounts that contribute to the fundraisers contain content supportive of terrorist campaigns.",
+      "flag": "A customer account receives large payouts from social media fundraisers or crowdfunding platforms and is then accessed from an IP address in a jurisdiction known for, or at high risk for, terrorist activity",
       "red_flag": "Crowdfunding payout fan-in → high-risk-terror IP access, pro-terror contributors",
       "src_line": 718,
       "status": "gap",
@@ -126,7 +126,7 @@
     {
       "id": "IND-09",
       "section": "financial",
-      "flag": "A customer company is incorporated in the United States or a third-country jurisdiction, but its activities occur solely in jurisdictions known for, or at high risk for, terrorist activity and show no relationship to the company's stated business purpose.",
+      "flag": "A customer company is incorporated in the United States or a third-country jurisdiction, but its activities occur solely in jurisdictions known for, or at high risk for, terrorist activity",
       "red_flag": "Incorporation-vs-activity mismatch: operating solely in high-risk-terror jurisdiction",
       "src_line": 723,
       "status": "gap",

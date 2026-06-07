@@ -62,3 +62,4 @@
 [2026-06-07T00:00:00] DEBRIEF — Phase 25 corpus output quality (extract→translate + article-processing) shipped; 5 tasks, reviewer 9/10 ACCEPT (two LOW fixed inline), delivery gate accepted
 [2026-06-07T00:00:00] PLAN — Phase 26 planned, 6 tasks, 3 decisions (elevate the corpus demo to showcase quality: register re-translation + progressive render + build/lift wow + grouping/sort + landing; workflow-driven)
 [2026-06-07T18:11:47Z] DEBRIEF -- 0 decisions (lite), 1 journal (phase-26-corpus-elevation), tasks confirmed [x], state refreshed, active-phase delivery gate unchecked
+[2026-06-07T19:59:01Z] DEBRIEF -- Phase 27 corpus shippability shipped; 7 tasks (2 dynamic workflows), 0 decisions (lite); assess→presentation fixes (cleanArticle/highlight 100%/build-beat/whole-article read)→re-extraction (121 flags→sub-spans, faithfulness-guarded)→regate; harness 139→148; committed+pushed to main per user, runtime review deferred (USER OVERRIDE)

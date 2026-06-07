@@ -34,7 +34,7 @@
     {
       "id": "IND-02",
       "section": "financial",
-      "flag": "Fundraisers are attached to social media profiles that show support for ISIS or display ISIS-related iconography or refer to supporting the \"mujahideen\" or the \"war against kufar (non-believers),\" especially if the fundraisers are soliciting donations to fund travel to an area of known ISIS activity.  The fundraising appeal posted on social media references aid to imprisoned women and children in Iraq or Syria.",
+      "flag": "Fundraisers are attached to social media profiles that show support for ISIS or display ISIS-related iconography or refer to supporting the \"mujahideen\" or the \"war against kufar (non-believers),\" especially if the fundraisers are soliciting donations to fund travel to an area of known ISIS activity",
       "red_flag": "Crowdfunding via ISIS-iconography social profiles for travel / detainee aid",
       "src_line": 575,
       "status": "gap",
@@ -97,7 +97,7 @@
     {
       "id": "IND-05",
       "section": "financial",
-      "flag": "A customer attempts to purchase plane or other travel tickets after abruptly liquidating assets, closing accounts, cancelling subscriptions, or receiving large unexplained sums of cash.  A period of account dormancy following these behaviors should also be regarded as suspicious, even if the customer eventually resumes transactions within the United States.",
+      "flag": "A customer attempts to purchase plane or other travel tickets after abruptly liquidating assets, closing accounts, cancelling subscriptions, or receiving large unexplained sums of cash",
       "red_flag": "Asset liquidation → travel-ticket purchase → account dormancy",
       "src_line": 603,
       "status": "partial",
@@ -145,7 +145,7 @@
     {
       "id": "IND-08",
       "section": "financial",
-      "flag": "A customer suddenly adopts or increases their use of financial methods that conceal the ultimate source or end use of funds, for example P2P transfers, ATM withdrawals, third party processors, prepaid cards, virtual currency, or wire transfers.",
+      "flag": "A customer suddenly adopts or increases their use of financial methods that conceal the ultimate source or end use of funds",
       "red_flag": "Abrupt shift to source-concealing channels (P2P, prepaid, CVC, third-party processors)",
       "src_line": 620,
       "status": "partial",

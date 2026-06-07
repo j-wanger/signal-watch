@@ -152,7 +152,7 @@
     {
       "id": "IND-10",
       "section": "Transactional and Behavioral Red Flags",
-      "flag": "Transactions involving consolidated shipments of luxury goods that previously would have\nbeen destined for Russia or Belarus, but are now destined for a transshipment country or a\ncountry without restrictions on exports/re-exports to Russia or Belarus.",
+      "flag": "Transactions involving consolidated shipments of luxury goods that previously would have\nbeen destined for Russia or Belarus, but are now destined for a transshipment country",
       "red_flag": "Luxury-goods consolidation rerouted off Russia/Belarus to a transshipment country",
       "src_line": 257,
       "status": "gap",
@@ -255,7 +255,7 @@
     {
       "id": "IND-18",
       "section": "Transactional and Behavioral Red Flags",
-      "flag": "When combined with other derogatory information, large dollar or volume purchases,\nincluding through the use of business credit cards, of items designated as EAR99 (or large\nvolume or dollar purchases at wholesale electrical/industrial merchants, electrical parts and\nequipment providers, or electronic parts providers), in the United States or abroad, especially\nif paired with purchases at shipping companies.",
+      "flag": "large dollar or volume purchases,\nincluding through the use of business credit cards, of items designated as EAR99 (or large\nvolume or dollar purchases at wholesale electrical/industrial merchants, electrical parts and\nequipment providers, or electronic parts providers), in the United States or abroad, especially\nif paired with purchases at shipping companies",
       "red_flag": "Large EAR99 / electronics-parts card spend paired with shipping-company purchases",
       "src_line": 283,
       "status": "gap",

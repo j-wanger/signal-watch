@@ -104,7 +104,7 @@
     {
       "id": "IND-07",
       "section": "redflag",
-      "flag": "A new business account is created for an established business, but no other business activity\noccurs in the account except the deposit of the ERC.  This may be indicative of identity theft,\nwhere the established business was used as a fraudulent front to file for the ERC.",
+      "flag": "A new business account is created for an established business, but no other business activity\noccurs in the account except the deposit of the ERC",
       "red_flag": "New ERC-only account on an established business (front / identity-theft pattern)",
       "src_line": 399,
       "status": "gap",

@@ -219,7 +219,7 @@
     {
       "id": "IND-15",
       "section": "cultivation-processing",
-      "flag": "Client makes excessive or atypical utility payments (e.g., bill payments made to different hydro accounts,\n\nmultiple individuals paying off the same hydro account, payment amount exceeds expected amount for personal\nconsumption, or bill payments that appear excessive given stated occupation and/or address).",
+      "flag": "Client makes excessive or atypical utility payments",
       "red_flag": "Utility-payment anomaly: multiple hydro accounts, shared account, or above-consumption amounts",
       "src_line": 243,
       "status": "gap",

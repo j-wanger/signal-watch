@@ -182,6 +182,17 @@
   /* the LOUD honesty tag — kept visually distinct from the always-on "Illustrative data & outputs" badge */
   .illus{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--rose);border-left:3px solid var(--rose);background:rgba(239,96,121,.07);border-radius:9px;padding:11px 13px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.5}
   .illus b{color:var(--rose);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;padding-top:1px}
+  /* Phase 27 (T4): the showcase Act-4 proposal grid + Act-5 lift-side panel ports */
+  .proposal{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:start}
+  @media(max-width:820px){.proposal{grid-template-columns:1fr}}
+  .buildside{display:flex;flex-direction:column;gap:12px}
+  .buildside .buildlog{margin-bottom:0;min-height:170px}
+  .liftwrap{display:grid;grid-template-columns:1fr 290px;gap:20px;align-items:start;margin-bottom:16px}
+  @media(max-width:820px){.liftwrap{grid-template-columns:1fr}}
+  .liftside{border:1px solid var(--line2);border-left:3px solid var(--signal);background:rgba(246,166,35,.05);border-radius:0 12px 12px 0;padding:16px}
+  .liftside .lt{font-family:var(--display);font-size:17px;font-style:italic;margin-bottom:9px;color:var(--ink);line-height:1.2}
+  .liftside p{font-size:12.5px;color:var(--muted);line-height:1.6;margin:0 0 8px}
+  .liftside p:last-child{margin-bottom:0}
 
   /* Phase 26 — story-driven LANDING (the narrative entry before the Select grid) */
   .scene.landing{max-width:760px}
@@ -301,7 +312,7 @@ const CORPUS = {
         {
           "id": "IND-02",
           "section": "financial",
-          "flag": "Transactions are inconsistent with a customer’s expected activity and/or line of business in an apparent effort to cover trafficking victims’ living costs, including housing (e.g., hotel, motel, short-term rentals, or residential accommodations), transportation (e.g., airplane, taxi, limousine, or rideshare services), medical expenses, pharmacies, clothing, grocery stores, and restaurants, to include fast food eateries.",
+          "flag": "Transactions are inconsistent with a customer’s expected activity and/or line of business in an apparent effort to cover trafficking victims’ living costs",
           "red_flag": "Victim-maintenance MCC basket inconsistent with profile",
           "src_line": 389,
           "status": "gap",
@@ -327,7 +338,7 @@ const CORPUS = {
         {
           "id": "IND-03",
           "section": "financial",
-          "flag": "Transactional activity largely occurs outside of normal business operating hours (e.g., an establishment that operates during the day has a large number of transactions at night), is almost always made in cash, and deposits are larger than what is expected for the business and the size of its operations.",
+          "flag": "Transactional activity largely occurs outside of normal business operating hours (e.g., an establishment that operates during the day has a large number of transactions at night), is almost always made in cash, and deposits are larger than what is expected for the business",
           "red_flag": "Off-hours, cash-heavy deposits oversized for the business",
           "src_line": 395,
           "status": "partial",
@@ -397,7 +408,7 @@ const CORPUS = {
         {
           "id": "IND-08",
           "section": "financial",
-          "flag": "A customer frequently sends or receives funds via cryptocurrency to or from darknet markets or services known to be associated with illicit activity.  This may include services that host advertising content for illicit services, sell illicit content, or financial institutions that allow prepaid cards to pay for cryptocurrencies without appropriate risk mitigation controls.",
+          "flag": "A customer frequently sends or receives funds via cryptocurrency to or from darknet markets or services known to be associated with illicit activity",
           "red_flag": "Crypto flows to / from darknet illicit-service markets",
           "src_line": 410,
           "status": "partial",
@@ -485,7 +496,7 @@ const CORPUS = {
         {
           "id": "IND-02",
           "section": "financial",
-          "flag": "A health care service provider's account receives health care benefit program or health insurance payments beyond the expected type or volume of service, based on staffing and other characteristics of the business (e.g., processing COVID-19 tests when the medical facility does not typically offer diagnostic services, or the facility is processing a high volume of tests despite only employing a few medical personnel).",
+          "flag": "A health care service provider's account receives health care benefit program or health insurance payments beyond the expected type or volume of service, based on staffing and other characteristics of the business",
           "red_flag": "Reimbursements beyond service type/volume for staffing profile",
           "src_line": 208,
           "status": "partial",
@@ -496,7 +507,7 @@ const CORPUS = {
         {
           "id": "IND-03",
           "section": "financial",
-          "flag": "A COVID-19-related health care service provider's business account has unusual transaction activities, such as payments for personal or medically irrelevant expenses (e.g., payments to automobile dealers, travel agents, or retailers of luxury goods).",
+          "flag": "A COVID-19-related health care service provider's business account has unusual transaction activities, such as payments for personal or medically irrelevant expenses",
           "red_flag": "Provider outflows to personal / non-medical merchants (auto, travel, luxury)",
           "src_line": 214,
           "status": "partial",
@@ -533,7 +544,7 @@ const CORPUS = {
         {
           "id": "IND-05",
           "section": "financial",
-          "flag": "A purported health care service provider's account receives health care benefit program or health insurance payments related to COVID-19 services, and then individuals immediately withdraw the funds in a manner that is not typical for health care businesses (e.g., cashier's checks, cash withdrawals, certain types of Automated Clearing House (ACH) transfers, or domestic and international wire transfers).",
+          "flag": "A purported health care service provider's account receives health care benefit program or health insurance payments related to COVID-19 services, and then individuals immediately withdraw the funds in a manner that is not typical for health care businesses",
           "red_flag": "Rapid withdrawal of program inflows via atypical instruments",
           "src_line": 224,
           "status": "gap",
@@ -559,7 +570,7 @@ const CORPUS = {
         {
           "id": "IND-06",
           "section": "financial",
-          "flag": "After the COVID-19 public health emergency determination, a purported health care provider's account does not receive small-dollar check deposits, payments from merchant fee servicers, or cash payments from patients that would indicate patient copayments. This may indicate the absence of actual business activity.",
+          "flag": "After the COVID-19 public health emergency determination, a purported health care provider's account does not receive small-dollar check deposits, payments from merchant fee servicers, or cash payments from patients that would indicate patient copayments",
           "red_flag": "Absence of patient-copayment inflows (no real business activity)",
           "src_line": 230,
           "status": "gap",
@@ -581,7 +592,7 @@ const CORPUS = {
         {
           "id": "IND-08",
           "section": "financial",
-          "flag": "The physical location of a purported medical facility receiving reimbursements for COVID-19-related health care services or relief funds is non-existent, a residential address, a commercial mail receiving agency address (e.g., a UPS Store address), or another non-office building address (e.g., a purported medical facility is listed as a laboratory, but the physical address is a vacant lot, car dealership, restaurant, or retail store).",
+          "flag": "The physical location of a purported medical facility receiving reimbursements for COVID-19-related health care services or relief funds is non-existent, a residential address, a commercial mail receiving agency address",
           "red_flag": "Reimbursed facility at non-existent / residential / CMRA address",
           "src_line": 238,
           "status": "gap",
@@ -603,7 +614,7 @@ const CORPUS = {
         {
           "id": "IND-10",
           "section": "financial",
-          "flag": "Following the public health emergency declaration, the physical location of a purported medical facility receiving payments for health care services or relief funds is far from the physical location of the majority of its patients or the providers purported to be practicing there, unless the facility is providing appropriate telehealth services (e.g., a purported medical facility located in a western state receives payments related to patients residing on the East Coast).",
+          "flag": "the physical location of a purported medical facility receiving payments for health care services or relief funds is far from the physical location of the majority of its patients or the providers purported to be practicing there, unless the facility is providing appropriate telehealth services",
           "red_flag": "Facility-to-patient geographic mismatch (non-telehealth)",
           "src_line": 250,
           "status": "gap",
@@ -614,7 +625,7 @@ const CORPUS = {
         {
           "id": "IND-11",
           "section": "financial",
-          "flag": "After the COVID-19 public health emergency declaration, a health care service provider's or other business account begins having overly complex, medical-related transactions involving multiple counterparties indicative of possible structuring, layering, kickbacks, or fraudulent medical claims.",
+          "flag": "a health care service provider's or other business account begins having overly complex, medical-related transactions involving multiple counterparties indicative of possible structuring, layering, kickbacks, or fraudulent medical claims",
           "red_flag": "Complex multi-counterparty medical structuring / layering",
           "src_line": 258,
           "status": "covered",
@@ -625,7 +636,7 @@ const CORPUS = {
         {
           "id": "IND-12",
           "section": "financial",
-          "flag": "A health care service provider's account makes frequent or unusually large payments recorded as advertising or marketing expenses, or makes recurring round-dollar payments to one or multiple individuals in a manner inconsistent with its payroll-related withdrawals. The payments may reference \"director fees,\" \"consulting fees,\" \"marketing,\" or \"business process outsourcing.\"",
+          "flag": "A health care service provider's account makes frequent or unusually large payments recorded as advertising or marketing expenses, or makes recurring round-dollar payments to one or multiple individuals in a manner inconsistent with its payroll-related withdrawals",
           "red_flag": "Round-dollar payments to individuals inconsistent with payroll (advertising / consulting memos)",
           "src_line": 263,
           "status": "gap",
@@ -819,7 +830,7 @@ const CORPUS = {
         {
           "id": "IND-01",
           "section": "financial",
-          "flag": "A financial institution or its customer detects IT enterprise activity that is connected to ransomware cyber indicators or known cyber threat actors. Malicious cyber activity may be evident in system log files, network traffic, or file information.",
+          "flag": "A financial institution or its customer detects IT enterprise activity that is connected to ransomware cyber indicators or known cyber threat actors",
           "red_flag": "IT activity tied to ransomware IOCs or known cyber threat actors",
           "src_line": 290,
           "status": "gap",
@@ -889,7 +900,7 @@ const CORPUS = {
         {
           "id": "IND-06",
           "section": "financial",
-          "flag": "A customer shows limited knowledge of CVC during onboarding or via other interactions with the financial institution, yet inquires about or purchases CVC (particularly if in a large amount or rush requests), which may indicate the customer is a victim of ransomware.",
+          "flag": "A customer shows limited knowledge of CVC during onboarding or via other interactions with the financial institution, yet inquires about or purchases CVC (particularly if in a large amount or rush requests",
           "red_flag": "Low-CVC-literacy customer makes a large or rush CVC purchase",
           "src_line": 321,
           "status": "partial",
@@ -926,7 +937,7 @@ const CORPUS = {
         {
           "id": "IND-08",
           "section": "financial",
-          "flag": "A customer that has not identified itself to the CVC exchanger, or registered with FinCEN as a money transmitter, appears to be using the liquidity provided by the exchange to execute large numbers of offsetting transactions between various CVCs, which may indicate that the customer is acting as an unregistered MSB.",
+          "flag": "A customer that has not identified itself to the CVC exchanger, or registered with FinCEN as a money transmitter, appears to be using the liquidity provided by the exchange to execute large numbers of offsetting transactions between various CVCs",
           "red_flag": "Unregistered-MSB offsetting CVC trades on exchange liquidity",
           "src_line": 326,
           "status": "gap",
@@ -948,7 +959,7 @@ const CORPUS = {
         {
           "id": "IND-10",
           "section": "financial",
-          "flag": "A customer receives CVC from an external wallet, and immediately initiates multiple, rapid trades among multiple CVCs, especially AECs, with no apparent related purpose, followed by a transaction off the platform. This may be indicative of attempts to break the chain of custody on the respective blockchains or further obfuscate the transaction.",
+          "flag": "A customer receives CVC from an external wallet, and immediately initiates multiple, rapid trades among multiple CVCs, especially AECs, with no apparent related purpose, followed by a transaction off the platform",
           "red_flag": "External-wallet deposit → rapid multi-CVC / AEC chain-hopping off-platform",
           "src_line": 332,
           "status": "gap",
@@ -1025,7 +1036,7 @@ const CORPUS = {
           "id": "IND-02",
           "section": "financial",
           "flag": "Transactions involving services provided to state-owned companies or public institutions by companies registered in high-risk jurisdictions.",
-          "red_flag": "Services to state-owned / public institutions via high-risk-jurisdiction firms",
+          "red_flag": "State-entity services billed through high-risk-jurisdiction intermediaries",
           "src_line": 440,
           "status": "partial",
           "data": "available",
@@ -1061,8 +1072,8 @@ const CORPUS = {
         {
           "id": "IND-04",
           "section": "financial",
-          "flag": "Transactions involving public officials related to high-value assets, such as real estate or other luxury goods, that are not commensurate with the reported source of wealth for the public official or that fall outside that individual’s normal pattern of activity or lifestyle.",
-          "red_flag": "Public-official high-value assets inconsistent with source of wealth",
+          "flag": "Transactions involving public officials related to high-value assets, such as real estate or other luxury goods, that are not commensurate with the reported source of wealth for the public official",
+          "red_flag": "PEP luxury / real-estate purchases beyond declared source of wealth",
           "src_line": 446,
           "status": "partial",
           "data": "partial",
@@ -1324,7 +1335,7 @@ const CORPUS = {
         {
           "id": "IND-01",
           "section": "financial",
-          "flag": "A customer or a customer's counterparty conducts transactions with Office of Foreign Assets Control (OFAC)-designated entities and individuals, or transactions that contain a nexus to identifiers listed for OFAC-designated entities and individuals, to include email addresses, physical addresses, phone numbers, passport numbers, or CVC addresses.",
+          "flag": "A customer or a customer's counterparty conducts transactions with Office of Foreign Assets Control (OFAC)-designated entities and individuals",
           "red_flag": "OFAC-designated counterparty or identifier-nexus match (email / address / phone / passport / CVC address)",
           "src_line": 667,
           "status": "partial",
@@ -1346,7 +1357,7 @@ const CORPUS = {
         {
           "id": "IND-03",
           "section": "financial",
-          "flag": "A customer conducts transactions with a money services business (MSB) or other financial institution, including a VASP, that operates in jurisdictions known for, or at high risk for, terrorist activity and is reasonably believed to have lax customer identification and verification processes, opaque ownership, or otherwise fails to comply with AML/CFT best practices.",
+          "flag": "money services business (MSB) or other financial institution, including a VASP, that operates in jurisdictions known for, or at high risk for, terrorist activity and is reasonably believed to have lax customer identification",
           "red_flag": "MSB / VASP counterparty in high-risk-for-terrorism jurisdiction with lax CDD / opaque ownership",
           "src_line": 676,
           "status": "partial",
@@ -1357,7 +1368,7 @@ const CORPUS = {
         {
           "id": "IND-04",
           "section": "financial",
-          "flag": "A customer conducts transactions that originate with, are directed to, or otherwise involve entities that are front companies, general \"trading companies\" with unclear business purposes, or other companies whose beneficial ownership information indicates that they may have a nexus with Iran or other Iran-supported terrorist groups.  Indicators of possible front companies include opaque ownership structures, individuals and/or entities with obscure names that direct the company, or business addresses that are residential or co-located with other companies.",
+          "flag": "front companies, general \"trading companies\" with unclear business purposes, or other companies whose beneficial ownership information indicates that they may have a nexus with Iran or other Iran-supported terrorist groups",
           "red_flag": "Front-company / vague \"trading company\" with Iran-terror nexus (opaque ownership, residential / co-located address)",
           "src_line": 681,
           "status": "gap",
@@ -1368,7 +1379,7 @@ const CORPUS = {
         {
           "id": "IND-05",
           "section": "financial",
-          "flag": "A customer that is or purports to be a charitable organization or NPO84 solicits donations but does not appear to provide any charitable services or openly supports terrorist activity or operations.  In some cases, these organizations may post on social media platforms or encrypted messaging apps to solicit donations, including in CVC.",
+          "flag": "A customer that is or purports to be a charitable organization or NPO84 solicits donations but does not appear to provide any charitable services or openly supports terrorist activity or operations",
           "red_flag": "Sham charity / NPO soliciting donations (incl. CVC) with no services or open terror support",
           "src_line": 703,
           "status": "gap",
@@ -1405,7 +1416,7 @@ const CORPUS = {
         {
           "id": "IND-07",
           "section": "financial",
-          "flag": "A customer makes money transfers to a jurisdiction known for, or at high risk for, terrorist activity that are inconsistent with their stated occupation or business purpose with vague stated purposes such as \"travel expenses,\" \"charity,\" \"aid,\" or \"gifts.",
+          "flag": "A customer makes money transfers to a jurisdiction known for, or at high risk for, terrorist activity that are inconsistent with their stated occupation or business purpose",
           "red_flag": "Vague-purpose transfers to high-risk-terror jurisdiction, occupation-inconsistent",
           "src_line": 714,
           "status": "gap",
@@ -1431,7 +1442,7 @@ const CORPUS = {
         {
           "id": "IND-08",
           "section": "financial",
-          "flag": "A customer account receives large payouts from social media fundraisers or crowdfunding platforms and is then accessed from an IP address in a jurisdiction known for, or at high risk for, terrorist activity, particularly if the social media accounts that contribute to the fundraisers contain content supportive of terrorist campaigns.",
+          "flag": "A customer account receives large payouts from social media fundraisers or crowdfunding platforms and is then accessed from an IP address in a jurisdiction known for, or at high risk for, terrorist activity",
           "red_flag": "Crowdfunding payout fan-in → high-risk-terror IP access, pro-terror contributors",
           "src_line": 718,
           "status": "gap",
@@ -1442,7 +1453,7 @@ const CORPUS = {
         {
           "id": "IND-09",
           "section": "financial",
-          "flag": "A customer company is incorporated in the United States or a third-country jurisdiction, but its activities occur solely in jurisdictions known for, or at high risk for, terrorist activity and show no relationship to the company's stated business purpose.",
+          "flag": "A customer company is incorporated in the United States or a third-country jurisdiction, but its activities occur solely in jurisdictions known for, or at high risk for, terrorist activity",
           "red_flag": "Incorporation-vs-activity mismatch: operating solely in high-risk-terror jurisdiction",
           "src_line": 723,
           "status": "gap",
@@ -1481,7 +1492,7 @@ const CORPUS = {
         {
           "id": "IND-02",
           "section": "profile",
-          "flag": "A customer or counterparty is a chemical or pharmaceutical company in the PRC, Hong Kong, or another jurisdiction with a residential address or a business address shared with other similar businesses or that has no physical presence or shows other indicators of possible illicit shell company activity.52",
+          "flag": "A customer or counterparty is a chemical or pharmaceutical company in the PRC, Hong Kong, or another jurisdiction with a residential address or a business address shared with other similar businesses or that has no physical presence",
           "red_flag": "PRC/HK chemical-pharma shell company (residential / shared address, no physical presence)",
           "src_line": 545,
           "status": "gap",
@@ -1503,7 +1514,7 @@ const CORPUS = {
         {
           "id": "IND-04",
           "section": "profile",
-          "flag": "A customer or counterparty is a vendor on an e-commerce or Darknet marketplace that advertises the sale of precursor chemicals (using chemical names, abbreviations, or CAS numbers in the advertisement) and manufacturing equipment used for the synthesis of illicit fentanyl and other synthetic opioids.",
+          "flag": "A customer or counterparty is a vendor on an e-commerce or Darknet marketplace that advertises the sale of precursor chemicals (using chemical names, abbreviations, or CAS numbers in the advertisement",
           "red_flag": "Marketplace / Darknet precursor-chemical vendor (CAS-number listings)",
           "src_line": 554,
           "status": "gap",
@@ -1562,7 +1573,7 @@ const CORPUS = {
         {
           "id": "IND-08",
           "section": "profile",
-          "flag": "A customer is a Mexican importing company that predominantly transacts only with chemical or pharmaceutical companies in the PRC or Hong Kong for no apparent legitimate reason as compared to similar importers that transact with foreign chemical manufacturing and pharmaceutical suppliers in multiple jurisdictions.",
+          "flag": "A customer is a Mexican importing company that predominantly transacts only with chemical or pharmaceutical companies in the PRC or Hong Kong for no apparent legitimate reason",
           "red_flag": "Single-jurisdiction PRC/HK chemical-supplier concentration vs peers",
           "src_line": 571,
           "status": "gap",
@@ -1727,7 +1738,7 @@ const CORPUS = {
         {
           "id": "IND-02",
           "section": "financial",
-          "flag": "Fundraisers are attached to social media profiles that show support for ISIS or display ISIS-related iconography or refer to supporting the \"mujahideen\" or the \"war against kufar (non-believers),\" especially if the fundraisers are soliciting donations to fund travel to an area of known ISIS activity.  The fundraising appeal posted on social media references aid to imprisoned women and children in Iraq or Syria.",
+          "flag": "Fundraisers are attached to social media profiles that show support for ISIS or display ISIS-related iconography or refer to supporting the \"mujahideen\" or the \"war against kufar (non-believers),\" especially if the fundraisers are soliciting donations to fund travel to an area of known ISIS activity",
           "red_flag": "Crowdfunding via ISIS-iconography social profiles for travel / detainee aid",
           "src_line": 575,
           "status": "gap",
@@ -1790,7 +1801,7 @@ const CORPUS = {
         {
           "id": "IND-05",
           "section": "financial",
-          "flag": "A customer attempts to purchase plane or other travel tickets after abruptly liquidating assets, closing accounts, cancelling subscriptions, or receiving large unexplained sums of cash.  A period of account dormancy following these behaviors should also be regarded as suspicious, even if the customer eventually resumes transactions within the United States.",
+          "flag": "A customer attempts to purchase plane or other travel tickets after abruptly liquidating assets, closing accounts, cancelling subscriptions, or receiving large unexplained sums of cash",
           "red_flag": "Asset liquidation → travel-ticket purchase → account dormancy",
           "src_line": 603,
           "status": "partial",
@@ -1838,7 +1849,7 @@ const CORPUS = {
         {
           "id": "IND-08",
           "section": "financial",
-          "flag": "A customer suddenly adopts or increases their use of financial methods that conceal the ultimate source or end use of funds, for example P2P transfers, ATM withdrawals, third party processors, prepaid cards, virtual currency, or wire transfers.",
+          "flag": "A customer suddenly adopts or increases their use of financial methods that conceal the ultimate source or end use of funds",
           "red_flag": "Abrupt shift to source-concealing channels (P2P, prepaid, CVC, third-party processors)",
           "src_line": 620,
           "status": "partial",
@@ -1899,7 +1910,7 @@ const CORPUS = {
         {
           "id": "IND-01",
           "section": "redflag",
-          "flag": "Documentation associated with a customer’s oil shipping-related transactions is inconsistent with information contained in maritime database entries used for conducting due diligence. For example, a maritime database may indicate that a vessel called in an Iranian port, even though this information is not included in the shipping documents submitted to financial institutions for payment processing.63",
+          "flag": "Documentation associated with a customer’s oil shipping-related transactions is inconsistent with information contained in maritime database entries used for conducting due diligence",
           "red_flag": "Shipping docs inconsistent with maritime database — Iranian port call omitted",
           "src_line": 328,
           "status": "gap",
@@ -1910,7 +1921,7 @@ const CORPUS = {
         {
           "id": "IND-02",
           "section": "redflag",
-          "flag": "Documentation associated with a customer’s oil-related transactions makes reference to vessels that, according to maritime databases, have undergone recent or multiple name or flag changes, or transfer of ownership or operation to another person following OFAC’s designation of its owner or operator, but the designated owner or operator appears to maintain an interest in the vessel.",
+          "flag": "vessels that, according to maritime databases, have undergone recent or multiple name or flag changes, or transfer of ownership or operation to another person following OFAC’s designation of its owner or operator, but the designated owner or operator appears to maintain an interest in the vessel",
           "red_flag": "Vessel name/flag changes or post-OFAC ownership transfer with designated owner retaining interest",
           "src_line": 334,
           "status": "gap",
@@ -1921,7 +1932,7 @@ const CORPUS = {
         {
           "id": "IND-03",
           "section": "redflag",
-          "flag": "Documentation associated with a customer’s oil-related transactions makes reference to vessels that claim an International Maritime Organization (IMO) number that, on examination of maritime databases, belong to a different vessel or to vessels that have previously been scrapped.",
+          "flag": "vessels that claim an International Maritime Organization (IMO) number that, on examination of maritime databases, belong to a different vessel or to vessels that have previously been scrapped",
           "red_flag": "Spoofed IMO number — belongs to another or scrapped vessel",
           "src_line": 340,
           "status": "gap",
@@ -1932,7 +1943,7 @@ const CORPUS = {
         {
           "id": "IND-04",
           "section": "redflag",
-          "flag": "Documentation associated with a customer’s oil-related transactions makes reference to “Malaysian blend” oil, particularly if the vessel is bound for China by way of Southeast Asia and if maritime databases indicate that the vessel displayed AIS irregularities during its voyage or reveal evidence of a ship-to-ship transfer in proximity to Southeast Asia.",
+          "flag": "Malaysian blend” oil, particularly if the vessel is bound for China by way of Southeast Asia and if maritime databases indicate that the vessel displayed AIS irregularities during its voyage or reveal evidence of a ship-to-ship transfer in proximity to Southeast Asia",
           "red_flag": "\"Malaysian blend\" oil reference with AIS irregularities / ship-to-ship transfer",
           "src_line": 345,
           "status": "gap",
@@ -1943,7 +1954,7 @@ const CORPUS = {
         {
           "id": "IND-05",
           "section": "redflag",
-          "flag": "Transactions involving a petroleum or shipping company reveal that it does business with counterparties that have ties to Iran or transports goods using vessels that have ties to Iran or that maritime databases indicate have made stops at Iranian ports.",
+          "flag": "does business with counterparties that have ties to Iran or transports goods using vessels that have ties to Iran or that maritime databases indicate have made stops at Iranian ports",
           "red_flag": "Counterparties or vessels tied to Iran / Iranian-port stops",
           "src_line": 350,
           "status": "partial",
@@ -1954,7 +1965,7 @@ const CORPUS = {
         {
           "id": "IND-06",
           "section": "redflag",
-          "flag": "A customer makes oil-related transactions and wire transfers involving vessels that have been previously linked to suspicious financial activities or that include documentation, such as bills of lading or shipping invoices, with no consignees, that appear to be falsified, or that omit key information, in an attempt to hide the Iranian nexus.",
+          "flag": "vessels that have been previously linked to suspicious financial activities or that include documentation, such as bills of lading or shipping invoices, with no consignees, that appear to be falsified, or that omit key information, in an attempt to hide the Iranian nexus",
           "red_flag": "Vessel previously linked to suspicious activity, or falsified / no-consignee shipping docs concealing Iranian nexus",
           "src_line": 354,
           "status": "gap",
@@ -1980,7 +1991,7 @@ const CORPUS = {
         {
           "id": "IND-07",
           "section": "redflag",
-          "flag": "A customer makes transactions that move through multiple exchange houses and/or trading companies, adding additional fees and costs as the transactions progress, where the fees, number of transactions, and pattern of transactions do not reflect standard and customary commercial practices.",
+          "flag": "move through multiple exchange houses and/or trading companies, adding additional fees and costs as the transactions progress, where the fees, number of transactions, and pattern of transactions do not reflect standard and customary commercial practices",
           "red_flag": "Multi-hop exchange-house / trading-company layering with fee-stacking",
           "src_line": 361,
           "status": "gap",
@@ -2017,7 +2028,7 @@ const CORPUS = {
         {
           "id": "IND-09",
           "section": "redflag",
-          "flag": "A customer receives wire transfers or deposits that do not contain any information about the source of funds, contain incomplete information about the source of funds, or do not match the customer’s line of business, especially if they involve entities in a high-risk jurisdiction for Iranian illicit finance-related activity.",
+          "flag": "receives wire transfers or deposits that do not contain any information about the source of funds, contain incomplete information about the source of funds, or do not match the customer’s line of business",
           "red_flag": "Missing / incomplete source-of-funds, or inflows inconsistent with line of business",
           "src_line": 373,
           "status": "covered",
@@ -2050,7 +2061,7 @@ const CORPUS = {
         {
           "id": "IND-12",
           "section": "redflag",
-          "flag": "A customer makes transactions involving companies that originate with, or are directed to, entities that are general trading companies, suspected front companies, or companies that have a nexus with Iran.  Other indicators of possible front companies include opaque ownership structures, individuals/entities with obscure names that direct the company, or business addresses that are residential or co-located with other companies, especially companies that have been previously sanctioned.",
+          "flag": "transactions involving companies that originate with, or are directed to, entities that are general trading companies, suspected front companies, or companies that have a nexus with Iran",
           "red_flag": "Front-company / Iran-nexus counterparties — opaque ownership, obscure directors, co-located addresses",
           "src_line": 390,
           "status": "partial",
@@ -2061,7 +2072,7 @@ const CORPUS = {
         {
           "id": "IND-13",
           "section": "redflag",
-          "flag": "A customer declares information about the nature of its business that is inconsistent with other available information, such as previous transaction history or associated transactional information, particularly if trade data indicates that they have a history of facilitating shipments to and from Iran and if they transact predominantly with technology companies or chemical suppliers.",
+          "flag": "declares information about the nature of its business that is inconsistent with other available information, such as previous transaction history or associated transactional information, particularly if trade data indicates that they have a history of facilitating shipments to and from Iran and if they transact predominantly with technology companies or chemical suppliers",
           "red_flag": "Declared business inconsistent with Iran-shipment and tech/chemical-supplier transaction history",
           "src_line": 397,
           "status": "gap",
@@ -2072,7 +2083,7 @@ const CORPUS = {
         {
           "id": "IND-14",
           "section": "redflag",
-          "flag": "A customer makes transactions that are directed to companies that operate in unrelated businesses, and which do not seem to align with the customer due diligence (CDD) and other customer identification information collected during client onboarding and subsequent updates.  For example, and of note with regard to illicit Iranian financial activity, customers that primarily receive funds from commodities trading companies, but send funds primarily to electronics suppliers.",
+          "flag": "transactions that are directed to companies that operate in unrelated businesses, and which do not seem to align with the customer due diligence (CDD) and other customer identification information collected during client onboarding and subsequent updates",
           "red_flag": "CDD–sector flow mismatch (commodities-in / electronics-out)",
           "src_line": 403,
           "status": "gap",
@@ -2098,7 +2109,7 @@ const CORPUS = {
         {
           "id": "IND-15",
           "section": "redflag",
-          "flag": "Multiple companies incorporated at roughly the same time share counterparties, addresses, owners, or name similarities and demonstrate similar transaction profiles.  Such companies may have little to no web presence and transact in large, recurring amounts.",
+          "flag": "Multiple companies incorporated at roughly the same time share counterparties, addresses, owners, or name similarities and demonstrate similar transaction profiles",
           "red_flag": "Company cluster — shared addresses/owners/counterparties, same-time incorporation, recurring amounts",
           "src_line": 410,
           "status": "gap",
@@ -2152,7 +2163,7 @@ const CORPUS = {
         {
           "id": "IND-01",
           "section": "redflag",
-          "flag": "A customer, especially a customer who presented a Chinese passport as identification during the onboarding process, regularly receives funds that are not commensurate with the reported occupation or income, and the source of the funds cannot be attributed to payroll or other legitimate sources of income (i.e., unexplained wealth).43",
+          "flag": "regularly receives funds that are not commensurate with the reported occupation or income, and the source of the funds cannot be attributed to payroll or other legitimate sources of income (i.e., unexplained wealth",
           "red_flag": "Unexplained-wealth inflows inconsistent with stated occupation/income",
           "src_line": 452,
           "status": "partial",
@@ -2174,7 +2185,7 @@ const CORPUS = {
         {
           "id": "IND-03",
           "section": "redflag",
-          "flag": "A customer, especially a Chinese national, creates an account at a financial institution and reports their occupation as a student during the onboarding process.  This customer then regularly deposits cash into their account or receives wire transfers notated as “tuition” or “living expenses” that are not commensurate with the reported information.  After receiving the funds, the customer may subsequently initiate wire transfers or P2P transactions to unknown individuals who are unrelated to the purpose of the wire transfers or may make credit or debit card payments.",
+          "flag": "creates an account at a financial institution and reports their occupation as a student during the onboarding process.  This customer then regularly deposits cash into their account or receives wire transfers notated as “tuition” or “living expenses” that are not commensurate with the reported information.  After receiving the funds, the customer may subsequently initiate wire transfers or P2P transactions to unknown individuals who are unrelated to the purpose of the wire transfers",
           "red_flag": "Student-account tuition/living-expense inflows then forward to unrelated parties (mule funnel)",
           "src_line": 460,
           "status": "gap",
@@ -2211,7 +2222,7 @@ const CORPUS = {
         {
           "id": "IND-05",
           "section": "redflag",
-          "flag": "A customer, especially a Chinese national with unexplained wealth, initiates a wire transfer related to a real estate purchase or purchases cashier’s checks made payable to a real estate company.  The customer may be accompanied by a real estate agent at the time of purchasing the cashier’s checks.",
+          "flag": "initiates a wire transfer related to a real estate purchase or purchases cashier’s checks made payable to a real estate company",
           "red_flag": "Unexplained-wealth funds to real estate via wire or cashier's check",
           "src_line": 472,
           "status": "gap",
@@ -2222,7 +2233,7 @@ const CORPUS = {
         {
           "id": "IND-06",
           "section": "redflag",
-          "flag": "A customer, especially a Chinese national, regularly deposits large volumes of cash or cashier’s checks, or receives multiple wire, ACH, or P2P transfers for no business or apparent lawful purpose.  The customer then subsequently uses the funds to purchase a cashier’s check or disperses the funds to other individuals using P2P and wire transfers, often to other high- risk jurisdictions.",
+          "flag": "regularly deposits large volumes of cash or cashier’s checks, or receives multiple wire, ACH, or P2P transfers for no business or apparent lawful purpose.  The customer then subsequently uses the funds to purchase a cashier’s check or disperses the funds to other individuals using P2P and wire transfers, often to other high- risk jurisdictions",
           "red_flag": "Cash/cashier's-check + multi-rail inflows layered out to high-risk jurisdictions",
           "src_line": 477,
           "status": "gap",
@@ -2248,7 +2259,7 @@ const CORPUS = {
         {
           "id": "IND-07",
           "section": "redflag",
-          "flag": "A customer’s account, especially a Chinese national, receives numerous transfers or deposits, and has a significant number of withdrawals or transfers, none of which appear to be related to routine payroll, living expenses, or customer’s stated expected activity.",
+          "flag": "receives numerous transfers or deposits, and has a significant number of withdrawals or transfers, none of which appear to be related to routine payroll, living expenses, or customer’s stated expected activity",
           "red_flag": "High-velocity pass-through unrelated to payroll or expected activity",
           "src_line": 483,
           "status": "covered",
@@ -2270,7 +2281,7 @@ const CORPUS = {
         {
           "id": "IND-09",
           "section": "redflag",
-          "flag": "A customer, especially a Chinese national, is reluctant or refuses to provide information regarding the source of funds deposited or transferred into their account or acts evasive when questioned about the purpose of a transaction or may explain it as repayment of a loan.",
+          "flag": "is reluctant or refuses to provide information regarding the source of funds deposited or transferred into their account or acts evasive when questioned about the purpose of a transaction or may explain it as repayment of a loan",
           "red_flag": "Evasive / refused source-of-funds, explained as loan repayment",
           "src_line": 490,
           "status": "gap",
@@ -2307,7 +2318,7 @@ const CORPUS = {
         {
           "id": "IND-11",
           "section": "redflag",
-          "flag": "A business owned by a Chinese national regularly receives wire transfers indicating the export of goods to foreign countries including Mexico, China, Hong Kong, and the United Arab Emirates, but rarely, or never, engages in transactions that indicate the purchase of goods to maintain inventory.",
+          "flag": "regularly receives wire transfers indicating the export of goods to foreign countries including Mexico, China, Hong Kong, and the United Arab Emirates, but rarely, or never, engages in transactions that indicate the purchase of goods to maintain inventory",
           "red_flag": "Export-indicating wires with no offsetting inventory purchasing",
           "src_line": 509,
           "status": "gap",
@@ -2329,7 +2340,7 @@ const CORPUS = {
         {
           "id": "IND-13",
           "section": "redflag",
-          "flag": "A customer, especially a Chinese national, regularly receives P2P or wire transfers from unknown individuals and subsequently uses those funds to make a substantial credit card payment.  If questioned about the source of the funds, the customer may state that the transfers are from U.S.-based family members of Chinese citizens who are sending the customer funds to purchase goods.",
+          "flag": "regularly receives P2P or wire transfers from unknown individuals and subsequently uses those funds to make a substantial credit card payment",
           "red_flag": "Aggregated third-party inflows settling one credit card (mirror transfer)",
           "src_line": 518,
           "status": "gap",
@@ -2442,7 +2453,7 @@ const CORPUS = {
         {
           "id": "IND-01",
           "section": "financial",
-          "flag": "A customer with neither legal permanent residence in the United States nor significant experience in the health care industry (e.g., based on the customer's stated occupation) tries to open a bank account as the owner or employee of a recently established or purchased health care provider or supplier registered with a Health Care Benefit Program.",
+          "flag": "neither legal permanent residence in the United States nor significant experience in the health care industry (e.g., based on the customer's stated occupation) tries to open a bank account as the owner or employee",
           "red_flag": "New-provider account opening by non-resident, inexperienced owner/employee",
           "src_line": 316,
           "status": "gap",
@@ -2464,7 +2475,7 @@ const CORPUS = {
         {
           "id": "IND-03",
           "section": "financial",
-          "flag": "A customer is the nominal or beneficial owner of a health care provider or supplier registered with a Health Care Benefit Program and has familial or business affiliations with individuals with health care or government benefits fraud convictions.",
+          "flag": "is the nominal or beneficial owner of a health care provider or supplier registered with a Health Care Benefit Program and has familial or business affiliations with individuals with health care or government benefits fraud convictions",
           "red_flag": "Provider owner tied to convicted fraudsters (familial / business nexus)",
           "src_line": 323,
           "status": "gap",
@@ -2475,7 +2486,7 @@ const CORPUS = {
         {
           "id": "IND-04",
           "section": "financial",
-          "flag": "A customer is a health care provider or supplier registered with a Health Care Benefit Program, and the account is accessed through an Internet Protocol (IP) address or Device ID that is linked to multiple accounts at the financial institution or other financial institutions or connected to foreign jurisdictions.",
+          "flag": "the account is accessed through an Internet Protocol (IP) address or Device ID that is linked to multiple accounts at the financial institution or other financial institutions or connected to foreign jurisdictions",
           "red_flag": "Shared device / IP across provider accounts or foreign-linked access",
           "src_line": 326,
           "status": "partial",
@@ -2486,7 +2497,7 @@ const CORPUS = {
         {
           "id": "IND-05",
           "section": "financial",
-          "flag": "A customer is a health care provider or supplier registered with a Health Care Benefit Program and has nominal and beneficial owners listed on the account who also appear on bank accounts for other separate and distinct health care providers or suppliers.",
+          "flag": "has nominal and beneficial owners listed on the account who also appear on bank accounts for other separate and distinct health care providers or suppliers",
           "red_flag": "Common owners across separate distinct provider accounts (shared-owner ring)",
           "src_line": 330,
           "status": "gap",
@@ -2497,7 +2508,7 @@ const CORPUS = {
         {
           "id": "IND-06",
           "section": "financial",
-          "flag": "A customer is a recently established or purchased health care provider or supplier registered with a Health Care Benefit Program, and there are changes in the individuals listed as beneficiaries of the corporate account without a change to the name or Tax Identification Number on the account.",
+          "flag": "there are changes in the individuals listed as beneficiaries of the corporate account without a change to the name or Tax Identification Number on the account",
           "red_flag": "Beneficiary swap with unchanged account name / TIN",
           "src_line": 340,
           "status": "gap",
@@ -2508,7 +2519,7 @@ const CORPUS = {
         {
           "id": "IND-07",
           "section": "financial",
-          "flag": "A customer that is a recently established or purchased health care provider or supplier receives a significant amount of reimbursements from a Health Care Benefit Program or commercial insurers and then immediately transfers those funds to other recently established companies with the same nominal or beneficial owners, little to no online presence, and other indicators of illicit shell company activity.",
+          "flag": "receives a significant amount of reimbursements from a Health Care Benefit Program or commercial insurers and then immediately transfers those funds to other recently established companies with the same nominal or beneficial owners",
           "red_flag": "Reimbursement pass-through to same-owner shell companies",
           "src_line": 344,
           "status": "gap",
@@ -2597,7 +2608,7 @@ const CORPUS = {
         {
           "id": "IND-11",
           "section": "financial",
-          "flag": "A customer is a recently established or purchased health care provider or supplier registered with Health Care Benefit Programs or commercial insurers that receives a significant amount of reimbursements inconsistent with the customer's profile (e.g., receiving a significant amount of payments from Medicare Part A and Part B MACs for reimbursements beyond the expected activity of other similar health care providers or suppliers).",
+          "flag": "receives a significant amount of reimbursements inconsistent with the customer's profile",
           "red_flag": "Reimbursements inconsistent with profile / above peer-provider activity",
           "src_line": 357,
           "status": "partial",
@@ -2608,7 +2619,7 @@ const CORPUS = {
         {
           "id": "IND-12",
           "section": "financial",
-          "flag": "A customer is a health care provider or supplier that receives significant volumes of reimbursements from a Health Care Benefit Program or commercial insurers but has little to no legitimate business expenses associated with the provision of health care goods and services (e.g., receiving reimbursements from DME MACs but little to no purchases of DME).",
+          "flag": "receives significant volumes of reimbursements from a Health Care Benefit Program or commercial insurers but has little to no legitimate business expenses associated with the provision of health care goods and services",
           "red_flag": "Heavy reimbursement inflows with no matching operating expenses (no-opex)",
           "src_line": 362,
           "status": "gap",
@@ -2634,7 +2645,7 @@ const CORPUS = {
         {
           "id": "IND-13",
           "section": "financial",
-          "flag": "A customer is a health care provider or supplier that receives a significant volume of reimbursements from a single Health Care Benefit Program as opposed to other customers that receive reimbursements from multiple Health Care Benefit Programs (e.g., a customer is receiving a significant amount of reimbursements from one MAC for only one type of health care good or service such as DME).",
+          "flag": "receives a significant volume of reimbursements from a single Health Care Benefit Program as opposed to other customers that receive reimbursements from multiple Health Care Benefit Programs",
           "red_flag": "Single-program reimbursement concentration unlike multi-program peers",
           "src_line": 366,
           "status": "partial",
@@ -2667,7 +2678,7 @@ const CORPUS = {
         {
           "id": "IND-16",
           "section": "financial",
-          "flag": "A customer is a health care provider or supplier that has outgoing transactions to, or expenditures related to, companies that have no apparent related nexus to the health care industry. This could include residential real estate and luxury goods such as art or jewelry.",
+          "flag": "has outgoing transactions to, or expenditures related to, companies that have no apparent related nexus to the health care industry",
           "red_flag": "Outflows to companies with no health care nexus (real estate, luxury goods)",
           "src_line": 380,
           "status": "partial",
@@ -2763,7 +2774,7 @@ const CORPUS = {
         {
           "id": "IND-22",
           "section": "financial",
-          "flag": "A customer that is a health care provider or supplier, or the customer's employee, engages in behavior suggesting efforts to evade the Currency Transaction Report (CTR) reporting requirement (e.g., alters or cancels a transaction when advised a CTR would be filed or engages in structuring with multiple cash transactions for under $10,000), as well as avoid recordkeeping requirements.",
+          "flag": "evade the Currency Transaction Report (CTR) reporting requirement (e.g., alters or cancels a transaction when advised a CTR would be filed or engages in structuring with multiple cash transactions for under $10,000",
           "red_flag": "CTR evasion - transaction cancelled when flagged, sub-$10k structuring",
           "src_line": 393,
           "status": "covered",
@@ -2774,7 +2785,7 @@ const CORPUS = {
         {
           "id": "IND-23",
           "section": "financial",
-          "flag": "A customer is a recently established or purchased health care provider or supplier registered with a Health Care Benefit Program that sends a significant amount of wire transfers to individuals and companies located in foreign jurisdictions.",
+          "flag": "recently established or purchased health care provider or supplier registered with a Health Care Benefit Program that sends a significant amount of wire transfers to individuals and companies located in foreign jurisdictions",
           "red_flag": "New provider sending significant wires to foreign jurisdictions",
           "src_line": 398,
           "status": "partial",
@@ -2838,7 +2849,7 @@ const CORPUS = {
         {
           "id": "IND-02",
           "section": "redflag",
-          "flag": "Communications, including social media posts, soliciting payments with misspellings\nor messages out of profile for the counterparty, soliciting payments from individuals or\norganizations with whom you have no prior existing business relationship, including\ncelebrities or public figures.",
+          "flag": "Communications, including social media posts, soliciting payments with misspellings\nor messages out of profile for the counterparty",
           "red_flag": "Misspelled / out-of-profile payment solicitations from no-relationship counterparties",
           "src_line": 53,
           "status": "gap",
@@ -3039,7 +3050,7 @@ const CORPUS = {
         {
           "id": "IND-09",
           "section": "redflag · Artworks",
-          "flag": "Artwork-related transactions involving persons with suspected ties to sanctioned Russian elites and their proxies who (i) are not concerned with recouping their initial investment or paying a substantially higher price than the notational value of the work, and/or (ii) conduct transactions that exceed the expected sales value of the work.",
+          "flag": "Artwork-related transactions involving persons with suspected ties to sanctioned Russian elites and their proxies who (i) are not concerned with recouping their initial investment or paying a substantially higher price than the notational value of the work",
           "red_flag": "Art purchase indifferent to recouping value / overpayment (sanctioned-elite ties)",
           "src_line": 185,
           "status": "gap",
@@ -3314,7 +3325,7 @@ const CORPUS = {
         {
           "id": "IND-10",
           "section": "Transactional and Behavioral Red Flags",
-          "flag": "Transactions involving consolidated shipments of luxury goods that previously would have\nbeen destined for Russia or Belarus, but are now destined for a transshipment country or a\ncountry without restrictions on exports/re-exports to Russia or Belarus.",
+          "flag": "Transactions involving consolidated shipments of luxury goods that previously would have\nbeen destined for Russia or Belarus, but are now destined for a transshipment country",
           "red_flag": "Luxury-goods consolidation rerouted off Russia/Belarus to a transshipment country",
           "src_line": 257,
           "status": "gap",
@@ -3417,7 +3428,7 @@ const CORPUS = {
         {
           "id": "IND-18",
           "section": "Transactional and Behavioral Red Flags",
-          "flag": "When combined with other derogatory information, large dollar or volume purchases,\nincluding through the use of business credit cards, of items designated as EAR99 (or large\nvolume or dollar purchases at wholesale electrical/industrial merchants, electrical parts and\nequipment providers, or electronic parts providers), in the United States or abroad, especially\nif paired with purchases at shipping companies.",
+          "flag": "large dollar or volume purchases,\nincluding through the use of business credit cards, of items designated as EAR99 (or large\nvolume or dollar purchases at wholesale electrical/industrial merchants, electrical parts and\nequipment providers, or electronic parts providers), in the United States or abroad, especially\nif paired with purchases at shipping companies",
           "red_flag": "Large EAR99 / electronics-parts card spend paired with shipping-company purchases",
           "src_line": 283,
           "status": "gap",
@@ -3735,7 +3746,7 @@ const CORPUS = {
         {
           "id": "IND-07",
           "section": "redflag",
-          "flag": "Implementation of legal instruments (e.g., deeds of exclusion) that are intended to transfer\nan interest in CRE from a PEP or Russian elite to a family member, business associate, or\nassociated trust following a legal event such as an arrest or an OFAC designation of that\nperson.",
+          "flag": "legal instruments (e.g., deeds of exclusion) that are intended to transfer\nan interest in CRE from a PEP or Russian elite to a family member, business associate, or\nassociated trust following a legal event such as an arrest or an OFAC designation",
           "red_flag": "Title-instrument transfer of CRE interest post-arrest / OFAC designation",
           "src_line": 347,
           "status": "gap",
@@ -3746,7 +3757,7 @@ const CORPUS = {
         {
           "id": "IND-08",
           "section": "redflag",
-          "flag": "Private investment funds or other companies that submit revised ownership disclosures to\nfinancial institutions showing sanctioned individuals or PEPs that previously owned more\nthan 50 percent of a fund changing their ownership to less than 50 percent.",
+          "flag": "submit revised ownership disclosures to\nfinancial institutions showing sanctioned individuals or PEPs that previously owned more\nthan 50 percent of a fund changing their ownership to less than 50 percent",
           "red_flag": "Revised disclosure dropping sanctioned / PEP owner below 50%",
           "src_line": 352,
           "status": "partial",
@@ -4086,7 +4097,7 @@ const CORPUS = {
         {
           "id": "IND-07",
           "section": "redflag",
-          "flag": "Parties\tto\ttransactions\tlisted\tas\tultimate\tconsignees\tor\tlisted\tin\tthe\t“consign\tto”\tfield\tdo\tnot\ntypically\tengage\tin\tbusiness\tconsistent\twith\tconsuming\tor\totherwise\tusing\tcommodities\t(e.g.,\nother\tfinancial\tinstitutions,\tmail\tcenters,\tor\tlogistics\tcompanies).",
+          "flag": "Parties\tto\ttransactions\tlisted\tas\tultimate\tconsignees\tor\tlisted\tin\tthe\t“consign\tto”\tfield\tdo\tnot\ntypically\tengage\tin\tbusiness\tconsistent\twith\tconsuming\tor\totherwise\tusing\tcommodities",
           "red_flag": "Consignee inconsistent with goods consumption (FI / mail / logistics)",
           "src_line": 471,
           "status": "gap",
@@ -4136,7 +4147,7 @@ const CORPUS = {
         {
           "id": "IND-01",
           "section": "Behavioral Red Flags",
-          "flag": "A customer with no history or background of using, exchanging, or otherwise interacting\nwith virtual currency attempts to exchange a high amount of fiat currency from an existing or\nnewly opened bank account for virtual currency or attempts to initiate high-value transfers to\nVASPs.",
+          "flag": "A customer with no history or background of using, exchanging, or otherwise interacting\nwith virtual currency attempts to exchange a high amount of fiat currency from an existing or\nnewly opened bank account for virtual currency",
           "red_flag": "No-history customer initiates high-value fiat-to-crypto exchange / VASP transfer",
           "src_line": 247,
           "status": "gap",
@@ -4243,7 +4254,7 @@ const CORPUS = {
         {
           "id": "IND-08",
           "section": "Financial Red Flags",
-          "flag": "Accounts with large balances that are inactive or have limited activity begin to show constant,\nuncharacteristic, sudden, abnormally frequent, or significant withdrawals of large amounts of\nmoney being transferred to a VASP or being exchanged for virtual currency.",
+          "flag": "Accounts with large balances that are inactive or have limited activity begin to show constant,\nuncharacteristic, sudden, abnormally frequent, or significant withdrawals of large amounts of\nmoney being transferred to a VASP",
           "red_flag": "Dormant high-balance account reactivated into VASP outflows",
           "src_line": 286,
           "status": "partial",
@@ -4306,7 +4317,7 @@ const CORPUS = {
         {
           "id": "IND-11",
           "section": "Technical Red Flags",
-          "flag": "System monitoring and logs show that a customer’s account is accessed repeatedly by unique\nIP addresses, device IDs, or geographies inconsistent with prior access patterns.  Additionally,\nlogins to a customer’s online account at a VASP come from a variety of different device IDs\nand names inconsistent with the customer’s typical logins.",
+          "flag": "System monitoring and logs show that a customer’s account is accessed repeatedly by unique\nIP addresses, device IDs, or geographies inconsistent with prior access patterns",
           "red_flag": "Anomalous IP / device / geo access including unfamiliar VASP logins",
           "src_line": 302,
           "status": "partial",
@@ -4367,7 +4378,7 @@ const CORPUS = {
         {
           "id": "IND-01",
           "section": "redflag",
-          "flag": "A customer or a customer’s counterparty conducts transactions with OFAC-designated entities and individuals, or transactions that contain a nexus to identifiers listed for OFAC-designated entities and individuals, to include, email addresses, physical addresses, phone numbers, or passport numbers, or virtual currency addresses.",
+          "flag": "A customer or a customer’s counterparty conducts transactions with OFAC-designated entities and individuals",
           "red_flag": "OFAC-designated counterparty / identifier match (email, phone, passport, VC address)",
           "src_line": 87,
           "status": "covered",
@@ -4400,7 +4411,7 @@ const CORPUS = {
         {
           "id": "IND-04",
           "section": "redflag",
-          "flag": "A customer conducts transactions that originate with, are directed to, or otherwise involve entities that are shell corporations, general “trading companies,” or other companies that have a nexus with Iran or other Iran-supported terrorist groups, such as Hizballah and Palestine Islamic Jihad.8",
+          "flag": "entities that are shell corporations, general “trading companies,” or other companies that have a nexus with Iran or other Iran-supported terrorist groups, such as Hizballah and Palestine Islamic Jihad",
           "red_flag": "Shell / \"trading company\" counterparty with Iran / Hizballah / PIJ nexus",
           "src_line": 121,
           "status": "gap",
@@ -4411,7 +4422,7 @@ const CORPUS = {
         {
           "id": "IND-05",
           "section": "redflag",
-          "flag": "A customer that is a charitable organization or nonprofit organization (NPO)9 solicits donations but does not appear to provide any charitable services or openly supports Hamas’s terrorist activity or operations.  In some cases, these organizations may post on social media platforms or encrypted messaging apps to solicit donations, including in virtual currency.",
+          "flag": "A customer that is a charitable organization or nonprofit organization (NPO)9 solicits donations but does not appear to provide any charitable services or openly supports Hamas’s terrorist activity or operations",
           "red_flag": "NPO soliciting donations with no apparent charitable services / Hamas support",
           "src_line": 126,
           "status": "gap",
@@ -4587,7 +4598,7 @@ const CORPUS = {
         {
           "id": "IND-07",
           "section": "redflag",
-          "flag": "A new business account is created for an established business, but no other business activity\noccurs in the account except the deposit of the ERC.  This may be indicative of identity theft,\nwhere the established business was used as a fraudulent front to file for the ERC.",
+          "flag": "A new business account is created for an established business, but no other business activity\noccurs in the account except the deposit of the ERC",
           "red_flag": "New ERC-only account on an established business (front / identity-theft pattern)",
           "src_line": 399,
           "status": "gap",
@@ -4691,7 +4702,7 @@ const CORPUS = {
         {
           "id": "IND-01",
           "section": "redflag",
-          "flag": "A customer or a customer’s counterparty conducts transactions with entities and individuals that OFAC has designated due to their connection with Hizballah, or conducts transactions that contain a nexus to identifiers listed for OFAC-designated entities and individuals affiliated with Hizballah, to include email addresses, physical addresses, phone numbers, passport numbers, or convertible virtual currency addresses.",
+          "flag": "A customer or a customer’s counterparty conducts transactions with entities and individuals that OFAC has designated due to their connection with Hizballah",
           "red_flag": "Counterparty match to OFAC Hizballah designations — name or identifier nexus (email / address / phone / passport / CVC)",
           "src_line": 377,
           "status": "gap",
@@ -4702,7 +4713,7 @@ const CORPUS = {
         {
           "id": "IND-02",
           "section": "redflag",
-          "flag": "A customer or a customer’s counterparty utilizes the services of foreign financial institutions that have been identified as being of “primary money laundering concern” under section 311 of the USA PATRIOT Act referencing their association with, or use by, Hizballah.",
+          "flag": "A customer or a customer’s counterparty utilizes the services of foreign financial institutions that have been identified as being of “primary money laundering concern” under section 311 of the USA PATRIOT Act",
           "red_flag": "Routing through a Section 311 \"primary money laundering concern\" FI tied to Hizballah",
           "src_line": 383,
           "status": "partial",
@@ -4713,7 +4724,7 @@ const CORPUS = {
         {
           "id": "IND-03",
           "section": "redflag",
-          "flag": "A customer conducts transactions with an MSB or other financial institution, including one that offers services in convertible virtual currency, that operates in jurisdictions known for, or at high risk for, Hizballah terrorist financing activity, such as the tri-border region of South America, the Middle East, or West Africa, and has opaque ownership or whose beneficial owners are known associates of Hizballah.",
+          "flag": "A customer conducts transactions with an MSB or other financial institution, including one that offers services in convertible virtual currency, that operates in jurisdictions known for, or at high risk for, Hizballah terrorist financing activity, such as the tri-border region of South America, the Middle East, or West Africa",
           "red_flag": "MSB / VASP counterparty in a Hizballah-TF high-risk corridor with opaque or Hizballah-linked ownership",
           "src_line": 387,
           "status": "gap",
@@ -4724,7 +4735,7 @@ const CORPUS = {
         {
           "id": "IND-04",
           "section": "redflag",
-          "flag": "A customer conducts transactions that originate with, are directed to, or otherwise involve entities that are known or suspected front companies or other companies whose beneficial ownership information indicates that they may have a nexus with Hizballah.  Indicators of possible front companies include opaque ownership structures or business addresses that are residential or co-located with other companies.",
+          "flag": "A customer conducts transactions that originate with, are directed to, or otherwise involve entities that are known or suspected front companies or other companies whose beneficial ownership information indicates that they may have a nexus with Hizballah",
           "red_flag": "Front-company counterparty — opaque ownership / residential or co-located address with Hizballah BO nexus",
           "src_line": 393,
           "status": "gap",
@@ -4735,7 +4746,7 @@ const CORPUS = {
         {
           "id": "IND-05",
           "section": "redflag",
-          "flag": "Invoices—particularly for shipments of electronics leaving the United States for the tri-border region of South America or the PRC, or used cars being shipped from the United States to West Africa—appear to over- or under-charge the recipient, especially if the goods do not appear to correspond with the counterparty’s stated line of business and/or if the payments for those goods are facilitated by a Lebanese or Hizballah-connected financial firm, or a branch of a Lebanese or Hizballah-connected financial firm located abroad.",
+          "flag": "Invoices—particularly for shipments of electronics leaving the United States for the tri-border region of South America or the PRC, or used cars being shipped from the United States to West Africa—appear to over- or under-charge the recipient",
           "red_flag": "Trade-based invoice over/under-pricing on TBA-PRC electronics / West-Africa used-car corridors",
           "src_line": 399,
           "status": "gap",
@@ -4761,7 +4772,7 @@ const CORPUS = {
         {
           "id": "IND-06",
           "section": "redflag",
-          "flag": "Transactions and wire transfers refer to underlying commercial activity that involves bills of lading with no consignees or involves vessels that have been previously linked to suspicious financial activities or registered to sanctioned entities connected with Hizballah, the Houthis, the IRGC-QF, or the Syrian regime.  Documentation, such as bills of lading and shipping invoices, appears to be falsified or omits key information, or there are inconsistencies between shipping related documents and maritime database entries.",
+          "flag": "Transactions and wire transfers refer to underlying commercial activity that involves bills of lading with no consignees or involves vessels that have been previously linked to suspicious financial activities or registered to sanctioned entities connected with Hizballah, the Houthis, the IRGC-QF, or the Syrian regime",
           "red_flag": "Falsified / consignee-less shipping docs tied to sanctioned or prior-suspicious vessels",
           "src_line": 414,
           "status": "gap",
@@ -4772,7 +4783,7 @@ const CORPUS = {
         {
           "id": "IND-07",
           "section": "redflag",
-          "flag": "A customer, domestic or foreign, with businesses in the real estate, import/export, construction, diamonds and precious stones, or high-value art sectors with numerous international counterparties in high-risk jurisdictions for Hizballah financing, makes an unusually high number of cash deposits in business accounts, transfers funds from business to personal accounts or vice versa, or uses personal accounts or personal credit cards to make business payments.",
+          "flag": "A customer, domestic or foreign, with businesses in the real estate, import/export, construction, diamonds and precious stones, or high-value art sectors with numerous international counterparties in high-risk jurisdictions for Hizballah financing, makes an unusually high number of cash deposits in business accounts, transfers funds from business to personal accounts or vice versa",
           "red_flag": "High-risk-sector business: heavy cash deposits and business-personal commingling",
           "src_line": 421,
           "status": "partial",
@@ -4800,7 +4811,7 @@ const CORPUS = {
         {
           "id": "IND-01",
           "section": "redflag",
-          "flag": "A\tcustomer’s\tphoto\tis\tinternally\tinconsistent\t(e.g.,\tshows\tvisual\ttells\tof\tbeing\taltered)\tor\tis\tinconsistent\twith\ttheir\tother\tidentifying\tinformation\t(e.g.,\ta\tcustomer’s\tdate\tof\tbirth\tindicates\tthat\tthey\tare\tmuch\tolder\tor\tyounger\tthan\tthe\tphoto\twould\tsuggest).",
+          "flag": "A\tcustomer’s\tphoto\tis\tinternally\tinconsistent\t(e.g.,\tshows\tvisual\ttells\tof\tbeing\taltered)\tor\tis\tinconsistent\twith\ttheir\tother\tidentifying\tinformation",
           "red_flag": "Photo alteration tells or photo–DOB age mismatch",
           "src_line": 268,
           "status": "partial",
@@ -4822,7 +4833,7 @@ const CORPUS = {
         {
           "id": "IND-03",
           "section": "redflag",
-          "flag": "A\tcustomer\tuses\ta\tthird-party\twebcam\tplugin\tduring\ta\tlive\tverification\tcheck.\t\t Alternatively,\na\tcustomer\tattempts\tto\tchange\tcommunication\tmethods\tduring\ta\tlive\tverification\tcheck\tdue\tto\nexcessive\tor\tsuspicious\ttechnological\tglitches\tduring\tremote\tverification\tof\ttheir\tidentity.",
+          "flag": "A\tcustomer\tuses\ta\tthird-party\twebcam\tplugin\tduring\ta\tlive\tverification\tcheck",
           "red_flag": "Third-party webcam plugin or channel-switching mid-verification",
           "src_line": 298,
           "status": "gap",
@@ -4916,7 +4927,7 @@ const CORPUS = {
         {
           "id": "IND-09",
           "section": "redflag",
-          "flag": "A\tnewly\topened\taccount\tor\tan\taccount\twith\tlittle\tprior\ttransaction\thistory\thas\ta\tpattern\tof\nrapid\ttransactions;\thigh\tpayment\tvolumes\tto\tpotentially\trisky\tpayees,\tsuch\tas\tgambling\nwebsites\tor\tdigital\tasset\texchanges;\tor\thigh\tvolumes\tof\tchargebacks\tor\trejected\tpayments.",
+          "flag": "A\tnewly\topened\taccount\tor\tan\taccount\twith\tlittle\tprior\ttransaction\thistory\thas\ta\tpattern\tof\nrapid\ttransactions;\thigh\tpayment\tvolumes\tto\tpotentially\trisky\tpayees,\tsuch\tas\tgambling\nwebsites\tor\tdigital\tasset\texchanges",
           "red_flag": "New / thin-history account → rapid flow to risky payees, chargebacks",
           "src_line": 314,
           "status": "gap",
@@ -5050,7 +5061,7 @@ const CORPUS = {
         {
           "id": "IND-08",
           "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
-          "flag": "A\tcompany\twith\ta\tlimited\tonline\tpresence\tprominently\thighlights\ttheir\tMSB\tregistration\twith\nFinCEN\tor\tclaims\tto\tbe\tlicensed\tby\tFinCEN\talongside\tunverified\ttestimonials\tand\tpromotions\tof\nrisk-free\thigh-investment\treturns,\toften\ton\tits\twebsite,\ta\tnews\twire\tservice,\tor\ta\tsocial\tmedia\tpost.",
+          "flag": "A\tcompany\twith\ta\tlimited\tonline\tpresence\tprominently\thighlights\ttheir\tMSB\tregistration\twith\nFinCEN\tor\tclaims\tto\tbe\tlicensed\tby\tFinCEN\talongside\tunverified\ttestimonials\tand\tpromotions\tof\nrisk-free\thigh-investment\treturns",
           "red_flag": "Low-presence MSB touting FinCEN registration with risk-free-return promotions",
           "src_line": 489,
           "status": "gap",
@@ -5155,7 +5166,7 @@ const CORPUS = {
         {
           "id": "IND-15",
           "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
-          "flag": "A\tcompany\tis\tregistered\tas\tan\tMSB\twith\tthe\tsame\tor\tvery\tsimilar\tname\tof\ta\tlarge,\twell-known\nfinancial\tinstitution\tthat\tappears\tto\tlack\tan\tMSB\tregistration\trequirement,\tsuch\tas\ta\tbank,\ncredit\tunion,\tor\tbroker-dealer,\tand\tappears\tto\thave\tno\tofficial\taffiliation\twith\tthat\tlarge,\twell-\nknown\tfinancial\tinstitution.",
+          "flag": "A\tcompany\tis\tregistered\tas\tan\tMSB\twith\tthe\tsame\tor\tvery\tsimilar\tname\tof\ta\tlarge,\twell-known\nfinancial\tinstitution",
           "red_flag": "MSB name impersonating a well-known financial institution",
           "src_line": 515,
           "status": "gap",
@@ -5191,7 +5202,7 @@ const CORPUS = {
         {
           "id": "IND-17",
           "section": "Red Flag Indicators for FinCEN Imposter Schemes",
-          "flag": "A\tcustomer\tuncharacteristically\tsends\tpayments\tto\ta\tnew\tcounterparty\tand\tindicates\tto\tthe\nfinancial\tinstitution\tthat\tthe\tfunds\tmust\tbe\tsent\timmediately\tto\tpay\tFinCEN\tfor\ta\tsupposed\n“AML/CFT\tviolation,”\t“outstanding\tdebt,”\tor\ta\t“Treasury\tgrant.”",
+          "flag": "A\tcustomer\tuncharacteristically\tsends\tpayments\tto\ta\tnew\tcounterparty\tand\tindicates\tto\tthe\nfinancial\tinstitution\tthat\tthe\tfunds\tmust\tbe\tsent\timmediately\tto\tpay\tFinCEN",
           "red_flag": "Uncharacteristic urgent new-counterparty payment to “pay FinCEN”",
           "src_line": 525,
           "status": "partial",
@@ -5328,7 +5339,7 @@ const CORPUS = {
         {
           "id": "IND-06",
           "section": "Red Flags for Armored Car Services",
-          "flag": "A business in Mexico, near the southwest border of the United States, organizes the transportation\nof a large volume of cash to multiple locations throughout the United States by an ACS or air\ntransport, for no business or apparent lawful purpose, before it is finally delivered to a U.S.-based\nfinancial institution or a Federal Reserve Bank location.",
+          "flag": "A business in Mexico, near the southwest border of the United States, organizes the transportation\nof a large volume of cash to multiple locations throughout the United States by an ACS or air\ntransport, for no business or apparent lawful purpose",
           "red_flag": "Border-business cash routed multi-location by ACS/air, no lawful purpose",
           "src_line": 299,
           "status": "gap",
@@ -5405,7 +5416,7 @@ const CORPUS = {
         {
           "id": "IND-01",
           "section": "redflag",
-          "flag": "A customer is a small U.S.-based oil and natural gas company, importing company, or freight\ncompany operating in states on the U.S. southwest border with transactional activity and\nprofit margins that exceed the typical business profile of similar companies in their industries.",
+          "flag": "transactional activity and\nprofit margins that exceed the typical business profile of similar companies in their industries",
           "red_flag": "Small SW-border oil/gas, import, or freight co. — activity and margins above industry peer profile",
           "src_line": 325,
           "status": "gap",
@@ -5429,7 +5440,7 @@ const CORPUS = {
         {
           "id": "IND-03",
           "section": "redflag",
-          "flag": "A customer is a small U.S.-based oil and natural gas company that is selling millions of dollars\nof crude oil per month but has no online presence or is using a basic website that appears\ndesigned to closely resemble major U.S. oil and natural gas companies’ websites in order to\nmake their significant crude oil sales appear legitimate.",
+          "flag": "selling millions of dollars\nof crude oil per month but has no online presence or is using a basic website that appears\ndesigned to closely resemble major U.S. oil and natural gas companies’ websites",
           "red_flag": "Millions in monthly crude sales with no / imitative web presence (front-company facade)",
           "src_line": 348,
           "status": "gap",
@@ -5441,7 +5452,7 @@ const CORPUS = {
         {
           "id": "IND-04",
           "section": "redflag",
-          "flag": "A customer is a small U.S.-based oil and natural gas company that has a website indicating it\nis only a buyer or seller of crude oil, but the company is sending wire transfers to Mexican or\nU.S. companies for purchases of purported waste oil or other hazardous materials.",
+          "flag": "has a website indicating it\nis only a buyer or seller of crude oil, but the company is sending wire transfers to Mexican or\nU.S. companies for purchases of purported waste oil or other hazardous materials",
           "red_flag": "Stated crude-only business vs. waste-oil purchase wires (business-purpose mismatch)",
           "src_line": 353,
           "status": "gap",
@@ -5493,7 +5504,7 @@ const CORPUS = {
         {
           "id": "IND-06",
           "section": "redflag",
-          "flag": "A customer is a small U.S.-based oil and natural gas company that is sending wire transfers to\nMexican or U.S. companies for waste oil or other hazardous materials without possessing the\nappropriate registrations with the U.S. Environmental Protection Agency (EPA).24",
+          "flag": "sending wire transfers to\nMexican or U.S. companies for waste oil or other hazardous materials without possessing the\nappropriate registrations with the U.S. Environmental Protection Agency (EPA",
           "red_flag": "Waste-oil / hazmat purchase wires without required EPA registration",
           "src_line": 361,
           "status": "gap",
@@ -5517,7 +5528,7 @@ const CORPUS = {
         {
           "id": "IND-08",
           "section": "redflag",
-          "flag": "A customer is a small U.S.-based oil and natural gas company that has a sudden and significant\nvolume of transactional activity with one or a small number of Mexican or U.S. companies that\nhave little to no online presence and displays other indicators of illicit shell company activity.",
+          "flag": "has a sudden and significant\nvolume of transactional activity with one or a small number of Mexican or U.S. companies that\nhave little to no online presence and displays other indicators of illicit shell company activity",
           "red_flag": "Sudden high-volume activity concentrated to low-web-presence shell-like counterparties",
           "src_line": 369,
           "status": "gap",
@@ -5529,7 +5540,7 @@ const CORPUS = {
         {
           "id": "IND-09",
           "section": "redflag",
-          "flag": "A customer is a small U.S.-based oil and natural gas company that is receiving domestic\nand international wire transfers for invoices related to the sale of crude oil but sending wire\ntransfers to Mexican or U.S. companies for invoices for the purchase of waste oil or other\nhazardous materials.",
+          "flag": "receiving domestic\nand international wire transfers for invoices related to the sale of crude oil but sending wire\ntransfers to Mexican or U.S. companies for invoices for the purchase of waste oil or other\nhazardous materials",
           "red_flag": "Crude-sale inbound vs. waste-oil purchase outbound (invoice-purpose mismatch)",
           "src_line": 373,
           "status": "gap",
@@ -5567,7 +5578,7 @@ const CORPUS = {
         {
           "id": "IND-11",
           "section": "redflag",
-          "flag": "A customer is a U.S. importing company that is receiving wire transfers from a small U.S.-\nbased oil and natural gas company for the sale of waste oil or other hazardous materials and\nthen wiring those funds to a singular or small number of companies in Mexico.",
+          "flag": "receiving wire transfers from a small U.S.-\nbased oil and natural gas company for the sale of waste oil or other hazardous materials and\nthen wiring those funds to a singular or small number of companies in Mexico",
           "red_flag": "Importer receive-and-forward of waste-oil proceeds to a few Mexican companies (pass-through)",
           "src_line": 383,
           "status": "gap",
@@ -5617,7 +5628,7 @@ const CORPUS = {
         {
           "id": "IND-14",
           "section": "redflag",
-          "flag": "A customer is a small U.S.-based oil and natural gas company, importing company, or freight\ncompany operating on the U.S. southwest border that is transacting with Mexican and U.S.\ncompanies and their beneficial owners associated with Cartel-related activity based on open-\nsource reporting in Mexico, indictments, and OFAC designations and/or press releases.",
+          "flag": "transacting with Mexican and U.S.\ncompanies and their beneficial owners associated with Cartel-related activity based on open-\nsource reporting in Mexico, indictments, and OFAC designations and/or press releases",
           "red_flag": "Counterparties / beneficial owners tied to Cartel activity (OFAC / indictment / open-source)",
           "src_line": 400,
           "status": "gap",
@@ -5658,7 +5669,7 @@ const CORPUS = {
         {
           "id": "IND-01",
           "section": "redflag",
-          "flag": "A customer is a company or NPO serving as a sponsor for a government benefit program that\nsuddenly receives and disburses a significant number of reimbursements in a short timeframe\ninconsistent with the customer profile of other similar entities.",
+          "flag": "suddenly receives and disburses a significant number of reimbursements in a short timeframe\ninconsistent with the customer profile of other similar entities",
           "red_flag": "Reimbursement pass-through spike off peer baseline",
           "src_line": 186,
           "status": "gap",
@@ -5818,7 +5829,7 @@ const CORPUS = {
         {
           "id": "IND-11",
           "section": "redflag",
-          "flag": "A customer that is a company or NPO, enrolled in a government benefit program, or\nthe customer’s employee, engages in behavior suggesting efforts to evade the Currency\nTransaction Report (CTR) reporting requirement (e.g., alters or cancels a transaction when\nadvised a CTR would be filed or engages in structuring with multiple cash transactions for\nunder $10,000), as well as avoiding recordkeeping requirements.16",
+          "flag": "engages in behavior suggesting efforts to evade the Currency\nTransaction Report (CTR) reporting requirement (e.g., alters or cancels a transaction when\nadvised a CTR would be filed or engages in structuring with multiple cash transactions for\nunder $10,000",
           "red_flag": "CTR-evasion: sub-$10k structuring / cancel-on-CTR-notice",
           "src_line": 221,
           "status": "covered",
@@ -5885,7 +5896,7 @@ const CORPUS = {
         {
           "id": "IND-01",
           "section": "Oil Smuggling-Related Red Flags",
-          "flag": "Shipping Companies with Iranian Counterparties.  Transactions involving a petroleum or shipping company reveal that it does business with counterparties that have ties to Iran or transport goods using “shadow fleet” vessels that have ties to Iran or that maritime databases indicate have made stops at Iranian ports.",
+          "flag": "Shipping Companies with Iranian Counterparties.  Transactions involving a petroleum or shipping company reveal that it does business with counterparties that have ties to Iran or transport goods using “shadow fleet” vessels that have ties to Iran",
           "red_flag": "Iran-linked counterparties / shadow-fleet vessels at Iranian ports",
           "src_line": 421,
           "status": "partial",
@@ -5896,7 +5907,7 @@ const CORPUS = {
         {
           "id": "IND-02",
           "section": "Oil Smuggling-Related Red Flags",
-          "flag": "Irregularities in Shipping Documentation that may be Intended to Hide Activities\nInvolving Iran.  A customer makes oil-related transactions and wire transfers involving\nvessels that have been previously linked to suspicious financial activities or that include\ndocumentation, such as bills of lading or shipping invoices, with no consignees, that appear to\nbe falsified, or that omit key information, to obfuscate the Iranian nexus.",
+          "flag": "Irregularities in Shipping Documentation that may be Intended to Hide Activities\nInvolving Iran.  A customer makes oil-related transactions and wire transfers involving\nvessels that have been previously linked to suspicious financial activities or that include\ndocumentation, such as bills of lading or shipping invoices, with no consignees, that appear to\nbe falsified",
           "red_flag": "Falsified / consignee-less oil shipping documents obscuring Iran nexus",
           "src_line": 430,
           "status": "gap",
@@ -5977,7 +5988,7 @@ const CORPUS = {
         {
           "id": "IND-08",
           "section": "Shadow Banking and Front Company Abuse-Related Red Flags",
-          "flag": "Unusual Use of Exchange Houses.  A customer makes transactions that move through\nmultiple exchange houses and/or trading companies, adding additional fees and costs as the\ntransactions progress, where the fees, number of transactions, or pattern of transactions do not\nreflect standard and customary commercial practices.",
+          "flag": "Unusual Use of Exchange Houses.  A customer makes transactions that move through\nmultiple exchange houses and/or trading companies, adding additional fees and costs as the\ntransactions progress",
           "red_flag": "Layering through multiple exchange houses with fee accretion",
           "src_line": 500,
           "status": "partial",
@@ -5999,7 +6010,7 @@ const CORPUS = {
         {
           "id": "IND-10",
           "section": "Digital Assets-Related Red Flags",
-          "flag": "Stablecoin Payments with an Unclear Source of Funds.  A customer in a high-risk\njurisdiction for Iranian illicit finance-related activities receives a stablecoin payment that does\nnot match the customer’s line of business and fails to provide information about the source of\nfunds or provides documentation indicating a potential link to Iranian illicit finance.",
+          "flag": "Stablecoin Payments with an Unclear Source of Funds.  A customer in a high-risk\njurisdiction for Iranian illicit finance-related activities receives a stablecoin payment that does\nnot match the customer’s line of business and fails to provide information about the source of\nfunds",
           "red_flag": "Stablecoin receipt with source-of-funds gap and business mismatch",
           "src_line": 521,
           "status": "gap",
@@ -6010,7 +6021,7 @@ const CORPUS = {
         {
           "id": "IND-11",
           "section": "Digital Assets-Related Red Flags",
-          "flag": "Unusual Stablecoin Account Activity.  A customer of a stablecoin issuer, particularly a foreign\nentity such as an overseas purported trust company, opens an account and subsequently engages\nin mint activity requiring multiple rate/limit increases in a short period of time, or otherwise\ntransacts in a manner that does not appear consistent with its reported business profile.",
+          "flag": "Unusual Stablecoin Account Activity.  A customer of a stablecoin issuer, particularly a foreign\nentity such as an overseas purported trust company, opens an account and subsequently engages\nin mint activity requiring multiple rate/limit increases in a short period of time",
           "red_flag": "New trust-company stablecoin account: mint with repeated limit increases",
           "src_line": 530,
           "status": "partial",
@@ -6119,7 +6130,7 @@ const CORPUS = {
         {
           "id": "IND-04",
           "section": "redflag",
-          "flag": "Ship-to-Ship (STS) Transfers\nWhile ship-to-ship transfers (the transfer of cargo between ships at sea) can be conducted for\nlegitimate purposes, STS transfers—especially at night or in areas determined to be high-risk for\nsanctions evasion or other illicit activity—are frequently used to evade sanctions by concealing the\norigin or destination of surreptitiously transferred petroleum, coal, and other material.",
+          "flag": "Ship-to-Ship (STS) Transfers\nWhile ship-to-ship transfers (the transfer of cargo between ships at sea) can be conducted for\nlegitimate purposes, STS transfers—especially at night or in areas determined to be high-risk for\nsanctions evasion or other illicit activity—are frequently used to evade sanctions by concealing the\norigin or destination",
           "red_flag": "Night / high-risk ship-to-ship transfers concealing cargo origin-destination",
           "src_line": 90,
           "status": "gap",
@@ -6195,7 +6206,7 @@ const CORPUS = {
         {
           "id": "IND-01",
           "section": "redflag",
-          "flag": "Commercially unreasonable transactions.  Transfers of property in which a blocked person once held an interest on terms that are not commercially reasonable, lacking adequate consideration, or otherwise not suggestive of an arm’s length transaction may indicate that the blocked person still retains an interest in the property.",
+          "flag": "Commercially unreasonable transactions.  Transfers of property in which a blocked person once held an interest on terms that are not commercially reasonable, lacking adequate consideration, or otherwise not suggestive of an arm’s length transaction",
           "red_flag": "Non-arm's-length transfer lacking adequate consideration",
           "src_line": 95,
           "status": "partial",
@@ -6242,7 +6253,7 @@ const CORPUS = {
         {
           "id": "IND-04",
           "section": "redflag",
-          "flag": "Unduly  complex  corporate  structures  involving  higher-risk  jurisdictions.    The  presence  of unnecessarily  complex  legal  structures  without  a  discernible  legitimate  purpose—such  as  certain multi-layered limited liability companies, partnerships, or trusts—may indicate an effort to conceal an ownership interest.",
+          "flag": "Unduly  complex  corporate  structures  involving  higher-risk  jurisdictions.    The  presence  of unnecessarily  complex  legal  structures  without  a  discernible  legitimate  purpose—such  as  certain multi-layered limited liability companies, partnerships, or trusts",
           "red_flag": "Multi-layered LLC / trust structures in higher-risk jurisdictions concealing ownership",
           "src_line": 132,
           "status": "gap",
@@ -6253,7 +6264,7 @@ const CORPUS = {
         {
           "id": "IND-05",
           "section": "redflag",
-          "flag": "Continued involvement of a blocked person.  Facts or circumstances suggesting a blocked person remains involved in the use, management, or disposition of property—including through proxies or intermediaries—may indicate that the blocked person continues to retain an interest in property.",
+          "flag": "Continued involvement of a blocked person.  Facts or circumstances suggesting a blocked person remains involved in the use, management, or disposition of property—including through proxies or intermediaries",
           "red_flag": "Blocked person retains control via proxies or intermediaries",
           "src_line": 139,
           "status": "gap",
@@ -6289,7 +6300,7 @@ const CORPUS = {
         {
           "id": "IND-07",
           "section": "redflag",
-          "flag": "Evasive  responses  regarding  a  blocked  person’s  involvement.    Evasive  or  vague  responses,  or failures to respond to questions from counterparties, key intermediaries, or gatekeepers regarding a blocked person’s involvement in property may be evidence of intent to conceal a continuing interest.",
+          "flag": "Evasive  responses  regarding  a  blocked  person’s  involvement.    Evasive  or  vague  responses,  or failures to respond to questions from counterparties, key intermediaries, or gatekeepers regarding a blocked person’s involvement in property",
           "red_flag": "Evasive / non-responsive answers on a blocked person's involvement",
           "src_line": 156,
           "status": "partial",
@@ -6614,7 +6625,7 @@ const CORPUS = {
         {
           "id": "IND-15",
           "section": "cultivation-processing",
-          "flag": "Client makes excessive or atypical utility payments (e.g., bill payments made to different hydro accounts,\n\nmultiple individuals paying off the same hydro account, payment amount exceeds expected amount for personal\nconsumption, or bill payments that appear excessive given stated occupation and/or address).",
+          "flag": "Client makes excessive or atypical utility payments",
           "red_flag": "Utility-payment anomaly: multiple hydro accounts, shared account, or above-consumption amounts",
           "src_line": 243,
           "status": "gap",
@@ -7715,7 +7726,7 @@ const CORPUS = {
         {
           "id": "IND-06",
           "section": "general-wildlife-trade",
-          "flag": "Individual received numerous transfers with wildlife-trade references from several parties, followed by\noutgoing transfers to an individual(s) who has also received similar email money transfers from other\nparties. The individual had very few or no other transactions in their account.",
+          "flag": "Individual received numerous transfers with wildlife-trade references from several parties, followed by\noutgoing transfers to an individual(s) who has also received similar email money transfers from other\nparties",
           "red_flag": "Wildlife-referenced fan-in passed through to onward collectors (nominee node)",
           "src_line": 309,
           "status": "gap",
@@ -7893,7 +7904,7 @@ const CORPUS = {
         {
           "id": "IND-02",
           "section": "consumer-facilitator",
-          "flag": "Frequent transfers of low-value funds by a male to one or a few recipients, often female, located in a\njurisdiction(s) at high-risk for child sexual exploitation, in a short timeframe and who has no apparent familial or\nother legitimate connection to the recipient.",
+          "flag": "Frequent transfers of low-value funds by a male to one or a few recipients, often female, located in a\njurisdiction(s) at high-risk for child sexual exploitation",
           "red_flag": "Frequent low-value transfers by a male to few often-female recipients in CSE-high-risk jurisdictions, no legitimate connection",
           "src_line": 315,
           "status": "gap",
@@ -7904,7 +7915,7 @@ const CORPUS = {
         {
           "id": "IND-03",
           "section": "consumer-facilitator",
-          "flag": "Frequent transfers of low-value funds by a male (usually aged over 40), to younger recipients, often female, in a\njurisdiction(s) at high-risk for child sexual exploitation through online banking or money services business,\nincluding digital platforms, often in the late evening/early morning hours.",
+          "flag": "Frequent transfers of low-value funds by a male (usually aged over 40), to younger recipients, often female, in a\njurisdiction(s) at high-risk for child sexual exploitation",
           "red_flag": "Over-40-male low-value transfers to younger recipients in CSE-high-risk jurisdictions, off-hours online/MSB",
           "src_line": 319,
           "status": "gap",
@@ -8007,7 +8018,7 @@ const CORPUS = {
         {
           "id": "IND-11",
           "section": "consumer-facilitator",
-          "flag": "Frequent, low-value transfers, to or through peer-to-peer funds transfer platforms, often with sexually explicit\nreferences, references to social media platforms, and/or references to file sharing and creator-content\nstreaming websites, including those hosting artificial intelligence generated material.",
+          "flag": "Frequent, low-value transfers, to or through peer-to-peer funds transfer platforms, often with sexually explicit\nreferences",
           "red_flag": "Low-value P2P transfers with sexual / file-sharing / AI-content memo references",
           "src_line": 355,
           "status": "gap",
@@ -8139,7 +8150,7 @@ const CORPUS = {
         {
           "id": "IND-23",
           "section": "producer-seller",
-          "flag": "Receiving peer-to-peer payments from predominantly male counterparts in low-value amounts, often located in\nother jurisdictions, with sexually explicit references, references to social media platforms and/or references to\nfile sharing and creator-content streaming websites, including those hosting artificial intelligence generated\nmaterial.",
+          "flag": "Receiving peer-to-peer payments from predominantly male counterparts in low-value amounts, often located in\nother jurisdictions, with sexually explicit references",
           "red_flag": "P2P fan-in from male foreign payers with sexual / file-sharing / AI-content memos",
           "src_line": 411,
           "status": "gap",
@@ -8443,7 +8454,7 @@ const CORPUS = {
         {
           "id": "IND-01",
           "section": "tbml",
-          "flag": "An entity is a Canadian small or medium-size import/export company, wholesaler, dealer or broker operating in a sector dealing in high-volume, high-demand commodities with variable price ranges, including agri-food, textiles, electronics, toys, lumber and paper, and automotive or heavy equipment.",
+          "flag": "An entity is a Canadian small or medium-size import/export company, wholesaler, dealer or broker operating in a sector dealing in high-volume, high-demand commodities with variable price ranges",
           "red_flag": "SME importer/exporter or broker in a high-turnover, variable-price commodity sector",
           "src_line": 73,
           "status": "gap",
@@ -8624,7 +8635,7 @@ const CORPUS = {
         {
           "id": "IND-12",
           "section": "msb",
-          "flag": "receives a sudden inflow of large electronic funds transfers and cash deposits; this is followed by an increased\noutflow of electronic funds transfers, cheques and bank drafts made out to multiple unrelated third parties for\nloans or investments, or to the individual conducting the transaction;",
+          "flag": "receives a sudden inflow of large electronic funds transfers and cash deposits; this is followed by an increased\noutflow of electronic funds transfers, cheques and bank drafts made out to multiple unrelated third parties",
           "red_flag": "Inflow surge then fan-out to multiple unrelated third parties or to self",
           "src_line": 131,
           "status": "gap",
@@ -9020,7 +9031,7 @@ const CORPUS = {
         {
           "id": "IND-15",
           "section": "transaction-speed",
-          "flag": "Client shows strong interest in quickly completing the transaction without good cause, or without interest in property characteristics, price negotiations, risks, commissions or other related details, or may offer unusually high bids relative to current value/industry standard.",
+          "flag": "Client shows strong interest in quickly completing the transaction without good cause",
           "red_flag": "Rushed close / over-market bid with no interest in deal details",
           "src_line": 443,
           "status": "gap",
@@ -9138,7 +9149,7 @@ const CORPUS = {
         {
           "id": "IND-23",
           "section": "structuring",
-          "flag": "Multiple transactions involving payments in cash or in negotiable instruments (for example, bank drafts) which do not state the true payer and where the accumulated amount is considered to be significant in relation to the total amount of the transaction.",
+          "flag": "Multiple transactions involving payments in cash or in negotiable instruments (for example, bank drafts) which do not state the true payer",
           "red_flag": "Structured cash / bank-draft funding with no true payer named",
           "src_line": 495,
           "status": "gap",
@@ -10264,7 +10275,7 @@ const CORPUS = {
         {
           "id": "IND-07",
           "section": "redflag",
-          "flag": "Cash deposit(s) are followed by funds sent to a real estate party (e.g., real estate agent/brokerage) with indications suggesting the purpose of payment is for a real estate-related transaction (such as memos referencing the same address repeatedly).",
+          "flag": "Cash deposit(s) are followed by funds sent to a real estate party (e.g., real estate agent/brokerage",
           "red_flag": "Cash placement then real-estate-party payout (repeated same-address memos)",
           "src_line": 273,
           "status": "gap",
@@ -10286,7 +10297,7 @@ const CORPUS = {
         {
           "id": "IND-09",
           "section": "redflag",
-          "flag": "Incoming funds from individuals/entities located in China, notably in Hong Kong, are used to purchase shorter-term investment products (such as Guaranteed Investment Certificates), which are then redeemed before the term date, despite incurring a penalty.",
+          "flag": "purchase shorter-term investment products (such as Guaranteed Investment Certificates), which are then redeemed before the term date, despite incurring a penalty",
           "red_flag": "Penalty-incurring early GIC redemption of China/HK-funded term product",
           "src_line": 290,
           "status": "gap",
@@ -10660,23 +10671,56 @@ function advCard(a){
 function srcCap(a){return `<div class="srccap"><b>Source.</b> ${esc(a.source||a.advisory||a.id)}</div>`;}
 
 /* ---------- screen 1: read the source — extract (verbatim, highlighted) → translate (red flag) ---------- */
-// Best-effort highlighter: each indicator's verbatim `flag` grounds in the md under normalize(), so a
-// literal hit isn't guaranteed (line-wraps, footnote digits) — we match whitespace-flexibly and skip a
-// miss. The extract→translate list shows EVERY flag→red_flag regardless, so a missed highlight never
-// drops content. Escapes the article first; the wrapped <span class="hl"> is the only inserted markup.
+// The displayed source is markitdown-CLEANED (cleanArticle, T2) then highlighted by normalize-both-sides
+// matching (highlightArticle, T3) — each indicator's verbatim `flag` grounds in the cleaned text under
+// the gate's normalize(), so highlighting is now ~complete (not best-effort). The extract→translate list
+// shows EVERY flag→red_flag regardless, so a missed highlight never drops content.
+// Phase 27 (T2): strip markitdown CONVERSION artifacts from the DISPLAYED source — page-break
+// form-feeds, running headers (FINCEN ADVISORY/ALERT, the letter-spaced "F I N C E N …", the
+// FINTRAC "OPERATIONAL ALERT/BRIEF" header), bare page-number lines, and tab-between-every-word
+// soup. A DISPLAY transform ONLY: the stored source_md + the grounding surface are byte-untouched,
+// and footnote-ref digits are deliberately KEPT so the cleaned text still grounds 1:1 under
+// normalize() (T3 matches on that — stripping them would desync the highlighter).
+function cleanArticle(text){
+  text=String(text==null?'':text).replace(/\r\n?/g,'\n').replace(/\f/g,'\n').replace(/\t+/g,' ');
+  const isHeaderLine=raw=>{const t=raw.trim();const c=t.replace(/\s+/g,'').toLowerCase();
+    return c==='fincenadvisory'||c==='fincenalert'||/^f i n c e n/i.test(t)||/^\d{1,4}$/.test(t)
+        ||c==='operationalalert'||c==='operationalbrief';};
+  return text.split('\n').filter(ln=>!isHeaderLine(ln)).join('\n')
+    .replace(/FINCEN\s+(?:ADVISORY|ALERT)(?=[A-Z0-9])/g,'')   // glued caps header prefix
+    .replace(/[ \t]{2,}/g,' ').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+}
+// Phase 27 (T3): highlight by NORMALIZING BOTH SIDES — the same collapse derive_signals.normalize()
+// uses for grounding (lowercase [a-z0-9], drop "fincenadvisory") — plus an index map back to source
+// positions, so smart quotes / hyphen-wraps / footnote digits / double spaces that defeat a literal
+// substring match no longer cause a miss. The grounding GATE is untouched; this fixes only the
+// DISPLAY match (literal-on-raw 95% → normalize-on-cleaned ~100%). Escapes before inserting <span>.
 function highlightArticle(text, flags){
-  let html=esc(text), n=0;
+  let norm='', map=[];
+  for(let i=0;i<text.length;i++){const c=text[i].toLowerCase();
+    if(c>='a'&&c<='z'||c>='0'&&c<='9'){norm+=c;map.push(i);}}
+  let k; while((k=norm.indexOf('fincenadvisory'))>=0){norm=norm.slice(0,k)+norm.slice(k+14);map.splice(k,14);}
+  const spans=[];
   flags.forEach(f=>{
-    f=String(f||'').trim(); if(f.length<6) return;
-    const pat=esc(f).replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\s+/g,'\\s+');
-    let re; try{re=new RegExp(pat);}catch(e){return;}
-    if(re.test(html)){ const id=n===0?' id="hl0"':''; html=html.replace(re,m=>`<span class="hl"${id}>${m}</span>`); n++; }
+    const nf=String(f==null?'':f).toLowerCase().replace(/[^a-z0-9]+/g,'').replace(/fincenadvisory/g,'');
+    if(nf.length<6) return;
+    const at=norm.indexOf(nf); if(at<0) return;
+    spans.push([map[at], map[at+nf.length-1]]);
   });
-  return html;
+  spans.sort((a,b)=>a[0]-b[0]);
+  let html='', cur=0, first=true;
+  for(const [s,e] of spans){
+    if(s<cur) continue;                                       // skip overlapping spans
+    html+=esc(text.slice(cur,s));
+    const id=first?' id="hl0"':''; first=false;
+    html+=`<span class="hl"${id}>`+esc(text.slice(s,e+1))+'</span>';
+    cur=e+1;
+  }
+  return html+esc(text.slice(cur));
 }
 function renderArticle(a){
   const inds=a.indicators;
-  const art=(typeof a.article_text==='string' && a.article_text)?a.article_text:'';
+  const art=(typeof a.article_text==='string' && a.article_text)?cleanArticle(a.article_text):'';
   const docHtml=art?highlightArticle(art,inds.map(i=>i.flag))
     :'<span style="color:var(--faint)">Source document text unavailable.</span>';
   const xrows=inds.map((i,k)=>`<div class="xrow" style="animation-delay:${REDUCED?0:k*70}ms">
@@ -10704,7 +10748,7 @@ function renderArticle(a){
   // Phase 26 — the "agent reading" beat (ported from the showcase streamAdvisory) as a progressive
   // ENHANCEMENT: the FINAL state (highlighted document + translate list) is in the template above, so
   // the reduced-motion path (and the string-DOM harness) settle on it with no extra work. Under full
-  // motion only, RESET the doc panel + hold the translate column, type a capped opening, then re-reveal.
+  // motion only, RESET the doc panel + hold the translate column, type the WHOLE article, then re-reveal.
   const docEl=document.getElementById('doc'), xEl=document.getElementById('xlate'), lbl=document.getElementById('doclabel');
   const scrollFirst=()=>T(()=>{const h=docEl&&docEl.querySelector&&docEl.querySelector('.hl');if(docEl&&h)docEl.scrollTop=Math.max(0,(h.offsetTop||0)-80);},60);
   if(REDUCED || !art || !docEl){scrollFirst();return;}  // final state already rendered — one-shot
@@ -10717,13 +10761,17 @@ function renderArticle(a){
     if(lbl)lbl.textContent=`Source document · ${inds.length} phrase${inds.length===1?'':'s'} extracted`;
     scrollFirst();
   };
-  const CAP=1600, head=art.slice(0,CAP); let i=0;       // type a capped opening so it reads as real processing
+  // Phase 27: type the WHOLE article (no length cap) — this is the demo's FIRST wow, so the "agent
+  // reading" must read the COMPLETE document. The per-tick chunk scales to the article length so the
+  // read always finishes in a bounded ~6s regardless of size (a 40KB advisory would take minutes at a
+  // fixed char rate); the caret-follow scroll reads as the agent ingesting the full document.
+  let i=0; const TICK=16, chunk=Math.max(3,Math.ceil(art.length/(6000/TICK)));
   (function type(){
-    if(i>=head.length){reveal();return;}
-    i=Math.min(head.length,i+3);
-    docEl.textContent=head.slice(0,i)+'▌';              // block char = caret; textContent keeps the source literal
+    if(i>=art.length){reveal();return;}
+    i=Math.min(art.length,i+chunk);
+    docEl.textContent=art.slice(0,i)+'▌';               // block char = caret; textContent keeps the source literal
     docEl.scrollTop=docEl.scrollHeight;                 // follow the caret as it reads
-    T(type,10);
+    T(type,TICK);
   })();
 }
 
@@ -10828,15 +10876,18 @@ function renderSignal(a){
     <h2>The agent builds the signals you <em>committed</em>.</h2>
     ${srcCap(a)}
     <p class="lead">For each <b style="color:var(--green)">build-now</b> gap you picked, the agent drafts a full signal definition mapped to data features. ${n?`<b>${n}</b> of ${allBuilds.length} buildable drafted — each is a proposal a human confirms before any build.`:''}</p>
-    ${buildlog}
-    ${n?builds.map(i=>specCard(i,a)).join(''):
-      `<div class="empty">${emptyMsg}</div>`}
+    ${n?`<div class="proposal">
+      <div class="speccol">${builds.map(i=>specCard(i,a)).join('')}</div>
+      <div class="buildside">${buildlog}</div>
+    </div>`:`<div class="empty">${emptyMsg}</div>`}
     <div class="framenote">A drafted signal becomes a governed model artifact — versioned, validated under E-23 before it can drive a filing.</div>
   </div>`;
-  // auto-complete the build-log (reduced motion → one paint). Steps mark ✓ in sequence; the build_logic
-  // they describe is real, the steps carry no numbers.
+  // Phase 27 (T4): the "agent working" rhythm (Act-4 port) — each step PULSES .run (spinner) then marks
+  // ✓ in sequence; the upstream Build-recs selection IS the human gate, so the gate step shows already-passed.
+  // Reduced motion: T() runs fn synchronously, so each step lands ✓ in one paint (no spinner). No numbers.
   const steps=[...stage.querySelectorAll('.blstep')];
-  if(steps.length) steps.forEach((el,k)=>T(()=>markStep(el),250+k*330));
+  let bt=300;
+  steps.forEach(el=>{ T(()=>{el.classList&&el.classList.add('run');}, bt); bt+=440; T(()=>markStep(el), bt); bt+=150; });
 }
 function markStep(el){if(!el||!el.classList)return;el.classList.remove('run');el.classList.add('ok');const bi=el.querySelector&&el.querySelector('.bi');if(bi)bi.textContent='✓';}
 function specCard(i,a){
@@ -10919,9 +10970,16 @@ function renderLift(a){
     ${srcCap(a)}
     <p class="lead">A new signal in isolation fires too widely to act on. Composed with existing signals — the engine discovers the combination rather than an analyst guessing it — it becomes precise and explainable. This is the case for <b>atoms over monolithic scenarios</b>.</p>
     <div class="illus"><b>Illustrative · pending calibration</b><span>These lift figures are a GENERIC template showing the shape of composition — they are NOT measured on this document and are identical across the corpus. Real precision requires backtesting on population; the figures are calibrated then.</span></div>
-    <div class="lift" id="lift">${LIFT.map((l,i)=>`
-      <div class="liftbar"><div class="llabel"><span class="ln">${l.name}<span class="combo">${l.combo}</span></span><span class="lv" id="lv${i}">0%</span></div>
-      <div class="track"><div class="fill ${l.cls}" id="fill${i}"></div></div></div>`).join('')}
+    <div class="liftwrap">
+      <div class="lift" id="lift">${LIFT.map((l,i)=>`
+        <div class="liftbar"><div class="llabel"><span class="ln">${l.name}<span class="combo">${l.combo}</span></span><span class="lv" id="lv${i}">0%</span></div>
+        <div class="track"><div class="fill ${l.cls}" id="fill${i}"></div></div></div>`).join('')}
+      </div>
+      <div class="liftside">
+        <div class="lt">Why this matters</div>
+        <p>One signal alone is a blunt instrument — it fires on too many ordinary accounts to action. The lift comes from <b>composition</b>: the engine searches which existing signals, fired together, isolate the real case.</p>
+        <p>An analyst can't enumerate those combinations by hand. Atoms that compose — not monolithic, hand-tuned scenarios — are what make detection both precise and explainable.</p>
+      </div>
     </div>
     <div class="framenote">A combination this strong would enter the promotion gate — precision floor, non-alert sampling, temporal hold-out — before it could drive a filing. The values above are illustrative placeholders, not a measured detection rate.</div>
   </div>`;

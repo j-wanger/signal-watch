@@ -8,7 +8,7 @@
     {
       "id": "IND-01",
       "section": "redflag",
-      "flag": "A\tcustomer’s\tphoto\tis\tinternally\tinconsistent\t(e.g.,\tshows\tvisual\ttells\tof\tbeing\taltered)\tor\tis\tinconsistent\twith\ttheir\tother\tidentifying\tinformation\t(e.g.,\ta\tcustomer’s\tdate\tof\tbirth\tindicates\tthat\tthey\tare\tmuch\tolder\tor\tyounger\tthan\tthe\tphoto\twould\tsuggest).",
+      "flag": "A\tcustomer’s\tphoto\tis\tinternally\tinconsistent\t(e.g.,\tshows\tvisual\ttells\tof\tbeing\taltered)\tor\tis\tinconsistent\twith\ttheir\tother\tidentifying\tinformation",
       "red_flag": "Photo alteration tells or photo–DOB age mismatch",
       "src_line": 268,
       "status": "partial",
@@ -30,7 +30,7 @@
     {
       "id": "IND-03",
       "section": "redflag",
-      "flag": "A\tcustomer\tuses\ta\tthird-party\twebcam\tplugin\tduring\ta\tlive\tverification\tcheck.\t\t Alternatively,\na\tcustomer\tattempts\tto\tchange\tcommunication\tmethods\tduring\ta\tlive\tverification\tcheck\tdue\tto\nexcessive\tor\tsuspicious\ttechnological\tglitches\tduring\tremote\tverification\tof\ttheir\tidentity.",
+      "flag": "A\tcustomer\tuses\ta\tthird-party\twebcam\tplugin\tduring\ta\tlive\tverification\tcheck",
       "red_flag": "Third-party webcam plugin or channel-switching mid-verification",
       "src_line": 298,
       "status": "gap",
@@ -114,7 +114,7 @@
     {
       "id": "IND-09",
       "section": "redflag",
-      "flag": "A\tnewly\topened\taccount\tor\tan\taccount\twith\tlittle\tprior\ttransaction\thistory\thas\ta\tpattern\tof\nrapid\ttransactions;\thigh\tpayment\tvolumes\tto\tpotentially\trisky\tpayees,\tsuch\tas\tgambling\nwebsites\tor\tdigital\tasset\texchanges;\tor\thigh\tvolumes\tof\tchargebacks\tor\trejected\tpayments.",
+      "flag": "A\tnewly\topened\taccount\tor\tan\taccount\twith\tlittle\tprior\ttransaction\thistory\thas\ta\tpattern\tof\nrapid\ttransactions;\thigh\tpayment\tvolumes\tto\tpotentially\trisky\tpayees,\tsuch\tas\tgambling\nwebsites\tor\tdigital\tasset\texchanges",
       "red_flag": "New / thin-history account → rapid flow to risky payees, chargebacks",
       "src_line": 314,
       "status": "gap",

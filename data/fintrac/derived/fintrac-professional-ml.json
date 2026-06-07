@@ -8,7 +8,7 @@
     {
       "id": "IND-01",
       "section": "tbml",
-      "flag": "An entity is a Canadian small or medium-size import/export company, wholesaler, dealer or broker operating in a sector dealing in high-volume, high-demand commodities with variable price ranges, including agri-food, textiles, electronics, toys, lumber and paper, and automotive or heavy equipment.",
+      "flag": "An entity is a Canadian small or medium-size import/export company, wholesaler, dealer or broker operating in a sector dealing in high-volume, high-demand commodities with variable price ranges",
       "red_flag": "SME importer/exporter or broker in a high-turnover, variable-price commodity sector",
       "src_line": 73,
       "status": "gap",
@@ -165,7 +165,7 @@
     {
       "id": "IND-12",
       "section": "msb",
-      "flag": "receives a sudden inflow of large electronic funds transfers and cash deposits; this is followed by an increased\noutflow of electronic funds transfers, cheques and bank drafts made out to multiple unrelated third parties for\nloans or investments, or to the individual conducting the transaction;",
+      "flag": "receives a sudden inflow of large electronic funds transfers and cash deposits; this is followed by an increased\noutflow of electronic funds transfers, cheques and bank drafts made out to multiple unrelated third parties",
       "red_flag": "Inflow surge then fan-out to multiple unrelated third parties or to self",
       "src_line": 131,
       "status": "gap",

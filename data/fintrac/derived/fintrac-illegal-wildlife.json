@@ -63,7 +63,7 @@
     {
       "id": "IND-06",
       "section": "general-wildlife-trade",
-      "flag": "Individual received numerous transfers with wildlife-trade references from several parties, followed by\noutgoing transfers to an individual(s) who has also received similar email money transfers from other\nparties. The individual had very few or no other transactions in their account.",
+      "flag": "Individual received numerous transfers with wildlife-trade references from several parties, followed by\noutgoing transfers to an individual(s) who has also received similar email money transfers from other\nparties",
       "red_flag": "Wildlife-referenced fan-in passed through to onward collectors (nominee node)",
       "src_line": 309,
       "status": "gap",

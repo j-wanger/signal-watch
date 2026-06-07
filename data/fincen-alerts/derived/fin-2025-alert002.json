@@ -8,7 +8,7 @@
     {
       "id": "IND-01",
       "section": "redflag",
-      "flag": "A customer is a small U.S.-based oil and natural gas company, importing company, or freight\ncompany operating in states on the U.S. southwest border with transactional activity and\nprofit margins that exceed the typical business profile of similar companies in their industries.",
+      "flag": "transactional activity and\nprofit margins that exceed the typical business profile of similar companies in their industries",
       "red_flag": "Small SW-border oil/gas, import, or freight co. — activity and margins above industry peer profile",
       "src_line": 325,
       "status": "gap",
@@ -32,7 +32,7 @@
     {
       "id": "IND-03",
       "section": "redflag",
-      "flag": "A customer is a small U.S.-based oil and natural gas company that is selling millions of dollars\nof crude oil per month but has no online presence or is using a basic website that appears\ndesigned to closely resemble major U.S. oil and natural gas companies’ websites in order to\nmake their significant crude oil sales appear legitimate.",
+      "flag": "selling millions of dollars\nof crude oil per month but has no online presence or is using a basic website that appears\ndesigned to closely resemble major U.S. oil and natural gas companies’ websites",
       "red_flag": "Millions in monthly crude sales with no / imitative web presence (front-company facade)",
       "src_line": 348,
       "status": "gap",
@@ -44,7 +44,7 @@
     {
       "id": "IND-04",
       "section": "redflag",
-      "flag": "A customer is a small U.S.-based oil and natural gas company that has a website indicating it\nis only a buyer or seller of crude oil, but the company is sending wire transfers to Mexican or\nU.S. companies for purchases of purported waste oil or other hazardous materials.",
+      "flag": "has a website indicating it\nis only a buyer or seller of crude oil, but the company is sending wire transfers to Mexican or\nU.S. companies for purchases of purported waste oil or other hazardous materials",
       "red_flag": "Stated crude-only business vs. waste-oil purchase wires (business-purpose mismatch)",
       "src_line": 353,
       "status": "gap",
@@ -84,7 +84,7 @@
     {
       "id": "IND-06",
       "section": "redflag",
-      "flag": "A customer is a small U.S.-based oil and natural gas company that is sending wire transfers to\nMexican or U.S. companies for waste oil or other hazardous materials without possessing the\nappropriate registrations with the U.S. Environmental Protection Agency (EPA).24",
+      "flag": "sending wire transfers to\nMexican or U.S. companies for waste oil or other hazardous materials without possessing the\nappropriate registrations with the U.S. Environmental Protection Agency (EPA",
       "red_flag": "Waste-oil / hazmat purchase wires without required EPA registration",
       "src_line": 361,
       "status": "gap",
@@ -108,7 +108,7 @@
     {
       "id": "IND-08",
       "section": "redflag",
-      "flag": "A customer is a small U.S.-based oil and natural gas company that has a sudden and significant\nvolume of transactional activity with one or a small number of Mexican or U.S. companies that\nhave little to no online presence and displays other indicators of illicit shell company activity.",
+      "flag": "has a sudden and significant\nvolume of transactional activity with one or a small number of Mexican or U.S. companies that\nhave little to no online presence and displays other indicators of illicit shell company activity",
       "red_flag": "Sudden high-volume activity concentrated to low-web-presence shell-like counterparties",
       "src_line": 369,
       "status": "gap",
@@ -120,7 +120,7 @@
     {
       "id": "IND-09",
       "section": "redflag",
-      "flag": "A customer is a small U.S.-based oil and natural gas company that is receiving domestic\nand international wire transfers for invoices related to the sale of crude oil but sending wire\ntransfers to Mexican or U.S. companies for invoices for the purchase of waste oil or other\nhazardous materials.",
+      "flag": "receiving domestic\nand international wire transfers for invoices related to the sale of crude oil but sending wire\ntransfers to Mexican or U.S. companies for invoices for the purchase of waste oil or other\nhazardous materials",
       "red_flag": "Crude-sale inbound vs. waste-oil purchase outbound (invoice-purpose mismatch)",
       "src_line": 373,
       "status": "gap",
@@ -152,7 +152,7 @@
     {
       "id": "IND-11",
       "section": "redflag",
-      "flag": "A customer is a U.S. importing company that is receiving wire transfers from a small U.S.-\nbased oil and natural gas company for the sale of waste oil or other hazardous materials and\nthen wiring those funds to a singular or small number of companies in Mexico.",
+      "flag": "receiving wire transfers from a small U.S.-\nbased oil and natural gas company for the sale of waste oil or other hazardous materials and\nthen wiring those funds to a singular or small number of companies in Mexico",
       "red_flag": "Importer receive-and-forward of waste-oil proceeds to a few Mexican companies (pass-through)",
       "src_line": 383,
       "status": "gap",
@@ -196,7 +196,7 @@
     {
       "id": "IND-14",
       "section": "redflag",
-      "flag": "A customer is a small U.S.-based oil and natural gas company, importing company, or freight\ncompany operating on the U.S. southwest border that is transacting with Mexican and U.S.\ncompanies and their beneficial owners associated with Cartel-related activity based on open-\nsource reporting in Mexico, indictments, and OFAC designations and/or press releases.",
+      "flag": "transacting with Mexican and U.S.\ncompanies and their beneficial owners associated with Cartel-related activity based on open-\nsource reporting in Mexico, indictments, and OFAC designations and/or press releases",
       "red_flag": "Counterparties / beneficial owners tied to Cartel activity (OFAC / indictment / open-source)",
       "src_line": 400,
       "status": "gap",

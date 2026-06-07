@@ -8,7 +8,7 @@
     {
       "id": "IND-01",
       "section": "Oil Smuggling-Related Red Flags",
-      "flag": "Shipping Companies with Iranian Counterparties.  Transactions involving a petroleum or shipping company reveal that it does business with counterparties that have ties to Iran or transport goods using “shadow fleet” vessels that have ties to Iran or that maritime databases indicate have made stops at Iranian ports.",
+      "flag": "Shipping Companies with Iranian Counterparties.  Transactions involving a petroleum or shipping company reveal that it does business with counterparties that have ties to Iran or transport goods using “shadow fleet” vessels that have ties to Iran",
       "red_flag": "Iran-linked counterparties / shadow-fleet vessels at Iranian ports",
       "src_line": 421,
       "status": "partial",
@@ -19,7 +19,7 @@
     {
       "id": "IND-02",
       "section": "Oil Smuggling-Related Red Flags",
-      "flag": "Irregularities in Shipping Documentation that may be Intended to Hide Activities\nInvolving Iran.  A customer makes oil-related transactions and wire transfers involving\nvessels that have been previously linked to suspicious financial activities or that include\ndocumentation, such as bills of lading or shipping invoices, with no consignees, that appear to\nbe falsified, or that omit key information, to obfuscate the Iranian nexus.",
+      "flag": "Irregularities in Shipping Documentation that may be Intended to Hide Activities\nInvolving Iran.  A customer makes oil-related transactions and wire transfers involving\nvessels that have been previously linked to suspicious financial activities or that include\ndocumentation, such as bills of lading or shipping invoices, with no consignees, that appear to\nbe falsified",
       "red_flag": "Falsified / consignee-less oil shipping documents obscuring Iran nexus",
       "src_line": 430,
       "status": "gap",
@@ -94,7 +94,7 @@
     {
       "id": "IND-08",
       "section": "Shadow Banking and Front Company Abuse-Related Red Flags",
-      "flag": "Unusual Use of Exchange Houses.  A customer makes transactions that move through\nmultiple exchange houses and/or trading companies, adding additional fees and costs as the\ntransactions progress, where the fees, number of transactions, or pattern of transactions do not\nreflect standard and customary commercial practices.",
+      "flag": "Unusual Use of Exchange Houses.  A customer makes transactions that move through\nmultiple exchange houses and/or trading companies, adding additional fees and costs as the\ntransactions progress",
       "red_flag": "Layering through multiple exchange houses with fee accretion",
       "src_line": 500,
       "status": "partial",
@@ -116,7 +116,7 @@
     {
       "id": "IND-10",
       "section": "Digital Assets-Related Red Flags",
-      "flag": "Stablecoin Payments with an Unclear Source of Funds.  A customer in a high-risk\njurisdiction for Iranian illicit finance-related activities receives a stablecoin payment that does\nnot match the customer’s line of business and fails to provide information about the source of\nfunds or provides documentation indicating a potential link to Iranian illicit finance.",
+      "flag": "Stablecoin Payments with an Unclear Source of Funds.  A customer in a high-risk\njurisdiction for Iranian illicit finance-related activities receives a stablecoin payment that does\nnot match the customer’s line of business and fails to provide information about the source of\nfunds",
       "red_flag": "Stablecoin receipt with source-of-funds gap and business mismatch",
       "src_line": 521,
       "status": "gap",
@@ -127,7 +127,7 @@
     {
       "id": "IND-11",
       "section": "Digital Assets-Related Red Flags",
-      "flag": "Unusual Stablecoin Account Activity.  A customer of a stablecoin issuer, particularly a foreign\nentity such as an overseas purported trust company, opens an account and subsequently engages\nin mint activity requiring multiple rate/limit increases in a short period of time, or otherwise\ntransacts in a manner that does not appear consistent with its reported business profile.",
+      "flag": "Unusual Stablecoin Account Activity.  A customer of a stablecoin issuer, particularly a foreign\nentity such as an overseas purported trust company, opens an account and subsequently engages\nin mint activity requiring multiple rate/limit increases in a short period of time",
       "red_flag": "New trust-company stablecoin account: mint with repeated limit increases",
       "src_line": 530,
       "status": "partial",

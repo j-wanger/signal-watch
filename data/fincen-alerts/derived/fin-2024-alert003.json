@@ -8,7 +8,7 @@
     {
       "id": "IND-01",
       "section": "redflag",
-      "flag": "A customer or a customer’s counterparty conducts transactions with entities and individuals that OFAC has designated due to their connection with Hizballah, or conducts transactions that contain a nexus to identifiers listed for OFAC-designated entities and individuals affiliated with Hizballah, to include email addresses, physical addresses, phone numbers, passport numbers, or convertible virtual currency addresses.",
+      "flag": "A customer or a customer’s counterparty conducts transactions with entities and individuals that OFAC has designated due to their connection with Hizballah",
       "red_flag": "Counterparty match to OFAC Hizballah designations — name or identifier nexus (email / address / phone / passport / CVC)",
       "src_line": 377,
       "status": "gap",
@@ -19,7 +19,7 @@
     {
       "id": "IND-02",
       "section": "redflag",
-      "flag": "A customer or a customer’s counterparty utilizes the services of foreign financial institutions that have been identified as being of “primary money laundering concern” under section 311 of the USA PATRIOT Act referencing their association with, or use by, Hizballah.",
+      "flag": "A customer or a customer’s counterparty utilizes the services of foreign financial institutions that have been identified as being of “primary money laundering concern” under section 311 of the USA PATRIOT Act",
       "red_flag": "Routing through a Section 311 \"primary money laundering concern\" FI tied to Hizballah",
       "src_line": 383,
       "status": "partial",
@@ -30,7 +30,7 @@
     {
       "id": "IND-03",
       "section": "redflag",
-      "flag": "A customer conducts transactions with an MSB or other financial institution, including one that offers services in convertible virtual currency, that operates in jurisdictions known for, or at high risk for, Hizballah terrorist financing activity, such as the tri-border region of South America, the Middle East, or West Africa, and has opaque ownership or whose beneficial owners are known associates of Hizballah.",
+      "flag": "A customer conducts transactions with an MSB or other financial institution, including one that offers services in convertible virtual currency, that operates in jurisdictions known for, or at high risk for, Hizballah terrorist financing activity, such as the tri-border region of South America, the Middle East, or West Africa",
       "red_flag": "MSB / VASP counterparty in a Hizballah-TF high-risk corridor with opaque or Hizballah-linked ownership",
       "src_line": 387,
       "status": "gap",
@@ -41,7 +41,7 @@
     {
       "id": "IND-04",
       "section": "redflag",
-      "flag": "A customer conducts transactions that originate with, are directed to, or otherwise involve entities that are known or suspected front companies or other companies whose beneficial ownership information indicates that they may have a nexus with Hizballah.  Indicators of possible front companies include opaque ownership structures or business addresses that are residential or co-located with other companies.",
+      "flag": "A customer conducts transactions that originate with, are directed to, or otherwise involve entities that are known or suspected front companies or other companies whose beneficial ownership information indicates that they may have a nexus with Hizballah",
       "red_flag": "Front-company counterparty — opaque ownership / residential or co-located address with Hizballah BO nexus",
       "src_line": 393,
       "status": "gap",
@@ -52,7 +52,7 @@
     {
       "id": "IND-05",
       "section": "redflag",
-      "flag": "Invoices—particularly for shipments of electronics leaving the United States for the tri-border region of South America or the PRC, or used cars being shipped from the United States to West Africa—appear to over- or under-charge the recipient, especially if the goods do not appear to correspond with the counterparty’s stated line of business and/or if the payments for those goods are facilitated by a Lebanese or Hizballah-connected financial firm, or a branch of a Lebanese or Hizballah-connected financial firm located abroad.",
+      "flag": "Invoices—particularly for shipments of electronics leaving the United States for the tri-border region of South America or the PRC, or used cars being shipped from the United States to West Africa—appear to over- or under-charge the recipient",
       "red_flag": "Trade-based invoice over/under-pricing on TBA-PRC electronics / West-Africa used-car corridors",
       "src_line": 399,
       "status": "gap",
@@ -78,7 +78,7 @@
     {
       "id": "IND-06",
       "section": "redflag",
-      "flag": "Transactions and wire transfers refer to underlying commercial activity that involves bills of lading with no consignees or involves vessels that have been previously linked to suspicious financial activities or registered to sanctioned entities connected with Hizballah, the Houthis, the IRGC-QF, or the Syrian regime.  Documentation, such as bills of lading and shipping invoices, appears to be falsified or omits key information, or there are inconsistencies between shipping related documents and maritime database entries.",
+      "flag": "Transactions and wire transfers refer to underlying commercial activity that involves bills of lading with no consignees or involves vessels that have been previously linked to suspicious financial activities or registered to sanctioned entities connected with Hizballah, the Houthis, the IRGC-QF, or the Syrian regime",
       "red_flag": "Falsified / consignee-less shipping docs tied to sanctioned or prior-suspicious vessels",
       "src_line": 414,
       "status": "gap",
@@ -89,7 +89,7 @@
     {
       "id": "IND-07",
       "section": "redflag",
-      "flag": "A customer, domestic or foreign, with businesses in the real estate, import/export, construction, diamonds and precious stones, or high-value art sectors with numerous international counterparties in high-risk jurisdictions for Hizballah financing, makes an unusually high number of cash deposits in business accounts, transfers funds from business to personal accounts or vice versa, or uses personal accounts or personal credit cards to make business payments.",
+      "flag": "A customer, domestic or foreign, with businesses in the real estate, import/export, construction, diamonds and precious stones, or high-value art sectors with numerous international counterparties in high-risk jurisdictions for Hizballah financing, makes an unusually high number of cash deposits in business accounts, transfers funds from business to personal accounts or vice versa",
       "red_flag": "High-risk-sector business: heavy cash deposits and business-personal commingling",
       "src_line": 421,
       "status": "partial",

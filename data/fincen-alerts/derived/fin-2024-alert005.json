@@ -99,7 +99,7 @@
     {
       "id": "IND-08",
       "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
-      "flag": "A\tcompany\twith\ta\tlimited\tonline\tpresence\tprominently\thighlights\ttheir\tMSB\tregistration\twith\nFinCEN\tor\tclaims\tto\tbe\tlicensed\tby\tFinCEN\talongside\tunverified\ttestimonials\tand\tpromotions\tof\nrisk-free\thigh-investment\treturns,\toften\ton\tits\twebsite,\ta\tnews\twire\tservice,\tor\ta\tsocial\tmedia\tpost.",
+      "flag": "A\tcompany\twith\ta\tlimited\tonline\tpresence\tprominently\thighlights\ttheir\tMSB\tregistration\twith\nFinCEN\tor\tclaims\tto\tbe\tlicensed\tby\tFinCEN\talongside\tunverified\ttestimonials\tand\tpromotions\tof\nrisk-free\thigh-investment\treturns",
       "red_flag": "Low-presence MSB touting FinCEN registration with risk-free-return promotions",
       "src_line": 489,
       "status": "gap",
@@ -204,7 +204,7 @@
     {
       "id": "IND-15",
       "section": "Red Flag Indicators for Fraudulent Schemes Involving MSBs",
-      "flag": "A\tcompany\tis\tregistered\tas\tan\tMSB\twith\tthe\tsame\tor\tvery\tsimilar\tname\tof\ta\tlarge,\twell-known\nfinancial\tinstitution\tthat\tappears\tto\tlack\tan\tMSB\tregistration\trequirement,\tsuch\tas\ta\tbank,\ncredit\tunion,\tor\tbroker-dealer,\tand\tappears\tto\thave\tno\tofficial\taffiliation\twith\tthat\tlarge,\twell-\nknown\tfinancial\tinstitution.",
+      "flag": "A\tcompany\tis\tregistered\tas\tan\tMSB\twith\tthe\tsame\tor\tvery\tsimilar\tname\tof\ta\tlarge,\twell-known\nfinancial\tinstitution",
       "red_flag": "MSB name impersonating a well-known financial institution",
       "src_line": 515,
       "status": "gap",
@@ -240,7 +240,7 @@
     {
       "id": "IND-17",
       "section": "Red Flag Indicators for FinCEN Imposter Schemes",
-      "flag": "A\tcustomer\tuncharacteristically\tsends\tpayments\tto\ta\tnew\tcounterparty\tand\tindicates\tto\tthe\nfinancial\tinstitution\tthat\tthe\tfunds\tmust\tbe\tsent\timmediately\tto\tpay\tFinCEN\tfor\ta\tsupposed\n“AML/CFT\tviolation,”\t“outstanding\tdebt,”\tor\ta\t“Treasury\tgrant.”",
+      "flag": "A\tcustomer\tuncharacteristically\tsends\tpayments\tto\ta\tnew\tcounterparty\tand\tindicates\tto\tthe\nfinancial\tinstitution\tthat\tthe\tfunds\tmust\tbe\tsent\timmediately\tto\tpay\tFinCEN",
       "red_flag": "Uncharacteristic urgent new-counterparty payment to “pay FinCEN”",
       "src_line": 525,
       "status": "partial",

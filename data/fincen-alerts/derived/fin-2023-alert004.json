@@ -116,7 +116,7 @@
     {
       "id": "IND-07",
       "section": "redflag",
-      "flag": "Parties\tto\ttransactions\tlisted\tas\tultimate\tconsignees\tor\tlisted\tin\tthe\t“consign\tto”\tfield\tdo\tnot\ntypically\tengage\tin\tbusiness\tconsistent\twith\tconsuming\tor\totherwise\tusing\tcommodities\t(e.g.,\nother\tfinancial\tinstitutions,\tmail\tcenters,\tor\tlogistics\tcompanies).",
+      "flag": "Parties\tto\ttransactions\tlisted\tas\tultimate\tconsignees\tor\tlisted\tin\tthe\t“consign\tto”\tfield\tdo\tnot\ntypically\tengage\tin\tbusiness\tconsistent\twith\tconsuming\tor\totherwise\tusing\tcommodities",
       "red_flag": "Consignee inconsistent with goods consumption (FI / mail / logistics)",
       "src_line": 471,
       "status": "gap",

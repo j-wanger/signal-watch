@@ -41,7 +41,7 @@
     {
       "id": "IND-04",
       "section": "redflag",
-      "flag": "Ship-to-Ship (STS) Transfers\nWhile ship-to-ship transfers (the transfer of cargo between ships at sea) can be conducted for\nlegitimate purposes, STS transfers—especially at night or in areas determined to be high-risk for\nsanctions evasion or other illicit activity—are frequently used to evade sanctions by concealing the\norigin or destination of surreptitiously transferred petroleum, coal, and other material.",
+      "flag": "Ship-to-Ship (STS) Transfers\nWhile ship-to-ship transfers (the transfer of cargo between ships at sea) can be conducted for\nlegitimate purposes, STS transfers—especially at night or in areas determined to be high-risk for\nsanctions evasion or other illicit activity—are frequently used to evade sanctions by concealing the\norigin or destination",
       "red_flag": "Night / high-risk ship-to-ship transfers concealing cargo origin-destination",
       "src_line": 90,
       "status": "gap",

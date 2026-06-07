@@ -19,7 +19,7 @@
     {
       "id": "IND-02",
       "section": "profile",
-      "flag": "A customer or counterparty is a chemical or pharmaceutical company in the PRC, Hong Kong, or another jurisdiction with a residential address or a business address shared with other similar businesses or that has no physical presence or shows other indicators of possible illicit shell company activity.52",
+      "flag": "A customer or counterparty is a chemical or pharmaceutical company in the PRC, Hong Kong, or another jurisdiction with a residential address or a business address shared with other similar businesses or that has no physical presence",
       "red_flag": "PRC/HK chemical-pharma shell company (residential / shared address, no physical presence)",
       "src_line": 545,
       "status": "gap",
@@ -41,7 +41,7 @@
     {
       "id": "IND-04",
       "section": "profile",
-      "flag": "A customer or counterparty is a vendor on an e-commerce or Darknet marketplace that advertises the sale of precursor chemicals (using chemical names, abbreviations, or CAS numbers in the advertisement) and manufacturing equipment used for the synthesis of illicit fentanyl and other synthetic opioids.",
+      "flag": "A customer or counterparty is a vendor on an e-commerce or Darknet marketplace that advertises the sale of precursor chemicals (using chemical names, abbreviations, or CAS numbers in the advertisement",
       "red_flag": "Marketplace / Darknet precursor-chemical vendor (CAS-number listings)",
       "src_line": 554,
       "status": "gap",
@@ -100,7 +100,7 @@
     {
       "id": "IND-08",
       "section": "profile",
-      "flag": "A customer is a Mexican importing company that predominantly transacts only with chemical or pharmaceutical companies in the PRC or Hong Kong for no apparent legitimate reason as compared to similar importers that transact with foreign chemical manufacturing and pharmaceutical suppliers in multiple jurisdictions.",
+      "flag": "A customer is a Mexican importing company that predominantly transacts only with chemical or pharmaceutical companies in the PRC or Hong Kong for no apparent legitimate reason",
       "red_flag": "Single-jurisdiction PRC/HK chemical-supplier concentration vs peers",
       "src_line": 571,
       "status": "gap",

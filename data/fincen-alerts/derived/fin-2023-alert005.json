@@ -8,7 +8,7 @@
     {
       "id": "IND-01",
       "section": "Behavioral Red Flags",
-      "flag": "A customer with no history or background of using, exchanging, or otherwise interacting\nwith virtual currency attempts to exchange a high amount of fiat currency from an existing or\nnewly opened bank account for virtual currency or attempts to initiate high-value transfers to\nVASPs.",
+      "flag": "A customer with no history or background of using, exchanging, or otherwise interacting\nwith virtual currency attempts to exchange a high amount of fiat currency from an existing or\nnewly opened bank account for virtual currency",
       "red_flag": "No-history customer initiates high-value fiat-to-crypto exchange / VASP transfer",
       "src_line": 247,
       "status": "gap",
@@ -103,7 +103,7 @@
     {
       "id": "IND-08",
       "section": "Financial Red Flags",
-      "flag": "Accounts with large balances that are inactive or have limited activity begin to show constant,\nuncharacteristic, sudden, abnormally frequent, or significant withdrawals of large amounts of\nmoney being transferred to a VASP or being exchanged for virtual currency.",
+      "flag": "Accounts with large balances that are inactive or have limited activity begin to show constant,\nuncharacteristic, sudden, abnormally frequent, or significant withdrawals of large amounts of\nmoney being transferred to a VASP",
       "red_flag": "Dormant high-balance account reactivated into VASP outflows",
       "src_line": 286,
       "status": "partial",
@@ -154,7 +154,7 @@
     {
       "id": "IND-11",
       "section": "Technical Red Flags",
-      "flag": "System monitoring and logs show that a customer’s account is accessed repeatedly by unique\nIP addresses, device IDs, or geographies inconsistent with prior access patterns.  Additionally,\nlogins to a customer’s online account at a VASP come from a variety of different device IDs\nand names inconsistent with the customer’s typical logins.",
+      "flag": "System monitoring and logs show that a customer’s account is accessed repeatedly by unique\nIP addresses, device IDs, or geographies inconsistent with prior access patterns",
       "red_flag": "Anomalous IP / device / geo access including unfamiliar VASP logins",
       "src_line": 302,
       "status": "partial",

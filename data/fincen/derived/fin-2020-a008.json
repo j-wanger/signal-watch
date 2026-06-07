@@ -19,7 +19,7 @@
     {
       "id": "IND-02",
       "section": "financial",
-      "flag": "Transactions are inconsistent with a customer’s expected activity and/or line of business in an apparent effort to cover trafficking victims’ living costs, including housing (e.g., hotel, motel, short-term rentals, or residential accommodations), transportation (e.g., airplane, taxi, limousine, or rideshare services), medical expenses, pharmacies, clothing, grocery stores, and restaurants, to include fast food eateries.",
+      "flag": "Transactions are inconsistent with a customer’s expected activity and/or line of business in an apparent effort to cover trafficking victims’ living costs",
       "red_flag": "Victim-maintenance MCC basket inconsistent with profile",
       "src_line": 389,
       "status": "gap",
@@ -45,7 +45,7 @@
     {
       "id": "IND-03",
       "section": "financial",
-      "flag": "Transactional activity largely occurs outside of normal business operating hours (e.g., an establishment that operates during the day has a large number of transactions at night), is almost always made in cash, and deposits are larger than what is expected for the business and the size of its operations.",
+      "flag": "Transactional activity largely occurs outside of normal business operating hours (e.g., an establishment that operates during the day has a large number of transactions at night), is almost always made in cash, and deposits are larger than what is expected for the business",
       "red_flag": "Off-hours, cash-heavy deposits oversized for the business",
       "src_line": 395,
       "status": "partial",
@@ -115,7 +115,7 @@
     {
       "id": "IND-08",
       "section": "financial",
-      "flag": "A customer frequently sends or receives funds via cryptocurrency to or from darknet markets or services known to be associated with illicit activity.  This may include services that host advertising content for illicit services, sell illicit content, or financial institutions that allow prepaid cards to pay for cryptocurrencies without appropriate risk mitigation controls.",
+      "flag": "A customer frequently sends or receives funds via cryptocurrency to or from darknet markets or services known to be associated with illicit activity",
       "red_flag": "Crypto flows to / from darknet illicit-service markets",
       "src_line": 410,
       "status": "partial",

@@ -8,7 +8,7 @@
     {
       "id": "IND-01",
       "section": "financial",
-      "flag": "A customer with neither legal permanent residence in the United States nor significant experience in the health care industry (e.g., based on the customer's stated occupation) tries to open a bank account as the owner or employee of a recently established or purchased health care provider or supplier registered with a Health Care Benefit Program.",
+      "flag": "neither legal permanent residence in the United States nor significant experience in the health care industry (e.g., based on the customer's stated occupation) tries to open a bank account as the owner or employee",
       "red_flag": "New-provider account opening by non-resident, inexperienced owner/employee",
       "src_line": 316,
       "status": "gap",
@@ -30,7 +30,7 @@
     {
       "id": "IND-03",
       "section": "financial",
-      "flag": "A customer is the nominal or beneficial owner of a health care provider or supplier registered with a Health Care Benefit Program and has familial or business affiliations with individuals with health care or government benefits fraud convictions.",
+      "flag": "is the nominal or beneficial owner of a health care provider or supplier registered with a Health Care Benefit Program and has familial or business affiliations with individuals with health care or government benefits fraud convictions",
       "red_flag": "Provider owner tied to convicted fraudsters (familial / business nexus)",
       "src_line": 323,
       "status": "gap",
@@ -41,7 +41,7 @@
     {
       "id": "IND-04",
       "section": "financial",
-      "flag": "A customer is a health care provider or supplier registered with a Health Care Benefit Program, and the account is accessed through an Internet Protocol (IP) address or Device ID that is linked to multiple accounts at the financial institution or other financial institutions or connected to foreign jurisdictions.",
+      "flag": "the account is accessed through an Internet Protocol (IP) address or Device ID that is linked to multiple accounts at the financial institution or other financial institutions or connected to foreign jurisdictions",
       "red_flag": "Shared device / IP across provider accounts or foreign-linked access",
       "src_line": 326,
       "status": "partial",
@@ -52,7 +52,7 @@
     {
       "id": "IND-05",
       "section": "financial",
-      "flag": "A customer is a health care provider or supplier registered with a Health Care Benefit Program and has nominal and beneficial owners listed on the account who also appear on bank accounts for other separate and distinct health care providers or suppliers.",
+      "flag": "has nominal and beneficial owners listed on the account who also appear on bank accounts for other separate and distinct health care providers or suppliers",
       "red_flag": "Common owners across separate distinct provider accounts (shared-owner ring)",
       "src_line": 330,
       "status": "gap",
@@ -63,7 +63,7 @@
     {
       "id": "IND-06",
       "section": "financial",
-      "flag": "A customer is a recently established or purchased health care provider or supplier registered with a Health Care Benefit Program, and there are changes in the individuals listed as beneficiaries of the corporate account without a change to the name or Tax Identification Number on the account.",
+      "flag": "there are changes in the individuals listed as beneficiaries of the corporate account without a change to the name or Tax Identification Number on the account",
       "red_flag": "Beneficiary swap with unchanged account name / TIN",
       "src_line": 340,
       "status": "gap",
@@ -74,7 +74,7 @@
     {
       "id": "IND-07",
       "section": "financial",
-      "flag": "A customer that is a recently established or purchased health care provider or supplier receives a significant amount of reimbursements from a Health Care Benefit Program or commercial insurers and then immediately transfers those funds to other recently established companies with the same nominal or beneficial owners, little to no online presence, and other indicators of illicit shell company activity.",
+      "flag": "receives a significant amount of reimbursements from a Health Care Benefit Program or commercial insurers and then immediately transfers those funds to other recently established companies with the same nominal or beneficial owners",
       "red_flag": "Reimbursement pass-through to same-owner shell companies",
       "src_line": 344,
       "status": "gap",
@@ -163,7 +163,7 @@
     {
       "id": "IND-11",
       "section": "financial",
-      "flag": "A customer is a recently established or purchased health care provider or supplier registered with Health Care Benefit Programs or commercial insurers that receives a significant amount of reimbursements inconsistent with the customer's profile (e.g., receiving a significant amount of payments from Medicare Part A and Part B MACs for reimbursements beyond the expected activity of other similar health care providers or suppliers).",
+      "flag": "receives a significant amount of reimbursements inconsistent with the customer's profile",
       "red_flag": "Reimbursements inconsistent with profile / above peer-provider activity",
       "src_line": 357,
       "status": "partial",
@@ -174,7 +174,7 @@
     {
       "id": "IND-12",
       "section": "financial",
-      "flag": "A customer is a health care provider or supplier that receives significant volumes of reimbursements from a Health Care Benefit Program or commercial insurers but has little to no legitimate business expenses associated with the provision of health care goods and services (e.g., receiving reimbursements from DME MACs but little to no purchases of DME).",
+      "flag": "receives significant volumes of reimbursements from a Health Care Benefit Program or commercial insurers but has little to no legitimate business expenses associated with the provision of health care goods and services",
       "red_flag": "Heavy reimbursement inflows with no matching operating expenses (no-opex)",
       "src_line": 362,
       "status": "gap",
@@ -200,7 +200,7 @@
     {
       "id": "IND-13",
       "section": "financial",
-      "flag": "A customer is a health care provider or supplier that receives a significant volume of reimbursements from a single Health Care Benefit Program as opposed to other customers that receive reimbursements from multiple Health Care Benefit Programs (e.g., a customer is receiving a significant amount of reimbursements from one MAC for only one type of health care good or service such as DME).",
+      "flag": "receives a significant volume of reimbursements from a single Health Care Benefit Program as opposed to other customers that receive reimbursements from multiple Health Care Benefit Programs",
       "red_flag": "Single-program reimbursement concentration unlike multi-program peers",
       "src_line": 366,
       "status": "partial",
@@ -233,7 +233,7 @@
     {
       "id": "IND-16",
       "section": "financial",
-      "flag": "A customer is a health care provider or supplier that has outgoing transactions to, or expenditures related to, companies that have no apparent related nexus to the health care industry. This could include residential real estate and luxury goods such as art or jewelry.",
+      "flag": "has outgoing transactions to, or expenditures related to, companies that have no apparent related nexus to the health care industry",
       "red_flag": "Outflows to companies with no health care nexus (real estate, luxury goods)",
       "src_line": 380,
       "status": "partial",
@@ -329,7 +329,7 @@
     {
       "id": "IND-22",
       "section": "financial",
-      "flag": "A customer that is a health care provider or supplier, or the customer's employee, engages in behavior suggesting efforts to evade the Currency Transaction Report (CTR) reporting requirement (e.g., alters or cancels a transaction when advised a CTR would be filed or engages in structuring with multiple cash transactions for under $10,000), as well as avoid recordkeeping requirements.",
+      "flag": "evade the Currency Transaction Report (CTR) reporting requirement (e.g., alters or cancels a transaction when advised a CTR would be filed or engages in structuring with multiple cash transactions for under $10,000",
       "red_flag": "CTR evasion - transaction cancelled when flagged, sub-$10k structuring",
       "src_line": 393,
       "status": "covered",
@@ -340,7 +340,7 @@
     {
       "id": "IND-23",
       "section": "financial",
-      "flag": "A customer is a recently established or purchased health care provider or supplier registered with a Health Care Benefit Program that sends a significant amount of wire transfers to individuals and companies located in foreign jurisdictions.",
+      "flag": "recently established or purchased health care provider or supplier registered with a Health Care Benefit Program that sends a significant amount of wire transfers to individuals and companies located in foreign jurisdictions",
       "red_flag": "New provider sending significant wires to foreign jurisdictions",
       "src_line": 398,
       "status": "partial",

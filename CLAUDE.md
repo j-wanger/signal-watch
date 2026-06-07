@@ -68,11 +68,14 @@ AML transformation framework. Keep vocabulary consistent with it
   configs (the 3 hand-curated typologies stay the showcase).
 - Corpus explorer (Phase 13, M7 — the demo scope expansion): a SECOND, separate ship artifact
   `dist/corpus/index.html`, built from a standalone template `corpus.html` (owns its own copy of the
-  dossier theme — the six-act engine `index.html` is left byte-untouched). A staged 5-screen ARC
-  (Phase 18 gave the explorer the showcase's two missing beats — a human gate + a close-the-loop payoff):
+  dossier theme — the six-act engine `index.html` is left byte-untouched). A staged 6-screen ARC
+  (Phase 18 gave the explorer the showcase's two missing beats — a human gate + a close-the-loop payoff;
+  Phase 25 added the article-processing beat):
   SELECT one of the 46 public publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC + 10 FINTRAC —
   Phase 20/21/22/23; honest `doc_type` chip Advisory/Alert/OFAC/FINTRAC + status chips: derived /
-  clean-or-low-not-yet-derived / non-derivable) → COVERAGE gauge → BUILD RECOMMENDATIONS **= the human GATE** (per-indicator cover×data
+  clean-or-low-not-yet-derived / non-derivable) → READ ADVISORY (Phase 25 — the FULL source document with each
+  verbatim red-flag phrase highlighted, then translated into a natural-AML `red_flag` shown BESIDE the verbatim
+  quote) → COVERAGE gauge → BUILD RECOMMENDATIONS **= the human GATE** (per-indicator cover×data
   build_rec, sorted BUILD_NOW-first, each row src_line-traceable; the BUILD_NOW rows are SELECTABLE
   div-toggles [NOT `<input>`, so Space/arrow nav still works] — default all-selected, "agent proposes,
   human disposes"; non-BUILD_NOW rows read-only) → SIGNAL spec for the PICKED BUILD_NOW gaps → CLOSE THE
@@ -176,7 +179,7 @@ AML transformation framework. Keep vocabulary consistent with it
   already lives; the grounding gate is untouched): agent proposes the map, the deterministic gate disposes, the
   human reviews. `build.py` merges `typology` + `jurisdiction` + the typology vocab into `__CORPUS__`;
   `corpus.html` adds a Documents/Typologies toggle on Select → a typology's cross-jurisdiction cluster +
-  combined coverage + per-jurisdiction contribution → drill-through into each doc's existing 5-screen per-doc
+  combined coverage + per-jurisdiction contribution → drill-through into each doc's existing 6-screen per-doc
   arc (the per-doc arc is the spine, unchanged; the lens is ADDITIVE). 5 cross-jurisdiction clusters
   (terrorist-financing, synthetic-opioids, human-trafficking, professional-money-laundering,
   romance-and-investment-fraud) + 2 cross-AGENCY US clusters (sanctions-evasion across Advisory/Alert/OFAC,
@@ -187,6 +190,25 @@ AML transformation framework. Keep vocabulary consistent with it
   or matched across regulators (that would need fabricated matching). Harness 74 → 98 (24 synthesis asserts).
   index.html + config/** + the 3 typology dists + the 4 source dirs + 42 derived records + the showcase stay
   byte-frozen; NO non-negotiable change.
+- RED-FLAG TRANSLATION + ARTICLE-PROCESSING (Phase 25, M7 — corpus OUTPUT QUALITY; NO new source / non-negotiable
+  change): the corpus explorer's red flags were bare VERBATIM article extractions (the grounded `flag` substring) — not
+  how an AML programme writes red flags — and it lacked the showcase's article-processing beat. Phase 25 brings the corpus
+  to the showcase's two-layer model: keep step 1 = the grounded verbatim extraction (the EVIDENCE), ADD step 2 = a
+  `red_flag` TRANSLATION (natural AML-term phrasing) BESIDE it. Every live derived indicator gained a `red_flag` field,
+  re-derived across all 42 docs via the inverted loop (one extraction subagent per doc, self-gated then independently
+  re-checked; the 3 hand-curated showcase typologies are untouched). A NEW per-doc screen (`renderArticle`, inserted
+  AHEAD of Coverage so the arc is Select → Read advisory → Coverage → Build recs → Signal → Close) renders the FULL source
+  article — `build.py` inlines each live doc's `source_md` body via a new `_inline_article`/`_strip_provenance` (mirroring
+  `advisory_full`'s text_file resolution; `render_one` + the 3 typology dists stay BYTE-FROZEN) — with each verbatim
+  red-flag phrase highlighted, then reveals the translation; downstream screens label indicators by `red_flag` with the
+  verbatim kept as a traceable subline. HONESTY (load-bearing): the verbatim `flag` stays the GROUNDED AUTHORITY shown
+  BESIDE the translation (never replaced); the grounding gate logic (`normalize`/`rf_region`/`flag⊂md`) is BYTE-UNCHANGED;
+  the gate's new `red_flag` check is SHAPE only (present / non-empty / distinct-from-verbatim / 12–240 chars), enforced in
+  BOTH `derive_signals.py check_record` AND `build.py validate_corpus_data`. Translation faithfulness is the one NEURAL
+  step — mitigated by show-both + the always-on illustrative badge + the per-doc re-check; paraphrase is the compliance
+  DEFAULT, so the translation ALIGNS with the non-negotiables. dist/corpus 635KB → 2.19MB (the inlined source articles);
+  harness 98 → 108. index.html + config/** + the 3 typology dists + every source md + every corpus-status.json + the
+  showcase + data/typology-map.json stay byte-frozen; NO non-negotiable change.
 - IMPORTANT — INVERTED extraction boundary (Phase 16) + the SUBTRACTION (Phase 17): the **LLM EXTRACTS, the
   deterministic layer GATES**, and the old extractor is **DELETED**. The earlier deterministic
   `extract_red_flags` accreted format special-casing every phase yet the LLM still had to author/prune its
@@ -229,13 +251,15 @@ AML transformation framework. Keep vocabulary consistent with it
 - Present: open `dist/<id>/index.html` (or `dist/corpus/index.html`) — single self-contained file,
   offline, no server. Drift guard before presenting: `python3 scripts/build.py --check all`.
 - Test (all dep-free, no install): `node tests/corpus-explorer.test.mjs` drives the corpus explorer's
-  5-screen arc against the committed `dist/corpus/index.html` (gate toggle, Signal empty states,
+  6-screen arc (incl. Phase 25's Read-advisory article-processing screen — the full source document with each
+  verbatim phrase highlighted → translated into a natural `red_flag`) against the committed `dist/corpus/index.html`
+  (gate toggle, the article screen + red_flag threading, Signal empty states,
   close-the-loop coverage math, reduced-motion) + the multi-source menu (advisories + alerts + OFAC +
   FINTRAC, doc_type chips; an alert, an OFAC advisory, AND a FINTRAC OA each walk the arc; the FINTRAC
   source panel shows its Crown-copyright basis, not US public domain) + the cross-corpus synthesis view
   (Phase 24: typology-mode picker, a cross-jurisdiction cluster's combined coverage = honest union over
   the pooled indicators, the no-similarity/overlap/lift honesty gate, drill-through + Back-to-cluster);
-  98 assertions · `python3 scripts/derive_signals.py --selftest` runs
+  108 assertions · `python3 scripts/derive_signals.py --selftest` runs
   the derivation GATE checks. Pre-present sequence: `--check all` (drift) → `node tests/…` (arc) → walk
   `tests/smoke-checklist.md` (the human-eye checks).
 - Iterate: edit `index.html` / `corpus.html` / a config, rebuild. `python3 -m http.server` optional, never required.
@@ -264,7 +288,10 @@ Phase 20 multi-source: FinCEN advisories + alerts; Phase 21: OFAC source #3; Pha
 (first cross-jurisdiction, Crown-copyright non-commercial licence); Phase 23: FINTRAC depth 3→10 (OAs +
 the real-estate Operational Brief; inverted-anchor widening) — 42 derived across 46 publications, 4 sources;
 Phase 24: cross-corpus synthesis — a `data/typology-map.json` overlay groups the corpus by typology + shows
-combined coverage across cross-jurisdiction clusters (honest union arithmetic, no fabricated cross-corpus metric)).
+combined coverage across cross-jurisdiction clusters (honest union arithmetic, no fabricated cross-corpus metric);
+Phase 25: red-flag translation + the article-processing screen — every derived indicator gains a natural-AML `red_flag`
+beside its grounded verbatim quote, and the corpus explorer renders the full source document (highlight → translate)
+ahead of Coverage (honest show-both; NO non-negotiable change)).
 See HANDOFF.md §8.
 
 ## Definition of done

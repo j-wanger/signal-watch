@@ -93,6 +93,16 @@ escaped + injected (highlights are the only markup); markdown line structure is 
 `white-space: pre-wrap`. Absent or malformed → the panel falls back to the paraphrased
 `advisory_stream` (defensive rendering).
 
+> **Corpus-explorer analogue (Phase 25).** The corpus explorer (`corpus.html` / `dist/corpus/` — a SEPARATE
+> artifact, NOT this typology schema) gives the *derived corpus records* the same extract→translate beat:
+> each derived indicator carries a verbatim `flag` (the grounded source quote) **and** a `red_flag` (its
+> natural-AML translation), and the explorer's *Read advisory* screen renders the full source md with the
+> verbatim phrases highlighted, then the translation beside each — mirroring this `advisory_full` + `highlights`
+> beat. That `red_flag` field + the full-article inlining live in the derived records + `build.py` /
+> `derive_signals.py` and are governed there (shape-gated; the verbatim stays the grounded authority shown
+> beside the translation) — see CLAUDE.md's Phase-25 bullet. This schema (the hand-curated showcase
+> typologies) is UNCHANGED by Phase 25.
+
 ### `Candidate` (candidates[])
 
 `{ id, name, type, cover, data, target?, definition? }`. `definition` is required on the

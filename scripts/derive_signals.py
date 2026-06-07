@@ -322,6 +322,15 @@ def rf_region(md: str):
 # extractor's old `len(text) < 20` stray-fragment floor, recomputed on whitespace-stripped text.
 _MIN_FLAG_NCHARS = 24
 
+# Phase 25 — red_flag (the natural AML-term TRANSLATION of the verbatim flag). The verbatim `flag`
+# stays the grounded authority; `red_flag` is an ADDITIVE per-indicator field the gate shape-checks
+# (present / non-empty / distinct-from-verbatim / length-bounded). Faithfulness is NOT gated here —
+# it is the one neural step, human-gated by showing the verbatim phrase BESIDE the translation in the
+# explorer (under the always-on illustrative badge). A red flag is a phrase/sentence, not a paragraph
+# (the max bound catches an over-generated translation) nor a bare word (the min bound).
+_MAX_RED_FLAG_CHARS = 240
+_MIN_RED_FLAG_CHARS = 12
+
 
 def check_record(record: dict, md: str) -> list:
     """PURE: run all deterministic checks on a derived record; return violations ([] = OK).
@@ -333,7 +342,9 @@ def check_record(record: dict, md: str) -> list:
     (3) RELEVANCE — the flag's src_line falls inside the advisory's red-flag region, so a grounded
     quote lifted from the overview / SAR section is rejected (the cheap section-cite guard);
     (4) a BUILD_NOW indicator carries build_logic with the full definition shape, COVERED/
-    SOURCE_DATA carry none.
+    SOURCE_DATA carry none; (5) each indicator carries a red_flag (the natural AML-term TRANSLATION
+    of the verbatim flag) that is present, distinct from the verbatim, and phrase-length-bounded —
+    SHAPE only (Phase 25); translation faithfulness is human-gated (shown beside the verbatim).
     """
     violations: list = []
     inds = record.get("indicators")
@@ -369,6 +380,17 @@ def check_record(record: dict, md: str) -> list:
             sl = ind.get("src_line")
             if not (isinstance(sl, int) and region[0] <= sl < region[1]):
                 violations.append(f"{iid}: src_line {sl!r} outside the red-flag region {region} (relevance)")
+        # Phase 25 — red_flag SHAPE gate (ADDITIVE; the verbatim `flag` grounding above is the
+        # authority and is unchanged). The translation must be present + non-empty, a natural
+        # rephrase (NOT a verbatim copy of `flag`), and phrase-length-bounded. Faithfulness is the
+        # one neural step — human-gated by showing the verbatim beside it in the explorer, not here.
+        rf = ind.get("red_flag")
+        if not (isinstance(rf, str) and rf.strip()):
+            violations.append(f"{iid}: missing red_flag (the natural AML-term translation of the verbatim flag)")
+        elif isinstance(flag, str) and rf.strip() == flag.strip():
+            violations.append(f"{iid}: red_flag is identical to the verbatim flag — it must be a natural AML-term rephrase, not a copy")
+        elif not (_MIN_RED_FLAG_CHARS <= len(rf.strip()) <= _MAX_RED_FLAG_CHARS):
+            violations.append(f"{iid}: red_flag length {len(rf.strip())} outside [{_MIN_RED_FLAG_CHARS}, {_MAX_RED_FLAG_CHARS}] — a red flag is a phrase, not a word or a paragraph")
         rec, logic = ind.get("build_rec"), ind.get("build_logic")
         if rec == "BUILD_NOW":
             if not isinstance(logic, dict):
@@ -415,9 +437,11 @@ def _checks_selftest() -> list:
                   for k in _DEFN_KEYS}
     good = {"indicators": [
         {"id": "IND-01", "section": "financial", "flag": f0["flag"],
+         "red_flag": "Long-dormant, large-balance account reactivated into a sustained drawdown",
          "src_line": f0["line"], "status": "gap", "data": "available",
          "build_rec": "BUILD_NOW", "build_logic": good_logic},
         {"id": "IND-02", "section": "financial", "flag": f1["flag"],
+         "red_flag": "Bulk gift-card / prepaid-access-card purchases by an older customer",
          "src_line": f1["line"], "status": "covered", "data": "available",
          "build_rec": "COVERED"},
     ]}
@@ -450,6 +474,21 @@ def _checks_selftest() -> list:
     dup["indicators"][1]["id"] = "IND-01"
     if not check_record(dup, md):
         fails.append("duplicate indicator id not caught")
+    # Phase 25 — the red_flag SHAPE gate (additive; the verbatim-flag grounding above is unchanged).
+    # A missing red_flag, a red_flag that merely COPIES the verbatim flag, and an over-long
+    # (paragraph-length) red_flag must each be caught — faithfulness stays human-gated, shape is gated.
+    no_rf = json.loads(json.dumps(good))
+    del no_rf["indicators"][0]["red_flag"]
+    if not check_record(no_rf, md):
+        fails.append("missing red_flag not caught (Phase-25 shape gate)")
+    copy_rf = json.loads(json.dumps(good))
+    copy_rf["indicators"][0]["red_flag"] = copy_rf["indicators"][0]["flag"]
+    if not check_record(copy_rf, md):
+        fails.append("red_flag identical to the verbatim flag not caught")
+    long_rf = json.loads(json.dumps(good))
+    long_rf["indicators"][0]["red_flag"] = "x" * (_MAX_RED_FLAG_CHARS + 1)
+    if not check_record(long_rf, md):
+        fails.append("over-long red_flag not caught by the length bound")
     # Phase-16 normalizer invariants (the closed artifact set) + the escrow grounding STRESS case
     # (header-glued 'FINCEN ADVISORY' prefix + a 'foreign-\nbased' word-wrap hyphen at src L499).
     if normalize("foreign-\nbased") != normalize("foreign-based"):
@@ -593,7 +632,7 @@ def selftest() -> int:
     if check_fails:
         print("CHECKS SELFTEST FAIL:", *check_fails, sep="\n  ", file=sys.stderr)
         return 1
-    print("SELFTEST PASS (build-rec matrix + quote-grounding + relevance + shape + normalizer checks)")
+    print("SELFTEST PASS (build-rec matrix + quote-grounding + relevance + shape + red_flag-shape + normalizer checks)")
     return 0
 
 

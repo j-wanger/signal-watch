@@ -58,3 +58,4 @@
 [2026-06-07T04:06:52Z] DEBRIEF -- 4 decisions (lite: in _CURRENT_STATE), 1 journal, tasks updated (5 completed), state refreshed; Phase 23 READY FOR COMPLETION; retro TRIGGERED (20 phases); active-phase delivery gate pending commit
 
 [2026-06-07T14:44:39Z] DEBRIEF -- 0 decision articles (lite: decisions in _CURRENT_STATE), 1 journal (2026-06-07-phase-24-cross-corpus-synthesis), tasks verified [x] (4 completed), state + architecture + active-phase + status-snapshot refreshed; Phase 24 READY FOR COMPLETION (reviewer 9/10 ACCEPT, two LOW fixed inline; awaiting commit); retro NOT triggered (21st completed phase); active-phase delivery gate left UNCHECKED pending commit
+[2026-06-07T00:00:00] PLAN — Phase 25 planned, 5 tasks, 3 decisions (corpus output quality: extract → translate + the article-processing page)

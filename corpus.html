@@ -149,6 +149,19 @@
   .framenote{margin-top:20px;font-size:12px;color:var(--faint);border-left:2px solid var(--line2);padding-left:12px;font-style:italic;font-family:var(--display)}
   .empty{border:1px dashed var(--line2);border-radius:10px;padding:20px;color:var(--muted);font-family:var(--mono);font-size:12px;background:var(--panel);line-height:1.6}
 
+  /* Phase 25 — the article-processing screen: the FULL source document (verbatim red-flag phrases
+     highlighted) beside the extract→translate list (verbatim phrase → natural AML red flag). */
+  .artwrap{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  @media(max-width:820px){.artwrap{grid-template-columns:1fr}}
+  .doclabel{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:7px}
+  .doc{position:relative;border:1px solid var(--line);background:var(--bg2);border-radius:11px;padding:14px 16px;max-height:380px;overflow:auto;font-family:var(--mono);font-size:11.5px;line-height:1.75;color:var(--muted);white-space:pre-wrap;word-break:break-word}
+  .doc .hl{background:rgba(246,166,35,.16);color:var(--ink);border-radius:3px;padding:0 2px;box-shadow:inset 0 -1px 0 var(--signal)}
+  .xlate{display:flex;flex-direction:column;gap:8px;max-height:380px;overflow:auto}
+  .xrow{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:10px 12px;opacity:0;transform:translateX(8px);animation:brin .4s forwards}
+  .xrow .xv{font-family:var(--mono);font-size:10.5px;color:var(--faint);line-height:1.5}
+  .xrow .xa{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--signal);margin:5px 0}
+  .xrow .xr{font-size:13.5px;color:var(--ink);line-height:1.4}
+
   /* controls (shared) */
   .controls{border-top:1px solid var(--line);padding:16px 0 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;position:sticky;bottom:0;background:linear-gradient(0deg,var(--bg) 60%,transparent)}
   .btn{font-family:var(--body);font-weight:600;font-size:14px;border-radius:10px;padding:12px 22px;cursor:pointer;border:1px solid var(--line2);background:var(--panel);color:var(--ink);transition:.18s}
@@ -225,7 +238,7 @@ const REC_COLOR={BUILD_NOW:'var(--green)',ENHANCE:'var(--blue)',BUILD_ENRICH:'va
 const REC_LABEL={BUILD_NOW:'build now',ENHANCE:'enhance',BUILD_ENRICH:'build + enrich',
   SOURCE_DATA:'source data',MONITOR:'monitor',COVERED:'covered'};
 
-const STEPS=['Select document','Coverage','Build recs','Signal','Close the loop'];
+const STEPS=['Select document','Read advisory','Coverage','Build recs','Signal','Close the loop'];
 
 // escapes text AND attribute positions (quotes included) — corpus.html interpolates into both.
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -428,6 +441,53 @@ function advCard(a){
 /* ---------- detail screens (1-3) for a chosen advisory ---------- */
 function srcCap(a){return `<div class="srccap"><b>Source.</b> ${esc(a.source||a.advisory||a.id)}</div>`;}
 
+/* ---------- screen 1: read the source — extract (verbatim, highlighted) → translate (red flag) ---------- */
+// Best-effort highlighter: each indicator's verbatim `flag` grounds in the md under normalize(), so a
+// literal hit isn't guaranteed (line-wraps, footnote digits) — we match whitespace-flexibly and skip a
+// miss. The extract→translate list shows EVERY flag→red_flag regardless, so a missed highlight never
+// drops content. Escapes the article first; the wrapped <span class="hl"> is the only inserted markup.
+function highlightArticle(text, flags){
+  let html=esc(text), n=0;
+  flags.forEach(f=>{
+    f=String(f||'').trim(); if(f.length<6) return;
+    const pat=esc(f).replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\s+/g,'\\s+');
+    let re; try{re=new RegExp(pat);}catch(e){return;}
+    if(re.test(html)){ const id=n===0?' id="hl0"':''; html=html.replace(re,m=>`<span class="hl"${id}>${m}</span>`); n++; }
+  });
+  return html;
+}
+function renderArticle(a){
+  const inds=a.indicators;
+  const art=(typeof a.article_text==='string' && a.article_text)?a.article_text:'';
+  const docHtml=art?highlightArticle(art,inds.map(i=>i.flag))
+    :'<span style="color:var(--faint)">Source document text unavailable.</span>';
+  const xrows=inds.map((i,k)=>`<div class="xrow" style="animation-delay:${REDUCED?0:k*70}ms">
+      <div class="xv">"${esc(shortFlag(i.flag,170))}"</div>
+      <div class="xa">↓ translate</div>
+      <div class="xr">${esc(i.red_flag||shortFlag(i.flag,170))}</div>
+    </div>`).join('');
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">${esc(a.advisory||a.id)} · Read the source</div>
+    <h2>The agent reads the source — <em>and translates.</em></h2>
+    ${srcCap(a)}
+    <p class="lead">Step 1 — extract the verbatim red-flag phrases (each an exact, grounded quote from the document, highlighted at left). Step 2 — translate each into a natural AML red flag (right). The verbatim stays beside its translation; nothing is invented.</p>
+    <div class="artwrap">
+      <div>
+        <div class="doclabel">Source document · ${inds.length} phrase${inds.length===1?'':'s'} extracted</div>
+        <div class="doc" id="doc">${docHtml}</div>
+      </div>
+      <div>
+        <div class="doclabel">Extract → translate · ${inds.length} red flag${inds.length===1?'':'s'}</div>
+        <div class="xlate">${xrows}</div>
+      </div>
+    </div>
+    <div class="framenote">Every red flag traces to a phrase in the source — the verbatim quote is the grounded evidence; the translation is how an AML programme would phrase it. The source text is verbatim; the coverage and build judgments downstream are illustrative.</div>
+  </div>`;
+  // scroll the first highlighted phrase into view inside the document panel (defensive: guard
+  // querySelector + offsetTop so a minimal/headless DOM never throws in the deferred callback)
+  T(()=>{const d=document.getElementById('doc'),h=d&&d.querySelector&&d.querySelector('.hl');if(d&&h)d.scrollTop=Math.max(0,(h.offsetTop||0)-80);},220);
+}
+
 function renderCoverage(a){
   const inds=a.indicators, cov=coverageIndex(inds);
   stage.innerHTML=`<div class="scene">
@@ -438,7 +498,7 @@ function renderCoverage(a){
     <div class="covwrap">
       <div class="covgrid">${inds.map(i=>`
         <div class="covrow">
-          <div class="clabel">${esc(shortFlag(i.flag,170))}<div class="csub">${esc(a.advisory)} ${esc(i.section||'')} · md L${esc(i.src_line)}</div></div>
+          <div class="clabel">${esc(i.red_flag||shortFlag(i.flag,170))}<div class="csub">${esc(a.advisory)} ${esc(i.section||'')} · md L${esc(i.src_line)} · "${esc(shortFlag(i.flag,90))}"</div></div>
           <span class="pill ${i.status||'gap'}">${i.status==='gap'?'not covered':esc(i.status||'gap')}</span>
         </div>`).join('')}
       </div>
@@ -486,7 +546,7 @@ function brecRow(i,a,k){
   return `<div class="brecrow ${pickable?'now pickable':''} ${on?'on':''}" style="animation-delay:${delay}ms"${pickable?` data-id="${esc(i.id)}" role="button" aria-pressed="${on}"`:''}>
     <div class="brectop">
       ${pickable?`<div class="cbox">${on?'✓':''}</div>`:''}
-      <div class="bflag">${esc(shortFlag(i.flag,200))}<span class="bsrc">${esc(a.advisory)} ${esc(i.section||'')} · md L${esc(i.src_line)}</span></div>
+      <div class="bflag">${esc(i.red_flag||shortFlag(i.flag,200))}<span class="bsrc">${esc(a.advisory)} ${esc(i.section||'')} · md L${esc(i.src_line)} · "${esc(shortFlag(i.flag,110))}"</span></div>
       <span class="recpill" style="color:${REC_COLOR[rec]||'var(--faint)'}">${esc(REC_LABEL[rec]||rec)}</span>
     </div>
     <div class="brecmeta">
@@ -519,6 +579,7 @@ function specCard(i,a){
   const feats=Array.isArray(d.features)?d.features.map(f=>`<code>${esc(f)}</code>`).join(' '):esc(d.features);
   return `<div class="spec">
     <div class="spech"><span>PROPOSED · ${esc(d.signal_name||'signal')}</span><span class="sfrom">from ${esc(a.advisory)} · md L${esc(i.src_line)}</span></div>
+    <div class="specrow"><span class="sk">Red flag</span><span class="sv">${esc(i.red_flag||shortFlag(i.flag,140))}</span></div>
     <div class="specrow"><span class="sk">Class</span><span class="sv">${esc(d.class)}</span></div>
     <div class="specrow"><span class="sk">Features</span><span class="sv">${feats}</span></div>
     <div class="specrow"><span class="sk">Logic</span><span class="sv">${esc(d.logic)}</span></div>
@@ -540,7 +601,7 @@ function renderClose(a){
   const after=coverageIndex(afterInds), delta=after-before, n=picks.length;
   const closed=n
     ? picks.map(i=>`<div class="covrow">
-        <div class="clabel">${esc(shortFlag(i.flag,150))}<div class="csub">${esc(a.advisory)} · md L${esc(i.src_line)}</div></div>
+        <div class="clabel">${esc(i.red_flag||shortFlag(i.flag,150))}<div class="csub">${esc(a.advisory)} · md L${esc(i.src_line)}</div></div>
         <span class="pill covered">gap → covered</span>
       </div>`).join('')
     : `<div class="empty">No build-now gap was committed at the gate — go back and pick at least one to close the loop.</div>`;
@@ -567,7 +628,7 @@ function renderClose(a){
 }
 
 /* ---------- render dispatch ---------- */
-const DETAIL=[renderCoverage,renderBuildRecs,renderSignal,renderClose];
+const DETAIL=[renderArticle,renderCoverage,renderBuildRecs,renderSignal,renderClose];
 function render(){
   clearTimers();
   renderStepper();
@@ -627,9 +688,9 @@ function updateControls(){
   backBtn.style.visibility='visible';
   resetBtn.style.visibility='visible';
   nextBtn.style.visibility='visible';
-  const backLabels=['‹ Advisories','‹ Coverage','‹ Build recs','‹ Signal'];
-  const nextLabels=['Build recommendations ›','Signal spec ›','Close the loop ›','↺ Another document'];
-  const hints=['Each red flag scored against the library','Pick the build-now gaps to commit','Drafted signals for your committed gaps','Coverage closes on what you built'];
+  const backLabels=['‹ Advisories','‹ Read advisory','‹ Coverage','‹ Build recs','‹ Signal'];
+  const nextLabels=['Assess coverage ›','Build recommendations ›','Signal spec ›','Close the loop ›','↺ Another document'];
+  const hints=['The agent reads the source and translates each red flag','Each red flag scored against the library','Pick the build-now gaps to commit','Drafted signals for your committed gaps','Coverage closes on what you built'];
   // when drilled from a typology cluster, Back from Coverage returns to that cluster (not the picker)
   backBtn.textContent=(screen===0 && fromTypology)?('‹ '+typoLabel(fromTypology)):(backLabels[screen]||'‹ Back');
   nextBtn.textContent=nextLabels[screen]||'Next ›';

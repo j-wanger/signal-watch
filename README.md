@@ -46,7 +46,7 @@ All checks are dep-free (no `npm install`, no test framework — they match the 
 
 ```
 python3 scripts/build.py --check all       # drift: every committed dist == a fresh build
-node tests/corpus-explorer.test.mjs        # corpus-explorer 5-screen arc, against the committed dist
+node tests/corpus-explorer.test.mjs        # corpus-explorer 6-screen arc, against the committed dist
 python3 scripts/derive_signals.py --selftest   # the derivation GATE checks (matrix + quote-grounding + shape)
 ```
 
@@ -137,23 +137,29 @@ non-derivable).
 `dist/corpus/index.html` is a **second, separate** single-file ship artifact: a FinCEN **corpus
 explorer**. Where the six-act typology demos each tell one scripted story, the explorer points the same
 loop at the *whole public corpus* — FinCEN advisories + alerts, OFAC, and FINTRAC — you pick one of the 46 publications
-and watch it derive. It is a **staged 5-screen arc** (Phase 18 gave it the two beats the six-act showcase
-has and the explorer lacked — a human gate and a close-the-loop payoff):
+and watch it derive. It is a **staged 6-screen arc** (Phase 18 gave it two of the beats the six-act showcase
+has and the explorer lacked — a human gate and a close-the-loop payoff; Phase 25 added the article-processing
+"read advisory" beat):
 
 1. **Select** — all 46 publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC advisories +
    10 FINTRAC publications — 9 operational alerts + 1 operational brief), each with an honest `doc_type` chip (*Advisory* / *Alert* / *OFAC* / *FINTRAC*) and a status chip: *derived* (live, clickable — 42 of them), or *no
    enumerated red-flag list* (non-derivable — the 4 remaining: the 2 FATF jurisdiction advisories + 2
    alerts whose text mentions red flags but carries no anchorable enumerated list). The *clean / low*
    "ready to derive, not yet derived" chip state remains for any future publication added before it is derived.
-2. **Coverage** — the chosen advisory's coverage gauge, derived from its indicator statuses.
-3. **Build recommendations — the human gate** *(the centerpiece)* — per red-flag indicator: coverage ×
+2. **Read advisory** *(Phase 25)* — the **full source document**, with each verbatim red-flag phrase
+   highlighted, then **translated** into a natural AML `red_flag` shown beside the verbatim quote. This makes
+   the corpus's two-layer pipeline visible — *step 1 extract (grounded, verbatim) → step 2 translate (a red
+   flag the way an AML programme writes it)* — the same model the six-act showcase uses. The verbatim quote
+   stays beside every translation (the grounded evidence; the translation is disclosed-illustrative).
+3. **Coverage** — the chosen advisory's coverage gauge, derived from its indicator statuses.
+4. **Build recommendations — the human gate** *(the centerpiece)* — per red-flag indicator: coverage ×
    data → one **build recommendation** (`BUILD NOW / ENHANCE / BUILD + ENRICH / SOURCE DATA / MONITOR /
    COVERED`), sorted build-now-first, each row tracing to its red-flag source line. The `BUILD NOW` rows
    are **selectable** (div-toggles, *not* `<input>` — so the keyboard nav still works), defaulting to all
    selected: the presenter picks what to commit. *Agent proposes, human disposes.*
-4. **Signal** — the full signal definition for each **picked** `BUILD NOW` gap (an honest empty state if
+5. **Signal** — the full signal definition for each **picked** `BUILD NOW` gap (an honest empty state if
    none are buildable, or if you deselect them all).
-5. **Close the loop** — the coverage index animates **before → after** as the gaps you committed flip
+6. **Close the loop** — the coverage index animates **before → after** as the gaps you committed flip
    *gap → covered* (the same model as the showcase's Act 6). The payoff is **coverage, not a precision
    "lift" number**: the derived records carry no precision figures, and fabricating ~12 per-advisory stats
    to mimic the showcase's combination-lift beat would break the *never present synthetic numbers as real*
@@ -241,12 +247,27 @@ EMT / cheque / cash / utility patterns) — and FINTRAC alerts run far denser th
 explorer's source panel renders each document's own basis, so a FINTRAC document shows its Crown-copyright
 attribution, never the US public-domain line.
 
+**Read advisory + red-flag translation (Phase 25) — red flags that read like red flags.** The grounded
+indicator text is a *verbatim quote* lifted from the source document — faithful, but it reads like advisory
+prose, not how an AML programme writes a red flag. So every derived indicator now carries a second field,
+`red_flag`: a natural-AML translation of the verbatim quote, re-derived across all 42 documents. The
+explorer's new **Read advisory** screen (step 2 of the arc) renders the **full source document** with each
+verbatim phrase highlighted, then shows the translation beside it — making the *extract → translate* pipeline
+visible (the same two-layer model the six-act showcase uses). The honesty is structural: the verbatim quote
+stays the **grounded authority**, shown beside every translation (never replaced); the quote-grounding gate is
+byte-unchanged; and the gate's new check on `red_flag` is *shape only* (present, distinct from the verbatim,
+length-bounded) — translation faithfulness is the one judgment a deterministic gate can't make, so the
+verbatim sits right beside it for the eye to check, under the always-on illustrative badge. Because paraphrase
+is the project's default compliance posture, the translation **aligns** with the non-negotiables rather than
+bending them. The full articles are inlined at build time (the single offline file grows to ~2.2 MB); the
+showcase, every source document, and the grounding core stay byte-frozen.
+
 **Cross-corpus synthesis (Phase 24) — the corpus becomes analytical.** Once the corpus spans two
 jurisdictions, the same money-laundering typology often shows up under more than one regulator — and no
 single advisory enumerates it all. The explorer's **Select** screen now has a **Documents / Typologies**
 toggle: in typology mode you pick a typology and see its **cross-jurisdiction cluster** — every corpus
 document on that typology, across FinCEN, OFAC, and FINTRAC — with a **combined coverage** gauge and each
-jurisdiction's contribution, then drill into any document's own 5-screen loop (Back returns to the
+jurisdiction's contribution, then drill into any document's own 6-screen loop (Back returns to the
 cluster). The point it makes: *no single regulator covers a typology; the combined corpus does.* Five
 typologies span both the US and Canada (terrorist financing, synthetic opioids, human trafficking,
 professional money laundering, romance-and-investment fraud); two more span US agencies (sanctions evasion

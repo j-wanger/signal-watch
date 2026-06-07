@@ -77,6 +77,9 @@ CORPUS_SOURCES = [
 # the cover×data build-recommendation vocabulary (mirrors derive_signals.py _REC_MATRIX values;
 # re-declared here so build.py's boundary check stays independent of the authoring tool).
 BUILD_RECS = {"COVERED", "BUILD_NOW", "BUILD_ENRICH", "SOURCE_DATA", "ENHANCE", "MONITOR"}
+# Phase 25 — red_flag (the natural AML-term translation beside the verbatim flag) is shape-checked
+# at this boundary too (build stays decoupled from the authoring gate; mirrors derive_signals.py).
+MAX_RED_FLAG_CHARS = 240
 
 STATUS = {"covered", "partial", "gap"}
 CAND_TYPE = {"entity", "relationship", "motif"}
@@ -316,10 +319,11 @@ def validate_corpus_data(advisories: list) -> list:
     """Deterministic boundary check on the merged corpus dataset. Returns error strings.
 
     SHAPE only — build.py stays decoupled from the authoring layer: a derived advisory's
-    indicators must each carry a valid status/data and a build_rec in the matrix vocabulary,
-    and a BUILD_NOW indicator must carry build_logic with the full definition shape. Traceability
-    (every indicator -> a red-flag md line) is the authoring gate's job — run
-    `derive_signals.py --check-derived` before committing a derived record.
+    indicators must each carry a valid status/data, a build_rec in the matrix vocabulary, and
+    (Phase 25) a red_flag — the natural AML-term translation, present + distinct from the verbatim
+    flag + phrase-length-bounded; a BUILD_NOW indicator must carry build_logic with the full
+    definition shape. Traceability (every indicator -> a red-flag md line) + translation
+    faithfulness are the authoring gate's job — run `derive_signals.py --check-derived` first.
     """
     e = []
     if not isinstance(advisories, list) or not advisories:
@@ -356,6 +360,16 @@ def validate_corpus_data(advisories: list) -> list:
                     feats = logic.get("features")
                     if not isinstance(feats, list) or not feats:
                         e.append(f"{aid}/{iid}: build_logic.features must be a non-empty array")
+            # Phase 25 — red_flag (the natural AML-term translation) shape: present, non-empty, a
+            # rephrase (not a verbatim copy of `flag`), phrase-length-bounded. The authoring gate
+            # (derive_signals.py) is the stricter check; this keeps the build boundary independent.
+            rf = i.get("red_flag")
+            if not (isinstance(rf, str) and rf.strip()):
+                e.append(f"{aid}/{iid}: missing red_flag (the natural AML-term translation)")
+            elif isinstance(i.get("flag"), str) and rf.strip() == i.get("flag").strip():
+                e.append(f"{aid}/{iid}: red_flag is identical to the verbatim flag (must be a rephrase)")
+            elif len(rf.strip()) > MAX_RED_FLAG_CHARS:
+                e.append(f"{aid}/{iid}: red_flag too long ({len(rf.strip())} > {MAX_RED_FLAG_CHARS} chars)")
     return e
 
 
@@ -404,6 +418,35 @@ def validate_typology(advisories: list, vocab: dict, mapping: dict) -> list:
     for doc_id in sorted(live - set(mapping)):
         e.append(f"{doc_id}: live (derived) document has no typology in the overlay")
     return e
+
+
+def _strip_provenance(md: str) -> str:
+    """Strip a corpus md's leading provenance HTML-comment header + blank lines → the body only.
+
+    Mirrors render_one's text_file resolution (the 3 single-line `<!-- … -->` provenance comments
+    pdf_to_md.py writes, then a blank line, then the advisory body) but as a STANDALONE helper, so
+    render_one and the byte-frozen typology dists stay untouched.
+    """
+    lines = md.splitlines()
+    while lines and (lines[0].lstrip().startswith("<!--") or not lines[0].strip()):
+        lines.pop(0)
+    return "\n".join(lines).strip()
+
+
+def _inline_article(source_md: str) -> str:
+    """Read a LIVE derived doc's verbatim source md and return its body for the full-article view.
+
+    Phase 25: the corpus explorer's article-processing screen renders the whole source document
+    (the grounded red-flag phrases highlighted → translated). The md (data/<source>/<id>.md) stays
+    the single source of truth; the build bakes its body into the offline single-file artifact (no
+    runtime fetch), exactly as advisory_full does for the showcase. Fails loud on a missing path.
+    """
+    if not source_md:
+        die("a derived record is missing 'source_md' — cannot inline the full article")
+    p = ROOT / source_md
+    if not p.exists():
+        die(f"source_md not found for the full-article view: {source_md}")
+    return _strip_provenance(p.read_text(encoding="utf-8"))
 
 
 def _load_source(source: dict) -> list:
@@ -458,6 +501,9 @@ def _load_source(source: dict) -> list:
         if rec is not None:
             entry["derived"] = True
             entry["indicators"] = rec.get("indicators")
+            # Phase 25 — inline the FULL source article (body only) so the explorer's article-
+            # processing screen renders it offline with the grounded phrases highlighted.
+            entry["article_text"] = _inline_article(rec.get("source_md"))
         merged.append(entry)
     return merged
 

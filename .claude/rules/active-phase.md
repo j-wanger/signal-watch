@@ -1,19 +1,28 @@
 # Active Phase Context
 
-Phase: 24 - Cross-corpus synthesis — a typology lens over the 4-source/2-jurisdiction corpus (M7) — DELIVERED 2026-06-07; all 4 tasks [x]; exit criteria GREEN (--check all 4/4 zero drift, --selftest PASS, harness 74→98, frozen set + grounding core derive_signals.py byte-clean); reviewer 9/10 ACCEPT, no CRITICAL/HIGH, two LOW FIXED INLINE (validate_typology set→dict annotation; jchip xx neutral class). READY FOR COMPLETION pending commit. The corpus is now ANALYTICAL: group-by-TYPOLOGY → cross-jurisdiction cluster + honest COMBINED coverage → drill-through to the per-doc arc; 5 cross-jurisdiction + 2 cross-agency clusters + 11 honest singletons. Demo at Definition of Done; run /dev-plan only for a net-new ask.
+Phase: 25 - Corpus output quality — extract → translate (natural AML red flags) + the article-processing page (M7) — PLANNED 2026-06-07; direction approved; 5 tasks; implementation starting at T1.
 
-Objective (all DELIVERED): T1 (M) author data/typology-map.json (22-term vocab + 42-entry doc→typology map; jurisdiction from the source registry) + build-boundary gate in build.py (load_typology_map + validate_typology, fail-loud) + CLUSTER-VERIFY checkpoint PASS (5 cross-jurisdiction) · T2 (L) the synthesis capability — build.py merges typology/jurisdiction into __CORPUS__; corpus.html adds the Documents/Typologies toggle + the synthesis view (cluster + union COMBINED coverage + per-jurisdiction counts + drill-through; NO similarity/overlap/lift) · T3 (S) rebuild dist/corpus 635KB + drift guard + harness 74→98 · T4 (S) docs CLAUDE.md + README.md.
+Objective: Turn the corpus explorer's red flags from bare VERBATIM article extractions into natural AML-term red flags, and give the corpus demo the showcase's missing article-processing beat. Each live derived indicator gains a `red_flag` (natural AML phrasing) BESIDE its grounded verbatim `flag` (the evidence). A new per-doc screen renders the FULL source article, highlights the grounded phrases (free — exact substrings by the gate), then reveals the translation. Per-doc arc becomes: Select → Read advisory [process] → Coverage → Build recs → Signal → Close.
 
-Scope (the UNFREEZE, all consumed): `data/typology-map.json` (NEW overlay), `scripts/build.py` (gate + merge — first structural touch since Phase 20), `corpus.html` (the synthesis view), `dist/corpus/index.html`, `tests/**`, `CLAUDE.md`, `README.md`. FROZEN byte-untouched (verified): `index.html`, `config/**`, the 3 typology dists, the grounding core `scripts/derive_signals.py` + the authoring scripts, ALL 4 source dirs (`data/fincen/**` + `data/fincen-alerts/**` + `data/ofac/**` + `data/fintrac/**` — mds + derived + corpus-status.json), and the six-act showcase. The typology label is an OVERLAY, not a migration.
+Tasks (lite, riskiest-first):
+- T1 (M) extend the gate (`red_flag` SHAPE check; grounding byte-unchanged) + build.py full-article inline (md → __CORPUS__, provenance-header-stripped) + re-derive EFE (fin-2022-a002) as the design PROOF. CHECKPOINT: the EFE translations resemble the showcase elder labels + ground clean, else STOP/degrade.
+- T2 (L) re-derive the remaining 41 derived docs with `red_flag` (inverted loop, batched subagents, each gated + independently re-checked).
+- T3 (M) corpus.html article-processing screen + thread `red_flag` through the arc (verbatim kept as the traceable subline).
+- T4 (S) rebuild dist/corpus + drift guard + extend the harness.
+- T5 (S) docs (schema/derivation + the honesty model, CLAUDE, README).
 
-Key constraints (all HELD):
-- HONESTY GATE (ties to the Phase-18 precision-lift rejection): combined coverage = honest UNION arithmetic; per-jurisdiction = honest counts; every clustered indicator traceable to source + jurisdiction. NO similarity/overlap/lift number; NOT de-duplicated/matched across regulators (disclosed in a framenote).
-- SUBTRACTION + GATE LOCATION: the overlay is a SEPARATE committed file, NOT 42 derived-record edits → the source dirs + the grounding core stay byte-frozen. Validated at the BUILD BOUNDARY in build.py, NOT in the grounding gate.
-- PER-DOC ARC PRESERVED: the synthesis lens is additive; the per-doc 5-screen arc unbroken + regression-clean (doc mode byte-identical, harness held). NO non-negotiable change (the always-on badge + the verbatim US-federal-public-domain + FINTRAC-Crown-copyright bases stay).
+Scope (UNFREEZE): `scripts/derive_signals.py` (ADDITIVE `red_flag` shape check ONLY — normalize/rf_region/flag⊂md grounding BYTE-UNCHANGED), `scripts/build.py` (full-article inline + `red_flag` merge/validate), all 4 sources' `derived/*.json` (the re-derive), `corpus.html` (the new screen + threading), `dist/corpus/index.html`, `tests/**`, `config/schema.md`, `CLAUDE.md`, `README.md`.
+FROZEN byte-untouched: every source MD (`data/{fincen,fincen-alerts,ofac,fintrac}/*.md`), every `corpus-status.json`, `index.html`, `config/typologies/**`, the 3 typology dists, `data/typology-map.json`, the six-act showcase, the authoring scripts (`acquire_fincen.py`/`crawl_fincen.py`/`pdf_to_md.py`).
 
-Exit criteria (all MET): see the DELIVERED line above.
-Abort (NOT needed): if T1 had found no genuine cross-jurisdiction cluster, DEGRADE to same-jurisdiction cross-doc-type clusters; if a beat needed a fabricated number, CUT it. Blocked >3 attempts → ask the user: skip or abort.
+Key constraints:
+- HONESTY (load-bearing): the verbatim `flag` stays the grounded authority, shown BESIDE the `red_flag` (never replaced). The grounding gate logic is byte-unchanged; the new gate check is SHAPE only (present / non-empty / distinct-from-verbatim / length-bounded) — translation faithfulness is the one NEURAL step, mitigated by show-both + the always-on illustrative badge + the EFE oracle + per-doc re-check. Paraphrase is the compliance DEFAULT, so the translation ALIGNS with the non-negotiables. NO non-negotiable change.
+- PER-DOC ARC + SYNTHESIS preserved: the new screen is ADDITIVE; the Phase-24 synthesis view + the 98-assertion harness stay regression-clean.
+- The full source article renders verbatim under each source's existing basis (US-federal public-domain 17 U.S.C. §105 / FINTRAC Crown-copyright non-commercial licence), kept visually distinct from the always-on illustrative badge.
+
+Exit criteria: every live derived indicator carries a natural `red_flag` beside its grounded verbatim `flag` (gate-shape-validated, grounding byte-unchanged); the explorer renders a full-article processing screen (highlight → translate) ahead of Coverage with `red_flag` threaded + the verbatim traceable; `--check all` zero drift; the harness extended; source mds + corpus-status.json + the six-act showcase byte-frozen; docs updated; NO non-negotiable change.
+
+Abort/degrade: if T1's EFE proof can't yield honest translations (don't resemble the showcase oracle / over-interpret), DEGRADE to presentation-only (verbatim-in-context + existing signal logic for buildable gaps) and report BEFORE T2. If inlining 42 mds pushes dist past ~2.5MB, reconsider (rf_region-only / note it). Blocked >3 attempts on a task → ask the user: skip or abort.
 
 Gates:
-- [x] Direction confirmed by user (cross-corpus synthesis at the goal gate over navigability/durability/more-scale; the group-by-typology integration shape + the build.py-boundary gate refinement signed off; 2026-06-07)
-- [x] Delivery accepted (post-implementation report 2026-06-07; reviewer 9/10 ACCEPT, two LOW fixed inline; impl + debrief commit c07d72c)
+- [x] Direction confirmed by user (full re-derive now + corpus extract→translate + full article; the `red_flag`-beside-verbatim honesty model + the build-boundary full-article inline + the 5-task shape signed off; 2026-06-07)
+- [ ] Delivery accepted (post-implementation report)

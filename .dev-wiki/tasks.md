@@ -1,9 +1,9 @@
 # Tasks
 
-> Last updated: 2026-06-06 by /dev-debrief (Phase 20 — all 6 tasks [x], exit criteria GREEN, READY FOR COMPLETION; delivery gate pending commit)
+> Last updated: 2026-06-06 by /dev-debrief (Phase 20 — all 6 tasks [x], exit criteria GREEN, DELIVERED + accepted; impl commit c9de677)
 
 <!-- phase:phase-20-multi-source-spine -->
-<!-- gate-log:phase-20 direction=approved delivery=pending -->
+<!-- gate-log:phase-20 direction=approved delivery=accepted -->
 
 ## Phase 20: Multi-source spine, proven with FinCEN Alerts — M7
 

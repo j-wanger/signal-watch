@@ -143,6 +143,27 @@ _RF_INTRO_FINTRAC = re.compile(
     r"\b(?:money\s+laundering|terrorist\s+(?:activity\s+)?financing|ml\s*(?:[/&]|and)\s*tf)"
     r"\s+indicators?\b[^.\n]{0,80}?"
     r"\b(?:may\s+(?:be|include|reflect)|reflective\s+of|listed\s+below|as\s+follows|include)\b", re.I)
+# Phase 23 — FINTRAC INVERTED "Indicators of <X>" heading form. The Operational BRIEFS (real estate)
+# and some OAs (professional ML) head their enumerated lists with "indicators" LEADING — "Indicators
+# of money laundering", "Indicators of professional money laundering through …", "Indicators relating
+# to romance fraud victims" — vs the forward "Money laundering indicators" the HEADER above matches.
+# The regression trap: a boilerplate FINTRAC SENTENCE — "Indicators of <ML/TF> can be thought of as
+# red flags …" — opens the existing 3 FINTRAC OAs BEFORE their forward heading, so a naive inverted
+# anchor would shift underground-banking / synthetic-opioids / terrorist-financing's rf_region. Two
+# narrow branches keep it 0-shift across all 39 existing FinCEN+OFAC+FINTRAC mds (verified): (1) the
+# "of <ML/TF>" branch REQUIRES the line to END at the ML phrase (`:?$`) or continue with a CONNECTOR-
+# led clause (by/through/of/related to/for/associated with/in) — the boilerplate continues with "can"
+# (not a connector, not EOL) so it is excluded, exactly mirroring the forward HEADER's strict-vs-
+# trailing-clause split; (2) the "relating to | associated with <topic>" branch uses connectors the
+# boilerplate (always "of") never uses → 0 collision, so it may be topic-broad. Grounding core
+# (normalize/check_record) is untouched — only this relevance-region anchor widens.
+_RF_HEADER_FINTRAC_INV = re.compile(
+    r"^(?:\d+\.\s+)?indicators\s+(?:"
+    r"of\s+(?:[\w-]+\s+){0,2}?"
+    r"(?:money\s+laundering|terrorist\s+(?:activity\s+)?financing|ml\s*(?:[/&]|and)\s*tf)"
+    r"(?:\s+(?:by|through|of|related\s+to|for|associated\s+with|in)\b.*)?"
+    r"|(?:relating\s+to|associated\s+with)\s+\w.*"
+    r")\s*:?$", re.I)
 # A block that is itself a footnote/citation, not a red flag (Phase-12 filter, retained for the
 # _rf_triage block counter): a footnote-numbered line, a legal "supra note"/"Id." marker, a
 # federal case-docket number, or a block ending in a "(Mon[ DD], YYYY)" citation date — real red
@@ -283,7 +304,8 @@ def rf_region(md: str):
         if t and (_RF_HEADER.match(t) or _RF_HEADER_LOOSE.match(t)
                   or _RF_INTRO.search(t) or _RF_INTRO_WEAK.search(t)
                   or _RF_HEADER_OFAC.match(t) or _RF_INTRO_OFAC.search(t)  # Phase 21: OFAC vocab
-                  or _RF_HEADER_FINTRAC.match(t) or _RF_INTRO_FINTRAC.search(t)):  # Phase 22: FINTRAC vocab
+                  or _RF_HEADER_FINTRAC.match(t) or _RF_INTRO_FINTRAC.search(t)  # Phase 22: FINTRAC vocab
+                  or _RF_HEADER_FINTRAC_INV.match(t)):  # Phase 23: FINTRAC inverted "Indicators of X" form
             start = ln
             break
     if start is None:
@@ -503,6 +525,33 @@ def _checks_selftest() -> list:
                                "", "x"])
     if rf_region(fintrac_prose) is not None:
         fails.append("a passing prose mention of bare 'indicators' falsely opened an rf_region (FINTRAC anchor too broad)")
+    # Phase 23 — FINTRAC INVERTED "Indicators of <X>" heading form (Operational Briefs + some OAs lead
+    # with "indicators"). Pin BOTH directions: the inverted "Indicators of money laundering" header, an
+    # "Indicators of <qual> money laundering through …" connector-clause header, and an "Indicators
+    # relating to <topic>" header each OPEN a region; the boilerplate SENTENCE "Indicators of <ML/TF>
+    # can be thought of as red flags …" (which opens the existing FINTRAC OAs BEFORE their forward
+    # heading) does NOT — the connector-gated `:?$` is exactly what keeps underground-banking /
+    # synthetic-opioids / terrorist-financing 0-shift.
+    fintrac_inv = "\n".join(["# FINTRAC Operational Brief", "", "Indicators of money laundering", "",
+                             "Real estate purchased well above or below market value relative to comparable properties.",
+                             "", "For further information", "", "x"])
+    if rf_region(fintrac_inv) is None:
+        fails.append("FINTRAC inverted 'Indicators of money laundering' header did not open an rf_region")
+    fintrac_inv2 = "\n".join(["# FINTRAC", "", "Indicators of professional money laundering through money services businesses", "",
+                              "A money services business processes large volumes of third-party remittances with no commercial rationale.",
+                              "", "For further information", "", "x"])
+    if rf_region(fintrac_inv2) is None:
+        fails.append("FINTRAC inverted '<...> money laundering through <...>' connector-clause header did not open an rf_region")
+    fintrac_inv_rel = "\n".join(["# FINTRAC", "", "Indicators relating to romance fraud victims", "",
+                                 "A client suddenly sends escalating EMTs to a new overseas payee they cannot identify.",
+                                 "", "For further information", "", "x"])
+    if rf_region(fintrac_inv_rel) is None:
+        fails.append("FINTRAC inverted 'Indicators relating to <topic>' header did not open an rf_region")
+    fintrac_boiler = "\n".join(["# FINTRAC", "",
+                                "Indicators of money laundering can be thought of as red flags indicating that something may very well be wrong.",
+                                "", "Body text describing methodology, not a heading.", "", "x"])
+    if rf_region(fintrac_boiler) is not None:
+        fails.append("the FINTRAC boilerplate 'Indicators of <ML/TF> can be thought of as red flags …' sentence falsely opened an rf_region (inverted anchor too loose)")
     return fails
 
 

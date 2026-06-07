@@ -1,0 +1,334 @@
+{
+  "id": "fintrac-romance-fraud",
+  "advisory": "FINTRAC-ROMANCE-FRAUD",
+  "source_md": "data/fintrac/fintrac-romance-fraud.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the indicator region (Phase 16/22/23). Coverage/data values are ILLUSTRATIVE (vision demo). FINTRAC Operational Alert — Canadian Crown copyright (© His Majesty the King in Right of Canada); reproduced verbatim for non-commercial use with attribution per FINTRAC's Terms & Conditions — NOT public domain.",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "victim",
+      "flag": "Client met the individual they are transacting with on a social media platform, via email or on a dating website.",
+      "src_line": 36,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "How and where a client met the counterparty is a contextual fact gathered at the front line, not present in transaction/KYC data, so the bank must source this narrative attribution before any signal is buildable."
+    },
+    {
+      "id": "IND-02",
+      "section": "victim",
+      "flag": "Client always, or almost always, communicates with the individual they met online by email or text.",
+      "src_line": 37,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "The mode and frequency of a client's personal communication with a counterparty is external to bank-held data and would have to be sourced from front-line interaction notes before it could drive a signal."
+    },
+    {
+      "id": "IND-03",
+      "section": "victim",
+      "flag": "Client has never met or has never seen the individual they are in the relationship with, and is often older than\n\nthat individual.",
+      "src_line": 38,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Whether a client has ever met the counterparty is relationship context the bank does not hold; only the age comparison is partly knowable, so the indicator overall requires sourced front-line attribution."
+    },
+    {
+      "id": "IND-04",
+      "section": "victim",
+      "flag": "Client relays a confusing, conflicting or non-believable story about why the funds are needed or the transaction is\n\ntaking place.",
+      "src_line": 42,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "A subjective judgment that a client's stated rationale is confusing or non-believable lives in front-line interaction notes, not structured data, so the bank must capture that narrative before it can be operationalized."
+    },
+    {
+      "id": "IND-05",
+      "section": "victim",
+      "flag": "Client is at a potentially more vulnerable stage of life (i.e., a senior or widowed, separated or divorced).",
+      "src_line": 46,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Age (senior) is derivable from KYC, but marital/life-stage vulnerability (widowed, separated, divorced) is only partially captured in customer profiles, so an existing vulnerability/age control can be enhanced rather than newly built from clean data."
+    },
+    {
+      "id": "IND-06",
+      "section": "victim",
+      "flag": "Client provides minimal or inconsistent information and/or avoids answering questions about the purpose of\n\nthe transaction.",
+      "src_line": 47,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "A client withholding or dodging purpose-of-transaction questions is a front-line behavioural observation that must be captured as sourced narrative; it is not present in transactional data."
+    },
+    {
+      "id": "IND-07",
+      "section": "transaction",
+      "flag": "Client appears to be pooling all financial resources from various sources (e.g., credit cards, loans, retirement savings,\ninsurance policies) and depleting assets (e.g., home, vehicle, investments and retirement savings) to fund transfers\nto individuals/entities.",
+      "src_line": 85,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Drawdown of credit-card advances, loans, retirement savings and asset liquidations all feeding outbound transfers is partly visible in the bank's own product and transaction ledgers, but tying together cross-product pooling and asset depletion into one funding-source view needs enrichment across subledgers before the signal is reliable."
+    },
+    {
+      "id": "IND-08",
+      "section": "transaction",
+      "flag": "Client sends funds to another individual, and the amount or frequency of funds sent increases over time.",
+      "src_line": 89,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Escalating value or frequency of outbound transfers to a single counterparty over time is a concrete velocity-escalation pattern fully derivable from the bank's own EMT/wire/transfer records, yet a per-counterparty escalation trend is rarely instrumented as a standing signal.",
+      "build_logic": {
+        "signal_name": "S-ESCALATING-PAYEE-TRANSFERS",
+        "class": "entity · account-level · windowed velocity-escalation",
+        "features": ["per_payee_transfer_value", "per_payee_transfer_count", "value_trend_slope", "frequency_trend_slope", "distinct_payee_id"],
+        "logic": "Flag a client whose outbound transfers to a single counterparty show a monotonically increasing value and/or frequency trend across successive windows, indicating the grooming-escalation pattern of romance-fraud funding.",
+        "window": "rolling 90 days, compared across three 30-day sub-windows",
+        "source": "EMT/wire/internal-transfer records keyed by sending client and receiving counterparty",
+        "route": "Tier-2 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-09",
+      "section": "transaction",
+      "flag": "Client is transacting with one or more individuals suspected of being either a victim or perpetrator of romance fraud.",
+      "src_line": 90,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Knowing a counterparty is a suspected victim or perpetrator of romance fraud requires external suspect/victim attribution (law enforcement, CAFC) the bank does not natively hold and must source before a signal is possible."
+    },
+    {
+      "id": "IND-10",
+      "section": "transaction",
+      "flag": "Client is identified as a victim and is transacting with one or more individuals who are also identified as victims of\n\nromance fraud.",
+      "src_line": 91,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Both the client's victim status and the counterparties' victim status depend on external identification (CAFC/law enforcement) that the bank lacks, so this indicator hinges on sourced attribution rather than internal data."
+    },
+    {
+      "id": "IND-11",
+      "section": "transaction",
+      "flag": "Client either cancels transaction for no apparent reason or transaction is refused due to questionable rationale for it.",
+      "src_line": 95,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Cancelled or refused transactions are recorded in the bank's own transaction-status data and are already partly surfaced by existing controls; tagging cancellations with a 'no apparent reason' context can sharpen an existing rule rather than require a net-new build."
+    },
+    {
+      "id": "IND-12",
+      "section": "transaction",
+      "flag": "Client makes payments to online dating services or social media websites.",
+      "src_line": 96,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Payments to online dating services or social-media platforms are identifiable from merchant/MCC and counterparty tags the bank already holds on card and transfer data, yet dating/social-platform spend is rarely turned into a standing risk signal in a romance-fraud context.",
+      "build_logic": {
+        "signal_name": "S-DATING-PLATFORM-SPEND",
+        "class": "entity · account-level · merchant-category",
+        "features": ["dating_service_merchant_flag", "social_platform_merchant_flag", "payment_count", "payment_value", "concurrent_outbound_transfer_flag"],
+        "logic": "Flag a client whose card/transfer activity includes payments tagged to online dating services or social-media platforms, especially when concurrent with escalating outbound transfers to individuals, as a romance-fraud context booster.",
+        "window": "rolling 60 days",
+        "source": "card/transfer records joined to merchant-category (MCC) and counterparty tags",
+        "route": "Tier-3 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-13",
+      "section": "transaction",
+      "flag": "Client conducts large volume and/or excessive number of transactions involving foreign jurisdictions over a\n\nshort period.",
+      "src_line": 97,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "High volume or count of cross-border transactions over a short period is observable from wire/EMT data and is already partly covered by existing cross-border velocity controls; a romance-fraud-tuned threshold enhances the existing control rather than requiring a fresh build."
+    },
+    {
+      "id": "IND-14",
+      "section": "transaction",
+      "flag": "Client receives funds from numerous individuals in multiple jurisdictions. The funds are then depleted by cash\n\nwithdrawals conducted in Canada or abroad, or by wires to the benefit of individuals/entities in Canada or abroad.",
+      "src_line": 101,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Inbound funds from many individuals across multiple jurisdictions, then depleted by cash withdrawals or onward wires, is a concrete fan-in/fan-out mule pattern fully derivable from the bank's own transaction, wire and ATM/withdrawal records, yet this multi-source fan-in to depletion is rarely a standing signal.",
+      "build_logic": {
+        "signal_name": "S-MULTISOURCE-FANIN-DEPLETE",
+        "class": "entity · account-level · windowed fan-in/fan-out",
+        "features": ["distinct_inbound_senders", "distinct_inbound_jurisdictions", "inbound_value", "cash_withdrawal_value", "outbound_wire_value", "depletion_ratio"],
+        "logic": "Flag an account that receives funds from numerous distinct individuals across multiple jurisdictions and within a short window depletes a high share of that value via cash withdrawals or onward wires, indicating money-mule pass-through of romance/mass-marketing fraud proceeds.",
+        "window": "rolling 30 days",
+        "source": "inbound EMT/wire records joined to ATM/cash-withdrawal and outbound-wire records with country attribution",
+        "route": "Tier-1 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-15",
+      "section": "mass-marketing",
+      "flag": "Client conducts financial activity or holds accounts at multiple financial entities without adequate rationale.",
+      "src_line": 106,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Activity referencing accounts at other financial entities is partly visible in counterparty/transfer data, but the bank cannot fully see another institution's accounts, so establishing multi-institution holding without rationale needs enrichment before a reliable signal."
+    },
+    {
+      "id": "IND-16",
+      "section": "mass-marketing",
+      "flag": "Non-account holders or apparently unrelated individuals make deposits or payments to client’s account.",
+      "src_line": 107,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Deposits or payments into a client's account from non-account-holders or apparently unrelated parties is a concrete third-party-funding pattern derivable from the bank's own deposit/transfer records and relationship links it already holds, yet unrelated-party inbound funding is rarely a standing signal.",
+      "build_logic": {
+        "signal_name": "S-UNRELATED-PARTY-DEPOSITS",
+        "class": "entity · account-level · windowed third-party-funding",
+        "features": ["distinct_unrelated_depositors", "non_accountholder_deposit_count", "non_accountholder_deposit_value", "relationship_link_absent_flag"],
+        "logic": "Flag an account funded over the window by multiple depositors who are neither account holders nor linked to the client by any known relationship, indicating use of the account as a collection point for third-party (mule) funds.",
+        "window": "rolling 30 days",
+        "source": "deposit/transfer records joined to account-ownership and known-relationship registries",
+        "route": "Tier-2 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-17",
+      "section": "mass-marketing",
+      "flag": "Client does not appear to know the sender of a wire transfer from whom the wire transfer was received, or the\n\nrecipient to whom they are sending a wire transfer.",
+      "src_line": 108,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Whether a client actually knows their wire counterparty is a front-line interaction observation, not a data field; the bank must source that narrative before the indicator can be operationalized."
+    },
+    {
+      "id": "IND-18",
+      "section": "mass-marketing",
+      "flag": "Client conducts transactions at different physical locations or with different representatives in an apparent attempt\n\nto avoid detection.",
+      "src_line": 112,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Branch/location and channel/representative identifiers are captured on the bank's own transaction records, so location-spreading is partly observable and an existing structuring/detection-avoidance control can be enhanced rather than built anew."
+    },
+    {
+      "id": "IND-19",
+      "section": "mass-marketing",
+      "flag": "Account is used for pass-through activities (e.g. to receive and subsequently send funds to beneficiaries).",
+      "src_line": 116,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Receive-then-send pass-through behaviour is a classic velocity pattern already partly covered by existing in/out layering rules on the bank's core transaction data; a romance/mass-marketing tuning enhances the existing control."
+    },
+    {
+      "id": "IND-20",
+      "section": "mass-marketing",
+      "flag": "Client becomes defensive when asked about the rationale for a transaction and may take steps to close account\n\nor conduct transaction elsewhere.",
+      "src_line": 120,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "A client's defensive demeanour when questioned is a front-line behavioural observation that lives in interaction notes, not structured data, so it must be sourced before it can drive a signal."
+    },
+    {
+      "id": "IND-21",
+      "section": "mass-marketing",
+      "flag": "Client orders wire transfers that are frequently returned or cancelled.",
+      "src_line": 124,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Returned or cancelled wire transfers are recorded in the bank's own wire-status data and are partly surfaced by existing controls; a frequency-of-returns tuning enhances an existing rule rather than requiring a net-new build."
+    },
+    {
+      "id": "IND-22",
+      "section": "mass-marketing",
+      "flag": "Client frequently deposits fraudulent cheques or bank drafts that are later returned by the financial institution.",
+      "src_line": 125,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Cheques and bank drafts that are deposited and later returned are captured in the bank's own item-return data; flagging frequent return-after-deposit patterns enhances existing returned-item controls rather than requiring a fresh build."
+    },
+    {
+      "id": "IND-23",
+      "section": "mass-marketing",
+      "flag": "Client appears to be directed by a third party to deposit funds into accounts or to wire funds to individuals\n\ndomestically or in foreign jurisdictions.",
+      "src_line": 126,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Whether a client is acting under a third party's direction is a front-line observation (e.g., a client on the phone receiving instructions) that the bank must source as narrative; it is not present in transactional data."
+    },
+    {
+      "id": "IND-24",
+      "section": "mass-marketing",
+      "flag": "Client sends and/or receives an increasing amount of wires/EMTs.",
+      "src_line": 130,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Increasing volume of wires/EMTs sent or received is a velocity-escalation pattern already partly covered by existing volume-trend controls on the bank's transfer data; a romance/mass-marketing tuning enhances the existing rule."
+    },
+    {
+      "id": "IND-25",
+      "section": "mass-marketing",
+      "flag": "Client’s wire transfers involve amounts or jurisdictions that are inconsistent with their profile.",
+      "src_line": 131,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Wire amounts and destination jurisdictions are observable, but judging them 'inconsistent with profile' depends on KYC expected-activity profiles that are only partially structured, so an existing profile-deviation control can be enhanced rather than fully built from clean data."
+    },
+    {
+      "id": "IND-26",
+      "section": "mass-marketing",
+      "flag": "Client receives multiple incoming wires into a business account in a manner inconsistent with day-to-day business.",
+      "src_line": 132,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Multiple incoming wires to a business account are visible in transaction data, but the 'inconsistent with day-to-day business' judgment relies on expected-business-activity profiles that are only partially structured, so an existing business-activity-deviation control can be enhanced."
+    },
+    {
+      "id": "IND-27",
+      "section": "mass-marketing",
+      "flag": "Client makes numerous third-party cash deposits followed by outgoing draft/wire transfers to or cash withdrawals\n\nin high-risk jurisdictions.",
+      "src_line": 133,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Numerous third-party cash deposits followed by outgoing drafts/wires or cash withdrawals tied to high-risk jurisdictions is a concrete cash-in/transfer-out layering pattern derivable from the bank's own deposit, transfer and withdrawal records with jurisdiction tags, yet this third-party-cash-to-cross-border depletion sequence is rarely a standing signal.",
+      "build_logic": {
+        "signal_name": "S-3P-CASH-IN-XBORDER-OUT",
+        "class": "entity · account-level · windowed cash-layering",
+        "features": ["third_party_cash_deposit_count", "third_party_cash_deposit_value", "outbound_draft_wire_value", "cash_withdrawal_value", "highrisk_jurisdiction_flag", "passthrough_ratio"],
+        "logic": "Flag an account fed by numerous third-party cash deposits that is then depleted by outgoing drafts/wires or cash withdrawals directed to or occurring in high-risk jurisdictions within a short window, indicating placement-then-layering of fraud proceeds.",
+        "window": "rolling 30 days",
+        "source": "cash-deposit records joined to outbound draft/wire and ATM/cash-withdrawal records with jurisdiction risk tags",
+        "route": "Tier-1 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-28",
+      "section": "mass-marketing",
+      "flag": "Client receives payments from payment processors that are inconsistent with the client’s profile.",
+      "src_line": 137,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Inbound payments from payment processors are identifiable from counterparty tags, but the 'inconsistent with profile' judgment depends on KYC expected-activity profiles that are only partially structured, so an existing profile-deviation control can be enhanced."
+    }
+  ]
+}

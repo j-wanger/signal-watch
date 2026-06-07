@@ -1,6 +1,6 @@
 # Architecture: Signal Watch — AML Vision Demo
 
-> Last updated: 2026-06-06 by /dev-debrief (Phase 22 SHIPPED — FINTRAC as corpus SOURCE #4, the demo's FIRST cross-jurisdiction source: `data/fintrac/` (3 FINTRAC Operational Alert md + 3 derived), registered in `CORPUS_SOURCES` (doc_type "FINTRAC"). The rf_region anchors were WIDENED for FINTRAC's ML/TF "indicators" vocab (`_RF_HEADER_FINTRAC` + `_RF_INTRO_FINTRAC`, NARROW/ML-TF-qualified), the issuer + a per-source licence parameterized (FinCEN/OFAC/FINTRAC) — regression-gated (0 FinCEN/OFAC rf_region shift; grounding core `normalize`/`check_record` byte-untouched). `pdf_to_md.py` provenance made source-aware. The verbatim non-negotiable extended to TWO bases — US-federal public domain (17 USC §105) + FINTRAC Crown-copyright non-commercial reproduction licence (NOT public domain). 39 publications, 35 derived live across 4 sources, 2 jurisdictions.)
+> Last updated: 2026-06-06 by /dev-debrief (Phase 23 SHIPPED — FINTRAC DEPTH: corpus SOURCE #4 grown 3→10 strategic-intel products (9 Operational Alerts + 1 real-estate Operational BRIEF). The genuinely new gate work was an INVERTED "Indicators of <X>" anchor `_RF_HEADER_FINTRAC_INV` in `derive_signals.py` (two narrow branches: "of <ML/TF>" with a connector-gated trailing clause + `:?$` excluding the boilerplate "…can be thought of as red flags…" sentence, and "relating to | associated with <topic>") — the planned literal "TABLE OF INDICATORS" was a misread (the Brief heading is markitdown-fragmented). Regression-gated: 0 of 39 existing rf_regions shifted; grounding core `normalize`/`check_record` byte-untouched. NO `build.py`/`corpus.html` edit (4-type menu/chips/count data-driven). 46 publications, 42 derived live across 4 sources, 2 jurisdictions. dist/corpus 432KB→621KB. Harness 61→74. NO non-negotiable change (depth within the Phase-22 Crown-copyright basis).)
 
 ## Directory Layout
 
@@ -14,9 +14,9 @@ signal-watch/
     build.py                      # stdlib: render_one (validate+inline = dist-bytes source of truth) + writer; --check drift guard; Phase 13: render/build/check_corpus + special "corpus" target (reads committed data, does NOT import derive_signals.py)
     acquire_fincen.py             # authoring-only: stdlib urllib fetch of a FinCEN advisory PDF. Phase 20: --source; Phase 21: _to_pdf_url treats an absolute /media/.../download or /system/files/ URL as a direct download (the OFAC form; Phase 22: the FINTRAC <page>.pdf form needed NO tweak — already direct-download)
     pdf_to_md.py                  # authoring-only: markitdown PDF→markdown; Phase 22: provenance header SOURCE-AWARE (FINTRAC = Crown-copyright non-commercial, NOT public domain; FinCEN/OFAC branch byte-identical)
-    derive_signals.py             # authoring-only, STDLIB-ONLY (Phase 17: 1202→600): inverted loop — LLM extracts → gate disposes (quote-grounding `normalize(flag) ⊂ normalize(md)` + `rf_region` + `_rf_triage` counter); --corpus-status / --check-derived / --selftest. Phase 21: rf_region anchors WIDENED for OFAC vocab (`_RF_HEADER_OFAC`/`_RF_INTRO_OFAC`). Phase 22: WIDENED for FINTRAC ML/TF "indicators" vocab (`_RF_HEADER_FINTRAC`/`_RF_INTRO_FINTRAC`, NARROW), issuer + per-source licence parameterized (FinCEN/OFAC/FINTRAC) — regression-gated (0 FinCEN/OFAC rf_region shift); the grounding core normalize/check_record byte-untouched. extract_red_flags + --scaffold/--draft/--scaffold-derived DELETED (Ph17)
+    derive_signals.py             # authoring-only, STDLIB-ONLY (Phase 17: 1202→600): inverted loop — LLM extracts → gate disposes (quote-grounding `normalize(flag) ⊂ normalize(md)` + `rf_region` + `_rf_triage` counter); --corpus-status / --check-derived / --selftest. Phase 21: rf_region anchors WIDENED for OFAC vocab (`_RF_HEADER_OFAC`/`_RF_INTRO_OFAC`). Phase 22: WIDENED for FINTRAC ML/TF "indicators" vocab (`_RF_HEADER_FINTRAC`/`_RF_INTRO_FINTRAC`, NARROW). Phase 23: + INVERTED "Indicators of <X>" FINTRAC heading anchor (`_RF_HEADER_FINTRAC_INV`, two narrow branches + boilerplate exclusion). Issuer + per-source licence parameterized (FinCEN/OFAC/FINTRAC) — every widening regression-gated (0 FinCEN/OFAC rf_region shift; Phase 23: 0 of 39 existing shifted); the grounding core normalize/check_record byte-untouched. extract_red_flags + --scaffold/--draft/--scaffold-derived DELETED (Ph17)
   tests/
-    corpus-explorer.test.mjs      # Phase 19: ZERO-DEP Node DOM-shim harness — reads the committed dist/corpus/index.html, drives the 5-screen arc (NO jsdom; file:// offline ethos). Phase 22 extended to 61 assertions (4-type menu + a FINTRAC OA walking the arc + a Crown-copyright-not-public-domain attribution assertion)
+    corpus-explorer.test.mjs      # Phase 19: ZERO-DEP Node DOM-shim harness — reads the committed dist/corpus/index.html, drives the 5-screen arc (NO jsdom; file:// offline ethos). Phase 23 extended to 74 assertions (4-type menu + an alert, an OFAC advisory, a FINTRAC OA, AND a FINTRAC Operational Brief walking the arc + Crown-copyright + Brief-subtype assertions)
     fixtures/fincen-index.html    # saved advisory-listing fixture (crawl_fincen.py --selftest, Phase 10)
     fixtures/fincen-alerts.html   # saved alerts-hub fixture (crawl_fincen.py --alerts --selftest, Phase 20)
     smoke-checklist.md            # manual pre-present checklist (Phase 19 references the automated arc test)
@@ -38,12 +38,12 @@ signal-watch/
     index.json                    # HAND-AUTHORED OFAC manifest ({id,title,date,type,url=/media/<id>/download}) — no OFAC crawler
     corpus-status.json            # per-source status manifest (issuer=OFAC) — 3 docs, all derivable
     derived/<id>.json             # LLM-extracted + gate-checked OFAC record (NOT a ship config) — 3 committed (19 ind / 4 BUILD_NOW; maritime honestly SOURCE_DATA-heavy)
-  data/fintrac/                   # Phase 22: the `fintrac-advisories` SOURCE #4 — the demo's FIRST CROSS-JURISDICTION source (Canada FINTRAC; Crown-copyright NON-COMMERCIAL reproduction LICENCE, NOT public domain) — HAND-CURATED
-    raw/<id>.pdf                  # acquired FINTRAC OA PDF (authoring-only, GITIGNORED — md is the committed source of truth)
-    <id>.md                       # verbatim FINTRAC Operational Alert markdown (markitdown-converted from a direct <page>.pdf URL; source-aware provenance header = Crown-copyright, NOT public domain)
-    index.json                    # HAND-AUTHORED FINTRAC manifest ({id,title,date,type,url=OA PDF-version URL}) — no FINTRAC crawler (crawl_fincen.py stays FinCEN-only)
-    corpus-status.json            # per-source status manifest (issuer=FINTRAC, licence=Crown-copyright non-commercial) — 3 docs, all derivable
-    derived/<id>.json             # LLM-extracted + gate-checked FINTRAC record (NOT a ship config) — 3 committed (42 ind / 11 BUILD_NOW across 3 OAs; TF honestly SOURCE_DATA-heavy)
+  data/fintrac/                   # Phase 22: the `fintrac-advisories` SOURCE #4 — the demo's FIRST CROSS-JURISDICTION source (Canada FINTRAC; Crown-copyright NON-COMMERCIAL reproduction LICENCE, NOT public domain) — HAND-CURATED. Phase 23 grew it 3→10 (9 Operational Alerts + 1 real-estate Operational BRIEF)
+    raw/<id>.pdf                  # acquired FINTRAC OA/Brief PDF (authoring-only, GITIGNORED — md is the committed source of truth)
+    <id>.md                       # verbatim FINTRAC Operational Alert/Brief markdown (markitdown-converted from a direct <page>.pdf URL; source-aware provenance header = Crown-copyright, NOT public domain)
+    index.json                    # HAND-AUTHORED FINTRAC manifest ({id,title,date,type,url}) — 10 entries (Phase 23); no FINTRAC crawler (crawl_fincen.py stays FinCEN-only)
+    corpus-status.json            # per-source status manifest (issuer=FINTRAC, licence=Crown-copyright non-commercial) — 10 docs, all derivable
+    derived/<id>.json             # LLM-extracted + gate-checked FINTRAC record (NOT a ship config) — 10 committed (Phase 23: 225 ind / 50 BUILD_NOW; OAs denser than FinCEN advisories, range 16-57; some honestly SOURCE_DATA-heavy)
   dist/<typology>/index.html      # built self-contained ship files (per typology); BYTE-FROZEN by Phase 13
   dist/corpus/index.html          # Phase 13: built self-contained CORPUS EXPLORER ship file (committed)
   archive/                        # original baseline (equivalence reference)
@@ -95,7 +95,12 @@ framework). The three pre-existing sources stay byte-frozen; multi-source is pro
 US-federal (17 USC §105 — FinCEN + OFAC, both US Treasury). Phase 22 added FINTRAC as the FIRST
 CROSS-JURISDICTION source and extended the non-negotiable to a SECOND verbatim basis — FINTRAC's
 Crown-copyright NON-COMMERCIAL reproduction LICENCE (NOT public domain) — and WIDENED the rf_region
-anchors (regression-gated) for FINTRAC's ML/TF "indicators" heading vocab.
+anchors (regression-gated) for FINTRAC's ML/TF "indicators" heading vocab. Phase 23 grew the FINTRAC
+source 3→10 (9 Operational Alerts + 1 Operational Brief) — DEPTH within the established source (NO new
+source, NO non-negotiable change) — adding only an INVERTED "Indicators of <X>" anchor for the
+heading-form variety, 0-of-39-shift regression-gated; the menu/chips/count are data-driven so no
+`build.py`/`corpus.html` edit. The anchor set now spans forward + inverted FINTRAC + OFAC + FinCEN — a
+5th heading form would justify the DEFERRED source-scoped rf_region refactor.
 
 The split is load-bearing: acquire/convert/derive run at authoring; their output is persisted to
 `data/<source>/` + `config/` and INLINED by `build.py`. The ship artifact stays single-file, offline,

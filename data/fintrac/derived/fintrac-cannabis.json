@@ -1,0 +1,332 @@
+{
+  "id": "fintrac-cannabis",
+  "advisory": "FINTRAC-CANNABIS",
+  "source_md": "data/fintrac/fintrac-cannabis.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the indicator region (Phase 16/22/23). Coverage/data values are ILLUSTRATIVE (vision demo). FINTRAC Operational Alert — Canadian Crown copyright (© His Majesty the King in Right of Canada); reproduced verbatim for non-commercial use with attribution per FINTRAC's Terms & Conditions — NOT public domain.",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "online-dispensaries",
+      "flag": "Client receives an excessive volume of email money transfers from seemingly unrelated third-party individuals.",
+      "src_line": 193,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "An account taking in an unusually high count of incoming EMTs from many distinct, unrelated remitters is fully derivable from the bank's own EMT/Interac records (counterparty count, sender-relationship novelty, volume vs. peer baseline) and is rarely a standing signal.",
+      "build_logic": {
+        "signal_name": "S-EMT-THIRD-PARTY-FANIN",
+        "class": "entity · account-level · windowed counterparty fan-in",
+        "features": [
+          "incoming_emt_count",
+          "distinct_unrelated_senders",
+          "share_first_seen_senders",
+          "emt_value_vs_peer_baseline"
+        ],
+        "logic": "Flag a personal or business account whose incoming EMT volume over the window is dominated by a large number of distinct third-party senders with no prior relationship to the client, indicating retail-purchaser fan-in inconsistent with the stated account use.",
+        "window": "rolling 30 days",
+        "source": "EMT/Interac e-Transfer records joined to the counterparty-relationship registry",
+        "route": "Tier-2 alert -> AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-02",
+      "section": "online-dispensaries",
+      "flag": "Transaction details (contact name, email address, remittance information) make reference to cannabis-related\n\nterminology (e.g., weed, pot, bud, leaf) and/or order numbers.",
+      "src_line": 194,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Cannabis jargon and order-number patterns sit in free-text EMT contact-name/remittance fields the bank holds but does not parse, so a keyword/regex enrichment over unstructured memo text is needed before this becomes a reliable signal."
+    },
+    {
+      "id": "IND-03",
+      "section": "online-dispensaries",
+      "flag": "Excessive cash deposits and/or merchant credits that do not appear in line with the stated nature of the\n\n\n\nbusiness.",
+      "src_line": 198,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Cash-deposit and merchant-credit volume is observable from core data and partly covered by cash-structuring controls, but judging it out of line with the stated nature of the business depends on KYC business-profile/expected-activity context that is only partially structured, so an existing control can be enhanced."
+    },
+    {
+      "id": "IND-04",
+      "section": "online-dispensaries",
+      "flag": "Incoming email money transfers are quickly depleted by the purchase of bank drafts and/or cheques to\nseemingly unrelated third party individuals and/or cash withdrawals.",
+      "src_line": 203,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Incoming EMTs rapidly drained via bank drafts, cheques, or cash withdrawals to unrelated parties is a concrete in/out pass-through velocity pattern fully derivable from the bank's own EMT, draft, cheque and withdrawal records, and is not typically instrumented as a single standing signal.",
+      "build_logic": {
+        "signal_name": "S-EMT-RAPID-DEPLETION",
+        "class": "entity · account-level · windowed pass-through",
+        "features": [
+          "incoming_emt_value",
+          "days_to_outflow",
+          "draft_cheque_cash_outflow_value",
+          "passthrough_ratio",
+          "distinct_unrelated_payees"
+        ],
+        "logic": "Flag an account where a high share of recently-received EMT value is depleted within a short window through bank-draft/cheque purchases or cash withdrawals to seemingly unrelated third parties, indicating conduit behaviour rather than genuine account use.",
+        "window": "rolling 7 days",
+        "source": "EMT records joined to bank-draft, cheque-issuance and cash-withdrawal ledgers",
+        "route": "Tier-1 alert -> AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-05",
+      "section": "online-dispensaries",
+      "flag": "Different accounts are using the same email money transfer contact information to receive funds (e.g., email\n\naddress) from third-party individuals or entities.",
+      "src_line": 206,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Distinct accounts sharing the same EMT contact email to receive funds is a shared-identifier linkage fully derivable from the bank's own EMT registration/contact records by grouping accounts on the receiving email/identifier, and is rarely surfaced as a standing signal.",
+      "build_logic": {
+        "signal_name": "S-SHARED-EMT-IDENTIFIER",
+        "class": "network · cross-account · shared-identifier linkage",
+        "features": [
+          "shared_emt_email",
+          "distinct_accounts_per_identifier",
+          "inbound_value_per_identifier",
+          "account_ownership_divergence"
+        ],
+        "logic": "Flag a cluster of otherwise-unrelated accounts that register or receive EMTs under the same contact email/identifier, indicating a coordinated collection point inconsistent with independent customers.",
+        "window": "rolling 60 days",
+        "source": "EMT contact-registration records grouped by receiving identifier and joined to account-ownership data",
+        "route": "Tier-2 alert -> AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-06",
+      "section": "online-dispensaries",
+      "flag": "Client is receiving incoming email money transfers sent to a series of email addresses and/or phone numbers\nassociated with an online unlicensed dispensary, but depositing the funds into their account which has a\ndifferent email address or phone number listed on file.",
+      "src_line": 210,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "The mismatch between the destination EMT contact identifiers and the account's on-file email/phone is observable from bank records, but tying the receiving identifiers to a specific unlicensed dispensary needs external/open-source enrichment before the signal is reliable."
+    },
+    {
+      "id": "IND-07",
+      "section": "online-dispensaries",
+      "flag": "Online information links the client’s contact information to an unlicensed cannabis dispensary.",
+      "src_line": 214,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Establishing that a client's contact information appears online linked to an unlicensed dispensary requires external open-source/web intelligence attribution the bank does not natively hold and must source before any signal is buildable."
+    },
+    {
+      "id": "IND-08",
+      "section": "online-dispensaries",
+      "flag": "An excessive volume of email money transfers occurs in a newly opened personal or business account, or after\nprolonged account inactivity and does not appear in line with stated occupation or nature of the business.",
+      "src_line": 215,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "A sudden burst of EMT volume in a newly opened or long-dormant account is fully derivable from account-age, dormancy and EMT-volume data the bank already holds; the occupation/business-nature comparison sharpens but is not required for a buildable velocity-vs-account-maturity signal.",
+      "build_logic": {
+        "signal_name": "S-EMT-BURST-NEW-DORMANT",
+        "class": "entity · account-level · windowed maturity-velocity",
+        "features": [
+          "account_age_days",
+          "days_since_last_activity",
+          "emt_volume_window",
+          "emt_volume_vs_expected_profile"
+        ],
+        "logic": "Flag an account that, within a short window of opening or of reactivation after prolonged inactivity, receives an EMT volume far above its expected profile, indicating a freshly provisioned or revived collection account.",
+        "window": "first 30 days of activity / first 30 days post-dormancy",
+        "source": "account-lifecycle (open/dormancy) records joined to EMT volume ledger",
+        "route": "Tier-2 alert -> AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-09",
+      "section": "online-dispensaries",
+      "flag": "Newly opened business account lacks open source footprint and has a registered address in a residential area.",
+      "src_line": 217,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Account-open date and registered address are held, but confirming the absence of an open-source footprint and classifying the address as residential require external web-presence and address-zoning enrichment the bank does not natively hold."
+    },
+    {
+      "id": "IND-10",
+      "section": "online-dispensaries",
+      "flag": "Client receives funds transfers from an entity who is suspected of operating an online unlicensed dispensary,\n\n\n\nand quickly transfers those funds to the personal account held by the signing authority of the entity.",
+      "src_line": 218,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "The rapid pass-through to the entity's signing-authority personal account is derivable from internal signatory-linkage and transfer records, but flagging the upstream entity as a suspected unlicensed dispensary depends on external attribution that must be enriched first."
+    },
+    {
+      "id": "IND-11",
+      "section": "online-dispensaries",
+      "flag": "Incoming fund transfer from virtual currency dealers into individual’s bank account, makes reference to\ncannabis-related terminology (e.g., weed, pot, bud, leaf).",
+      "src_line": 223,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Inbound transfers from VC dealers can be tagged from counterparty/MSB data, but the cannabis-terminology cue lives in free-text remittance fields that need keyword-parsing enrichment before the combined signal is reliable."
+    },
+    {
+      "id": "IND-12",
+      "section": "online-dispensaries",
+      "flag": "Client makes excessive purchases at packaging, shipping, and/or mail service businesses.",
+      "src_line": 226,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Outbound spend is visible in transaction data, but reliably classifying counterparties as packaging/shipping/mail-service businesses depends on merchant-category/MCC or merchant-name tagging that needs enrichment beyond core fields."
+    },
+    {
+      "id": "IND-13",
+      "section": "online-dispensaries",
+      "flag": "Media or law enforcement information links client and/or related individuals/entities to illicit cannabis activity\n\nand/or other drug trafficking activities.",
+      "src_line": 227,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Linking a client to illicit cannabis or drug-trafficking activity via media or law-enforcement information requires external intelligence/adverse-media attribution the bank does not natively hold and must source."
+    },
+    {
+      "id": "IND-14",
+      "section": "online-dispensaries",
+      "flag": "Following the closure of the business account of an unlicensed dispensary, a seemingly unrelated third-party\nindividual starts to receive email money transfers from the same unlicensed dispensary operating name or\nemail.",
+      "src_line": 236,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "The migration of EMT inflows under the same operating name/email to a new third-party account after a prior account closed is observable from the bank's EMT contact and account-status records, but tying the identifier to a known unlicensed dispensary needs external attribution to enrich."
+    },
+    {
+      "id": "IND-15",
+      "section": "cultivation-processing",
+      "flag": "Client makes excessive or atypical utility payments (e.g., bill payments made to different hydro accounts,\n\nmultiple individuals paying off the same hydro account, payment amount exceeds expected amount for personal\nconsumption, or bill payments that appear excessive given stated occupation and/or address).",
+      "src_line": 243,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Utility-bill-payment anomalies — one client paying many hydro accounts, many clients paying one hydro account, or amounts above expected consumption — are fully derivable from the bank's own bill-payment records (payee account, payer, amount) and are rarely turned into a standing grow-op signal.",
+      "build_logic": {
+        "signal_name": "S-UTILITY-PAYMENT-ANOMALY",
+        "class": "network · bill-payment · many-to-one / one-to-many linkage",
+        "features": [
+          "distinct_hydro_payees_per_client",
+          "distinct_payers_per_hydro_account",
+          "payment_vs_expected_consumption",
+          "payment_amount_zscore"
+        ],
+        "logic": "Flag clients whose hydro/utility bill payments are anomalous in topology or magnitude — a single client paying multiple distinct hydro accounts, multiple clients converging on one hydro account, or amounts well above expected residential consumption — indicating possible unlicensed grow-operation power draw.",
+        "window": "rolling 90 days",
+        "source": "utility/hydro bill-payment ledger joined to payer/payee account registry",
+        "route": "Tier-1 alert -> AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-16",
+      "section": "cultivation-processing",
+      "flag": "Client conducts large purchases at businesses used by the cannabis industry (i.e., hydroponics store, hardware\n\nstore, and gardening stores).",
+      "src_line": 248,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Large outbound purchases are visible in transaction data, but classifying merchants as hydroponics/garden/hardware stores associated with cannabis cultivation depends on merchant-category/MCC tagging that needs enrichment beyond core fields."
+    },
+    {
+      "id": "IND-17",
+      "section": "cultivation-processing",
+      "flag": "Cash is used for over-the-counter utility bill payments.",
+      "src_line": 252,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Cash-funded over-the-counter utility bill payments are directly derivable from the bank's own teller/payment records (payment channel = OTC, funding tender = cash, payee = utility), and cash-for-utility is not typically instrumented as a standing signal.",
+      "build_logic": {
+        "signal_name": "S-CASH-OTC-UTILITY",
+        "class": "entity · transaction-level · channel/tender pattern",
+        "features": [
+          "otc_channel_flag",
+          "cash_tender_flag",
+          "utility_payee_flag",
+          "cash_utility_payment_frequency"
+        ],
+        "logic": "Flag utility bill payments made over the counter and funded with cash, particularly when recurring or in exact/rounded bill amounts, indicating deliberate avoidance of a traceable funding account for grow-operation power costs.",
+        "window": "rolling 90 days",
+        "source": "over-the-counter bill-payment records with funding-tender and payee-type tags",
+        "route": "Tier-2 alert -> AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-18",
+      "section": "cultivation-processing",
+      "flag": "Utility bill payments conducted in multiple over-the-counter locations.",
+      "src_line": 253,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Utility bill payments spread across multiple over-the-counter branch/location codes for the same client are fully derivable from the bank's own transaction location/branch metadata, and location-spreading of utility payments is rarely a standing signal.",
+      "build_logic": {
+        "signal_name": "S-UTILITY-OTC-LOCATION-SPREAD",
+        "class": "entity · transaction-level · location dispersion",
+        "features": [
+          "distinct_otc_locations",
+          "utility_payment_count",
+          "location_spread_window",
+          "same_payee_across_locations"
+        ],
+        "logic": "Flag a client whose utility bill payments over the window are dispersed across an unusual number of distinct over-the-counter locations, indicating deliberate fragmentation to avoid a recognizable single-branch footprint.",
+        "window": "rolling 90 days",
+        "source": "bill-payment records with originating-location/branch metadata joined to payee-type tags",
+        "route": "Tier-2 alert -> AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-19",
+      "section": "cultivation-processing",
+      "flag": "Client has a listed address in one province but is paying large utility bills in another province.",
+      "src_line": 254,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Comparing the client's on-file (KYC) province against the province of the utility payee/account being paid is fully derivable from data the bank already holds, and a cross-province utility-payment mismatch is not typically instrumented as a standing signal.",
+      "build_logic": {
+        "signal_name": "S-CROSS-PROVINCE-UTILITY",
+        "class": "entity · account-level · geography mismatch",
+        "features": [
+          "kyc_address_province",
+          "utility_payee_province",
+          "utility_payment_value",
+          "province_mismatch_flag"
+        ],
+        "logic": "Flag a client whose listed residential province differs from the province of a large utility bill they are paying, indicating payment for a remote premises consistent with an off-address grow operation.",
+        "window": "rolling 90 days",
+        "source": "KYC address registry joined to utility bill-payment payee/account geography",
+        "route": "Tier-2 alert -> AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-20",
+      "section": "cultivation-processing",
+      "flag": "Client provides misleading or falsified documentation concerning cannabis production (i.e., falsified licence\n\ncertificate for marijuana production).",
+      "src_line": 255,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Determining that documentation about cannabis production is misleading or falsified requires verification against external licensing ground truth the bank does not hold; it is a manual/documentary finding, not a pattern derivable from transaction data."
+    },
+    {
+      "id": "IND-21",
+      "section": "cultivation-processing",
+      "flag": "Large purchases towards candy stores or kitchen ware stores outside of the expected businesses activity of the\n\nclient.",
+      "src_line": 259,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Large outbound purchases are visible in transaction data, but classifying merchants as candy/kitchenware stores and judging them outside expected business activity depends on merchant-category tagging plus KYC expected-activity context that needs enrichment."
+    }
+  ]
+}

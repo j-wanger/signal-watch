@@ -337,6 +337,38 @@ ok(/· Close the loop/.test(envF.__stage._html), 'fintrac: Close-the-loop screen
 eq(numText(envF, 'gnum'), afterF, 'fintrac: close gauge lands on the recomputed after-coverage');
 ok(envF.__errors.length === 0, 'fintrac: full 5-screen arc walked with no console errors');
 
+// ---- the FINTRAC real-estate OPERATIONAL BRIEF walks the full 5-screen arc (Phase 23 — FINTRAC
+//      depth: the Brief is the doc that required the NEW inverted "Indicators of <X>" rf_region anchor,
+//      and is a different FINTRAC product subtype (Operational Brief, FINTRAC-2016-OB001) than the OAs.
+//      Snow-washing / real-estate ML is the marquee Canadian typology for the demo's audience. ----
+const envB = boot(true);
+const apiB = envB.__api;
+const brief = apiB.ADVISORIES.find(a => a.id === 'fintrac-real-estate');
+ok(brief && apiB.isLive(brief), 'fintrac-brief: the real-estate Operational Brief is derived/live');
+ok(/Operational Brief/.test(brief.title || ''), 'fintrac-brief: doc is the FINTRAC Operational Brief subtype');
+ok(apiB.buildNows(brief).some(i => i.build_logic && typeof i.build_logic === 'object'),
+  'fintrac-brief: the Brief carries a buildable BUILD_NOW gap (inverted-anchor derivation produced real signals)');
+apiB.pick(brief.id);
+eq(apiB.view, 'detail', 'fintrac-brief: pick() enters detail view');
+ok(/His Majesty the King in Right of Canada/.test(envB.__stage._html),
+  'fintrac-brief: source panel renders the FINTRAC Crown-copyright attribution');
+ok(!/public domain/i.test(envB.__stage._html), 'fintrac-brief: the source panel does NOT claim US public domain');
+const covB = apiB.coverageIndex(brief.indicators);
+eq(numText(envB, 'gnum'), covB, 'fintrac-brief: Coverage gauge lands on coverageIndex(indicators)');
+apiB.gotoScreen(1);
+ok(/Build recommendations · gate/.test(envB.__stage._html), 'fintrac-brief: Build-recs/GATE screen renders');
+eq([...apiB.selected].sort().join(','), apiB.buildNows(brief).map(i => i.id).sort().join(','),
+  'fintrac-brief: gate defaults to ALL BUILD_NOW selected');
+apiB.gotoScreen(2);
+ok(/PROPOSED ·/.test(envB.__stage._html), 'fintrac-brief: Signal drafts ≥1 spec card for the picks');
+apiB.selected = new Set(apiB.buildNows(brief).map(i => i.id));
+const afterB = apiB.coverageIndex(brief.indicators.map(i =>
+  apiB.selected.has(i.id) ? Object.assign({}, i, { status: 'covered' }) : i));
+apiB.gotoScreen(3);
+ok(/· Close the loop/.test(envB.__stage._html), 'fintrac-brief: Close-the-loop screen renders');
+eq(numText(envB, 'gnum'), afterB, 'fintrac-brief: close gauge lands on the recomputed after-coverage');
+ok(envB.__errors.length === 0, 'fintrac-brief: full 5-screen arc walked with no console errors');
+
 /* ============================ report ============================ */
 console.log(`\n${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.log('FAILURES:\n  - ' + fails.join('\n  - ')); process.exit(1); }

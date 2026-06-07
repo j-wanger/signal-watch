@@ -136,12 +136,12 @@ non-derivable).
 
 `dist/corpus/index.html` is a **second, separate** single-file ship artifact: a FinCEN **corpus
 explorer**. Where the six-act typology demos each tell one scripted story, the explorer points the same
-loop at the *whole public corpus* — FinCEN advisories + alerts, OFAC, and FINTRAC — you pick one of the 39 publications
+loop at the *whole public corpus* — FinCEN advisories + alerts, OFAC, and FINTRAC — you pick one of the 46 publications
 and watch it derive. It is a **staged 5-screen arc** (Phase 18 gave it the two beats the six-act showcase
 has and the explorer lacked — a human gate and a close-the-loop payoff):
 
-1. **Select** — all 39 publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC advisories +
-   3 FINTRAC operational alerts), each with an honest `doc_type` chip (*Advisory* / *Alert* / *OFAC* / *FINTRAC*) and a status chip: *derived* (live, clickable — 35 of them), or *no
+1. **Select** — all 46 publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC advisories +
+   10 FINTRAC publications — 9 operational alerts + 1 operational brief), each with an honest `doc_type` chip (*Advisory* / *Alert* / *OFAC* / *FINTRAC*) and a status chip: *derived* (live, clickable — 42 of them), or *no
    enumerated red-flag list* (non-derivable — the 4 remaining: the 2 FATF jurisdiction advisories + 2
    alerts whose text mentions red flags but carries no anchorable enumerated list). The *clean / low*
    "ready to derive, not yet derived" chip state remains for any future publication added before it is derived.
@@ -170,9 +170,9 @@ indicator must carry a full signal definition). `build.py` never imports `derive
 and red-flag text are verbatim from their public sources (US-federal public domain, or FINTRAC under its
 non-commercial reproduction licence); the coverage/data/build judgments are illustrative (the
 "Illustrative data & outputs" badge stays on, with the per-document source attribution — each carrying its
-own basis — kept visually distinct from it). The explorer ships with **35 derived across 39 publications**
-(12 of 14 FinCEN advisories + 17 of 19 FinCEN alerts + 3 of 3 OFAC advisories + 3 of 3 FINTRAC operational
-alerts) — the non-derivable documents (the 2 FATF advisories + 2 alerts with no enumerated red-flag list) are labelled as such. The menu is deliberately varied: the transaction-pattern-rich
+own basis — kept visually distinct from it). The explorer ships with **42 derived across 46 publications**
+(12 of 14 FinCEN advisories + 17 of 19 FinCEN alerts + 3 of 3 OFAC advisories + 10 of 10 FINTRAC publications
+— 9 operational alerts + 1 operational brief) — the non-derivable documents (the 2 FATF advisories + 2 alerts with no enumerated red-flag list) are labelled as such. The menu is deliberately varied: the transaction-pattern-rich
 Chinese money-laundering-networks typology (`fin-2025-a003`) surfaces five immediately-buildable signals;
 the enrichment-hungry Iran (`fin-2025-a002`) and Iran-backed-terror-finance (`fin-2024-a001`) typologies
 lean to *build + enrich*; the **glued-no-separator** advisories — ransomware (`fin-2021-a004`) and
@@ -225,12 +225,21 @@ OFAC mds, so every existing region stays byte-unchanged and all 32 records + `--
 grounding `normalize` is untouched). Acquisition is **hand-curated** (`data/fintrac/index.json`): FINTRAC
 serves a PDF at `<page-url>.pdf`, which the existing direct-download path handled with no change
 (`acquire_fincen.py --source data/fintrac`; the `pdf_to_md.py` provenance header was made source-aware so a
-FINTRAC file is never mislabelled public domain). Three OAs derive — underground banking, illicit synthetic
-opioids (the Canadian counterpart to the fentanyl showcase), and terrorist activity financing — 42
-indicators, 11 build-now; the TF alert is honestly `SOURCE_DATA`-heavy (its indicators hinge on external
-listed-entity / jurisdiction attribution a bank can't see in its own data). The explorer's source panel
-renders each document's own basis, so a FINTRAC document shows its Crown-copyright attribution, never the
-US public-domain line.
+FINTRAC file is never mislabelled public domain). **Phase 23 then deepened FINTRAC 3 → 10** — the demo's
+audience is a Canadian bank, so depth weighted Canadian-relevant typologies: six more Operational Alerts
+(human trafficking / Project Protect, online child sexual exploitation / Project Shadow, romance fraud /
+Project Chameleon, illegal wildlife trade / Project Anton, professional money laundering, illicit cannabis /
+Project Legion) plus the **real-estate Operational Brief** (FINTRAC-2016-OB001 — snow-washing, the marquee
+Canadian typology). Those Briefs (and some OAs) head their lists with the *inverted* form "Indicators **of**
+money laundering …", so `rf_region` was widened once more (`_RF_HEADER_FINTRAC_INV`, two narrow branches)
+strictly regression-gated — **0 of 39** prior FinCEN + OFAC + FINTRAC regions shifted, the grounding core
+untouched, and any document whose heading couldn't anchor without disturbing an existing region is skipped,
+not forced. The 10 FINTRAC documents contribute **225 indicators / 50 build-now**, honest yield over count:
+the OCSE and wildlife alerts are deliberately `SOURCE_DATA`-heavy (their indicators hinge on external
+attribution a bank can't see), while cannabis and professional-ML are build-now-rich (bank-observable
+EMT / cheque / cash / utility patterns) — and FINTRAC alerts run far denser than FinCEN advisories. The
+explorer's source panel renders each document's own basis, so a FINTRAC document shows its Crown-copyright
+attribution, never the US public-domain line.
 
 ## Present it
 

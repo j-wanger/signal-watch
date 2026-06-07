@@ -1,0 +1,187 @@
+{
+  "id": "fintrac-illegal-wildlife",
+  "advisory": "FINTRAC-ILLEGAL-WILDLIFE",
+  "source_md": "data/fintrac/fintrac-illegal-wildlife.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the indicator region (Phase 16/22/23). Coverage/data values are ILLUSTRATIVE (vision demo). FINTRAC Operational Alert — Canadian Crown copyright (© His Majesty the King in Right of Canada); reproduced verbatim for non-commercial use with attribution per FINTRAC's Terms & Conditions — NOT public domain.",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "general-wildlife-trade",
+      "flag": "Transaction details (email address, remittance information) make reference to species or animal parts of\nconcern for illegal wildlife trade, particularly endangered species (e.g., ivory, tusk, scales, shark fin,\ntortoise, gecko).",
+      "src_line": 280,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Free-text remittance/email fields are bank-held, but reliably detecting species/animal-part references (ivory, tusk, scales, shark fin) requires a curated wildlife-keyword lexicon and memo parsing to enrich unstructured payment text before the signal fires."
+    },
+    {
+      "id": "IND-02",
+      "section": "general-wildlife-trade",
+      "flag": "Media and/or law enforcement information links client or transacting parties to the illegal wildlife trade.",
+      "src_line": 284,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Linking a client or counterparty to illegal wildlife trade via media or law-enforcement information requires external adverse-media/LE intelligence attribution the bank does not natively hold and must source first."
+    },
+    {
+      "id": "IND-03",
+      "section": "general-wildlife-trade",
+      "flag": "Transaction details (contact name, email address, remittance information) specifies the role of the\nbeneficiary of funds (e.g., poacher, coordinator, supplier, breeder, trader, courier).",
+      "src_line": 290,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Beneficiary contact/remittance text is observable, but flagging role keywords (poacher, coordinator, breeder, courier) inside free-text fields needs a wildlife-role lexicon and memo parsing to enrich the unstructured data before it is reliable."
+    },
+    {
+      "id": "IND-04",
+      "section": "general-wildlife-trade",
+      "flag": "An individual is the owner, operator, employee or associated with an industry that could be used to\nfacilitate illegal wildlife trade (e.g., import/export of goods, fisheries wholesaler, pet store, freight company,\nanimal control).",
+      "src_line": 293,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Whether a client is owner/operator of a wildlife-facilitating industry (import/export, fisheries wholesaler, pet store, freight) depends on business-sector/occupation tags that are only partially structured in KYC and need enrichment before a signal can key on them."
+    },
+    {
+      "id": "IND-05",
+      "section": "general-wildlife-trade",
+      "flag": "Individual or an entity has open source information10 linking them to the possession and/or advertising the\nsale of species of concern for illegal wildlife trade, particularly endangered species (e.g., geckos, turtles,\nand tortoises).",
+      "src_line": 305,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Open-source links to possession or advertising of species of concern require external open-source-intelligence attribution about the party that the bank does not hold internally and must source before any signal is buildable."
+    },
+    {
+      "id": "IND-06",
+      "section": "general-wildlife-trade",
+      "flag": "Individual received numerous transfers with wildlife-trade references from several parties, followed by\noutgoing transfers to an individual(s) who has also received similar email money transfers from other\nparties. The individual had very few or no other transactions in their account.",
+      "src_line": 309,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "A funnel pattern — numerous inbound transfers from several parties immediately passed out to a recipient who is itself a similar collector, in an account with little other activity — is a concrete structural flow fully derivable from the bank's own EMT/transfer ledger and counterparty fan-in/fan-out, yet is rarely a standing signal.",
+      "build_logic": {
+        "signal_name": "S-WILDLIFE-FUNNEL-INTERMEDIARY",
+        "class": "entity · account-level · windowed fan-in/fan-out",
+        "features": ["inbound_transfer_count", "distinct_inbound_parties", "passthrough_ratio_to_single_recipient", "recipient_is_also_collector", "other_account_activity_count"],
+        "logic": "Flag an account that receives many transfers from multiple distinct parties and rapidly passes a high share of that value onward to one or a few recipients who themselves exhibit the same multi-party collector pattern, while the account has very few or no other transactions — indicating a financial-intermediary/nominee node in a collection network.",
+        "window": "rolling 30 days",
+        "source": "EMT/wire/transfer ledger joined to counterparty graph (fan-in/fan-out degree) and per-account activity counts",
+        "route": "Tier-1 alert -> AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-07",
+      "section": "general-wildlife-trade",
+      "flag": "Individual or entity provides misleading or falsified documentation concerning wildlife trade (e.g., incorrect\npermits).",
+      "src_line": 317,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Detecting misleading or falsified wildlife-trade documentation (e.g., incorrect CITES/WAPPRIITA permits) requires permit/licensing validation against external regulatory data the bank does not hold and must source before any signal is possible."
+    },
+    {
+      "id": "IND-08",
+      "section": "import-into-canada",
+      "flag": "Frequent transfers to individuals and/or entities located in jurisdictions of concern for wildlife crime (e.g.,\nChina, Hong Kong, Australia, and Sub-Saharan Africa).",
+      "src_line": 324,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Frequent outbound transfers to a defined set of wildlife-crime jurisdictions of concern (China, Hong Kong, Australia, Sub-Saharan Africa) is a concrete geography+frequency pattern fully derivable from the bank's own wire/EMT records and beneficiary country attribution, and is not typically instrumented as a standing wildlife-specific signal.",
+      "build_logic": {
+        "signal_name": "S-WILDLIFE-JURISDICTION-TRANSFERS",
+        "class": "entity · account-level · windowed geography",
+        "features": ["outbound_transfer_count", "share_value_to_concern_jurisdictions", "distinct_concern_jurisdictions", "beneficiary_country_attribution"],
+        "logic": "Flag a client making frequent outbound transfers (above count/value thresholds over the window) to beneficiaries located in the configured wildlife-crime jurisdictions of concern (China, Hong Kong, Australia, Sub-Saharan Africa), combined for triage with other wildlife indicators rather than fired in isolation.",
+        "window": "rolling 30 days",
+        "source": "outbound wire/EMT ledger joined to beneficiary country/jurisdiction attribution and a configured concern-jurisdiction list",
+        "route": "Tier-2 alert -> AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-09",
+      "section": "import-into-canada",
+      "flag": "Payments to entities operating in the traditional medicine market.",
+      "src_line": 327,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Outbound payments are visible, but identifying the counterparty as operating in the traditional-medicine market depends on merchant/sector classification that is only partially tagged and needs enrichment before a reliable signal."
+    },
+    {
+      "id": "IND-10",
+      "section": "import-into-canada",
+      "flag": "Transaction details (email address, remittance information) make reference to traditional medicine or the\ntraditional medicine market.",
+      "src_line": 331,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Email/remittance free-text is bank-held, but keying on 'traditional medicine market' references requires a keyword lexicon and memo parsing to enrich the unstructured payment text before the signal is dependable."
+    },
+    {
+      "id": "IND-11",
+      "section": "import-into-canada",
+      "flag": "Payments made to individuals and/or entities involved in an animal-related business (e.g., aquarium, zoo,\nveterinary clinic) that are inconsistent with the client’s profile.",
+      "src_line": 334,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Outbound payments to animal-related businesses (aquarium, zoo, veterinary clinic) are partly observable via merchant tags, but judging them 'inconsistent with the client's profile' relies on KYC expected-activity data that is only partially structured, so an existing profile-mismatch control can be enhanced rather than newly built."
+    },
+    {
+      "id": "IND-12",
+      "section": "import-into-canada",
+      "flag": "Purchases and/or payments for travel-related purchases (e.g., airfare, lodging) to and from jurisdictions of\nconcern for wildlife crime.",
+      "src_line": 338,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Travel purchases (airfare, lodging) are visible from card/transaction data, but tying them to travel 'to and from jurisdictions of concern for wildlife crime' requires merchant-geography and itinerary enrichment beyond the raw transaction before the signal is reliable."
+    },
+    {
+      "id": "IND-13",
+      "section": "export-from-canada",
+      "flag": "Individual or entity received multiple email money transfers or wire transfers referencing species or animal\nparts of concern for illegal wildlife trade from Canada (e.g., bear, grease, eels).",
+      "src_line": 348,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Inbound EMT/wire volume is bank-held, but detecting species/animal-part references (bear, bear grease, eels) inside transfer remittance text needs a wildlife-keyword lexicon and memo parsing to enrich the unstructured field before firing."
+    },
+    {
+      "id": "IND-14",
+      "section": "export-from-canada",
+      "flag": "Frequent purchases and/or payments for animal related goods and services (e.g., animal supplies, cages,\nfreight equipment).",
+      "src_line": 351,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Frequent purchases are visible in transaction data, but recognising the merchant/goods as animal-related (animal supplies, cages, freight equipment) depends on merchant-category/MCC tagging that needs enrichment before a wildlife-specific signal is reliable."
+    },
+    {
+      "id": "IND-15",
+      "section": "export-from-canada",
+      "flag": "Frequent payments to shipping entities, postal services, and/or cargo services.",
+      "src_line": 356,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Frequent payments to shipping/postal/cargo counterparties are fully observable from transaction data and counterparty MCC tags, and overlap with existing high-frequency-merchant monitoring, so tagging the shipping/postal/cargo destination can sharpen an existing control rather than require a net-new build."
+    },
+    {
+      "id": "IND-16",
+      "section": "export-from-canada",
+      "flag": "Payments received from individuals and/or entities involved in an animal-related business (e.g., aquarium,\nzoo, pet store) that are inconsistent with the client’s profile.",
+      "src_line": 358,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Inbound payments from animal-related businesses (aquarium, zoo, pet store) are partly observable via counterparty tags, but the 'inconsistent with the client's profile' judgment relies on KYC expected-activity data that is only partially structured, so an existing profile-mismatch control can be enhanced."
+    }
+  ]
+}

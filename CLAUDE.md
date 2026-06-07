@@ -70,8 +70,8 @@ AML transformation framework. Keep vocabulary consistent with it
   `dist/corpus/index.html`, built from a standalone template `corpus.html` (owns its own copy of the
   dossier theme — the six-act engine `index.html` is left byte-untouched). A staged 5-screen ARC
   (Phase 18 gave the explorer the showcase's two missing beats — a human gate + a close-the-loop payoff):
-  SELECT one of the 39 public publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC + 3 FINTRAC —
-  Phase 20/21/22; honest `doc_type` chip Advisory/Alert/OFAC/FINTRAC + status chips: derived /
+  SELECT one of the 46 public publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC + 10 FINTRAC —
+  Phase 20/21/22/23; honest `doc_type` chip Advisory/Alert/OFAC/FINTRAC + status chips: derived /
   clean-or-low-not-yet-derived / non-derivable) → COVERAGE gauge → BUILD RECOMMENDATIONS **= the human GATE** (per-indicator cover×data
   build_rec, sorted BUILD_NOW-first, each row src_line-traceable; the BUILD_NOW rows are SELECTABLE
   div-toggles [NOT `<input>`, so Space/arrow nav still works] — default all-selected, "agent proposes,
@@ -104,9 +104,10 @@ AML transformation framework. Keep vocabulary consistent with it
   gate. Phase 20 stayed STILL FinCEN, STILL verbatim, STILL public-domain (17 U.S.C. 105) — NO
   non-negotiable changed by it; the quote-grounding gate (`check_record`/`rf_region`/`normalize`) is
   source-agnostic. `data/fincen/` (the advisories source) stays byte-frozen — multi-source via the MERGE,
-  not a migration. (Phase 21 then added OFAC as source #3 + Phase 22 added FINTRAC as source #4 — see the
-  next bullets; the corpus now ships **35 derived across 39 publications** = 12 advisories + 17 alerts +
-  3 OFAC + 3 FINTRAC, only the 2 FATF advisories + 2 alerts with no enumerated red-flag list non-derivable.)
+  not a migration. (Phase 21 then added OFAC as source #3 + Phase 22 added FINTRAC as source #4 + Phase 23
+  DEEPENED FINTRAC 3→10 — see the next bullets; the corpus now ships **42 derived across 46 publications** =
+  12 advisories + 17 alerts + 3 OFAC + 10 FINTRAC, only the 2 FATF advisories + 2 alerts with no enumerated
+  red-flag list non-derivable.)
 - OFAC as source #3 (Phase 21, M7 — cross-agency, US-federal): OFAC (US Treasury) added as the THIRD
   corpus source (`data/ofac/`, doc_type "OFAC"; 3 derived). Because 17 U.S.C. §105 covers ALL US federal
   works, the verbatim non-negotiable was extended FinCEN-only → US-federal (FinCEN + OFAC + US federal;
@@ -144,6 +145,25 @@ AML transformation framework. Keep vocabulary consistent with it
   corpus.html's source panel renders each doc's OWN basis (FINTRAC shows Crown-copyright, never "public
   domain"); the prior blanket "all public domain" SELECT/footer copy was corrected to the multi-jurisdiction
   reality. The always-on "Illustrative data & outputs" badge stays, distinct from the verbatim attribution.
+- FINTRAC DEPTH (Phase 23, M7 — Canadian depth, NO new source/non-negotiable/architecture change): grew the
+  FINTRAC source 3 → 10 by deriving 7 more anchorable FINTRAC strategic-intelligence products — 6 Operational
+  Alerts (human-trafficking/Project Protect, online-child-exploitation/Project Shadow, romance-fraud/Project
+  Chameleon, illegal-wildlife/Project Anton, professional-ML, cannabis/Project Legion) + the real-estate
+  Operational BRIEF (FINTRAC-2016-OB001 — snow-washing, the marquee Canadian typology). The demo's audience is
+  a Canadian bank, so depth weighted Canadian-relevant. Reused the registry + inverted loop + gate UNCHANGED;
+  the ONLY gate touch was a regression-gated WIDENING for the new INVERTED "Indicators of <X>" heading form
+  (Operational Briefs + some OAs lead with "indicators": `_RF_HEADER_FINTRAC_INV`, two narrow branches —
+  "of <ML/TF>" with a CONNECTOR-gated `:?$` that EXCLUDES the boilerplate sentence "Indicators of <ML/TF> can
+  be thought of as red flags …" [which opens the existing 3 OAs before their forward heading], + "relating
+  to | associated with <topic>" using connectors the boilerplate never uses → 0 collision). 0 of 39
+  prior FinCEN+OFAC+FINTRAC rf_regions shifted; grounding core `normalize`/`check_record` byte-UNTOUCHED.
+  225 indicators / 50 BUILD_NOW; honest yield over count — OCSE + wildlife are honestly SOURCE_DATA/
+  BUILD_ENRICH-heavy (external attribution a bank can't observe), cannabis/professional-ml BUILD_NOW-rich
+  (bank-observable EMT/cheque/cash/utility patterns); the human-trafficking record drops its 2016 APPENDIX
+  (a reproduction of a SEPARATE 2016 OA — faithfulness, not a count cap). FINTRAC OAs are far more
+  indicator-dense than FinCEN advisories (house norm ≤24; new range 16-57) — honest, the demo shows real
+  depth. build.py + corpus.html UNCHANGED (the 4-type menu/chips/counts are data-driven). The always-on
+  badge + source-aware Crown-copyright attribution stay.
 - IMPORTANT — INVERTED extraction boundary (Phase 16) + the SUBTRACTION (Phase 17): the **LLM EXTRACTS, the
   deterministic layer GATES**, and the old extractor is **DELETED**. The earlier deterministic
   `extract_red_flags` accreted format special-casing every phase yet the LLM still had to author/prune its
@@ -215,7 +235,8 @@ M0 bootstrap · M1 config-driven refactor · M2 multi-typology · M3 presenter p
 M4 (skipped) live/pre-gen mode · M5 ship · M6 Signal Watch ingestion pipeline (FinCEN verbatim) ·
 M7 corpus-backed demo (Phase 12 derivation backend + Phase 13 corpus explorer `dist/corpus/` +
 Phase 20 multi-source: FinCEN advisories + alerts; Phase 21: OFAC source #3; Phase 22: FINTRAC source #4
-(first cross-jurisdiction, Crown-copyright non-commercial licence) — 35 derived across 39 publications, 4 sources).
+(first cross-jurisdiction, Crown-copyright non-commercial licence); Phase 23: FINTRAC depth 3→10 (OAs +
+the real-estate Operational Brief; inverted-anchor widening) — 42 derived across 46 publications, 4 sources).
 See HANDOFF.md §8.
 
 ## Definition of done

@@ -1,0 +1,393 @@
+{
+  "id": "fintrac-real-estate",
+  "advisory": "FINTRAC-REAL-ESTATE",
+  "source_md": "data/fintrac/fintrac-real-estate.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the indicator region (Phase 16/22/23). Coverage/data values are ILLUSTRATIVE (vision demo). FINTRAC Operational Brief (FINTRAC-2016-OB001) — Canadian Crown copyright (© His Majesty the King in Right of Canada); reproduced verbatim for non-commercial use with attribution per FINTRAC's Terms & Conditions — NOT public domain.",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "value",
+      "flag": "Client negotiates a purchase for the market value or above, but requests that a lower value be recorded on documents, and pays the difference “under the table”.",
+      "src_line": 375,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Under-the-table payment of the difference between true and documented price is invisible to the bank because the off-book cash leg and the recorded property value both sit in registry/title and side-agreement data the FI does not hold."
+    },
+    {
+      "id": "IND-02",
+      "section": "value",
+      "flag": "Loan/mortgage amount is above the market value of the property/real estate.",
+      "src_line": 378,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "The bank knows the loan/mortgage amount it advances, but judging it 'above market value' needs property-value comparables or an appraisal feed the FI must enrich beyond its own subledger before the over-lending signal is reliable."
+    },
+    {
+      "id": "IND-03",
+      "section": "anonymity",
+      "flag": "Client purchases property in someone else’s name such as an associate, nominee, from a company, corporation, trust or a relative (other than a spouse).",
+      "src_line": 382,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Whose name the property is registered under is title/registry data external to the bank; tying the purchaser to a nominee, trust or company relative requires beneficial-ownership attribution the FI does not natively hold."
+    },
+    {
+      "id": "IND-04",
+      "section": "anonymity",
+      "flag": "Client inadequately explains the last minute substitution of the purchasing party’s name.",
+      "src_line": 387,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "A last-minute swap of the purchasing party's name and the adequacy of the client's explanation are observed at the conveyance/agent interaction, not in bank transaction data, so the FI would have to source it externally."
+    },
+    {
+      "id": "IND-05",
+      "section": "anonymity",
+      "flag": "Client pays initial deposit with a cheque from a third party, other than a spouse or a parent.",
+      "src_line": 391,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "A real-estate deposit funded by a cheque drawn on a third party who is not the client's spouse or parent is a third-party-funding pattern the bank can derive from its own cheque/deposit records joined to account-ownership and declared family relationships, yet it is rarely a standing signal.",
+      "build_logic": {
+        "signal_name": "S-THIRD-PARTY-DEPOSIT-CHEQUE",
+        "class": "entity · account-level · third-party funding",
+        "features": ["deposit_payee_is_realestate_party", "cheque_drawer_account_id", "drawer_client_relationship", "spouse_parent_link_flag", "deposit_value"],
+        "logic": "Flag a real-estate-deposit payment funded by a cheque whose drawer account belongs to a party other than the client, their spouse, or their parent (per KYC relationship records), indicating a third party is anonymously seeding the purchase deposit.",
+        "window": "per real-estate deposit event",
+        "source": "cheque/deposit clearing records joined to account-ownership registry and KYC relationship links",
+        "route": "Tier-2 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-06",
+      "section": "anonymity",
+      "flag": "Transaction is completed anonymously, in collusion or innocently, through lawyer or notary. Deposits are made into lawyer’s or notary’s trust account.",
+      "src_line": 397,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Deposits routed into a lawyer's or notary's trust account are visible as outbound payments to those parties, but identifying the destination as a legal trust account and inferring anonymity/collusion needs counterparty-classification enrichment beyond core transaction fields."
+    },
+    {
+      "id": "IND-07",
+      "section": "anonymity",
+      "flag": "Use of real estate brokers/agents/developers, lawyers or notaries, wittingly or unwittingly, to accept false personal or financial information related to any aspect of a real estate deal, or to mortgage/loans.",
+      "src_line": 402,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Whether a broker, lawyer or notary accepted false personal or financial information is conduct at the intermediary, not a transaction the FI observes; establishing the falsity requires external attribution the bank lacks."
+    },
+    {
+      "id": "IND-08",
+      "section": "anonymity",
+      "flag": "Company purchasing real estate has a complex ownership structure.",
+      "src_line": 412,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Assessing a purchasing company's ownership complexity depends on corporate-registry and beneficial-ownership data sourced from outside the bank, not from the FI's own transaction or account records."
+    },
+    {
+      "id": "IND-09",
+      "section": "anonymity",
+      "flag": "Company or individual has no e-mail address, physical address, home or business telephone number (disconnected or fake), company logo, contact person.",
+      "src_line": 418,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Missing or invalid contact details partly surface in the bank's KYC profile, but confirming a number is disconnected/fake or the address non-existent needs third-party verification, so an existing onboarding-data-quality control can be enhanced rather than fully built."
+    },
+    {
+      "id": "IND-10",
+      "section": "anonymity",
+      "flag": "Client refuses to provide own name on documents, or uses different names on offers to purchase, closing documents and deposit receipts.",
+      "src_line": 421,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Name discrepancies across offers, closing documents and deposit receipts live in the conveyancing paperwork held by the agent/lawyer, not in bank data, so the FI must source these documents externally."
+    },
+    {
+      "id": "IND-11",
+      "section": "anonymity",
+      "flag": "Client insists on providing signature on documents by fax only.",
+      "src_line": 426,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "A client's insistence on fax-only signatures is an interaction behaviour observed by the real-estate or legal intermediary, not a financial transaction the bank can see in its own data."
+    },
+    {
+      "id": "IND-12",
+      "section": "anonymity",
+      "flag": "Client uses a post office box or general delivery address where other options are available.",
+      "src_line": 430,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "The bank holds the client's address-on-file so a PO-box/general-delivery address is partly visible in KYC, but judging that 'other options are available' needs address-verification enrichment, so an existing address-quality control can be enhanced."
+    },
+    {
+      "id": "IND-13",
+      "section": "flipping",
+      "flag": "Client buys back a property that he or she recently sold.",
+      "src_line": 436,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Linking a current purchase to a property the same client recently sold requires property-title transaction history from the land registry, which the bank does not hold and would have to source."
+    },
+    {
+      "id": "IND-14",
+      "section": "flipping",
+      "flag": "Successive buying and selling transactions of the same real estate.",
+      "src_line": 438,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Rapid successive sale-and-purchase of the same property is a registry/title-level chain the FI cannot reconstruct from its own records without external land-registry data."
+    },
+    {
+      "id": "IND-15",
+      "section": "transaction-speed",
+      "flag": "Client shows strong interest in quickly completing the transaction without good cause, or without interest in property characteristics, price negotiations, risks, commissions or other related details, or may offer unusually high bids relative to current value/industry standard.",
+      "src_line": 443,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "The client's negotiation behaviour, disinterest in property details and bid levels are observed by the real-estate agent during the deal, not in bank transaction data, so the FI lacks the source to detect them."
+    },
+    {
+      "id": "IND-16",
+      "section": "transaction-speed",
+      "flag": "Accelerated repayment of loan/mortgage shortly after deal is completed even if penalties are incurred.",
+      "src_line": 456,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Economically-irrational accelerated payoff of a mortgage/loan soon after origination despite incurring prepayment penalties is fully derivable from the bank's own mortgage subledger (origination date, payoff date, penalty charged), and is rarely instrumented as a standing signal.",
+      "build_logic": {
+        "signal_name": "S-EARLY-MORTGAGE-PAYOFF",
+        "class": "entity · account-level · loan-lifecycle",
+        "features": ["loan_origination_date", "full_repayment_date", "days_to_full_repayment", "prepayment_penalty_incurred", "repayment_source_lump_sum"],
+        "logic": "Flag a mortgage/loan repaid in full shortly after the deal closes where a prepayment penalty was incurred, indicating the financing was a layering vehicle rather than genuine credit need rather than an economically rational payoff.",
+        "window": "rolling 180 days from loan origination",
+        "source": "mortgage/loan subledger (origination, payoff, penalty fields) joined to repayment transaction records",
+        "route": "Tier-1 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-17",
+      "section": "loan",
+      "flag": "The conditions in the loan agreement are unusual (for example, no collateral was required) or the complex nature of the loan scheme could not be justified.",
+      "src_line": 469,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "The bank holds its own loan-agreement terms, but flagging 'unusual' conditions such as missing collateral or an unjustifiably complex scheme needs comparison against normal product terms and structured collateral metadata, requiring enrichment of loan-agreement text."
+    },
+    {
+      "id": "IND-18",
+      "section": "loan",
+      "flag": "Underlying collateral is either not referenced in a loan agreement, is insufficient or fictitious or the collateral provider and other parties involved in the loan structure are not known.",
+      "src_line": 472,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Whether collateral is absent or insufficient is partly checkable against the bank's own loan terms, but confirming collateral is fictitious or that structure parties are unknown needs external valuation/identity attribution, so the data must be enriched."
+    },
+    {
+      "id": "IND-19",
+      "section": "loan",
+      "flag": "Company lending the money for the purchase of real estate, possibly an offshore company, has no direct relation with the borrower.",
+      "src_line": 475,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "When a third-party (possibly offshore) company is the lender, the financing sits outside the bank's books entirely, so the relationship between that lender and the borrower is external attribution the FI cannot source from its own data."
+    },
+    {
+      "id": "IND-20",
+      "section": "renovations",
+      "flag": "Invoices for real or phantom large remodelling or renovations are paid with cash.",
+      "src_line": 480,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Large cash payments are partly visible to the bank, but tying them to renovation invoices and distinguishing real from phantom work depends on invoice/memo context that is unstructured, so an existing cash-spend control can be enhanced rather than fully built."
+    },
+    {
+      "id": "IND-21",
+      "section": "income-generating",
+      "flag": "Buyer of income-generating property shows no interest in generating profit by filling-in vacancies or by adjusting rent or lease value based on market value.",
+      "src_line": 485,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "A buyer's disinterest in profit from an income-generating property is a behavioural/operational fact about property management that the bank does not observe and would have to source externally."
+    },
+    {
+      "id": "IND-22",
+      "section": "flow-through",
+      "flag": "Incoming payments from abroad possibly linked to a trust account, followed immediately by wire transfers abroad without a logical reason.",
+      "src_line": 490,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Funds arriving from abroad and being wired straight back out without economic rationale is a classic flow-through pattern fully derivable from the bank's own inbound/outbound wire records and timing, and is a concrete signal the FI can stand up.",
+      "build_logic": {
+        "signal_name": "S-FOREIGN-PASSTHROUGH-WIRE",
+        "class": "entity · account-level · windowed flow-through",
+        "features": ["inbound_foreign_wire_value", "hours_to_outbound_wire", "outbound_foreign_wire_value", "passthrough_ratio", "trust_account_linkage_flag"],
+        "logic": "Flag an account that receives an inbound cross-border payment and, within a short window, sends a high proportion of that value back out by foreign wire with no offsetting economic activity, indicating the account is a conduit rather than a destination.",
+        "window": "rolling 7 days",
+        "source": "inbound and outbound wire records joined on counterparty and value within the account ledger",
+        "route": "Tier-1 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-23",
+      "section": "structuring",
+      "flag": "Multiple transactions involving payments in cash or in negotiable instruments (for example, bank drafts) which do not state the true payer and where the accumulated amount is considered to be significant in relation to the total amount of the transaction.",
+      "src_line": 495,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Multiple cash or bank-draft payments toward one real-estate transaction whose payer is not stated and whose accumulated value is significant is a structuring pattern the bank can derive from its own cash/draft instrument records aggregated to the deal, yet is rarely instrumented as a standing signal.",
+      "build_logic": {
+        "signal_name": "S-DRAFT-STRUCTURING-AGG",
+        "class": "entity · transaction-set · windowed structuring",
+        "features": ["instrument_type_cash_or_draft", "true_payer_named_flag", "instrument_count", "accumulated_value", "share_of_deal_value"],
+        "logic": "Flag a set of cash or negotiable-instrument (bank draft) payments tied to one real-estate transaction where the true payer is not stated on the instruments and the accumulated value is a significant share of the deal, indicating value is being assembled anonymously through multiple instruments.",
+        "window": "per real-estate transaction (typically a rolling 90-day funding window)",
+        "source": "cash and negotiable-instrument (bank draft) records aggregated to the funded real-estate transaction",
+        "route": "Tier-1 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-24",
+      "section": "geography",
+      "flag": "Foreign buyer, either an individual or company, or source of funds are from a jurisdiction with strict bank secrecy laws, weak anti-money laundering regimes, or with a high level of political corruption.",
+      "src_line": 501,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "The source jurisdiction of inbound funds is visible in the bank's wire/origination data, so a high-risk-jurisdiction screen already partly covers this; tagging the buyer and fund source against secrecy/weak-AML/corruption lists can enhance the existing geographic-risk control."
+    },
+    {
+      "id": "IND-25",
+      "section": "geography",
+      "flag": "Foreign buyer, either an individual or company, especially if on a watch list, whose only connection to Canada is the real estate transaction.",
+      "src_line": 535,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Watch-list screening of a foreign buyer is partly covered by existing sanctions/PEP screening, but establishing that the real-estate transaction is their only Canadian connection needs relationship/footprint enrichment, so the existing screen can be enhanced."
+    },
+    {
+      "id": "IND-26",
+      "section": "inconsistency",
+      "flag": "Client purchases personal use property through his or her company when this type of transaction is inconsistent with the client’s ordinary business practice.",
+      "src_line": 540,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Using a corporate account to buy personal-use property is partly visible from account-type and payment data, but judging it 'inconsistent with ordinary business practice' needs the company's expected-activity/business-purpose profile to be enriched before the signal is reliable."
+    },
+    {
+      "id": "IND-27",
+      "section": "inconsistency",
+      "flag": "Client persists in representing his financial situation in a way that is unrealistic or that cannot be supported by documents.",
+      "src_line": 545,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Mismatch between a client's stated finances and what documents support is partly checkable against KYC and account holdings, but reliably detecting the misrepresentation requires reconciling declared profile against supporting documentation that needs enrichment."
+    },
+    {
+      "id": "IND-28",
+      "section": "inconsistency",
+      "flag": "Transactions carried out on behalf of minors, incapacitated persons or other persons who, although not included in these categories, appear to lack the economic capacity to make such purchases.",
+      "src_line": 550,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Age/capacity is partly held in KYC, but flagging a purchase as beyond a person's economic capacity needs income/expected-activity profiling joined to the transaction value, which requires enrichment of the KYC profile."
+    },
+    {
+      "id": "IND-29",
+      "section": "inconsistency",
+      "flag": "A transaction involving legal entities, when there does not seem to be any relationship between the transaction and the activity carried out by the buying company, or when the company has no business activity.",
+      "src_line": 555,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "A real-estate purchase by a company with no apparent or matching business activity is partly visible from the account's transaction profile, but confirming the company has no genuine activity needs business-purpose/expected-activity enrichment beyond the FI's raw ledger."
+    },
+    {
+      "id": "IND-30",
+      "section": "inconsistency",
+      "flag": "Unusually large cash amounts used to fund any financial aspect of a real estate transaction; for example, deposits, down payments, loans/mortgages, etc.",
+      "src_line": 561,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Unusually large cash funding any leg of a real-estate transaction — deposit, down payment, or loan paydown — is fully observable in the bank's own cash-deposit and payment records tied to a property purchase, and is a concrete, buildable signal not always standing as a dedicated control.",
+      "build_logic": {
+        "signal_name": "S-CASH-FUNDED-REALESTATE",
+        "class": "entity · account-level · cash-intensity",
+        "features": ["cash_deposit_value", "realestate_payment_linkage", "cash_share_of_deal_funding", "deposit_to_payment_days", "deal_value"],
+        "logic": "Flag a real-estate-related payment (deposit, down payment, or loan/mortgage funding) where an unusually large share of the funding traces to cash deposits relative to the customer's profile and the deal value, indicating cash placement into property.",
+        "window": "rolling 90 days around the real-estate payment",
+        "source": "cash-deposit records joined to outbound real-estate payments and the loan/mortgage subledger",
+        "route": "Tier-1 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-31",
+      "section": "defaulting",
+      "flag": "Transactions which are not completed in seeming disregard of a contract clause penalizing the buyer with loss of the deposit if the sale does not go ahead.",
+      "src_line": 566,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Whether a sale completed and whether a deposit-forfeiture clause was disregarded is conveyancing/contract data held by the agent or lawyer, not a transaction the bank records, so the FI must source it externally."
+    },
+    {
+      "id": "IND-32",
+      "section": "defaulting",
+      "flag": "Place a deposit for a house, renege on the deal shortly thereafter, then obtain a legitimate cheque from the solicitor’s office for the value of the deposit.",
+      "src_line": 575,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Paying a property deposit and then shortly receiving back a clean solicitor's-trust cheque for the same value is a deposit-cleansing round-trip the bank can derive from its own outbound deposit payment and the matching inbound cheque from a solicitor, yet it is rarely instrumented.",
+      "build_logic": {
+        "signal_name": "S-DEPOSIT-CLEANSE-ROUNDTRIP",
+        "class": "entity · account-level · windowed round-trip",
+        "features": ["outbound_realestate_deposit_value", "inbound_solicitor_cheque_value", "days_between_out_and_in", "value_match_ratio", "solicitor_trust_source_flag"],
+        "logic": "Flag an account that pays a real-estate deposit and within a short window receives a near-equal inbound cheque drawn on a solicitor's/notary's trust account, indicating a short-lived deal used to return funds as a clean legitimate cheque.",
+        "window": "rolling 60 days between deposit and refund",
+        "source": "outbound real-estate deposit payments matched to inbound solicitor/notary trust-account cheques by value",
+        "route": "Tier-1 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-33",
+      "section": "direct",
+      "flag": "Existing mortgage on a purchased property is assumed by another individual without involvement of a financial institution.",
+      "src_line": 590,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "An off-book mortgage assumption between individuals with no financial institution involved leaves no record in the bank's systems by definition, so detecting it requires external registry/title data the FI does not hold."
+    }
+  ]
+}

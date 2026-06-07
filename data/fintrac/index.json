@@ -19,5 +19,54 @@
     "date": "2022-12",
     "type": "operational alert",
     "url": "https://www.fintrac-canafe.gc.ca/intel/operation/taf-eng.pdf"
+  },
+  {
+    "id": "fintrac-human-trafficking",
+    "title": "Operational Alert: Laundering of the proceeds of human trafficking for sexual exploitation",
+    "date": "2021-07",
+    "type": "operational alert",
+    "url": "https://fintrac-canafe.canada.ca/intel/operation/oai-hts-2021-eng.pdf"
+  },
+  {
+    "id": "fintrac-online-child-exploitation",
+    "title": "Operational Alert: Laundering the proceeds of online child sexual exploitation",
+    "date": "2025-11",
+    "type": "operational alert",
+    "url": "https://fintrac-canafe.canada.ca/intel/operation/exploitation-eng.pdf"
+  },
+  {
+    "id": "fintrac-romance-fraud",
+    "title": "Operational Alert: Laundering of the proceeds of romance fraud",
+    "date": "2021-02",
+    "type": "operational alert",
+    "url": "https://fintrac-canafe.canada.ca/intel/operation/rf-eng.pdf"
+  },
+  {
+    "id": "fintrac-illegal-wildlife",
+    "title": "Operational Alert: Laundering the proceeds of crime from illegal wildlife trade",
+    "date": "2024-03",
+    "type": "operational alert",
+    "url": "https://fintrac-canafe.canada.ca/intel/operation/oai-wildlife-eng.pdf"
+  },
+  {
+    "id": "fintrac-professional-ml",
+    "title": "Operational Alert: Professional money laundering through trade and money services businesses",
+    "date": "2021-12",
+    "type": "operational alert",
+    "url": "https://fintrac-canafe.canada.ca/intel/operation/oai-ml-eng.pdf"
+  },
+  {
+    "id": "fintrac-cannabis",
+    "title": "Operational Alert: Laundering of proceeds from illicit cannabis",
+    "date": "2022-09",
+    "type": "operational alert",
+    "url": "https://fintrac-canafe.canada.ca/intel/operation/cannabis-eng.pdf"
+  },
+  {
+    "id": "fintrac-real-estate",
+    "title": "Operational Brief: Indicators of money laundering in financial transactions related to real estate",
+    "date": "2016-07",
+    "type": "operational brief",
+    "url": "https://fintrac-canafe.canada.ca/intel/operation/real-eng.pdf"
   }
 ]

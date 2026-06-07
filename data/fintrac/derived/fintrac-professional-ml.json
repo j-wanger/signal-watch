@@ -1,0 +1,332 @@
+{
+  "id": "fintrac-professional-ml",
+  "advisory": "FINTRAC-PROFESSIONAL-ML",
+  "source_md": "data/fintrac/fintrac-professional-ml.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the indicator region (Phase 16/22/23). Coverage/data values are ILLUSTRATIVE (vision demo). FINTRAC Operational Alert — Canadian Crown copyright (© His Majesty the King in Right of Canada); reproduced verbatim for non-commercial use with attribution per FINTRAC's Terms & Conditions — NOT public domain.",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "tbml",
+      "flag": "An entity is a Canadian small or medium-size import/export company, wholesaler, dealer or broker operating in a sector dealing in high-volume, high-demand commodities with variable price ranges, including agri-food, textiles, electronics, toys, lumber and paper, and automotive or heavy equipment.",
+      "src_line": 73,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Whether a business client is an SME import/export/wholesale entity in one of these named high-turnover commodity sectors is partly visible from KYC business-type and MCC/industry codes, but reliably mapping a customer to the specific sector list needs industry-tag enrichment beyond the coarse codes the bank holds."
+    },
+    {
+      "id": "IND-02",
+      "section": "tbml",
+      "flag": "The entity has business activities or a business model that is outside the norm for its sector, or conducts no business activities in Canada. It may also be difficult to confirm the exact nature of the business.",
+      "src_line": 77,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Judging that a business model is 'outside the norm for its sector' or that the nature of the business is hard to confirm is a qualitative due-diligence assessment requiring sector-baseline benchmarks and corporate-registry/business-verification intel the bank does not natively hold and must source."
+    },
+    {
+      "id": "IND-03",
+      "section": "tbml",
+      "flag": "orders electronic funds transfers to the benefit of China- or Hong Kong-based trading companies or individuals,\n\nreceives a sudden inflow of large-value electronic funds transfers;\n\nand receives electronic funds transfers from the U.S. and Latin American countries;",
+      "src_line": 85,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "An entity that orders EFTs to China/Hong Kong-based counterparties while taking a sudden inflow of large-value EFTs and receiving transfers from the U.S. and Latin America is a concrete bidirectional cross-corridor flow pattern fully derivable from the bank's own wire/EFT records with counterparty country attribution, yet this specific corridor-pairing is rarely instrumented as a standing signal.",
+      "build_logic": {
+        "signal_name": "S-CN-HK-LATAM-CORRIDOR",
+        "class": "entity · account-level · windowed cross-corridor flow",
+        "features": ["outbound_eft_value_cn_hk", "inbound_eft_value_us_latam", "max_single_inbound_value", "inbound_surge_ratio", "distinct_corridor_counts"],
+        "logic": "Flag a business entity that within the window sends EFTs to China/Hong Kong-attributed counterparties AND receives a sudden surge of large-value EFTs sourced from U.S. and Latin American counterparties, indicating the trade-finance pass-through leg of a Black Market Peso-style scheme.",
+        "window": "rolling 30 days",
+        "source": "wire/EFT records joined to counterparty country attribution and account-balance velocity baseline",
+        "route": "Tier-1 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-04",
+      "section": "tbml",
+      "flag": "orders electronic funds transfers to the benefit of entities or individuals in the U.S., Mexico or Latin American\n\ncountries, and receives such transfers from the U.S.;",
+      "src_line": 91,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Ordering EFTs to U.S./Mexico/Latin American counterparties while also receiving transfers from the U.S. is a round-trip corridor pattern already partly covered by existing cross-border wire-velocity rules on core EFT data; the specific corridor tagging can sharpen an existing control rather than require a net-new build."
+    },
+    {
+      "id": "IND-05",
+      "section": "tbml",
+      "flag": "orders or receives electronic funds transfers to/from entities holding a bank account in Latvia or Cyprus, and are\n\nregistered to addresses in the U.K., Cyprus, the British Virgin Islands, Panama, the Seychelles, Belize, the\nMarshall Islands or other offshore financial centers; and",
+      "src_line": 95,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "EFTs to/from Latvia or Cyprus accounts are visible in wire data, but tying the counterparty to registration in a named offshore financial centre (BVI, Panama, Seychelles, Belize, Marshall Islands, etc.) needs corporate-registration/address enrichment the bank holds only partially before the signal is reliable."
+    },
+    {
+      "id": "IND-06",
+      "section": "tbml",
+      "flag": "orders or receives payments for goods in round figures or in increments of approximately US$50,000.",
+      "src_line": 100,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Payments for goods in round figures or in regular ~US$50,000 increments is a value-pattern fully computable from the bank's own transaction amounts and currency fields without any external attribution, and round/increment structuring of trade payments is rarely turned into a standing signal.",
+      "build_logic": {
+        "signal_name": "S-ROUND-INCREMENT-TRADE-PAY",
+        "class": "entity · account-level · value-pattern",
+        "features": ["payment_amount_roundness", "increment_modulus_50k_usd", "repeat_increment_count", "trade_payment_flag", "usd_denomination"],
+        "logic": "Flag an entity whose goods-related payments cluster on round figures or repeat at increments of approximately US$50,000 over the window, indicating amounts engineered to a template rather than reflecting genuine invoice values.",
+        "window": "rolling 90 days",
+        "source": "transaction ledger amount/currency fields with trade-payment classification",
+        "route": "Tier-2 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-07",
+      "section": "tbml",
+      "flag": "A trading company based in the United Arab Emirates orders electronic funds transfers to the benefit of individuals\n\nor entities in Canada.",
+      "src_line": 102,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Incoming EFTs to Canadian customers ordered by a UAE-based trading company is a single-corridor inbound pattern fully derivable from the bank's wire records with ordering-party country and business-type attribution it already captures, and this specific UAE-trading-company corridor is not typically a standing signal.",
+      "build_logic": {
+        "signal_name": "S-UAE-TRADECO-INBOUND",
+        "class": "entity · account-level · inbound corridor",
+        "features": ["inbound_eft_from_uae", "ordering_party_business_type", "beneficiary_is_canadian", "inbound_value", "inbound_frequency"],
+        "logic": "Flag a Canadian customer receiving EFTs ordered by a UAE-based trading company, by joining inbound wire originator country and business-type fields to the beneficiary account, surfacing the UAE trade-company funding corridor FINTRAC associates with professional ML.",
+        "window": "rolling 30 days",
+        "source": "inbound wire/EFT message fields (originator country + business type) joined to beneficiary account",
+        "route": "Tier-2 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-08",
+      "section": "tbml",
+      "flag": "An entity’s U.S. dollar business accounts held in Canada exhibit flow-through activity—that is, money is taken or\n\ntransferred out of the account as quickly as it flows in.",
+      "src_line": 106,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Flow-through behaviour on a USD business account — funds leaving as fast as they arrive — is a classic velocity/pass-through pattern already partly covered by existing layering rules on core balance and transaction data; USD-account and business-account tagging can sharpen an existing control."
+    },
+    {
+      "id": "IND-09",
+      "section": "tbml",
+      "flag": "An entity imports currency (predominantly U.S. dollars) from Latin American countries.",
+      "src_line": 110,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Physical currency imports (predominantly USD) from Latin America are partly visible through cash-letter / large-cash and EFT-in records, but reliably attributing the funds as imported currency from Latin American origin needs cross-border cash-movement and origin enrichment beyond clean core fields."
+    },
+    {
+      "id": "IND-10",
+      "section": "tbml",
+      "flag": "An entity makes large business purchases by credit card, funded by overpayments.",
+      "src_line": 111,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Large business credit-card purchases funded by deliberate overpayments (credit-balance funding then spend) is a pattern fully derivable from the bank's own card-account payment and purchase ledger — overpayment credit balances followed by large purchases — and is rarely instrumented as a standing signal.",
+      "build_logic": {
+        "signal_name": "S-CARD-OVERPAYMENT-SPEND",
+        "class": "account-level · card · credit-balance lifecycle",
+        "features": ["card_overpayment_credit_balance", "subsequent_large_purchase_value", "overpayment_to_purchase_lag", "business_card_flag", "credit_balance_ratio"],
+        "logic": "Flag a business card account that is funded into a credit balance by overpayments and then makes large purchases against that balance over the window, indicating the card is used as a value-movement vehicle rather than ordinary revolving credit.",
+        "window": "rolling 30 days",
+        "source": "card-account payment and purchase subledger",
+        "route": "Tier-2 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-11",
+      "section": "tbml",
+      "flag": "An individual issues cheques, purchases drafts or orders electronic funds transfers through the account of a legal\n\nprofessional for trade-related payments.",
+      "src_line": 112,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Cheques, drafts and EFTs are visible in core data, but establishing that they are issued 'through the account of a legal professional' for trade-related payments requires attributing the account holder as a legal professional and the purpose as trade-related — external profession attribution and purpose ground-truth the bank does not natively hold."
+    },
+    {
+      "id": "IND-12",
+      "section": "msb",
+      "flag": "receives a sudden inflow of large electronic funds transfers and cash deposits; this is followed by an increased\noutflow of electronic funds transfers, cheques and bank drafts made out to multiple unrelated third parties for\nloans or investments, or to the individual conducting the transaction;",
+      "src_line": 131,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "A sudden inflow of large EFTs and cash deposits followed by an outflow of EFTs, cheques and drafts to multiple unrelated third parties (or back to the conductor) is a concrete fan-in-then-fan-out layering pattern fully derivable from the bank's own transaction, instrument and counterparty-distinctness data, yet this MSB-style burst pattern is rarely instrumented as a standing signal.",
+      "build_logic": {
+        "signal_name": "S-MSB-INFLOW-FANOUT",
+        "class": "account-level · windowed fan-in/fan-out",
+        "features": ["inbound_eft_cash_surge_value", "outbound_to_distinct_unrelated_parties", "outbound_instrument_mix", "inflow_to_outflow_lag", "self_directed_outflow_share"],
+        "logic": "Flag an account showing a sudden large inflow of EFTs and cash followed within a short window by dispersing outflows via EFTs/cheques/drafts to many unrelated third parties or back to the transacting individual, indicating MSB-like third-party value distribution.",
+        "window": "rolling 14 days",
+        "source": "transaction ledger joined to instrument type and counterparty-distinctness/relationship tags",
+        "route": "Tier-1 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-13",
+      "section": "msb",
+      "flag": "undertakes numerous currency exchanges involving Canadian and U.S. dollars and/or Euros;",
+      "src_line": 135,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Frequent CAD/USD/EUR currency exchanges are visible in the bank's own FX transaction records and partly covered by existing FX-volume monitoring; counting distinct exchanges per customer can enhance an existing control rather than require a net-new build."
+    },
+    {
+      "id": "IND-14",
+      "section": "msb",
+      "flag": "carries out business largely with or through Iran or other countries subject to sanctions, the United Arab\n\nEmirates, Kuwait, Hong Kong, and China or countries with internal capital controls; and",
+      "src_line": 138,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "The bank sees transaction counterparty countries, but classifying activity as 'largely with or through' sanctioned states, named high-risk jurisdictions or capital-control countries needs a maintained jurisdiction-risk reference and through-routing attribution to enrich the raw country fields before the signal is reliable."
+    },
+    {
+      "id": "IND-15",
+      "section": "msb",
+      "flag": "receives electronic funds transfers from foreign exchange and trading companies based in the above-noted\ncountries for real estate transactions, loans or investments.",
+      "src_line": 140,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Inbound EFTs are visible, but tying them to FX/trading-company senders in the named countries and to a stated real-estate/loan/investment purpose needs ordering-party business-type and purpose-field enrichment beyond the core wire fields."
+    },
+    {
+      "id": "IND-16",
+      "section": "msb",
+      "flag": "maintains personal account activity similar to that of a money services business;",
+      "src_line": 154,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "MSB-like behaviour on a personal account (many third-party transfers, FX, structuring) is partly observable from transaction velocity and counterparty breadth, but characterising it as 'similar to a money services business' needs a behavioural MSB-profile model to enrich the raw activity before it fires reliably."
+    },
+    {
+      "id": "IND-17",
+      "section": "msb",
+      "flag": "attempts to avoid reporting obligations when exchanging currency on behalf of another money services\n\nbusiness;",
+      "src_line": 157,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Currency exchange just under reporting thresholds is observable, but establishing that it is done 'on behalf of another money services business' requires attributing the counterparty as an MSB — external registration/attribution the bank does not natively hold and must source."
+    },
+    {
+      "id": "IND-18",
+      "section": "msb",
+      "flag": "lists multiple occupations, addresses and/or telephone numbers with financial institutions or online;",
+      "src_line": 159,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Multiple occupations/addresses/phone numbers on file is partly visible within the bank's own KYC history, but 'with financial institutions or online' spans other institutions and open-source listings, so the bank-held portion needs cross-source enrichment to be a reliable signal."
+    },
+    {
+      "id": "IND-19",
+      "section": "msb",
+      "flag": "lists occupation as immigration consultant, student, homemaker or unemployed;",
+      "src_line": 160,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Stated occupation is captured in KYC and this specific low/no-income occupation set is directly checkable; on its own it is weak, so it best enhances an existing occupation-vs-activity mismatch control rather than standing as its own build."
+    },
+    {
+      "id": "IND-20",
+      "section": "msb",
+      "flag": "lives outside of their reasonable means (i.e., buys real estate beyond what they could reasonably afford on\n\ntheir claimed income);",
+      "src_line": 161,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Large real-estate-related outflows are visible and claimed income sits in KYC, but a robust 'beyond reasonable means' judgment needs income-vs-spend modelling and property-value enrichment to compare reliably against the claimed-income baseline."
+    },
+    {
+      "id": "IND-21",
+      "section": "msb",
+      "flag": "attempts to close an account(s) to avoid due diligence questioning;",
+      "src_line": 163,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Account-closure requests are recorded, but linking a closure to avoidance of due-diligence questioning needs the closure event correlated with an open EDD/RFI case — context that requires enriching the transaction record with case-management state."
+    },
+    {
+      "id": "IND-22",
+      "section": "msb",
+      "flag": "receives wires and transfers from multiple sources in accounts at numerous banks and credit unions; the\n\nindividual then depletes these amounts through drafts payable to self or for real estate purchases;",
+      "src_line": 164,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "The bank sees the wires it receives and self-payable drafts and real-estate outflows on its own accounts, but the indicator hinges on the customer holding accounts at numerous other banks and credit unions — cross-institution breadth the bank can only partly infer and must enrich."
+    },
+    {
+      "id": "IND-23",
+      "section": "msb",
+      "flag": "places large structured cash deposits into the same account at multiple locations on the same day; and",
+      "src_line": 166,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Large structured cash deposits into the same account across multiple branch/ATM locations on the same day is a classic structuring pattern fully derivable from the bank's own deposit records with location and timestamp fields it already captures, and same-day multi-location aggregation is a concrete buildable signal.",
+      "build_logic": {
+        "signal_name": "S-MULTI-LOCATION-STRUCTURING",
+        "class": "account-level · same-day cash structuring",
+        "features": ["same_day_cash_deposit_count", "distinct_deposit_locations", "per_deposit_amount", "aggregate_daily_cash", "below_threshold_flag"],
+        "logic": "Flag an account receiving multiple cash deposits across different physical locations on the same day where individual amounts sit below reporting thresholds but aggregate to a large sum, indicating deliberately structured multi-location placement.",
+        "window": "single calendar day (with rolling repetition count)",
+        "source": "cash deposit transaction records with branch/ATM location and timestamp",
+        "route": "Tier-1 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-24",
+      "section": "msb",
+      "flag": "is a customer at many banks and credit unions, and negotiates many self-addressed bank drafts from various\n\nfinancial institutions.",
+      "src_line": 169,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "The bank can see self-addressed drafts it issues, but the indicator turns on the customer being a client at many other banks and negotiating drafts from various institutions — cross-institution presence the bank does not hold and must source externally."
+    },
+    {
+      "id": "IND-25",
+      "section": "msb",
+      "flag": "receives one or two large electronic funds transfers and then orders multiple outgoing cheques and drafts to\n\nmultiple third-party individuals and companies; and",
+      "src_line": 179,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Receiving one or two large EFTs and then dispersing them via multiple outgoing cheques and drafts to many distinct third-party individuals and companies is a concrete consolidate-then-disperse layering pattern fully derivable from the bank's own EFT, instrument and counterparty-distinctness data, and is rarely instrumented as a standing signal.",
+      "build_logic": {
+        "signal_name": "S-CONSOLIDATE-DISPERSE",
+        "class": "account-level · windowed fan-out",
+        "features": ["large_inbound_eft_count", "inbound_eft_value", "outbound_cheque_draft_count", "distinct_third_party_payees", "inflow_to_dispersal_lag"],
+        "logic": "Flag an import/export-style account that receives one or two large inbound EFTs and within a short window orders many outgoing cheques and drafts to multiple distinct third-party individuals and companies, indicating MSB-like onward dispersal of consolidated funds.",
+        "window": "rolling 14 days",
+        "source": "EFT and negotiable-instrument records joined to payee-distinctness tags",
+        "route": "Tier-1 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-26",
+      "section": "msb",
+      "flag": "receives large incoming electronic funds transfers from Iran, the United Arab Emirates, Kuwait, Hong Kong and\n\nChina for living costs, expenses or spare parts.",
+      "src_line": 181,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Large inbound EFTs from Iran, the UAE, Kuwait, Hong Kong and China are visible with country attribution, but tying them to a stated purpose of 'living costs, expenses or spare parts' inconsistent with an import/export business profile needs purpose-field and business-profile enrichment before the signal is reliable."
+    }
+  ]
+}

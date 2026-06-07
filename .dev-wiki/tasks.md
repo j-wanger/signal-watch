@@ -3,7 +3,7 @@
 > Last updated: 2026-06-06 by /dev-plan (Phase 22 planned — FINTRAC as corpus source #4, first cross-jurisdiction source; 6 lite tasks [1 L])
 
 <!-- phase:phase-22-fintrac-corpus-source -->
-<!-- gate-log:phase-22 direction=approved delivery=pending -->
+<!-- gate-log:phase-22 direction=approved delivery=accepted -->
 
 ## Phase 22: FINTRAC as corpus source #4 (first cross-jurisdiction source; gate widened for FINTRAC "indicators" vocab; Crown-copyright non-commercial reproduction) — M7
 

@@ -61,3 +61,4 @@
 [2026-06-07T00:00:00] PLAN — Phase 25 planned, 5 tasks, 3 decisions (corpus output quality: extract → translate + the article-processing page)
 [2026-06-07T00:00:00] DEBRIEF — Phase 25 corpus output quality (extract→translate + article-processing) shipped; 5 tasks, reviewer 9/10 ACCEPT (two LOW fixed inline), delivery gate accepted
 [2026-06-07T00:00:00] PLAN — Phase 26 planned, 6 tasks, 3 decisions (elevate the corpus demo to showcase quality: register re-translation + progressive render + build/lift wow + grouping/sort + landing; workflow-driven)
+[2026-06-07T18:11:47Z] DEBRIEF -- 0 decisions (lite), 1 journal (phase-26-corpus-elevation), tasks confirmed [x], state refreshed, active-phase delivery gate unchecked

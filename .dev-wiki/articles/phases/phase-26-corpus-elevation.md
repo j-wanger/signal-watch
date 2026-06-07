@@ -2,7 +2,7 @@
 type: phase
 phase: 26
 slug: phase-26-corpus-elevation
-status: active
+status: completed
 ceremony: lite
 created: 2026-06-07
 updated: 2026-06-07
@@ -11,7 +11,7 @@ milestone: M7
 
 # Phase 26: Elevate the corpus demo to showcase quality
 
-> Planned 2026-06-07, direction approved. Workflow-driven, largest phase to date (6 tasks, two L); not yet implemented.
+> Planned 2026-06-07, direction approved. Workflow-driven, largest phase to date (6 tasks, two L). All 6 tasks [x]; exit criteria met → READY FOR COMPLETION (delivery gate pending acceptance). Reviewer 10/10 ACCEPT. Commits 7a35147 (T1) · 44c24a6 (T2) · 83be590 (T3) · 337b8aa (T4–T6).
 
 ## Objective
 Reviewing the BUILT Phase-25 corpus artifact, the user reframed AGAIN — to a QUALITY elevation of the whole corpus demo to the six-act showcase's bar. Five gaps, fixed ALL-IN in one **workflow-driven** phase (the user asked to "build a workflow"):

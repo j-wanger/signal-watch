@@ -3,7 +3,7 @@
 > Last updated: 2026-06-07 by /dev-plan (Phase 26 — elevate the corpus demo to showcase quality: register re-translation + progressive render + build/lift wow + grouping/sort + landing; 6 tasks, workflow-driven, direction approved)
 
 <!-- phase:phase-26-corpus-elevation -->
-<!-- gate-log:phase-26 direction=approved delivery=pending -->
+<!-- gate-log:phase-26 direction=approved delivery=accepted -->
 
 ## Phase 26: Elevate the corpus demo to showcase quality — register re-translation + progressive render + build/lift wow + grouping/sort + landing page — M7
 

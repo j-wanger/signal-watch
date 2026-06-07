@@ -1,9 +1,9 @@
 # Tasks
 
-> Last updated: 2026-06-07 by /dev-plan (Phase 25 — corpus output quality: extract → translate (natural AML red flags) + the article-processing page; 5 tasks, planned, direction approved)
+> Last updated: 2026-06-07 by /dev-debrief (Phase 25 SHIPPED — corpus output quality: extract → translate (natural AML red flags) + the article-processing screen; all 5 tasks [x], reviewer 9/10 ACCEPT, two LOW fixed inline; committed d3fdadf + cd0e1e5)
 
 <!-- phase:phase-25-corpus-translation -->
-<!-- gate-log:phase-25 direction=approved delivery=pending -->
+<!-- gate-log:phase-25 direction=approved delivery=accepted -->
 
 ## Phase 25: Corpus output quality — extract → translate (natural AML red flags) + the article-processing page — M7
 

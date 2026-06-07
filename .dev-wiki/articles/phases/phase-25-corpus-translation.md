@@ -2,7 +2,7 @@
 type: phase
 phase: 25
 slug: phase-25-corpus-translation
-status: active
+status: complete
 ceremony: lite
 created: 2026-06-07
 updated: 2026-06-07
@@ -10,6 +10,8 @@ milestone: M7
 ---
 
 # Phase 25: Corpus output quality — extract → translate (natural AML red flags) + the article-processing page
+
+> Delivered + accepted 2026-06-07 (reviewer 9/10 ACCEPT, two LOW fixed inline; committed d3fdadf + cd0e1e5).
 
 ## Objective
 Bring the corpus explorer to the six-act showcase's two-layer red-flag model. The corpus demo currently surfaces the grounded VERBATIM `flag` substring as "the red flag" — which reads like an article extraction, not how an AML program writes red flags — and it lacks the showcase's article-processing beat (full advisory rendered, red-flag phrases highlighted, then extracted/translated). Keep step 1 = the grounded verbatim extraction (the evidence); ADD step 2 = a natural-AML `red_flag` TRANSLATION beside it. Add a per-doc screen that renders the FULL source article, highlights the grounded phrases (free — exact substrings by the Phase-16 grounding invariant), then reveals the translation.

@@ -1,9 +1,9 @@
 # Tasks
 
-> Last updated: 2026-06-06 by /dev-debrief (Phase 23 DELIVERED — FINTRAC depth: source #4 grown 3→10 [9 OAs + 1 Operational Brief] via the inverted "Indicators of <X>" anchor; all 5 tasks [x]; exit criteria GREEN; reviewer 9/10 ACCEPT — READY FOR COMPLETION pending commit)
+> Last updated: 2026-06-06 by /dev-debrief (Phase 23 DELIVERED — FINTRAC depth: source #4 grown 3→10 [9 OAs + 1 Operational Brief] via the inverted "Indicators of <X>" anchor; all 5 tasks [x]; exit criteria GREEN; reviewer 9/10 ACCEPT — DELIVERED + accepted, committed b0fcda4)
 
 <!-- phase:phase-23-fintrac-depth -->
-<!-- gate-log:phase-23 direction=approved delivery=pending -->
+<!-- gate-log:phase-23 direction=approved delivery=accepted -->
 
 ## Phase 23: FINTRAC depth — grow source #4 with the remaining anchorable strategic-intel products (Operational Alerts + Operational Briefs) — M7
 

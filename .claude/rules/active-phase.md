@@ -15,4 +15,4 @@ Abort (NOT needed): if a new heading form had shifted ANY existing rf_region, SK
 
 Gates:
 - [x] Direction confirmed by user (FINTRAC depth at the goal gate — audience = a Canadian bank; OAs + Briefs WITH the regression-gated narrow-anchor widening at the scope gate, over OAs-only / the source-scoped refactor; 2026-06-06)
-- [ ] Delivery accepted (post-implementation report 2026-06-06; reviewer 9/10 ACCEPT, two LOW grounding-backstopped — flips to [x] at commit)
+- [x] Delivery accepted (post-implementation report 2026-06-06; reviewer 9/10 ACCEPT, two LOW grounding-backstopped; impl commit b0fcda4)

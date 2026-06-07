@@ -1,0 +1,88 @@
+{
+  "id": "ofac-maritime-shipping",
+  "advisory": "OFAC-MARITIME-SHIPPING",
+  "source_md": "data/ofac/ofac-maritime-shipping.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16/21). Coverage/data values are ILLUSTRATIVE (vision demo). OFAC sanctions advisory — U.S. federal government work, public domain (17 U.S.C. 105). NOTE: maritime deceptive practices are largely vessel-behavior not observable from FI transaction data → honestly source-data-heavy.",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "redflag",
+      "flag": "Disabling or Manipulating the Automatic Identification System (AIS) on Vessels",
+      "src_line": 57,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "AIS disablement/spoofing is vessel-navigation behavior on the high seas that a financial institution cannot observe from its transaction or payment data; closing this requires an external maritime AIS-tracking feed."
+    },
+    {
+      "id": "IND-02",
+      "section": "redflag",
+      "flag": "Physically Altering Vessel Identification",
+      "src_line": 69,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Painting over a hull name or IMO number is a physical-vessel tampering signal with no footprint in FI transaction data; detection needs port-state inspection or vessel-imagery sources."
+    },
+    {
+      "id": "IND-03",
+      "section": "redflag",
+      "flag": "Falsifying Cargo and Vessel Documents",
+      "src_line": 75,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "A trade-finance bank does handle bills of lading, invoices, and certificates of origin, but verifying their authenticity (disguised petroleum/metals origin) requires enriching transaction records with external trade-document and origin-validation data the FI does not natively hold."
+    },
+    {
+      "id": "IND-04",
+      "section": "redflag",
+      "flag": "Ship-to-Ship (STS) Transfers\nWhile ship-to-ship transfers (the transfer of cargo between ships at sea) can be conducted for\nlegitimate purposes, STS transfers—especially at night or in areas determined to be high-risk for\nsanctions evasion or other illicit activity—are frequently used to evade sanctions by concealing the\norigin or destination of surreptitiously transferred petroleum, coal, and other material.",
+      "src_line": 90,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Cargo transferred between ships at sea (often at night in high-risk areas) is invisible to an FI's payment ledger; surfacing it requires maritime AIS/dark-activity tracking feeds."
+    },
+    {
+      "id": "IND-05",
+      "section": "redflag",
+      "flag": "Voyage Irregularities\nMalign actors may attempt to disguise the ultimate destination or origin of cargo or recipients by\nusing indirect routing, unscheduled detours, or transit or transshipment of cargo through third\ncountries.",
+      "src_line": 95,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Indirect routing and third-country transshipment leave a partial trace in trade-payment counterparties and shipping terms, but distinguishing it from legitimate transshipment requires enriching the transaction with external routing/port-call data."
+    },
+    {
+      "id": "IND-06",
+      "section": "redflag",
+      "flag": "False Flags and Flag Hopping",
+      "src_line": 103,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Vessel flag-state registration and deregistration history lives in flag-registry data, not FI transaction data; detecting flag hopping requires an external vessel-registry feed."
+    },
+    {
+      "id": "IND-07",
+      "section": "redflag",
+      "flag": "Complex Ownership or Management",
+      "src_line": 112,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Shell-company layering and frequent ownership/management changes to obscure the ultimate beneficial owner is the one practice an FI can observe from its own KYC and counterparty data — a classic AML beneficial-ownership-obfuscation pattern over the customer's existing payment and ownership records.",
+      "build_logic": {
+        "signal_name": "S-maritime-shell-ownership-layering",
+        "class": "counterparty_structure",
+        "features": ["ubo_resolution_depth", "ownership_change_count_180d", "shell_indicator_counterparty_ratio", "ism_manager_change_count", "high_risk_jurisdiction_layer_flag"],
+        "logic": "Flag a maritime/commodity-trade counterparty when the beneficial-ownership chain cannot be resolved within a threshold depth AND the structure shows shell-company indicators (no operating footprint, address-sharing) OR a pattern of ownership/ISM-management changes exceeding a baseline within a rolling window.",
+        "window": "rolling 180 days for ownership/management-change counting; point-in-time UBO resolution at onboarding and periodic refresh",
+        "source": "KYC/onboarding beneficial-ownership records, corporate-registry counterparty data, payment counterparty ledger",
+        "route": "enhanced due diligence / sanctions-evasion review queue"
+      }
+    }
+  ]
+}

@@ -19,10 +19,12 @@ AML transformation framework. Keep vocabulary consistent with it
   numbers as real.
 - NO real customer/transaction data, ever. Advisory text must be public-source and PARAPHRASED by
   default (e.g. the FINTRAC Jan-2025 Operational Alert behind the fentanyl demo). ONE exception:
-  US FinCEN federal advisories are public domain (17 USC §105) and may be reproduced VERBATIM with
-  attribution, kept visually separate from the "Illustrative data & outputs" badge (see Act 1's
-  SOURCE DOCUMENT panel, EFE FIN-2022-A002). The verbatim exception is FinCEN-only — it does NOT
-  extend to FINTRAC (Canadian Crown copyright → still paraphrase).
+  US FEDERAL GOVERNMENT advisories are public domain (17 USC §105 — works of the US government carry no
+  copyright) and may be reproduced VERBATIM with attribution, kept visually separate from the
+  "Illustrative data & outputs" badge (see Act 1's SOURCE DOCUMENT panel, EFE FIN-2022-A002). This
+  US-federal exception covers FinCEN AND OFAC (both US Treasury — Phase 21 added OFAC as corpus source #3)
+  and other US federal agencies. It is US-FEDERAL-ONLY — it does NOT extend to FINTRAC (Canadian Crown
+  copyright → still paraphrase) or any non-US / non-government source (still paraphrase).
 - Live mode is optional, isolated, off by default, always has a scripted fallback.
   Never put keys/tokens in the frontend. Copilot is NOT a web backend (HANDOFF §4.5).
 
@@ -62,8 +64,8 @@ AML transformation framework. Keep vocabulary consistent with it
   `dist/corpus/index.html`, built from a standalone template `corpus.html` (owns its own copy of the
   dossier theme — the six-act engine `index.html` is left byte-untouched). A staged 5-screen ARC
   (Phase 18 gave the explorer the showcase's two missing beats — a human gate + a close-the-loop payoff):
-  SELECT one of the 33 FinCEN publications (14 advisories + 19 alerts — Phase 20; honest `doc_type` chip
-  Advisory/Alert + status chips: derived / clean-or-low-not-yet-derived /
+  SELECT one of the 36 US-federal publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC — Phase
+  20/21; honest `doc_type` chip Advisory/Alert/OFAC + status chips: derived / clean-or-low-not-yet-derived /
   non-derivable) → COVERAGE gauge → BUILD RECOMMENDATIONS **= the human GATE** (per-indicator cover×data
   build_rec, sorted BUILD_NOW-first, each row src_line-traceable; the BUILD_NOW rows are SELECTABLE
   div-toggles [NOT `<input>`, so Space/arrow nav still works] — default all-selected, "agent proposes,
@@ -93,13 +95,26 @@ AML transformation framework. Keep vocabulary consistent with it
   Alert). FinCEN ALERTS are source #2 (`data/fincen-alerts/` — 19 alert md, 17 derived): acquired by
   `crawl_fincen.py --alerts` (the alerts hub lists each PDF DIRECTLY → zero-hop download) →
   `acquire_fincen.py`/`pdf_to_md.py --source data/fincen-alerts` → derived via the SAME inverted loop +
-  gate. Ships **29 derived across 33 FinCEN publications** (12 advisories + 17 alerts; only the 2 FATF
-  advisories + 2 alerts with no enumerated red-flag list stay non-derivable). STILL FinCEN, STILL
-  verbatim, STILL public-domain (17 U.S.C. 105) — so NO non-negotiable changed; the quote-grounding gate
-  (`check_record`/`rf_region`/`normalize`) is source-agnostic and reused UNCHANGED. `data/fincen/` (the
-  advisories source) stays byte-frozen — multi-source via the MERGE, not a migration. OFAC (also US-federal
-  public domain under 17 U.S.C. 105) is the documented next-source candidate; cross-jurisdiction sources
-  (FINTRAC etc.) would require paraphrase, which breaks quote-grounding (not pursued).
+  gate. Phase 20 stayed STILL FinCEN, STILL verbatim, STILL public-domain (17 U.S.C. 105) — NO
+  non-negotiable changed by it; the quote-grounding gate (`check_record`/`rf_region`/`normalize`) is
+  source-agnostic. `data/fincen/` (the advisories source) stays byte-frozen — multi-source via the MERGE,
+  not a migration. (Phase 21 then added OFAC as source #3 — see next bullet; the corpus now ships **32
+  derived across 36 publications** = 12 advisories + 17 alerts + 3 OFAC, only the 2 FATF advisories + 2
+  alerts with no enumerated red-flag list non-derivable.)
+- OFAC as source #3 (Phase 21, M7 — cross-agency, US-federal): OFAC (US Treasury) added as the THIRD
+  corpus source (`data/ofac/`, doc_type "OFAC"; 3 derived). Because 17 U.S.C. §105 covers ALL US federal
+  works, the verbatim non-negotiable was extended FinCEN-only → US-federal (FinCEN + OFAC + US federal;
+  FINTRAC + non-US still paraphrase). OFAC mostly uses sanctions-RISK vocab ("Risk Indicators" / "Deceptive
+  Practices") rather than FinCEN's "red flags", so `rf_region`'s anchors were WIDENED (`_RF_HEADER_OFAC` +
+  `_RF_INTRO_OFAC`), REGRESSION-GATED: every FinCEN md's rf_region stays byte-unchanged, all 29 FinCEN
+  records + `--selftest` still clean (the new vocab is ~inert for FinCEN); grounding/`normalize` untouched.
+  Acquisition is HAND-CURATED (OFAC's site is a JS SPA — no static crawl; `crawl_fincen.py` stays
+  FinCEN-only): `data/ofac/index.json` lists /media/<id>/download PDFs, acquired via `acquire_fincen.py
+  --source data/ofac`. OFAC content is sanctions/vessel-oriented → records are honestly enrichment/
+  SOURCE_DATA-heavy with few BUILD_NOW (the maritime deceptive practices are vessel-behavior the FI can't
+  observe → SOURCE_DATA, NOT fabricated signals). The cleanly-anchoring OFAC advisory set is small (3:
+  sham-transactions, maritime, virtual-currency — each a different vocab form); most OFAC docs defer red
+  flags to a co-issued FinCEN advisory or use non-anchoring framing (honestly skipped, not forced).
 - IMPORTANT — INVERTED extraction boundary (Phase 16) + the SUBTRACTION (Phase 17): the **LLM EXTRACTS, the
   deterministic layer GATES**, and the old extractor is **DELETED**. The earlier deterministic
   `extract_red_flags` accreted format special-casing every phase yet the LLM still had to author/prune its
@@ -168,7 +183,7 @@ JetBrains Mono. Theme lives in `:root` CSS variables. Refined, not flashy.
 M0 bootstrap · M1 config-driven refactor · M2 multi-typology · M3 presenter polish ·
 M4 (skipped) live/pre-gen mode · M5 ship · M6 Signal Watch ingestion pipeline (FinCEN verbatim) ·
 M7 corpus-backed demo (Phase 12 derivation backend + Phase 13 corpus explorer `dist/corpus/` +
-Phase 20 multi-source: FinCEN advisories + alerts, 29 derived across 33 publications).
+Phase 20 multi-source: FinCEN advisories + alerts; Phase 21: OFAC source #3 — 32 derived across 36 publications, 3 sources).
 See HANDOFF.md §8.
 
 ## Definition of done

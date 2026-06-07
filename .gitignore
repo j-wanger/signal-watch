@@ -35,6 +35,9 @@ data/fincen/raw/
 # Phase 20: FinCEN ALERTS as a second source — same convention (raw PDFs local + regenerable;
 # the committed data/fincen-alerts/*.md is the derivation surface).
 data/fincen-alerts/raw/
+# Phase 21: OFAC as a third source (US-federal public domain, 17 USC §105) — same convention
+# (raw PDFs local + regenerable from the hand-curated data/ofac/index.json; the committed *.md ships).
+data/ofac/raw/
 
 # Authoring scratch: scaffolded config SKELETONS from scripts/derive_signals.py --scaffold
 # (Phase 11). A draft is reviewed, has its JUDGMENT fields filled, then RENAMED to

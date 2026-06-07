@@ -271,16 +271,16 @@ function renderSelect(){
   const rank=a=>isLive(a)?0:a.derivable?(a.extraction==='clean'?1:2):3;
   const list=ADVISORIES.slice().sort((x,y)=>rank(x)-rank(y) || String(x.id).localeCompare(String(y.id)));
   const live=ADVISORIES.filter(isLive).length;
-  const ready=ADVISORIES.filter(a=>a.derivable && !isLive(a)).length;
   const nd=ADVISORIES.filter(a=>!a.derivable).length;
-  const advN=ADVISORIES.filter(a=>a.doc_type!=='Alert').length;
+  const advN=ADVISORIES.filter(a=>a.doc_type==='Advisory').length;
   const alertN=ADVISORIES.filter(a=>a.doc_type==='Alert').length;
+  const ofacN=ADVISORIES.filter(a=>a.doc_type==='OFAC').length;
   stage.innerHTML=`<div class="scene">
-    <div class="eyebrow">FinCEN advisory + alert corpus</div>
+    <div class="eyebrow">FinCEN + OFAC corpus</div>
     <h2>Pick a document. <em>Watch the loop derive it.</em></h2>
-    <p class="lead">The same signal engine, pointed at the public FinCEN corpus — advisories and alerts. Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
+    <p class="lead">The same signal engine, pointed at the public US-federal corpus — FinCEN advisories + alerts, plus OFAC sanctions advisories (all public domain, 17 U.S.C. §105). Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
     <div class="selhead">
-      <span class="sct">${ADVISORIES.length} FinCEN publications · ${advN} advisories · ${alertN} alerts · ${live} derived · ${ready} ready to derive · ${nd} non-derivable</span>
+      <span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${live} derived · ${nd} non-derivable</span>
     </div>
     <div class="advgrid">${list.map(a=>advCard(a)).join('')}</div>
     <div class="framenote">Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the public-domain source documents.</div>

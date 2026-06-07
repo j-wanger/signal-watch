@@ -99,6 +99,23 @@ _RF_HEADER_LOOSE = re.compile(
     r"^(?P<label>(?:[A-Z][\w’'/-]*\s+){0,3})red\s+flags?(?:\s+indicators?)?\b"
     r"(?:\s+(?:related|potentially|indicative|of|to|that|associated|targeting)\b.*)?$", re.I)
 _RF_INTRO_WEAK = re.compile(r"\bidentified\b[^.\n]{0,40}?\bred\s+flags?(?:\s+indicators?)?\b", re.I)
+# Phase 21 — OFAC vocabulary. OFAC sanctions advisories open their indicator list with vocab other than
+# "red flags": a standalone "<Category> Risk Indicators / Deceptive [Shipping] Practices / Risk Factors"
+# HEADER (maritime "Deceptive Practices", art/VC "Risk Indicators"), or a "risk indicators … may be /
+# include" INTRO. These mirror the FinCEN anchors (the red-flag-template OFAC advisories — e.g. the Sham
+# Transactions advisory's "the red flags listed below" — already match _RF_INTRO unchanged). They are
+# inert for the committed FinCEN corpus (verified across all 33 mds: the OFAC vocab appears in FinCEN
+# text ONLY mid-prose — e.g. "deceptive shipping practices" in a few advisories, and "risk factors" in a
+# footnote citation — NEVER as a line-start heading or a list lead-in, and both anchors require that
+# position (the HEADER `^…:?$`, the INTRO a "may be/include"-style lead-in)), so every FinCEN rf_region
+# stays byte-unchanged — pinned by the --selftest fixtures + the all-33-md baseline check. The HEADER also
+# excludes table-of-contents dotted-leader lines (the trailing `:?$` rejects "Risk Indicators ...... 17").
+_RF_HEADER_OFAC = re.compile(
+    r"^(?:[A-Z][\w’'/-]*(?:\s+(?:[A-Z][\w’'/-]*|and|of|the|&|for)){0,4}\s+)?"
+    r"(?:risk\s+indicators?|deceptive\s+(?:shipping\s+)?practices?|risk\s+factors?)\s*:?$", re.I)
+_RF_INTRO_OFAC = re.compile(
+    r"\brisk\s+indicators?\b[^.\n]{0,80}?\b(?:may\s+be|may\s+include|include|as\s+follows|listed\s+below)\b"
+    r"|\bthe\s+following\b[^.\n]{0,50}?\brisk\s+indicators?\b", re.I)
 # A block that is itself a footnote/citation, not a red flag (Phase-12 filter, retained for the
 # _rf_triage block counter): a footnote-numbered line, a legal "supra note"/"Id." marker, a
 # federal case-docket number, or a block ending in a "(Mon[ DD], YYYY)" citation date — real red
@@ -237,7 +254,8 @@ def rf_region(md: str):
     start = None
     for ln, t in lines:
         if t and (_RF_HEADER.match(t) or _RF_HEADER_LOOSE.match(t)
-                  or _RF_INTRO.search(t) or _RF_INTRO_WEAK.search(t)):
+                  or _RF_INTRO.search(t) or _RF_INTRO_WEAK.search(t)
+                  or _RF_HEADER_OFAC.match(t) or _RF_INTRO_OFAC.search(t)):  # Phase 21: OFAC vocab
             start = ln
             break
     if start is None:
@@ -409,6 +427,24 @@ def _checks_selftest() -> list:
         fails.append("_rf_triage glued pin drifted (3 glued flags must read coarse-undercount ('low', 1))")
     if _rf_triage(sep, rf_region(sep)) != ("clean", 3, {"redflag": 3}):
         fails.append("_rf_triage separated pin drifted (the same 3 blank-separated flags must read ('clean', 3))")
+    # Phase 21 — OFAC vocabulary anchors (widened rf_region). Pin BOTH directions: an OFAC-style
+    # "Deceptive Practices" header and a "risk indicators … may be" intro each OPEN a region; a passing
+    # prose mention of the vocab (no heading, no list lead-in) does NOT falsely anchor one.
+    ofac_hdr = "\n".join(["# OFAC Advisory", "", "Deceptive Practices", "",
+                          "A vessel disables its AIS transponder to obscure its location during a sanctioned-port call.",
+                          "", "Reminder of Sanctions Obligations", "", "x"])
+    if rf_region(ofac_hdr) is None:
+        fails.append("OFAC 'Deceptive Practices' header did not open an rf_region (widening regressed)")
+    ofac_intro = "\n".join(["# OFAC", "", "Examples of risk indicators may be entities that:", "",
+                            "An entity routes payments through a front company in a jurisdiction with no commercial nexus.",
+                            "", "For further information", "", "x"])
+    if rf_region(ofac_intro) is None:
+        fails.append("OFAC 'risk indicators … may be' intro did not open an rf_region")
+    ofac_prose = "\n".join(["# Doc", "",
+                            "This paragraph mentions risk factors and risk indicators only in passing prose, never as a heading.",
+                            "", "x"])
+    if rf_region(ofac_prose) is not None:
+        fails.append("a passing prose mention of OFAC vocab falsely opened an rf_region (anchor too loose)")
     return fails
 
 
@@ -526,7 +562,12 @@ def corpus_status_records(source_dir: Path = CORPUS_DIR) -> list:
         meta = index.get(p.stem, {})
         advisory_no = p.stem.upper()
         title = meta.get("title", "")
-        source = f"FinCEN {advisory_no}" + (f" · {title}" if title else "") \
+        # Phase 21 — per-source issuer (OFAC for data/ofac/, FinCEN otherwise). The prefix is dropped
+        # when advisory_no already starts with the issuer (OFAC ids are `ofac-…`), so it never doubles;
+        # FinCEN output stays byte-identical ("FinCEN FIN-2020-A008 · …").
+        issuer = "OFAC" if "ofac" in source_dir.name.lower() else "FinCEN"
+        issuer_prefix = "" if advisory_no.startswith(issuer.upper()) else f"{issuer} "
+        source = f"{issuer_prefix}{advisory_no}" + (f" · {title}" if title else "") \
             + " · public domain (17 U.S.C. 105)"
         records.append({
             "id": p.stem,

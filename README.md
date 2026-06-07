@@ -140,8 +140,8 @@ loop at the *whole public FinCEN corpus* — advisories and alerts — you pick 
 and watch it derive. It is a **staged 5-screen arc** (Phase 18 gave it the two beats the six-act showcase
 has and the explorer lacked — a human gate and a close-the-loop payoff):
 
-1. **Select** — all 33 FinCEN publications (14 advisories + 19 alerts), each with an honest `doc_type`
-   chip (*Advisory* / *Alert*) and a status chip: *derived* (live, clickable — 29 of them), or *no
+1. **Select** — all 36 US-federal publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC
+   advisories), each with an honest `doc_type` chip (*Advisory* / *Alert* / *OFAC*) and a status chip: *derived* (live, clickable — 32 of them), or *no
    enumerated red-flag list* (non-derivable — the 4 remaining: the 2 FATF jurisdiction advisories + 2
    alerts whose text mentions red flags but carries no anchorable enumerated list). The *clean / low*
    "ready to derive, not yet derived" chip state remains for any future publication added before it is derived.
@@ -169,9 +169,9 @@ derived records' shape at the build boundary (every `build_rec` in the matrix vo
 indicator must carry a full signal definition). `build.py` never imports `derive_signals.py`. The titles
 and red-flag text are verbatim public domain; the coverage/data/build judgments are illustrative (the
 "Illustrative data & outputs" badge stays on, with the per-document source attribution kept visually
-distinct from it). The explorer ships with **29 derived across 33 FinCEN publications** (12 of 14
-advisories + 17 of 19 alerts) — the non-derivable documents (the 2 FATF advisories + 2 alerts with no
-enumerated red-flag list) are labelled as such. The menu is deliberately varied: the transaction-pattern-rich
+distinct from it). The explorer ships with **32 derived across 36 US-federal publications** (12 of 14
+FinCEN advisories + 17 of 19 FinCEN alerts + 3 of 3 OFAC advisories) — the non-derivable documents (the
+2 FATF advisories + 2 alerts with no enumerated red-flag list) are labelled as such. The menu is deliberately varied: the transaction-pattern-rich
 Chinese money-laundering-networks typology (`fin-2025-a003`) surfaces five immediately-buildable signals;
 the enrichment-hungry Iran (`fin-2025-a002`) and Iran-backed-terror-finance (`fin-2024-a001`) typologies
 lean to *build + enrich*; the **glued-no-separator** advisories — ransomware (`fin-2021-a004`) and
@@ -179,7 +179,7 @@ health-care fraud (`fin-2026-a001`, 24 red flags) — were unreachable by the de
 yet ship derived via the inverted loop (the LLM reads them like a human, the gate grounds every verbatim
 flag). The front-end shows the full corpus honestly; the non-derivable documents are labelled as such.
 
-**Multi-source (Phase 20) — beyond advisories, still verbatim FinCEN.** A thin `CORPUS_SOURCES` registry
+**Multi-source (Phases 20-21) — beyond advisories, still verbatim US-federal.** A thin `CORPUS_SOURCES` registry
 in `build.py` maps each FinCEN publication *type* to its own committed `corpus-status.json` +
 `derived/*.json`, and `render_corpus` merges them into one menu with an honest `doc_type` chip per card.
 **FinCEN Alerts** are the second source (`data/fincen-alerts/` — 19 alert markdown files, 17 derived):
@@ -189,9 +189,24 @@ and they derive through the **same inverted loop and the same gate** — nothing
 changed. This stays inside the one verbatim exception: alerts are still FinCEN, still U.S.-federal public
 domain (17 U.S.C. §105), so **no non-negotiable changed** and the quote-grounding gate is reused
 unchanged; `data/fincen/` (the advisories source) is byte-frozen — the corpus grew by *merge*, not
-migration. The documented next source is **OFAC** (also U.S.-federal public domain under the same
-statute); a cross-jurisdiction source (FINTRAC, FATF, …) would have to be paraphrased, which breaks
-verbatim quote-grounding, so it is deliberately not pursued.
+migration.
+
+**OFAC is the third source (Phase 21) — a second US-federal agency.** OFAC (US Treasury) advisories are
+also public domain under the same statute, so the verbatim exception was **extended FinCEN-only →
+US-federal** (FinCEN + OFAC + US federal agencies; FINTRAC and any non-US / non-government source still
+paraphrase). OFAC mostly frames its indicators as "Risk Indicators" / "Deceptive Practices" rather than
+FinCEN's "red flags", so `rf_region`'s anchors were **widened** (`_RF_HEADER_OFAC` + `_RF_INTRO_OFAC`) —
+strictly **regression-gated**: every existing FinCEN md's region stays byte-unchanged and all 29 FinCEN
+records + `--selftest` stay clean (the new vocab is inert for FinCEN; the grounding `normalize` is
+untouched). OFAC's site is a JS app with no static listing, so `data/ofac/index.json` is **hand-curated**
+from `/media/<id>/download` PDFs (acquired via `acquire_fincen.py --source data/ofac`; `crawl_fincen.py`
+stays FinCEN-only). The cleanly-anchoring OFAC advisory set is **small** (3 — sham-transactions, maritime,
+virtual-currency, each a different vocab form): most OFAC docs defer red flags to a co-issued FinCEN
+advisory or use non-anchoring framing, and are honestly skipped. OFAC content is sanctions/vessel-oriented,
+so its records are honestly enrichment / `SOURCE_DATA`-heavy with few build-now signals (the maritime
+deceptive practices are vessel behavior an FI can't see in its transaction data — `SOURCE_DATA`, never a
+fabricated signal). A cross-*jurisdiction* source (FINTRAC, FATF, …) would still have to be paraphrased,
+which breaks verbatim quote-grounding, so it remains out of scope.
 
 ## Present it
 

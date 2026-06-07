@@ -54,6 +54,10 @@ CORPUS_SOURCES = [
     {"id": "fincen-alerts", "doc_type": "Alert",
      "status": ROOT / "data" / "fincen-alerts" / "corpus-status.json",
      "derived": ROOT / "data" / "fincen-alerts" / "derived"},
+    # Phase 21: OFAC (US Treasury) — a second US-federal agency, also public domain under 17 U.S.C. 105.
+    {"id": "ofac-advisories", "doc_type": "OFAC",
+     "status": ROOT / "data" / "ofac" / "corpus-status.json",
+     "derived": ROOT / "data" / "ofac" / "derived"},
 ]
 # the cover×data build-recommendation vocabulary (mirrors derive_signals.py _REC_MATRIX values;
 # re-declared here so build.py's boundary check stays independent of the authoring tool).

@@ -1,0 +1,54 @@
+{
+  "_generated_by": "scripts/derive_signals.py --corpus-status",
+  "_note": "Deterministic per-advisory manifest for the corpus-explorer build (scripts/build.py corpus reads this + data/ofac/derived/*.json). `derivable` = a red-flag region exists (rf_region; false only for the 2 FATF advisories); `extraction`/`flag_count` are a cheap rf_region-bounded triage HINT (_rf_triage), NOT the derivability authority — an advisory goes live via a gate-passing derived/<id>.json (the LLM extracts; check_record grounds), and build.py ignores the manifest count for a live advisory. Authoring artifact, NOT a ship config. Regenerate after the corpus md set changes.",
+  "summary": {
+    "clean": 3,
+    "low": 0,
+    "needs": 0,
+    "total": 3
+  },
+  "advisories": [
+    {
+      "id": "ofac-maritime-shipping",
+      "advisory": "OFAC-MARITIME-SHIPPING",
+      "title": "Sanctions Advisory for the Maritime Industry, Energy and Metals Sectors, and Related Communities",
+      "date": "2020-05-14",
+      "url": "https://ofac.treasury.gov/media/37751/download",
+      "source": "OFAC-MARITIME-SHIPPING · Sanctions Advisory for the Maritime Industry, Energy and Metals Sectors, and Related Communities · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 38,
+      "sections": {
+        "redflag": 38
+      },
+      "derivable": true
+    },
+    {
+      "id": "ofac-sham-transactions",
+      "advisory": "OFAC-SHAM-TRANSACTIONS",
+      "title": "Sanctions Advisory: Guidance on Sham Transactions and Sanctions Evasion",
+      "date": "2026-03-31",
+      "url": "https://ofac.treasury.gov/media/935441/download",
+      "source": "OFAC-SHAM-TRANSACTIONS · Sanctions Advisory: Guidance on Sham Transactions and Sanctions Evasion · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 26,
+      "sections": {
+        "redflag": 26
+      },
+      "derivable": true
+    },
+    {
+      "id": "ofac-virtual-currency",
+      "advisory": "OFAC-VIRTUAL-CURRENCY",
+      "title": "Sanctions Compliance Guidance for the Virtual Currency Industry",
+      "date": "2021-10-15",
+      "url": "https://ofac.treasury.gov/media/913571/download",
+      "source": "OFAC-VIRTUAL-CURRENCY · Sanctions Compliance Guidance for the Virtual Currency Industry · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 13,
+      "sections": {
+        "redflag": 13
+      },
+      "derivable": true
+    }
+  ]
+}

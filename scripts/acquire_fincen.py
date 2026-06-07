@@ -84,10 +84,14 @@ def resolve_pdf(detail_url: str) -> str:
 
 
 def _to_pdf_url(manifest_url: str) -> str:
-    """A manifest url that ends in .pdf is a direct (zero-hop) download (alerts + EFE override);
-    otherwise it is a detail page whose PDF link we resolve. Relative paths are made absolute."""
+    """A manifest url that is already a direct PDF download is fetched as-is; otherwise it is a detail
+    page whose PDF link we resolve. Direct = ends in .pdf (FinCEN alerts + the EFE override) OR is an
+    absolute agency media/file URL that serves a PDF body — /media/<id>/download (Phase 21: OFAC) or
+    /system/files/… . Relative paths are made absolute against BASE."""
     url = manifest_url
-    if url.lower().split("?")[0].endswith(".pdf"):
+    low = url.lower().split("?")[0]
+    direct = low.endswith(".pdf") or (url.startswith("http") and ("/media/" in low or "/system/files/" in low))
+    if direct:
         return url if url.startswith("http") else BASE + url
     return resolve_pdf(url)
 

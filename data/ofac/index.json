@@ -1,0 +1,23 @@
+[
+  {
+    "id": "ofac-sham-transactions",
+    "title": "Sanctions Advisory: Guidance on Sham Transactions and Sanctions Evasion",
+    "date": "2026-03-31",
+    "type": "advisory",
+    "url": "https://ofac.treasury.gov/media/935441/download"
+  },
+  {
+    "id": "ofac-maritime-shipping",
+    "title": "Sanctions Advisory for the Maritime Industry, Energy and Metals Sectors, and Related Communities",
+    "date": "2020-05-14",
+    "type": "advisory",
+    "url": "https://ofac.treasury.gov/media/37751/download"
+  },
+  {
+    "id": "ofac-virtual-currency",
+    "title": "Sanctions Compliance Guidance for the Virtual Currency Industry",
+    "date": "2021-10-15",
+    "type": "guidance",
+    "url": "https://ofac.treasury.gov/media/913571/download"
+  }
+]

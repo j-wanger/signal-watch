@@ -1,0 +1,107 @@
+{
+  "id": "ofac-sham-transactions",
+  "advisory": "OFAC-SHAM-TRANSACTIONS",
+  "source_md": "data/ofac/ofac-sham-transactions.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16/21). Coverage/data values are ILLUSTRATIVE (vision demo). OFAC sanctions advisory — U.S. federal government work, public domain (17 U.S.C. 105).",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "redflag",
+      "flag": "Commercially unreasonable transactions.  Transfers of property in which a blocked person once held an interest on terms that are not commercially reasonable, lacking adequate consideration, or otherwise not suggestive of an arm’s length transaction may indicate that the blocked person still retains an interest in the property.",
+      "src_line": 95,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "A bank sees transferred amounts but judging \"commercially reasonable\" terms needs external valuation context, so existing price-anomaly screening can be enhanced rather than built fresh."
+    },
+    {
+      "id": "IND-02",
+      "section": "redflag",
+      "flag": "Transfer  to  family  members  or  close  associates.    Transfers  by  a  blocked  person  to  a  family member or close associate can be evidence of a sham transaction.",
+      "src_line": 106,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Mapping nominal owners to a blocked person's family or close associates requires beneficial-ownership and relationship enrichment beyond core KYC fields."
+    },
+    {
+      "id": "IND-03",
+      "section": "redflag",
+      "flag": "Unclear purpose of transfer.  Transfers lacking apparent business purpose may indicate an attempt to obfuscate a blocked person’s continued interest in property.  Likewise, transfers to an individual with little or no relevant experience or expertise with respect to the transferred property may be evidence of a sham transaction.",
+      "src_line": 115,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Transfers with no declared business purpose to a transferee whose account profile shows no related activity are computable from the bank's own transaction and account-profile data.",
+      "build_logic": {
+        "signal_name": "S-purposeless-transfer-to-unfit-transferee",
+        "class": "entity · account-level · windowed",
+        "features": [
+          "missing_or_generic_purpose_code",
+          "transferee_no_prior_related_activity",
+          "transferee_profile_expertise_mismatch",
+          "transfer_amount_vs_account_baseline"
+        ],
+        "logic": "Flag a property/asset-linked transfer carrying a missing or boilerplate purpose code when the receiving account shows no prior activity consistent with the transferred property and the transferee profile lacks any related occupation or expertise marker.",
+        "window": "rolling 30 days",
+        "source": "wire/payment messages, account-profile + occupation KYC, transaction history",
+        "route": "Tier-1 alert → sanctions-evasion review gate"
+      }
+    },
+    {
+      "id": "IND-04",
+      "section": "redflag",
+      "flag": "Unduly  complex  corporate  structures  involving  higher-risk  jurisdictions.    The  presence  of unnecessarily  complex  legal  structures  without  a  discernible  legitimate  purpose—such  as  certain multi-layered limited liability companies, partnerships, or trusts—may indicate an effort to conceal an ownership interest.",
+      "src_line": 132,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Detecting multi-layered LLC/trust obfuscation across higher-risk jurisdictions requires external corporate-registry and ownership-chain data the bank does not hold internally."
+    },
+    {
+      "id": "IND-05",
+      "section": "redflag",
+      "flag": "Continued involvement of a blocked person.  Facts or circumstances suggesting a blocked person remains involved in the use, management, or disposition of property—including through proxies or intermediaries—may indicate that the blocked person continues to retain an interest in property.",
+      "src_line": 139,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Attributing continued control to a blocked person operating through proxies requires sanctions-network and proxy-attribution intelligence outside the bank's transaction record."
+    },
+    {
+      "id": "IND-06",
+      "section": "redflag",
+      "flag": "Transfer near the time of designation.  Transfers completed close in time to a person’s designation may  trigger  suspicion  warranting  further  analysis,  such  as  when  a  purported  transfer  occurs",
+      "src_line": 145,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Temporal proximity between an ownership-transfer transaction and a related party's OFAC designation date is computable from the bank's transaction timestamps joined to dated SDN-list entries.",
+      "build_logic": {
+        "signal_name": "S-transfer-near-designation-date",
+        "class": "entity · account-level · windowed",
+        "features": [
+          "ownership_transfer_event_flag",
+          "days_to_related_party_designation",
+          "counterparty_sdn_name_match_score",
+          "transfer_to_nominal_owner_flag"
+        ],
+        "logic": "Flag an ownership or asset transfer when its execution date falls within a tight window of an OFAC designation date for a name-matched related party, especially when the transferee is a newly introduced nominal owner.",
+        "window": "rolling 30 days",
+        "source": "transaction ledger with timestamps, dated OFAC SDN list, counterparty screening hits",
+        "route": "Tier-1 alert → sanctions-evasion review gate"
+      }
+    },
+    {
+      "id": "IND-07",
+      "section": "redflag",
+      "flag": "Evasive  responses  regarding  a  blocked  person’s  involvement.    Evasive  or  vague  responses,  or failures to respond to questions from counterparties, key intermediaries, or gatekeepers regarding a blocked person’s involvement in property may be evidence of intent to conceal a continuing interest.",
+      "src_line": 156,
+      "status": "partial",
+      "data": "insufficient",
+      "build_rec": "MONITOR",
+      "rationale": "Evasive or non-responsive answers during diligence are qualitative human-judgment signals not captured in structured transaction data, so they are monitored rather than systematically built."
+    }
+  ]
+}

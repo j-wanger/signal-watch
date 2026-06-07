@@ -6,7 +6,8 @@
 // test — `build.py --check all` already guarantees that file equals a fresh build of corpus.html),
 // extracts the single inline <script>, evaluates it under the shim, then drives the 5-screen arc
 // (Select → Coverage → Build recs/GATE → Signal → Close the loop) and asserts the Phase-18 invariants
-// + the Phase-20 multi-source menu (FinCEN advisories + alerts, honest doc_type chips, an alert walks the arc).
+// + the multi-source menu (Phase 20 FinCEN advisories + alerts, Phase 21 OFAC — 3 source types, honest
+// doc_type chips, an alert AND an OFAC advisory each walk the full arc).
 //
 // Why a vm + shim instead of a third-party DOM library: the ship artifact is a single file:// offline
 // HTML; the project's whole test idiom is dep-free (derive_signals.py --selftest, build.py --check).
@@ -172,10 +173,15 @@ ok(env.__errors.length === 0, 'Select rendered with no console errors');
 // (1b) MULTI-SOURCE menu (Phase 20): both FinCEN publication types present, each card honestly typed
 const advisoryChips = (env.__stage._html.match(/<span class="chip doc">Advisory<\/span>/g) || []).length;
 const alertChips = (env.__stage._html.match(/<span class="chip doc">Alert<\/span>/g) || []).length;
-ok(advisoryChips > 0 && alertChips > 0, `unified menu lists both types (${advisoryChips} advisories + ${alertChips} alerts)`);
-eq(advisoryChips + alertChips, api.ADVISORIES.length, 'every card carries an honest doc_type chip (Advisory/Alert)');
+const ofacChips = (env.__stage._html.match(/<span class="chip doc">OFAC<\/span>/g) || []).length;
+ok(advisoryChips > 0 && alertChips > 0 && ofacChips > 0,
+  `unified menu lists all 3 source types (${advisoryChips} advisories + ${alertChips} alerts + ${ofacChips} OFAC)`);
+eq(advisoryChips + alertChips + ofacChips, api.ADVISORIES.length,
+  'every card carries an honest doc_type chip (Advisory/Alert/OFAC)');
 const liveAlerts = api.ADVISORIES.filter(a => a.doc_type === 'Alert' && api.isLive(a));
 ok(liveAlerts.length > 0, `at least one FinCEN Alert is derived/live (${liveAlerts.length})`);
+const liveOfac = api.ADVISORIES.filter(a => a.doc_type === 'OFAC' && api.isLive(a));
+ok(liveOfac.length > 0, `at least one OFAC advisory is derived/live (${liveOfac.length})`);
 
 // choose a live advisory that has at least one buildable (BUILD_NOW + build_logic) gap
 const adv = api.ADVISORIES.filter(api.isLive)
@@ -271,6 +277,28 @@ apiA.gotoScreen(3);
 ok(/· Close the loop/.test(envA.__stage._html), 'alert: Close-the-loop screen renders');
 eq(numText(envA, 'gnum'), afterA, 'alert: close gauge lands on the recomputed after-coverage');
 ok(envA.__errors.length === 0, 'alert: full 5-screen arc walked with no console errors');
+
+// ---- an OFAC advisory walks the full 5-screen arc (Phase 21 — 3rd source / cross-agency proof) ----
+const envO = boot(true);
+const apiO = envO.__api;
+const ofac = apiO.ADVISORIES.filter(a => a.doc_type === 'OFAC' && apiO.isLive(a))
+  .find(a => apiO.buildNows(a).some(i => i.build_logic && typeof i.build_logic === 'object'));
+ok(ofac, `found a live OFAC advisory with a buildable BUILD_NOW gap (${ofac && ofac.id})`);
+apiO.pick(ofac.id);
+eq(apiO.view, 'detail', 'ofac: pick() enters detail view');
+const covO = apiO.coverageIndex(ofac.indicators);
+eq(numText(envO, 'gnum'), covO, 'ofac: Coverage gauge lands on coverageIndex(indicators)');
+apiO.gotoScreen(1);
+ok(/Build recommendations · gate/.test(envO.__stage._html), 'ofac: Build-recs/GATE screen renders');
+apiO.gotoScreen(2);
+ok(/PROPOSED ·/.test(envO.__stage._html), 'ofac: Signal drafts ≥1 spec card for the picks');
+apiO.selected = new Set(apiO.buildNows(ofac).map(i => i.id));
+const afterO = apiO.coverageIndex(ofac.indicators.map(i =>
+  apiO.selected.has(i.id) ? Object.assign({}, i, { status: 'covered' }) : i));
+apiO.gotoScreen(3);
+ok(/· Close the loop/.test(envO.__stage._html), 'ofac: Close-the-loop screen renders');
+eq(numText(envO, 'gnum'), afterO, 'ofac: close gauge lands on the recomputed after-coverage');
+ok(envO.__errors.length === 0, 'ofac: full 5-screen arc walked with no console errors');
 
 /* ============================ report ============================ */
 console.log(`\n${pass} passed, ${fails.length} failed`);

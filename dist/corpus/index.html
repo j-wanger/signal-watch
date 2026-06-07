@@ -5555,6 +5555,295 @@ const CORPUS = {
           "rationale": "Large offsetting-transaction patterns are visible in account activity, but classifying the customer as an unregistered P2P/nested-DASP operator needs VASP-exposure and registration enrichment."
         }
       ]
+    },
+    {
+      "id": "ofac-maritime-shipping",
+      "advisory": "OFAC-MARITIME-SHIPPING",
+      "title": "Sanctions Advisory for the Maritime Industry, Energy and Metals Sectors, and Related Communities",
+      "date": "2020-05-14",
+      "source": "OFAC-MARITIME-SHIPPING · Sanctions Advisory for the Maritime Industry, Energy and Metals Sectors, and Related Communities · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 38,
+      "derivable": true,
+      "doc_type": "OFAC",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "Disabling or Manipulating the Automatic Identification System (AIS) on Vessels",
+          "src_line": 57,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "AIS disablement/spoofing is vessel-navigation behavior on the high seas that a financial institution cannot observe from its transaction or payment data; closing this requires an external maritime AIS-tracking feed."
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "Physically Altering Vessel Identification",
+          "src_line": 69,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Painting over a hull name or IMO number is a physical-vessel tampering signal with no footprint in FI transaction data; detection needs port-state inspection or vessel-imagery sources."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "Falsifying Cargo and Vessel Documents",
+          "src_line": 75,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "A trade-finance bank does handle bills of lading, invoices, and certificates of origin, but verifying their authenticity (disguised petroleum/metals origin) requires enriching transaction records with external trade-document and origin-validation data the FI does not natively hold."
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "Ship-to-Ship (STS) Transfers\nWhile ship-to-ship transfers (the transfer of cargo between ships at sea) can be conducted for\nlegitimate purposes, STS transfers—especially at night or in areas determined to be high-risk for\nsanctions evasion or other illicit activity—are frequently used to evade sanctions by concealing the\norigin or destination of surreptitiously transferred petroleum, coal, and other material.",
+          "src_line": 90,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Cargo transferred between ships at sea (often at night in high-risk areas) is invisible to an FI's payment ledger; surfacing it requires maritime AIS/dark-activity tracking feeds."
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "Voyage Irregularities\nMalign actors may attempt to disguise the ultimate destination or origin of cargo or recipients by\nusing indirect routing, unscheduled detours, or transit or transshipment of cargo through third\ncountries.",
+          "src_line": 95,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Indirect routing and third-country transshipment leave a partial trace in trade-payment counterparties and shipping terms, but distinguishing it from legitimate transshipment requires enriching the transaction with external routing/port-call data."
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "False Flags and Flag Hopping",
+          "src_line": 103,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Vessel flag-state registration and deregistration history lives in flag-registry data, not FI transaction data; detecting flag hopping requires an external vessel-registry feed."
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "Complex Ownership or Management",
+          "src_line": 112,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Shell-company layering and frequent ownership/management changes to obscure the ultimate beneficial owner is the one practice an FI can observe from its own KYC and counterparty data — a classic AML beneficial-ownership-obfuscation pattern over the customer's existing payment and ownership records.",
+          "build_logic": {
+            "signal_name": "S-maritime-shell-ownership-layering",
+            "class": "counterparty_structure",
+            "features": [
+              "ubo_resolution_depth",
+              "ownership_change_count_180d",
+              "shell_indicator_counterparty_ratio",
+              "ism_manager_change_count",
+              "high_risk_jurisdiction_layer_flag"
+            ],
+            "logic": "Flag a maritime/commodity-trade counterparty when the beneficial-ownership chain cannot be resolved within a threshold depth AND the structure shows shell-company indicators (no operating footprint, address-sharing) OR a pattern of ownership/ISM-management changes exceeding a baseline within a rolling window.",
+            "window": "rolling 180 days for ownership/management-change counting; point-in-time UBO resolution at onboarding and periodic refresh",
+            "source": "KYC/onboarding beneficial-ownership records, corporate-registry counterparty data, payment counterparty ledger",
+            "route": "enhanced due diligence / sanctions-evasion review queue"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ofac-sham-transactions",
+      "advisory": "OFAC-SHAM-TRANSACTIONS",
+      "title": "Sanctions Advisory: Guidance on Sham Transactions and Sanctions Evasion",
+      "date": "2026-03-31",
+      "source": "OFAC-SHAM-TRANSACTIONS · Sanctions Advisory: Guidance on Sham Transactions and Sanctions Evasion · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 26,
+      "derivable": true,
+      "doc_type": "OFAC",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "Commercially unreasonable transactions.  Transfers of property in which a blocked person once held an interest on terms that are not commercially reasonable, lacking adequate consideration, or otherwise not suggestive of an arm’s length transaction may indicate that the blocked person still retains an interest in the property.",
+          "src_line": 95,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "A bank sees transferred amounts but judging \"commercially reasonable\" terms needs external valuation context, so existing price-anomaly screening can be enhanced rather than built fresh."
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "Transfer  to  family  members  or  close  associates.    Transfers  by  a  blocked  person  to  a  family member or close associate can be evidence of a sham transaction.",
+          "src_line": 106,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Mapping nominal owners to a blocked person's family or close associates requires beneficial-ownership and relationship enrichment beyond core KYC fields."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "Unclear purpose of transfer.  Transfers lacking apparent business purpose may indicate an attempt to obfuscate a blocked person’s continued interest in property.  Likewise, transfers to an individual with little or no relevant experience or expertise with respect to the transferred property may be evidence of a sham transaction.",
+          "src_line": 115,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Transfers with no declared business purpose to a transferee whose account profile shows no related activity are computable from the bank's own transaction and account-profile data.",
+          "build_logic": {
+            "signal_name": "S-purposeless-transfer-to-unfit-transferee",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "missing_or_generic_purpose_code",
+              "transferee_no_prior_related_activity",
+              "transferee_profile_expertise_mismatch",
+              "transfer_amount_vs_account_baseline"
+            ],
+            "logic": "Flag a property/asset-linked transfer carrying a missing or boilerplate purpose code when the receiving account shows no prior activity consistent with the transferred property and the transferee profile lacks any related occupation or expertise marker.",
+            "window": "rolling 30 days",
+            "source": "wire/payment messages, account-profile + occupation KYC, transaction history",
+            "route": "Tier-1 alert → sanctions-evasion review gate"
+          }
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "Unduly  complex  corporate  structures  involving  higher-risk  jurisdictions.    The  presence  of unnecessarily  complex  legal  structures  without  a  discernible  legitimate  purpose—such  as  certain multi-layered limited liability companies, partnerships, or trusts—may indicate an effort to conceal an ownership interest.",
+          "src_line": 132,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting multi-layered LLC/trust obfuscation across higher-risk jurisdictions requires external corporate-registry and ownership-chain data the bank does not hold internally."
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "Continued involvement of a blocked person.  Facts or circumstances suggesting a blocked person remains involved in the use, management, or disposition of property—including through proxies or intermediaries—may indicate that the blocked person continues to retain an interest in property.",
+          "src_line": 139,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Attributing continued control to a blocked person operating through proxies requires sanctions-network and proxy-attribution intelligence outside the bank's transaction record."
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "Transfer near the time of designation.  Transfers completed close in time to a person’s designation may  trigger  suspicion  warranting  further  analysis,  such  as  when  a  purported  transfer  occurs",
+          "src_line": 145,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Temporal proximity between an ownership-transfer transaction and a related party's OFAC designation date is computable from the bank's transaction timestamps joined to dated SDN-list entries.",
+          "build_logic": {
+            "signal_name": "S-transfer-near-designation-date",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "ownership_transfer_event_flag",
+              "days_to_related_party_designation",
+              "counterparty_sdn_name_match_score",
+              "transfer_to_nominal_owner_flag"
+            ],
+            "logic": "Flag an ownership or asset transfer when its execution date falls within a tight window of an OFAC designation date for a name-matched related party, especially when the transferee is a newly introduced nominal owner.",
+            "window": "rolling 30 days",
+            "source": "transaction ledger with timestamps, dated OFAC SDN list, counterparty screening hits",
+            "route": "Tier-1 alert → sanctions-evasion review gate"
+          }
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "Evasive  responses  regarding  a  blocked  person’s  involvement.    Evasive  or  vague  responses,  or failures to respond to questions from counterparties, key intermediaries, or gatekeepers regarding a blocked person’s involvement in property may be evidence of intent to conceal a continuing interest.",
+          "src_line": 156,
+          "status": "partial",
+          "data": "insufficient",
+          "build_rec": "MONITOR",
+          "rationale": "Evasive or non-responsive answers during diligence are qualitative human-judgment signals not captured in structured transaction data, so they are monitored rather than systematically built."
+        }
+      ]
+    },
+    {
+      "id": "ofac-virtual-currency",
+      "advisory": "OFAC-VIRTUAL-CURRENCY",
+      "title": "Sanctions Compliance Guidance for the Virtual Currency Industry",
+      "date": "2021-10-15",
+      "source": "OFAC-VIRTUAL-CURRENCY · Sanctions Compliance Guidance for the Virtual Currency Industry · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 13,
+      "derivable": true,
+      "doc_type": "OFAC",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "Provide inaccurate or incomplete customer identification or KYC information when attempting to open an account",
+          "src_line": 695,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Onboarding KYC completeness/accuracy validation is a standard control at a mid-size US bank or VASP, run against core account-opening data."
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "Attempt to access a virtual currency exchange from an IP address or VPN connected to a sanctioned jurisdiction",
+          "src_line": 696,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting access from a sanctioned-jurisdiction IP/VPN needs external IP-geolocation and VPN-attribution feeds the institution does not natively hold, so the data must be sourced before a signal is buildable."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "Are non-responsive or refuse to provide updated customer identification or KYC information",
+          "src_line": 697,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Periodic KYC refresh exists at most mid-size institutions and the response status sits in core account/KYC data, but systematically flagging non-response is only partially instrumented."
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "Are non-responsive or refuse to provide additional transaction information in response to a virtual currency company’s request",
+          "src_line": 698,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Request-for-information non-response is a concrete account-level pattern derivable from core RFI/case data, but it is rarely turned into a standing signal — a buildable gap on data already held.",
+          "build_logic": {
+            "signal_name": "S-RFI-NONRESPONSE",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "open_rfi_count",
+              "days_since_oldest_rfi",
+              "rfi_response_rate",
+              "post_rfi_outbound_value"
+            ],
+            "logic": "Flag an account with one or more open transaction-information requests (RFIs) past the response deadline and a response rate below threshold, weighted up when post-request outbound value continues, indicating evasive non-cooperation.",
+            "window": "rolling 30 days",
+            "source": "RFI/case-management records joined to account and transaction ledger",
+            "route": "Tier-1 alert → sanctions/AML analyst review gate"
+          }
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "Attempt to transact with a virtual currency address associated with a blocked person or sanctioned jurisdiction",
+          "src_line": 700,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Matching a counterparty virtual-currency address to a blocked person or sanctioned jurisdiction requires blockchain chain-analytics exposure data that is only partially deployed, so existing screening can be enhanced but not fully closed from core data."
+        }
+      ]
     }
   ]
 };
@@ -5636,16 +5925,16 @@ function renderSelect(){
   const rank=a=>isLive(a)?0:a.derivable?(a.extraction==='clean'?1:2):3;
   const list=ADVISORIES.slice().sort((x,y)=>rank(x)-rank(y) || String(x.id).localeCompare(String(y.id)));
   const live=ADVISORIES.filter(isLive).length;
-  const ready=ADVISORIES.filter(a=>a.derivable && !isLive(a)).length;
   const nd=ADVISORIES.filter(a=>!a.derivable).length;
-  const advN=ADVISORIES.filter(a=>a.doc_type!=='Alert').length;
+  const advN=ADVISORIES.filter(a=>a.doc_type==='Advisory').length;
   const alertN=ADVISORIES.filter(a=>a.doc_type==='Alert').length;
+  const ofacN=ADVISORIES.filter(a=>a.doc_type==='OFAC').length;
   stage.innerHTML=`<div class="scene">
-    <div class="eyebrow">FinCEN advisory + alert corpus</div>
+    <div class="eyebrow">FinCEN + OFAC corpus</div>
     <h2>Pick a document. <em>Watch the loop derive it.</em></h2>
-    <p class="lead">The same signal engine, pointed at the public FinCEN corpus — advisories and alerts. Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
+    <p class="lead">The same signal engine, pointed at the public US-federal corpus — FinCEN advisories + alerts, plus OFAC sanctions advisories (all public domain, 17 U.S.C. §105). Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
     <div class="selhead">
-      <span class="sct">${ADVISORIES.length} FinCEN publications · ${advN} advisories · ${alertN} alerts · ${live} derived · ${ready} ready to derive · ${nd} non-derivable</span>
+      <span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${live} derived · ${nd} non-derivable</span>
     </div>
     <div class="advgrid">${list.map(a=>advCard(a)).join('')}</div>
     <div class="framenote">Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the public-domain source documents.</div>

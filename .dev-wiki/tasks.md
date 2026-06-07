@@ -1,9 +1,9 @@
 # Tasks
 
-> Last updated: 2026-06-06 by /dev-plan (Phase 21 planned — 6 tasks [1 L], direction approved; OFAC as corpus source #3 with a regression-gated rf_region anchor widening)
+> Last updated: 2026-06-06 by /dev-debrief (Phase 21 DELIVERED + accepted — all 6 tasks [x], reviewer 9/10; impl commit 68ee1dc)
 
 <!-- phase:phase-21-ofac-corpus-source -->
-<!-- gate-log:phase-21 direction=approved delivery=pending -->
+<!-- gate-log:phase-21 direction=approved delivery=accepted -->
 
 ## Phase 21: OFAC as corpus source #3 (gate widened for OFAC vocab; US-federal public-domain) — M7
 

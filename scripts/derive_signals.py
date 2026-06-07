@@ -35,8 +35,9 @@ Usage:
     python3 scripts/derive_signals.py --selftest             # offline: gate checks (build-rec matrix
                                                              #   + quote-grounding + relevance + shape)
     python3 scripts/derive_signals.py --check-derived <record.json>  # offline: DISPOSE a derived record
-    python3 scripts/derive_signals.py --corpus               # offline: cheap rf_region triage across the corpus
-    python3 scripts/derive_signals.py --corpus-status        # offline: emit data/fincen/corpus-status.json
+    python3 scripts/derive_signals.py --corpus [source_dir]        # offline: cheap rf_region triage across a source
+    python3 scripts/derive_signals.py --corpus-status [source_dir] # offline: emit <source_dir>/corpus-status.json
+                                                             #   (source_dir defaults to data/fincen — Phase 20 multi-source)
 
 TRIAGE (the rf_region-bounded counter — replaces the deleted extractor's counting role):
   --corpus / --corpus-status are a cheap deterministic HINT, never the derivation authority. For
@@ -60,10 +61,13 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# CORPUS_DIR is the DEFAULT corpus source (fincen-advisories). Phase 20 — multi-source: the
+# per-source functions below take a `source_dir`, so OTHER FinCEN publication types (e.g.
+# data/fincen-alerts/) regenerate their own corpus-status.json with the SAME gate + triage via
+# `--corpus-status [source_dir]`. Each source dir holds <id>.md + index.json + corpus-status.json.
+# The gate (check_record/rf_region/normalize) is source-agnostic and unchanged across sources.
 CORPUS_DIR = ROOT / "data" / "fincen"
-EFE_MD = CORPUS_DIR / "fin-2022-a002.md"
-INDEX_JSON = CORPUS_DIR / "index.json"               # crawl manifest (titles/dates/urls)
-CORPUS_STATUS_JSON = CORPUS_DIR / "corpus-status.json"  # emitted manifest the corpus build reads
+EFE_MD = CORPUS_DIR / "fin-2022-a002.md"  # selftest gate fixture (verbatim EFE red flags)
 
 # Red-flag REGION anchors — the heading/intro that OPENS an advisory's enumerated red-flag
 # list. These now serve rf_region() (the relevance region the gate cites) + the _rf_triage()
@@ -479,38 +483,41 @@ def _rf_triage(md: str, region) -> tuple:
     return (("clean" if n >= _MIN_CLEAN_FLAGS else "low"), n, {"redflag": n} if n else {})
 
 
-def _load_index() -> dict:
-    """advisory id -> {title, date, url, …} from the committed crawl manifest (best-effort).
+def _load_index(source_dir: Path = CORPUS_DIR) -> dict:
+    """advisory id -> {title, date, url, …} from the source's committed crawl manifest (best-effort).
 
     Missing/malformed index.json degrades to empty metadata (titles blank) rather than failing
     — the extraction status is the load-bearing data; titles are presentation polish.
     """
-    if not INDEX_JSON.exists():
+    index_json = source_dir / "index.json"
+    if not index_json.exists():
         return {}
     try:
-        entries = json.loads(INDEX_JSON.read_text(encoding="utf-8"))
+        entries = json.loads(index_json.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return {}
     return {e["id"]: e for e in entries if isinstance(e, dict) and e.get("id")} \
         if isinstance(entries, list) else {}
 
 
-def corpus_status_records() -> list:
+def corpus_status_records(source_dir: Path = CORPUS_DIR) -> list:
     """PURE-ish (reads corpus md + index.json): per-advisory extraction-status records.
 
-    The deterministic input the corpus-explorer build consumes. For every committed advisory md:
+    The deterministic input the corpus-explorer build consumes. For every committed source md:
     a cheap rf_region triage HINT (extraction clean|low|none + flag_count + sections via
     _rf_triage), the title/date/url/source attribution (from index.json), and a `derivable` flag.
     `derivable` = a red-flag REGION exists (rf_region) — true even for the glued advisories (the
     LLM backend extracts them); false ONLY for the 2 FATF jurisdiction advisories (no red-flag
-    list at all). The triage is no longer the derivability authority — an advisory goes "live" in
-    the explorer by the presence of a gate-passing data/fincen/derived/<id>.json.
-    Deterministic: md glob is sorted; the triage reuses the calibrated rf_region span.
+    list at all). The triage is no longer the derivability authority — a document goes "live" in
+    the explorer by the presence of a gate-passing <source_dir>/derived/<id>.json.
+    Phase 20: `source_dir` defaults to fincen-advisories but takes any FinCEN-publication source
+    (e.g. data/fincen-alerts/) — same triage, same attribution shape. Deterministic: md glob is
+    sorted; the triage reuses the calibrated rf_region span.
     """
-    mds = sorted(CORPUS_DIR.glob("*.md"))
+    mds = sorted(source_dir.glob("*.md"))
     if not mds:
-        sys.exit(f"no corpus md under {CORPUS_DIR.relative_to(ROOT)} — acquire/convert first")
-    index = _load_index()
+        sys.exit(f"no corpus md under {source_dir.relative_to(ROOT)} — acquire/convert first")
+    index = _load_index(source_dir)
     records = []
     for p in mds:
         md = p.read_text(encoding="utf-8")
@@ -541,16 +548,21 @@ def corpus_status_records() -> list:
     return records
 
 
-def write_corpus_status() -> int:
-    """Emit data/fincen/corpus-status.json — the committed manifest the corpus build reads."""
-    records = corpus_status_records()
+def write_corpus_status(source_dir: Path = CORPUS_DIR) -> int:
+    """Emit <source_dir>/corpus-status.json — the committed manifest the corpus build reads."""
+    records = corpus_status_records(source_dir)
+    status_path = source_dir / "corpus-status.json"
     summary = {"clean": 0, "low": 0, "needs": 0, "total": len(records)}
     for r in records:
         summary[{"clean": "clean", "low": "low", "none": "needs"}[r["extraction"]]] += 1
+    # the per-source derived path the note cites — byte-identical for the default fincen-advisories
+    # source (so its committed manifest never drifts), accurate for any other FinCEN source.
+    derived_ref = ("data/fincen/derived/*.json" if source_dir == CORPUS_DIR
+                   else f"{source_dir.relative_to(ROOT).as_posix()}/derived/*.json")
     manifest = {
         "_generated_by": "scripts/derive_signals.py --corpus-status",
         "_note": ("Deterministic per-advisory manifest for the corpus-explorer build "
-                  "(scripts/build.py corpus reads this + data/fincen/derived/*.json). `derivable` "
+                  f"(scripts/build.py corpus reads this + {derived_ref}). `derivable` "
                   "= a red-flag region exists (rf_region; false only for the 2 FATF advisories); "
                   "`extraction`/`flag_count` are a cheap rf_region-bounded triage HINT (_rf_triage), "
                   "NOT the derivability authority — an advisory goes live via a gate-passing "
@@ -560,31 +572,32 @@ def write_corpus_status() -> int:
         "summary": summary,
         "advisories": records,
     }
-    CORPUS_STATUS_JSON.write_text(
+    status_path.write_text(
         json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"wrote {CORPUS_STATUS_JSON.relative_to(ROOT)} — {len(records)} advisories "
+    print(f"wrote {status_path.relative_to(ROOT)} — {len(records)} documents "
           f"({summary['clean']} clean · {summary['low']} low · {summary['needs']} needs)")
     return 0
 
 
-def corpus_report() -> int:
-    """Cheap rf_region triage across the whole committed FinCEN corpus + report per advisory.
+def corpus_report(source_dir: Path = CORPUS_DIR) -> int:
+    """Cheap rf_region triage across a whole committed FinCEN source + report per document.
 
-    Deterministic + offline. For each advisory: DERIVABLE (a red-flag region exists) with a coarse
+    Deterministic + offline. For each document: DERIVABLE (a red-flag region exists) with a coarse
     block-flag count classified CLEAN (≥ _MIN_CLEAN_FLAGS) / LOW (fewer — e.g. a glued advisory the
     counter sizes as one block) / or NON-DERIVABLE (no red-flag region — the 2 FATF advisories).
     A HINT, not the derivation authority (the LLM extracts; check_record grounds). Exit 0 always.
+    `source_dir` defaults to fincen-advisories; pass any FinCEN-publication source (data/fincen-alerts/).
     """
-    mds = sorted(CORPUS_DIR.glob("*.md"))
+    mds = sorted(source_dir.glob("*.md"))
     if not mds:
-        sys.exit(f"no corpus md under {CORPUS_DIR.relative_to(ROOT)} — acquire/convert first")
+        sys.exit(f"no corpus md under {source_dir.relative_to(ROOT)} — acquire/convert first")
     clean = low = attn = 0
-    print(f"corpus: {len(mds)} advisories under {CORPUS_DIR.relative_to(ROOT)}\n")
+    print(f"corpus: {len(mds)} documents under {source_dir.relative_to(ROOT)}\n")
     for p in mds:
         md = p.read_text(encoding="utf-8")
         extraction, flag_count, _ = _rf_triage(md, rf_region(md))
         if extraction == "none":
-            print(f"  {p.stem:14}  NON-DERIVABLE     no red-flag region (FATF jurisdiction advisory)")
+            print(f"  {p.stem:14}  NON-DERIVABLE     no enumerated red-flag list")
             attn += 1
         elif extraction == "low":
             print(f"  {p.stem:14}  LOW   {flag_count:>3} block-flag(s) — review "
@@ -598,6 +611,22 @@ def corpus_report() -> int:
     return 0
 
 
+def _source_dir_arg(argv) -> Path:
+    """Resolve the optional source-dir positional for --corpus/--corpus-status (default: data/fincen).
+
+    Phase 20 — multi-source: `--corpus-status data/fincen-alerts` regenerates that source's manifest
+    with the same triage. A path is taken relative to ROOT (or absolute); it must be an existing dir.
+    """
+    if len(argv) >= 2 and not argv[1].startswith("-"):
+        d = Path(argv[1])
+        if not d.is_absolute():
+            d = ROOT / d
+        if not d.is_dir():
+            sys.exit(f"source dir not found: {argv[1]} (expected a dir with <id>.md + index.json)")
+        return d
+    return CORPUS_DIR
+
+
 def main(argv):
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__)
@@ -606,9 +635,9 @@ def main(argv):
     if cmd == "--selftest":
         return selftest()
     if cmd == "--corpus":
-        return corpus_report()
+        return corpus_report(_source_dir_arg(argv))
     if cmd == "--corpus-status":
-        return write_corpus_status()
+        return write_corpus_status(_source_dir_arg(argv))
     if cmd == "--check-derived":
         if len(argv) < 2:
             sys.exit("usage: --check-derived <record.json>")

@@ -69,6 +69,7 @@
   .advcard.live:hover{border-color:var(--line2);border-left-color:var(--signal);background:var(--panel2);transform:translateY(-1px)}
   .advcard.inert{opacity:.62}
   .advcard .actop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .advcard .acleft{display:flex;align-items:center;gap:8px;min-width:0}
   .advcard .acno{font-family:var(--mono);font-size:11px;color:var(--signal);letter-spacing:.04em}
   .advcard .actitle{font-size:13.5px;line-height:1.35;color:var(--ink)}
   .advcard .acmeta{font-family:var(--mono);font-size:10px;color:var(--faint)}
@@ -77,6 +78,7 @@
   .chip.clean{color:var(--blue)}
   .chip.low{color:var(--signal)}
   .chip.none{color:var(--faint)}
+  .chip.doc{color:var(--muted)}
 
   /* coverage map (shared component) */
   .covwrap{display:grid;grid-template-columns:1fr 230px;gap:20px;align-items:start}
@@ -181,7 +183,7 @@
   </div>
 
   <footer>
-    Corpus-backed walkthrough · advisory text is verbatim public-domain (FinCEN, 17 U.S.C. §105); coverage &amp; build judgments are illustrative<br>
+    Corpus-backed walkthrough · source text is verbatim public-domain (FinCEN, 17 U.S.C. §105); coverage &amp; build judgments are illustrative<br>
     <span class="keys">←/→ navigate · Space advance · Esc back to list</span>
   </footer>
 </div>
@@ -208,7 +210,7 @@ const REC_COLOR={BUILD_NOW:'var(--green)',ENHANCE:'var(--blue)',BUILD_ENRICH:'va
 const REC_LABEL={BUILD_NOW:'build now',ENHANCE:'enhance',BUILD_ENRICH:'build + enrich',
   SOURCE_DATA:'source data',MONITOR:'monitor',COVERED:'covered'};
 
-const STEPS=['Select advisory','Coverage','Build recs','Signal','Close the loop'];
+const STEPS=['Select document','Coverage','Build recs','Signal','Close the loop'];
 
 // escapes text AND attribute positions (quotes included) — corpus.html interpolates into both.
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -271,15 +273,17 @@ function renderSelect(){
   const live=ADVISORIES.filter(isLive).length;
   const ready=ADVISORIES.filter(a=>a.derivable && !isLive(a)).length;
   const nd=ADVISORIES.filter(a=>!a.derivable).length;
+  const advN=ADVISORIES.filter(a=>a.doc_type!=='Alert').length;
+  const alertN=ADVISORIES.filter(a=>a.doc_type==='Alert').length;
   stage.innerHTML=`<div class="scene">
-    <div class="eyebrow">FinCEN advisory corpus</div>
-    <h2>Pick an advisory. <em>Watch the loop derive it.</em></h2>
-    <p class="lead">The same signal engine, pointed at the public FinCEN advisory corpus. Choose a <b>derived</b> advisory and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
+    <div class="eyebrow">FinCEN advisory + alert corpus</div>
+    <h2>Pick a document. <em>Watch the loop derive it.</em></h2>
+    <p class="lead">The same signal engine, pointed at the public FinCEN corpus — advisories and alerts. Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
     <div class="selhead">
-      <span class="sct">${ADVISORIES.length} advisories · ${live} derived · ${ready} ready to derive · ${nd} no red-flag list</span>
+      <span class="sct">${ADVISORIES.length} FinCEN publications · ${advN} advisories · ${alertN} alerts · ${live} derived · ${ready} ready to derive · ${nd} non-derivable</span>
     </div>
     <div class="advgrid">${list.map(a=>advCard(a)).join('')}</div>
-    <div class="framenote">Coverage and data-availability are illustrative; the advisory titles and red-flag text are verbatim from the public-domain source documents.</div>
+    <div class="framenote">Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the public-domain source documents.</div>
   </div>`;
   stage.querySelectorAll('.advcard.live').forEach(el=>el.onclick=()=>pick(el.dataset.id));
 }
@@ -295,11 +299,11 @@ function advCard(a){
     chip=`<span class="chip ${cls}">${esc(a.extraction)} · ${a.flag_count||0} flags · not yet derived</span>`;
     sub=`${esc(a.date||'')}${a.date?' · ':''}extraction: ${esc(a.extraction)}`;
   } else {
-    chip=`<span class="chip none">no red-flag list</span>`;
+    chip=`<span class="chip none">no enumerated red-flag list</span>`;
     sub=`${esc(a.date||'')}${a.date?' · ':''}not derivable`;
   }
   return `<div class="advcard ${live?'live':'inert'}" data-id="${esc(a.id)}">
-    <div class="actop"><span class="acno">${esc(a.advisory||a.id)}</span>${chip}</div>
+    <div class="actop"><span class="acleft"><span class="acno">${esc(a.advisory||a.id)}</span><span class="chip doc">${esc(a.doc_type||'Advisory')}</span></span>${chip}</div>
     <div class="actitle">${esc(a.title||a.id)}</div>
     <div class="acmeta">${sub}</div>
   </div>`;
@@ -312,7 +316,7 @@ function renderCoverage(a){
   const inds=a.indicators, cov=coverageIndex(inds);
   stage.innerHTML=`<div class="scene">
     <div class="eyebrow">${esc(a.advisory||a.id)} · Coverage</div>
-    <h2>Where are we <em>blind</em> on this advisory?</h2>
+    <h2>Where are we <em>blind</em> on this document?</h2>
     ${srcCap(a)}
     <p class="lead">Each enumerated red flag, scored against our existing detection library: do we already cover it? The coverage index is derived from those statuses.</p>
     <div class="covwrap">
@@ -343,7 +347,7 @@ function renderBuildRecs(a){
     <div class="eyebrow">${esc(a.advisory||a.id)} · Build recommendations · gate</div>
     <h2>You decide what we <em>build</em>.</h2>
     ${srcCap(a)}
-    <p class="lead">Coverage status × data availability produces a single recommendation per red flag. <b style="color:var(--green)">Build now</b> = an uncovered gap we already hold the data for. ${nb?`<b>${nb}</b> ${nb===1?'indicator is':'indicators are'} immediately buildable — <b style="color:var(--green)">pick which to commit</b>; your choice carries through to the drafted signals and the coverage you close.`:'No immediately-buildable gap on this advisory — the rest need data work first.'}</p>
+    <p class="lead">Coverage status × data availability produces a single recommendation per red flag. <b style="color:var(--green)">Build now</b> = an uncovered gap we already hold the data for. ${nb?`<b>${nb}</b> ${nb===1?'indicator is':'indicators are'} immediately buildable — <b style="color:var(--green)">pick which to commit</b>; your choice carries through to the drafted signals and the coverage you close.`:'No immediately-buildable gap on this document — the rest need data work first.'}</p>
     <div class="brec">${inds.map((i,k)=>brecRow(i,a,k)).join('')}</div>
     <div class="framenote">The agent proposes; the human disposes. Each recommendation is deterministic given (coverage, data) — the LLM proposes the judgment, the cover×data matrix disposes it; no recommendation is invented.</div>
   </div>`;
@@ -382,7 +386,7 @@ function renderSignal(a){
   const builds=allBuilds.filter(i=>selected.has(i.id));                                       // what the human committed at the gate
   // two honest empty states: nothing buildable at all (data-limited) vs. everything deselected (a choice).
   const emptyMsg=allBuilds.length===0
-    ? 'No immediately-buildable signal for this advisory — its gaps need data enrichment or sourcing first (see the build recommendations).'
+    ? 'No immediately-buildable signal for this document — its gaps need data enrichment or sourcing first (see the build recommendations).'
     : 'No build-now gaps selected — go back to the build recommendations and pick at least one to draft.';
   stage.innerHTML=`<div class="scene">
     <div class="eyebrow">${esc(a.advisory||a.id)} · Signal</div>
@@ -441,7 +445,7 @@ function renderClose(a){
         <div class="gdelta ${delta>0?'show':''}" id="gdelta">${delta>0?`▲ +${delta} pts · ${n} gap${n===1?'':'s'} closed`:'coverage holds — no gap committed'}</div>
       </div>
     </div>
-    <div class="framenote">The advisory radar runs continuously — the next gap is found before it becomes a headline. Every figure is illustrative; the workflow and the decision points are real.</div>
+    <div class="framenote">The corpus radar runs continuously — the next gap is found before it becomes a headline. Every figure is illustrative; the workflow and the decision points are real.</div>
   </div>`;
   T(()=>{const f=document.getElementById('gfill');if(f)f.style.width=after+'%';animVal('gnum',before,after,1000,'%');},300);
 }
@@ -460,7 +464,7 @@ function render(){
     }
   }catch(e){
     console.error('corpus render',view,screen,e);
-    stage.innerHTML='<div class="scene"><div class="eyebrow">Corpus explorer</div><h2>This view can\'t render</h2><div class="empty">The data for this screen is missing or malformed — return to the advisory list.</div></div>';
+    stage.innerHTML='<div class="scene"><div class="eyebrow">Corpus explorer</div><h2>This view can\'t render</h2><div class="empty">The data for this screen is missing or malformed — return to the document list.</div></div>';
   }
   updateControls();
   window.scrollTo({top:0,behavior:REDUCED?'auto':'smooth'});
@@ -487,14 +491,14 @@ function updateControls(){
     backBtn.style.visibility='hidden';
     resetBtn.style.visibility='hidden';
     nextBtn.style.visibility='hidden';
-    hint.textContent='Pick a derived advisory to explore →';
+    hint.textContent='Pick a derived document to explore →';
     return;
   }
   backBtn.style.visibility='visible';
   resetBtn.style.visibility='visible';
   nextBtn.style.visibility='visible';
   const backLabels=['‹ Advisories','‹ Coverage','‹ Build recs','‹ Signal'];
-  const nextLabels=['Build recommendations ›','Signal spec ›','Close the loop ›','↺ Another advisory'];
+  const nextLabels=['Build recommendations ›','Signal spec ›','Close the loop ›','↺ Another document'];
   const hints=['Each red flag scored against the library','Pick the build-now gaps to commit','Drafted signals for your committed gaps','Coverage closes on what you built'];
   backBtn.textContent=backLabels[screen]||'‹ Back';
   nextBtn.textContent=nextLabels[screen]||'Next ›';

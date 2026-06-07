@@ -32,6 +32,9 @@ node_modules/
 # the offline-reproducible input to the deterministic spine. The build/derive read the .md,
 # not the PDF. (Reverses Phase-10's no-bulk-md call — the corpus now backs the demo.)
 data/fincen/raw/
+# Phase 20: FinCEN ALERTS as a second source — same convention (raw PDFs local + regenerable;
+# the committed data/fincen-alerts/*.md is the derivation surface).
+data/fincen-alerts/raw/
 
 # Authoring scratch: scaffolded config SKELETONS from scripts/derive_signals.py --scaffold
 # (Phase 11). A draft is reviewed, has its JUDGMENT fields filled, then RENAMED to

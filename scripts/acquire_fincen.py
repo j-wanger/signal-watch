@@ -12,17 +12,20 @@ This script is not imported by the engine or the build; it is a developer tool.
 FinCEN advisories are works of the U.S. federal government and are in the public
 domain (17 U.S.C. §105), so the full text may be persisted and shown verbatim.
 
-CORPUS SOURCE (Phase 10): the set of acquirable advisories now comes from the
-generated manifest data/fincen/index.json (built by crawl_fincen.py from the FinCEN
-advisories listing). The manifest holds each advisory's DETAIL-PAGE url — FinCEN PDF
-filenames are unpredictable — so for a manifest id we resolve the PDF link from the
-detail page at fetch time. A small set of DIRECT-PDF overrides (below) short-circuits
-that hop for known-good anchors (the Phase-7 EFE advisory), keeping them zero-hop and
-backward-compatible even if the listing markup shifts.
+CORPUS SOURCE (Phase 10): the set of acquirable advisories comes from the generated manifest
+<source>/index.json (built by crawl_fincen.py). For ADVISORIES the manifest holds each advisory's
+DETAIL-PAGE url — FinCEN PDF filenames are unpredictable — so we resolve the PDF link from the
+detail page at fetch time. A manifest url that already ENDS IN .pdf is taken as a direct (zero-hop)
+download — this is how FinCEN ALERTS resolve (Phase 20: their hub links the PDF directly), and how
+the DIRECT-PDF overrides below short-circuit the hop for known-good anchors (the Phase-7 EFE advisory).
+
+Phase 20 — multi-source: `--source <dir>` targets another FinCEN publication source
+(e.g. data/fincen-alerts/); the manifest + raw/ live under that dir. Default: data/fincen.
 
 Usage:
-    python3 scripts/acquire_fincen.py fin-2022-a002      # acquire one advisory
-    python3 scripts/acquire_fincen.py --list             # show the manifest corpus
+    python3 scripts/acquire_fincen.py fin-2022-a002                       # acquire one advisory
+    python3 scripts/acquire_fincen.py --source data/fincen-alerts <id>    # acquire one alert
+    python3 scripts/acquire_fincen.py [--source <dir>] --list            # show the manifest corpus
 """
 import json
 import re
@@ -31,8 +34,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-RAW_DIR = ROOT / "data" / "fincen" / "raw"
-MANIFEST = ROOT / "data" / "fincen" / "index.json"
+DEFAULT_SOURCE = ROOT / "data" / "fincen"   # Phase 20: --source <dir> targets another FinCEN source
 BASE = "https://www.fincen.gov"
 
 # Direct-PDF overrides: advisory id -> canonical public-domain PDF URL on fincen.gov.
@@ -56,11 +58,15 @@ def _get(url: str) -> bytes:
         return resp.read()
 
 
-def load_manifest() -> dict:
-    """advisory id -> detail-page url, from data/fincen/index.json (empty if absent)."""
-    if not MANIFEST.exists():
+def load_manifest(source_dir: Path) -> dict:
+    """document id -> url, from <source>/index.json (empty if absent).
+
+    For advisories the url is a detail page; for alerts it is a direct .pdf (Phase 20).
+    """
+    manifest = source_dir / "index.json"
+    if not manifest.exists():
         return {}
-    return {e["id"]: e["url"] for e in json.loads(MANIFEST.read_text(encoding="utf-8"))}
+    return {e["id"]: e["url"] for e in json.loads(manifest.read_text(encoding="utf-8"))}
 
 
 def resolve_pdf(detail_url: str) -> str:
@@ -77,17 +83,27 @@ def resolve_pdf(detail_url: str) -> str:
     return BASE + preferred[0]
 
 
-def acquire(advisory_id: str) -> Path:
-    manifest = load_manifest()
+def _to_pdf_url(manifest_url: str) -> str:
+    """A manifest url that ends in .pdf is a direct (zero-hop) download (alerts + EFE override);
+    otherwise it is a detail page whose PDF link we resolve. Relative paths are made absolute."""
+    url = manifest_url
+    if url.lower().split("?")[0].endswith(".pdf"):
+        return url if url.startswith("http") else BASE + url
+    return resolve_pdf(url)
+
+
+def acquire(advisory_id: str, source_dir: Path) -> Path:
+    manifest = load_manifest(source_dir)
     if advisory_id in DIRECT_PDF:
         url = DIRECT_PDF[advisory_id]                 # zero-hop override
     elif advisory_id in manifest:
-        url = resolve_pdf(manifest[advisory_id])      # detail-page -> PDF hop
+        url = _to_pdf_url(manifest[advisory_id])      # direct .pdf, else detail-page -> PDF hop
     else:
         known = ", ".join(sorted(set(DIRECT_PDF) | set(manifest))) or "(none — run crawl_fincen.py --write)"
-        sys.exit(f"unknown advisory id '{advisory_id}'. Known: {known}")
-    RAW_DIR.mkdir(parents=True, exist_ok=True)
-    out = RAW_DIR / f"{advisory_id}.pdf"
+        sys.exit(f"unknown id '{advisory_id}'. Known: {known}")
+    raw_dir = source_dir / "raw"
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    out = raw_dir / f"{advisory_id}.pdf"
     print(f"fetching {url}\n     -> {out}")
     data = _get(url)
     if not data.startswith(b"%PDF"):
@@ -97,20 +113,34 @@ def acquire(advisory_id: str) -> Path:
     return out
 
 
+def _source_arg(argv) -> tuple:
+    """Pull an optional `--source <dir>` (relative to ROOT or absolute); return (source_dir, rest)."""
+    if "--source" in argv:
+        i = argv.index("--source")
+        if i + 1 >= len(argv):
+            sys.exit("usage: --source <dir>")
+        d = Path(argv[i + 1])
+        if not d.is_absolute():
+            d = ROOT / d
+        return d, argv[:i] + argv[i + 2:]
+    return DEFAULT_SOURCE, argv
+
+
 def main(argv):
+    source_dir, argv = _source_arg(argv)
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__)
         return
     if argv[0] == "--list":
-        manifest = load_manifest()
+        manifest = load_manifest(source_dir)
         if not manifest:
-            print("no manifest — run: python3 scripts/crawl_fincen.py --write")
+            print(f"no manifest under {source_dir.relative_to(ROOT)} — run crawl_fincen.py")
             return
         for k in sorted(manifest):
-            tag = " [direct-pdf]" if k in DIRECT_PDF else ""
+            tag = " [direct-pdf]" if k in DIRECT_PDF or manifest[k].lower().endswith(".pdf") else ""
             print(f"{k}\t{manifest[k]}{tag}")
         return
-    acquire(argv[0])
+    acquire(argv[0], source_dir)
 
 
 if __name__ == "__main__":

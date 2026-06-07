@@ -5,7 +5,8 @@
 // What it does: loads the COMMITTED dist/corpus/index.html (so it doubles as a build-output smoke
 // test — `build.py --check all` already guarantees that file equals a fresh build of corpus.html),
 // extracts the single inline <script>, evaluates it under the shim, then drives the 5-screen arc
-// (Select → Coverage → Build recs/GATE → Signal → Close the loop) and asserts the Phase-18 invariants.
+// (Select → Coverage → Build recs/GATE → Signal → Close the loop) and asserts the Phase-18 invariants
+// + the Phase-20 multi-source menu (FinCEN advisories + alerts, honest doc_type chips, an alert walks the arc).
 //
 // Why a vm + shim instead of a third-party DOM library: the ship artifact is a single file:// offline
 // HTML; the project's whole test idiom is dep-free (derive_signals.py --selftest, build.py --check).
@@ -158,15 +159,23 @@ const env = boot(true);
 const api = env.__api;
 ok(api && typeof api.pick === 'function', 'script booted; internals re-exported');
 
-// (1) Boot lands on Select and lists every advisory
+// (1) Boot lands on Select and lists every document
 eq(api.view, 'select', 'boot view = select');
-ok(/Pick an advisory/.test(env.__stage._html), 'Select screen renders ("Pick an advisory")');
+ok(/Pick a document/.test(env.__stage._html), 'Select screen renders ("Pick a document")');
 const advCards = (env.__stage._html.match(/class="advcard /g) || []).length;
-eq(advCards, api.ADVISORIES.length, 'Select lists every advisory as a card');
+eq(advCards, api.ADVISORIES.length, 'Select lists every document as a card');
 const liveCount = api.ADVISORIES.filter(api.isLive).length;
 const liveCards = (env.__stage._html.match(/class="advcard live"/g) || []).length;
-eq(liveCards, liveCount, 'only live (derived) advisories are clickable cards');
+eq(liveCards, liveCount, 'only live (derived) documents are clickable cards');
 ok(env.__errors.length === 0, 'Select rendered with no console errors');
+
+// (1b) MULTI-SOURCE menu (Phase 20): both FinCEN publication types present, each card honestly typed
+const advisoryChips = (env.__stage._html.match(/<span class="chip doc">Advisory<\/span>/g) || []).length;
+const alertChips = (env.__stage._html.match(/<span class="chip doc">Alert<\/span>/g) || []).length;
+ok(advisoryChips > 0 && alertChips > 0, `unified menu lists both types (${advisoryChips} advisories + ${alertChips} alerts)`);
+eq(advisoryChips + alertChips, api.ADVISORIES.length, 'every card carries an honest doc_type chip (Advisory/Alert)');
+const liveAlerts = api.ADVISORIES.filter(a => a.doc_type === 'Alert' && api.isLive(a));
+ok(liveAlerts.length > 0, `at least one FinCEN Alert is derived/live (${liveAlerts.length})`);
 
 // choose a live advisory that has at least one buildable (BUILD_NOW + build_logic) gap
 const adv = api.ADVISORIES.filter(api.isLive)
@@ -238,6 +247,30 @@ ok(numText(env2, 'gnum') !== after2 || after2 === api2.coverageIndex(adv2.indica
 env2.__flush();                                              // run the deferred T() → animVal → rAF chain
 eq(numText(env2, 'gnum'), after2, 'animated close: gauge reaches the after value after the rAF/timer flush');
 ok(env2.__errors.length === 0, 'animated run produced no console errors');
+
+// ---- a FinCEN ALERT walks the full 5-screen arc (Phase 20 multi-source proof) ----
+const envA = boot(true);
+const apiA = envA.__api;
+const alert = apiA.ADVISORIES.filter(a => a.doc_type === 'Alert' && apiA.isLive(a))
+  .find(a => apiA.buildNows(a).some(i => i.build_logic && typeof i.build_logic === 'object'));
+ok(alert, `found a live FinCEN Alert with a buildable BUILD_NOW gap (${alert && alert.id})`);
+apiA.pick(alert.id);
+eq(apiA.view, 'detail', 'alert: pick() enters detail view');
+const covA = apiA.coverageIndex(alert.indicators);
+eq(numText(envA, 'gnum'), covA, 'alert: Coverage gauge lands on coverageIndex(indicators)');
+apiA.gotoScreen(1);
+ok(/Build recommendations · gate/.test(envA.__stage._html), 'alert: Build-recs/GATE screen renders');
+eq([...apiA.selected].sort().join(','), apiA.buildNows(alert).map(i => i.id).sort().join(','),
+  'alert: gate defaults to ALL BUILD_NOW selected');
+apiA.gotoScreen(2);
+ok(/PROPOSED ·/.test(envA.__stage._html), 'alert: Signal drafts ≥1 spec card for the picks');
+apiA.selected = new Set(apiA.buildNows(alert).map(i => i.id));
+const afterA = apiA.coverageIndex(alert.indicators.map(i =>
+  apiA.selected.has(i.id) ? Object.assign({}, i, { status: 'covered' }) : i));
+apiA.gotoScreen(3);
+ok(/· Close the loop/.test(envA.__stage._html), 'alert: Close-the-loop screen renders');
+eq(numText(envA, 'gnum'), afterA, 'alert: close gauge lands on the recomputed after-coverage');
+ok(envA.__errors.length === 0, 'alert: full 5-screen arc walked with no console errors');
 
 /* ============================ report ============================ */
 console.log(`\n${pass} passed, ${fails.length} failed`);

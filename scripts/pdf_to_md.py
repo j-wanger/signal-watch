@@ -20,18 +20,22 @@ this machine has a broken pyexpat, so we use a uv-managed interpreter):
     uv pip install --python .venv "markitdown[pdf]"     # see requirements-authoring.txt
     .venv/bin/python scripts/pdf_to_md.py fin-2022-a002
 
+Phase 20 — multi-source: `--source <dir>` converts from another FinCEN publication source
+(e.g. data/fincen-alerts/); the raw/ + <id>.md live under that dir. Default: data/fincen.
+
 Usage:
-    .venv/bin/python scripts/pdf_to_md.py <advisory-id>   # e.g. fin-2022-a002
+    .venv/bin/python scripts/pdf_to_md.py <advisory-id>                     # e.g. fin-2022-a002
+    .venv/bin/python scripts/pdf_to_md.py --source data/fincen-alerts <id> # convert an alert
 """
 import sys
 from pathlib import Path
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "fincen"
-RAW_DIR = DATA_DIR / "raw"
+ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_SOURCE = ROOT / "data" / "fincen"
 
 
-def convert(advisory_id: str) -> Path:
-    pdf = RAW_DIR / f"{advisory_id}.pdf"
+def convert(advisory_id: str, source_dir: Path) -> Path:
+    pdf = source_dir / "raw" / f"{advisory_id}.pdf"
     if not pdf.exists():
         sys.exit(f"missing {pdf} — run acquire_fincen.py {advisory_id} first")
     try:
@@ -43,10 +47,12 @@ def convert(advisory_id: str) -> Path:
         )
     result = MarkItDown().convert(str(pdf))
     text = getattr(result, "markdown", None) or result.text_content
-    out = DATA_DIR / f"{advisory_id}.md"
+    out = source_dir / f"{advisory_id}.md"
+    # the FinCEN publication noun for the provenance header (advisories vs alerts)
+    kind = "alert" if "alert" in source_dir.name.lower() else "advisory"
     # Provenance header so the corpus file self-documents its source + public-domain status.
     header = (
-        f"<!-- source-of-truth: verbatim text of FinCEN advisory {advisory_id.upper()} -->\n"
+        f"<!-- source-of-truth: verbatim text of FinCEN {kind} {advisory_id.upper()} -->\n"
         f"<!-- acquired via scripts/acquire_fincen.py; public domain, 17 U.S.C. 105 -->\n"
         f"<!-- converted via markitdown (authoring-only); do not hand-edit the body -->\n\n"
     )
@@ -55,11 +61,24 @@ def convert(advisory_id: str) -> Path:
     return out
 
 
+def _source_arg(argv) -> tuple:
+    if "--source" in argv:
+        i = argv.index("--source")
+        if i + 1 >= len(argv):
+            sys.exit("usage: --source <dir>")
+        d = Path(argv[i + 1])
+        if not d.is_absolute():
+            d = ROOT / d
+        return d, argv[:i] + argv[i + 2:]
+    return DEFAULT_SOURCE, argv
+
+
 def main(argv):
+    source_dir, argv = _source_arg(argv)
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__)
         return
-    convert(argv[0])
+    convert(argv[0], source_dir)
 
 
 if __name__ == "__main__":

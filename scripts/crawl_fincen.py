@@ -27,11 +27,17 @@ The listing yields advisory DETAIL-PAGE urls (FinCEN PDF filenames are unpredict
 resolving the actual PDF is an acquire-time hop (see acquire_fincen.py). FinCEN
 advisories are U.S. federal works in the public domain (17 U.S.C. 105).
 
+Phase 20 — multi-source: pass `--alerts` with any command to target the FinCEN ALERTS hub instead
+(parse_alerts -> data/fincen-alerts/index.json; the rows link the alert PDF directly, so the manifest
+url is the .pdf and acquire_fincen.py downloads it zero-hop). The advisory path is unchanged.
+
 Usage:
-    python3 scripts/crawl_fincen.py --selftest    # offline: parse the fixture + assert
-    python3 scripts/crawl_fincen.py --write       # offline: fixture -> data/fincen/index.json
-    python3 scripts/crawl_fincen.py --list        # offline: print parsed entries
-    python3 scripts/crawl_fincen.py --fetch       # LIVE (manual authoring): refresh the fixture
+    python3 scripts/crawl_fincen.py --selftest             # offline: parse the fixture + assert
+    python3 scripts/crawl_fincen.py --write                # offline: fixture -> data/fincen/index.json
+    python3 scripts/crawl_fincen.py --list                 # offline: print parsed entries
+    python3 scripts/crawl_fincen.py --fetch                # LIVE (manual authoring): refresh the fixture
+    python3 scripts/crawl_fincen.py --alerts --fetch       # LIVE: refresh the alerts hub fixture
+    python3 scripts/crawl_fincen.py --alerts --write       # offline: -> data/fincen-alerts/index.json
 """
 import html
 import json
@@ -48,6 +54,15 @@ INDEX_URL = "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets/adv
 BASE = "https://www.fincen.gov"
 # fincen.gov returns 403 to the bare urllib UA; present a normal browser UA.
 _UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Signal-Watch-authoring/0.1"
+
+# Phase 20 — FinCEN ALERTS as a second source. The alerts are listed on the advisories/bulletins/
+# fact-sheets HUB as rows that link the alert PDF DIRECTLY (/system/files/...Alert....pdf) with a
+# canonical "FIN-YYYY-AlertNNN" id + date + title in the row — the same Drupal table shape as the
+# advisories listing, so parse_alerts mirrors parse_index. Pass `--alerts` with any command below.
+ALERTS_URL = "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets"
+ALERTS_FIXTURE = ROOT / "tests" / "fixtures" / "fincen-alerts.html"
+ALERTS_MANIFEST = ROOT / "data" / "fincen-alerts" / "index.json"
+_ALERT_ID_RE = re.compile(r"\b(FIN-\d{4}-Alert\d{3})\b", re.I)
 
 # The EFE advisory is the Phase-7 anchor; guarantee it survives even if the live
 # listing markup shifts. Its detail page (acquire_fincen.py holds the direct-PDF override).
@@ -110,27 +125,78 @@ def parse_index(page_html: str) -> list[dict]:
     return [entries[k] for k in sorted(entries)]
 
 
-def fetch_index() -> str:
-    """LIVE thin shell (manual authoring only): GET the advisories listing HTML."""
-    req = urllib.request.Request(INDEX_URL, headers={"User-Agent": _UA})
+def parse_alerts(page_html: str) -> list[dict]:
+    """PURE: FinCEN alerts hub HTML -> sorted list of manifest entries (Phase 20).
+
+    Each alerts-table row is three <td> cells: [0] <a href="<direct .pdf>">FIN-YYYY-AlertNNN</a>,
+    [1] the date, [2] the title. We take the canonical id from the cell-0 link text and the PDF
+    DIRECTLY from its href (acquire_fincen.py downloads it zero-hop). Skips Spanish translations
+    + rescinded (withdrawn) PDFs — each Spanish alert also has an English row — and dedups by id.
+    Deterministic: output sorted by id.
+    """
+    entries: dict[str, dict] = {}
+    for row in _ROW_RE.findall(page_html):
+        cells = re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)
+        if len(cells) < 3:
+            continue
+        a = re.search(r'<a[^>]*href="([^"]+\.pdf)"[^>]*>(.*?)</a>', cells[0], re.I | re.S)
+        if not a:
+            continue
+        href, link_text = a.group(1), _text(a.group(2))
+        low = href.lower()
+        if "alert" not in low:
+            continue                          # not a FinCEN Alert row
+        if "spanish" in low or "rescinded" in low:
+            continue                          # skip translations + withdrawn guidance
+        mid = _ALERT_ID_RE.search(link_text)
+        if mid:
+            alert_id = mid.group(1).lower()                  # canonical FIN-YYYY-AlertNNN
+        else:                                                # fall back to a filename slug
+            stem = re.sub(r"\.pdf$", "", href.rsplit("/", 1)[-1], flags=re.I)
+            alert_id = "fincen-alert-" + re.sub(r"[^a-z0-9]+", "-", stem.lower()).strip("-")
+        title = _text(cells[2]) or f"FinCEN Alert {alert_id.upper()}"
+        tm = _TIME_RE.search(cells[1])
+        if tm:
+            date = tm.group(1)
+        else:
+            d = _DATE_FALLBACK_RE.search(cells[1])
+            date = f"{d.group(3)}-{d.group(1)}-{d.group(2)}" if d else ""
+        url = href if href.startswith("http") else BASE + href
+        entries[alert_id] = {
+            "id": alert_id,
+            "title": title,
+            "date": date,
+            "type": "alert",
+            # direct .pdf (acquire downloads zero-hop). Some FinCEN filenames contain literal
+            # spaces in the href — encode them so the manifest holds a fetchable URL (URLs that
+            # already use %20 are left as-is, so no double-encoding).
+            "url": url.replace(" ", "%20"),
+        }
+    return [entries[k] for k in sorted(entries)]
+
+
+def fetch_index(url: str = INDEX_URL) -> str:
+    """LIVE thin shell (manual authoring only): GET a listing/hub HTML."""
+    req = urllib.request.Request(url, headers={"User-Agent": _UA})
     with urllib.request.urlopen(req, timeout=60) as resp:
         return resp.read().decode("utf-8", "replace")
 
 
-def _load_fixture() -> str:
-    if not FIXTURE.exists():
-        sys.exit(f"missing fixture {FIXTURE} — run: python3 scripts/crawl_fincen.py --fetch")
-    return FIXTURE.read_text(encoding="utf-8")
+def _load_fixture(fixture: Path = FIXTURE) -> str:
+    if not fixture.exists():
+        sys.exit(f"missing fixture {fixture} — run a `--fetch` (e.g. crawl_fincen.py --fetch)")
+    return fixture.read_text(encoding="utf-8")
 
 
-def selftest() -> int:
-    entries = parse_index(_load_fixture())
+def selftest(parse=parse_index, fixture: Path = FIXTURE, anchor: str = _EFE_ID) -> int:
+    entries = parse(_load_fixture(fixture))
     keys = {"id", "title", "date", "type", "url"}
     bad = [e for e in entries if set(e) != keys or not e["id"] or not e["url"]
            or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", e["date"] or "")]
-    ok = len(entries) >= 3 and not bad and any(e["id"] == _EFE_ID for e in entries)
-    print(f"parsed {len(entries)} entries; malformed={len(bad)}; "
-          f"EFE present={any(e['id'] == _EFE_ID for e in entries)}")
+    has_anchor = anchor is None or any(e["id"] == anchor for e in entries)
+    ok = len(entries) >= 3 and not bad and has_anchor
+    print(f"parsed {len(entries)} entries; malformed={len(bad)}"
+          + (f"; {anchor} present={any(e['id'] == anchor for e in entries)}" if anchor else ""))
     if not ok:
         print("SELFTEST FAIL", file=sys.stderr)
         return 1
@@ -138,38 +204,56 @@ def selftest() -> int:
     return 0
 
 
-def write_manifest() -> int:
-    entries = parse_index(_load_fixture())
-    MANIFEST.parent.mkdir(parents=True, exist_ok=True)
-    MANIFEST.write_text(json.dumps(entries, indent=2) + "\n", encoding="utf-8")
-    print(f"wrote {MANIFEST} ({len(entries)} advisories)")
+def write_manifest(parse=parse_index, fixture: Path = FIXTURE,
+                   manifest: Path = MANIFEST, noun: str = "advisories") -> int:
+    entries = parse(_load_fixture(fixture))
+    manifest.parent.mkdir(parents=True, exist_ok=True)
+    manifest.write_text(json.dumps(entries, indent=2) + "\n", encoding="utf-8")
+    print(f"wrote {manifest} ({len(entries)} {noun})")
+    return 0
+
+
+def _fetch_fixture(url: str, fixture: Path, label: str) -> int:
+    fixture.parent.mkdir(parents=True, exist_ok=True)
+    html_text = fetch_index(url)
+    prov = (
+        f"<!-- fixture: FinCEN {label}, saved for the crawl_fincen.py parser test -->\n"
+        f"<!-- source: {url} -->\n"
+        "<!-- acquired via crawl_fincen.py --fetch (urllib, browser UA); server-rendered; do not hand-edit -->\n"
+    )
+    fixture.write_text(prov + html_text, encoding="utf-8")
+    print(f"refreshed {fixture} ({len(html_text):,} chars) from {url}")
     return 0
 
 
 def main(argv):
-    if not argv or argv[0] in ("-h", "--help"):
+    if not argv or "-h" in argv or "--help" in argv:
         print(__doc__)
         return 0
-    cmd = argv[0]
+    # Phase 20: `--alerts` switches every command to the FinCEN alerts source (hub + parse_alerts).
+    alerts = "--alerts" in argv
+    rest = [a for a in argv if a != "--alerts"]
+    if not rest:
+        print(__doc__)
+        return 0
+    cmd = rest[0]
+    parse = parse_alerts if alerts else parse_index
+    fixture = ALERTS_FIXTURE if alerts else FIXTURE
+    manifest = ALERTS_MANIFEST if alerts else MANIFEST
+    url = ALERTS_URL if alerts else INDEX_URL
+    anchor = None if alerts else _EFE_ID
+    noun = "alerts" if alerts else "advisories"
+    label = "alerts hub" if alerts else "advisories listing"
     if cmd == "--selftest":
-        return selftest()
+        return selftest(parse, fixture, anchor)
     if cmd == "--write":
-        return write_manifest()
+        return write_manifest(parse, fixture, manifest, noun)
     if cmd == "--list":
-        for e in parse_index(_load_fixture()):
+        for e in parse(_load_fixture(fixture)):
             print(f"{e['id']}\t{e['date']}\t{e['title']}")
         return 0
     if cmd == "--fetch":
-        FIXTURE.parent.mkdir(parents=True, exist_ok=True)
-        html_text = fetch_index()
-        prov = (
-            "<!-- fixture: FinCEN advisories listing, saved for the crawl_fincen.py parser test (Phase 10) -->\n"
-            f"<!-- source: {INDEX_URL} -->\n"
-            "<!-- acquired via crawl_fincen.py --fetch (urllib, browser UA); server-rendered; do not hand-edit -->\n"
-        )
-        FIXTURE.write_text(prov + html_text, encoding="utf-8")
-        print(f"refreshed {FIXTURE} ({len(html_text):,} chars) from {INDEX_URL}")
-        return 0
+        return _fetch_fixture(url, fixture, label)
     sys.exit(f"unknown option '{cmd}'. See --help.")
 
 

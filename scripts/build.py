@@ -12,10 +12,12 @@ Usage:
     python3 scripts/build.py all             # build every typology + the corpus explorer
     python3 scripts/build.py --check [all|corpus|<id>]  # drift guard: committed dist == fresh build?
 
-The corpus explorer (Phase 13) is a separate single-file artifact built from corpus.html +
-the committed data/fincen/corpus-status.json (extraction manifest) + data/fincen/derived/*.json
-(LLM-derived records). build.py reads those committed data artifacts and NEVER imports the
-authoring layer (derive_signals.py); the derived records' shape is validated at this boundary.
+The corpus explorer (Phase 13) is a separate single-file artifact built from corpus.html + the
+committed per-source data artifacts. Phase 20 made it MULTI-SOURCE: CORPUS_SOURCES registers each
+FinCEN publication type (advisories, alerts, …), and render_corpus merges every source's
+corpus-status.json (extraction manifest) + derived/*.json (LLM-derived records) by id into one
+__CORPUS__. build.py reads those committed data artifacts and NEVER imports the authoring layer
+(derive_signals.py); the derived records' shape is validated at this boundary.
 
 `--check` is non-mutating and git-agnostic: it re-renders each config in memory and
 byte-compares against the committed dist/<id>/index.html, exiting non-zero (and naming the
@@ -34,12 +36,25 @@ PLACEHOLDER = "__CONFIG__"
 DEFAULT_TYPOLOGY = "fentanyl"
 
 # Corpus explorer (Phase 13) — a SEPARATE ship artifact: its own template + data sources,
-# built alongside the typologies. build.py reads the committed data artifacts (the extraction
-# manifest + the LLM-derived records) and NEVER imports the authoring layer (derive_signals.py).
+# built alongside the typologies. build.py reads the committed data artifacts (per-source
+# extraction manifests + the LLM-derived records) and NEVER imports the authoring layer
+# (derive_signals.py).
 CORPUS_TEMPLATE = ROOT / "corpus.html"
-CORPUS_STATUS = ROOT / "data" / "fincen" / "corpus-status.json"
-DERIVED_DIR = ROOT / "data" / "fincen" / "derived"
 CORPUS_PLACEHOLDER = "__CORPUS__"
+# Multi-source corpus registry (Phase 20): each source is one FinCEN publication TYPE with its own
+# committed corpus-status.json + derived/*.json; render_corpus merges them by id into one __CORPUS__.
+# Decoupling source-id from storage dir means adding the Nth FinCEN source (or, later, OFAC — also
+# public domain under 17 U.S.C. 105) is a registry entry, not a code change. `doc_type` is the honest
+# human label the explorer's menu chip shows per document. The quote-grounding gate (derive_signals.py)
+# is source-agnostic; build.py only consumes the committed per-source artifacts.
+CORPUS_SOURCES = [
+    {"id": "fincen-advisories", "doc_type": "Advisory",
+     "status": ROOT / "data" / "fincen" / "corpus-status.json",
+     "derived": ROOT / "data" / "fincen" / "derived"},
+    {"id": "fincen-alerts", "doc_type": "Alert",
+     "status": ROOT / "data" / "fincen-alerts" / "corpus-status.json",
+     "derived": ROOT / "data" / "fincen-alerts" / "derived"},
+]
 # the cover×data build-recommendation vocabulary (mirrors derive_signals.py _REC_MATRIX values;
 # re-declared here so build.py's boundary check stays independent of the authoring tool).
 BUILD_RECS = {"COVERED", "BUILD_NOW", "BUILD_ENRICH", "SOURCE_DATA", "ENHANCE", "MONITOR"}
@@ -325,31 +340,31 @@ def validate_corpus_data(advisories: list) -> list:
     return e
 
 
-def render_corpus(template: str) -> str:
-    """Validate + assemble the corpus dataset and inline it into corpus.html.
+def _load_source(source: dict) -> list:
+    """Merge ONE corpus source's committed status manifest with its derived records.
 
-    Reads the committed extraction-status manifest (data/fincen/corpus-status.json) and the
-    LLM-derived records (data/fincen/derived/*.json), merges them by advisory id, validates the
-    derived records at the boundary (validate_corpus_data — fail loud), and injects the result
-    at __CORPUS__. Pure: no disk write, no stdout — the single source of truth for what
-    dist/corpus/index.html should contain (shared by build_corpus + check_corpus). build.py
-    stays decoupled from derive_signals.py: it consumes committed data, never imports the tool.
+    Reads <source>/corpus-status.json (the extraction manifest) + <source>/derived/*.json (the
+    LLM-derived records), merges them by id, and projects to the fields corpus.html renders, with
+    the derived indicators attached where a gate-passing record exists. build.py stays decoupled
+    from derive_signals.py — it consumes committed data, never imports the tool. Fails loud on a
+    missing/invalid manifest or a derived record with no manifest entry (orphan).
     """
-    if not CORPUS_STATUS.exists():
-        die(f"corpus status manifest not found: {CORPUS_STATUS.relative_to(ROOT)} "
-            f"(run `python3 scripts/derive_signals.py --corpus-status`)")
+    status_path, derived_dir = source["status"], source["derived"]
+    rel = status_path.relative_to(ROOT)
+    regen = f"python3 scripts/derive_signals.py --corpus-status {status_path.parent.relative_to(ROOT)}"
+    if not status_path.exists():
+        die(f"corpus status manifest not found: {rel} (run `{regen}`)")
     try:
-        manifest = json.loads(CORPUS_STATUS.read_text(encoding="utf-8"))
+        manifest = json.loads(status_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as ex:
-        die(f"invalid JSON in {CORPUS_STATUS.name}: {ex}")
+        die(f"invalid JSON in {rel}: {ex}")
     advisories = manifest.get("advisories")
     if not isinstance(advisories, list) or not advisories:
-        die(f"{CORPUS_STATUS.name}: 'advisories' must be a non-empty array "
-            f"(regenerate with `derive_signals.py --corpus-status`)")
+        die(f"{rel}: 'advisories' must be a non-empty array (regenerate with `{regen}`)")
 
-    # load the LLM-derived records by advisory id (sorted glob → deterministic merge)
+    # load this source's LLM-derived records by id (sorted glob → deterministic merge)
     derived = {}
-    for p in sorted(DERIVED_DIR.glob("*.json")):
+    for p in (sorted(derived_dir.glob("*.json")) if derived_dir.exists() else []):
         try:
             rec = json.loads(p.read_text(encoding="utf-8"))
         except json.JSONDecodeError as ex:
@@ -361,21 +376,38 @@ def render_corpus(template: str) -> str:
     manifest_ids = {a.get("id") for a in advisories if isinstance(a, dict)}
     orphan = sorted(i for i in derived if i not in manifest_ids)
     if orphan:
-        die(f"derived record(s) {orphan} have no entry in {CORPUS_STATUS.name} "
-            f"(regenerate the manifest: `derive_signals.py --corpus-status`)")
+        die(f"derived record(s) {orphan} in {derived_dir.relative_to(ROOT)} have no entry in "
+            f"{rel.name} (regenerate the manifest: `{regen}`)")
 
     # project to the fields corpus.html renders + attach the derived indicators where present
     merged = []
     for a in advisories:
         if not isinstance(a, dict) or not a.get("id"):
-            die(f"{CORPUS_STATUS.name}: every advisory needs an id")
+            die(f"{rel}: every advisory needs an id")
         entry = {k: a.get(k) for k in
                  ("id", "advisory", "title", "date", "source", "extraction", "flag_count", "derivable")}
+        entry["doc_type"] = source["doc_type"]   # honest menu label (Advisory / Alert)
         rec = derived.get(a["id"])
         if rec is not None:
             entry["derived"] = True
             entry["indicators"] = rec.get("indicators")
         merged.append(entry)
+    return merged
+
+
+def render_corpus(template: str) -> str:
+    """Validate + assemble the multi-source corpus dataset and inline it into corpus.html.
+
+    Iterates CORPUS_SOURCES (each one FinCEN publication type — advisories, alerts, …), merging
+    each source's committed corpus-status.json + derived/*.json by id (via _load_source) into one
+    __CORPUS__, validates the merged derived records at the boundary (validate_corpus_data — fail
+    loud), and injects the result. Pure: no disk write, no stdout — the single source of truth for
+    what dist/corpus/index.html should contain (shared by build_corpus + check_corpus). build.py
+    stays decoupled from derive_signals.py: it consumes committed data, never imports the tool.
+    """
+    merged = []
+    for source in CORPUS_SOURCES:
+        merged.extend(_load_source(source))
 
     errors = validate_corpus_data(merged)
     if errors:

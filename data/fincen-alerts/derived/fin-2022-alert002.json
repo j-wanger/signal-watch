@@ -1,0 +1,197 @@
+{
+  "id": "fin-2022-alert002",
+  "advisory": "FIN-2022-ALERT002",
+  "source_md": "data/fincen-alerts/fin-2022-alert002.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "redflag · Real Estate",
+      "flag": "The purchase, sale, donation, or legal ownership transfer of high-value real estate in the name of a foreign legal entity, shell company, or trust, especially if the transaction: (i) is far above or below fair market value, (ii) involves all-cash transfers, or (iii) is funded by a third party with a known nexus to sanctioned Russian elites and their proxies.",
+      "src_line": 133,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Transaction price-vs-market and all-cash funding are observable, but attributing legal ownership to a shell-company beneficial owner requires beneficial-ownership data we only hold partially."
+    },
+    {
+      "id": "IND-02",
+      "section": "redflag · Real Estate",
+      "flag": "The use of legal entities or arrangements that may have a nexus to sanctioned Russian elites and their proxies to hide the ultimate beneficiary or the origins or source of the funds.",
+      "src_line": 138,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Identifying the ultimate beneficiary behind layered legal arrangements depends on external corporate-registry and sanctions-network attribution we do not hold."
+    },
+    {
+      "id": "IND-03",
+      "section": "redflag · Real Estate",
+      "flag": "Changes, without an apparent business reason, to the transaction patterns of a firm located in a country other than the United States, Russia, Belarus, and Ukraine, where the new transactions involve convertible virtual currency and Russian-related investments or firms.",
+      "src_line": 141,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "We can baseline a firm's transaction patterns and flag CVC-linked deviations, but the Russian-investment nexus needs partial external enrichment to confirm."
+    },
+    {
+      "id": "IND-04",
+      "section": "redflag · Real Estate",
+      "flag": "A Russian individual or entity requests a wire transfer from a non-U.S. (particularly non-Russian) bank to pay for an all-cash purchase, especially if the wired funds come from an account held by an individual or entity other than the original requestor.",
+      "src_line": 145,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Inbound wire origination, originator-vs-payer mismatch, and all-cash purchase context are all core wire/account fields we hold — a directly buildable third-party-funded all-cash wire signal.",
+      "build_logic": {
+        "signal_name": "S-third-party-allcash-wire",
+        "class": "entity · account-level · windowed",
+        "features": ["wire_originator_country", "originator_account_mismatch", "all_cash_purchase_flag", "counterparty_russia_nexus", "wire_amount"],
+        "logic": "Flag an inbound wire from a non-U.S. (non-Russian) bank funding an all-cash high-value purchase where the funding account holder differs from the original requestor.",
+        "window": "rolling 30 days",
+        "source": "wire/payment messages + account ownership records",
+        "route": "Tier-1 alert → sanctions-evasion review gate"
+      }
+    },
+    {
+      "id": "IND-05",
+      "section": "redflag · Real Estate",
+      "flag": "The dilution of equitable interest held in real property by sanctioned Russian elites and their proxies, by the addition of, or the transfer of real estate to, an individual not affiliated with the buyer or seller.",
+      "src_line": 149,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Detecting dilution of equitable interest requires real-property title/asset-registry data outside the institution's transaction record."
+    },
+    {
+      "id": "IND-06",
+      "section": "redflag · Real Estate",
+      "flag": "The maintenance, purchase, or termination of real estate insurance by persons with a known nexus to sanctioned Russian elites and their proxies.",
+      "src_line": 153,
+      "status": "partial",
+      "data": "insufficient",
+      "build_rec": "MONITOR",
+      "rationale": "Insurance lifecycle events tied to a sanctioned-nexus party depend on external insurance-registry and attribution data we do not source."
+    },
+    {
+      "id": "IND-07",
+      "section": "redflag · Artworks",
+      "flag": "The use of shell companies and trusts, and/or third-party intermediaries, including art dealers, brokers, advisers, or interior designers, with a nexus to sanctioned Russian elites and their proxies, to purchase, hold, or sell art on a client’s behalf.",
+      "src_line": 178,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Mapping art-market intermediaries to a sanctioned-elite nexus requires external corporate and sanctions-network attribution beyond our data."
+    },
+    {
+      "id": "IND-08",
+      "section": "redflag · Artworks",
+      "flag": "Transactions involving sanctioned Russian elites and their proxies, and large amounts of cash, especially in currencies not typically used in the art market.",
+      "src_line": 182,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Large-cash transactions and atypical settlement currencies are observable in our records; the sanctioned-party tie needs partial enrichment."
+    },
+    {
+      "id": "IND-09",
+      "section": "redflag · Artworks",
+      "flag": "Artwork-related transactions involving persons with suspected ties to sanctioned Russian elites and their proxies who (i) are not concerned with recouping their initial investment or paying a substantially higher price than the notational value of the work, and/or (ii) conduct transactions that exceed the expected sales value of the work.",
+      "src_line": 185,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Judging price-vs-notational-value for artwork requires external art-valuation reference data the institution does not hold."
+    },
+    {
+      "id": "IND-10",
+      "section": "redflag · Artworks",
+      "flag": "The purchase, maintenance, or termination of insurance policies to protect the market value or provide cash payments for the loss, theft, or destruction of privately held or donated high-value artwork linked to sanctioned Russian elites and their proxies.",
+      "src_line": 190,
+      "status": "partial",
+      "data": "insufficient",
+      "build_rec": "MONITOR",
+      "rationale": "Art-insurance lifecycle events linked to a sanctioned party depend on external insurance and attribution sources we do not ingest."
+    },
+    {
+      "id": "IND-11",
+      "section": "redflag · PMSJ",
+      "flag": "Transactions involving PMSJ trading companies, particularly in Asia, and firms with a nexus to sanctioned Russian elites and their proxies.",
+      "src_line": 232,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Counterparty trading-company transactions and Asia-region routing are observable in transaction data; the sanctioned-nexus tie needs partial enrichment."
+    },
+    {
+      "id": "IND-12",
+      "section": "redflag · PMSJ",
+      "flag": "High-value or frequent transactions involving mining operations with opaque and complex corporate structures, that are or have been owned or controlled by sanctioned Russian elites or their proxies.",
+      "src_line": 235,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Resolving opaque mining-operation ownership and control chains requires external corporate-registry data outside our holdings."
+    },
+    {
+      "id": "IND-13",
+      "section": "redflag · Other High-Value Assets",
+      "flag": "The sudden transfer, including through sales, by sanctioned Russian elites and their proxies of ownership in high-value assets and goods.",
+      "src_line": 285,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Sudden large asset-ownership transfers are observable as account/transfer activity, but tying the seller to a sanctioned-elite identity needs partial beneficial-ownership enrichment."
+    },
+    {
+      "id": "IND-14",
+      "section": "redflag · Other High-Value Assets",
+      "flag": "The involvement of legal entities, such as shell companies, with a nexus to sanctioned Russian elites and their proxies, that are falsely posing as well-known entities and operating in jurisdictions other than the well-known entity’s jurisdiction and geographic sphere of business.",
+      "src_line": 288,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Detecting entities falsely posing as well-known firms across jurisdictions requires external corporate-registry and impersonation intelligence we do not source."
+    },
+    {
+      "id": "IND-15",
+      "section": "redflag · Other High-Value Assets",
+      "flag": "The involvement of a common set of (i) financial institutions, (ii) individuals, or (iii) addresses to facilitate luxury goods-related transactions, that may have a nexus to sanctioned Russian elites and their proxies.",
+      "src_line": 292,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Shared counterparty institutions, individuals, and addresses across luxury-goods transactions are graph features computable from our own transaction records — a buildable common-facilitator clustering signal.",
+      "build_logic": {
+        "signal_name": "S-shared-facilitator-cluster",
+        "class": "entity · account-level · windowed",
+        "features": ["shared_counterparty_institution", "shared_individual_id", "shared_address", "luxury_goods_mcc", "cluster_transaction_count"],
+        "logic": "Cluster luxury-goods-related transactions that recur over a common set of financial institutions, individuals, or addresses and flag clusters exceeding a recurrence threshold.",
+        "window": "rolling 30 days",
+        "source": "transaction records + counterparty/address graph",
+        "route": "Tier-1 alert → sanctions-evasion review gate"
+      }
+    },
+    {
+      "id": "IND-16",
+      "section": "redflag · Other High-Value Assets",
+      "flag": "The involvement of law firms based in global and offshore financial centers that have historically specialized in Russian clientele or in transactions associated with sanctioned Russian elites and their proxies.",
+      "src_line": 296,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Profiling law firms by historical Russian-clientele specialization requires external legal-sector intelligence outside the institution's data."
+    },
+    {
+      "id": "IND-17",
+      "section": "redflag · Other High-Value Assets",
+      "flag": "The involvement of transportation service companies that have been owned by, or have a nexus to, sanctioned Russian elites and their proxies, and that may be used to transport luxury goods and obfuscate their movement.",
+      "src_line": 300,
+      "status": "partial",
+      "data": "insufficient",
+      "build_rec": "MONITOR",
+      "rationale": "Linking transportation-service companies to a sanctioned-elite nexus depends on external ownership and logistics attribution we do not hold."
+    }
+  ]
+}

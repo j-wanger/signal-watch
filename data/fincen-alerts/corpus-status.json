@@ -1,0 +1,274 @@
+{
+  "_generated_by": "scripts/derive_signals.py --corpus-status",
+  "_note": "Deterministic per-advisory manifest for the corpus-explorer build (scripts/build.py corpus reads this + data/fincen-alerts/derived/*.json). `derivable` = a red-flag region exists (rf_region; false only for the 2 FATF advisories); `extraction`/`flag_count` are a cheap rf_region-bounded triage HINT (_rf_triage), NOT the derivability authority — an advisory goes live via a gate-passing derived/<id>.json (the LLM extracts; check_record grounds), and build.py ignores the manifest count for a live advisory. Authoring artifact, NOT a ship config. Regenerate after the corpus md set changes.",
+  "summary": {
+    "clean": 17,
+    "low": 0,
+    "needs": 2,
+    "total": 19
+  },
+  "advisories": [
+    {
+      "id": "fin-2020-alert001",
+      "advisory": "FIN-2020-ALERT001",
+      "title": "FinCEN Alerts Financial Institutions to Convertible Virtual Currency Scam Involving Twitter",
+      "date": "2020-07-16",
+      "url": "https://www.fincen.gov/system/files/2020-07/FinCEN%20Alert%20Twitter_508%20FINAL.pdf",
+      "source": "FinCEN FIN-2020-ALERT001 · FinCEN Alerts Financial Institutions to Convertible Virtual Currency Scam Involving Twitter · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 13,
+      "sections": {
+        "redflag": 13
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2022-alert001",
+      "advisory": "FIN-2022-ALERT001",
+      "title": "FinCEN Advises Increased Vigilance for Potential Russian Sanctions Evasion Attempts",
+      "date": "2022-03-07",
+      "url": "https://www.fincen.gov/system/files/2022-03/FinCEN%20Alert%20Russian%20Sanctions%20Evasion%20FINAL%20508.pdf",
+      "source": "FinCEN FIN-2022-ALERT001 · FinCEN Advises Increased Vigilance for Potential Russian Sanctions Evasion Attempts · public domain (17 U.S.C. 105)",
+      "extraction": "none",
+      "flag_count": 0,
+      "sections": {},
+      "derivable": false
+    },
+    {
+      "id": "fin-2022-alert002",
+      "advisory": "FIN-2022-ALERT002",
+      "title": "FinCEN Alert on Real Estate, Luxury Goods, and Other High Value Assets Involving Russian Elites, Oligarchs, and their Family Members",
+      "date": "2022-03-16",
+      "url": "https://www.fincen.gov/system/files/2022-03/FinCEN%20Alert%20Russian%20Elites%20High%20Value%20Assets_508%20FINAL.pdf",
+      "source": "FinCEN FIN-2022-ALERT002 · FinCEN Alert on Real Estate, Luxury Goods, and Other High Value Assets Involving Russian Elites, Oligarchs, and their Family Members · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 36,
+      "sections": {
+        "redflag": 36
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2022-alert003",
+      "advisory": "FIN-2022-ALERT003",
+      "title": "FinCEN and the U.S. Department of Commerce’s Bureau of Industry and Security Urge Increased Vigilance for Potential Russian and Belarusian Export Control Evasion Attempts",
+      "date": "2022-06-28",
+      "url": "https://www.fincen.gov/system/files/2022-06/FinCEN%20and%20Bis%20Joint%20Alert%20FINAL.pdf",
+      "source": "FinCEN FIN-2022-ALERT003 · FinCEN and the U.S. Department of Commerce’s Bureau of Industry and Security Urge Increased Vigilance for Potential Russian and Belarusian Export Control Evasion Attempts · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 3,
+      "sections": {
+        "redflag": 3
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2023-alert001",
+      "advisory": "FIN-2023-ALERT001",
+      "title": "FinCEN Alert on Human Smuggling Along the Southwest Border of the United States",
+      "date": "2023-01-13",
+      "url": "https://www.fincen.gov/system/files/shared/FinCEN%20Alert%20Human%20Smuggling%20FINAL_508.pdf",
+      "source": "FinCEN FIN-2023-ALERT001 · FinCEN Alert on Human Smuggling Along the Southwest Border of the United States · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 45,
+      "sections": {
+        "redflag": 45
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2023-alert002",
+      "advisory": "FIN-2023-ALERT002",
+      "title": "FinCEN Alert on Potential U.S. Commercial Real Estate Investments by Sanctioned Russian Elites, Oligarchs, and Their Proxies",
+      "date": "2023-01-25",
+      "url": "https://www.fincen.gov/system/files/shared/FinCEN%20Alert%20Real%20Estate%20FINAL%20508_1-25-23%20FINAL%20FINAL.pdf",
+      "source": "FinCEN FIN-2023-ALERT002 · FinCEN Alert on Potential U.S. Commercial Real Estate Investments by Sanctioned Russian Elites, Oligarchs, and Their Proxies · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 14,
+      "sections": {
+        "redflag": 14
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2023-alert003",
+      "advisory": "FIN-2023-ALERT003",
+      "title": "FinCEN Alert on Nationwide Surge in Mail Theft-Related Check Fraud Schemes Targeting the U.S. Mail",
+      "date": "2023-02-27",
+      "url": "https://www.fincen.gov/system/files/shared/FinCEN%20Alert%20Mail%20Theft-Related%20Check%20Fraud%20FINAL%20508.pdf",
+      "source": "FinCEN FIN-2023-ALERT003 · FinCEN Alert on Nationwide Surge in Mail Theft-Related Check Fraud Schemes Targeting the U.S. Mail · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 21,
+      "sections": {
+        "redflag": 21
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2023-alert004",
+      "advisory": "FIN-2023-ALERT004",
+      "title": "Supplemental Alert: FinCEN and the U.S. Department of Commerce’s Bureau of Industry and Security Urge Continued Vigilance for Potential Russian Export Control Evasion Attempts",
+      "date": "2023-05-19",
+      "url": "https://www.fincen.gov/system/files/shared/FinCEN%20and%20BIS%20Joint%20Alert%20_FINAL_508C.pdf",
+      "source": "FinCEN FIN-2023-ALERT004 · Supplemental Alert: FinCEN and the U.S. Department of Commerce’s Bureau of Industry and Security Urge Continued Vigilance for Potential Russian Export Control Evasion Attempts · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 55,
+      "sections": {
+        "redflag": 55
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2023-alert005",
+      "advisory": "FIN-2023-ALERT005",
+      "title": "FinCEN Alert on Prevalent Virtual Currency Investment Scam Commonly Known as “Pig Butchering”",
+      "date": "2023-09-08",
+      "url": "https://www.fincen.gov/system/files/shared/FinCEN_Alert_Pig_Butchering_FINAL_508c.pdf",
+      "source": "FinCEN FIN-2023-ALERT005 · FinCEN Alert on Prevalent Virtual Currency Investment Scam Commonly Known as “Pig Butchering” · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 19,
+      "sections": {
+        "redflag": 19
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2023-alert006",
+      "advisory": "FIN-2023-ALERT006",
+      "title": "FinCEN Alert to Financial Institutions to Counter Financing to Hamas and its Terrorist Activities",
+      "date": "2023-10-20",
+      "url": "https://www.fincen.gov/system/files/2025-09/FinCEN_Alert_Terrorist_Financing_proof1.pdf",
+      "source": "FinCEN FIN-2023-ALERT006 · FinCEN Alert to Financial Institutions to Counter Financing to Hamas and its Terrorist Activities · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 13,
+      "sections": {
+        "redflag": 13
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2023-alert007",
+      "advisory": "FIN-2023-ALERT007",
+      "title": "FinCEN Alert on COVID-19 Employee Retention Credit Fraud",
+      "date": "2023-11-22",
+      "url": "https://www.fincen.gov/system/files/shared/FinCEN_ERC_Fraud_Alert_FINAL508.pdf",
+      "source": "FinCEN FIN-2023-ALERT007 · FinCEN Alert on COVID-19 Employee Retention Credit Fraud · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 11,
+      "sections": {
+        "redflag": 11
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2024-alert003",
+      "advisory": "FIN-2024-ALERT003",
+      "title": "FinCEN Alert to Financial Institutions to Counter Financing of Hizballah and its Terrorist Activities",
+      "date": "2024-10-23",
+      "url": "https://www.fincen.gov/system/files/shared/FinCEN-Alert-Hizballah-Alert-508C.pdf",
+      "source": "FinCEN FIN-2024-ALERT003 · FinCEN Alert to Financial Institutions to Counter Financing of Hizballah and its Terrorist Activities · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 15,
+      "sections": {
+        "redflag": 15
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2024-alert004",
+      "advisory": "FIN-2024-ALERT004",
+      "title": "FinCEN Alert on Fraud Schemes Involving Deepfake Media Targeting Financial Institutions",
+      "date": "2024-11-13",
+      "url": "https://www.fincen.gov/system/files/shared/FinCEN-Alert-DeepFakes-Alert508FINAL.pdf",
+      "source": "FinCEN FIN-2024-ALERT004 · FinCEN Alert on Fraud Schemes Involving Deepfake Media Targeting Financial Institutions · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 46,
+      "sections": {
+        "redflag": 46
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2024-alert005",
+      "advisory": "FIN-2024-ALERT005",
+      "title": "FinCEN Alert on Fraud Schemes Abusing FinCEN’s Name, Insignia, and Authorities for Financial Gain",
+      "date": "2024-12-18",
+      "url": "https://www.fincen.gov/system/files/2024-12/Alert-FinCEN-Scams-FINAL508.pdf",
+      "source": "FinCEN FIN-2024-ALERT005 · FinCEN Alert on Fraud Schemes Abusing FinCEN’s Name, Insignia, and Authorities for Financial Gain · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 23,
+      "sections": {
+        "redflag": 23
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2025-alert001",
+      "advisory": "FIN-2025-ALERT001",
+      "title": "FinCEN Alert on Bulk Cash Smuggling and Repatriation by Mexico-Based Transnational Criminal Organizations",
+      "date": "2025-03-31",
+      "url": "https://www.fincen.gov/system/files/shared/BCS-Alert-FINAL-508C.pdf",
+      "source": "FinCEN FIN-2025-ALERT001 · FinCEN Alert on Bulk Cash Smuggling and Repatriation by Mexico-Based Transnational Criminal Organizations · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 13,
+      "sections": {
+        "redflag": 13
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2025-alert002",
+      "advisory": "FIN-2025-ALERT002",
+      "title": "FinCEN Alert on Oil Smuggling Schemes on the U.S. Southwest Border Associated with Mexico-Based Cartels",
+      "date": "2025-05-01",
+      "url": "https://www.fincen.gov/system/files/shared/FinCEN-Alert-Oil-Smuggling-FINAL-508C.pdf",
+      "source": "FinCEN FIN-2025-ALERT002 · FinCEN Alert on Oil Smuggling Schemes on the U.S. Southwest Border Associated with Mexico-Based Cartels · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 22,
+      "sections": {
+        "redflag": 22
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2025-alert003",
+      "advisory": "FIN-2025-ALERT003",
+      "title": "FinCEN Alert on Cross-Border Funds Transfers Involving Illegal Aliens",
+      "date": "2025-11-28",
+      "url": "https://www.fincen.gov/system/files/FinCEN_Alert_Cross_Border_FINAL508.pdf",
+      "source": "FinCEN FIN-2025-ALERT003 · FinCEN Alert on Cross-Border Funds Transfers Involving Illegal Aliens · public domain (17 U.S.C. 105)",
+      "extraction": "none",
+      "flag_count": 0,
+      "sections": {},
+      "derivable": false
+    },
+    {
+      "id": "fin-2026-alert001",
+      "advisory": "FIN-2026-ALERT001",
+      "title": "FinCEN Alert on Fraud Rings and Their Exploitation of Federal Child Nutrition Programs in Minnesota",
+      "date": "2026-01-09",
+      "url": "https://www.fincen.gov/system/files/2026-01/FinCEN-Alert-Federal-Child-Nutrition-Programs.pdf",
+      "source": "FinCEN FIN-2026-ALERT001 · FinCEN Alert on Fraud Rings and Their Exploitation of Federal Child Nutrition Programs in Minnesota · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 17,
+      "sections": {
+        "redflag": 17
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2026-alert002",
+      "advisory": "FIN-2026-ALERT002",
+      "title": "FinCEN Alert on the Use of Front Companies, Financial Facilitators, and Digital Asset Infrastructure by Iran’s Islamic Revolutionary Guard Corps to Evade Sanctions and Launder Proceeds",
+      "date": "2026-05-11",
+      "url": "https://www.fincen.gov/system/files/2026-05/FinCEN-Alert-IRGC.pdf",
+      "source": "FinCEN FIN-2026-ALERT002 · FinCEN Alert on the Use of Front Companies, Financial Facilitators, and Digital Asset Infrastructure by Iran’s Islamic Revolutionary Guard Corps to Evade Sanctions and Launder Proceeds · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 43,
+      "sections": {
+        "redflag": 43
+      },
+      "derivable": true
+    }
+  ]
+}

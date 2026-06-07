@@ -69,6 +69,7 @@
   .advcard.live:hover{border-color:var(--line2);border-left-color:var(--signal);background:var(--panel2);transform:translateY(-1px)}
   .advcard.inert{opacity:.62}
   .advcard .actop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .advcard .acleft{display:flex;align-items:center;gap:8px;min-width:0}
   .advcard .acno{font-family:var(--mono);font-size:11px;color:var(--signal);letter-spacing:.04em}
   .advcard .actitle{font-size:13.5px;line-height:1.35;color:var(--ink)}
   .advcard .acmeta{font-family:var(--mono);font-size:10px;color:var(--faint)}
@@ -77,6 +78,7 @@
   .chip.clean{color:var(--blue)}
   .chip.low{color:var(--signal)}
   .chip.none{color:var(--faint)}
+  .chip.doc{color:var(--muted)}
 
   /* coverage map (shared component) */
   .covwrap{display:grid;grid-template-columns:1fr 230px;gap:20px;align-items:start}
@@ -181,7 +183,7 @@
   </div>
 
   <footer>
-    Corpus-backed walkthrough · advisory text is verbatim public-domain (FinCEN, 17 U.S.C. §105); coverage &amp; build judgments are illustrative<br>
+    Corpus-backed walkthrough · source text is verbatim public-domain (FinCEN, 17 U.S.C. §105); coverage &amp; build judgments are illustrative<br>
     <span class="keys">←/→ navigate · Space advance · Esc back to list</span>
   </footer>
 </div>
@@ -206,6 +208,7 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 26,
       "derivable": true,
+      "doc_type": "Advisory",
       "derived": true,
       "indicators": [
         {
@@ -348,7 +351,8 @@ const CORPUS = {
       "source": "FinCEN FIN-2020-A009 · Advisory on the Financial Action Task Force-Identified Jurisdictions with Anti-Money Laundering, Combating the Financing of Terrorism, and Proliferation Deficiencies · public domain (17 U.S.C. 105)",
       "extraction": "none",
       "flag_count": 0,
-      "derivable": false
+      "derivable": false,
+      "doc_type": "Advisory"
     },
     {
       "id": "fin-2021-a001",
@@ -359,6 +363,7 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 47,
       "derivable": true,
+      "doc_type": "Advisory",
       "derived": true,
       "indicators": [
         {
@@ -607,6 +612,7 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 22,
       "derivable": true,
+      "doc_type": "Advisory",
       "derived": true,
       "indicators": [
         {
@@ -679,7 +685,8 @@ const CORPUS = {
       "source": "FinCEN FIN-2021-A003 · Advisory on the Financial Action Task Force-Identified Jurisdictions with Anti-Money Laundering and Combating the Financing of Terrorism and Counter-Proliferation Deficiencies · public domain (17 U.S.C. 105)",
       "extraction": "none",
       "flag_count": 0,
-      "derivable": false
+      "derivable": false,
+      "doc_type": "Advisory"
     },
     {
       "id": "fin-2021-a004",
@@ -690,6 +697,7 @@ const CORPUS = {
       "extraction": "low",
       "flag_count": 1,
       "derivable": true,
+      "doc_type": "Advisory",
       "derived": true,
       "indicators": [
         {
@@ -868,6 +876,7 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 12,
       "derivable": true,
+      "doc_type": "Advisory",
       "derived": true,
       "indicators": [
         {
@@ -961,6 +970,7 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 28,
       "derivable": true,
+      "doc_type": "Advisory",
       "derived": true,
       "indicators": [
         {
@@ -1154,6 +1164,7 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 11,
       "derivable": true,
+      "doc_type": "Advisory",
       "derived": true,
       "indicators": [
         {
@@ -1287,6 +1298,7 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 17,
       "derivable": true,
+      "doc_type": "Advisory",
       "derived": true,
       "indicators": [
         {
@@ -1500,6 +1512,7 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 12,
       "derivable": true,
+      "doc_type": "Advisory",
       "derived": true,
       "indicators": [
         {
@@ -1683,6 +1696,7 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 20,
       "derivable": true,
+      "doc_type": "Advisory",
       "derived": true,
       "indicators": [
         {
@@ -1916,6 +1930,7 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 21,
       "derivable": true,
+      "doc_type": "Advisory",
       "derived": true,
       "indicators": [
         {
@@ -2184,6 +2199,7 @@ const CORPUS = {
       "extraction": "clean",
       "flag_count": 6,
       "derivable": true,
+      "doc_type": "Advisory",
       "derived": true,
       "indicators": [
         {
@@ -2517,6 +2533,1253 @@ const CORPUS = {
           "rationale": "Flagging transfers to VASPs / brokerages / betting platforms needs counterparty-type tagging of those destinations we hold only partially; enrich the counterparty registry, then build the out-of-pattern-destination signal."
         }
       ]
+    },
+    {
+      "id": "fin-2020-alert001",
+      "advisory": "FIN-2020-ALERT001",
+      "title": "FinCEN Alerts Financial Institutions to Convertible Virtual Currency Scam Involving Twitter",
+      "date": "2020-07-16",
+      "source": "FinCEN FIN-2020-ALERT001 · FinCEN Alerts Financial Institutions to Convertible Virtual Currency Scam Involving Twitter · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 13,
+      "derivable": true,
+      "doc_type": "Alert"
+    },
+    {
+      "id": "fin-2022-alert001",
+      "advisory": "FIN-2022-ALERT001",
+      "title": "FinCEN Advises Increased Vigilance for Potential Russian Sanctions Evasion Attempts",
+      "date": "2022-03-07",
+      "source": "FinCEN FIN-2022-ALERT001 · FinCEN Advises Increased Vigilance for Potential Russian Sanctions Evasion Attempts · public domain (17 U.S.C. 105)",
+      "extraction": "none",
+      "flag_count": 0,
+      "derivable": false,
+      "doc_type": "Alert"
+    },
+    {
+      "id": "fin-2022-alert002",
+      "advisory": "FIN-2022-ALERT002",
+      "title": "FinCEN Alert on Real Estate, Luxury Goods, and Other High Value Assets Involving Russian Elites, Oligarchs, and their Family Members",
+      "date": "2022-03-16",
+      "source": "FinCEN FIN-2022-ALERT002 · FinCEN Alert on Real Estate, Luxury Goods, and Other High Value Assets Involving Russian Elites, Oligarchs, and their Family Members · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 36,
+      "derivable": true,
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag · Real Estate",
+          "flag": "The purchase, sale, donation, or legal ownership transfer of high-value real estate in the name of a foreign legal entity, shell company, or trust, especially if the transaction: (i) is far above or below fair market value, (ii) involves all-cash transfers, or (iii) is funded by a third party with a known nexus to sanctioned Russian elites and their proxies.",
+          "src_line": 133,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Transaction price-vs-market and all-cash funding are observable, but attributing legal ownership to a shell-company beneficial owner requires beneficial-ownership data we only hold partially."
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag · Real Estate",
+          "flag": "The use of legal entities or arrangements that may have a nexus to sanctioned Russian elites and their proxies to hide the ultimate beneficiary or the origins or source of the funds.",
+          "src_line": 138,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Identifying the ultimate beneficiary behind layered legal arrangements depends on external corporate-registry and sanctions-network attribution we do not hold."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag · Real Estate",
+          "flag": "Changes, without an apparent business reason, to the transaction patterns of a firm located in a country other than the United States, Russia, Belarus, and Ukraine, where the new transactions involve convertible virtual currency and Russian-related investments or firms.",
+          "src_line": 141,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "We can baseline a firm's transaction patterns and flag CVC-linked deviations, but the Russian-investment nexus needs partial external enrichment to confirm."
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag · Real Estate",
+          "flag": "A Russian individual or entity requests a wire transfer from a non-U.S. (particularly non-Russian) bank to pay for an all-cash purchase, especially if the wired funds come from an account held by an individual or entity other than the original requestor.",
+          "src_line": 145,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Inbound wire origination, originator-vs-payer mismatch, and all-cash purchase context are all core wire/account fields we hold — a directly buildable third-party-funded all-cash wire signal.",
+          "build_logic": {
+            "signal_name": "S-third-party-allcash-wire",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "wire_originator_country",
+              "originator_account_mismatch",
+              "all_cash_purchase_flag",
+              "counterparty_russia_nexus",
+              "wire_amount"
+            ],
+            "logic": "Flag an inbound wire from a non-U.S. (non-Russian) bank funding an all-cash high-value purchase where the funding account holder differs from the original requestor.",
+            "window": "rolling 30 days",
+            "source": "wire/payment messages + account ownership records",
+            "route": "Tier-1 alert → sanctions-evasion review gate"
+          }
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag · Real Estate",
+          "flag": "The dilution of equitable interest held in real property by sanctioned Russian elites and their proxies, by the addition of, or the transfer of real estate to, an individual not affiliated with the buyer or seller.",
+          "src_line": 149,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting dilution of equitable interest requires real-property title/asset-registry data outside the institution's transaction record."
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag · Real Estate",
+          "flag": "The maintenance, purchase, or termination of real estate insurance by persons with a known nexus to sanctioned Russian elites and their proxies.",
+          "src_line": 153,
+          "status": "partial",
+          "data": "insufficient",
+          "build_rec": "MONITOR",
+          "rationale": "Insurance lifecycle events tied to a sanctioned-nexus party depend on external insurance-registry and attribution data we do not source."
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag · Artworks",
+          "flag": "The use of shell companies and trusts, and/or third-party intermediaries, including art dealers, brokers, advisers, or interior designers, with a nexus to sanctioned Russian elites and their proxies, to purchase, hold, or sell art on a client’s behalf.",
+          "src_line": 178,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Mapping art-market intermediaries to a sanctioned-elite nexus requires external corporate and sanctions-network attribution beyond our data."
+        },
+        {
+          "id": "IND-08",
+          "section": "redflag · Artworks",
+          "flag": "Transactions involving sanctioned Russian elites and their proxies, and large amounts of cash, especially in currencies not typically used in the art market.",
+          "src_line": 182,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Large-cash transactions and atypical settlement currencies are observable in our records; the sanctioned-party tie needs partial enrichment."
+        },
+        {
+          "id": "IND-09",
+          "section": "redflag · Artworks",
+          "flag": "Artwork-related transactions involving persons with suspected ties to sanctioned Russian elites and their proxies who (i) are not concerned with recouping their initial investment or paying a substantially higher price than the notational value of the work, and/or (ii) conduct transactions that exceed the expected sales value of the work.",
+          "src_line": 185,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Judging price-vs-notational-value for artwork requires external art-valuation reference data the institution does not hold."
+        },
+        {
+          "id": "IND-10",
+          "section": "redflag · Artworks",
+          "flag": "The purchase, maintenance, or termination of insurance policies to protect the market value or provide cash payments for the loss, theft, or destruction of privately held or donated high-value artwork linked to sanctioned Russian elites and their proxies.",
+          "src_line": 190,
+          "status": "partial",
+          "data": "insufficient",
+          "build_rec": "MONITOR",
+          "rationale": "Art-insurance lifecycle events linked to a sanctioned party depend on external insurance and attribution sources we do not ingest."
+        },
+        {
+          "id": "IND-11",
+          "section": "redflag · PMSJ",
+          "flag": "Transactions involving PMSJ trading companies, particularly in Asia, and firms with a nexus to sanctioned Russian elites and their proxies.",
+          "src_line": 232,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Counterparty trading-company transactions and Asia-region routing are observable in transaction data; the sanctioned-nexus tie needs partial enrichment."
+        },
+        {
+          "id": "IND-12",
+          "section": "redflag · PMSJ",
+          "flag": "High-value or frequent transactions involving mining operations with opaque and complex corporate structures, that are or have been owned or controlled by sanctioned Russian elites or their proxies.",
+          "src_line": 235,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Resolving opaque mining-operation ownership and control chains requires external corporate-registry data outside our holdings."
+        },
+        {
+          "id": "IND-13",
+          "section": "redflag · Other High-Value Assets",
+          "flag": "The sudden transfer, including through sales, by sanctioned Russian elites and their proxies of ownership in high-value assets and goods.",
+          "src_line": 285,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Sudden large asset-ownership transfers are observable as account/transfer activity, but tying the seller to a sanctioned-elite identity needs partial beneficial-ownership enrichment."
+        },
+        {
+          "id": "IND-14",
+          "section": "redflag · Other High-Value Assets",
+          "flag": "The involvement of legal entities, such as shell companies, with a nexus to sanctioned Russian elites and their proxies, that are falsely posing as well-known entities and operating in jurisdictions other than the well-known entity’s jurisdiction and geographic sphere of business.",
+          "src_line": 288,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting entities falsely posing as well-known firms across jurisdictions requires external corporate-registry and impersonation intelligence we do not source."
+        },
+        {
+          "id": "IND-15",
+          "section": "redflag · Other High-Value Assets",
+          "flag": "The involvement of a common set of (i) financial institutions, (ii) individuals, or (iii) addresses to facilitate luxury goods-related transactions, that may have a nexus to sanctioned Russian elites and their proxies.",
+          "src_line": 292,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Shared counterparty institutions, individuals, and addresses across luxury-goods transactions are graph features computable from our own transaction records — a buildable common-facilitator clustering signal.",
+          "build_logic": {
+            "signal_name": "S-shared-facilitator-cluster",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "shared_counterparty_institution",
+              "shared_individual_id",
+              "shared_address",
+              "luxury_goods_mcc",
+              "cluster_transaction_count"
+            ],
+            "logic": "Cluster luxury-goods-related transactions that recur over a common set of financial institutions, individuals, or addresses and flag clusters exceeding a recurrence threshold.",
+            "window": "rolling 30 days",
+            "source": "transaction records + counterparty/address graph",
+            "route": "Tier-1 alert → sanctions-evasion review gate"
+          }
+        },
+        {
+          "id": "IND-16",
+          "section": "redflag · Other High-Value Assets",
+          "flag": "The involvement of law firms based in global and offshore financial centers that have historically specialized in Russian clientele or in transactions associated with sanctioned Russian elites and their proxies.",
+          "src_line": 296,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Profiling law firms by historical Russian-clientele specialization requires external legal-sector intelligence outside the institution's data."
+        },
+        {
+          "id": "IND-17",
+          "section": "redflag · Other High-Value Assets",
+          "flag": "The involvement of transportation service companies that have been owned by, or have a nexus to, sanctioned Russian elites and their proxies, and that may be used to transport luxury goods and obfuscate their movement.",
+          "src_line": 300,
+          "status": "partial",
+          "data": "insufficient",
+          "build_rec": "MONITOR",
+          "rationale": "Linking transportation-service companies to a sanctioned-elite nexus depends on external ownership and logistics attribution we do not hold."
+        }
+      ]
+    },
+    {
+      "id": "fin-2022-alert003",
+      "advisory": "FIN-2022-ALERT003",
+      "title": "FinCEN and the U.S. Department of Commerce’s Bureau of Industry and Security Urge Increased Vigilance for Potential Russian and Belarusian Export Control Evasion Attempts",
+      "date": "2022-06-28",
+      "source": "FinCEN FIN-2022-ALERT003 · FinCEN and the U.S. Department of Commerce’s Bureau of Industry and Security Urge Increased Vigilance for Potential Russian and Belarusian Export Control Evasion Attempts · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 3,
+      "derivable": true,
+      "doc_type": "Alert"
+    },
+    {
+      "id": "fin-2023-alert001",
+      "advisory": "FIN-2023-ALERT001",
+      "title": "FinCEN Alert on Human Smuggling Along the Southwest Border of the United States",
+      "date": "2023-01-13",
+      "source": "FinCEN FIN-2023-ALERT001 · FinCEN Alert on Human Smuggling Along the Southwest Border of the United States · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 45,
+      "derivable": true,
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "Transactions involving multiple wire transfers, cash deposits, or P2P payments from multiple originators from different geographic locations either across (1) the United States, or (2) Mexico and Central America, to one beneficiary located on or around the SW border, with no apparent business purpose.",
+          "src_line": 391,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Funnel-into-one-beneficiary fan-in across wire/cash/P2P is the core human-smuggling collection pattern and is fully observable from in-house transaction, deposit, and account-geography data, yet no current rule scores many-to-one inbound concentration.",
+          "build_logic": {
+            "signal_name": "S-funnel-fan-in-beneficiary",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "distinct_originator_count",
+              "originator_geo_dispersion",
+              "inbound_channel_mix",
+              "beneficiary_swborder_proximity_flag",
+              "no_business_purpose_score"
+            ],
+            "logic": "Flag a beneficiary account when >=N distinct originators across >=K geographic clusters (spanning US and/or MX/Central America) push inbound wire+cash+P2P credits within the window, with no declared business purpose for many-to-one collection.",
+            "window": "rolling 30 days",
+            "source": "core deposit ledger + wire system + P2P rails + account geo/branch reference",
+            "route": "Tier-1 alert → human-smuggling typology review gate"
+          }
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "Deposits made by multiple individuals in multiple locations into a single account, not affiliated with the account holder’s area of residence or work, with no apparent business purpose.",
+          "src_line": 396,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Multiple-depositor, multiple-location credits into one account decoupled from the holder's home/work geography is a classic structured collection pattern fully derivable from deposit-channel and KYC address data, but is not currently scored as a standalone signal.",
+          "build_logic": {
+            "signal_name": "S-multi-location-third-party-deposits",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "distinct_depositor_count",
+              "deposit_location_count",
+              "holder_geo_mismatch_distance",
+              "third_party_deposit_ratio",
+              "no_business_purpose_score"
+            ],
+            "logic": "Flag an account when deposits come from >=N distinct individuals at >=K distinct physical locations whose distance from the holder's KYC residence/work exceeds a threshold, with no business rationale for non-affiliated third-party funding.",
+            "window": "rolling 30 days",
+            "source": "branch/ATM/teller deposit logs + KYC residence & employment address",
+            "route": "Tier-1 alert → human-smuggling typology review gate"
+          }
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "Currency deposits into U.S. accounts without explanation, followed by rapid wire transfers to countries with high migrant flows (e.g., Mexico, Central America), in a manner that is inconsistent with expected customer activity.",
+          "src_line": 400,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Cash-in then rapid-wire-out is observable internally, but reliably scoping the destination to high-migrant-flow corridors needs an external/maintained corridor list, so the signal is buildable only with enrichment.",
+          "rationale_note": "high-migrant-flow corridor classification is a partial/external reference, not core transaction data"
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "Frequent exchange of small-denomination for larger-denomination bills by a customer who is not in a cash-intensive industry.",
+          "src_line": 418,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Denomination-swap transactions and the customer's declared NAICS/industry are both captured, so an existing cash-activity rule can be enhanced to weight small-to-large exchanges against a non-cash-intensive industry profile rather than building a new signal."
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "Multiple customers sending wire transfers to the same beneficiary (who is not a relative, and may be located in the sender’s home country), inconsistent with the customer’s usual business activity and reported occupation.",
+          "src_line": 421,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Many-senders-to-one-beneficiary wire concentration is internally observable, but the non-relative and same-home-country qualifiers require cross-institution beneficiary resolution and external sender-origin reference, so the signal needs enrichment to be reliable."
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "A customer making significantly greater deposits—including cash deposits—than those of peers in similar professions or lines of business.",
+          "src_line": 425,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Deposit volumes and declared occupation/line-of-business are in-house, so an existing peer-anomaly model can be enhanced with a profession-cohort baseline rather than standing up a new build."
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "A customer making cash deposits that are inconsistent with the customer’s line of business.",
+          "src_line": 428,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "Cash-deposits-inconsistent-with-stated-business is a standard expected-activity deviation already covered by existing transaction-monitoring rules against the customer's declared line of business."
+        },
+        {
+          "id": "IND-08",
+          "section": "redflag",
+          "flag": "Extensive use of cash to purchase assets, such as real estate, and to conduct transactions.",
+          "src_line": 430,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Cash purchases of real estate and other high-value assets largely settle outside the institution's accounts; detecting this pattern requires external real-estate/title-registry and asset-ownership data the bank does not hold, so data must be sourced before a signal is feasible."
+        }
+      ]
+    },
+    {
+      "id": "fin-2023-alert002",
+      "advisory": "FIN-2023-ALERT002",
+      "title": "FinCEN Alert on Potential U.S. Commercial Real Estate Investments by Sanctioned Russian Elites, Oligarchs, and Their Proxies",
+      "date": "2023-01-25",
+      "source": "FinCEN FIN-2023-ALERT002 · FinCEN Alert on Potential U.S. Commercial Real Estate Investments by Sanctioned Russian Elites, Oligarchs, and Their Proxies · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 14,
+      "derivable": true,
+      "doc_type": "Alert"
+    },
+    {
+      "id": "fin-2023-alert003",
+      "advisory": "FIN-2023-ALERT003",
+      "title": "FinCEN Alert on Nationwide Surge in Mail Theft-Related Check Fraud Schemes Targeting the U.S. Mail",
+      "date": "2023-02-27",
+      "source": "FinCEN FIN-2023-ALERT003 · FinCEN Alert on Nationwide Surge in Mail Theft-Related Check Fraud Schemes Targeting the U.S. Mail · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 21,
+      "derivable": true,
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "Non-characteristic large withdrawals on a customer’s account via check to a new payee.",
+          "src_line": 206,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Withdrawal amount, payee, and prior-payee history all live in core transaction data, but few banks score check withdrawals against a customer's own baseline to a never-seen payee.",
+          "build_logic": {
+            "signal_name": "S-OUTLIER-CHECK-NEW-PAYEE",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "check_withdrawal_amount",
+              "amount_vs_account_baseline_zscore",
+              "payee_first_seen_flag",
+              "days_since_account_open",
+              "prior_payee_count"
+            ],
+            "logic": "Flag a check-debit when the amount exceeds the account's trailing-window baseline by a configurable z-score AND the payee has never appeared on a prior check from this account.",
+            "window": "rolling 90 days",
+            "source": "core deposit/withdrawal ledger + check payee field",
+            "route": "Tier-1 alert → fraud-ops new-payee review gate"
+          }
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "Customer complains of a check or checks stolen from the mail and then deposited into an\nunknown account.",
+          "src_line": 208,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "The complaint itself is captured in servicing/case notes, but linking the stolen check to the unknown deposit account requires cross-institution image-clearing data the bank only partly sees.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "Customer complains that a check they mailed was never received by the intended recipient.",
+          "src_line": 211,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Recorded as a servicing complaint, but confirming non-receipt and tying it to downstream fraud needs payee-side and clearing data outside the bank's full view.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "Checks used to withdraw funds from a customer’s account appear to be of a noticeably\ndifferent check stock than check stock used by the issuing bank and check stock used for\nknown, legitimate transactions.",
+          "src_line": 213,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Check images are on file, but discriminating check stock requires image-forensics enrichment (paper/MICR/template features) most cores do not extract today.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "Existing customer with no history of check deposits has new sudden check deposits and\nwithdrawal or transfer of funds.",
+          "src_line": 217,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Deposit type history and subsequent withdrawal/transfer timing are fully in core data; the dormant-then-active check pattern is directly computable but rarely modeled.",
+          "build_logic": {
+            "signal_name": "S-DORMANT-CHECK-ACTIVATION",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "prior_check_deposit_count",
+              "new_check_deposit_count",
+              "check_deposit_total_amount",
+              "outflow_within_72h_ratio",
+              "deposit_to_withdrawal_lag_hours"
+            ],
+            "logic": "Flag accounts with zero check deposits in the lookback window that suddenly receive check deposits followed by withdrawal or transfer of a high share of the credited funds.",
+            "window": "rolling 180 days lookback, 7-day activation",
+            "source": "core deposit ledger + transfer/withdrawal ledger",
+            "route": "Tier-1 alert → fraud-ops dormancy-break review gate"
+          }
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "Non-characteristic, sudden, abnormal deposit of checks, often electronically, followed by\nrapid withdrawal or transfer of funds.",
+          "src_line": 220,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Mobile/remote check deposit channel, amount, and rapid outflow are all in core/channel data — the classic deposit-then-drain velocity pattern is computable but underdetected.",
+          "build_logic": {
+            "signal_name": "S-CHECK-DEPOSIT-DRAIN",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "check_deposit_amount",
+              "deposit_channel_electronic_flag",
+              "amount_vs_account_baseline_zscore",
+              "outflow_within_24h_ratio",
+              "withdrawal_transfer_count"
+            ],
+            "logic": "Flag an out-of-pattern electronic check deposit (amount exceeds account baseline z-score) where a high share of the credited funds is withdrawn or transferred within a short window.",
+            "window": "rolling 30 days",
+            "source": "remote-deposit channel logs + core ledger",
+            "route": "Tier-1 alert → fraud-ops velocity review gate"
+          }
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "Examination of suspect checks reveals faded handwriting underneath darker handwriting,\ngiving the appearance that the original handwriting has been overwritten.",
+          "src_line": 235,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting overwritten/washed handwriting needs forensic image analysis not produced by standard check-image capture; the discriminating data must be sourced before any signal is buildable.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-08",
+          "section": "redflag",
+          "flag": "Suspect accounts may have indicators of other suspicious activity, such as pandemic-related\nfraud.",
+          "src_line": 238,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Some prior-fraud indicators exist in internal case history, but a fuller view of pandemic-era and cross-program fraud overlaps requires external lists the bank only partly holds.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-09",
+          "section": "redflag",
+          "flag": "New customer opens an account that is seemingly used only for the deposit of checks\nfollowed by frequent withdrawals and transfer of funds.",
+          "src_line": 241,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Account age, the check-deposit-only usage profile, and frequent outflows are all in core onboarding + transaction data — a mule-style single-purpose account pattern that is directly computable.",
+          "build_logic": {
+            "signal_name": "S-SINGLE-PURPOSE-CHECK-ACCOUNT",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "days_since_account_open",
+              "check_deposit_share_of_credits",
+              "withdrawal_transfer_frequency",
+              "non_check_credit_count",
+              "outflow_within_72h_ratio"
+            ],
+            "logic": "Flag newly opened accounts whose credit activity is overwhelmingly check deposits with little other use, followed by frequent withdrawals and transfers of the credited funds.",
+            "window": "rolling 60 days from account open",
+            "source": "onboarding records + core deposit/withdrawal ledger",
+            "route": "Tier-1 alert → fraud-ops new-account mule review gate"
+          }
+        },
+        {
+          "id": "IND-10",
+          "section": "redflag",
+          "flag": "A non-customer that is attempting to cash a large check or multiple large checks in-person\nand, when questioned by the financial institution, provides an explanation that is suspicious\nor potentially indicative of money mule activity.",
+          "src_line": 244,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Teller-line non-customer check cashing is logged, but the suspicious-explanation judgment is qualitative and the non-customer's wider activity sits outside the bank's data.",
+          "build_logic": null
+        }
+      ]
+    },
+    {
+      "id": "fin-2023-alert004",
+      "advisory": "FIN-2023-ALERT004",
+      "title": "Supplemental Alert: FinCEN and the U.S. Department of Commerce’s Bureau of Industry and Security Urge Continued Vigilance for Potential Russian Export Control Evasion Attempts",
+      "date": "2023-05-19",
+      "source": "FinCEN FIN-2023-ALERT004 · Supplemental Alert: FinCEN and the U.S. Department of Commerce’s Bureau of Industry and Security Urge Continued Vigilance for Potential Russian Export Control Evasion Attempts · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 55,
+      "derivable": true,
+      "doc_type": "Alert"
+    },
+    {
+      "id": "fin-2023-alert005",
+      "advisory": "FIN-2023-ALERT005",
+      "title": "FinCEN Alert on Prevalent Virtual Currency Investment Scam Commonly Known as “Pig Butchering”",
+      "date": "2023-09-08",
+      "source": "FinCEN FIN-2023-ALERT005 · FinCEN Alert on Prevalent Virtual Currency Investment Scam Commonly Known as “Pig Butchering” · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 19,
+      "derivable": true,
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "Behavioral Red Flags",
+          "flag": "A customer with no history or background of using, exchanging, or otherwise interacting\nwith virtual currency attempts to exchange a high amount of fiat currency from an existing or\nnewly opened bank account for virtual currency or attempts to initiate high-value transfers to\nVASPs.",
+          "src_line": 247,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A first-time-crypto customer pushing high-value fiat out of a new or existing bank account toward VASPs is fully observable on core account and wire/ACH rails, but no signal flags the no-history-to-high-VASP-transfer transition today.",
+          "build_logic": {
+            "signal_name": "S-new-crypto-fiat-outflow",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "prior_vc_interaction_flag",
+              "account_age_days",
+              "outbound_vasp_transfer_amount",
+              "outbound_vasp_transfer_count",
+              "fiat_to_vasp_ratio"
+            ],
+            "logic": "Fire when a customer with no prior virtual-currency interaction history initiates high-value or escalating fiat transfers to known VASP counterparties from a recently opened or previously low-activity bank account within the window.",
+            "window": "rolling 30 days",
+            "source": "core account ledger + outbound wire/ACH rail + VASP counterparty list",
+            "route": "Tier-1 alert → first-time-crypto outflow review gate"
+          }
+        },
+        {
+          "id": "IND-02",
+          "section": "Behavioral Red Flags",
+          "flag": "A customer mentions or expresses interest in an investment opportunity leveraging virtual\ncurrency with significant returns that they were told about from a new contact who reached\nout to them unsolicited online or through text message.",
+          "src_line": 252,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting an unsolicited-contact investment pitch depends on customer-disclosed conversational context (chat/social-media origin) that the institution does not hold, so the data must be sourced before any signal is buildable."
+        },
+        {
+          "id": "IND-03",
+          "section": "Behavioral Red Flags",
+          "flag": "A customer mentions that they were instructed by an individual who recently contacted them\nto exchange fiat currency for virtual currency at a virtual currency kiosk and deposit the\nvirtual currency at an address supplied by the individual.",
+          "src_line": 256,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Kiosk-instruction-by-a-recent-contact is a verbal disclosure with no transaction footprint at the institution; the social/instruction context must be sourced externally before a detection rule can exist."
+        },
+        {
+          "id": "IND-04",
+          "section": "Behavioral Red Flags",
+          "flag": "A customer appears distressed or anxious to access funds to meet demands or the timeline of\na virtual currency investment opportunity.",
+          "src_line": 260,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Customer distress or urgency is a branch/contact-center behavioral observation not captured in structured transaction data, so the affect signal must first be sourced into a structured field."
+        },
+        {
+          "id": "IND-05",
+          "section": "Financial Red Flags",
+          "flag": "A customer uncharacteristically liquidates savings accounts prior to maturation, such as a\ncertificate of deposit, and then subsequently attempts to wire the liquidated fiat currency to a\nVASP or to exchange them for virtual currency.",
+          "src_line": 265,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Early CD/savings liquidation followed by a wire to a VASP is fully reconstructable from deposit-product and wire records, but no signal chains the premature-liquidation event to the downstream VASP transfer.",
+          "build_logic": {
+            "signal_name": "S-premature-liquidation-to-vasp",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "early_withdrawal_penalty_flag",
+              "cd_liquidation_amount",
+              "days_to_maturity_at_liquidation",
+              "outbound_vasp_wire_amount",
+              "liquidation_to_vasp_lag_days"
+            ],
+            "logic": "Fire when a customer liquidates a savings or CD account before maturity (incurring an early-withdrawal penalty) and subsequently wires or exchanges the freed fiat to a VASP within the window.",
+            "window": "rolling 30 days",
+            "source": "deposit-product ledger + early-withdrawal penalty feed + outbound wire rail + VASP counterparty list",
+            "route": "Tier-1 alert → premature-liquidation review gate"
+          }
+        },
+        {
+          "id": "IND-06",
+          "section": "Financial Red Flags",
+          "flag": "A customer takes out a HELOC, home equity loan, or second mortgage and uses the proceeds\nto purchase virtual currency or wires the proceeds to a VASP for the purchase of virtual\ncurrency.",
+          "src_line": 269,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Loan-origination and outbound-wire records make HELOC/second-mortgage-proceeds-to-VASP partly observable, but linking a specific loan disbursement to the downstream crypto purchase needs the existing rule enhanced with proceeds-tracing."
+        },
+        {
+          "id": "IND-07",
+          "section": "Financial Red Flags",
+          "flag": "A customer receives what appears to be a deposit of virtual currency from a virtual currency\naddress at or slightly above the amount that the customer previously transferred out of\ntheir virtual currency account.  This deposit is then followed by outgoing transfers from the\ncustomer in substantially larger amounts.",
+          "src_line": 273,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "The small confidence-building return followed by larger outflows is a chain-analytics pattern; institutions see only partial VASP-exposure data, so the signal needs blockchain enrichment before it is buildable."
+        },
+        {
+          "id": "IND-08",
+          "section": "Financial Red Flags",
+          "flag": "Accounts with large balances that are inactive or have limited activity begin to show constant,\nuncharacteristic, sudden, abnormally frequent, or significant withdrawals of large amounts of\nmoney being transferred to a VASP or being exchanged for virtual currency.",
+          "src_line": 286,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Dormant-account-to-active VASP outflow is detectable from balance and transfer history, but the existing dormancy-reactivation rule needs enhancement to specifically weight VASP-destined withdrawals."
+        },
+        {
+          "id": "IND-09",
+          "section": "Financial Red Flags",
+          "flag": "A customer sends multiple electronic funds transfers (EFTs) or wire transfers to a VASP or\nsends part of their available balance from an account or wallet they maintain with a VASP and\nnotes that the transaction is for “taxes,” “fees,” or “penalties.”",
+          "src_line": 290,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Repeated VASP transfers memo-tagged as taxes/fees/penalties are fully visible on EFT/wire rails including memo fields, yet no signal screens transfer memos for the extortion-style fee narrative.",
+          "build_logic": {
+            "signal_name": "S-vasp-fee-memo-transfers",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "vasp_transfer_count",
+              "transfer_memo_keyword_flag",
+              "vasp_transfer_amount_sum",
+              "distinct_vasp_counterparties",
+              "memo_fee_tax_penalty_match"
+            ],
+            "logic": "Fire when a customer sends multiple EFTs or wire transfers to a VASP within the window where transaction memos match a taxes/fees/penalties keyword set, indicating coerced withdrawal-fee payments.",
+            "window": "rolling 30 days",
+            "source": "EFT/wire rail with memo fields + VASP counterparty list + fee/tax/penalty keyword lexicon",
+            "route": "Tier-1 alert → coerced-fee transfer review gate"
+          }
+        },
+        {
+          "id": "IND-10",
+          "section": "Financial Red Flags",
+          "flag": "A customer with a short history of conducting several small-value EFTs to a VASP abruptly\nstops sending EFTs and begins sending multiple high-value wire transfers to accounts of\nholding companies, limited liability corporations, and individuals with which the customer\nhas no prior transaction history.",
+          "src_line": 294,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "The escalation from small trial EFTs to large wires toward never-before-seen LLC/individual counterparties is fully reconstructable from transfer history and counterparty records, but no signal models the trial-then-escalate pivot.",
+          "build_logic": {
+            "signal_name": "S-trial-to-escalation-pivot",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "prior_small_eft_count",
+              "new_counterparty_flag",
+              "wire_amount_escalation_ratio",
+              "counterparty_entity_type",
+              "first_seen_counterparty_days"
+            ],
+            "logic": "Fire when a customer with a short history of small-value VASP EFTs abruptly shifts to multiple high-value wires sent to holding-company, LLC, or individual counterparties having no prior transaction history within the window.",
+            "window": "rolling 30 days",
+            "source": "EFT/wire rail + counterparty master + entity-type reference",
+            "route": "Tier-1 alert → counterparty-escalation review gate"
+          }
+        },
+        {
+          "id": "IND-11",
+          "section": "Technical Red Flags",
+          "flag": "System monitoring and logs show that a customer’s account is accessed repeatedly by unique\nIP addresses, device IDs, or geographies inconsistent with prior access patterns.  Additionally,\nlogins to a customer’s online account at a VASP come from a variety of different device IDs\nand names inconsistent with the customer’s typical logins.",
+          "src_line": 302,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Anomalous IP/device/geo access is partly covered by existing account-takeover monitoring; correlating it with VASP-side login anomalies needs partial external signals, so enhance the current login-anomaly rule."
+        },
+        {
+          "id": "IND-12",
+          "section": "Technical Red Flags",
+          "flag": "A customer mentions that they are transacting to invest in virtual currency using a service that\nhas a website or application with poor spelling or grammatical structure, dubious customer\ntestimonials, or a generally amateurish site design.",
+          "src_line": 307,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Judging a counterparty platform as amateurish relies on customer-disclosed site impressions the institution never collects, so the scam-site corpus must be sourced before any rule is feasible."
+        },
+        {
+          "id": "IND-13",
+          "section": "Technical Red Flags",
+          "flag": "A customer mentions visiting a website or application that is purported to be associated\nwith a legitimate VASP or business involved in investing in virtual currency.  The website or\napplication shows warning signs such as a web address or domain name that is misspelled\nin such a manner as to resemble that of another business, a recently registered web address\nor domain name, no physical street address, international contact information, or contact\nmethods that include only chat or email.",
+          "src_line": 311,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Spoofed-domain and recently-registered-site signals require an external scam-domain / WHOIS corpus the institution does not maintain, so the data must be sourced before building a typosquat-detection rule."
+        },
+        {
+          "id": "IND-14",
+          "section": "Technical Red Flags",
+          "flag": "A customer receives a large amount of virtual currency such as ether at an exchange,\nsubsequently converts the amount to a virtual currency with lower transaction fees such as\nTRX, and then abruptly sends it out of the exchange.",
+          "src_line": 322,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "The receive-ether → convert-to-TRX → rapid-outflow laundering chain is a chain-analytics pattern observable only with partial VASP/blockchain exposure, so it needs chain enrichment before it is buildable."
+        }
+      ]
+    },
+    {
+      "id": "fin-2023-alert006",
+      "advisory": "FIN-2023-ALERT006",
+      "title": "FinCEN Alert to Financial Institutions to Counter Financing to Hamas and its Terrorist Activities",
+      "date": "2023-10-20",
+      "source": "FinCEN FIN-2023-ALERT006 · FinCEN Alert to Financial Institutions to Counter Financing to Hamas and its Terrorist Activities · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 13,
+      "derivable": true,
+      "doc_type": "Alert"
+    },
+    {
+      "id": "fin-2023-alert007",
+      "advisory": "FIN-2023-ALERT007",
+      "title": "FinCEN Alert on COVID-19 Employee Retention Credit Fraud",
+      "date": "2023-11-22",
+      "source": "FinCEN FIN-2023-ALERT007 · FinCEN Alert on COVID-19 Employee Retention Credit Fraud · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 11,
+      "derivable": true,
+      "doc_type": "Alert"
+    },
+    {
+      "id": "fin-2024-alert003",
+      "advisory": "FIN-2024-ALERT003",
+      "title": "FinCEN Alert to Financial Institutions to Counter Financing of Hizballah and its Terrorist Activities",
+      "date": "2024-10-23",
+      "source": "FinCEN FIN-2024-ALERT003 · FinCEN Alert to Financial Institutions to Counter Financing of Hizballah and its Terrorist Activities · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 15,
+      "derivable": true,
+      "doc_type": "Alert"
+    },
+    {
+      "id": "fin-2024-alert004",
+      "advisory": "FIN-2024-ALERT004",
+      "title": "FinCEN Alert on Fraud Schemes Involving Deepfake Media Targeting Financial Institutions",
+      "date": "2024-11-13",
+      "source": "FinCEN FIN-2024-ALERT004 · FinCEN Alert on Fraud Schemes Involving Deepfake Media Targeting Financial Institutions · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 46,
+      "derivable": true,
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "A\tcustomer’s\tphoto\tis\tinternally\tinconsistent\t(e.g.,\tshows\tvisual\ttells\tof\tbeing\taltered)\tor\tis\tinconsistent\twith\ttheir\tother\tidentifying\tinformation\t(e.g.,\ta\tcustomer’s\tdate\tof\tbirth\tindicates\tthat\tthey\tare\tmuch\tolder\tor\tyounger\tthan\tthe\tphoto\twould\tsuggest).",
+          "src_line": 268,
+          "status": "partial",
+          "data": "insufficient",
+          "build_rec": "MONITOR",
+          "rationale": "Cross-checking a photo against DOB is partly doable from KYC fields, but judging whether a photo shows GenAI alteration tells needs external deepfake-detection capability the bank does not hold internally."
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "A\tcustomer\tpresents\tmultiple\tidentity\tdocuments\tthat\tare\tinconsistent\twith\teach\tother.",
+          "src_line": 272,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "The bank holds the submitted identity documents at onboarding, so cross-document consistency checks are already partly performed and can be tightened into a systematic comparison."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "A\tcustomer\tuses\ta\tthird-party\twebcam\tplugin\tduring\ta\tlive\tverification\tcheck.\t\t Alternatively,\na\tcustomer\tattempts\tto\tchange\tcommunication\tmethods\tduring\ta\tlive\tverification\tcheck\tdue\tto\nexcessive\tor\tsuspicious\ttechnological\tglitches\tduring\tremote\tverification\tof\ttheir\tidentity.",
+          "src_line": 298,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting a virtual webcam plugin or mid-session channel switching requires onboarding-session liveness telemetry from the identity-verification vendor, which is not captured in core bank systems."
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "A\tcustomer\tdeclines\tto\tuse\tmultifactor\tauthentication\tto\tverify\ttheir\tidentity.",
+          "src_line": 302,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "build_logic": {
+            "signal_name": "S-MFA-OPT-OUT-NEW-ACCT",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "mfa_enrollment_declined",
+              "account_age_days",
+              "auth_factor_count",
+              "high_risk_action_attempted"
+            ],
+            "logic": "Flag an account that declines MFA enrollment or reverts to single-factor auth within the first 30 days, especially when paired with a high-risk action (large transfer, payee add, profile change).",
+            "window": "rolling 30 days",
+            "source": "authentication event logs + account-opening metadata",
+            "route": "Tier-1 alert → fraud-ops account-access review gate"
+          },
+          "rationale": "Authentication-enrollment events are captured in the bank's own auth logs, so an MFA opt-out signal is buildable today from data already held; it is not yet a monitored detection."
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "A\treverse-image\tlookup\tor\topen-source\tsearch\tof\tan\tidentity\tphoto\tmatches\tan\timage\tin\tan\nonline\tgallery\tof\tGenAI-produced\tfaces.",
+          "src_line": 304,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Matching an identity photo to an online gallery of GenAI faces depends on an external reverse-image / synthetic-face corpus the bank does not hold and would have to source."
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "A\tcustomer’s\tphoto\tor\tvideo\tis\tflagged\tby\tcommercial\tor\topen-source\tdeepfake\tdetection\tsoftware.",
+          "src_line": 307,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Many banks already run a commercial deepfake-detection tool at onboarding; the gap is integrating its score into the monitoring pipeline rather than treating it as a standalone vendor check."
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "GenAI-detection\tsoftware\tflags\tthe\tpotential\tuse\tof\tGenAI\ttext\tin\ta\tcustomer’s\tprofile\tor\nresponses to prompts.",
+          "src_line": 309,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Detecting GenAI-authored text in profile or prompt responses requires a specialized text-detection capability and the prompt-response corpus, neither of which the bank holds today."
+        },
+        {
+          "id": "IND-08",
+          "section": "redflag",
+          "flag": "A\tcustomer’s\tgeographic\tor\tdevice\tdata\tis\tinconsistent\twith\tthe\tcustomer’s\tidentity\tdocuments.",
+          "src_line": 312,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "build_logic": {
+            "signal_name": "S-GEO-DEVICE-ID-MISMATCH",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "login_ip_geo",
+              "device_fingerprint",
+              "stated_residence_country",
+              "id_document_issuer_region"
+            ],
+            "logic": "Flag when session IP geolocation or device fingerprint region is persistently inconsistent with the stated residence and the issuing region of the identity document on file.",
+            "window": "rolling 30 days",
+            "source": "session IP/device telemetry + KYC residence and identity-document fields",
+            "route": "Tier-1 alert → fraud-ops account-access review gate"
+          },
+          "rationale": "Login IP/device telemetry and the customer's stated residence plus identity-document region are all held by the bank, so a geo/device-vs-identity mismatch signal is buildable from existing data."
+        },
+        {
+          "id": "IND-09",
+          "section": "redflag",
+          "flag": "A\tnewly\topened\taccount\tor\tan\taccount\twith\tlittle\tprior\ttransaction\thistory\thas\ta\tpattern\tof\nrapid\ttransactions;\thigh\tpayment\tvolumes\tto\tpotentially\trisky\tpayees,\tsuch\tas\tgambling\nwebsites\tor\tdigital\tasset\texchanges;\tor\thigh\tvolumes\tof\tchargebacks\tor\trejected\tpayments.",
+          "src_line": 314,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "build_logic": {
+            "signal_name": "S-NEW-ACCT-RAPID-RISKY-FLOW",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "account_age_days",
+              "transaction_velocity",
+              "risky_payee_volume_ratio",
+              "chargeback_rate",
+              "rejected_payment_rate"
+            ],
+            "logic": "Flag a newly opened account (or one with thin prior history) showing a burst of rapid transactions, disproportionate payment volume to higher-risk payees (gambling sites, digital-asset exchanges), or elevated chargeback / rejected-payment rates.",
+            "window": "rolling 30 days",
+            "source": "core transaction ledger + account-opening date + payee classification + chargeback/return records",
+            "route": "Tier-1 alert → fraud-ops transaction review gate"
+          },
+          "rationale": "Account age, transaction velocity, payee risk classification, and chargeback/return data all live in the core ledger, so this rapid-risky-flow pattern is buildable now and is the strongest transaction-pattern signal in the alert."
+        }
+      ]
+    },
+    {
+      "id": "fin-2024-alert005",
+      "advisory": "FIN-2024-ALERT005",
+      "title": "FinCEN Alert on Fraud Schemes Abusing FinCEN’s Name, Insignia, and Authorities for Financial Gain",
+      "date": "2024-12-18",
+      "source": "FinCEN FIN-2024-ALERT005 · FinCEN Alert on Fraud Schemes Abusing FinCEN’s Name, Insignia, and Authorities for Financial Gain · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 23,
+      "derivable": true,
+      "doc_type": "Alert"
+    },
+    {
+      "id": "fin-2025-alert001",
+      "advisory": "FIN-2025-ALERT001",
+      "title": "FinCEN Alert on Bulk Cash Smuggling and Repatriation by Mexico-Based Transnational Criminal Organizations",
+      "date": "2025-03-31",
+      "source": "FinCEN FIN-2025-ALERT001 · FinCEN Alert on Bulk Cash Smuggling and Repatriation by Mexico-Based Transnational Criminal Organizations · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 13,
+      "derivable": true,
+      "doc_type": "Alert"
+    },
+    {
+      "id": "fin-2025-alert002",
+      "advisory": "FIN-2025-ALERT002",
+      "title": "FinCEN Alert on Oil Smuggling Schemes on the U.S. Southwest Border Associated with Mexico-Based Cartels",
+      "date": "2025-05-01",
+      "source": "FinCEN FIN-2025-ALERT002 · FinCEN Alert on Oil Smuggling Schemes on the U.S. Southwest Border Associated with Mexico-Based Cartels · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 22,
+      "derivable": true,
+      "doc_type": "Alert",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "A customer is a small U.S.-based oil and natural gas company, importing company, or freight\ncompany operating in states on the U.S. southwest border with transactional activity and\nprofit margins that exceed the typical business profile of similar companies in their industries.",
+          "src_line": 325,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Per-customer transaction volume is in core data, but benchmarking margins against an industry peer profile needs energy-sector counterparty and revenue-norm data the bank only partly holds.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "A customer is a small U.S.-based oil and natural gas company that is selling WTI crude oil and\nother types of crude oil for significantly less than the market rate.23",
+          "src_line": 345,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Sale invoice amounts are in payment data, but judging a price as below-market requires a WTI spot-price reference feed and per-grade benchmarks that must be enriched in.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "A customer is a small U.S.-based oil and natural gas company that is selling millions of dollars\nof crude oil per month but has no online presence or is using a basic website that appears\ndesigned to closely resemble major U.S. oil and natural gas companies’ websites in order to\nmake their significant crude oil sales appear legitimate.",
+          "src_line": 348,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Monthly sales totals are in core data, but assessing absent or imitative web presence needs external web-footprint and brand-similarity signals the bank does not hold and must source.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "A customer is a small U.S.-based oil and natural gas company that has a website indicating it\nis only a buyer or seller of crude oil, but the company is sending wire transfers to Mexican or\nU.S. companies for purchases of purported waste oil or other hazardous materials.",
+          "src_line": 353,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "The contradiction between a crude-oil-only stated business and outbound wires memo-coded for waste-oil purchases is fully derivable from wire memo fields and the customer's stated NAICS/business profile.",
+          "build_logic": {
+            "signal_name": "S-STATED-BIZ-WIRE-MEMO-MISMATCH",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "stated_business_crude_only_flag",
+              "outbound_wire_memo_wasteoil_count",
+              "wasteoil_wire_total_amount",
+              "counterparty_country_mx_us_flag",
+              "memo_purpose_vs_naics_mismatch"
+            ],
+            "logic": "Flag a customer whose stated business is buying or selling crude oil only but whose outbound wires carry purchase memos for waste oil or other hazardous materials to Mexican or U.S. counterparties.",
+            "window": "rolling 30 days",
+            "source": "wire memo/purpose fields + onboarding stated-business profile",
+            "route": "Tier-1 alert → EDD business-purpose review gate"
+          }
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "A customer is a small U.S.-based oil and natural gas company that is suddenly purchasing\nwaste oil or other hazardous materials from a singular or small number of Mexican and U.S.\ncompanies.",
+          "src_line": 357,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A sudden onset of waste-oil purchase wires concentrated to one or a few counterparties is computable directly from wire counterparty IDs and timing in core payment data.",
+          "build_logic": {
+            "signal_name": "S-SUDDEN-CONCENTRATED-WASTEOIL-PURCHASE",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "wasteoil_purchase_wire_count",
+              "distinct_counterparty_count",
+              "counterparty_concentration_ratio",
+              "days_since_first_wasteoil_wire",
+              "purchase_amount_vs_baseline_zscore"
+            ],
+            "logic": "Flag a sharp increase in waste-oil or hazardous-materials purchase wires concentrated to a singular or small set of Mexican and U.S. counterparties after little or no prior such activity.",
+            "window": "rolling 30 days",
+            "source": "core wire ledger + counterparty registry",
+            "route": "Tier-1 alert → AML counterparty-concentration review gate"
+          }
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "A customer is a small U.S.-based oil and natural gas company that is sending wire transfers to\nMexican or U.S. companies for waste oil or other hazardous materials without possessing the\nappropriate registrations with the U.S. Environmental Protection Agency (EPA).24",
+          "src_line": 361,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "The waste-oil wires are in core data, but confirming the absence of EPA hazardous-materials registration requires cross-referencing the EPA ECHO registry the bank must enrich against.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "A customer is a small U.S.-based oil and natural gas company that is sending wire transfers\nfor waste oil or other hazardous materials to Mexican or U.S. companies that do not appear to\nbe related to the oil and natural gas industry.",
+          "src_line": 365,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Outbound waste-oil wire memos and counterparties are in core data, but determining whether the counterparty is outside the oil and gas industry needs external industry-classification data to enrich the counterparty record.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-08",
+          "section": "redflag",
+          "flag": "A customer is a small U.S.-based oil and natural gas company that has a sudden and significant\nvolume of transactional activity with one or a small number of Mexican or U.S. companies that\nhave little to no online presence and displays other indicators of illicit shell company activity.",
+          "src_line": 369,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Transaction concentration is computable, but the shell-company determination (no web presence, no economic substance) depends on external corporate-registry and web-footprint attribution the bank must source.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-09",
+          "section": "redflag",
+          "flag": "A customer is a small U.S.-based oil and natural gas company that is receiving domestic\nand international wire transfers for invoices related to the sale of crude oil but sending wire\ntransfers to Mexican or U.S. companies for invoices for the purchase of waste oil or other\nhazardous materials.",
+          "src_line": 373,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Both legs are in core wire data — crude-oil sale credits in versus waste-oil purchase debits out — so the inbound-crude/outbound-wasteoil invoice mismatch is directly computable from wire memo and direction fields.",
+          "build_logic": {
+            "signal_name": "S-CRUDE-IN-WASTEOIL-OUT-MISMATCH",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "inbound_crude_sale_wire_total",
+              "outbound_wasteoil_purchase_wire_total",
+              "inbound_outbound_memo_mismatch_flag",
+              "international_wire_share",
+              "wire_pass_through_ratio"
+            ],
+            "logic": "Flag a customer receiving domestic and international wires memo-coded as crude-oil sale invoices while sending wires memo-coded as waste-oil or hazardous-materials purchase invoices, indicating an invoice-purpose mismatch across the inbound and outbound legs.",
+            "window": "rolling 30 days",
+            "source": "core wire ledger memo/direction fields",
+            "route": "Tier-1 alert → AML trade-payment mismatch review gate"
+          }
+        },
+        {
+          "id": "IND-10",
+          "section": "redflag",
+          "flag": "A customer is a U.S. importing company that is receiving wire transfers from U.S.-based oil\nand natural gas companies and sending wire transfers to Mexican companies for invoices\ninvolving the U.S. importing company’s purchases of waste oil or other hazardous materials,\ndespite the U.S. importing company lacking appropriate registrations from the EPA.25",
+          "src_line": 378,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "The pass-through wire pattern from U.S. oil companies out to Mexican counterparties is in core data, but flagging the missing EPA registration needs the EPA ECHO registry enriched onto the customer.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-11",
+          "section": "redflag",
+          "flag": "A customer is a U.S. importing company that is receiving wire transfers from a small U.S.-\nbased oil and natural gas company for the sale of waste oil or other hazardous materials and\nthen wiring those funds to a singular or small number of companies in Mexico.",
+          "src_line": 383,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A pass-through pattern — inbound wires from one small oil company immediately re-wired out to a singular or small set of Mexican counterparties — is fully derivable from wire timing, amounts, and counterparty IDs in core data.",
+          "build_logic": {
+            "signal_name": "S-IMPORTER-WASTEOIL-PASSTHROUGH",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "inbound_wire_source_count",
+              "outbound_mx_counterparty_count",
+              "inbound_to_outbound_lag_hours",
+              "passthrough_amount_match_ratio",
+              "outbound_counterparty_concentration"
+            ],
+            "logic": "Flag a U.S. importing company that receives waste-oil sale wires from a small U.S. oil and gas company and rapidly re-wires matching funds to a singular or small number of Mexican companies.",
+            "window": "rolling 30 days",
+            "source": "core wire ledger + counterparty registry",
+            "route": "Tier-1 alert → AML pass-through review gate"
+          }
+        },
+        {
+          "id": "IND-12",
+          "section": "redflag",
+          "flag": "A customer claims to be a U.S.-based company involved in the import of waste oil or other\nhazardous materials, but upon further review, appears to be a shell company of a Mexican\ncompany.",
+          "src_line": 393,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Establishing that a stated U.S. importer is in fact a shell of a Mexican parent requires external corporate-registry and beneficial-ownership attribution the bank does not hold and must source.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-13",
+          "section": "redflag",
+          "flag": "A customer is a U.S. company that is the ultimate consignee of purchases of waste oil or other\nhazardous materials but is registered to a residential address.",
+          "src_line": 397,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "The waste-oil purchase activity is in core data, but flagging a residential registered address for a purported hazardous-materials consignee needs an address-classification source enriched onto the customer record.",
+          "build_logic": null
+        },
+        {
+          "id": "IND-14",
+          "section": "redflag",
+          "flag": "A customer is a small U.S.-based oil and natural gas company, importing company, or freight\ncompany operating on the U.S. southwest border that is transacting with Mexican and U.S.\ncompanies and their beneficial owners associated with Cartel-related activity based on open-\nsource reporting in Mexico, indictments, and OFAC designations and/or press releases.",
+          "src_line": 400,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "The customer's transactions are in core data, but tying counterparties and beneficial owners to Cartel activity depends on OFAC designations, indictments, and open-source attribution the bank must source externally.",
+          "build_logic": null
+        }
+      ]
+    },
+    {
+      "id": "fin-2025-alert003",
+      "advisory": "FIN-2025-ALERT003",
+      "title": "FinCEN Alert on Cross-Border Funds Transfers Involving Illegal Aliens",
+      "date": "2025-11-28",
+      "source": "FinCEN FIN-2025-ALERT003 · FinCEN Alert on Cross-Border Funds Transfers Involving Illegal Aliens · public domain (17 U.S.C. 105)",
+      "extraction": "none",
+      "flag_count": 0,
+      "derivable": false,
+      "doc_type": "Alert"
+    },
+    {
+      "id": "fin-2026-alert001",
+      "advisory": "FIN-2026-ALERT001",
+      "title": "FinCEN Alert on Fraud Rings and Their Exploitation of Federal Child Nutrition Programs in Minnesota",
+      "date": "2026-01-09",
+      "source": "FinCEN FIN-2026-ALERT001 · FinCEN Alert on Fraud Rings and Their Exploitation of Federal Child Nutrition Programs in Minnesota · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 17,
+      "derivable": true,
+      "doc_type": "Alert"
+    },
+    {
+      "id": "fin-2026-alert002",
+      "advisory": "FIN-2026-ALERT002",
+      "title": "FinCEN Alert on the Use of Front Companies, Financial Facilitators, and Digital Asset Infrastructure by Iran’s Islamic Revolutionary Guard Corps to Evade Sanctions and Launder Proceeds",
+      "date": "2026-05-11",
+      "source": "FinCEN FIN-2026-ALERT002 · FinCEN Alert on the Use of Front Companies, Financial Facilitators, and Digital Asset Infrastructure by Iran’s Islamic Revolutionary Guard Corps to Evade Sanctions and Launder Proceeds · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 43,
+      "derivable": true,
+      "doc_type": "Alert"
     }
   ]
 };
@@ -2537,7 +3800,7 @@ const REC_COLOR={BUILD_NOW:'var(--green)',ENHANCE:'var(--blue)',BUILD_ENRICH:'va
 const REC_LABEL={BUILD_NOW:'build now',ENHANCE:'enhance',BUILD_ENRICH:'build + enrich',
   SOURCE_DATA:'source data',MONITOR:'monitor',COVERED:'covered'};
 
-const STEPS=['Select advisory','Coverage','Build recs','Signal','Close the loop'];
+const STEPS=['Select document','Coverage','Build recs','Signal','Close the loop'];
 
 // escapes text AND attribute positions (quotes included) — corpus.html interpolates into both.
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -2600,15 +3863,17 @@ function renderSelect(){
   const live=ADVISORIES.filter(isLive).length;
   const ready=ADVISORIES.filter(a=>a.derivable && !isLive(a)).length;
   const nd=ADVISORIES.filter(a=>!a.derivable).length;
+  const advN=ADVISORIES.filter(a=>a.doc_type!=='Alert').length;
+  const alertN=ADVISORIES.filter(a=>a.doc_type==='Alert').length;
   stage.innerHTML=`<div class="scene">
-    <div class="eyebrow">FinCEN advisory corpus</div>
-    <h2>Pick an advisory. <em>Watch the loop derive it.</em></h2>
-    <p class="lead">The same signal engine, pointed at the public FinCEN advisory corpus. Choose a <b>derived</b> advisory and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
+    <div class="eyebrow">FinCEN advisory + alert corpus</div>
+    <h2>Pick a document. <em>Watch the loop derive it.</em></h2>
+    <p class="lead">The same signal engine, pointed at the public FinCEN corpus — advisories and alerts. Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
     <div class="selhead">
-      <span class="sct">${ADVISORIES.length} advisories · ${live} derived · ${ready} ready to derive · ${nd} no red-flag list</span>
+      <span class="sct">${ADVISORIES.length} FinCEN publications · ${advN} advisories · ${alertN} alerts · ${live} derived · ${ready} ready to derive · ${nd} non-derivable</span>
     </div>
     <div class="advgrid">${list.map(a=>advCard(a)).join('')}</div>
-    <div class="framenote">Coverage and data-availability are illustrative; the advisory titles and red-flag text are verbatim from the public-domain source documents.</div>
+    <div class="framenote">Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the public-domain source documents.</div>
   </div>`;
   stage.querySelectorAll('.advcard.live').forEach(el=>el.onclick=()=>pick(el.dataset.id));
 }
@@ -2624,11 +3889,11 @@ function advCard(a){
     chip=`<span class="chip ${cls}">${esc(a.extraction)} · ${a.flag_count||0} flags · not yet derived</span>`;
     sub=`${esc(a.date||'')}${a.date?' · ':''}extraction: ${esc(a.extraction)}`;
   } else {
-    chip=`<span class="chip none">no red-flag list</span>`;
+    chip=`<span class="chip none">no enumerated red-flag list</span>`;
     sub=`${esc(a.date||'')}${a.date?' · ':''}not derivable`;
   }
   return `<div class="advcard ${live?'live':'inert'}" data-id="${esc(a.id)}">
-    <div class="actop"><span class="acno">${esc(a.advisory||a.id)}</span>${chip}</div>
+    <div class="actop"><span class="acleft"><span class="acno">${esc(a.advisory||a.id)}</span><span class="chip doc">${esc(a.doc_type||'Advisory')}</span></span>${chip}</div>
     <div class="actitle">${esc(a.title||a.id)}</div>
     <div class="acmeta">${sub}</div>
   </div>`;
@@ -2641,7 +3906,7 @@ function renderCoverage(a){
   const inds=a.indicators, cov=coverageIndex(inds);
   stage.innerHTML=`<div class="scene">
     <div class="eyebrow">${esc(a.advisory||a.id)} · Coverage</div>
-    <h2>Where are we <em>blind</em> on this advisory?</h2>
+    <h2>Where are we <em>blind</em> on this document?</h2>
     ${srcCap(a)}
     <p class="lead">Each enumerated red flag, scored against our existing detection library: do we already cover it? The coverage index is derived from those statuses.</p>
     <div class="covwrap">
@@ -2672,7 +3937,7 @@ function renderBuildRecs(a){
     <div class="eyebrow">${esc(a.advisory||a.id)} · Build recommendations · gate</div>
     <h2>You decide what we <em>build</em>.</h2>
     ${srcCap(a)}
-    <p class="lead">Coverage status × data availability produces a single recommendation per red flag. <b style="color:var(--green)">Build now</b> = an uncovered gap we already hold the data for. ${nb?`<b>${nb}</b> ${nb===1?'indicator is':'indicators are'} immediately buildable — <b style="color:var(--green)">pick which to commit</b>; your choice carries through to the drafted signals and the coverage you close.`:'No immediately-buildable gap on this advisory — the rest need data work first.'}</p>
+    <p class="lead">Coverage status × data availability produces a single recommendation per red flag. <b style="color:var(--green)">Build now</b> = an uncovered gap we already hold the data for. ${nb?`<b>${nb}</b> ${nb===1?'indicator is':'indicators are'} immediately buildable — <b style="color:var(--green)">pick which to commit</b>; your choice carries through to the drafted signals and the coverage you close.`:'No immediately-buildable gap on this document — the rest need data work first.'}</p>
     <div class="brec">${inds.map((i,k)=>brecRow(i,a,k)).join('')}</div>
     <div class="framenote">The agent proposes; the human disposes. Each recommendation is deterministic given (coverage, data) — the LLM proposes the judgment, the cover×data matrix disposes it; no recommendation is invented.</div>
   </div>`;
@@ -2711,7 +3976,7 @@ function renderSignal(a){
   const builds=allBuilds.filter(i=>selected.has(i.id));                                       // what the human committed at the gate
   // two honest empty states: nothing buildable at all (data-limited) vs. everything deselected (a choice).
   const emptyMsg=allBuilds.length===0
-    ? 'No immediately-buildable signal for this advisory — its gaps need data enrichment or sourcing first (see the build recommendations).'
+    ? 'No immediately-buildable signal for this document — its gaps need data enrichment or sourcing first (see the build recommendations).'
     : 'No build-now gaps selected — go back to the build recommendations and pick at least one to draft.';
   stage.innerHTML=`<div class="scene">
     <div class="eyebrow">${esc(a.advisory||a.id)} · Signal</div>
@@ -2770,7 +4035,7 @@ function renderClose(a){
         <div class="gdelta ${delta>0?'show':''}" id="gdelta">${delta>0?`▲ +${delta} pts · ${n} gap${n===1?'':'s'} closed`:'coverage holds — no gap committed'}</div>
       </div>
     </div>
-    <div class="framenote">The advisory radar runs continuously — the next gap is found before it becomes a headline. Every figure is illustrative; the workflow and the decision points are real.</div>
+    <div class="framenote">The corpus radar runs continuously — the next gap is found before it becomes a headline. Every figure is illustrative; the workflow and the decision points are real.</div>
   </div>`;
   T(()=>{const f=document.getElementById('gfill');if(f)f.style.width=after+'%';animVal('gnum',before,after,1000,'%');},300);
 }
@@ -2789,7 +4054,7 @@ function render(){
     }
   }catch(e){
     console.error('corpus render',view,screen,e);
-    stage.innerHTML='<div class="scene"><div class="eyebrow">Corpus explorer</div><h2>This view can\'t render</h2><div class="empty">The data for this screen is missing or malformed — return to the advisory list.</div></div>';
+    stage.innerHTML='<div class="scene"><div class="eyebrow">Corpus explorer</div><h2>This view can\'t render</h2><div class="empty">The data for this screen is missing or malformed — return to the document list.</div></div>';
   }
   updateControls();
   window.scrollTo({top:0,behavior:REDUCED?'auto':'smooth'});
@@ -2816,14 +4081,14 @@ function updateControls(){
     backBtn.style.visibility='hidden';
     resetBtn.style.visibility='hidden';
     nextBtn.style.visibility='hidden';
-    hint.textContent='Pick a derived advisory to explore →';
+    hint.textContent='Pick a derived document to explore →';
     return;
   }
   backBtn.style.visibility='visible';
   resetBtn.style.visibility='visible';
   nextBtn.style.visibility='visible';
   const backLabels=['‹ Advisories','‹ Coverage','‹ Build recs','‹ Signal'];
-  const nextLabels=['Build recommendations ›','Signal spec ›','Close the loop ›','↺ Another advisory'];
+  const nextLabels=['Build recommendations ›','Signal spec ›','Close the loop ›','↺ Another document'];
   const hints=['Each red flag scored against the library','Pick the build-now gaps to commit','Drafted signals for your committed gaps','Coverage closes on what you built'];
   backBtn.textContent=backLabels[screen]||'‹ Back';
   nextBtn.textContent=nextLabels[screen]||'Next ›';

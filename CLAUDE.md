@@ -26,7 +26,7 @@ AML transformation framework. Keep vocabulary consistent with it
 - Live mode is optional, isolated, off by default, always has a scripted fallback.
   Never put keys/tokens in the frontend. Copilot is NOT a web backend (HANDOFF §4.5).
 
-## Current state (M7 — corpus-backed derivation; M6 pipeline complete)
+## Current state (M7 — corpus-backed derivation, multi-source; M6 pipeline complete)
 - Generic engine: `index.html` (vanilla HTML/CSS/JS) with a single `__CONFIG__` injection point.
   Typology-agnostic — adding a typology is one JSON file, no engine edits. Presenter controls (M3):
   keyboard nav (←/→/Space/Esc/↺), reset, `prefers-reduced-motion`.
@@ -62,7 +62,8 @@ AML transformation framework. Keep vocabulary consistent with it
   `dist/corpus/index.html`, built from a standalone template `corpus.html` (owns its own copy of the
   dossier theme — the six-act engine `index.html` is left byte-untouched). A staged 5-screen ARC
   (Phase 18 gave the explorer the showcase's two missing beats — a human gate + a close-the-loop payoff):
-  SELECT one of the 14 advisories (honest status chips: derived / clean-or-low-not-yet-derived /
+  SELECT one of the 33 FinCEN publications (14 advisories + 19 alerts — Phase 20; honest `doc_type` chip
+  Advisory/Alert + status chips: derived / clean-or-low-not-yet-derived /
   non-derivable) → COVERAGE gauge → BUILD RECOMMENDATIONS **= the human GATE** (per-indicator cover×data
   build_rec, sorted BUILD_NOW-first, each row src_line-traceable; the BUILD_NOW rows are SELECTABLE
   div-toggles [NOT `<input>`, so Space/arrow nav still works] — default all-selected, "agent proposes,
@@ -85,6 +86,19 @@ AML transformation framework. Keep vocabulary consistent with it
   unreachable by the deleted structural extractor yet ship derived via the inverted loop (the LLM reads
   them like a human, the gate grounds each verbatim flag). No fabricated lift/stats; the always-on badge
   stays, with the verbatim public-domain source attribution kept visually distinct from it.
+- Multi-source corpus (Phase 20, M7 — scale beyond advisories): the corpus explorer is now MULTI-SOURCE.
+  A thin `CORPUS_SOURCES` registry in `build.py` (source-id → {status, derived dir, doc_type}) lets
+  `render_corpus` merge each FinCEN publication TYPE's committed `corpus-status.json` + `derived/*.json` by
+  id into one `__CORPUS__`; the SELECT menu lists all of them with an honest `doc_type` chip (Advisory /
+  Alert). FinCEN ALERTS are source #2 (`data/fincen-alerts/` — 19 alert md, 6 derived): acquired by
+  `crawl_fincen.py --alerts` (the alerts hub lists each PDF DIRECTLY → zero-hop download) →
+  `acquire_fincen.py`/`pdf_to_md.py --source data/fincen-alerts` → derived via the SAME inverted loop +
+  gate. Ships **18 derived across 33 FinCEN publications** (12 advisories + 6 alerts). STILL FinCEN, STILL
+  verbatim, STILL public-domain (17 U.S.C. 105) — so NO non-negotiable changed; the quote-grounding gate
+  (`check_record`/`rf_region`/`normalize`) is source-agnostic and reused UNCHANGED. `data/fincen/` (the
+  advisories source) stays byte-frozen — multi-source via the MERGE, not a migration. OFAC (also US-federal
+  public domain under 17 U.S.C. 105) is the documented next-source candidate; cross-jurisdiction sources
+  (FINTRAC etc.) would require paraphrase, which breaks quote-grounding (not pursued).
 - IMPORTANT — INVERTED extraction boundary (Phase 16) + the SUBTRACTION (Phase 17): the **LLM EXTRACTS, the
   deterministic layer GATES**, and the old extractor is **DELETED**. The earlier deterministic
   `extract_red_flags` accreted format special-casing every phase yet the LLM still had to author/prune its
@@ -116,14 +130,19 @@ AML transformation framework. Keep vocabulary consistent with it
 
 ## How to run
 - Build: `python3 scripts/build.py <id>` (or `all`) → `dist/<id>/index.html`.
-- Corpus explorer: `python3 scripts/build.py corpus` → `dist/corpus/index.html` (from `corpus.html` +
-  `data/fincen/corpus-status.json` + `data/fincen/derived/*.json`). Regenerate the manifest with
-  `python3 scripts/derive_signals.py --corpus-status` after the corpus md set changes, then rebuild.
+- Corpus explorer (MULTI-SOURCE): `python3 scripts/build.py corpus` → `dist/corpus/index.html`, merging
+  every source in `build.py`'s `CORPUS_SOURCES` registry — `data/fincen/` (advisories) + `data/fincen-alerts/`
+  (alerts), each contributing `corpus-status.json` + `derived/*.json`. Regenerate a source's manifest with
+  `python3 scripts/derive_signals.py --corpus-status [source_dir]` (default `data/fincen`) after its md set
+  changes, then rebuild. Acquire a new FinCEN source: `crawl_fincen.py [--alerts] --fetch` then `--write` →
+  `acquire_fincen.py --source <dir> <id>` → `pdf_to_md.py --source <dir> <id>` (raw PDFs are gitignored;
+  the committed `<dir>/*.md` is the derivation surface).
 - Present: open `dist/<id>/index.html` (or `dist/corpus/index.html`) — single self-contained file,
   offline, no server. Drift guard before presenting: `python3 scripts/build.py --check all`.
 - Test (all dep-free, no install): `node tests/corpus-explorer.test.mjs` drives the corpus explorer's
   5-screen arc against the committed `dist/corpus/index.html` (gate toggle, Signal empty states,
-  close-the-loop coverage math, reduced-motion) · `python3 scripts/derive_signals.py --selftest` runs
+  close-the-loop coverage math, reduced-motion) + the Phase-20 multi-source menu (advisories + alerts,
+  doc_type chips, an alert walks the arc) · `python3 scripts/derive_signals.py --selftest` runs
   the derivation GATE checks. Pre-present sequence: `--check all` (drift) → `node tests/…` (arc) → walk
   `tests/smoke-checklist.md` (the human-eye checks).
 - Iterate: edit `index.html` / `corpus.html` / a config, rebuild. `python3 -m http.server` optional, never required.
@@ -147,7 +166,8 @@ JetBrains Mono. Theme lives in `:root` CSS variables. Refined, not flashy.
 ## Milestones
 M0 bootstrap · M1 config-driven refactor · M2 multi-typology · M3 presenter polish ·
 M4 (skipped) live/pre-gen mode · M5 ship · M6 Signal Watch ingestion pipeline (FinCEN verbatim) ·
-M7 corpus-backed demo (Phase 12 derivation backend + Phase 13 corpus explorer `dist/corpus/`).
+M7 corpus-backed demo (Phase 12 derivation backend + Phase 13 corpus explorer `dist/corpus/` +
+Phase 20 multi-source: FinCEN advisories + alerts, 18 derived across 33 publications).
 See HANDOFF.md §8.
 
 ## Definition of done

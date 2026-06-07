@@ -1,0 +1,135 @@
+[
+  {
+    "id": "fin-2020-alert001",
+    "title": "FinCEN Alerts Financial Institutions to Convertible Virtual Currency Scam Involving Twitter",
+    "date": "2020-07-16",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/2020-07/FinCEN%20Alert%20Twitter_508%20FINAL.pdf"
+  },
+  {
+    "id": "fin-2022-alert001",
+    "title": "FinCEN Advises Increased Vigilance for Potential Russian Sanctions Evasion Attempts",
+    "date": "2022-03-07",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/2022-03/FinCEN%20Alert%20Russian%20Sanctions%20Evasion%20FINAL%20508.pdf"
+  },
+  {
+    "id": "fin-2022-alert002",
+    "title": "FinCEN Alert on Real Estate, Luxury Goods, and Other High Value Assets Involving Russian Elites, Oligarchs, and their Family Members",
+    "date": "2022-03-16",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/2022-03/FinCEN%20Alert%20Russian%20Elites%20High%20Value%20Assets_508%20FINAL.pdf"
+  },
+  {
+    "id": "fin-2022-alert003",
+    "title": "FinCEN and the U.S. Department of Commerce\u2019s Bureau of Industry and Security Urge Increased Vigilance for Potential Russian and Belarusian Export Control Evasion Attempts",
+    "date": "2022-06-28",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/2022-06/FinCEN%20and%20Bis%20Joint%20Alert%20FINAL.pdf"
+  },
+  {
+    "id": "fin-2023-alert001",
+    "title": "FinCEN Alert on Human Smuggling Along the Southwest Border of the United States",
+    "date": "2023-01-13",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/shared/FinCEN%20Alert%20Human%20Smuggling%20FINAL_508.pdf"
+  },
+  {
+    "id": "fin-2023-alert002",
+    "title": "FinCEN Alert on Potential U.S. Commercial Real Estate Investments by Sanctioned Russian Elites, Oligarchs, and Their Proxies",
+    "date": "2023-01-25",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/shared/FinCEN%20Alert%20Real%20Estate%20FINAL%20508_1-25-23%20FINAL%20FINAL.pdf"
+  },
+  {
+    "id": "fin-2023-alert003",
+    "title": "FinCEN Alert on Nationwide Surge in Mail Theft-Related Check Fraud Schemes Targeting the U.S. Mail",
+    "date": "2023-02-27",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/shared/FinCEN%20Alert%20Mail%20Theft-Related%20Check%20Fraud%20FINAL%20508.pdf"
+  },
+  {
+    "id": "fin-2023-alert004",
+    "title": "Supplemental Alert: FinCEN and the U.S. Department of Commerce\u2019s Bureau of Industry and Security Urge Continued Vigilance for Potential Russian Export Control Evasion Attempts",
+    "date": "2023-05-19",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/shared/FinCEN%20and%20BIS%20Joint%20Alert%20_FINAL_508C.pdf"
+  },
+  {
+    "id": "fin-2023-alert005",
+    "title": "FinCEN Alert on Prevalent Virtual Currency Investment Scam Commonly Known as \u201cPig Butchering\u201d",
+    "date": "2023-09-08",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/shared/FinCEN_Alert_Pig_Butchering_FINAL_508c.pdf"
+  },
+  {
+    "id": "fin-2023-alert006",
+    "title": "FinCEN Alert to Financial Institutions to Counter Financing to Hamas and its Terrorist Activities",
+    "date": "2023-10-20",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/2025-09/FinCEN_Alert_Terrorist_Financing_proof1.pdf"
+  },
+  {
+    "id": "fin-2023-alert007",
+    "title": "FinCEN Alert on COVID-19 Employee Retention Credit Fraud",
+    "date": "2023-11-22",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/shared/FinCEN_ERC_Fraud_Alert_FINAL508.pdf"
+  },
+  {
+    "id": "fin-2024-alert003",
+    "title": "FinCEN Alert to Financial Institutions to Counter Financing of Hizballah and its Terrorist Activities",
+    "date": "2024-10-23",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/shared/FinCEN-Alert-Hizballah-Alert-508C.pdf"
+  },
+  {
+    "id": "fin-2024-alert004",
+    "title": "FinCEN Alert on Fraud Schemes Involving Deepfake Media Targeting Financial Institutions",
+    "date": "2024-11-13",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/shared/FinCEN-Alert-DeepFakes-Alert508FINAL.pdf"
+  },
+  {
+    "id": "fin-2024-alert005",
+    "title": "FinCEN Alert on Fraud Schemes Abusing FinCEN\u2019s Name, Insignia, and Authorities for Financial Gain",
+    "date": "2024-12-18",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/2024-12/Alert-FinCEN-Scams-FINAL508.pdf"
+  },
+  {
+    "id": "fin-2025-alert001",
+    "title": "FinCEN Alert on Bulk Cash Smuggling and Repatriation by Mexico-Based Transnational Criminal Organizations",
+    "date": "2025-03-31",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/shared/BCS-Alert-FINAL-508C.pdf"
+  },
+  {
+    "id": "fin-2025-alert002",
+    "title": "FinCEN Alert on Oil Smuggling Schemes on the U.S. Southwest Border Associated with Mexico-Based Cartels",
+    "date": "2025-05-01",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/shared/FinCEN-Alert-Oil-Smuggling-FINAL-508C.pdf"
+  },
+  {
+    "id": "fin-2025-alert003",
+    "title": "FinCEN Alert on Cross-Border Funds Transfers Involving Illegal Aliens",
+    "date": "2025-11-28",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/FinCEN_Alert_Cross_Border_FINAL508.pdf"
+  },
+  {
+    "id": "fin-2026-alert001",
+    "title": "FinCEN Alert on Fraud Rings and Their Exploitation of Federal Child Nutrition Programs in Minnesota",
+    "date": "2026-01-09",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/2026-01/FinCEN-Alert-Federal-Child-Nutrition-Programs.pdf"
+  },
+  {
+    "id": "fin-2026-alert002",
+    "title": "FinCEN Alert on the Use of Front Companies, Financial Facilitators, and Digital Asset Infrastructure by Iran\u2019s Islamic Revolutionary Guard Corps to Evade Sanctions and Launder Proceeds",
+    "date": "2026-05-11",
+    "type": "alert",
+    "url": "https://www.fincen.gov/system/files/2026-05/FinCEN-Alert-IRGC.pdf"
+  }
+]

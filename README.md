@@ -81,8 +81,11 @@ python3 scripts/acquire_fincen.py <id>        # LIVE: download one advisory PDF 
 .venv/bin/python scripts/pdf_to_md.py <id>    # convert PDF -> data/fincen/<id>.md (verbatim source of truth)
 python3 scripts/derive_signals.py --selftest                     # offline: the deterministic GATE checks (matrix + quote-grounding + relevance + shape)
 python3 scripts/derive_signals.py --check-derived <record.json>  # offline: DISPOSE a derived record (the gate)
-python3 scripts/derive_signals.py --corpus                       # offline: cheap rf_region triage across ALL 14 committed advisories
-python3 scripts/derive_signals.py --corpus-status                # offline: emit data/fincen/corpus-status.json (the corpus-explorer manifest)
+python3 scripts/derive_signals.py --corpus [source_dir]          # offline: cheap rf_region triage across a source's committed md (default data/fincen)
+python3 scripts/derive_signals.py --corpus-status [source_dir]   # offline: emit <source_dir>/corpus-status.json (the corpus-explorer manifest)
+# Phase 20 — a second FinCEN source (ALERTS): --alerts on the crawl, --source <dir> on acquire/convert/status
+python3 scripts/crawl_fincen.py --alerts --fetch                 # LIVE: refresh the alerts-hub fixture (then `--alerts --write` -> data/fincen-alerts/index.json)
+.venv/bin/python scripts/pdf_to_md.py --source data/fincen-alerts <id>   # convert one alert PDF -> data/fincen-alerts/<id>.md
 ```
 
 `crawl_fincen.py` discovers the FinCEN advisories listing into the committed manifest
@@ -95,7 +98,11 @@ plus the per-indicator judgment into `data/fincen/derived/<id>.json`, and `--che
 ship artifact stays single-file, offline, never fetches, and never calls an LLM. Only PDF conversion
 (`markitdown`) needs a gitignored uv `.venv` (see `scripts/requirements-authoring.txt`); everything in
 `derive_signals.py` is pure stdlib. FinCEN advisories are U.S. federal works in the public domain
-(17 U.S.C. §105).
+(17 U.S.C. §105). Phase 20 generalized these authoring tools to multiple FinCEN sources: `crawl_fincen.py
+--alerts` discovers the FinCEN **alerts** hub (each PDF linked directly → zero-hop), and
+`acquire_fincen.py` / `pdf_to_md.py` / `derive_signals.py --corpus-status` take a `--source <dir>`, so
+alerts (`data/fincen-alerts/`) ingest and derive through the *same* gate — still verbatim, still
+public-domain, no non-negotiable changed.
 
 **Corpus derivation (the backend for a singular corpus-backed demo).** The full 14-advisory FinCEN corpus
 is committed as markdown (`data/fincen/*.md`). The LLM backend reads an advisory and *extracts* its red
@@ -129,14 +136,14 @@ non-derivable).
 
 `dist/corpus/index.html` is a **second, separate** single-file ship artifact: a FinCEN **corpus
 explorer**. Where the six-act typology demos each tell one scripted story, the explorer points the same
-loop at the *whole public advisory corpus* — you pick one of the 14 advisories and watch it derive. It
-is a **staged 5-screen arc** (Phase 18 gave it the two beats the six-act showcase has and the explorer
-lacked — a human gate and a close-the-loop payoff):
+loop at the *whole public FinCEN corpus* — advisories and alerts — you pick one of the 33 publications
+and watch it derive. It is a **staged 5-screen arc** (Phase 18 gave it the two beats the six-act showcase
+has and the explorer lacked — a human gate and a close-the-loop payoff):
 
-1. **Select** — all 14 advisories, each with an honest status chip: *derived* (live, clickable — 12 of
-   them), or *no red-flag list* (non-derivable — the 2 FATF jurisdiction advisories). The chip also has a
-   *clean / low* extraction state (ready to derive, not yet derived) for any future advisory added to the
-   corpus before it is derived.
+1. **Select** — all 33 FinCEN publications (14 advisories + 19 alerts), each with an honest `doc_type`
+   chip (*Advisory* / *Alert*) and a status chip: *derived* (live, clickable — 18 of them), *ready to
+   derive* (clean / low — extracted but not yet derived, 11), or *no red-flag list* (non-derivable — 4:
+   the 2 FATF jurisdiction advisories + 2 alerts with no enumerated red-flag list).
 2. **Coverage** — the chosen advisory's coverage gauge, derived from its indicator statuses.
 3. **Build recommendations — the human gate** *(the centerpiece)* — per red-flag indicator: coverage ×
    data → one **build recommendation** (`BUILD NOW / ENHANCE / BUILD + ENRICH / SOURCE DATA / MONITOR /
@@ -154,21 +161,36 @@ lacked — a human gate and a close-the-loop payoff):
 
 Build it with `python3 scripts/build.py corpus` (or `all`); guard it with `python3 scripts/build.py
 --check corpus` (folded into `--check all`). The build is **decoupled from the authoring layer**: it
-reads two committed data artifacts — the extraction manifest `data/fincen/corpus-status.json` (emitted
-by `derive_signals.py --corpus-status`) and the LLM-derived records `data/fincen/derived/*.json` —
-merges them by advisory id, and validates the derived records' shape at the build boundary (every
-`build_rec` in the matrix vocabulary; a `BUILD NOW` indicator must carry a full signal definition).
-`build.py` never imports `derive_signals.py`. The advisory titles and red-flag text are verbatim public
-domain; the coverage/data/build judgments are illustrative (the "Illustrative data & outputs" badge
-stays on, with the per-advisory source attribution kept visually distinct from it). The explorer ships
-with **12 of 14** advisories derived — only the two FATF jurisdiction advisories (which carry no
-enumerated red-flag list) stay non-derivable. The menu is deliberately varied: the transaction-pattern-rich
+iterates the `CORPUS_SOURCES` registry (Phase 20 — multi-source), reading each source's committed
+extraction manifest `corpus-status.json` (emitted by `derive_signals.py --corpus-status [source_dir]`)
+and LLM-derived records `derived/*.json`, merging them all by id into one menu, and validating the
+derived records' shape at the build boundary (every `build_rec` in the matrix vocabulary; a `BUILD NOW`
+indicator must carry a full signal definition). `build.py` never imports `derive_signals.py`. The titles
+and red-flag text are verbatim public domain; the coverage/data/build judgments are illustrative (the
+"Illustrative data & outputs" badge stays on, with the per-document source attribution kept visually
+distinct from it). The explorer ships with **18 derived across 33 FinCEN publications** (12 of 14
+advisories + 6 of 19 alerts) — the non-derivable documents (the 2 FATF advisories + 2 alerts with no
+enumerated red-flag list) are labelled as such. The menu is deliberately varied: the transaction-pattern-rich
 Chinese money-laundering-networks typology (`fin-2025-a003`) surfaces five immediately-buildable signals;
 the enrichment-hungry Iran (`fin-2025-a002`) and Iran-backed-terror-finance (`fin-2024-a001`) typologies
 lean to *build + enrich*; the **glued-no-separator** advisories — ransomware (`fin-2021-a004`) and
 health-care fraud (`fin-2026-a001`, 24 red flags) — were unreachable by the deleted structural extractor
 yet ship derived via the inverted loop (the LLM reads them like a human, the gate grounds every verbatim
-flag). The front-end shows the full corpus honestly; the two non-derivable advisories are labelled as such.
+flag). The front-end shows the full corpus honestly; the non-derivable documents are labelled as such.
+
+**Multi-source (Phase 20) — beyond advisories, still verbatim FinCEN.** A thin `CORPUS_SOURCES` registry
+in `build.py` maps each FinCEN publication *type* to its own committed `corpus-status.json` +
+`derived/*.json`, and `render_corpus` merges them into one menu with an honest `doc_type` chip per card.
+**FinCEN Alerts** are the second source (`data/fincen-alerts/` — 19 alert markdown files, 6 derived):
+`crawl_fincen.py --alerts` discovers them from the FinCEN alerts hub (each PDF is linked directly — a
+zero-hop download), then `acquire_fincen.py` / `pdf_to_md.py --source data/fincen-alerts` convert them,
+and they derive through the **same inverted loop and the same gate** — nothing about the derivation
+changed. This stays inside the one verbatim exception: alerts are still FinCEN, still U.S.-federal public
+domain (17 U.S.C. §105), so **no non-negotiable changed** and the quote-grounding gate is reused
+unchanged; `data/fincen/` (the advisories source) is byte-frozen — the corpus grew by *merge*, not
+migration. The documented next source is **OFAC** (also U.S.-federal public domain under the same
+statute); a cross-jurisdiction source (FINTRAC, FATF, …) would have to be paraphrased, which breaks
+verbatim quote-grounding, so it is deliberately not pursued.
 
 ## Present it
 

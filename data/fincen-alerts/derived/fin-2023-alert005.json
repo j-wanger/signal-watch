@@ -1,0 +1,185 @@
+{
+  "id": "fin-2023-alert005",
+  "advisory": "FIN-2023-ALERT005",
+  "source_md": "data/fincen-alerts/fin-2023-alert005.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "Behavioral Red Flags",
+      "flag": "A customer with no history or background of using, exchanging, or otherwise interacting\nwith virtual currency attempts to exchange a high amount of fiat currency from an existing or\nnewly opened bank account for virtual currency or attempts to initiate high-value transfers to\nVASPs.",
+      "src_line": 247,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "A first-time-crypto customer pushing high-value fiat out of a new or existing bank account toward VASPs is fully observable on core account and wire/ACH rails, but no signal flags the no-history-to-high-VASP-transfer transition today.",
+      "build_logic": {
+        "signal_name": "S-new-crypto-fiat-outflow",
+        "class": "entity · account-level · windowed",
+        "features": ["prior_vc_interaction_flag", "account_age_days", "outbound_vasp_transfer_amount", "outbound_vasp_transfer_count", "fiat_to_vasp_ratio"],
+        "logic": "Fire when a customer with no prior virtual-currency interaction history initiates high-value or escalating fiat transfers to known VASP counterparties from a recently opened or previously low-activity bank account within the window.",
+        "window": "rolling 30 days",
+        "source": "core account ledger + outbound wire/ACH rail + VASP counterparty list",
+        "route": "Tier-1 alert → first-time-crypto outflow review gate"
+      }
+    },
+    {
+      "id": "IND-02",
+      "section": "Behavioral Red Flags",
+      "flag": "A customer mentions or expresses interest in an investment opportunity leveraging virtual\ncurrency with significant returns that they were told about from a new contact who reached\nout to them unsolicited online or through text message.",
+      "src_line": 252,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Detecting an unsolicited-contact investment pitch depends on customer-disclosed conversational context (chat/social-media origin) that the institution does not hold, so the data must be sourced before any signal is buildable."
+    },
+    {
+      "id": "IND-03",
+      "section": "Behavioral Red Flags",
+      "flag": "A customer mentions that they were instructed by an individual who recently contacted them\nto exchange fiat currency for virtual currency at a virtual currency kiosk and deposit the\nvirtual currency at an address supplied by the individual.",
+      "src_line": 256,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Kiosk-instruction-by-a-recent-contact is a verbal disclosure with no transaction footprint at the institution; the social/instruction context must be sourced externally before a detection rule can exist."
+    },
+    {
+      "id": "IND-04",
+      "section": "Behavioral Red Flags",
+      "flag": "A customer appears distressed or anxious to access funds to meet demands or the timeline of\na virtual currency investment opportunity.",
+      "src_line": 260,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Customer distress or urgency is a branch/contact-center behavioral observation not captured in structured transaction data, so the affect signal must first be sourced into a structured field."
+    },
+    {
+      "id": "IND-05",
+      "section": "Financial Red Flags",
+      "flag": "A customer uncharacteristically liquidates savings accounts prior to maturation, such as a\ncertificate of deposit, and then subsequently attempts to wire the liquidated fiat currency to a\nVASP or to exchange them for virtual currency.",
+      "src_line": 265,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Early CD/savings liquidation followed by a wire to a VASP is fully reconstructable from deposit-product and wire records, but no signal chains the premature-liquidation event to the downstream VASP transfer.",
+      "build_logic": {
+        "signal_name": "S-premature-liquidation-to-vasp",
+        "class": "entity · account-level · windowed",
+        "features": ["early_withdrawal_penalty_flag", "cd_liquidation_amount", "days_to_maturity_at_liquidation", "outbound_vasp_wire_amount", "liquidation_to_vasp_lag_days"],
+        "logic": "Fire when a customer liquidates a savings or CD account before maturity (incurring an early-withdrawal penalty) and subsequently wires or exchanges the freed fiat to a VASP within the window.",
+        "window": "rolling 30 days",
+        "source": "deposit-product ledger + early-withdrawal penalty feed + outbound wire rail + VASP counterparty list",
+        "route": "Tier-1 alert → premature-liquidation review gate"
+      }
+    },
+    {
+      "id": "IND-06",
+      "section": "Financial Red Flags",
+      "flag": "A customer takes out a HELOC, home equity loan, or second mortgage and uses the proceeds\nto purchase virtual currency or wires the proceeds to a VASP for the purchase of virtual\ncurrency.",
+      "src_line": 269,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Loan-origination and outbound-wire records make HELOC/second-mortgage-proceeds-to-VASP partly observable, but linking a specific loan disbursement to the downstream crypto purchase needs the existing rule enhanced with proceeds-tracing."
+    },
+    {
+      "id": "IND-07",
+      "section": "Financial Red Flags",
+      "flag": "A customer receives what appears to be a deposit of virtual currency from a virtual currency\naddress at or slightly above the amount that the customer previously transferred out of\ntheir virtual currency account.  This deposit is then followed by outgoing transfers from the\ncustomer in substantially larger amounts.",
+      "src_line": 273,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "The small confidence-building return followed by larger outflows is a chain-analytics pattern; institutions see only partial VASP-exposure data, so the signal needs blockchain enrichment before it is buildable."
+    },
+    {
+      "id": "IND-08",
+      "section": "Financial Red Flags",
+      "flag": "Accounts with large balances that are inactive or have limited activity begin to show constant,\nuncharacteristic, sudden, abnormally frequent, or significant withdrawals of large amounts of\nmoney being transferred to a VASP or being exchanged for virtual currency.",
+      "src_line": 286,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Dormant-account-to-active VASP outflow is detectable from balance and transfer history, but the existing dormancy-reactivation rule needs enhancement to specifically weight VASP-destined withdrawals."
+    },
+    {
+      "id": "IND-09",
+      "section": "Financial Red Flags",
+      "flag": "A customer sends multiple electronic funds transfers (EFTs) or wire transfers to a VASP or\nsends part of their available balance from an account or wallet they maintain with a VASP and\nnotes that the transaction is for “taxes,” “fees,” or “penalties.”",
+      "src_line": 290,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Repeated VASP transfers memo-tagged as taxes/fees/penalties are fully visible on EFT/wire rails including memo fields, yet no signal screens transfer memos for the extortion-style fee narrative.",
+      "build_logic": {
+        "signal_name": "S-vasp-fee-memo-transfers",
+        "class": "entity · account-level · windowed",
+        "features": ["vasp_transfer_count", "transfer_memo_keyword_flag", "vasp_transfer_amount_sum", "distinct_vasp_counterparties", "memo_fee_tax_penalty_match"],
+        "logic": "Fire when a customer sends multiple EFTs or wire transfers to a VASP within the window where transaction memos match a taxes/fees/penalties keyword set, indicating coerced withdrawal-fee payments.",
+        "window": "rolling 30 days",
+        "source": "EFT/wire rail with memo fields + VASP counterparty list + fee/tax/penalty keyword lexicon",
+        "route": "Tier-1 alert → coerced-fee transfer review gate"
+      }
+    },
+    {
+      "id": "IND-10",
+      "section": "Financial Red Flags",
+      "flag": "A customer with a short history of conducting several small-value EFTs to a VASP abruptly\nstops sending EFTs and begins sending multiple high-value wire transfers to accounts of\nholding companies, limited liability corporations, and individuals with which the customer\nhas no prior transaction history.",
+      "src_line": 294,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "The escalation from small trial EFTs to large wires toward never-before-seen LLC/individual counterparties is fully reconstructable from transfer history and counterparty records, but no signal models the trial-then-escalate pivot.",
+      "build_logic": {
+        "signal_name": "S-trial-to-escalation-pivot",
+        "class": "entity · account-level · windowed",
+        "features": ["prior_small_eft_count", "new_counterparty_flag", "wire_amount_escalation_ratio", "counterparty_entity_type", "first_seen_counterparty_days"],
+        "logic": "Fire when a customer with a short history of small-value VASP EFTs abruptly shifts to multiple high-value wires sent to holding-company, LLC, or individual counterparties having no prior transaction history within the window.",
+        "window": "rolling 30 days",
+        "source": "EFT/wire rail + counterparty master + entity-type reference",
+        "route": "Tier-1 alert → counterparty-escalation review gate"
+      }
+    },
+    {
+      "id": "IND-11",
+      "section": "Technical Red Flags",
+      "flag": "System monitoring and logs show that a customer’s account is accessed repeatedly by unique\nIP addresses, device IDs, or geographies inconsistent with prior access patterns.  Additionally,\nlogins to a customer’s online account at a VASP come from a variety of different device IDs\nand names inconsistent with the customer’s typical logins.",
+      "src_line": 302,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Anomalous IP/device/geo access is partly covered by existing account-takeover monitoring; correlating it with VASP-side login anomalies needs partial external signals, so enhance the current login-anomaly rule."
+    },
+    {
+      "id": "IND-12",
+      "section": "Technical Red Flags",
+      "flag": "A customer mentions that they are transacting to invest in virtual currency using a service that\nhas a website or application with poor spelling or grammatical structure, dubious customer\ntestimonials, or a generally amateurish site design.",
+      "src_line": 307,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Judging a counterparty platform as amateurish relies on customer-disclosed site impressions the institution never collects, so the scam-site corpus must be sourced before any rule is feasible."
+    },
+    {
+      "id": "IND-13",
+      "section": "Technical Red Flags",
+      "flag": "A customer mentions visiting a website or application that is purported to be associated\nwith a legitimate VASP or business involved in investing in virtual currency.  The website or\napplication shows warning signs such as a web address or domain name that is misspelled\nin such a manner as to resemble that of another business, a recently registered web address\nor domain name, no physical street address, international contact information, or contact\nmethods that include only chat or email.",
+      "src_line": 311,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Spoofed-domain and recently-registered-site signals require an external scam-domain / WHOIS corpus the institution does not maintain, so the data must be sourced before building a typosquat-detection rule."
+    },
+    {
+      "id": "IND-14",
+      "section": "Technical Red Flags",
+      "flag": "A customer receives a large amount of virtual currency such as ether at an exchange,\nsubsequently converts the amount to a virtual currency with lower transaction fees such as\nTRX, and then abruptly sends it out of the exchange.",
+      "src_line": 322,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "The receive-ether → convert-to-TRX → rapid-outflow laundering chain is a chain-analytics pattern observable only with partial VASP/blockchain exposure, so it needs chain enrichment before it is buildable."
+    }
+  ]
+}

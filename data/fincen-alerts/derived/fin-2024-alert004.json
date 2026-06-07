@@ -1,0 +1,126 @@
+{
+  "id": "fin-2024-alert004",
+  "advisory": "FIN-2024-ALERT004",
+  "source_md": "data/fincen-alerts/fin-2024-alert004.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "redflag",
+      "flag": "A\tcustomer’s\tphoto\tis\tinternally\tinconsistent\t(e.g.,\tshows\tvisual\ttells\tof\tbeing\taltered)\tor\tis\tinconsistent\twith\ttheir\tother\tidentifying\tinformation\t(e.g.,\ta\tcustomer’s\tdate\tof\tbirth\tindicates\tthat\tthey\tare\tmuch\tolder\tor\tyounger\tthan\tthe\tphoto\twould\tsuggest).",
+      "src_line": 268,
+      "status": "partial",
+      "data": "insufficient",
+      "build_rec": "MONITOR",
+      "rationale": "Cross-checking a photo against DOB is partly doable from KYC fields, but judging whether a photo shows GenAI alteration tells needs external deepfake-detection capability the bank does not hold internally."
+    },
+    {
+      "id": "IND-02",
+      "section": "redflag",
+      "flag": "A\tcustomer\tpresents\tmultiple\tidentity\tdocuments\tthat\tare\tinconsistent\twith\teach\tother.",
+      "src_line": 272,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "The bank holds the submitted identity documents at onboarding, so cross-document consistency checks are already partly performed and can be tightened into a systematic comparison."
+    },
+    {
+      "id": "IND-03",
+      "section": "redflag",
+      "flag": "A\tcustomer\tuses\ta\tthird-party\twebcam\tplugin\tduring\ta\tlive\tverification\tcheck.\t\t Alternatively,\na\tcustomer\tattempts\tto\tchange\tcommunication\tmethods\tduring\ta\tlive\tverification\tcheck\tdue\tto\nexcessive\tor\tsuspicious\ttechnological\tglitches\tduring\tremote\tverification\tof\ttheir\tidentity.",
+      "src_line": 298,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Detecting a virtual webcam plugin or mid-session channel switching requires onboarding-session liveness telemetry from the identity-verification vendor, which is not captured in core bank systems."
+    },
+    {
+      "id": "IND-04",
+      "section": "redflag",
+      "flag": "A\tcustomer\tdeclines\tto\tuse\tmultifactor\tauthentication\tto\tverify\ttheir\tidentity.",
+      "src_line": 302,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "build_logic": {
+        "signal_name": "S-MFA-OPT-OUT-NEW-ACCT",
+        "class": "entity · account-level · windowed",
+        "features": ["mfa_enrollment_declined", "account_age_days", "auth_factor_count", "high_risk_action_attempted"],
+        "logic": "Flag an account that declines MFA enrollment or reverts to single-factor auth within the first 30 days, especially when paired with a high-risk action (large transfer, payee add, profile change).",
+        "window": "rolling 30 days",
+        "source": "authentication event logs + account-opening metadata",
+        "route": "Tier-1 alert → fraud-ops account-access review gate"
+      },
+      "rationale": "Authentication-enrollment events are captured in the bank's own auth logs, so an MFA opt-out signal is buildable today from data already held; it is not yet a monitored detection."
+    },
+    {
+      "id": "IND-05",
+      "section": "redflag",
+      "flag": "A\treverse-image\tlookup\tor\topen-source\tsearch\tof\tan\tidentity\tphoto\tmatches\tan\timage\tin\tan\nonline\tgallery\tof\tGenAI-produced\tfaces.",
+      "src_line": 304,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Matching an identity photo to an online gallery of GenAI faces depends on an external reverse-image / synthetic-face corpus the bank does not hold and would have to source."
+    },
+    {
+      "id": "IND-06",
+      "section": "redflag",
+      "flag": "A\tcustomer’s\tphoto\tor\tvideo\tis\tflagged\tby\tcommercial\tor\topen-source\tdeepfake\tdetection\tsoftware.",
+      "src_line": 307,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Many banks already run a commercial deepfake-detection tool at onboarding; the gap is integrating its score into the monitoring pipeline rather than treating it as a standalone vendor check."
+    },
+    {
+      "id": "IND-07",
+      "section": "redflag",
+      "flag": "GenAI-detection\tsoftware\tflags\tthe\tpotential\tuse\tof\tGenAI\ttext\tin\ta\tcustomer’s\tprofile\tor\nresponses to prompts.",
+      "src_line": 309,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Detecting GenAI-authored text in profile or prompt responses requires a specialized text-detection capability and the prompt-response corpus, neither of which the bank holds today."
+    },
+    {
+      "id": "IND-08",
+      "section": "redflag",
+      "flag": "A\tcustomer’s\tgeographic\tor\tdevice\tdata\tis\tinconsistent\twith\tthe\tcustomer’s\tidentity\tdocuments.",
+      "src_line": 312,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "build_logic": {
+        "signal_name": "S-GEO-DEVICE-ID-MISMATCH",
+        "class": "entity · account-level · windowed",
+        "features": ["login_ip_geo", "device_fingerprint", "stated_residence_country", "id_document_issuer_region"],
+        "logic": "Flag when session IP geolocation or device fingerprint region is persistently inconsistent with the stated residence and the issuing region of the identity document on file.",
+        "window": "rolling 30 days",
+        "source": "session IP/device telemetry + KYC residence and identity-document fields",
+        "route": "Tier-1 alert → fraud-ops account-access review gate"
+      },
+      "rationale": "Login IP/device telemetry and the customer's stated residence plus identity-document region are all held by the bank, so a geo/device-vs-identity mismatch signal is buildable from existing data."
+    },
+    {
+      "id": "IND-09",
+      "section": "redflag",
+      "flag": "A\tnewly\topened\taccount\tor\tan\taccount\twith\tlittle\tprior\ttransaction\thistory\thas\ta\tpattern\tof\nrapid\ttransactions;\thigh\tpayment\tvolumes\tto\tpotentially\trisky\tpayees,\tsuch\tas\tgambling\nwebsites\tor\tdigital\tasset\texchanges;\tor\thigh\tvolumes\tof\tchargebacks\tor\trejected\tpayments.",
+      "src_line": 314,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "build_logic": {
+        "signal_name": "S-NEW-ACCT-RAPID-RISKY-FLOW",
+        "class": "entity · account-level · windowed",
+        "features": ["account_age_days", "transaction_velocity", "risky_payee_volume_ratio", "chargeback_rate", "rejected_payment_rate"],
+        "logic": "Flag a newly opened account (or one with thin prior history) showing a burst of rapid transactions, disproportionate payment volume to higher-risk payees (gambling sites, digital-asset exchanges), or elevated chargeback / rejected-payment rates.",
+        "window": "rolling 30 days",
+        "source": "core transaction ledger + account-opening date + payee classification + chargeback/return records",
+        "route": "Tier-1 alert → fraud-ops transaction review gate"
+      },
+      "rationale": "Account age, transaction velocity, payee risk classification, and chargeback/return data all live in the core ledger, so this rapid-risky-flow pattern is buildable now and is the strongest transaction-pattern signal in the alert."
+    }
+  ]
+}

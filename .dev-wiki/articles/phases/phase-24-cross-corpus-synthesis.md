@@ -7,8 +7,8 @@ parents: [phase-23-fintrac-depth]
 created: 2026-06-07
 updated: 2026-06-07
 source: plan
-status: active
-delivery: ready-for-completion
+status: complete
+delivery: accepted
 scope: ["data/typology-map.json", "scripts/build.py", "corpus.html", "dist/corpus/index.html", "tests/**", "CLAUDE.md", "README.md"]
 entry_criteria: "Phase 23 complete + accepted + committed (b0fcda4); the demo is at Definition of Done — a 4-source / 2-jurisdiction corpus (42 derived across 46 publications: 12 FinCEN advisories + 17 alerts + 3 OFAC + 10 FINTRAC) via the CORPUS_SOURCES registry; the corpus explorer presents docs as a flat per-document arc. No carried scope debt. User invoked /dev-plan for a net-new stakeholder ask and chose cross-corpus synthesis at the goal gate (highest net-new value for the Canadian-bank audience, now that the corpus spans two jurisdictions)."
 exit_criteria: "data/typology-map.json overlays a closed-vocab typology onto every live derived doc, validated at the build boundary (closed vocab + referential + full coverage, fail-loud); ≥2 genuine cross-jurisdiction clusters confirmed (or the degrade path taken); corpus.html renders a cross-corpus synthesis view (group-by-typology → cluster → honest COMBINED coverage + per-jurisdiction contribution, drill-through to the per-doc arc) with NO fabricated similarity/overlap/lift metric; the per-doc arc unbroken; --check all zero drift; the 4 source dirs + 42 derived + the grounding core derive_signals.py + the showcase byte-frozen; the harness extended for a cross-jurisdiction cluster; CLAUDE + README updated; NO non-negotiable change."

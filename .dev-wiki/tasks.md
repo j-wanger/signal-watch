@@ -3,7 +3,7 @@
 > Last updated: 2026-06-07 by /dev-debrief (Phase 24 — cross-corpus synthesis: a typology lens over the 4-source/2-jurisdiction corpus; all 4 tasks [x]; READY FOR COMPLETION — reviewer 9/10 ACCEPT, awaiting commit)
 
 <!-- phase:phase-24-cross-corpus-synthesis -->
-<!-- gate-log:phase-24 direction=approved delivery=pending -->
+<!-- gate-log:phase-24 direction=approved delivery=accepted -->
 
 ## Phase 24: Cross-corpus synthesis — a typology lens over the multi-source corpus — M7
 

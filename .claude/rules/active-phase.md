@@ -16,4 +16,4 @@ Abort (NOT needed): if T1 had found no genuine cross-jurisdiction cluster, DEGRA
 
 Gates:
 - [x] Direction confirmed by user (cross-corpus synthesis at the goal gate over navigability/durability/more-scale; the group-by-typology integration shape + the build.py-boundary gate refinement signed off; 2026-06-07)
-- [ ] Delivery accepted (post-implementation report 2026-06-07; reviewer 9/10 ACCEPT, two LOW fixed inline — awaiting commit; delivery-flow Step D3 flips this after the commit verifies)
+- [x] Delivery accepted (post-implementation report 2026-06-07; reviewer 9/10 ACCEPT, two LOW fixed inline; impl + debrief commit c07d72c)

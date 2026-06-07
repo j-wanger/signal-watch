@@ -31,7 +31,7 @@ cross-jurisdiction cluster.
 
 ## Active Phase
 
-**[[phase-24-cross-corpus-synthesis|Phase 24: Cross-corpus synthesis — a typology lens over the multi-source corpus]]** (status: active — planned 2026-06-07, direction approved; 4 tasks, lite; implementation starting at T1)
+**[[phase-24-cross-corpus-synthesis|Phase 24: Cross-corpus synthesis — a typology lens over the multi-source corpus]]** (status: complete — delivered + accepted, committed c07d72c 2026-06-07; all 4 tasks [x], exit criteria GREEN, reviewer 9/10 ACCEPT, two LOW fixed inline)
 
 Entry criteria: MET (Phase 23 complete + accepted + committed [b0fcda4]; the demo is at Definition of Done — a
 4-source / 2-jurisdiction corpus, 42 derived across 46 publications [12 FinCEN advisories + 17 alerts + 3 OFAC +
@@ -48,7 +48,7 @@ fabricated similarity/overlap/lift metric · the per-doc arc unbroken · `--chec
 42 derived + the grounding core `derive_signals.py` + the showcase byte-frozen · the harness extended for a
 cross-jurisdiction cluster · CLAUDE + README updated; NO non-negotiable change.
 
-Progress: ~0% (planned; direction approved, implementation starting at T1)
+Progress: 100% (delivered + accepted + committed c07d72c; both gates flipped)
 
 ## Active Phase Contract
 

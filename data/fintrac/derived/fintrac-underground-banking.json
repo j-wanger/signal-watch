@@ -1,0 +1,185 @@
+{
+  "id": "fintrac-underground-banking",
+  "advisory": "FINTRAC-UNDERGROUND-BANKING",
+  "source_md": "data/fintrac/fintrac-underground-banking.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the indicator region (Phase 16/22). Coverage/data values are ILLUSTRATIVE (vision demo). FINTRAC Operational Alert — Canadian Crown copyright (© His Majesty the King in Right of Canada); reproduced verbatim for non-commercial use with attribution per FINTRAC's Terms & Conditions — NOT public domain.",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "redflag",
+      "flag": "Client moves funds sourced from individuals/entities located in China, notably in Hong Kong, within a short period of time to one or more of the following sectors: real estate, investments, automotive and/or the legal profession.",
+      "src_line": 227,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Rapid onward movement of recently-received foreign-sourced funds into a fan of high-value sectors (real estate, investments, automotive, legal) is a concrete flow-through pattern derivable from core transaction/wire/EMT data and counterparty MCC/sector tags the bank already holds, yet cross-sector funnelling is rarely instrumented as a standing signal.",
+      "build_logic": {
+        "signal_name": "S-CROSS-SECTOR-FUNNEL",
+        "class": "entity · account-level · windowed flow-through",
+        "features": ["inbound_value_foreign_sourced", "days_to_outbound", "distinct_outbound_sectors", "outbound_value_to_re_inv_auto_legal", "passthrough_ratio"],
+        "logic": "Flag an account that receives funds attributed to China/Hong Kong counterparties and, within a short window, disburses a high proportion of that value into two or more of the {real estate, investments, automotive, legal} sectors (by counterparty sector tag), indicating layered placement across multiple high-value channels.",
+        "window": "rolling 14 days",
+        "source": "transaction ledger + EMT/wire records joined to counterparty sector/MCC tags and country attribution",
+        "route": "Tier-1 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-02",
+      "section": "redflag",
+      "flag": "Incoming funds from individuals/entities located in China, notably in Hong Kong, are immediately transferred to a client’s associated personal or businesses account(s) or to unrelated party(ies).",
+      "src_line": 231,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Immediate pass-through of incoming funds to associated or unrelated accounts is a rapid in/out velocity pattern already partly covered by existing layering/velocity rules on core transaction data; the China-attribution and associated-party linkage can sharpen an existing control rather than require a net-new build."
+    },
+    {
+      "id": "IND-03",
+      "section": "redflag",
+      "flag": "Client has ties to China and is using their accounts for pass-through activities funded by individuals/entities located in China, notably in Hong Kong, whose relationship is unclear.",
+      "src_line": 236,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Pass-through volume is observable from transaction data, but establishing that the funding parties' relationship to the client is 'unclear' depends on relationship/beneficial-ownership context the bank holds only partially and would need to enrich before a reliable signal."
+    },
+    {
+      "id": "IND-04",
+      "section": "redflag",
+      "flag": "Client is receiving funds from entities located in China, notably in Hong Kong, that are connected to the money service business industry, with no ultimate remitting party names listed.",
+      "src_line": 240,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Missing ultimate-remitter names in incoming wires from MSB-connected senders is partly visible in wire/SWIFT message fields, but reliably identifying MSB connection and absent originator data needs message-field parsing plus MSB attribution enrichment beyond what core fields cleanly provide."
+    },
+    {
+      "id": "IND-05",
+      "section": "redflag",
+      "flag": "Stated purpose of incoming funds from individuals/entities located in China, notably in Hong Kong, is for the purchase of property but the funds were used to purchase Guaranteed Investment Certificates.",
+      "src_line": 248,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Comparing a stated purpose against the funds' actual destination (property vs. GIC) requires reconciling free-text purpose/memo fields with downstream product purchases; the data is held but the stated-purpose capture is unstructured and needs enrichment to compare reliably."
+    },
+    {
+      "id": "IND-06",
+      "section": "redflag",
+      "flag": "Business accounts are funded by multiple transfers, mainly from the business’ directors and/or authorized signatories’ personal accounts.",
+      "src_line": 252,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Funding of a business account predominantly from its own directors'/signatories' personal accounts is a related-party funding pattern fully derivable from account-ownership/signatory records joined to the transaction ledger the bank already holds, and is not typically a standing signal.",
+      "build_logic": {
+        "signal_name": "S-DIRECTOR-FUNDED-BIZ",
+        "class": "entity · account-level · windowed related-party",
+        "features": ["inbound_transfer_count", "share_value_from_directors", "distinct_director_funders", "director_signatory_link"],
+        "logic": "Flag a business account whose inbound funding over the window is dominated (by value share above threshold) by transfers from accounts whose owners are the business's registered directors or authorized signatories, indicating self-funded conduit behaviour inconsistent with genuine third-party commercial activity.",
+        "window": "rolling 30 days",
+        "source": "account-ownership/signatory registry joined to internal transfer records",
+        "route": "Tier-2 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-07",
+      "section": "redflag",
+      "flag": "Cash deposit(s) are followed by funds sent to a real estate party (e.g., real estate agent/brokerage) with indications suggesting the purpose of payment is for a real estate-related transaction (such as memos referencing the same address repeatedly).",
+      "src_line": 273,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Cash-in followed by an outbound payment to a real-estate party is observable from transaction data, but anchoring it to a 'same address repeatedly' memo pattern depends on parsing unstructured payment memos that need enrichment before the signal is reliable."
+    },
+    {
+      "id": "IND-08",
+      "section": "redflag",
+      "flag": "Mortgage payments are sourced from incoming funds from China, notably in Hong Kong, where the original source of funds is unclear.",
+      "src_line": 283,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "The bank can see that mortgage payments trace to incoming China-sourced funds, but establishing that the original source of those funds is 'unclear' requires upstream source-of-funds/origin attribution the bank does not natively hold and must source before a signal is buildable."
+    },
+    {
+      "id": "IND-09",
+      "section": "redflag",
+      "flag": "Incoming funds from individuals/entities located in China, notably in Hong Kong, are used to purchase shorter-term investment products (such as Guaranteed Investment Certificates), which are then redeemed before the term date, despite incurring a penalty.",
+      "src_line": 290,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Purchasing a term investment product (e.g., a GIC) with recently-received foreign funds and then redeeming it early at a penalty is an economically-irrational placement pattern fully visible in the bank's own product lifecycle and transaction records, and is rarely turned into a standing signal.",
+      "build_logic": {
+        "signal_name": "S-EARLY-GIC-REDEMPTION",
+        "class": "entity · account-level · product-lifecycle",
+        "features": ["gic_purchase_source_foreign_inbound", "days_held_before_redemption", "early_redemption_penalty_incurred", "purchase_to_redemption_value"],
+        "logic": "Flag a customer who funds a short-term investment product (GIC) from recently-received China/Hong Kong-attributed inflows and redeems it before term despite incurring a penalty, indicating the investment was a layering vehicle rather than a genuine savings choice.",
+        "window": "product term to redemption (typically 30–365 days)",
+        "source": "investment-product subledger joined to source-of-funds transaction records",
+        "route": "Tier-1 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-10",
+      "section": "redflag",
+      "flag": "Cash deposits are transferred within a short period of time to a holding company, trust company or investment firm.",
+      "src_line": 298,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Cash deposited and quickly moved out to a holding/trust/investment firm is a rapid cash-placement-then-layer pattern already partly covered by cash-velocity rules on core data; tagging the holding/trust/investment-firm destination can sharpen an existing control."
+    },
+    {
+      "id": "IND-11",
+      "section": "redflag",
+      "flag": "Incoming funds from individuals/entities located in China, notably in Hong Kong, are used to send funds to high-end car dealerships that are inconsistent with clients stated occupation.",
+      "src_line": 317,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Outbound payments to high-end car dealerships are visible in transaction data, but judging them 'inconsistent with stated occupation' relies on KYC occupation/expected-activity profiles that are only partially structured, so an existing high-value-spend control can be enhanced rather than fully built from clean data."
+    },
+    {
+      "id": "IND-12",
+      "section": "redflag",
+      "flag": "Inter-account transfer from personal to business accounts (or vice-versa) sourced through high value domestic fund transfers from individuals/entities in the automotive sector.",
+      "src_line": 341,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Personal-to-business (or reverse) inter-account transfers fed by high-value domestic transfers from automotive-sector counterparties is a layering pattern fully derivable from internal account-type, transfer-value and counterparty-sector data the bank already holds, and is not typically instrumented as a standing signal.",
+      "build_logic": {
+        "signal_name": "S-PERS-BIZ-AUTO-LAYER",
+        "class": "entity · account-level · windowed inter-account",
+        "features": ["personal_business_transfer_value", "upstream_auto_sector_inbound", "transfer_direction_flips", "high_value_domestic_flag"],
+        "logic": "Flag a customer who shuttles high value between own personal and business accounts where the upstream funding traces to high-value domestic transfers from automotive-sector counterparties, indicating commingling/layering of automotive-channel proceeds across account types.",
+        "window": "rolling 30 days",
+        "source": "internal transfer records joined to account-type registry and counterparty sector tags",
+        "route": "Tier-2 alert → AML analyst review gate"
+      }
+    },
+    {
+      "id": "IND-13",
+      "section": "redflag",
+      "flag": "Client’s account is mainly or in part funded by bank drafts, email money transfers and/or cheques from legal professionals who have limited or no open source footprint.",
+      "src_line": 362,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Funding via drafts/EMTs/cheques is visible in core data, but attributing the remitters as 'legal professionals with limited or no open-source footprint' requires external entity/profession attribution and open-source-presence enrichment the bank does not hold and must source first."
+    },
+    {
+      "id": "IND-14",
+      "section": "redflag",
+      "flag": "Cash deposits, not in line with account holder’s stated occupation, were used to send funds to legal professionals with no clear relationship.",
+      "src_line": 366,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Cash deposits inconsistent with stated occupation then routed to a legal professional are partly observable, but the occupation-consistency judgment and 'no clear relationship' assessment depend on KYC profile and relationship context that is only partially structured, so the existing occupation-mismatch control can be enhanced."
+    }
+  ]
+}

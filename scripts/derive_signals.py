@@ -116,6 +116,33 @@ _RF_HEADER_OFAC = re.compile(
 _RF_INTRO_OFAC = re.compile(
     r"\brisk\s+indicators?\b[^.\n]{0,80}?\b(?:may\s+be|may\s+include|include|as\s+follows|listed\s+below)\b"
     r"|\bthe\s+following\b[^.\n]{0,50}?\brisk\s+indicators?\b", re.I)
+# Phase 22 — FINTRAC vocabulary (the FIRST cross-jurisdiction source: Canada's FIU). FINTRAC Operational
+# Alerts open their enumerated list with "indicators", not "red flags": a standalone "Money laundering |
+# Terrorist (activity) financing | ML/TF indicators" HEADER directly above the bulleted list (e.g. the
+# underground-banking OA's "Money laundering indicators"), or that same ML/TF-specific phrase in a "…
+# indicators … may be/include" INTRO. DELIBERATELY NARROW — restricted to the ML/TF-qualified phrasing,
+# NOT a broad "<category> indicators": fin-2020-a008 carries header-glued "Financial Indicators" /
+# "Behavioral Indicators" lines, so a bare "indicators" anchor would shift its rf_region. The qualified
+# forms have ZERO occurrences anywhere across all 36 committed FinCEN+OFAC mds (verified — not even
+# mid-prose, unlike OFAC's "deceptive shipping practices"), so every existing rf_region stays byte-
+# unchanged, pinned by the --selftest fixtures + the all-36-md baseline. The HEADER's trailing `:?$`
+# excludes a "… indicators ..... 12" TOC dotted-leader line. The grounding core (normalize/check_record)
+# is untouched — only this relevance-region anchor set widens.
+_RF_HEADER_FINTRAC = re.compile(
+    r"^(?:money\s+laundering(?:\s+(?:and|&|/)\s+terrorist\s+(?:activity\s+)?financing)?"
+    r"|terrorist\s+(?:activity\s+)?financing"
+    r"|ml\s*(?:[/&]|and)\s*tf)"
+    r"\s+indicators?\b"
+    # optional trailing topic clause — the section-TITLE form (e.g. "Money laundering indicators of
+    # synthetic opioid activity"), mirroring FinCEN's strict-vs-LOOSE _RF_HEADER split. The clause must
+    # START with a connector (of/related to/for/…), so a TOC dotted-leader line ("… indicators .... 12")
+    # is NOT consumed (no `.*` catch-all). Still regression-safe: the ML/TF base phrase occurs 0× in all
+    # 36 FinCEN+OFAC mds, so no line starts with it, clause or no clause.
+    r"(?:\s+(?:of|related\s+to|for|associated\s+with|in)\b.*)?\s*:?$", re.I)
+_RF_INTRO_FINTRAC = re.compile(
+    r"\b(?:money\s+laundering|terrorist\s+(?:activity\s+)?financing|ml\s*(?:[/&]|and)\s*tf)"
+    r"\s+indicators?\b[^.\n]{0,80}?"
+    r"\b(?:may\s+(?:be|include|reflect)|reflective\s+of|listed\s+below|as\s+follows|include)\b", re.I)
 # A block that is itself a footnote/citation, not a red flag (Phase-12 filter, retained for the
 # _rf_triage block counter): a footnote-numbered line, a legal "supra note"/"Id." marker, a
 # federal case-docket number, or a block ending in a "(Mon[ DD], YYYY)" citation date — real red
@@ -255,7 +282,8 @@ def rf_region(md: str):
     for ln, t in lines:
         if t and (_RF_HEADER.match(t) or _RF_HEADER_LOOSE.match(t)
                   or _RF_INTRO.search(t) or _RF_INTRO_WEAK.search(t)
-                  or _RF_HEADER_OFAC.match(t) or _RF_INTRO_OFAC.search(t)):  # Phase 21: OFAC vocab
+                  or _RF_HEADER_OFAC.match(t) or _RF_INTRO_OFAC.search(t)  # Phase 21: OFAC vocab
+                  or _RF_HEADER_FINTRAC.match(t) or _RF_INTRO_FINTRAC.search(t)):  # Phase 22: FINTRAC vocab
             start = ln
             break
     if start is None:
@@ -445,6 +473,36 @@ def _checks_selftest() -> list:
                             "", "x"])
     if rf_region(ofac_prose) is not None:
         fails.append("a passing prose mention of OFAC vocab falsely opened an rf_region (anchor too loose)")
+    # Phase 22 — FINTRAC vocabulary anchors (widened rf_region for Canada's FIU). Pin BOTH directions: a
+    # FINTRAC-style "Money laundering indicators" header and a "ML/TF indicators … may include" intro each
+    # OPEN a region; a passing prose mention of bare "indicators" (no ML/TF-qualified heading/lead-in) does
+    # NOT — the narrowness that keeps fin-2020-a008's "Financial/Behavioral Indicators" region byte-stable.
+    fintrac_hdr = "\n".join(["# FINTRAC Operational Alert", "", "Money laundering indicators", "",
+                             "A client receives funds from multiple unrelated third parties then immediately remits them abroad.",
+                             "", "For further information", "", "x"])
+    if rf_region(fintrac_hdr) is None:
+        fails.append("FINTRAC 'Money laundering indicators' header did not open an rf_region (widening regressed)")
+    # the section-TITLE form: "<ML/TF> indicators of <topic>" (a trailing topic clause) must also OPEN a
+    # region (FINTRAC's synthetic-opioids OA heads its list this way), but a TOC dotted-leader must NOT.
+    fintrac_title = "\n".join(["# FINTRAC", "", "Money laundering indicators of synthetic opioid activity", "",
+                               "A client structures cash deposits just below the reporting threshold across several branches.",
+                               "", "For further information", "", "x"])
+    if rf_region(fintrac_title) is None:
+        fails.append("FINTRAC '<ML/TF> indicators of <topic>' section-title header did not open an rf_region")
+    fintrac_toc = "\n".join(["# FINTRAC", "", "Money laundering indicators ........... 12", "",
+                             "Body text.", "", "x"])
+    if rf_region(fintrac_toc) is not None:
+        fails.append("a FINTRAC TOC dotted-leader 'indicators ..... 12' line falsely opened an rf_region")
+    fintrac_intro = "\n".join(["# FINTRAC", "", "The following terrorist financing indicators may include transactions where a client:", "",
+                               "Sends small-value transfers to a jurisdiction associated with a listed terrorist entity.",
+                               "", "For further information", "", "x"])
+    if rf_region(fintrac_intro) is None:
+        fails.append("FINTRAC 'terrorist financing indicators … may include' intro did not open an rf_region")
+    fintrac_prose = "\n".join(["# Doc", "",
+                               "This paragraph notes that various indicators were considered, only in passing prose, never as a heading.",
+                               "", "x"])
+    if rf_region(fintrac_prose) is not None:
+        fails.append("a passing prose mention of bare 'indicators' falsely opened an rf_region (FINTRAC anchor too broad)")
     return fails
 
 
@@ -562,13 +620,21 @@ def corpus_status_records(source_dir: Path = CORPUS_DIR) -> list:
         meta = index.get(p.stem, {})
         advisory_no = p.stem.upper()
         title = meta.get("title", "")
-        # Phase 21 — per-source issuer (OFAC for data/ofac/, FinCEN otherwise). The prefix is dropped
-        # when advisory_no already starts with the issuer (OFAC ids are `ofac-…`), so it never doubles;
-        # FinCEN output stays byte-identical ("FinCEN FIN-2020-A008 · …").
-        issuer = "OFAC" if "ofac" in source_dir.name.lower() else "FinCEN"
+        # Phase 21/22 — per-source issuer + licence basis. Issuer: FINTRAC (data/fintrac/), OFAC
+        # (data/ofac/), else FinCEN. The prefix is dropped when advisory_no already starts with the
+        # issuer (OFAC/FINTRAC ids are `ofac-…`/`fintrac-…`), so it never doubles; FinCEN output stays
+        # byte-identical ("FinCEN FIN-2020-A008 · …"). LICENCE basis differs by jurisdiction and is the
+        # compliance-load-bearing suffix: US-federal works (FinCEN, OFAC) are public domain (17 U.S.C.
+        # 105 — no copyright); FINTRAC (Canadian Crown copyright) is reproduced verbatim under FINTRAC's
+        # NON-COMMERCIAL reproduction terms WITH attribution — NOT public domain (kept distinct so the
+        # verbatim rail never mislabels a Canadian source as US public domain).
+        name = source_dir.name.lower()
+        issuer = "FINTRAC" if "fintrac" in name else "OFAC" if "ofac" in name else "FinCEN"
         issuer_prefix = "" if advisory_no.startswith(issuer.upper()) else f"{issuer} "
-        source = f"{issuer_prefix}{advisory_no}" + (f" · {title}" if title else "") \
-            + " · public domain (17 U.S.C. 105)"
+        licence = (" · © His Majesty the King in Right of Canada — reproduced for non-commercial use "
+                   "per FINTRAC's Terms & Conditions" if issuer == "FINTRAC"
+                   else " · public domain (17 U.S.C. 105)")
+        source = f"{issuer_prefix}{advisory_no}" + (f" · {title}" if title else "") + licence
         records.append({
             "id": p.stem,
             "advisory": advisory_no,

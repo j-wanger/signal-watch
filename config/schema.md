@@ -68,11 +68,14 @@ built); `sub` optional mono subline.
 
 ### `advisory_full` (optional)
 
-`{ source, text?, text_file?, highlights? }` — a VERBATIM public-domain source document (e.g. a
+`{ source, text?, text_file?, highlights? }` — a VERBATIM public-source document (e.g. a
 FinCEN advisory; U.S. federal works are public domain under 17 U.S.C. §105). Rendered whole and
 scrollable in Act 1's SOURCE DOCUMENT panel, with the `source` attribution shown **distinct
 from** the always-on "Illustrative data & outputs" badge — the advisory is genuine, not
-illustrative. This verbatim exception is FinCEN-only; it does NOT extend to FINTRAC (Crown copyright).
+illustrative. Verbatim reproduction covers US-federal works (FinCEN, OFAC — public domain, 17 U.S.C.
+§105) and, since Phase 22, FINTRAC (Canadian Crown copyright, reproduced for non-commercial use with
+attribution per FINTRAC's Terms & Conditions — a licence, not public domain); every other non-US /
+non-FINTRAC source still paraphrases.
 
 - `source` — required attribution caption (e.g. `FinCEN FIN-2022-A002 · Advisory on Elder Financial Exploitation`).
 - `text` — the verbatim body inline; **or**

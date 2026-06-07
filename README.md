@@ -136,12 +136,12 @@ non-derivable).
 
 `dist/corpus/index.html` is a **second, separate** single-file ship artifact: a FinCEN **corpus
 explorer**. Where the six-act typology demos each tell one scripted story, the explorer points the same
-loop at the *whole public FinCEN corpus* — advisories and alerts — you pick one of the 33 publications
+loop at the *whole public corpus* — FinCEN advisories + alerts, OFAC, and FINTRAC — you pick one of the 39 publications
 and watch it derive. It is a **staged 5-screen arc** (Phase 18 gave it the two beats the six-act showcase
 has and the explorer lacked — a human gate and a close-the-loop payoff):
 
-1. **Select** — all 36 US-federal publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC
-   advisories), each with an honest `doc_type` chip (*Advisory* / *Alert* / *OFAC*) and a status chip: *derived* (live, clickable — 32 of them), or *no
+1. **Select** — all 39 publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC advisories +
+   3 FINTRAC operational alerts), each with an honest `doc_type` chip (*Advisory* / *Alert* / *OFAC* / *FINTRAC*) and a status chip: *derived* (live, clickable — 35 of them), or *no
    enumerated red-flag list* (non-derivable — the 4 remaining: the 2 FATF jurisdiction advisories + 2
    alerts whose text mentions red flags but carries no anchorable enumerated list). The *clean / low*
    "ready to derive, not yet derived" chip state remains for any future publication added before it is derived.
@@ -167,11 +167,12 @@ extraction manifest `corpus-status.json` (emitted by `derive_signals.py --corpus
 and LLM-derived records `derived/*.json`, merging them all by id into one menu, and validating the
 derived records' shape at the build boundary (every `build_rec` in the matrix vocabulary; a `BUILD NOW`
 indicator must carry a full signal definition). `build.py` never imports `derive_signals.py`. The titles
-and red-flag text are verbatim public domain; the coverage/data/build judgments are illustrative (the
-"Illustrative data & outputs" badge stays on, with the per-document source attribution kept visually
-distinct from it). The explorer ships with **32 derived across 36 US-federal publications** (12 of 14
-FinCEN advisories + 17 of 19 FinCEN alerts + 3 of 3 OFAC advisories) — the non-derivable documents (the
-2 FATF advisories + 2 alerts with no enumerated red-flag list) are labelled as such. The menu is deliberately varied: the transaction-pattern-rich
+and red-flag text are verbatim from their public sources (US-federal public domain, or FINTRAC under its
+non-commercial reproduction licence); the coverage/data/build judgments are illustrative (the
+"Illustrative data & outputs" badge stays on, with the per-document source attribution — each carrying its
+own basis — kept visually distinct from it). The explorer ships with **35 derived across 39 publications**
+(12 of 14 FinCEN advisories + 17 of 19 FinCEN alerts + 3 of 3 OFAC advisories + 3 of 3 FINTRAC operational
+alerts) — the non-derivable documents (the 2 FATF advisories + 2 alerts with no enumerated red-flag list) are labelled as such. The menu is deliberately varied: the transaction-pattern-rich
 Chinese money-laundering-networks typology (`fin-2025-a003`) surfaces five immediately-buildable signals;
 the enrichment-hungry Iran (`fin-2025-a002`) and Iran-backed-terror-finance (`fin-2024-a001`) typologies
 lean to *build + enrich*; the **glued-no-separator** advisories — ransomware (`fin-2021-a004`) and
@@ -179,7 +180,7 @@ health-care fraud (`fin-2026-a001`, 24 red flags) — were unreachable by the de
 yet ship derived via the inverted loop (the LLM reads them like a human, the gate grounds every verbatim
 flag). The front-end shows the full corpus honestly; the non-derivable documents are labelled as such.
 
-**Multi-source (Phases 20-21) — beyond advisories, still verbatim US-federal.** A thin `CORPUS_SOURCES` registry
+**Multi-source (Phases 20-22) — beyond advisories, across agencies and jurisdictions.** A thin `CORPUS_SOURCES` registry
 in `build.py` maps each FinCEN publication *type* to its own committed `corpus-status.json` +
 `derived/*.json`, and `render_corpus` merges them into one menu with an honest `doc_type` chip per card.
 **FinCEN Alerts** are the second source (`data/fincen-alerts/` — 19 alert markdown files, 17 derived):
@@ -193,8 +194,9 @@ migration.
 
 **OFAC is the third source (Phase 21) — a second US-federal agency.** OFAC (US Treasury) advisories are
 also public domain under the same statute, so the verbatim exception was **extended FinCEN-only →
-US-federal** (FinCEN + OFAC + US federal agencies; FINTRAC and any non-US / non-government source still
-paraphrase). OFAC mostly frames its indicators as "Risk Indicators" / "Deceptive Practices" rather than
+US-federal** (FinCEN + OFAC + US federal agencies; at this point FINTRAC and any non-US / non-government
+source still paraphrased — Phase 22 then added FINTRAC as a verbatim source under a separate licence, below).
+OFAC mostly frames its indicators as "Risk Indicators" / "Deceptive Practices" rather than
 FinCEN's "red flags", so `rf_region`'s anchors were **widened** (`_RF_HEADER_OFAC` + `_RF_INTRO_OFAC`) —
 strictly **regression-gated**: every existing FinCEN md's region stays byte-unchanged and all 29 FinCEN
 records + `--selftest` stay clean (the new vocab is inert for FinCEN; the grounding `normalize` is
@@ -205,8 +207,30 @@ virtual-currency, each a different vocab form): most OFAC docs defer red flags t
 advisory or use non-anchoring framing, and are honestly skipped. OFAC content is sanctions/vessel-oriented,
 so its records are honestly enrichment / `SOURCE_DATA`-heavy with few build-now signals (the maritime
 deceptive practices are vessel behavior an FI can't see in its transaction data — `SOURCE_DATA`, never a
-fabricated signal). A cross-*jurisdiction* source (FINTRAC, FATF, …) would still have to be paraphrased,
-which breaks verbatim quote-grounding, so it remains out of scope.
+fabricated signal).
+
+**FINTRAC is the fourth source (Phase 22) — the first cross-*jurisdiction* source.** FINTRAC (Canada's
+financial-intelligence unit) is **Canadian Crown copyright, not US public domain** — the first source the
+US-federal verbatim exception did *not* already cover. Rather than paraphrase (the earlier assumption), the
+verbatim exception gained a **second, distinct basis**: FINTRAC's [Terms &
+Conditions](https://fintrac-canafe.canada.ca/help-aide/no-av-eng) permit reproducing its publications
+**verbatim for non-commercial use with attribution** (© His Majesty the King in Right of Canada + title +
+"a copy of the version at &lt;URL&gt;") — a reproduction *licence*, not the 17 U.S.C. §105 no-copyright
+basis (every *other* non-US / non-FINTRAC source still paraphrases). FINTRAC **Operational Alerts** head
+their list with "Money laundering indicators" / "Terrorist activity financing indicators" — neither "red
+flags" nor OFAC's "risk indicators" — so `rf_region` was **widened again** (`_RF_HEADER_FINTRAC` +
+`_RF_INTRO_FINTRAC`, ML/TF-qualified plus an optional "… indicators *of &lt;topic&gt;*" section-title
+clause), strictly **regression-gated**: the ML/TF-qualified phrasing occurs **0×** across all 36 FinCEN +
+OFAC mds, so every existing region stays byte-unchanged and all 32 records + `--selftest` stay clean (the
+grounding `normalize` is untouched). Acquisition is **hand-curated** (`data/fintrac/index.json`): FINTRAC
+serves a PDF at `<page-url>.pdf`, which the existing direct-download path handled with no change
+(`acquire_fincen.py --source data/fintrac`; the `pdf_to_md.py` provenance header was made source-aware so a
+FINTRAC file is never mislabelled public domain). Three OAs derive — underground banking, illicit synthetic
+opioids (the Canadian counterpart to the fentanyl showcase), and terrorist activity financing — 42
+indicators, 11 build-now; the TF alert is honestly `SOURCE_DATA`-heavy (its indicators hinge on external
+listed-entity / jurisdiction attribution a bank can't see in its own data). The explorer's source panel
+renders each document's own basis, so a FINTRAC document shows its Crown-copyright attribution, never the
+US public-domain line.
 
 ## Present it
 
@@ -233,7 +257,10 @@ which breaks verbatim quote-grounding, so it remains out of scope.
     FATF report on TBML trends & developments (2024).
   - **elder financial exploitation** — FinCEN Advisory EFE FIN-2022-A002, reproduced **verbatim**
     (US federal advisories are public domain, 17 USC §105; attributed, kept visually separate from
-    the illustrative badge). The verbatim exception is FinCEN-only — it does not extend to FINTRAC.
+    the illustrative badge). Verbatim reproduction now covers **US-federal** sources (FinCEN, OFAC —
+    public domain) and, since Phase 22, **FINTRAC** (Canadian Crown copyright, reproduced for
+    non-commercial use with attribution per its Terms & Conditions — a licence, not public domain);
+    every other non-US / non-FINTRAC source still paraphrases.
 - The "Illustrative data & outputs" badge stays visible at all times — it is a trust
   device for a compliance audience, not a disclaimer to hide.
 

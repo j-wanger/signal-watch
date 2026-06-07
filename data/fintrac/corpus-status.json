@@ -1,0 +1,54 @@
+{
+  "_generated_by": "scripts/derive_signals.py --corpus-status",
+  "_note": "Deterministic per-advisory manifest for the corpus-explorer build (scripts/build.py corpus reads this + data/fintrac/derived/*.json). `derivable` = a red-flag region exists (rf_region; false only for the 2 FATF advisories); `extraction`/`flag_count` are a cheap rf_region-bounded triage HINT (_rf_triage), NOT the derivability authority — an advisory goes live via a gate-passing derived/<id>.json (the LLM extracts; check_record grounds), and build.py ignores the manifest count for a live advisory. Authoring artifact, NOT a ship config. Regenerate after the corpus md set changes.",
+  "summary": {
+    "clean": 3,
+    "low": 0,
+    "needs": 0,
+    "total": 3
+  },
+  "advisories": [
+    {
+      "id": "fintrac-synthetic-opioids",
+      "advisory": "FINTRAC-SYNTHETIC-OPIOIDS",
+      "title": "Operational Alert: Laundering the proceeds of illicit synthetic opioids",
+      "date": "2025-01",
+      "url": "https://www.fintrac-canafe.gc.ca/intel/operation/iso-osi-eng.pdf",
+      "source": "FINTRAC-SYNTHETIC-OPIOIDS · Operational Alert: Laundering the proceeds of illicit synthetic opioids · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 130,
+      "sections": {
+        "redflag": 130
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-terrorist-financing",
+      "advisory": "FINTRAC-TERRORIST-FINANCING",
+      "title": "Operational Alert: Terrorist activity financing",
+      "date": "2022-12",
+      "url": "https://www.fintrac-canafe.gc.ca/intel/operation/taf-eng.pdf",
+      "source": "FINTRAC-TERRORIST-FINANCING · Operational Alert: Terrorist activity financing · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 64,
+      "sections": {
+        "redflag": 64
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-underground-banking",
+      "advisory": "FINTRAC-UNDERGROUND-BANKING",
+      "title": "Updated indicators: Laundering the proceeds of crime through underground banking schemes",
+      "date": "2023-07",
+      "url": "https://www.fintrac-canafe.gc.ca/intel/operation/ml-rec-eng.pdf",
+      "source": "FINTRAC-UNDERGROUND-BANKING · Updated indicators: Laundering the proceeds of crime through underground banking schemes · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 43,
+      "sections": {
+        "redflag": 43
+      },
+      "derivable": true
+    }
+  ]
+}

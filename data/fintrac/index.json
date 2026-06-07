@@ -1,0 +1,23 @@
+[
+  {
+    "id": "fintrac-underground-banking",
+    "title": "Updated indicators: Laundering the proceeds of crime through underground banking schemes",
+    "date": "2023-07",
+    "type": "operational alert",
+    "url": "https://www.fintrac-canafe.gc.ca/intel/operation/ml-rec-eng.pdf"
+  },
+  {
+    "id": "fintrac-synthetic-opioids",
+    "title": "Operational Alert: Laundering the proceeds of illicit synthetic opioids",
+    "date": "2025-01",
+    "type": "operational alert",
+    "url": "https://www.fintrac-canafe.gc.ca/intel/operation/iso-osi-eng.pdf"
+  },
+  {
+    "id": "fintrac-terrorist-financing",
+    "title": "Operational Alert: Terrorist activity financing",
+    "date": "2022-12",
+    "type": "operational alert",
+    "url": "https://www.fintrac-canafe.gc.ca/intel/operation/taf-eng.pdf"
+  }
+]

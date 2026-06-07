@@ -18,13 +18,19 @@ AML transformation framework. Keep vocabulary consistent with it
 - Keep the "Illustrative data & outputs" badge always visible. Never present synthetic
   numbers as real.
 - NO real customer/transaction data, ever. Advisory text must be public-source and PARAPHRASED by
-  default (e.g. the FINTRAC Jan-2025 Operational Alert behind the fentanyl demo). ONE exception:
-  US FEDERAL GOVERNMENT advisories are public domain (17 USC §105 — works of the US government carry no
-  copyright) and may be reproduced VERBATIM with attribution, kept visually separate from the
-  "Illustrative data & outputs" badge (see Act 1's SOURCE DOCUMENT panel, EFE FIN-2022-A002). This
-  US-federal exception covers FinCEN AND OFAC (both US Treasury — Phase 21 added OFAC as corpus source #3)
-  and other US federal agencies. It is US-FEDERAL-ONLY — it does NOT extend to FINTRAC (Canadian Crown
-  copyright → still paraphrase) or any non-US / non-government source (still paraphrase).
+  default (e.g. the FINTRAC Jan-2025 Operational Alert behind the fentanyl SHOWCASE is paraphrased).
+  TWO verbatim exceptions, each kept visually separate from the always-on "Illustrative data & outputs"
+  badge: (1) US FEDERAL GOVERNMENT advisories are public domain (17 USC §105 — works of the US government
+  carry no copyright) and may be reproduced VERBATIM with attribution (see Act 1's SOURCE DOCUMENT panel,
+  EFE FIN-2022-A002). This US-federal exception covers FinCEN AND OFAC (both US Treasury — Phase 21 added
+  OFAC as corpus source #3) and other US federal agencies. (2) FINTRAC (Phase 22, corpus source #4 — the
+  FIRST cross-jurisdiction source) is Canadian Crown copyright — NOT public domain — but its publications
+  MAY be reproduced VERBATIM for NON-COMMERCIAL use WITH FINTRAC's required attribution (© His Majesty the
+  King in Right of Canada + complete title + "a copy of the version available at <URL>"), per FINTRAC's
+  Terms & Conditions: a reproduction LICENCE, distinct from the US 17 USC §105 no-copyright basis. NOT
+  commercial redistribution (needs FINTRAC's written permission). The verbatim relaxation is US-FEDERAL +
+  FINTRAC ONLY — every OTHER non-US / non-FINTRAC / non-government source still paraphrases (corpus.html's
+  source panel renders each document's OWN basis; the fentanyl showcase still paraphrases its FINTRAC OA).
 - Live mode is optional, isolated, off by default, always has a scripted fallback.
   Never put keys/tokens in the frontend. Copilot is NOT a web backend (HANDOFF §4.5).
 
@@ -64,9 +70,9 @@ AML transformation framework. Keep vocabulary consistent with it
   `dist/corpus/index.html`, built from a standalone template `corpus.html` (owns its own copy of the
   dossier theme — the six-act engine `index.html` is left byte-untouched). A staged 5-screen ARC
   (Phase 18 gave the explorer the showcase's two missing beats — a human gate + a close-the-loop payoff):
-  SELECT one of the 36 US-federal publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC — Phase
-  20/21; honest `doc_type` chip Advisory/Alert/OFAC + status chips: derived / clean-or-low-not-yet-derived /
-  non-derivable) → COVERAGE gauge → BUILD RECOMMENDATIONS **= the human GATE** (per-indicator cover×data
+  SELECT one of the 39 public publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC + 3 FINTRAC —
+  Phase 20/21/22; honest `doc_type` chip Advisory/Alert/OFAC/FINTRAC + status chips: derived /
+  clean-or-low-not-yet-derived / non-derivable) → COVERAGE gauge → BUILD RECOMMENDATIONS **= the human GATE** (per-indicator cover×data
   build_rec, sorted BUILD_NOW-first, each row src_line-traceable; the BUILD_NOW rows are SELECTABLE
   div-toggles [NOT `<input>`, so Space/arrow nav still works] — default all-selected, "agent proposes,
   human disposes"; non-BUILD_NOW rows read-only) → SIGNAL spec for the PICKED BUILD_NOW gaps → CLOSE THE
@@ -98,13 +104,14 @@ AML transformation framework. Keep vocabulary consistent with it
   gate. Phase 20 stayed STILL FinCEN, STILL verbatim, STILL public-domain (17 U.S.C. 105) — NO
   non-negotiable changed by it; the quote-grounding gate (`check_record`/`rf_region`/`normalize`) is
   source-agnostic. `data/fincen/` (the advisories source) stays byte-frozen — multi-source via the MERGE,
-  not a migration. (Phase 21 then added OFAC as source #3 — see next bullet; the corpus now ships **32
-  derived across 36 publications** = 12 advisories + 17 alerts + 3 OFAC, only the 2 FATF advisories + 2
-  alerts with no enumerated red-flag list non-derivable.)
+  not a migration. (Phase 21 then added OFAC as source #3 + Phase 22 added FINTRAC as source #4 — see the
+  next bullets; the corpus now ships **35 derived across 39 publications** = 12 advisories + 17 alerts +
+  3 OFAC + 3 FINTRAC, only the 2 FATF advisories + 2 alerts with no enumerated red-flag list non-derivable.)
 - OFAC as source #3 (Phase 21, M7 — cross-agency, US-federal): OFAC (US Treasury) added as the THIRD
   corpus source (`data/ofac/`, doc_type "OFAC"; 3 derived). Because 17 U.S.C. §105 covers ALL US federal
   works, the verbatim non-negotiable was extended FinCEN-only → US-federal (FinCEN + OFAC + US federal;
-  FINTRAC + non-US still paraphrase). OFAC mostly uses sanctions-RISK vocab ("Risk Indicators" / "Deceptive
+  at Phase 21 FINTRAC + non-US still paraphrased — Phase 22 then extended verbatim to FINTRAC too under a
+  non-commercial licence, see next bullet). OFAC mostly uses sanctions-RISK vocab ("Risk Indicators" / "Deceptive
   Practices") rather than FinCEN's "red flags", so `rf_region`'s anchors were WIDENED (`_RF_HEADER_OFAC` +
   `_RF_INTRO_OFAC`), REGRESSION-GATED: every FinCEN md's rf_region stays byte-unchanged, all 29 FinCEN
   records + `--selftest` still clean (the new vocab is ~inert for FinCEN); grounding/`normalize` untouched.
@@ -115,6 +122,28 @@ AML transformation framework. Keep vocabulary consistent with it
   observe → SOURCE_DATA, NOT fabricated signals). The cleanly-anchoring OFAC advisory set is small (3:
   sham-transactions, maritime, virtual-currency — each a different vocab form); most OFAC docs defer red
   flags to a co-issued FinCEN advisory or use non-anchoring framing (honestly skipped, not forced).
+- FINTRAC as source #4 (Phase 22, M7 — the FIRST CROSS-JURISDICTION source): FINTRAC (Canada's FIU) added
+  as the FOURTH corpus source (`data/fintrac/`, doc_type "FINTRAC"; 3 derived) — the demo's first move
+  beyond US-federal (US Treasury → +Canada). Compliance basis is DIFFERENT from the US sources: FINTRAC is
+  Canadian Crown copyright, NOT public domain, so the verbatim non-negotiable was extended to a SECOND basis
+  — FINTRAC publications are reproducible verbatim for NON-COMMERCIAL use WITH FINTRAC's required attribution
+  (© His Majesty the King in Right of Canada + title + "a copy of the version at <URL>"), per FINTRAC's Terms
+  & Conditions: a reproduction LICENCE, not the US 17 U.S.C. §105 no-copyright basis (updated identically in
+  CLAUDE.md + HANDOFF.md; every OTHER non-US/non-FINTRAC source still paraphrases). FINTRAC OAs head their
+  list with "indicators" (not "red flags"/"risk indicators"), so `rf_region` was WIDENED (`_RF_HEADER_FINTRAC`
+  + `_RF_INTRO_FINTRAC`, ML/TF-QUALIFIED + an optional section-title trailing clause so "Money laundering
+  indicators of <topic>" anchors), REGRESSION-GATED: the ML/TF-qualified phrasing occurs 0× across all 36
+  FinCEN+OFAC mds → every existing rf_region byte-unchanged, all 32 records + `--selftest` still clean;
+  grounding/`normalize` untouched. Acquisition HAND-CURATED (no FINTRAC crawler): FINTRAC serves a PDF at
+  `<page-url>.pdf`, so `data/fintrac/index.json` lists those (the existing `_to_pdf_url` direct-download
+  branch handled them with NO tweak), acquired via `acquire_fincen.py --source data/fintrac` (the
+  `pdf_to_md.py` provenance header was made source-aware so a FINTRAC md is never mislabeled public domain).
+  3 OAs derived (underground-banking, synthetic-opioids [the Canadian counterpart to the fentanyl showcase],
+  terrorist-financing) — 42 indicators / 11 BUILD_NOW; the TF alert is honestly SOURCE_DATA-heavy (4/13 hinge
+  on external listed-entity/jurisdiction attribution a bank can't observe → SOURCE_DATA, never fabricated).
+  corpus.html's source panel renders each doc's OWN basis (FINTRAC shows Crown-copyright, never "public
+  domain"); the prior blanket "all public domain" SELECT/footer copy was corrected to the multi-jurisdiction
+  reality. The always-on "Illustrative data & outputs" badge stays, distinct from the verbatim attribution.
 - IMPORTANT — INVERTED extraction boundary (Phase 16) + the SUBTRACTION (Phase 17): the **LLM EXTRACTS, the
   deterministic layer GATES**, and the old extractor is **DELETED**. The earlier deterministic
   `extract_red_flags` accreted format special-casing every phase yet the LLM still had to author/prune its
@@ -148,7 +177,8 @@ AML transformation framework. Keep vocabulary consistent with it
 - Build: `python3 scripts/build.py <id>` (or `all`) → `dist/<id>/index.html`.
 - Corpus explorer (MULTI-SOURCE): `python3 scripts/build.py corpus` → `dist/corpus/index.html`, merging
   every source in `build.py`'s `CORPUS_SOURCES` registry — `data/fincen/` (advisories) + `data/fincen-alerts/`
-  (alerts), each contributing `corpus-status.json` + `derived/*.json`. Regenerate a source's manifest with
+  (alerts) + `data/ofac/` (OFAC) + `data/fintrac/` (FINTRAC), each contributing `corpus-status.json` +
+  `derived/*.json`. Regenerate a source's manifest with
   `python3 scripts/derive_signals.py --corpus-status [source_dir]` (default `data/fincen`) after its md set
   changes, then rebuild. Acquire a new FinCEN source: `crawl_fincen.py [--alerts] --fetch` then `--write` →
   `acquire_fincen.py --source <dir> <id>` → `pdf_to_md.py --source <dir> <id>` (raw PDFs are gitignored;
@@ -157,8 +187,9 @@ AML transformation framework. Keep vocabulary consistent with it
   offline, no server. Drift guard before presenting: `python3 scripts/build.py --check all`.
 - Test (all dep-free, no install): `node tests/corpus-explorer.test.mjs` drives the corpus explorer's
   5-screen arc against the committed `dist/corpus/index.html` (gate toggle, Signal empty states,
-  close-the-loop coverage math, reduced-motion) + the Phase-20 multi-source menu (advisories + alerts,
-  doc_type chips, an alert walks the arc) · `python3 scripts/derive_signals.py --selftest` runs
+  close-the-loop coverage math, reduced-motion) + the multi-source menu (advisories + alerts + OFAC +
+  FINTRAC, doc_type chips; an alert, an OFAC advisory, AND a FINTRAC OA each walk the arc; the FINTRAC
+  source panel shows its Crown-copyright basis, not US public domain) · `python3 scripts/derive_signals.py --selftest` runs
   the derivation GATE checks. Pre-present sequence: `--check all` (drift) → `node tests/…` (arc) → walk
   `tests/smoke-checklist.md` (the human-eye checks).
 - Iterate: edit `index.html` / `corpus.html` / a config, rebuild. `python3 -m http.server` optional, never required.
@@ -183,7 +214,8 @@ JetBrains Mono. Theme lives in `:root` CSS variables. Refined, not flashy.
 M0 bootstrap · M1 config-driven refactor · M2 multi-typology · M3 presenter polish ·
 M4 (skipped) live/pre-gen mode · M5 ship · M6 Signal Watch ingestion pipeline (FinCEN verbatim) ·
 M7 corpus-backed demo (Phase 12 derivation backend + Phase 13 corpus explorer `dist/corpus/` +
-Phase 20 multi-source: FinCEN advisories + alerts; Phase 21: OFAC source #3 — 32 derived across 36 publications, 3 sources).
+Phase 20 multi-source: FinCEN advisories + alerts; Phase 21: OFAC source #3; Phase 22: FINTRAC source #4
+(first cross-jurisdiction, Crown-copyright non-commercial licence) — 35 derived across 39 publications, 4 sources).
 See HANDOFF.md §8.
 
 ## Definition of done

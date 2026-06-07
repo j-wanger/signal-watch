@@ -54,8 +54,9 @@
   h2 em{font-style:italic;color:var(--muted)}
   .lead{color:var(--muted);max-width:680px;font-size:15.5px;margin-bottom:22px}
   .lead b{color:var(--ink)}
-  /* source attribution — verbatim public-domain advisory, kept visually distinct from the
-     always-on "illustrative" badge (the red-flag text is genuine; the judgment is illustrative). */
+  /* source attribution — verbatim public-source document (US-federal public domain, or FINTRAC under
+     its non-commercial reproduction licence), kept visually distinct from the always-on "illustrative"
+     badge (the red-flag text is genuine; the judgment is illustrative). Each doc carries its own basis. */
   .srccap{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--teal);border-left:2px solid var(--teal);padding:4px 0 4px 11px;margin-bottom:20px;line-height:1.5}
   .srccap b{color:var(--ink);font-weight:500}
 
@@ -183,7 +184,7 @@
   </div>
 
   <footer>
-    Corpus-backed walkthrough · source text is verbatim public-domain (FinCEN, 17 U.S.C. §105); coverage &amp; build judgments are illustrative<br>
+    Corpus-backed walkthrough · source text is verbatim from public sources — FinCEN/OFAC public domain (17 U.S.C. §105) + FINTRAC reproduced under non-commercial licence; coverage &amp; build judgments are illustrative<br>
     <span class="keys">←/→ navigate · Space advance · Esc back to list</span>
   </footer>
 </div>
@@ -275,15 +276,16 @@ function renderSelect(){
   const advN=ADVISORIES.filter(a=>a.doc_type==='Advisory').length;
   const alertN=ADVISORIES.filter(a=>a.doc_type==='Alert').length;
   const ofacN=ADVISORIES.filter(a=>a.doc_type==='OFAC').length;
+  const fintracN=ADVISORIES.filter(a=>a.doc_type==='FINTRAC').length;
   stage.innerHTML=`<div class="scene">
-    <div class="eyebrow">FinCEN + OFAC corpus</div>
+    <div class="eyebrow">FinCEN + OFAC + FINTRAC corpus</div>
     <h2>Pick a document. <em>Watch the loop derive it.</em></h2>
-    <p class="lead">The same signal engine, pointed at the public US-federal corpus — FinCEN advisories + alerts, plus OFAC sanctions advisories (all public domain, 17 U.S.C. §105). Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
+    <p class="lead">The same signal engine, pointed at a multi-jurisdiction public corpus — US-federal FinCEN advisories + alerts and OFAC sanctions advisories (public domain, 17 U.S.C. §105), plus Canadian <b>FINTRAC</b> operational alerts (Crown copyright, reproduced for non-commercial use with attribution). Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
     <div class="selhead">
-      <span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${live} derived · ${nd} non-derivable</span>
+      <span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${fintracN} FINTRAC · ${live} derived · ${nd} non-derivable</span>
     </div>
     <div class="advgrid">${list.map(a=>advCard(a)).join('')}</div>
-    <div class="framenote">Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the public-domain source documents.</div>
+    <div class="framenote">Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the cited source documents (each carries its own public-source attribution).</div>
   </div>`;
   stage.querySelectorAll('.advcard.live').forEach(el=>el.onclick=()=>pick(el.dataset.id));
 }

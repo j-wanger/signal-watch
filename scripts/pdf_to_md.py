@@ -48,14 +48,31 @@ def convert(advisory_id: str, source_dir: Path) -> Path:
     result = MarkItDown().convert(str(pdf))
     text = getattr(result, "markdown", None) or result.text_content
     out = source_dir / f"{advisory_id}.md"
-    # the FinCEN publication noun for the provenance header (advisories vs alerts)
-    kind = "alert" if "alert" in source_dir.name.lower() else "advisory"
-    # Provenance header so the corpus file self-documents its source + public-domain status.
-    header = (
-        f"<!-- source-of-truth: verbatim text of FinCEN {kind} {advisory_id.upper()} -->\n"
-        f"<!-- acquired via scripts/acquire_fincen.py; public domain, 17 U.S.C. 105 -->\n"
-        f"<!-- converted via markitdown (authoring-only); do not hand-edit the body -->\n\n"
-    )
+    # Per-source issuer + publication noun + LICENCE basis for the provenance header. Phase 22 added the
+    # FINTRAC branch ONLY: FINTRAC (Canadian Crown copyright) is reproduced verbatim under FINTRAC's
+    # NON-COMMERCIAL reproduction terms WITH attribution — NOT public domain. The non-FINTRAC branch is
+    # left EXACTLY as before (FinCEN/OFAC = US-federal public domain, 17 U.S.C. 105), so every committed
+    # FinCEN + OFAC md reproduces byte-identically (those sources are frozen).
+    name = source_dir.name.lower()
+    if "fintrac" in name:
+        issuer, kind = "FINTRAC", "operational alert"
+        licence = ("Crown copyright (© His Majesty the King in Right of Canada); reproduced for "
+                   "non-commercial use with attribution per FINTRAC's Terms & Conditions — NOT public domain")
+        # Provenance header so the corpus file self-documents its source + reproduction basis.
+        header = (
+            f"<!-- source-of-truth: verbatim text of {issuer} {kind} {advisory_id.upper()} -->\n"
+            f"<!-- acquired via scripts/acquire_fincen.py; {licence} -->\n"
+            f"<!-- converted via markitdown (authoring-only); do not hand-edit the body -->\n\n"
+        )
+    else:
+        # the FinCEN publication noun for the provenance header (advisories vs alerts)
+        kind = "alert" if "alert" in name else "advisory"
+        # Provenance header so the corpus file self-documents its source + public-domain status.
+        header = (
+            f"<!-- source-of-truth: verbatim text of FinCEN {kind} {advisory_id.upper()} -->\n"
+            f"<!-- acquired via scripts/acquire_fincen.py; public domain, 17 U.S.C. 105 -->\n"
+            f"<!-- converted via markitdown (authoring-only); do not hand-edit the body -->\n\n"
+        )
     out.write_text(header + text.strip() + "\n", encoding="utf-8")
     print(f"wrote {out} ({len(text):,} chars)")
     return out

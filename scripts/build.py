@@ -58,6 +58,13 @@ CORPUS_SOURCES = [
     {"id": "ofac-advisories", "doc_type": "OFAC",
      "status": ROOT / "data" / "ofac" / "corpus-status.json",
      "derived": ROOT / "data" / "ofac" / "derived"},
+    # Phase 22: FINTRAC (Canada's FIU) — the FIRST CROSS-JURISDICTION source. NOT US public domain:
+    # Canadian Crown copyright, reproduced verbatim for NON-COMMERCIAL use with attribution per FINTRAC's
+    # Terms & Conditions (the `source` attribution string each record carries states this distinct basis;
+    # the corpus.html source panel renders it verbatim, so FINTRAC never shows the US "public domain" line).
+    {"id": "fintrac-advisories", "doc_type": "FINTRAC",
+     "status": ROOT / "data" / "fintrac" / "corpus-status.json",
+     "derived": ROOT / "data" / "fintrac" / "derived"},
 ]
 # the cover×data build-recommendation vocabulary (mirrors derive_signals.py _REC_MATRIX values;
 # re-declared here so build.py's boundary check stays independent of the authoring tool).

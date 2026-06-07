@@ -6,8 +6,9 @@
 // test — `build.py --check all` already guarantees that file equals a fresh build of corpus.html),
 // extracts the single inline <script>, evaluates it under the shim, then drives the 5-screen arc
 // (Select → Coverage → Build recs/GATE → Signal → Close the loop) and asserts the Phase-18 invariants
-// + the multi-source menu (Phase 20 FinCEN advisories + alerts, Phase 21 OFAC — 3 source types, honest
-// doc_type chips, an alert AND an OFAC advisory each walk the full arc).
+// + the multi-source menu (Phase 20 FinCEN advisories + alerts, Phase 21 OFAC, Phase 22 FINTRAC — 4
+// source types, honest doc_type chips; an alert, an OFAC advisory, AND a FINTRAC operational alert each
+// walk the full arc; the FINTRAC source panel carries the Crown-copyright basis, not US public domain).
 //
 // Why a vm + shim instead of a third-party DOM library: the ship artifact is a single file:// offline
 // HTML; the project's whole test idiom is dep-free (derive_signals.py --selftest, build.py --check).
@@ -174,14 +175,17 @@ ok(env.__errors.length === 0, 'Select rendered with no console errors');
 const advisoryChips = (env.__stage._html.match(/<span class="chip doc">Advisory<\/span>/g) || []).length;
 const alertChips = (env.__stage._html.match(/<span class="chip doc">Alert<\/span>/g) || []).length;
 const ofacChips = (env.__stage._html.match(/<span class="chip doc">OFAC<\/span>/g) || []).length;
-ok(advisoryChips > 0 && alertChips > 0 && ofacChips > 0,
-  `unified menu lists all 3 source types (${advisoryChips} advisories + ${alertChips} alerts + ${ofacChips} OFAC)`);
-eq(advisoryChips + alertChips + ofacChips, api.ADVISORIES.length,
-  'every card carries an honest doc_type chip (Advisory/Alert/OFAC)');
+const fintracChips = (env.__stage._html.match(/<span class="chip doc">FINTRAC<\/span>/g) || []).length;
+ok(advisoryChips > 0 && alertChips > 0 && ofacChips > 0 && fintracChips > 0,
+  `unified menu lists all 4 source types (${advisoryChips} advisories + ${alertChips} alerts + ${ofacChips} OFAC + ${fintracChips} FINTRAC)`);
+eq(advisoryChips + alertChips + ofacChips + fintracChips, api.ADVISORIES.length,
+  'every card carries an honest doc_type chip (Advisory/Alert/OFAC/FINTRAC)');
 const liveAlerts = api.ADVISORIES.filter(a => a.doc_type === 'Alert' && api.isLive(a));
 ok(liveAlerts.length > 0, `at least one FinCEN Alert is derived/live (${liveAlerts.length})`);
 const liveOfac = api.ADVISORIES.filter(a => a.doc_type === 'OFAC' && api.isLive(a));
 ok(liveOfac.length > 0, `at least one OFAC advisory is derived/live (${liveOfac.length})`);
+const liveFintrac = api.ADVISORIES.filter(a => a.doc_type === 'FINTRAC' && api.isLive(a));
+ok(liveFintrac.length > 0, `at least one FINTRAC operational alert is derived/live (${liveFintrac.length})`);
 
 // choose a live advisory that has at least one buildable (BUILD_NOW + build_logic) gap
 const adv = api.ADVISORIES.filter(api.isLive)
@@ -299,6 +303,39 @@ apiO.gotoScreen(3);
 ok(/· Close the loop/.test(envO.__stage._html), 'ofac: Close-the-loop screen renders');
 eq(numText(envO, 'gnum'), afterO, 'ofac: close gauge lands on the recomputed after-coverage');
 ok(envO.__errors.length === 0, 'ofac: full 5-screen arc walked with no console errors');
+
+// ---- a FINTRAC operational alert walks the full 5-screen arc (Phase 22 — 4th source / FIRST
+//      cross-jurisdiction proof) + the source attribution is the FINTRAC Crown-copyright basis,
+//      NOT the US "public domain" string (compliance: FINTRAC is reproduced under a non-commercial
+//      licence, distinct from the US-federal 17 U.S.C. 105 sources). ----
+const envF = boot(true);
+const apiF = envF.__api;
+const fintrac = apiF.ADVISORIES.filter(a => a.doc_type === 'FINTRAC' && apiF.isLive(a))
+  .find(a => apiF.buildNows(a).some(i => i.build_logic && typeof i.build_logic === 'object'));
+ok(fintrac, `found a live FINTRAC operational alert with a buildable BUILD_NOW gap (${fintrac && fintrac.id})`);
+apiF.pick(fintrac.id);
+eq(apiF.view, 'detail', 'fintrac: pick() enters detail view');
+// the source panel (srcCap) on the Coverage screen carries the FINTRAC Crown-copyright attribution,
+// and NEVER the US public-domain line (the footer's mixed-basis note is outside #stage).
+ok(/His Majesty the King in Right of Canada/.test(envF.__stage._html),
+  'fintrac: source panel renders the FINTRAC Crown-copyright attribution (© His Majesty…)');
+ok(!/public domain/i.test(envF.__stage._html),
+  'fintrac: the FINTRAC source panel does NOT claim US public domain');
+const covF = apiF.coverageIndex(fintrac.indicators);
+eq(numText(envF, 'gnum'), covF, 'fintrac: Coverage gauge lands on coverageIndex(indicators)');
+apiF.gotoScreen(1);
+ok(/Build recommendations · gate/.test(envF.__stage._html), 'fintrac: Build-recs/GATE screen renders');
+eq([...apiF.selected].sort().join(','), apiF.buildNows(fintrac).map(i => i.id).sort().join(','),
+  'fintrac: gate defaults to ALL BUILD_NOW selected');
+apiF.gotoScreen(2);
+ok(/PROPOSED ·/.test(envF.__stage._html), 'fintrac: Signal drafts ≥1 spec card for the picks');
+apiF.selected = new Set(apiF.buildNows(fintrac).map(i => i.id));
+const afterF = apiF.coverageIndex(fintrac.indicators.map(i =>
+  apiF.selected.has(i.id) ? Object.assign({}, i, { status: 'covered' }) : i));
+apiF.gotoScreen(3);
+ok(/· Close the loop/.test(envF.__stage._html), 'fintrac: Close-the-loop screen renders');
+eq(numText(envF, 'gnum'), afterF, 'fintrac: close gauge lands on the recomputed after-coverage');
+ok(envF.__errors.length === 0, 'fintrac: full 5-screen arc walked with no console errors');
 
 /* ============================ report ============================ */
 console.log(`\n${pass} passed, ${fails.length} failed`);

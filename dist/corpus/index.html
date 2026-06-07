@@ -54,8 +54,9 @@
   h2 em{font-style:italic;color:var(--muted)}
   .lead{color:var(--muted);max-width:680px;font-size:15.5px;margin-bottom:22px}
   .lead b{color:var(--ink)}
-  /* source attribution — verbatim public-domain advisory, kept visually distinct from the
-     always-on "illustrative" badge (the red-flag text is genuine; the judgment is illustrative). */
+  /* source attribution — verbatim public-source document (US-federal public domain, or FINTRAC under
+     its non-commercial reproduction licence), kept visually distinct from the always-on "illustrative"
+     badge (the red-flag text is genuine; the judgment is illustrative). Each doc carries its own basis. */
   .srccap{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--teal);border-left:2px solid var(--teal);padding:4px 0 4px 11px;margin-bottom:20px;line-height:1.5}
   .srccap b{color:var(--ink);font-weight:500}
 
@@ -183,7 +184,7 @@
   </div>
 
   <footer>
-    Corpus-backed walkthrough · source text is verbatim public-domain (FinCEN, 17 U.S.C. §105); coverage &amp; build judgments are illustrative<br>
+    Corpus-backed walkthrough · source text is verbatim from public sources — FinCEN/OFAC public domain (17 U.S.C. §105) + FINTRAC reproduced under non-commercial licence; coverage &amp; build judgments are illustrative<br>
     <span class="keys">←/→ navigate · Space advance · Esc back to list</span>
   </footer>
 </div>
@@ -5844,6 +5845,630 @@ const CORPUS = {
           "rationale": "Matching a counterparty virtual-currency address to a blocked person or sanctioned jurisdiction requires blockchain chain-analytics exposure data that is only partially deployed, so existing screening can be enhanced but not fully closed from core data."
         }
       ]
+    },
+    {
+      "id": "fintrac-synthetic-opioids",
+      "advisory": "FINTRAC-SYNTHETIC-OPIOIDS",
+      "title": "Operational Alert: Laundering the proceeds of illicit synthetic opioids",
+      "date": "2025-01",
+      "source": "FINTRAC-SYNTHETIC-OPIOIDS · Operational Alert: Laundering the proceeds of illicit synthetic opioids · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 130,
+      "derivable": true,
+      "doc_type": "FINTRAC",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "Client deposits cash into a personal account and then immediately moves it through email money transfers, transfers between accounts, drafts or cheques, or withdraws it, often at multiple financial institutions.",
+          "src_line": 435,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Cash-in then immediate fan-out through EMTs / internal transfers / drafts is a classic rapid flow-through pattern fully observable in the bank's own deposit and outbound-payment ledger, yet rarely instrumented as a standing velocity signal — a buildable gap on data already held.",
+          "build_logic": {
+            "signal_name": "S-CASH-FLOWTHROUGH",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "cash_deposit_value",
+              "hours_to_first_outbound",
+              "outbound_channel_count",
+              "flowthrough_ratio",
+              "cross_fi_outbound_share"
+            ],
+            "logic": "Flag a personal account where cash deposits are followed within a short window by outbound EMTs, internal transfers, drafts/cheques or withdrawals totalling a high fraction of the deposited value, escalating when disbursement spreads across multiple channels or destination institutions.",
+            "window": "rolling 72 hours per deposit",
+            "source": "core deposit ledger joined to outbound payment / EMT rails",
+            "route": "Tier-1 alert → AML analyst review gate"
+          }
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "Client has funds coming in and out of their personal account through email money transfers more quickly than normal.",
+          "src_line": 438,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "EMT in/out velocity sits entirely in the bank's e-transfer rail data and most institutions already run some pass-through monitoring, but tuning it to a per-client 'faster than normal' baseline is only partially instrumented — an enhancement on data held, not a net-new build."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "Client has funds deposited into his or her personal account in amounts below the reporting threshold from what appear to be multiple third parties located in many parts of a city, broader geographic area or several provinces.",
+          "src_line": 467,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Sub-threshold deposits aggregated from many dispersed third parties is textbook structuring, derivable from the bank's own deposit records (amount, originator, location) — a concrete buildable signal on data already held that is seldom run as a standing geographic-dispersion aggregate.",
+          "build_logic": {
+            "signal_name": "S-STRUCTURED-MULTIPARTY",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "sub_threshold_deposit_count",
+              "distinct_originator_count",
+              "distinct_deposit_locations",
+              "geographic_spread_km",
+              "aggregate_value_vs_threshold"
+            ],
+            "logic": "Flag a personal account receiving multiple deposits individually below the LCTR reporting threshold from numerous distinct third parties across dispersed geographic locations within the window, where the aggregate materially exceeds the threshold — indicative of structuring to evade reporting.",
+            "window": "rolling 30 days",
+            "source": "core deposit ledger with originator and branch/location attributes",
+            "route": "Tier-1 alert → AML analyst review gate"
+          }
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "Client uses multiple financial institutions; their personal account sees significant cash flow-through; and they carry out little typical banking activity (such as paying household bills).",
+          "src_line": 470,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "The bank sees its own cash flow-through and the absence of routine bill-pay activity, but the 'multiple financial institutions' leg needs partial enrichment (counterparty-FI inference from outbound EMT/wire destinations) — instrumentable as an enhancement, not fully closed from a single institution's data."
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "Client opens bank accounts for several businesses for no apparent economic reason.",
+          "src_line": 491,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "The bank holds its own multi-entity account-opening records, but judging 'no apparent economic reason' across several related businesses needs partial enrichment from beneficial-ownership and KYC linkage; existing onboarding controls can be enhanced rather than rebuilt."
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "Client sends or receives virtual currency from an address that is known to be associated with a darknet marketplace",
+          "src_line": 503,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Attributing a counterparty virtual-currency address to a darknet marketplace requires external blockchain chain-analytics / address-attribution feeds the bank does not natively hold, so the data must be sourced before any signal is buildable."
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "Client sends or receives virtual currency to/from mixing or tumbling services that is unusual for their profile.",
+          "src_line": 511,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Mixer/tumbler exposure is partly inferable where the bank already ingests some chain-analytics tagging, but full coverage of decentralised tumbling services needs additional address-label enrichment — buildable once the partial external labels are enriched."
+        },
+        {
+          "id": "IND-08",
+          "section": "redflag",
+          "flag": "Client makes wire transfers to or from known cryptocurrency friendly banks.",
+          "src_line": 523,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Outbound/inbound wire counterparties are in the bank's own SWIFT/wire data, but flagging 'crypto-friendly' correspondent institutions requires partial enrichment from an external VASP-affiliated-bank reference list — buildable once that classification is enriched onto the wire data."
+        },
+        {
+          "id": "IND-09",
+          "section": "redflag",
+          "flag": "Client makes virtual currency or wire transfers to chemical companies located in China, Eastern Europe, or India.",
+          "src_line": 553,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Wire/VC transfer destination and counterparty geography are in the bank's payment data, but identifying the counterparty as a chemical company in the named jurisdictions needs partial enrichment from merchant-category / corporate-registry data — buildable once counterparty classification is enriched."
+        },
+        {
+          "id": "IND-10",
+          "section": "redflag",
+          "flag": "Client purchases industrial lab equipment with no obvious business need, for example pill presses and industrial pumps.",
+          "src_line": 575,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Identifying a purchase as pill-press / industrial lab equipment requires line-item merchant or invoice detail the bank does not hold for card/wire payments — only the merchant and amount are visible, so the descriptive data must be sourced externally before a signal is buildable."
+        },
+        {
+          "id": "IND-11",
+          "section": "redflag",
+          "flag": "Client makes unusual cash deposits to a chemical company’s accounts.",
+          "src_line": 585,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Where the chemical company banks with the same institution, unusual cash deposits to its accounts are visible in the deposit ledger and existing cash-anomaly monitoring applies, but identifying the recipient as a chemical company needs partial business-classification enrichment — an enhancement on partially held data."
+        },
+        {
+          "id": "IND-12",
+          "section": "redflag",
+          "flag": "Client makes excessive transactions to payment processing companies that are not commensurate with the subject’s financial profile.",
+          "src_line": 599,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Volume and value of outbound payments to identifiable payment processors against the client's expected financial profile are fully derivable from the bank's own transaction ledger and KYC profile — a concrete buildable signal on data already held that is seldom run as a standing processor-concentration check.",
+          "build_logic": {
+            "signal_name": "S-PAYPROC-CONCENTRATION",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "payment_processor_txn_count",
+              "payment_processor_txn_value",
+              "value_vs_expected_profile",
+              "processor_counterparty_count"
+            ],
+            "logic": "Flag an account whose aggregate transactions to payment-processing counterparties over the window materially exceed the expected value implied by its KYC/income profile, weighted up by the number of distinct processors, indicating layering through processor rails.",
+            "window": "rolling 30 days",
+            "source": "core transaction ledger joined to counterparty (payment-processor) tagging and KYC profile",
+            "route": "Tier-1 alert → AML analyst review gate"
+          }
+        },
+        {
+          "id": "IND-13",
+          "section": "redflag",
+          "flag": "Client receives email money transfers with references to common street-names for drugs in memo section",
+          "src_line": 654,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "The EMT memo / reference field is captured in the bank's own e-transfer records, so screening inbound EMT memos against a drug street-name lexicon (fent, fenty, china girl, etc.) is directly buildable on data already held — a high-precision keyword signal that is rarely run as a standing control.",
+          "build_logic": {
+            "signal_name": "S-EMT-MEMO-LEXICON",
+            "class": "entity · transaction-level · keyword-match",
+            "features": [
+              "emt_memo_text",
+              "lexicon_hit_term",
+              "inbound_emt_count_with_hit",
+              "distinct_senders_with_hit"
+            ],
+            "logic": "Flag inbound email money transfers whose memo/reference field matches a curated drug street-name lexicon (e.g. fent, fenty, china girl, tango, dragon's breath, bean), escalating on repeat hits or multiple distinct senders referencing the same client.",
+            "window": "rolling 30 days",
+            "source": "email-money-transfer records including the memo/reference free-text field",
+            "route": "Tier-1 alert → AML analyst review gate"
+          }
+        },
+        {
+          "id": "IND-14",
+          "section": "redflag",
+          "flag": "Client ships packages under the 1 kg weight.",
+          "src_line": 666,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Package weight and shipping behaviour are courier/logistics data the bank does not hold; only a payment to a shipping merchant is visible, so the shipment-level detail must be sourced externally before this indicator is observable."
+        },
+        {
+          "id": "IND-15",
+          "section": "redflag",
+          "flag": "Client typically pays for purchases in cash and/or prepaid financial products.",
+          "src_line": 668,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Cash usage and the bank's own prepaid-product loads/spend are visible in account data and partially monitored, but a standing 'predominantly cash/prepaid' profile signal is only partially instrumented — an enhancement on data already held."
+        }
+      ]
+    },
+    {
+      "id": "fintrac-terrorist-financing",
+      "advisory": "FINTRAC-TERRORIST-FINANCING",
+      "title": "Operational Alert: Terrorist activity financing",
+      "date": "2022-12",
+      "source": "FINTRAC-TERRORIST-FINANCING · Operational Alert: Terrorist activity financing · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 64,
+      "derivable": true,
+      "doc_type": "FINTRAC",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "Excessive email money transfers followed by the depletion of funds through third parties or cash withdrawals.",
+          "src_line": 244,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "A concrete, fully observable account pattern — inbound EMTs followed by rapid pass-through to third parties or cash-out — derivable entirely from the bank's own e-transfer and withdrawal ledger, but rarely turned into a standing TF signal.",
+          "build_logic": {
+            "signal_name": "S-EMT-DEPLETE",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "inbound_emt_count",
+              "inbound_emt_value",
+              "outbound_to_third_party_value",
+              "cash_withdrawal_value",
+              "depletion_ratio",
+              "inbound_to_outflow_lag_hours"
+            ],
+            "logic": "Flag an account where inbound email money transfers are substantially depleted within a short window via third-party transfers and/or cash withdrawals, weighted up when the depletion ratio approaches the inbound total and the inbound-to-outflow lag is short, indicating funnel/pass-through behaviour.",
+            "window": "rolling 7 days",
+            "source": "Interac e-Transfer ledger joined to account transaction and cash-withdrawal records",
+            "route": "Tier-1 alert → AML/TF analyst review gate"
+          }
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "Payments to online gaming platforms, particularly platforms with in-platform chat rooms that are known to be",
+          "src_line": 262,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Identifying which gaming platforms are 'known to be frequented by violent extremist groups' depends on external intelligence/attribution the bank does not natively hold; the payment itself is observable but the risk signal hinges on sourced platform-reputation data."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "Monthly and/or one time payments are made to extremist media outlets and/or propaganda websites.",
+          "src_line": 266,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Classifying a payee as an 'extremist media outlet' or 'propaganda website' requires external attribution lists the institution does not hold; without sourced merchant/payee designation data the recurring-payment pattern cannot be safely flagged."
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "Use of crowdfunding, FinTech platforms and/or cryptocurrencies to finance individuals or groups associated",
+          "src_line": 277,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Crowdfunding/FinTech/crypto channel exposure is partly visible from MCC and counterparty data the bank holds, but tying flows to violent-extremism-associated individuals or groups needs additional attribution enrichment, so existing channel screening can be enhanced rather than closed from core data."
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "Transaction details make reference to membership fees or clubhouse fees.",
+          "src_line": 276,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Transfer memo / remittance-info text sits in core payment data, so keyword detection of 'membership fees' or 'clubhouse fees' is buildable from data held, but only partially instrumented today — an enhancement to existing free-text screening."
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "Sending or receiving international transfers to and/or from locations of specific concern.",
+          "src_line": 300,
+          "status": "covered",
+          "data": "available",
+          "build_rec": "COVERED",
+          "rationale": "High-risk / specific-concern jurisdiction screening on international wires is a standard control already running at a mid-size Canadian bank against held wire and country data."
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "The use of funds by a non-profit organization is not consistent with the purpose for which it was established.",
+          "src_line": 305,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "NPO/charity flow-versus-stated-purpose anomaly is derivable from the bank's own data — stated business purpose captured at onboarding compared against observed transaction profile (geography, counterparties, value) — but is rarely operationalised as a standing signal.",
+          "build_logic": {
+            "signal_name": "S-NPO-PURPOSE-MISMATCH",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "stated_purpose_category",
+              "outbound_geo_concentration",
+              "high_risk_jurisdiction_value",
+              "large_cash_deposit_value",
+              "counterparty_diversity",
+              "profile_deviation_score"
+            ],
+            "logic": "Flag a non-profit / charity account whose observed transaction profile (destination geography, counterparty mix, large cash deposits or wires to locations of concern) materially deviates from the activity stated at onboarding, scored against an expected-profile baseline for its declared purpose.",
+            "window": "rolling 90 days",
+            "source": "Onboarding stated-purpose attributes joined to the NPO account's transaction and wire ledger",
+            "route": "Tier-1 alert → AML/TF analyst review gate"
+          }
+        },
+        {
+          "id": "IND-08",
+          "section": "redflag",
+          "flag": "Raising donations in an unofficial or unregistered manner.",
+          "src_line": 306,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Determining that donations are raised in an 'unofficial or unregistered' manner requires external charity-registry and solicitation-status data the bank does not natively hold; the inbound donation flow is observable but the unregistered-status determination must be sourced."
+        },
+        {
+          "id": "IND-09",
+          "section": "redflag",
+          "flag": "Purchase or airline ticket to country in the vicinity of a conflict zone.",
+          "src_line": 350,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Airline-ticket purchases are visible via MCC/merchant data, but resolving the destination 'in the vicinity of a conflict zone' needs route/destination enrichment beyond what most card-authorization records carry, so existing travel-spend monitoring can be enhanced rather than fully closed."
+        },
+        {
+          "id": "IND-10",
+          "section": "redflag",
+          "flag": "Purchases for prepaid SIM cards and/or prepaid data plans.",
+          "src_line": 373,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Prepaid SIM / data-plan purchases are detectable from MCC-level card data the bank holds, but the indicator is weak in isolation and needs merchant-category enrichment and corroborating context before it is a usable signal — buildable only after enrichment."
+        },
+        {
+          "id": "IND-11",
+          "section": "redflag",
+          "flag": "Depleting account via cash withdrawals.",
+          "src_line": 358,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Pre-departure account depletion through cash withdrawals is a clean, fully observable pattern derivable from the bank's own withdrawal and balance history, yet is not typically codified as a standing CET (Canadian Extremist Traveller) signal.",
+          "build_logic": {
+            "signal_name": "S-CASH-DEPLETE",
+            "class": "entity · account-level · windowed",
+            "features": [
+              "cash_withdrawal_count",
+              "cash_withdrawal_value",
+              "balance_drawdown_ratio",
+              "days_to_near_zero",
+              "prior_baseline_balance"
+            ],
+            "logic": "Flag an account drawn down toward zero predominantly via cash withdrawals over a short window relative to its prior baseline balance, weighted up when the drawdown is rapid and clusters with travel-related spend, indicating pre-departure account depletion.",
+            "window": "rolling 30 days",
+            "source": "Account balance history joined to cash-withdrawal (ATM/branch) transaction records",
+            "route": "Tier-1 alert → AML/TF analyst review gate"
+          }
+        },
+        {
+          "id": "IND-12",
+          "section": "redflag",
+          "flag": "Account activity shows a significant shift from historical activity in account.",
+          "src_line": 359,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Behavioural-baseline deviation is computable from the account's own transaction history the bank holds and is partially instrumented in existing anomaly monitoring, so it is an enhancement of held-data detection rather than a net-new build."
+        },
+        {
+          "id": "IND-13",
+          "section": "redflag",
+          "flag": "Individual receives money transfers from family or friends in or in the vicinity of a conflict zone.",
+          "src_line": 377,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Attributing inbound transfers as originating 'in or in the vicinity of a conflict zone' requires external originator-location and conflict-zone geographic data the bank does not natively hold; the receipt is observable but the conflict-zone attribution must be sourced."
+        }
+      ]
+    },
+    {
+      "id": "fintrac-underground-banking",
+      "advisory": "FINTRAC-UNDERGROUND-BANKING",
+      "title": "Updated indicators: Laundering the proceeds of crime through underground banking schemes",
+      "date": "2023-07",
+      "source": "FINTRAC-UNDERGROUND-BANKING · Updated indicators: Laundering the proceeds of crime through underground banking schemes · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 43,
+      "derivable": true,
+      "doc_type": "FINTRAC",
+      "derived": true,
+      "indicators": [
+        {
+          "id": "IND-01",
+          "section": "redflag",
+          "flag": "Client moves funds sourced from individuals/entities located in China, notably in Hong Kong, within a short period of time to one or more of the following sectors: real estate, investments, automotive and/or the legal profession.",
+          "src_line": 227,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Rapid onward movement of recently-received foreign-sourced funds into a fan of high-value sectors (real estate, investments, automotive, legal) is a concrete flow-through pattern derivable from core transaction/wire/EMT data and counterparty MCC/sector tags the bank already holds, yet cross-sector funnelling is rarely instrumented as a standing signal.",
+          "build_logic": {
+            "signal_name": "S-CROSS-SECTOR-FUNNEL",
+            "class": "entity · account-level · windowed flow-through",
+            "features": [
+              "inbound_value_foreign_sourced",
+              "days_to_outbound",
+              "distinct_outbound_sectors",
+              "outbound_value_to_re_inv_auto_legal",
+              "passthrough_ratio"
+            ],
+            "logic": "Flag an account that receives funds attributed to China/Hong Kong counterparties and, within a short window, disburses a high proportion of that value into two or more of the {real estate, investments, automotive, legal} sectors (by counterparty sector tag), indicating layered placement across multiple high-value channels.",
+            "window": "rolling 14 days",
+            "source": "transaction ledger + EMT/wire records joined to counterparty sector/MCC tags and country attribution",
+            "route": "Tier-1 alert → AML analyst review gate"
+          }
+        },
+        {
+          "id": "IND-02",
+          "section": "redflag",
+          "flag": "Incoming funds from individuals/entities located in China, notably in Hong Kong, are immediately transferred to a client’s associated personal or businesses account(s) or to unrelated party(ies).",
+          "src_line": 231,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Immediate pass-through of incoming funds to associated or unrelated accounts is a rapid in/out velocity pattern already partly covered by existing layering/velocity rules on core transaction data; the China-attribution and associated-party linkage can sharpen an existing control rather than require a net-new build."
+        },
+        {
+          "id": "IND-03",
+          "section": "redflag",
+          "flag": "Client has ties to China and is using their accounts for pass-through activities funded by individuals/entities located in China, notably in Hong Kong, whose relationship is unclear.",
+          "src_line": 236,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Pass-through volume is observable from transaction data, but establishing that the funding parties' relationship to the client is 'unclear' depends on relationship/beneficial-ownership context the bank holds only partially and would need to enrich before a reliable signal."
+        },
+        {
+          "id": "IND-04",
+          "section": "redflag",
+          "flag": "Client is receiving funds from entities located in China, notably in Hong Kong, that are connected to the money service business industry, with no ultimate remitting party names listed.",
+          "src_line": 240,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Missing ultimate-remitter names in incoming wires from MSB-connected senders is partly visible in wire/SWIFT message fields, but reliably identifying MSB connection and absent originator data needs message-field parsing plus MSB attribution enrichment beyond what core fields cleanly provide."
+        },
+        {
+          "id": "IND-05",
+          "section": "redflag",
+          "flag": "Stated purpose of incoming funds from individuals/entities located in China, notably in Hong Kong, is for the purchase of property but the funds were used to purchase Guaranteed Investment Certificates.",
+          "src_line": 248,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Comparing a stated purpose against the funds' actual destination (property vs. GIC) requires reconciling free-text purpose/memo fields with downstream product purchases; the data is held but the stated-purpose capture is unstructured and needs enrichment to compare reliably."
+        },
+        {
+          "id": "IND-06",
+          "section": "redflag",
+          "flag": "Business accounts are funded by multiple transfers, mainly from the business’ directors and/or authorized signatories’ personal accounts.",
+          "src_line": 252,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Funding of a business account predominantly from its own directors'/signatories' personal accounts is a related-party funding pattern fully derivable from account-ownership/signatory records joined to the transaction ledger the bank already holds, and is not typically a standing signal.",
+          "build_logic": {
+            "signal_name": "S-DIRECTOR-FUNDED-BIZ",
+            "class": "entity · account-level · windowed related-party",
+            "features": [
+              "inbound_transfer_count",
+              "share_value_from_directors",
+              "distinct_director_funders",
+              "director_signatory_link"
+            ],
+            "logic": "Flag a business account whose inbound funding over the window is dominated (by value share above threshold) by transfers from accounts whose owners are the business's registered directors or authorized signatories, indicating self-funded conduit behaviour inconsistent with genuine third-party commercial activity.",
+            "window": "rolling 30 days",
+            "source": "account-ownership/signatory registry joined to internal transfer records",
+            "route": "Tier-2 alert → AML analyst review gate"
+          }
+        },
+        {
+          "id": "IND-07",
+          "section": "redflag",
+          "flag": "Cash deposit(s) are followed by funds sent to a real estate party (e.g., real estate agent/brokerage) with indications suggesting the purpose of payment is for a real estate-related transaction (such as memos referencing the same address repeatedly).",
+          "src_line": 273,
+          "status": "gap",
+          "data": "partial",
+          "build_rec": "BUILD_ENRICH",
+          "rationale": "Cash-in followed by an outbound payment to a real-estate party is observable from transaction data, but anchoring it to a 'same address repeatedly' memo pattern depends on parsing unstructured payment memos that need enrichment before the signal is reliable."
+        },
+        {
+          "id": "IND-08",
+          "section": "redflag",
+          "flag": "Mortgage payments are sourced from incoming funds from China, notably in Hong Kong, where the original source of funds is unclear.",
+          "src_line": 283,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "The bank can see that mortgage payments trace to incoming China-sourced funds, but establishing that the original source of those funds is 'unclear' requires upstream source-of-funds/origin attribution the bank does not natively hold and must source before a signal is buildable."
+        },
+        {
+          "id": "IND-09",
+          "section": "redflag",
+          "flag": "Incoming funds from individuals/entities located in China, notably in Hong Kong, are used to purchase shorter-term investment products (such as Guaranteed Investment Certificates), which are then redeemed before the term date, despite incurring a penalty.",
+          "src_line": 290,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Purchasing a term investment product (e.g., a GIC) with recently-received foreign funds and then redeeming it early at a penalty is an economically-irrational placement pattern fully visible in the bank's own product lifecycle and transaction records, and is rarely turned into a standing signal.",
+          "build_logic": {
+            "signal_name": "S-EARLY-GIC-REDEMPTION",
+            "class": "entity · account-level · product-lifecycle",
+            "features": [
+              "gic_purchase_source_foreign_inbound",
+              "days_held_before_redemption",
+              "early_redemption_penalty_incurred",
+              "purchase_to_redemption_value"
+            ],
+            "logic": "Flag a customer who funds a short-term investment product (GIC) from recently-received China/Hong Kong-attributed inflows and redeems it before term despite incurring a penalty, indicating the investment was a layering vehicle rather than a genuine savings choice.",
+            "window": "product term to redemption (typically 30–365 days)",
+            "source": "investment-product subledger joined to source-of-funds transaction records",
+            "route": "Tier-1 alert → AML analyst review gate"
+          }
+        },
+        {
+          "id": "IND-10",
+          "section": "redflag",
+          "flag": "Cash deposits are transferred within a short period of time to a holding company, trust company or investment firm.",
+          "src_line": 298,
+          "status": "partial",
+          "data": "available",
+          "build_rec": "ENHANCE",
+          "rationale": "Cash deposited and quickly moved out to a holding/trust/investment firm is a rapid cash-placement-then-layer pattern already partly covered by cash-velocity rules on core data; tagging the holding/trust/investment-firm destination can sharpen an existing control."
+        },
+        {
+          "id": "IND-11",
+          "section": "redflag",
+          "flag": "Incoming funds from individuals/entities located in China, notably in Hong Kong, are used to send funds to high-end car dealerships that are inconsistent with clients stated occupation.",
+          "src_line": 317,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Outbound payments to high-end car dealerships are visible in transaction data, but judging them 'inconsistent with stated occupation' relies on KYC occupation/expected-activity profiles that are only partially structured, so an existing high-value-spend control can be enhanced rather than fully built from clean data."
+        },
+        {
+          "id": "IND-12",
+          "section": "redflag",
+          "flag": "Inter-account transfer from personal to business accounts (or vice-versa) sourced through high value domestic fund transfers from individuals/entities in the automotive sector.",
+          "src_line": 341,
+          "status": "gap",
+          "data": "available",
+          "build_rec": "BUILD_NOW",
+          "rationale": "Personal-to-business (or reverse) inter-account transfers fed by high-value domestic transfers from automotive-sector counterparties is a layering pattern fully derivable from internal account-type, transfer-value and counterparty-sector data the bank already holds, and is not typically instrumented as a standing signal.",
+          "build_logic": {
+            "signal_name": "S-PERS-BIZ-AUTO-LAYER",
+            "class": "entity · account-level · windowed inter-account",
+            "features": [
+              "personal_business_transfer_value",
+              "upstream_auto_sector_inbound",
+              "transfer_direction_flips",
+              "high_value_domestic_flag"
+            ],
+            "logic": "Flag a customer who shuttles high value between own personal and business accounts where the upstream funding traces to high-value domestic transfers from automotive-sector counterparties, indicating commingling/layering of automotive-channel proceeds across account types.",
+            "window": "rolling 30 days",
+            "source": "internal transfer records joined to account-type registry and counterparty sector tags",
+            "route": "Tier-2 alert → AML analyst review gate"
+          }
+        },
+        {
+          "id": "IND-13",
+          "section": "redflag",
+          "flag": "Client’s account is mainly or in part funded by bank drafts, email money transfers and/or cheques from legal professionals who have limited or no open source footprint.",
+          "src_line": 362,
+          "status": "gap",
+          "data": "insufficient",
+          "build_rec": "SOURCE_DATA",
+          "rationale": "Funding via drafts/EMTs/cheques is visible in core data, but attributing the remitters as 'legal professionals with limited or no open-source footprint' requires external entity/profession attribution and open-source-presence enrichment the bank does not hold and must source first."
+        },
+        {
+          "id": "IND-14",
+          "section": "redflag",
+          "flag": "Cash deposits, not in line with account holder’s stated occupation, were used to send funds to legal professionals with no clear relationship.",
+          "src_line": 366,
+          "status": "partial",
+          "data": "partial",
+          "build_rec": "ENHANCE",
+          "rationale": "Cash deposits inconsistent with stated occupation then routed to a legal professional are partly observable, but the occupation-consistency judgment and 'no clear relationship' assessment depend on KYC profile and relationship context that is only partially structured, so the existing occupation-mismatch control can be enhanced."
+        }
+      ]
     }
   ]
 };
@@ -5929,15 +6554,16 @@ function renderSelect(){
   const advN=ADVISORIES.filter(a=>a.doc_type==='Advisory').length;
   const alertN=ADVISORIES.filter(a=>a.doc_type==='Alert').length;
   const ofacN=ADVISORIES.filter(a=>a.doc_type==='OFAC').length;
+  const fintracN=ADVISORIES.filter(a=>a.doc_type==='FINTRAC').length;
   stage.innerHTML=`<div class="scene">
-    <div class="eyebrow">FinCEN + OFAC corpus</div>
+    <div class="eyebrow">FinCEN + OFAC + FINTRAC corpus</div>
     <h2>Pick a document. <em>Watch the loop derive it.</em></h2>
-    <p class="lead">The same signal engine, pointed at the public US-federal corpus — FinCEN advisories + alerts, plus OFAC sanctions advisories (all public domain, 17 U.S.C. §105). Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
+    <p class="lead">The same signal engine, pointed at a multi-jurisdiction public corpus — US-federal FinCEN advisories + alerts and OFAC sanctions advisories (public domain, 17 U.S.C. §105), plus Canadian <b>FINTRAC</b> operational alerts (Crown copyright, reproduced for non-commercial use with attribution). Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.</p>
     <div class="selhead">
-      <span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${live} derived · ${nd} non-derivable</span>
+      <span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${fintracN} FINTRAC · ${live} derived · ${nd} non-derivable</span>
     </div>
     <div class="advgrid">${list.map(a=>advCard(a)).join('')}</div>
-    <div class="framenote">Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the public-domain source documents.</div>
+    <div class="framenote">Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the cited source documents (each carries its own public-source attribution).</div>
   </div>`;
   stage.querySelectorAll('.advcard.live').forEach(el=>el.onclick=()=>pick(el.dataset.id));
 }

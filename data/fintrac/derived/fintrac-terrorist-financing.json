@@ -1,0 +1,166 @@
+{
+  "id": "fintrac-terrorist-financing",
+  "advisory": "FINTRAC-TERRORIST-FINANCING",
+  "source_md": "data/fintrac/fintrac-terrorist-financing.md",
+  "extraction_quality": "clean",
+  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the indicator region (Phase 16/22). Coverage/data values are ILLUSTRATIVE (vision demo). FINTRAC Operational Alert — Canadian Crown copyright (© His Majesty the King in Right of Canada); reproduced verbatim for non-commercial use with attribution per FINTRAC's Terms & Conditions — NOT public domain.",
+  "indicators": [
+    {
+      "id": "IND-01",
+      "section": "redflag",
+      "flag": "Excessive email money transfers followed by the depletion of funds through third parties or cash withdrawals.",
+      "src_line": 244,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "A concrete, fully observable account pattern — inbound EMTs followed by rapid pass-through to third parties or cash-out — derivable entirely from the bank's own e-transfer and withdrawal ledger, but rarely turned into a standing TF signal.",
+      "build_logic": {
+        "signal_name": "S-EMT-DEPLETE",
+        "class": "entity · account-level · windowed",
+        "features": ["inbound_emt_count", "inbound_emt_value", "outbound_to_third_party_value", "cash_withdrawal_value", "depletion_ratio", "inbound_to_outflow_lag_hours"],
+        "logic": "Flag an account where inbound email money transfers are substantially depleted within a short window via third-party transfers and/or cash withdrawals, weighted up when the depletion ratio approaches the inbound total and the inbound-to-outflow lag is short, indicating funnel/pass-through behaviour.",
+        "window": "rolling 7 days",
+        "source": "Interac e-Transfer ledger joined to account transaction and cash-withdrawal records",
+        "route": "Tier-1 alert → AML/TF analyst review gate"
+      }
+    },
+    {
+      "id": "IND-02",
+      "section": "redflag",
+      "flag": "Payments to online gaming platforms, particularly platforms with in-platform chat rooms that are known to be",
+      "src_line": 262,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Identifying which gaming platforms are 'known to be frequented by violent extremist groups' depends on external intelligence/attribution the bank does not natively hold; the payment itself is observable but the risk signal hinges on sourced platform-reputation data."
+    },
+    {
+      "id": "IND-03",
+      "section": "redflag",
+      "flag": "Monthly and/or one time payments are made to extremist media outlets and/or propaganda websites.",
+      "src_line": 266,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Classifying a payee as an 'extremist media outlet' or 'propaganda website' requires external attribution lists the institution does not hold; without sourced merchant/payee designation data the recurring-payment pattern cannot be safely flagged."
+    },
+    {
+      "id": "IND-04",
+      "section": "redflag",
+      "flag": "Use of crowdfunding, FinTech platforms and/or cryptocurrencies to finance individuals or groups associated",
+      "src_line": 277,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Crowdfunding/FinTech/crypto channel exposure is partly visible from MCC and counterparty data the bank holds, but tying flows to violent-extremism-associated individuals or groups needs additional attribution enrichment, so existing channel screening can be enhanced rather than closed from core data."
+    },
+    {
+      "id": "IND-05",
+      "section": "redflag",
+      "flag": "Transaction details make reference to membership fees or clubhouse fees.",
+      "src_line": 276,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Transfer memo / remittance-info text sits in core payment data, so keyword detection of 'membership fees' or 'clubhouse fees' is buildable from data held, but only partially instrumented today — an enhancement to existing free-text screening."
+    },
+    {
+      "id": "IND-06",
+      "section": "redflag",
+      "flag": "Sending or receiving international transfers to and/or from locations of specific concern.",
+      "src_line": 300,
+      "status": "covered",
+      "data": "available",
+      "build_rec": "COVERED",
+      "rationale": "High-risk / specific-concern jurisdiction screening on international wires is a standard control already running at a mid-size Canadian bank against held wire and country data."
+    },
+    {
+      "id": "IND-07",
+      "section": "redflag",
+      "flag": "The use of funds by a non-profit organization is not consistent with the purpose for which it was established.",
+      "src_line": 305,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "NPO/charity flow-versus-stated-purpose anomaly is derivable from the bank's own data — stated business purpose captured at onboarding compared against observed transaction profile (geography, counterparties, value) — but is rarely operationalised as a standing signal.",
+      "build_logic": {
+        "signal_name": "S-NPO-PURPOSE-MISMATCH",
+        "class": "entity · account-level · windowed",
+        "features": ["stated_purpose_category", "outbound_geo_concentration", "high_risk_jurisdiction_value", "large_cash_deposit_value", "counterparty_diversity", "profile_deviation_score"],
+        "logic": "Flag a non-profit / charity account whose observed transaction profile (destination geography, counterparty mix, large cash deposits or wires to locations of concern) materially deviates from the activity stated at onboarding, scored against an expected-profile baseline for its declared purpose.",
+        "window": "rolling 90 days",
+        "source": "Onboarding stated-purpose attributes joined to the NPO account's transaction and wire ledger",
+        "route": "Tier-1 alert → AML/TF analyst review gate"
+      }
+    },
+    {
+      "id": "IND-08",
+      "section": "redflag",
+      "flag": "Raising donations in an unofficial or unregistered manner.",
+      "src_line": 306,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Determining that donations are raised in an 'unofficial or unregistered' manner requires external charity-registry and solicitation-status data the bank does not natively hold; the inbound donation flow is observable but the unregistered-status determination must be sourced."
+    },
+    {
+      "id": "IND-09",
+      "section": "redflag",
+      "flag": "Purchase or airline ticket to country in the vicinity of a conflict zone.",
+      "src_line": 350,
+      "status": "partial",
+      "data": "partial",
+      "build_rec": "ENHANCE",
+      "rationale": "Airline-ticket purchases are visible via MCC/merchant data, but resolving the destination 'in the vicinity of a conflict zone' needs route/destination enrichment beyond what most card-authorization records carry, so existing travel-spend monitoring can be enhanced rather than fully closed."
+    },
+    {
+      "id": "IND-10",
+      "section": "redflag",
+      "flag": "Purchases for prepaid SIM cards and/or prepaid data plans.",
+      "src_line": 373,
+      "status": "gap",
+      "data": "partial",
+      "build_rec": "BUILD_ENRICH",
+      "rationale": "Prepaid SIM / data-plan purchases are detectable from MCC-level card data the bank holds, but the indicator is weak in isolation and needs merchant-category enrichment and corroborating context before it is a usable signal — buildable only after enrichment."
+    },
+    {
+      "id": "IND-11",
+      "section": "redflag",
+      "flag": "Depleting account via cash withdrawals.",
+      "src_line": 358,
+      "status": "gap",
+      "data": "available",
+      "build_rec": "BUILD_NOW",
+      "rationale": "Pre-departure account depletion through cash withdrawals is a clean, fully observable pattern derivable from the bank's own withdrawal and balance history, yet is not typically codified as a standing CET (Canadian Extremist Traveller) signal.",
+      "build_logic": {
+        "signal_name": "S-CASH-DEPLETE",
+        "class": "entity · account-level · windowed",
+        "features": ["cash_withdrawal_count", "cash_withdrawal_value", "balance_drawdown_ratio", "days_to_near_zero", "prior_baseline_balance"],
+        "logic": "Flag an account drawn down toward zero predominantly via cash withdrawals over a short window relative to its prior baseline balance, weighted up when the drawdown is rapid and clusters with travel-related spend, indicating pre-departure account depletion.",
+        "window": "rolling 30 days",
+        "source": "Account balance history joined to cash-withdrawal (ATM/branch) transaction records",
+        "route": "Tier-1 alert → AML/TF analyst review gate"
+      }
+    },
+    {
+      "id": "IND-12",
+      "section": "redflag",
+      "flag": "Account activity shows a significant shift from historical activity in account.",
+      "src_line": 359,
+      "status": "partial",
+      "data": "available",
+      "build_rec": "ENHANCE",
+      "rationale": "Behavioural-baseline deviation is computable from the account's own transaction history the bank holds and is partially instrumented in existing anomaly monitoring, so it is an enhancement of held-data detection rather than a net-new build."
+    },
+    {
+      "id": "IND-13",
+      "section": "redflag",
+      "flag": "Individual receives money transfers from family or friends in or in the vicinity of a conflict zone.",
+      "src_line": 377,
+      "status": "gap",
+      "data": "insufficient",
+      "build_rec": "SOURCE_DATA",
+      "rationale": "Attributing inbound transfers as originating 'in or in the vicinity of a conflict zone' requires external originator-location and conflict-zone geographic data the bank does not natively hold; the receipt is observable but the conflict-zone attribution must be sourced."
+    }
+  ]
+}

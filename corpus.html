@@ -65,6 +65,15 @@
   .selhead .sct{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.04em}
   .advgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   @media(max-width:780px){.advgrid{grid-template-columns:1fr}}
+  /* Phase 26 — Select grouped by SOURCE (newest-first within each), + red-flag sub-grouping by section */
+  .srcgroup{margin-bottom:18px}
+  .srcgroup:last-child{margin-bottom:0}
+  .srchead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .srchead .srcname{font-family:var(--display);font-size:14px;color:var(--ink);letter-spacing:.02em}
+  .srchead .srcsub{font-family:var(--mono);font-size:9.5px;color:var(--faint);letter-spacing:.05em;text-transform:uppercase}
+  .secthead{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--signal);margin:16px 0 7px;display:flex;gap:8px;align-items:baseline}
+  .secthead:first-child{margin-top:0}
+  .secthead .secn{color:var(--faint)}
   .advcard{border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:14px 15px;display:flex;flex-direction:column;gap:7px;transition:.18s;position:relative}
   .advcard.live{cursor:pointer;border-left:3px solid var(--signal)}
   .advcard.live:hover{border-color:var(--line2);border-left-color:var(--signal);background:var(--panel2);transform:translateY(-1px)}
@@ -268,6 +277,7 @@ function shortFlag(t,cap){cap=cap||150;t=String(t||'').replace(/\s+/g,' ').trim(
 // typology -> human-readable description (injected by build.py from data/typology-map.json).
 const TYPOLOGY_DESC=(CORPUS.typologies && typeof CORPUS.typologies==='object')?CORPUS.typologies:{};
 function typoLabel(t){return String(t||'').replace(/-/g,' ');}
+function sectLabel(s){s=String(s||'').replace(/-/g,' ').trim();return s?s.charAt(0).toUpperCase()+s.slice(1):'';}
 function clusterFor(t){return ADVISORIES.filter(a=>isLive(a) && a.typology===t);}
 // build the cluster list: one entry per typology over the LIVE docs, with jurisdictions/doc-types/
 // pooled indicator count. Sorted cross-jurisdiction first, then cross-agency, then size — the
@@ -319,9 +329,6 @@ function renderStepper(){
 
 /* ---------- screen 0: advisory selection ---------- */
 function renderSelect(){
-  // derived (live) first, then derivable-not-derived (clean/low), then non-derivable.
-  const rank=a=>isLive(a)?0:a.derivable?(a.extraction==='clean'?1:2):3;
-  const list=ADVISORIES.slice().sort((x,y)=>rank(x)-rank(y) || String(x.id).localeCompare(String(y.id)));
   const live=ADVISORIES.filter(isLive).length;
   const nd=ADVISORIES.filter(a=>!a.derivable).length;
   const advN=ADVISORIES.filter(a=>a.doc_type==='Advisory').length;
@@ -344,7 +351,18 @@ function renderSelect(){
   const note = byTyp
     ? `Documents are grouped by their typology (a closed-vocabulary overlay, traceable to each document's stated subject). Combined coverage is honest union arithmetic over the existing per-indicator statuses — no similarity, overlap, or lift between regulators is computed or claimed.`
     : `Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the cited source documents (each carries its own public-source attribution).`;
-  const grid = byTyp ? cl.map(typoCard).join('') : list.map(a=>advCard(a)).join('');
+  // doc-mode: group by SOURCE (FinCEN advisories / alerts / OFAC / FINTRAC), newest-first within each.
+  // doc_type comes from the source registry → always one of these four; dates are ISO (lexical = chronological).
+  const SRC_ORDER=[['Advisory','FinCEN Advisories'],['Alert','FinCEN Alerts'],['OFAC','OFAC advisories'],['FINTRAC','FINTRAC operational alerts']];
+  const byDateDesc=(x,y)=>String(y.date||'').localeCompare(String(x.date||'')) || String(x.id).localeCompare(String(y.id));
+  const groupsHtml=SRC_ORDER.map(([dt,label])=>{
+    const docs=ADVISORIES.filter(a=>(a.doc_type||'Advisory')===dt).slice().sort(byDateDesc);
+    if(!docs.length) return '';
+    const dl=docs.filter(isLive).length;
+    return `<div class="srcgroup"><div class="srchead"><span class="srcname">${esc(label)}</span><span class="srcsub">${docs.length} document${docs.length===1?'':'s'} · ${dl} derived · newest first</span></div>
+      <div class="advgrid">${docs.map(a=>advCard(a)).join('')}</div></div>`;
+  }).join('');
+  const gridHtml = byTyp ? `<div class="advgrid">${cl.map(typoCard).join('')}</div>` : groupsHtml;
   stage.innerHTML=`<div class="scene">
     <div class="eyebrow">FinCEN + OFAC + FINTRAC corpus</div>
     <h2>${byTyp?'Pick a typology. <em>See the corpus combine.</em>':'Pick a document. <em>Watch the loop derive it.</em>'}</h2>
@@ -353,7 +371,7 @@ function renderSelect(){
       ${count}
       ${toggle}
     </div>
-    <div class="advgrid">${grid}</div>
+    ${gridHtml}
     <div class="framenote">${note}</div>
   </div>`;
   stage.querySelectorAll('.modetoggle button').forEach(b=>b.onclick=()=>{selMode=b.dataset.mode;render();});
@@ -473,35 +491,64 @@ function renderArticle(a){
     <p class="lead">Step 1 — extract the verbatim red-flag phrases (each an exact, grounded quote from the document, highlighted at left). Step 2 — translate each into a natural AML red flag (right). The verbatim stays beside its translation; nothing is invented.</p>
     <div class="artwrap">
       <div>
-        <div class="doclabel">Source document · ${inds.length} phrase${inds.length===1?'':'s'} extracted</div>
+        <div class="doclabel" id="doclabel">Source document · ${inds.length} phrase${inds.length===1?'':'s'} extracted</div>
         <div class="doc" id="doc">${docHtml}</div>
       </div>
       <div>
         <div class="doclabel">Extract → translate · ${inds.length} red flag${inds.length===1?'':'s'}</div>
-        <div class="xlate">${xrows}</div>
+        <div class="xlate" id="xlate">${xrows}</div>
       </div>
     </div>
     <div class="framenote">Every red flag traces to a phrase in the source — the verbatim quote is the grounded evidence; the translation is how an AML programme would phrase it. The source text is verbatim; the coverage and build judgments downstream are illustrative.</div>
   </div>`;
-  // scroll the first highlighted phrase into view inside the document panel (defensive: guard
-  // querySelector + offsetTop so a minimal/headless DOM never throws in the deferred callback)
-  T(()=>{const d=document.getElementById('doc'),h=d&&d.querySelector&&d.querySelector('.hl');if(d&&h)d.scrollTop=Math.max(0,(h.offsetTop||0)-80);},220);
+  // Phase 26 — the "agent reading" beat (ported from the showcase streamAdvisory) as a progressive
+  // ENHANCEMENT: the FINAL state (highlighted document + translate list) is in the template above, so
+  // the reduced-motion path (and the string-DOM harness) settle on it with no extra work. Under full
+  // motion only, RESET the doc panel + hold the translate column, type a capped opening, then re-reveal.
+  const docEl=document.getElementById('doc'), xEl=document.getElementById('xlate'), lbl=document.getElementById('doclabel');
+  const scrollFirst=()=>T(()=>{const h=docEl&&docEl.querySelector&&docEl.querySelector('.hl');if(docEl&&h)docEl.scrollTop=Math.max(0,(h.offsetTop||0)-80);},60);
+  if(REDUCED || !art || !docEl){scrollFirst();return;}  // final state already rendered — one-shot
+  if(lbl)lbl.textContent='Source document · reading…';
+  if(xEl)xEl.innerHTML='';                              // hold the translate column until the read completes
+  docEl.textContent='';
+  const reveal=()=>{                                    // re-reveal the full highlighted document + the translate list
+    docEl.innerHTML=docHtml;
+    if(xEl)xEl.innerHTML=xrows;
+    if(lbl)lbl.textContent=`Source document · ${inds.length} phrase${inds.length===1?'':'s'} extracted`;
+    scrollFirst();
+  };
+  const CAP=1600, head=art.slice(0,CAP); let i=0;       // type a capped opening so it reads as real processing
+  (function type(){
+    if(i>=head.length){reveal();return;}
+    i=Math.min(head.length,i+3);
+    docEl.textContent=head.slice(0,i)+'▌';              // block char = caret; textContent keeps the source literal
+    docEl.scrollTop=docEl.scrollHeight;                 // follow the caret as it reads
+    T(type,10);
+  })();
 }
 
 function renderCoverage(a){
   const inds=a.indicators, cov=coverageIndex(inds);
+  const covRow=i=>`
+        <div class="covrow">
+          <div class="clabel">${esc(i.red_flag||shortFlag(i.flag,170))}<div class="csub">${esc(a.advisory)} ${esc(i.section||'')} · md L${esc(i.src_line)} · "${esc(shortFlag(i.flag,90))}"</div></div>
+          <span class="pill ${i.status||'gap'}">${i.status==='gap'?'not covered':esc(i.status||'gap')}</span>
+        </div>`;
+  // Phase 26 — group indicators by section when the doc enumerates >1 (and every indicator is sectioned),
+  // else flat. Order preserved via each section's first appearance; coverage math (over all) is unchanged.
+  const secOrder=[]; inds.forEach(i=>{const s=i.section||''; if(!secOrder.includes(s))secOrder.push(s);});
+  const grouped = secOrder.length>1 && inds.every(i=>i.section);
+  const covBody = grouped
+    ? secOrder.map(s=>{const g=inds.filter(i=>(i.section||'')===s);
+        return `<div class="secthead">${esc(sectLabel(s))}<span class="secn">${g.length}</span></div>`+g.map(covRow).join('');}).join('')
+    : inds.map(covRow).join('');
   stage.innerHTML=`<div class="scene">
     <div class="eyebrow">${esc(a.advisory||a.id)} · Coverage</div>
     <h2>Where are we <em>blind</em> on this document?</h2>
     ${srcCap(a)}
     <p class="lead">Each enumerated red flag, scored against our existing detection library: do we already cover it? The coverage index is derived from those statuses.</p>
     <div class="covwrap">
-      <div class="covgrid">${inds.map(i=>`
-        <div class="covrow">
-          <div class="clabel">${esc(i.red_flag||shortFlag(i.flag,170))}<div class="csub">${esc(a.advisory)} ${esc(i.section||'')} · md L${esc(i.src_line)} · "${esc(shortFlag(i.flag,90))}"</div></div>
-          <span class="pill ${i.status||'gap'}">${i.status==='gap'?'not covered':esc(i.status||'gap')}</span>
-        </div>`).join('')}
-      </div>
+      <div class="covgrid">${covBody}</div>
       <div class="gauge">
         <div class="gh">Coverage index</div>
         <div class="gnum" id="gnum">${cov}%</div>

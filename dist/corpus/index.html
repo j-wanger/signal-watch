@@ -158,6 +158,44 @@
   .framenote{margin-top:20px;font-size:12px;color:var(--faint);border-left:2px solid var(--line2);padding-left:12px;font-style:italic;font-family:var(--display)}
   .empty{border:1px dashed var(--line2);border-radius:10px;padding:20px;color:var(--muted);font-family:var(--mono);font-size:12px;background:var(--panel);line-height:1.6}
 
+  /* Phase 26 — build-log (Act-4 port: animates the REAL build_logic, structural, no numbers — safe) +
+     combination-lift (Act-5 port: a GENERIC ILLUSTRATIVE template, no per-doc figures, loudly badged). */
+  .buildlog{border:1px solid var(--line);background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+  .bllabel{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  .blstep{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--faint);padding:5px 0;transition:.3s}
+  .blstep .bi{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line2);flex:none;display:grid;place-items:center;font-size:11px}
+  .blstep.run{color:var(--ink)} .blstep.run .bi{border-color:var(--signal);color:var(--signal);animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .blstep.ok{color:var(--ink)} .blstep.ok .bi{border-color:var(--green);background:var(--green);color:#0c0e12}
+  .blstep.gate .bi{border-color:var(--violet);color:var(--violet)} .blstep.gate.ok .bi{background:var(--violet);color:#0c0e12}
+  .lift{border:1px solid var(--line);background:var(--panel);border-radius:13px;padding:22px}
+  .liftbar{margin-bottom:16px} .liftbar:last-child{margin-bottom:0}
+  .liftbar .llabel{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;margin-bottom:6px}
+  .liftbar .llabel .ln{color:var(--ink)}
+  .liftbar .llabel .ln .combo{font-family:var(--mono);font-size:10px;color:var(--faint);display:block;margin-top:2px}
+  .liftbar .llabel .lv{font-family:var(--mono);font-weight:700}
+  .track{height:14px;background:var(--bg2);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .fill{height:100%;width:0;border-radius:7px;transition:width 1.2s cubic-bezier(.2,.7,.2,1)}
+  .fill.weak{background:linear-gradient(90deg,#6a3a3a,var(--rose))}
+  .fill.mid{background:linear-gradient(90deg,#7a5a1f,var(--signal))}
+  .fill.strong{background:linear-gradient(90deg,#2f6a47,var(--green))}
+  /* the LOUD honesty tag — kept visually distinct from the always-on "Illustrative data & outputs" badge */
+  .illus{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--rose);border-left:3px solid var(--rose);background:rgba(239,96,121,.07);border-radius:9px;padding:11px 13px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.5}
+  .illus b{color:var(--rose);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;padding-top:1px}
+
+  /* Phase 26 — story-driven LANDING (the narrative entry before the Select grid) */
+  .scene.landing{max-width:760px}
+  .lhero{font-family:var(--display);font-size:34px;line-height:1.16;color:var(--ink);margin:6px 0 18px;font-weight:600;letter-spacing:-.01em}
+  @media(max-width:600px){.lhero{font-size:26px}}
+  .lhero em{color:var(--signal);font-style:italic}
+  .llead{font-size:15px;line-height:1.62;color:var(--muted);margin-bottom:14px}
+  .llead b{color:var(--ink)}
+  .lstats{display:flex;gap:14px;flex-wrap:wrap;margin:24px 0}
+  .lstat{border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:14px 18px;min-width:118px;flex:1}
+  .lstat .lsn{font-family:var(--display);font-size:30px;color:var(--signal);line-height:1}
+  .lstat .lsl{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-top:6px}
+  .lcta{margin:6px 0 4px;font-size:15px}
+
   /* Phase 25 — the article-processing screen: the FULL source document (verbatim red-flag phrases
      highlighted) beside the extract→translate list (verbatim phrase → natural AML red flag). */
   .artwrap{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
@@ -10386,7 +10424,7 @@ const REC_COLOR={BUILD_NOW:'var(--green)',ENHANCE:'var(--blue)',BUILD_ENRICH:'va
 const REC_LABEL={BUILD_NOW:'build now',ENHANCE:'enhance',BUILD_ENRICH:'build + enrich',
   SOURCE_DATA:'source data',MONITOR:'monitor',COVERED:'covered'};
 
-const STEPS=['Select document','Read advisory','Coverage','Build recs','Signal','Close the loop'];
+const STEPS=['Select document','Read advisory','Coverage','Build recs','Signal','Combination lift','Close the loop'];
 
 // escapes text AND attribute positions (quotes included) — corpus.html interpolates into both.
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -10435,7 +10473,7 @@ function clusters(){
 function jchip(j){const cls=j==='Canada'?'ca':j==='US'?'us':'xx';return `<span class="chip jur ${cls}">${esc(j)}</span>`;}
 
 /* ---------- state + chrome ---------- */
-let view='select', current=null, screen=0, maxScreen=0, timers=[];
+let view='landing', current=null, screen=0, maxScreen=0, timers=[];  // Phase 26: the story landing is the entry
 let selMode='doc';          // Select picker mode: 'doc' (by document) | 'typology' (by typology)
 let currentTypology=null;   // the active cluster when view==='synthesis'
 let fromTypology=null;      // the cluster a doc was drilled from (so Back returns to it)
@@ -10452,9 +10490,10 @@ function clearTimers(){timers.forEach(t=>clearTimeout(t));timers=[];}
 function T(fn,ms){if(REDUCED){fn();return 0;}const id=setTimeout(fn,ms);timers.push(id);return id;}
 
 function curAdv(){return ADVISORIES.find(a=>a.id===current)||null;}
-function stepIndex(){return (view==='select'||view==='synthesis')?0:screen+1;}  // Select/synthesis=0, Coverage=1, Build=2, Signal=3
+function stepIndex(){return (view==='landing'||view==='select'||view==='synthesis')?0:screen+1;}  // landing/Select/synthesis=0, then detail screens
 
 function renderStepper(){
+  if(view==='landing'){stepper.innerHTML='';return;}   // the landing is a cover page — no stepper
   const at=stepIndex();
   stepper.innerHTML=STEPS.map((s,i)=>
     `<div class="step ${i<at?'done':''} ${i===at?'active':''}" data-i="${i}"><div class="sbar"></div><div class="sl">${i}· ${s}</div></div>`
@@ -10467,6 +10506,28 @@ function renderStepper(){
 }
 
 /* ---------- screen 0: advisory selection ---------- */
+// Phase 26 — the story-driven landing: a narrative entry framing the multi-jurisdiction public corpus,
+// then an "Enter" into the arc. Stat tiles are HONEST counts derived from the data (not fabricated).
+function renderLanding(){
+  const total=ADVISORIES.length, derived=ADVISORIES.filter(isLive).length;
+  const juris=[...new Set(ADVISORIES.map(a=>a.jurisdiction||'').filter(Boolean))];
+  const srcN=[...new Set(ADVISORIES.map(a=>a.doc_type||'Advisory'))].length;
+  stage.innerHTML=`<div class="scene landing">
+    <div class="eyebrow">Signal Watch · Corpus Explorer</div>
+    <h1 class="lhero">The financial-crime regulators publish the playbook. <em>In public.</em></h1>
+    <p class="llead">FinCEN advisories and alerts, OFAC sanctions advisories, FINTRAC operational alerts — each enumerates the red flags of a money-laundering typology, in the open. The hard part was never access. It's that a bank reads them one PDF at a time, by hand, and the detection signal rarely gets built.</p>
+    <p class="llead">Signal Watch points <b>one signal loop</b> at the whole corpus: read each public document, extract its verbatim red flags, translate them into detection indicators, score them against your existing coverage, and recommend the signals you can build now. The agent proposes; <b>you dispose</b>.</p>
+    <div class="lstats">
+      <div class="lstat"><div class="lsn">${total}</div><div class="lsl">public documents</div></div>
+      <div class="lstat"><div class="lsn">${derived}</div><div class="lsl">derived into indicators</div></div>
+      <div class="lstat"><div class="lsn">${srcN}</div><div class="lsl">regulators / sources</div></div>
+      <div class="lstat"><div class="lsn">${juris.length}</div><div class="lsl">jurisdictions · ${esc(juris.join(' + '))}</div></div>
+    </div>
+    <button class="btn primary lcta" id="enter">Enter the corpus ›</button>
+    <div class="framenote">A vision prototype over a public, multi-jurisdiction corpus — US-federal FinCEN + OFAC (public domain, 17 U.S.C. §105) and Canadian FINTRAC (Crown copyright, reproduced for non-commercial use with attribution). Coverage and build judgments are illustrative; the documents and red-flag text are verbatim from the cited sources.</div>
+  </div>`;
+  const btn=document.getElementById('enter'); if(btn) btn.onclick=toSelect;
+}
 function renderSelect(){
   const live=ADVISORIES.filter(isLive).length;
   const nd=ADVISORIES.filter(a=>!a.derivable).length;
@@ -10750,16 +10811,34 @@ function renderSignal(a){
   const emptyMsg=allBuilds.length===0
     ? 'No immediately-buildable signal for this document — its gaps need data enrichment or sourcing first (see the build recommendations).'
     : 'No build-now gaps selected — go back to the build recommendations and pick at least one to draft.';
+  const n=builds.length;
+  // Phase 26 — the "agent builds" beat (Act-4 port): a structural build-log over the REAL committed
+  // signals (no numbers — safe). The human gate already happened at Build recs, so it shows ALREADY passed.
+  const buildlog=n?`<div class="buildlog" id="buildlog">
+      <div class="bllabel">Agent build log · ${n} committed signal${n===1?'':'s'}</div>
+      <div class="blstep" data-s="0"><span class="bi">1</span>Draft ${n} signal definition${n===1?'':'s'} from the document</div>
+      <div class="blstep" data-s="1"><span class="bi">2</span>Map to available data features</div>
+      <div class="blstep" data-s="2"><span class="bi">3</span>Generate proposals</div>
+      <div class="blstep gate" data-s="3"><span class="bi">◈</span>Human gate — ${n} committed at the build recommendations</div>
+      <div class="blstep" data-s="4"><span class="bi">4</span>Backtest on population</div>
+      <div class="blstep gate" data-s="5"><span class="bi">⚖</span>Route to Model Validation (E-23)</div>
+    </div>`:'';
   stage.innerHTML=`<div class="scene">
     <div class="eyebrow">${esc(a.advisory||a.id)} · Signal</div>
-    <h2>The signals you <em>committed</em>.</h2>
+    <h2>The agent builds the signals you <em>committed</em>.</h2>
     ${srcCap(a)}
-    <p class="lead">For each <b style="color:var(--green)">build-now</b> gap you picked, the agent drafts a full signal definition mapped to data features. ${builds.length?`<b>${builds.length}</b> of ${allBuilds.length} buildable drafted — each is a proposal a human confirms before any build.`:''}</p>
-    ${builds.length?builds.map(i=>specCard(i,a)).join(''):
+    <p class="lead">For each <b style="color:var(--green)">build-now</b> gap you picked, the agent drafts a full signal definition mapped to data features. ${n?`<b>${n}</b> of ${allBuilds.length} buildable drafted — each is a proposal a human confirms before any build.`:''}</p>
+    ${buildlog}
+    ${n?builds.map(i=>specCard(i,a)).join(''):
       `<div class="empty">${emptyMsg}</div>`}
     <div class="framenote">A drafted signal becomes a governed model artifact — versioned, validated under E-23 before it can drive a filing.</div>
   </div>`;
+  // auto-complete the build-log (reduced motion → one paint). Steps mark ✓ in sequence; the build_logic
+  // they describe is real, the steps carry no numbers.
+  const steps=[...stage.querySelectorAll('.blstep')];
+  if(steps.length) steps.forEach((el,k)=>T(()=>markStep(el),250+k*330));
 }
+function markStep(el){if(!el||!el.classList)return;el.classList.remove('run');el.classList.add('ok');const bi=el.querySelector&&el.querySelector('.bi');if(bi)bi.textContent='✓';}
 function specCard(i,a){
   const d=i.build_logic;
   const feats=Array.isArray(d.features)?d.features.map(f=>`<code>${esc(f)}</code>`).join(' '):esc(d.features);
@@ -10813,13 +10892,50 @@ function renderClose(a){
   T(()=>{const f=document.getElementById('gfill');if(f)f.style.width=after+'%';animVal('gnum',before,after,1000,'%');},300);
 }
 
+/* ---------- screen 5: combination lift (ILLUSTRATIVE template — Act-5 port) ---------- */
+function renderLift(a){
+  const picks=buildNows(a).filter(i=>i.build_logic && typeof i.build_logic==='object' && selected.has(i.id));
+  if(!picks.length){
+    stage.innerHTML=`<div class="scene">
+      <div class="eyebrow">${esc(a.advisory||a.id)} · Combination lift</div>
+      <h2>Alone it's noise. <em>Together</em> it's a case.</h2>
+      ${srcCap(a)}
+      <div class="empty">No signal committed at the gate — go back to the build recommendations and pick at least one build-now gap to see how composition lifts precision.</div>
+    </div>`;
+    return;
+  }
+  const sig=esc(picks[0].build_logic.signal_name||'The new signal');
+  // GENERIC illustrative template — IDENTICAL for every document, NEVER measured per-doc. The derived
+  // records carry no precision/lift figures (Phase 18 rejected fabricating ~12 per-advisory stats); this
+  // shows the SHAPE of composition only, loudly badged "illustrative · pending calibration".
+  const LIFT=[
+    {name:sig+' alone', combo:'new signal in isolation', v:18, cls:'weak'},
+    {name:'+ a correlated existing signal', combo:'composition · 2 signals', v:64, cls:'mid'},
+    {name:'+ a second existing signal', combo:'composition · 3 signals', v:83, cls:'strong'}
+  ];
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">${esc(a.advisory||a.id)} · Combination lift</div>
+    <h2>Alone it's noise. <em>Together</em> it's a case.</h2>
+    ${srcCap(a)}
+    <p class="lead">A new signal in isolation fires too widely to act on. Composed with existing signals — the engine discovers the combination rather than an analyst guessing it — it becomes precise and explainable. This is the case for <b>atoms over monolithic scenarios</b>.</p>
+    <div class="illus"><b>Illustrative · pending calibration</b><span>These lift figures are a GENERIC template showing the shape of composition — they are NOT measured on this document and are identical across the corpus. Real precision requires backtesting on population; the figures are calibrated then.</span></div>
+    <div class="lift" id="lift">${LIFT.map((l,i)=>`
+      <div class="liftbar"><div class="llabel"><span class="ln">${l.name}<span class="combo">${l.combo}</span></span><span class="lv" id="lv${i}">0%</span></div>
+      <div class="track"><div class="fill ${l.cls}" id="fill${i}"></div></div></div>`).join('')}
+    </div>
+    <div class="framenote">A combination this strong would enter the promotion gate — precision floor, non-alert sampling, temporal hold-out — before it could drive a filing. The values above are illustrative placeholders, not a measured detection rate.</div>
+  </div>`;
+  LIFT.forEach((l,i)=>{T(()=>{const f=document.getElementById('fill'+i);if(f)f.style.width=l.v+'%';animVal('lv'+i,0,l.v,1100,'%');},250+i*550);});
+}
+
 /* ---------- render dispatch ---------- */
-const DETAIL=[renderArticle,renderCoverage,renderBuildRecs,renderSignal,renderClose];
+const DETAIL=[renderArticle,renderCoverage,renderBuildRecs,renderSignal,renderLift,renderClose];
 function render(){
   clearTimers();
   renderStepper();
   try{
-    if(view==='select'){ renderSelect(); }
+    if(view==='landing'){ renderLanding(); }
+    else if(view==='select'){ renderSelect(); }
     else if(view==='synthesis'){
       if(!currentTypology){ toSelect(); return; }
       renderSynthesis(currentTypology);
@@ -10845,18 +10961,28 @@ function pick(id,from){const a=ADVISORIES.find(x=>x.id===id);if(!isLive(a))retur
 function enterSynthesis(t){currentTypology=t;view='synthesis';screen=0;maxScreen=0;render();}
 function gotoScreen(s){screen=Math.max(0,Math.min(DETAIL.length-1,s));maxScreen=Math.max(maxScreen,screen);render();}
 function toSelect(){view='select';current=null;currentTypology=null;fromTypology=null;screen=0;maxScreen=0;render();}
+function toLanding(){view='landing';current=null;currentTypology=null;fromTypology=null;screen=0;maxScreen=0;render();}
 function advance(){
-  if(view==='select'||view==='synthesis')return;   // pick by clicking a card / cluster row
+  if(view==='landing'){toSelect();return;}          // Enter the corpus
+  if(view==='select'||view==='synthesis')return;    // pick by clicking a card / cluster row
   if(screen>=DETAIL.length-1){toSelect();return;}
   gotoScreen(screen+1);
 }
 function back(){
+  if(view==='landing')return;
   if(view==='synthesis'){toSelect();return;}                  // cluster → the picker
-  if(view==='select')return;
+  if(view==='select'){toLanding();return;}                    // Select → back to the cover
   if(screen<=0){ if(fromTypology){enterSynthesis(fromTypology);return;} toSelect();return; }  // drilled from a cluster → back to it
   gotoScreen(screen-1);
 }
 function updateControls(){
+  if(view==='landing'){
+    backBtn.style.visibility='hidden';
+    resetBtn.style.visibility='hidden';
+    nextBtn.style.visibility='hidden';
+    hint.textContent='Enter the corpus to begin →';
+    return;
+  }
   if(view==='select'){
     backBtn.style.visibility='hidden';
     resetBtn.style.visibility='hidden';
@@ -10874,9 +11000,9 @@ function updateControls(){
   backBtn.style.visibility='visible';
   resetBtn.style.visibility='visible';
   nextBtn.style.visibility='visible';
-  const backLabels=['‹ Advisories','‹ Read advisory','‹ Coverage','‹ Build recs','‹ Signal'];
-  const nextLabels=['Assess coverage ›','Build recommendations ›','Signal spec ›','Close the loop ›','↺ Another document'];
-  const hints=['The agent reads the source and translates each red flag','Each red flag scored against the library','Pick the build-now gaps to commit','Drafted signals for your committed gaps','Coverage closes on what you built'];
+  const backLabels=['‹ Advisories','‹ Read advisory','‹ Coverage','‹ Build recs','‹ Signal','‹ Combination lift'];
+  const nextLabels=['Assess coverage ›','Build recommendations ›','Signal spec ›','See the lift ›','Close the loop ›','↺ Another document'];
+  const hints=['The agent reads the source and translates each red flag','Each red flag scored against the library','Pick the build-now gaps to commit','The agent builds your committed signals','Why composition beats a signal alone — illustrative','Coverage closes on what you built'];
   // when drilled from a typology cluster, Back from Coverage returns to that cluster (not the picker)
   backBtn.textContent=(screen===0 && fromTypology)?('‹ '+typoLabel(fromTypology)):(backLabels[screen]||'‹ Back');
   nextBtn.textContent=nextLabels[screen]||'Next ›';
@@ -10903,7 +11029,7 @@ document.addEventListener('keydown',e=>{
     case 'ArrowRight':case 'PageDown':e.preventDefault();advance();break;
     case 'ArrowLeft':case 'PageUp':e.preventDefault();back();break;
     case ' ':case 'Spacebar':if(onBtn)break;e.preventDefault();advance();break;
-    case 'Escape':e.preventDefault();toSelect();break;
+    case 'Escape':e.preventDefault();if(view!=='landing')toSelect();break;
   }
 });
 

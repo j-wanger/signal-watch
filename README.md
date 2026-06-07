@@ -46,7 +46,7 @@ All checks are dep-free (no `npm install`, no test framework — they match the 
 
 ```
 python3 scripts/build.py --check all       # drift: every committed dist == a fresh build
-node tests/corpus-explorer.test.mjs        # corpus-explorer 6-screen arc, against the committed dist
+node tests/corpus-explorer.test.mjs        # corpus-explorer: landing + per-doc arc + wow beats, vs the committed dist
 python3 scripts/derive_signals.py --selftest   # the derivation GATE checks (matrix + quote-grounding + shape)
 ```
 
@@ -137,34 +137,51 @@ non-derivable).
 `dist/corpus/index.html` is a **second, separate** single-file ship artifact: a FinCEN **corpus
 explorer**. Where the six-act typology demos each tell one scripted story, the explorer points the same
 loop at the *whole public corpus* — FinCEN advisories + alerts, OFAC, and FINTRAC — you pick one of the 46 publications
-and watch it derive. It is a **staged 6-screen arc** (Phase 18 gave it two of the beats the six-act showcase
-has and the explorer lacked — a human gate and a close-the-loop payoff; Phase 25 added the article-processing
-"read advisory" beat):
+and watch it derive. Phase 26 elevated it to the showcase's bar: a story-driven **landing** as the entry,
+red flags re-translated to the showcase's terse mechanism-named AML-indicator **register**, a progressive
+"agent reading" article render, and the showcase's build-log + combination-lift **wow beats**. It opens on a
+**landing** (frames the multi-jurisdiction public corpus → one signal loop; an "Enter the corpus" CTA), then
+runs a **staged 6-screen per-doc arc** (Phase 18 gave it the human gate + the close-the-loop payoff; Phase 25
+added the article-processing "read advisory" beat; Phase 26 added the combination-lift beat):
 
 1. **Select** — all 46 publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC advisories +
-   10 FINTRAC publications — 9 operational alerts + 1 operational brief), each with an honest `doc_type` chip (*Advisory* / *Alert* / *OFAC* / *FINTRAC*) and a status chip: *derived* (live, clickable — 42 of them), or *no
+   10 FINTRAC publications — 9 operational alerts + 1 operational brief), **grouped by source** (FinCEN
+   Advisories / Alerts / OFAC / FINTRAC), newest-first within each, each with an honest `doc_type` chip
+   (*Advisory* / *Alert* / *OFAC* / *FINTRAC*) and a status chip: *derived* (live, clickable — 42 of them), or *no
    enumerated red-flag list* (non-derivable — the 4 remaining: the 2 FATF jurisdiction advisories + 2
    alerts whose text mentions red flags but carries no anchorable enumerated list). The *clean / low*
    "ready to derive, not yet derived" chip state remains for any future publication added before it is derived.
-2. **Read advisory** *(Phase 25)* — the **full source document**, with each verbatim red-flag phrase
-   highlighted, then **translated** into a natural AML `red_flag` shown beside the verbatim quote. This makes
-   the corpus's two-layer pipeline visible — *step 1 extract (grounded, verbatim) → step 2 translate (a red
-   flag the way an AML programme writes it)* — the same model the six-act showcase uses. The verbatim quote
-   stays beside every translation (the grounded evidence; the translation is disclosed-illustrative).
-3. **Coverage** — the chosen advisory's coverage gauge, derived from its indicator statuses.
+2. **Read advisory** *(Phase 25; Phase 26 progressive render)* — the **full source document**, rendered with
+   the showcase's "agent reading" beat (it types a capped opening, then reveals the full text with each verbatim
+   red-flag phrase highlighted, then staggers in the translations; reduced-motion settles to the final state in
+   one paint). Each verbatim phrase is **translated** into a natural AML `red_flag` shown beside the verbatim
+   quote — the corpus's two-layer pipeline made visible: *step 1 extract (grounded, verbatim) → step 2 translate*.
+   Phase 26 re-translated all 42 documents' red flags to the showcase's register (terse, mechanism-named —
+   *fan-in / flow-through / structuring / nominee / funnel*) so they read like the six-act showcase's indicators,
+   not prose; the verbatim quote stays beside every translation (the grounded evidence; the translation is
+   disclosed-illustrative).
+3. **Coverage** — the chosen advisory's coverage gauge, derived from its indicator statuses; for a document
+   with more than one enumerated section, the indicators are **sub-grouped by section** (else flat).
 4. **Build recommendations — the human gate** *(the centerpiece)* — per red-flag indicator: coverage ×
    data → one **build recommendation** (`BUILD NOW / ENHANCE / BUILD + ENRICH / SOURCE DATA / MONITOR /
    COVERED`), sorted build-now-first, each row tracing to its red-flag source line. The `BUILD NOW` rows
    are **selectable** (div-toggles, *not* `<input>` — so the keyboard nav still works), defaulting to all
    selected: the presenter picks what to commit. *Agent proposes, human disposes.*
-5. **Signal** — the full signal definition for each **picked** `BUILD NOW` gap (an honest empty state if
+5. **Signal** — the agent **build-log** (a structural "agent builds" reveal — Draft → Map → Generate → the
+   human gate, already passed → Backtest → Route to Model Validation — animating the *real* `build_logic`, no
+   numbers) followed by the full signal definition for each **picked** `BUILD NOW` gap (an honest empty state if
    none are buildable, or if you deselect them all).
-6. **Close the loop** — the coverage index animates **before → after** as the gaps you committed flip
-   *gap → covered* (the same model as the showcase's Act 6). The payoff is **coverage, not a precision
-   "lift" number**: the derived records carry no precision figures, and fabricating ~12 per-advisory stats
-   to mimic the showcase's combination-lift beat would break the *never present synthetic numbers as real*
-   rule — so the explorer closes the loop on the one quantity it can honestly show. A 0-build-now advisory
-   (or deselecting everything) holds coverage flat with a note, never a fake rise.
+6. **Combination lift** *(Phase 26)* — the showcase's Act-5 "alone it's noise; together it's a case" beat:
+   composition bars (the committed signal alone → + a correlated signal → + a second signal) animate to show
+   that composed atoms beat a monolithic rule. **The lift figures are a generic illustrative template, identical
+   across every document, behind a loud "Illustrative · pending calibration — NOT measured on this document"
+   tag** (kept visually distinct from the always-on badge). This is the deliberate, scoped reversal of Phase 18's
+   rejection: the records still carry *no* precision figures, and fabricating ~42 distinct per-document lift stats
+   would break the *never present synthetic numbers as real* rule — so the beat shows the *shape* of composition
+   as an openly-templated placeholder, never a measured rate. An empty selection shows an honest empty state.
+7. **Close the loop** — the coverage index animates **before → after** as the gaps you committed flip
+   *gap → covered* (the same model as the showcase's Act 6). The honestly-measurable payoff is **coverage**: a
+   0-build-now advisory (or deselecting everything) holds coverage flat with a note, never a fake rise.
 
 Build it with `python3 scripts/build.py corpus` (or `all`); guard it with `python3 scripts/build.py
 --check corpus` (folded into `--check all`). The build is **decoupled from the authoring layer**: it
@@ -262,12 +279,30 @@ is the project's default compliance posture, the translation **aligns** with the
 bending them. The full articles are inlined at build time (the single offline file grows to ~2.2 MB); the
 showcase, every source document, and the grounding core stay byte-frozen.
 
+**Showcase-quality elevation (Phase 26) — the register, the wow, the entry.** Phase 25 shipped the two-layer
+model but the output was still weak: the translations read like prose, the article render was static, the Signal
+screen didn't land, nothing was grouped, and there was no front door. Phase 26 raised the whole explorer to the
+six-act showcase's bar. **The register:** all 42 documents' `red_flag`s were re-translated to the showcase's
+terse, mechanism-named AML-indicator style (*"Receive-and-forward to no-relationship payees (mule pass-through)"*,
+*"Multi-originator geographic funnel-in"*) — done with a **dynamic workflow** (42 translate agents → 42 *independent*
+adversarial verifiers; the model proposes, a byte-surgical applier writes only the `red_flag` value, and
+`--check-derived` disposes), so the verbatim quote and the grounding logic stay byte-unchanged and only the
+translation register changed. **The render:** the Read-advisory screen now progressively "reads" the document
+(types an opening → reveals highlights → staggers the translations; reduced-motion settles in one paint).
+**Grouping:** Select is grouped by source (newest-first); red flags sub-group by section on Coverage. **The wow
+beats:** the Signal screen gained the showcase's build-log (animating the *real* `build_logic`), and a new
+**Combination-lift** screen ports the "alone it's noise, together it's a case" beat — with its lift figures held
+to a *generic illustrative template behind a loud "pending calibration" tag* (never per-document fabricated; the
+deliberate, scoped reversal of Phase 18's no-lift rule). **The entry:** a story-driven **landing** now frames the
+corpus before the Select grid. The showcase (`index.html` + the 3 typology dists), every source document, every
+manifest, the typology overlay, and the grounding core stay byte-frozen; no non-negotiable changed.
+
 **Cross-corpus synthesis (Phase 24) — the corpus becomes analytical.** Once the corpus spans two
 jurisdictions, the same money-laundering typology often shows up under more than one regulator — and no
 single advisory enumerates it all. The explorer's **Select** screen now has a **Documents / Typologies**
 toggle: in typology mode you pick a typology and see its **cross-jurisdiction cluster** — every corpus
 document on that typology, across FinCEN, OFAC, and FINTRAC — with a **combined coverage** gauge and each
-jurisdiction's contribution, then drill into any document's own 6-screen loop (Back returns to the
+jurisdiction's contribution, then drill into any document's own per-doc loop (Back returns to the
 cluster). The point it makes: *no single regulator covers a typology; the combined corpus does.* Five
 typologies span both the US and Canada (terrorist financing, synthetic opioids, human trafficking,
 professional money laundering, romance-and-investment fraud); two more span US agencies (sanctions evasion

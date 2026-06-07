@@ -209,6 +209,32 @@ AML transformation framework. Keep vocabulary consistent with it
   DEFAULT, so the translation ALIGNS with the non-negotiables. dist/corpus 635KB → 2.19MB (the inlined source articles);
   harness 98 → 108. index.html + config/** + the 3 typology dists + every source md + every corpus-status.json + the
   showcase + data/typology-map.json stay byte-frozen; NO non-negotiable change.
+- SHOWCASE-QUALITY ELEVATION (Phase 26, M7 — corpus OUTPUT QUALITY raised to the six-act showcase bar; NO new source /
+  non-negotiable change): Phase 25 shipped the two-layer model but the output was still weak — the `red_flag`s read like
+  PROSE (never anchored to `config/typologies/fentanyl.json`), the article render was STATIC, the Signal screen didn't
+  "wow", docs/red-flags weren't grouped, and there was no landing. Phase 26 elevates all of it, workflow-driven. (1)
+  THE REGISTER: every live derived indicator's `red_flag` was RE-TRANSLATED to the showcase's terse, mechanism-named
+  AML-indicator register (fentanyl.json style — "Receive-and-forward to no-relationship payees (mule pass-through)",
+  "Multi-originator geographic funnel-in", "Round-dollar gift-card / prepaid-card retail spend") via a DYNAMIC WORKFLOW
+  (`ph26-register-retranslate`: 84 agents — 42 translate → 42 INDEPENDENT adversarial verify; the LLM proposes, a
+  byte-SURGICAL applier writes ONLY the `red_flag` value + `--check-derived` disposes). All 42 `--check-derived` clean;
+  the verbatim `flag` + the grounding logic + the SHAPE gate are BYTE-UNCHANGED (only `red_flag` VALUES changed); the
+  show-both honesty model holds. (2) PROGRESSIVE ARTICLE RENDER: the Read-advisory screen ports the showcase
+  `streamAdvisory` "agent reading" beat as a progressive ENHANCEMENT (final state in the template → reduced-motion + the
+  string-DOM harness settle on it; full motion types a capped opening → reveals highlights → staggers the translate list).
+  (3) GROUPING/SORT: Select is grouped by SOURCE (FinCEN Advisories / Alerts / OFAC / FINTRAC), newest-first within each;
+  red flags sub-group by `section` on Coverage (the 13 multi-section docs; single-section stays flat). (4) WOW BEATS: a
+  build-log on Signal (Act-4 port — animates the REAL `build_logic`, structural, no numbers) + a NEW Combination-lift
+  screen (Act-5 port) between Signal and Close. The per-doc arc is now Select → Read advisory → Coverage → Build recs →
+  Signal → Combination lift → Close. WOW-NUMBERS HONESTY (a deliberate, user-approved, scoped reversal of the Phase-18
+  no-lift call): the lift figures are a GENERIC illustrative template (18→64→83), IDENTICAL across every doc, behind a
+  LOUD "Illustrative · pending calibration — NOT measured on this document" tag (rose, distinct from the always-on badge)
+  — NEVER 42 fabricated per-doc findings, NEVER presented as real; the records still carry no lift numbers. (5) a
+  story-driven LANDING is the new ENTRY (`renderLanding` before Select; honest data-derived stat tiles 46/42/4/2; "Enter
+  the corpus" CTA; the showcase landing is roadmapped — index.html stays byte-frozen). dist/corpus 2.19MB → 2.17MB;
+  harness 108 → 139. Scope was the 42 `derived/*.json` (`red_flag` VALUES only) + `corpus.html` + `dist/corpus` + tests +
+  docs; FROZEN byte-clean: the showcase (index.html + config/** + the 3 typology dists), every source md, every
+  corpus-status.json, data/typology-map.json, and the grounding core `derive_signals.py`. NO non-negotiable change.
 - IMPORTANT — INVERTED extraction boundary (Phase 16) + the SUBTRACTION (Phase 17): the **LLM EXTRACTS, the
   deterministic layer GATES**, and the old extractor is **DELETED**. The earlier deterministic
   `extract_red_flags` accreted format special-casing every phase yet the LLM still had to author/prune its
@@ -250,16 +276,18 @@ AML transformation framework. Keep vocabulary consistent with it
   the committed `<dir>/*.md` is the derivation surface).
 - Present: open `dist/<id>/index.html` (or `dist/corpus/index.html`) — single self-contained file,
   offline, no server. Drift guard before presenting: `python3 scripts/build.py --check all`.
-- Test (all dep-free, no install): `node tests/corpus-explorer.test.mjs` drives the corpus explorer's
-  6-screen arc (incl. Phase 25's Read-advisory article-processing screen — the full source document with each
-  verbatim phrase highlighted → translated into a natural `red_flag`) against the committed `dist/corpus/index.html`
-  (gate toggle, the article screen + red_flag threading, Signal empty states,
+- Test (all dep-free, no install): `node tests/corpus-explorer.test.mjs` drives the story landing + the corpus explorer's
+  6-screen per-doc arc (Select → Read advisory → Coverage → Build recs → Signal → Combination lift → Close) against the
+  committed `dist/corpus/index.html` (gate toggle, the article screen + red_flag threading, Signal empty states,
   close-the-loop coverage math, reduced-motion) + the multi-source menu (advisories + alerts + OFAC +
   FINTRAC, doc_type chips; an alert, an OFAC advisory, AND a FINTRAC OA each walk the arc; the FINTRAC
   source panel shows its Crown-copyright basis, not US public domain) + the cross-corpus synthesis view
   (Phase 24: typology-mode picker, a cross-jurisdiction cluster's combined coverage = honest union over
-  the pooled indicators, the no-similarity/overlap/lift honesty gate, drill-through + Back-to-cluster);
-  108 assertions · `python3 scripts/derive_signals.py --selftest` runs
+  the pooled indicators, the no-similarity/overlap/lift honesty gate, drill-through + Back-to-cluster)
+  + the Phase-26 register beats (the story landing as entry; Select grouped by source / newest-first;
+  red-flag section sub-grouping on Coverage; the Act-4 build-log + the Act-5 combination-lift with its LOUD
+  "illustrative · pending calibration" honest-illustrative gate — a generic template, never per-doc fabricated);
+  139 assertions · `python3 scripts/derive_signals.py --selftest` runs
   the derivation GATE checks. Pre-present sequence: `--check all` (drift) → `node tests/…` (arc) → walk
   `tests/smoke-checklist.md` (the human-eye checks).
 - Iterate: edit `index.html` / `corpus.html` / a config, rebuild. `python3 -m http.server` optional, never required.
@@ -291,7 +319,12 @@ Phase 24: cross-corpus synthesis — a `data/typology-map.json` overlay groups t
 combined coverage across cross-jurisdiction clusters (honest union arithmetic, no fabricated cross-corpus metric);
 Phase 25: red-flag translation + the article-processing screen — every derived indicator gains a natural-AML `red_flag`
 beside its grounded verbatim quote, and the corpus explorer renders the full source document (highlight → translate)
-ahead of Coverage (honest show-both; NO non-negotiable change)).
+ahead of Coverage (honest show-both; NO non-negotiable change);
+Phase 26: showcase-quality elevation — all 42 `red_flag`s re-translated to the fentanyl-register AML-indicator style
+(via a dynamic translate→adversarial-verify workflow; verbatim + grounding byte-unchanged), progressive "agent reading"
+article render, Select grouped by source / newest-first + red-flag section sub-grouping, the Act-4 build-log + an Act-5
+combination-lift wow beat (generic illustrative template, loud "pending calibration" tag — never per-doc fabricated),
+and a story-driven landing as the entry (NO non-negotiable change)).
 See HANDOFF.md §8.
 
 ## Definition of done

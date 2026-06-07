@@ -4,15 +4,20 @@
 //
 // What it does: loads the COMMITTED dist/corpus/index.html (so it doubles as a build-output smoke
 // test — `build.py --check all` already guarantees that file equals a fresh build of corpus.html),
-// extracts the single inline <script>, evaluates it under the shim, then drives the 6-screen arc
-// (Select → Read advisory → Coverage → Build recs/GATE → Signal → Close) and asserts the Phase-18
-// invariants + the Phase-25 article-processing screen (the full source document with each verbatim
-// red-flag phrase highlighted, then a natural AML red_flag translation beside it)
+// extracts the single inline <script>, evaluates it under the shim, then drives the story landing +
+// the 6-screen per-doc arc (Select → Read advisory → Coverage → Build recs/GATE → Signal → Combination
+// lift → Close) and asserts the Phase-18 invariants + the Phase-25 article-processing screen (the full
+// source document with each verbatim red-flag phrase highlighted, then a natural AML red_flag translation
+// beside it)
 // + the multi-source menu (Phase 20 FinCEN advisories + alerts, Phase 21 OFAC, Phase 22 FINTRAC — 4
 // source types, honest doc_type chips; an alert, an OFAC advisory, AND a FINTRAC operational alert each
 // walk the full arc; the FINTRAC source panel carries the Crown-copyright basis, not US public domain)
 // + the cross-corpus SYNTHESIS view (Phase 24: group by typology, combined coverage across a
-// cross-jurisdiction cluster as honest union arithmetic — no similarity/overlap/lift — with drill-through).
+// cross-jurisdiction cluster as honest union arithmetic — no similarity/overlap/lift — with drill-through)
+// + the Phase-26 register beats: the story LANDING (entry before Select), Select grouped by source /
+// newest-first, red-flag section sub-grouping on Coverage, the Act-4 build-log (real build_logic) + the
+// Act-5 combination-lift (a GENERIC illustrative template, loudly badged "pending calibration" — never
+// per-doc fabricated). Boot auto-enters Select (the landing is the new entry); raw=true stays on the cover.
 //
 // Why a vm + shim instead of a third-party DOM library: the ship artifact is a single file:// offline
 // HTML; the project's whole test idiom is dep-free (derive_signals.py --selftest, build.py --check).
@@ -153,10 +158,13 @@ const EPILOGUE = `;__capture({coverageIndex,buildNows,isLive,curAdv,pick,gotoScr
   get view(){return view}, get screen(){return screen},
   get currentTypology(){return currentTypology}, get fromTypology(){return fromTypology},
   get selMode(){return selMode}, set selMode(v){selMode=v}});`;
-function boot(reduced) {
+function boot(reduced, raw) {
   const env = makeEnv(reduced);
   vm.createContext(env);
   vm.runInContext(SCRIPT + EPILOGUE, env, { filename: 'corpus-explorer-inline.js' });
+  // Phase 26: the story landing is now the ENTRY view. The existing arc/Select assertions expect to begin
+  // on Select, so auto-enter the demo unless a test explicitly wants the raw landing (raw=true).
+  if (!raw && env.__api && typeof env.__api.toSelect === 'function') env.__api.toSelect();
   return env;
 }
 
@@ -165,13 +173,29 @@ function numText(env, id) { return parseInt(String(env.document.getElementById(i
 /* ============================ drive the arc ============================ */
 console.log('corpus-explorer arc harness  (source: dist/corpus/index.html)\n');
 
-// ---- reduced-motion context: deterministic single-paint ----
+// ---- (0) the story-driven LANDING is the entry (Phase 26) ----
+const envL = boot(true, true);                                // raw — do NOT auto-enter; stay on the cover
+const apiL = envL.__api;
+eq(apiL.view, 'landing', 'boots into the story landing (the entry before Select)');
+ok(/class="scene landing"/.test(envL.__stage._html) && /lhero/.test(envL.__stage._html),
+  'landing renders the story hero');
+const ltotal = apiL.ADVISORIES.length, lderived = apiL.ADVISORIES.filter(apiL.isLive).length;
+ok(envL.__stage._html.includes(`>${ltotal}<`) && envL.__stage._html.includes(`>${lderived}<`),
+  `landing stat tiles show HONEST data-derived counts (${ltotal} docs, ${lderived} derived)`);
+ok(/id="enter"/.test(envL.__stage._html) && /Enter the corpus/.test(envL.__stage._html), 'landing carries the Enter CTA');
+ok(envL.__errors.length === 0, 'landing rendered with no console errors');
+apiL.toSelect();                                              // Enter →
+ok(apiL.view === 'select' && /class="srcgroup"/.test(envL.__stage._html), 'Enter → the (source-grouped) Select grid');
+apiL.back();
+eq(apiL.view, 'landing', 'Back from Select returns to the landing cover (re-reachable)');
+
+// ---- reduced-motion context: deterministic single-paint (boot auto-enters Select, Phase 26) ----
 const env = boot(true);
 const api = env.__api;
 ok(api && typeof api.pick === 'function', 'script booted; internals re-exported');
 
-// (1) Boot lands on Select and lists every document
-eq(api.view, 'select', 'boot view = select');
+// (1) After entering (boot auto-enters), Select lists every document
+eq(api.view, 'select', 'boot auto-enters Select (the story landing is the entry)');
 ok(/Pick a document/.test(env.__stage._html), 'Select screen renders ("Pick a document")');
 const advCards = (env.__stage._html.match(/class="advcard /g) || []).length;
 eq(advCards, api.ADVISORIES.length, 'Select lists every document as a card');
@@ -254,7 +278,7 @@ api.gotoScreen(3);
 ok(/No build-now gaps selected/.test(env.__stage._html), 'Signal honest empty state: deselected-all');
 
 // (6) Close the loop — 0-picked flat-hold (no fake rise)
-api.gotoScreen(4);
+api.gotoScreen(5);
 ok(/· Close the loop/.test(env.__stage._html), 'Close-the-loop screen renders');
 ok(/coverage holds/.test(env.__stage._html), '0-picked close: honest flat-hold note (no fake rise)');
 eq(numText(env, 'gnum'), cov, '0-picked close: gauge holds at the before value');
@@ -264,7 +288,7 @@ api.selected = new Set(buildNowIds);
 const pickedSet = new Set(buildNowIds);
 const afterInds = adv.indicators.map(i => pickedSet.has(i.id) ? Object.assign({}, i, { status: 'covered' }) : i);
 const after = api.coverageIndex(afterInds);
-api.gotoScreen(4);
+api.gotoScreen(5);
 ok(after > cov, `committing the gaps raises coverage (${cov}% → ${after}%)`);
 eq(numText(env, 'gnum'), after, 'close gauge lands on the recomputed after-coverage (reduced motion)');
 ok(new RegExp(`\\+${after - cov} pts`).test(env.__stage._html), 'close shows the +Δpts chip from the picks');
@@ -278,7 +302,7 @@ api2.pick(adv2.id);
 api2.selected = new Set(api2.buildNows(adv2).map(i => i.id));
 const after2 = api2.coverageIndex(adv2.indicators.map(i =>
   api2.selected.has(i.id) ? Object.assign({}, i, { status: 'covered' }) : i));
-api2.gotoScreen(4);
+api2.gotoScreen(5);
 ok(numText(env2, 'gnum') !== after2 || after2 === api2.coverageIndex(adv2.indicators),
   'animated close: gauge starts at the before value (not yet animated)');
 env2.__flush();                                              // run the deferred T() → animVal → rAF chain
@@ -305,7 +329,8 @@ ok(/PROPOSED ·/.test(envA.__stage._html), 'alert: Signal drafts ≥1 spec card 
 apiA.selected = new Set(apiA.buildNows(alert).map(i => i.id));
 const afterA = apiA.coverageIndex(alert.indicators.map(i =>
   apiA.selected.has(i.id) ? Object.assign({}, i, { status: 'covered' }) : i));
-apiA.gotoScreen(4);
+apiA.gotoScreen(4);                                           // Combination-lift (Phase 26) — exercise it on the way to Close
+apiA.gotoScreen(5);
 ok(/· Close the loop/.test(envA.__stage._html), 'alert: Close-the-loop screen renders');
 eq(numText(envA, 'gnum'), afterA, 'alert: close gauge lands on the recomputed after-coverage');
 ok(envA.__errors.length === 0, 'alert: full 6-screen arc walked with no console errors');
@@ -329,6 +354,7 @@ apiO.selected = new Set(apiO.buildNows(ofac).map(i => i.id));
 const afterO = apiO.coverageIndex(ofac.indicators.map(i =>
   apiO.selected.has(i.id) ? Object.assign({}, i, { status: 'covered' }) : i));
 apiO.gotoScreen(4);
+apiO.gotoScreen(5);
 ok(/· Close the loop/.test(envO.__stage._html), 'ofac: Close-the-loop screen renders');
 eq(numText(envO, 'gnum'), afterO, 'ofac: close gauge lands on the recomputed after-coverage');
 ok(envO.__errors.length === 0, 'ofac: full 6-screen arc walked with no console errors');
@@ -363,6 +389,7 @@ apiF.selected = new Set(apiF.buildNows(fintrac).map(i => i.id));
 const afterF = apiF.coverageIndex(fintrac.indicators.map(i =>
   apiF.selected.has(i.id) ? Object.assign({}, i, { status: 'covered' }) : i));
 apiF.gotoScreen(4);
+apiF.gotoScreen(5);
 ok(/· Close the loop/.test(envF.__stage._html), 'fintrac: Close-the-loop screen renders');
 eq(numText(envF, 'gnum'), afterF, 'fintrac: close gauge lands on the recomputed after-coverage');
 ok(envF.__errors.length === 0, 'fintrac: full 6-screen arc walked with no console errors');
@@ -396,6 +423,7 @@ apiB.selected = new Set(apiB.buildNows(brief).map(i => i.id));
 const afterB = apiB.coverageIndex(brief.indicators.map(i =>
   apiB.selected.has(i.id) ? Object.assign({}, i, { status: 'covered' }) : i));
 apiB.gotoScreen(4);
+apiB.gotoScreen(5);
 ok(/· Close the loop/.test(envB.__stage._html), 'fintrac-brief: Close-the-loop screen renders');
 eq(numText(envB, 'gnum'), afterB, 'fintrac-brief: close gauge lands on the recomputed after-coverage');
 ok(envB.__errors.length === 0, 'fintrac-brief: full 6-screen arc walked with no console errors');
@@ -465,6 +493,78 @@ apiS.toSelect();
 eq(apiS.view, 'select', 'toSelect() returns to the picker');
 ok(apiS.currentTypology === null && apiS.fromTypology === null, 'toSelect() clears the synthesis state');
 ok(envS.__errors.length === 0, 'the full synthesis flow produced no console errors');
+
+/* ===== Phase 26 — register beats: source grouping/sort, section grouping, build-log, combination-lift ===== */
+const env26 = boot(true);
+const api26 = env26.__api;
+const s26 = env26.__stage._html;
+
+// (P26-1) Select grouped by SOURCE, newest-first within each group
+eq((s26.match(/class="srcgroup"/g) || []).length, 4,
+  'Select groups documents into 4 source sections (Advisories / Alerts / OFAC / FINTRAC)');
+['FinCEN Advisories', 'FinCEN Alerts', 'OFAC advisories', 'FINTRAC operational alerts'].forEach(l =>
+  ok(s26.includes(l), `source-group header present: "${l}"`));
+const advBlock = s26.slice(s26.indexOf('FinCEN Advisories'), s26.indexOf('FinCEN Alerts'));
+const renderedAdvIds = [...advBlock.matchAll(/class="advcard [^"]*" data-id="([^"]+)"/g)].map(m => m[1]);
+const expectedAdvIds = api26.ADVISORIES.filter(a => (a.doc_type || 'Advisory') === 'Advisory').slice()
+  .sort((x, y) => String(y.date || '').localeCompare(String(x.date || '')) || String(x.id).localeCompare(String(y.id)))
+  .map(a => a.id);
+eq(renderedAdvIds.join(','), expectedAdvIds.join(','), 'Advisories group is sorted newest-first (date desc)');
+
+// (P26-2) red-flag grouping by SECTION on Coverage — multi-section doc shows sub-headers; single-section is flat
+const multi = api26.ADVISORIES.find(a => api26.isLive(a) &&
+  new Set(a.indicators.map(i => i.section || '')).size > 1 && a.indicators.every(i => i.section));
+ok(multi, `found a multi-section doc for section grouping (${multi && multi.id})`);
+api26.pick(multi.id); api26.gotoScreen(1);
+ok(/class="secthead"/.test(env26.__stage._html), 'Coverage of a multi-section doc renders section sub-headers');
+const efe = api26.ADVISORIES.find(a => a.id === 'fin-2022-a002');     // EFE — a single 'financial' section
+api26.pick(efe.id); api26.gotoScreen(1);
+ok(!/class="secthead"/.test(env26.__stage._html), 'Coverage of a single-section doc (EFE) renders flat — no section noise');
+
+// (P26-3) progressive article render SETTLES to the final state (reduced motion = the resting paint)
+api26.pick(efe.id);
+ok(/phrase.? extracted/.test(env26.__stage._html) && !/reading…/.test(env26.__stage._html),
+  'Read-advisory settles to the final "phrases extracted" state (progressive render resting paint)');
+
+// (P26-4) build-log on Signal (Act-4 port) — structural, reads the real build_logic, NO numbers
+const adv26 = api26.ADVISORIES.filter(api26.isLive)
+  .find(a => api26.buildNows(a).some(i => i.build_logic && typeof i.build_logic === 'object'));
+api26.pick(adv26.id); api26.gotoScreen(3);
+ok(/class="buildlog"/.test(env26.__stage._html) && /Agent build log/.test(env26.__stage._html),
+  'Signal renders the agent build-log (Act-4 port)');
+eq((env26.__stage._html.match(/class="blstep/g) || []).length, 6, 'build-log has 6 structural steps');
+ok(/PROPOSED ·/.test(env26.__stage._html), 'Signal still drafts the spec card(s) below the build-log');
+
+// (P26-5) combination-lift screen (Act-5 port) — GENERIC illustrative template + the LOUD honesty gate
+api26.gotoScreen(4);
+const lift26 = env26.__stage._html;
+ok(/· Combination lift/.test(lift26), 'screen 4 is the new Combination-lift beat');
+eq((lift26.match(/class="liftbar"/g) || []).length, 3, 'combination-lift renders 3 composition bars');
+ok(/fill weak/.test(lift26) && /fill mid/.test(lift26) && /fill strong/.test(lift26), 'lift bars: weak → mid → strong');
+// THE HONEST-ILLUSTRATIVE GATE: the loud tag is present and the figures are openly NOT real / NOT per-doc.
+ok(/class="illus"/.test(lift26) && /Illustrative · pending calibration/.test(lift26),
+  'combination-lift carries the LOUD "illustrative · pending calibration" tag');
+ok(/NOT measured on this document/.test(lift26) && /identical across the corpus/.test(lift26),
+  'honesty gate: lift figures are openly declared a generic template, not measured per-document');
+eq(numText(env26, 'lv0'), 18, 'reduced: lift count-up jumps to the template value (signal alone = 18%)');
+eq(numText(env26, 'lv2'), 83, 'reduced: lift count-up jumps to the template value (full combination = 83%)');
+ok(env26.__errors.length === 0, 'grouping + build-log + lift rendered with no console errors');
+
+// (P26-6) combination-lift honest empty state when nothing is committed at the gate
+api26.selected = new Set(); api26.gotoScreen(4);
+ok(/class="empty"/.test(env26.__stage._html) && /No signal committed/.test(env26.__stage._html),
+  'combination-lift shows an honest empty state when nothing is committed');
+
+// (P26-7) animated (non-reduced) lift bars count up after a flush
+const env26b = boot(false);
+const api26b = env26b.__api;
+const adv26b = api26b.ADVISORIES.find(a => a.id === adv26.id);
+api26b.pick(adv26b.id);
+api26b.selected = new Set(api26b.buildNows(adv26b).map(i => i.id));
+api26b.gotoScreen(4);
+env26b.__flush();                                            // run the deferred T() → animVal → rAF chain
+eq(numText(env26b, 'lv2'), 83, 'animated: lift count-up reaches the template value after the timer flush');
+ok(env26b.__errors.length === 0, 'animated combination-lift produced no console errors');
 
 /* ============================ report ============================ */
 console.log(`\n${pass} passed, ${fails.length} failed`);

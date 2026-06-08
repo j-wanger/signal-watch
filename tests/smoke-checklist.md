@@ -60,26 +60,34 @@ that table.
   **Back** returns to the data source (not the picker). No fabricated number — only honest counts + the
   always-on badge. (Sanity: the lens is genuinely distinct — at least one feed reads **"not yet"**.)
 
-## Adverse-media / negative-news stream (`dist/news/`) — M8, Phase 31
+## Adverse-media / negative-news stream (`dist/news/`) — M8, Phase 31 + Phase 32
 - [ ] **Automated arc:** `node tests/news-stream.test.mjs` exits **0** — drives the committed
   `dist/news/index.html` through the screening arc (Select → Read → Screen → Disposition → Exposure) +
-  the fuzzy matcher under a dep-free DOM shim, both motion modes (38 assertions). Run after any
-  `news.html` edit + rebuild (`python3 scripts/build.py news`); it doubles as a build-output smoke test.
+  the fuzzy matcher under a dep-free DOM shim, both motion modes (**65 assertions** — reduced-motion final
+  state + a full-motion enriched-shim drive of the stream + scan). Run after any `news.html` edit + rebuild
+  (`python3 scripts/build.py news`); it doubles as a build-output smoke test.
 - [ ] Open `dist/news/index.html` (`file://`): the **"Illustrative data & outputs"** badge is visible; the
-  Select screen lists the synthetic articles with honest stat tiles. Pick the **trade-shell** article.
-- [ ] **Read:** the article renders with red-flag phrases **highlighted** (amber) and named entities
-  **tagged** (green); a natural-AML `red_flag` translation shows beside each verbatim quote.
-- [ ] **Screen:** each entity shows a real fuzzy-match **score**; the near-matches surface above the line —
-  **Volkoff Maritime Logistics ≈ 0.977** and **Dimitri Karpov ≈ 0.921** (the matches an exact-name screen
-  would miss) — and the note calls out the near-match. No percentage / precision figure is shown.
+  Select screen lists the **real enforcement articles** with an honest source chip (DOJ / OFAC) and stat
+  tiles. A **step rail** (Select › Read › Screen › Disposition › Exposure) shows where you are. Pick the
+  **OFAC TGR Group** article.
+- [ ] **Read (streaming):** under full motion the source **streams in** (a blinking caret trails the read);
+  each red-flag phrase **highlights** (amber) as the read reaches it and each named entity is **tagged**
+  (green); **entity cards** reveal alongside with grounded **location / age / profession**, the **typology**
+  is shown, a natural-AML `red_flag` translation sits beside each verbatim quote, and the **source
+  attribution** (public domain, 17 U.S.C. §105) is shown. Reduced-motion shows the same final state at once.
+- [ ] **Screen (scan process):** the book is **swept** — each entity scored against every row, ranked across a
+  **threshold line**. **Siam Expert Trading Company Limited = 1.000 (EXACT)** — a counterparty *is* a
+  designated entity; near-matches an exact-name screen would miss surface too (**Pullman ≈ 1.000** suffix,
+  **Ekaterina Zhdanova ≈ 0.989**). No percentage / precision figure is shown.
 - [ ] **Disposition (the human gate):** hits default to **CONFIRMED**; the common-name collision
-  **Andrei Petrov (1.000)** is present — click it to **DISMISS** it (a different person; high score ≠
-  confirmation). Toggles respond to click and to Space/Enter when focused; ←/→ still navigate.
+  **George Rossi (1.000)** is present with its dismiss note — click it to **DISMISS** it (a different person;
+  high score ≠ confirmation). Toggles respond to click and to Space/Enter when focused; ←/→ still navigate.
 - [ ] **Exposure:** after dismissing the trap, **confirmed = 3, dismissed = 1**; the confirmed hits are
   framed as adverse-media **atoms** (the compose-with-the-transaction-signal north star is named).
 - [ ] Keyboard: **→ next · ← back · Esc** returns to the article list. No console errors (both motion modes).
-- [ ] Compliance: the client/counterparty **book and the articles are synthetic** (no real names presented
-  as real); scores are real computed similarity; nothing reads as a real detection/precision rate.
+- [ ] Compliance: the source **articles are real US-federal public-domain enforcement records** (DOJ + OFAC,
+  verbatim under 17 U.S.C. §105); the client/counterparty **book is synthetic** (no real customer data);
+  scores are real computed similarity; nothing reads as a real detection/precision rate.
 
 ## Walk the six-act arc (Next / Back) — read values from the table
 - [ ] **Act 0 — Blind spot:** coverage map renders; gauge animates to the **table value**; red (not-covered) rows visible

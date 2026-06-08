@@ -1,0 +1,109 @@
+{
+ "id": "ofac-tgr-group",
+ "title": "Treasury Targets Russian Illicit Finance Network Using Digital Assets to Evade Sanctions",
+ "source_md": "data/news/articles/ofac-tgr-group.md",
+ "doc_type": "OFAC",
+ "typology": "sanctions-evasion",
+ "source_org": "U.S. Department of the Treasury, Office of Foreign Assets Control",
+ "source_url": "https://home.treasury.gov/news/press-releases/jy2735",
+ "basis": "Public domain · 17 U.S.C. §105",
+ "archived": "2026-05-29",
+ "provenance": "Real U.S. federal government enforcement record, reproduced verbatim (excerpted) under 17 U.S.C. §105 (public domain). Named entities and red-flag phrases are quote-grounded (verbatim) in the source article (normalize-substring); red_flag is the natural-AML translation beside each grounded flag. The client/counterparty book screened against this article is SYNTHETIC and illustrative — NO real customer data. Illustrative vision demo.",
+ "entities": [
+  {
+   "id": "E1",
+   "name": "George Rossi",
+   "type": "person",
+   "location": "Ukrainian national",
+   "profession": "founder of TGR Partners",
+   "context": "Believed to be in overall control of the TGR Group sanctions-evasion network."
+  },
+  {
+   "id": "E2",
+   "name": "Elena Chirkinyan",
+   "type": "person",
+   "location": "Russian national",
+   "profession": "Chief Executive Officer of TGR Corporate Concierge LTD",
+   "context": "Decision-maker within the TGR Group; partner at TGR Partners."
+  },
+  {
+   "id": "E3",
+   "name": "Ekaterina Zhdanova",
+   "type": "person",
+   "location": "Russian national",
+   "profession": "money launderer",
+   "context": "Leads the Smart Group; previously OFAC-designated for laundering via digital assets."
+  },
+  {
+   "id": "E4",
+   "name": "TGR Partners",
+   "type": "org",
+   "location": "Moscow, Russia",
+   "context": "Moscow-based entity providing asset management, crypto trading, and concierge services."
+  },
+  {
+   "id": "E5",
+   "name": "Pullman Global Solutions LLC",
+   "type": "org",
+   "location": "Wyoming",
+   "context": "Wyoming-based entity owned by a designated individual."
+  },
+  {
+   "id": "E6",
+   "name": "Siam Expert Trading Company Limited",
+   "type": "org",
+   "location": "Thailand",
+   "context": "Thailand-based entity that facilitated the export of electronic components to Russia."
+  }
+ ],
+ "red_flags": [
+  {
+   "id": "R1",
+   "flag": "obfuscate the illicit activities of its clients, including through the use digital assets, such as stablecoins like Tether (USDT)",
+   "red_flag": "Launder client funds via stablecoins (USDT)",
+   "category": "Virtual assets"
+  },
+  {
+   "id": "R2",
+   "flag": "providing an unregistered service to exchange cash and cryptocurrency",
+   "red_flag": "Unregistered cash-to-crypto exchange service",
+   "category": "Virtual assets"
+  },
+  {
+   "id": "R3",
+   "flag": "obfuscating the source of funds to allow high-net worth Russian nationals to purchase property in the United Kingdom",
+   "red_flag": "Obscure source of funds for foreign real-estate purchases",
+   "category": "Real estate"
+  },
+  {
+   "id": "R4",
+   "flag": "arranged cash handovers in which USDT was sent to a cryptocurrency address controlled by Zhdanova, and in return cash was received",
+   "red_flag": "Cash-for-crypto handovers to break the trail",
+   "category": "Cash"
+  },
+  {
+   "id": "R5",
+   "flag": "leveraged OFAC-sanctioned Russian cryptocurrency exchange, Garantex OU, to process USDT transactions after its date of designation",
+   "red_flag": "Route transactions through a sanctioned crypto exchange",
+   "category": "Sanctions evasion"
+  },
+  {
+   "id": "R6",
+   "flag": "arrange for intermediaries to deliver and convert bulk cash into cryptocurrency",
+   "red_flag": "Bulk-cash placement converted to cryptocurrency",
+   "category": "Cash"
+  },
+  {
+   "id": "R7",
+   "flag": "used a luxury watch company to facilitate trade-based money laundering",
+   "red_flag": "Trade-based laundering via a luxury-goods company",
+   "category": "Trade-based ML"
+  },
+  {
+   "id": "R8",
+   "flag": "is owned 50 percent or more by a sanctioned individual",
+   "red_flag": "Ownership obfuscation: 50%+ held by a blocked person",
+   "category": "Ownership"
+  }
+ ]
+}

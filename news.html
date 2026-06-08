@@ -9,79 +9,149 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0e1116; --panel:#161b22; --panel2:#1b2230; --ink:#e8edf4; --muted:#8b97a8;
-  --signal:#f6a623; --line:#26303d; --ok:#54c08a; --warn:#e0654b; --chip:#202a38;
+  --bg:#0e1116; --bg2:#0b0e13; --panel:#161b22; --panel2:#1b2230; --ink:#e8edf4;
+  --muted:#8b97a8; --faint:#5f6b7c; --signal:#f6a623; --line:#26303d; --line2:#313c4b;
+  --ok:#54c08a; --warn:#e0654b; --chip:#202a38;
   --mono:'JetBrains Mono',ui-monospace,monospace; --head:'Archivo',system-ui,sans-serif;
-  --serif:'Newsreader',Georgia,serif;
+  --serif:'Newsreader',Georgia,serif; --body:'Archivo',system-ui,sans-serif;
 }
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--head);
-  -webkit-font-smoothing:antialiased}
-body{line-height:1.5;padding:0 0 80px}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+body{line-height:1.5;padding:0 0 90px}
 a{color:var(--signal)}
+em{color:var(--signal);font-style:italic}
 .badge{position:fixed;top:10px;right:12px;z-index:50;background:rgba(246,166,35,.12);
   border:1px solid var(--signal);color:var(--signal);font:600 11px/1 var(--mono);
   letter-spacing:.03em;padding:6px 9px;border-radius:5px}
-header.top{padding:22px 28px 6px;border-bottom:1px solid var(--line)}
+header.top{padding:20px 28px 14px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:14px}
 header.top .brand{font:700 15px/1.2 var(--head);letter-spacing:.02em}
-header.top .sub{color:var(--muted);font:500 12px/1.4 var(--mono);margin-top:3px}
-main{max-width:1040px;margin:0 auto;padding:26px 28px}
-h1{font:600 26px/1.2 var(--head);margin:0 0 6px}
-h2{font:600 18px/1.25 var(--head);margin:26px 0 10px}
-.lead{color:var(--muted);font:400 16px/1.55 var(--serif);max-width:70ch}
-.muted{color:var(--muted)}
-.mono{font-family:var(--mono)}
-.tiles{display:flex;gap:14px;flex-wrap:wrap;margin:20px 0 8px}
-.tile{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:120px}
-.tile .n{font:600 26px/1 var(--head);color:var(--signal)}
+header.top .sub{color:var(--muted);font:500 12px/1.4 var(--mono)}
+main{max-width:1060px;margin:0 auto;padding:22px 28px}
+h1{font:600 27px/1.2 var(--head);margin:0 0 8px;letter-spacing:-.01em}
+h2{font:600 18px/1.3 var(--head);margin:24px 0 10px}
+h2 em{font-family:var(--serif)}
+.eyebrow{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--signal);margin-bottom:10px}
+.lead{color:var(--muted);font:400 16px/1.6 var(--serif);max-width:74ch;margin:0 0 4px}
+.muted{color:var(--muted)} .mono{font-family:var(--mono)}
+.framenote{color:var(--faint);font:400 13px/1.6 var(--serif);margin-top:16px;max-width:80ch;border-left:2px solid var(--line2);padding-left:13px}
+
+/* the step rail — makes the arc legible: Select › Read › Screen › Disposition › Exposure */
+.rail{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:0 0 20px;font:600 11px/1 var(--mono);letter-spacing:.04em}
+.rail .st{display:flex;align-items:center;gap:7px;color:var(--faint);text-transform:uppercase}
+.rail .st .dot{width:19px;height:19px;border-radius:999px;border:1px solid var(--line2);display:inline-flex;align-items:center;justify-content:center;font:600 10px/1 var(--mono);color:var(--faint)}
+.rail .st.done{color:var(--muted)} .rail .st.done .dot{border-color:var(--ok);color:var(--ok)}
+.rail .st.now{color:var(--signal)} .rail .st.now .dot{border-color:var(--signal);color:var(--signal);background:rgba(246,166,35,.12)}
+.rail .sep{color:var(--line2)}
+
+.tiles{display:flex;gap:14px;flex-wrap:wrap;margin:18px 0 6px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:14px 16px;min-width:128px}
+.tile .n{font:600 27px/1 var(--head);color:var(--signal)}
 .tile .l{color:var(--muted);font:500 11px/1.3 var(--mono);margin-top:6px;text-transform:uppercase;letter-spacing:.04em}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:14px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 17px;
-  cursor:pointer;transition:border-color .12s,transform .12s;text-align:left}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:16px 18px;
+  cursor:pointer;transition:border-color .14s,transform .14s;text-align:left;color:var(--ink);font-family:var(--body)}
 .card:hover,.card:focus-visible{border-color:var(--signal);transform:translateY(-1px);outline:none}
-.card .ttl{font:600 15px/1.3 var(--head)}
-.card .meta{color:var(--muted);font:500 11px/1.4 var(--mono);margin-top:9px;display:flex;gap:10px;flex-wrap:wrap}
+.card .ttl{font:600 15px/1.35 var(--head)}
+.card .src{color:var(--faint);font:500 11px/1.5 var(--mono);margin-top:8px}
+.card .meta{color:var(--muted);font:500 11px/1.4 var(--mono);margin-top:11px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .chip{display:inline-block;background:var(--chip);border:1px solid var(--line);border-radius:999px;
-  padding:2px 9px;font:500 11px/1.5 var(--mono);color:var(--muted)}
+  padding:2px 10px;font:500 11px/1.6 var(--mono);color:var(--muted)}
 .chip.sig{color:var(--signal);border-color:var(--signal)}
-.btn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);font:600 13px/1 var(--head);
-  padding:10px 16px;border-radius:7px;cursor:pointer}
-.btn:hover{border-color:var(--signal)}
-.btn.primary{background:var(--signal);color:#10141a;border-color:var(--signal)}
-.nav{display:flex;gap:10px;align-items:center;margin-top:26px;border-top:1px solid var(--line);padding-top:18px}
-.crumbs{color:var(--muted);font:500 12px/1 var(--mono);margin-bottom:16px}
-footer{max-width:1040px;margin:30px auto 0;padding:16px 28px;border-top:1px solid var(--line);
-  color:var(--muted);font:400 12px/1.6 var(--mono)}
-.crumbs a{cursor:pointer;color:var(--signal)}
-.article{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px 22px;
-  font-family:var(--serif);font-size:16px;line-height:1.75;white-space:pre-wrap;max-height:46vh;overflow:auto;margin-top:8px}
-mark.hl{background:rgba(246,166,35,.20);color:#ffd27a;border-bottom:1px solid var(--signal);padding:0 1px;border-radius:2px}
-.ent{background:rgba(84,192,138,.13);border-bottom:1px dashed var(--ok);color:#bfe9d3;border-radius:2px}
-.xlist{display:grid;gap:8px;margin-top:8px}
-.xrow{display:grid;grid-template-columns:1fr 1fr;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 13px}
-.xrow .v{font-family:var(--serif);color:var(--muted);font-size:14px;line-height:1.5}
-.xrow .t{font:600 13px/1.4 var(--head);color:var(--ink)}
-.rows{display:grid;gap:9px;margin-top:14px}
-.row{display:flex;justify-content:space-between;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
-.row.hit{border-color:var(--signal)}
+.chip.ty{color:var(--ink);border-color:var(--line2)}
+
+.srccap{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--signal);border-radius:8px;
+  padding:10px 14px;margin:14px 0 4px;font:400 12.5px/1.55 var(--mono);color:var(--muted)}
+.srccap b{color:var(--signal);font-weight:600}
+.srccap .u{color:var(--faint);word-break:break-all}
+
+/* Read: article (left) + extraction (right) */
+.artwrap{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start;margin-top:6px}
+@media(max-width:860px){.artwrap{grid-template-columns:1fr}}
+.collabel{font:600 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.doc{position:relative;border:1px solid var(--line);background:var(--bg2);border-radius:11px;padding:16px 18px;
+  max-height:430px;overflow:auto;font-family:var(--serif);font-size:15px;line-height:1.78;color:var(--muted);white-space:pre-wrap;word-break:break-word}
+.doc .hl{border-radius:3px;padding:0 2px;transition:background .35s,box-shadow .35s,color .35s}
+.doc .hl.on{background:rgba(246,166,35,.16);color:var(--ink);box-shadow:inset 0 -1px 0 var(--signal)}
+.doc .ent{border-radius:3px;padding:0 2px;background:rgba(84,192,138,.12);color:#bfe9d3;box-shadow:inset 0 -1px 0 var(--ok);transition:background .35s,box-shadow .35s,color .35s}
+.doc.reading::after{content:'▌';color:var(--signal);animation:cblink 1.05s steps(2) infinite}
+@keyframes cblink{50%{opacity:0}}
+@media(prefers-reduced-motion:no-preference){.doc .hl.on{animation:hlflash .55s ease-out}.doc .ent{animation:entflash .55s ease-out}}
+@keyframes hlflash{from{background:rgba(246,166,35,.5)}}
+@keyframes entflash{from{background:rgba(84,192,138,.4)}}
+.xstack{display:flex;flex-direction:column;gap:18px;max-height:430px;overflow:auto;padding-right:2px}
+.ecard{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:11px 13px;opacity:1}
+.ecard.in{opacity:0;transform:translateX(8px);animation:brin .4s forwards}
+.ecard .eh{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.ecard .en{font:600 14px/1.35 var(--head);color:var(--ink)}
+.echip{font:600 9px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:999px;white-space:nowrap}
+.echip.person{color:#bfe9d3;border:1px solid var(--ok)} .echip.org{color:var(--signal);border:1px solid var(--signal)}
+.eattrs{display:flex;flex-wrap:wrap;gap:5px 10px;margin-top:9px}
+.eattr{font:500 11px/1.4 var(--mono);color:var(--muted)} .eattr b{color:var(--faint);font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-size:9.5px;margin-right:4px}
+.ectx{font:400 12.5px/1.5 var(--serif);color:var(--faint);margin-top:8px}
+.xrow{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:10px 12px;opacity:1}
+.xrow.in{opacity:0;transform:translateX(8px);animation:brin .4s forwards}
+.xrow .xv{font-family:var(--mono);font-size:10.5px;color:var(--faint);line-height:1.5}
+.xrow .xa{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--signal);margin:5px 0}
+.xrow .xr{font-size:13.5px;color:var(--ink);line-height:1.4}
+.xrow .xc{font:500 9.5px/1 var(--mono);color:var(--faint);text-transform:uppercase;letter-spacing:.05em;margin-top:6px}
+@keyframes brin{to{opacity:1;transform:none}}
+
+/* Screen: the scan process */
+.scanhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:14px 0 8px}
+.scanctr{font:600 12px/1 var(--mono);color:var(--signal)}
+.thline{display:flex;align-items:center;gap:10px;margin:14px 0 8px;color:var(--faint);font:600 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.thline::before,.thline::after{content:'';flex:1;height:1px;background:var(--line2)}
+.rows{display:grid;gap:9px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:12px 15px}
+.row.in{opacity:0;animation:rin .34s forwards}
+@keyframes rin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.row.hit{border-color:var(--signal)} .row.below{opacity:.5}
 .row .who{font:600 14px/1.35 var(--head)}
 .row .sub{color:var(--muted);font:500 11px/1.45 var(--mono);margin-top:4px}
-.score{font:600 14px/1 var(--mono);padding:6px 9px;border-radius:6px;background:var(--chip);border:1px solid var(--line);white-space:nowrap}
+.score{font:600 14px/1 var(--mono);padding:7px 10px;border-radius:7px;background:var(--chip);border:1px solid var(--line);white-space:nowrap;color:var(--muted)}
 .score.s-hi{color:var(--signal);border-color:var(--signal)}
-.tag{font:600 10px/1 var(--mono);padding:3px 7px;border-radius:999px;text-transform:uppercase;letter-spacing:.05em;margin-left:6px}
+.tag{font:600 10px/1 var(--mono);padding:3px 7px;border-radius:999px;text-transform:uppercase;letter-spacing:.05em;margin-left:7px}
 .tag.exact{background:rgba(224,101,75,.16);color:#ef8b73;border:1px solid var(--warn)}
 .tag.near{background:rgba(246,166,35,.16);color:var(--signal);border:1px solid var(--signal)}
-.tag.none{color:var(--muted);border:1px solid var(--line)}
-.hitbtn{display:flex;justify-content:space-between;align-items:center;gap:14px;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;cursor:pointer;color:var(--ink);font-family:var(--head)}
+.tag.none{color:var(--faint);border:1px solid var(--line)}
+.flagtrap{color:var(--warn);font:600 11px/1.4 var(--mono);margin-top:4px}
+
+/* Disposition + Exposure */
+.hitbtn{display:flex;justify-content:space-between;align-items:center;gap:14px;width:100%;text-align:left;
+  background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:13px 15px;cursor:pointer;color:var(--ink);font-family:var(--body)}
 .hitbtn:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
-.hitbtn[aria-pressed="true"]{border-color:var(--ok);background:rgba(84,192,138,.08)}
-.hitbtn[aria-pressed="false"]{opacity:.55;border-style:dashed}
-.disp{font:600 11px/1 var(--mono);padding:6px 9px;border-radius:6px;white-space:nowrap}
-.disp.on{color:var(--ok);border:1px solid var(--ok)}
-.disp.off{color:var(--muted);border:1px solid var(--line)}
-.note{color:var(--muted);font:400 13px/1.55 var(--serif);margin-top:12px;max-width:74ch}
-.keyhint{color:var(--muted);font:500 11px/1 var(--mono);margin-left:auto}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.hitbtn[aria-pressed="true"]{border-color:var(--ok);background:rgba(84,192,138,.07)}
+.hitbtn[aria-pressed="false"]{opacity:.6;border-style:dashed}
+.disp{font:600 11px/1 var(--mono);padding:7px 10px;border-radius:6px;white-space:nowrap}
+.disp.on{color:var(--ok);border:1px solid var(--ok)} .disp.off{color:var(--muted);border:1px solid var(--line)}
+.note{color:var(--muted);font:400 14px/1.6 var(--serif);margin-top:14px;max-width:78ch}
+.note b{color:var(--ink)}
+
+.nav{display:flex;gap:10px;align-items:center;margin-top:26px;border-top:1px solid var(--line);padding-top:18px}
+.btn{background:var(--panel2);border:1px solid var(--line2);color:var(--ink);font:600 13px/1 var(--head);padding:11px 18px;border-radius:8px;cursor:pointer;transition:.16s}
+.btn:hover{border-color:var(--signal)}
+.btn.primary{background:var(--signal);color:#10141a;border-color:var(--signal)}
+.keyhint{color:var(--faint);font:500 11px/1 var(--mono);margin-left:auto}
+.crumbs{color:var(--muted);font:500 12px/1 var(--mono);margin-bottom:14px}
+.crumbs a{cursor:pointer;color:var(--signal)}
+footer{max-width:1060px;margin:28px auto 0;padding:16px 28px;border-top:1px solid var(--line);color:var(--faint);font:400 12px/1.65 var(--mono)}
+
+/* accent + affordance polish (dossier feel) */
+::selection{background:var(--signal);color:#10141a}
+header.top{border-top:2px solid var(--signal)}
+.btn:focus-visible,.card:focus-visible,.hitbtn:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.card:hover .ttl{color:var(--signal)}
+.tile:hover{border-color:var(--signal)}
+.ecard:hover{border-color:var(--signal)}
+.xrow:hover{border-color:var(--signal)}
+.row:hover{border-color:var(--signal)}
+.doc::-webkit-scrollbar,.xstack::-webkit-scrollbar{width:9px}
+.doc::-webkit-scrollbar-thumb,.xstack::-webkit-scrollbar-thumb{background:var(--line2);border-radius:9px}
+.doc::-webkit-scrollbar-thumb:hover,.xstack::-webkit-scrollbar-thumb:hover{background:var(--signal)}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
 </style>
 </head>
 <body>
@@ -97,52 +167,29 @@ mark.hl{background:rgba(246,166,35,.20);color:#ffd27a;border-bottom:1px solid va
 /* Phase 31 (M8) — the adverse-media / negative-news stream. A SECOND atom stream: read a news
    article → its grounded entities + red flags → fuzzy-match the entities against a SYNTHETIC
    client/counterparty book → potential exposure → human disposition. All client-side, offline.
-   Data inlined at build time by scripts/build.py (render_news); the fuzzy matcher runs here. */
+   Phase 32 — REAL US-federal gov-enforcement articles (DOJ/OFAC, public domain 17 U.S.C. §105);
+   the book stays synthetic. Presentation elevated to the corpus's bar: a streaming "agent reading"
+   Read with entity cards, and a visible scan PROCESS on Screen. Data inlined at build time. */
 const NEWS = __NEWS__;
-const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+const REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
 
 const app = document.getElementById('app');
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
+/* ---- timers (so reduced-motion + the string-DOM harness fold animation into the final state) ---- */
+let timers = [];
+function clearTimers(){ timers.forEach(t => clearTimeout(t)); timers = []; }
+function T(fn, ms){ if(REDUCED){ fn(); return 0; } const id = setTimeout(fn, ms); timers.push(id); return id; }
+
 /* ---- state machine -------------------------------------------------------- */
 const state = { view:'select', articleId:null, dispo:{} };
-function go(view, articleId){ state.view = view; if(articleId!==undefined) state.articleId = articleId; render(); }
+function go(view, articleId){ clearTimers(); state.view = view; if(articleId!==undefined) state.articleId = articleId; render(); }
 function articleById(id){ return NEWS.articles.find(a => a.id === id); }
-
-/* ---- screens (T2: select; T3 fills read/screen/disposition/close) ---------- */
-function renderSelect(){
-  const arts = NEWS.articles;
-  const ents = arts.reduce((n,a)=>n+(a.entities||[]).length,0);
-  const flags = arts.reduce((n,a)=>n+(a.red_flags||[]).length,0);
-  const book = (NEWS.book && NEWS.book.rows) ? NEWS.book.rows.length : 0;
-  let h = '';
-  h += '<h1>Adverse-media exposure stream</h1>';
-  h += '<p class="lead">A second monitoring stream over unstructured news. For each article the agent '
-     + 'extracts named entities and red-flag conduct, then fuzzy-matches the entities against the '
-     + 'institution’s client &amp; counterparty book to surface potential exposure — the matches an '
-     + 'exact-name screen would miss. Every figure is illustrative; the book is synthetic.</p>';
-  h += '<div class="tiles">'
-     + tile(arts.length,'news articles') + tile(ents,'entities extracted')
-     + tile(flags,'red flags') + tile(book,'book entries (synthetic)') + '</div>';
-  h += '<h2>Select an article</h2><div class="cards">';
-  for(const a of arts){
-    h += '<button class="card" data-id="'+esc(a.id)+'">'
-       + '<div class="ttl">'+esc(a.title)+'</div>'
-       + '<div class="meta"><span class="chip sig">'+esc(a.doc_type||'News')+'</span>'
-       + (a.typology?'<span class="chip">'+esc(a.typology)+'</span>':'')
-       + '<span>'+ (a.entities||[]).length +' entities</span>'
-       + '<span>'+ (a.red_flags||[]).length +' red flags</span></div></button>';
-  }
-  h += '</div>';
-  app.innerHTML = h;
-  app.querySelectorAll('.card').forEach(c =>
-    c.addEventListener('click', () => go('read', c.getAttribute('data-id'))));
-}
 
 /* ---- the fuzzy matcher (the new muscle) ----------------------------------- */
 /* Normalize → token-sort → Jaro-Winkler. Real string-similarity, computed in-browser, offline.
-   Mirrors the scripts/build.py prototype exactly. Word-order-robust (token-sort) + typo/prefix
-   tolerant (Jaro-Winkler) — it surfaces the near-matches an exact-name screen would miss. */
+   Word-order-robust (token-sort) + typo/prefix tolerant (Jaro-Winkler) — it surfaces the
+   near-matches an exact-name screen would miss. */
 const M_SUFFIX = new Set(['ltd','llc','inc','co','group','plc','corp','limited','holdings','sa','ag','gmbh']);
 function mnorm(s){ return String(s).toLowerCase().replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim(); }
 function tokensort(s, drop){
@@ -188,36 +235,52 @@ function matchEntities(a){
   });
 }
 
-/* ---- article highlighting (red flags + entities, position-merged) ---------- */
+/* ---- article highlighting: red-flag phrases + entity names, position-merged ---- */
+/* Returns {html, spans}. html = FINAL resting state (every phrase/entity wrapped). spans = sorted,
+   non-overlapping [start,end,kind,idx] used by the renderRead stream to reveal each as the read
+   edge reaches it. kind:'hl' (red flag, idx into red_flags) or 'ent' (entity, idx into entities). */
 function findAll(hay, needle){
   const out = []; if(!needle) return out; let i = 0;
   while((i = hay.indexOf(needle, i)) !== -1){ out.push([i, i+needle.length]); i += needle.length; }
   return out;
 }
-function highlightBody(raw, flags, ents){
+function articleSpans(raw, flags, ents){
   const spans = [];
-  (flags||[]).forEach(f => findAll(raw, f.flag).forEach(([s,e]) => spans.push({s,e,cls:'hl',title:f.red_flag})));
-  (ents||[]).forEach(en => findAll(raw, en.name).forEach(([s,e]) => spans.push({s,e,cls:'ent',title:en.type})));
+  (flags||[]).forEach((f,fi) => findAll(raw, f.flag).forEach(([s,e]) => spans.push({s,e,kind:'hl',idx:fi,title:f.red_flag})));
+  (ents||[]).forEach((en,ei) => findAll(raw, en.name).forEach(([s,e]) => spans.push({s,e,kind:'ent',idx:ei,title:en.type})));
   spans.sort((a,b) => a.s-b.s || (b.e-b.s)-(a.e-a.s));
   const picked = []; let last = -1;
   for(const sp of spans){ if(sp.s >= last){ picked.push(sp); last = sp.e; } }
+  return picked;
+}
+function spanHTML(raw, sp){
+  const cls = sp.kind==='hl' ? 'hl on' : 'ent';
+  const tag = sp.kind==='hl' ? 'span' : 'span';
+  return '<'+tag+' class="'+cls+'" title="'+esc(sp.title)+'">'+esc(raw.slice(sp.s, sp.e))+'</'+tag+'>';
+}
+function highlightBody(raw, flags, ents){
+  const picked = articleSpans(raw, flags, ents);
   let html = '', pos = 0;
-  for(const sp of picked){
-    html += esc(raw.slice(pos, sp.s));
-    const tag = sp.cls==='hl' ? 'mark' : 'span';
-    html += '<'+tag+' class="'+sp.cls+'" title="'+esc(sp.title)+'">'+esc(raw.slice(sp.s, sp.e))+'</'+tag+'>';
-    pos = sp.e;
-  }
+  for(const sp of picked){ html += esc(raw.slice(pos, sp.s)) + spanHTML(raw, sp); pos = sp.e; }
   return html + esc(raw.slice(pos));
 }
 
-/* ---- arc navigation ------------------------------------------------------- */
+/* ---- arc navigation + the step rail --------------------------------------- */
 const STEP = ['read','screen','disposition','close'];
 const STEP_LABEL = { read:'Read', screen:'Screen', disposition:'Disposition', close:'Exposure' };
+const RAIL = [['select','Select'],['read','Read'],['screen','Screen'],['disposition','Disposition'],['close','Exposure']];
+function rail(view){
+  const order = RAIL.map(r=>r[0]); const cur = order.indexOf(view);
+  let h = '<div class="rail">';
+  RAIL.forEach((r,i) => {
+    const cls = i<cur ? 'done' : (i===cur ? 'now' : '');
+    h += (i?'<span class="sep">›</span>':'') + '<span class="st '+cls+'"><span class="dot">'+(i<cur?'✓':(i+1))+'</span>'+r[1]+'</span>';
+  });
+  return h + '</div>';
+}
 function crumbs(view){
   const a = articleById(state.articleId);
-  return '<div class="crumbs"><a id="cb-sel">Articles</a> › '+esc(a?a.title:'')+' › '
-    + STEP.map(v => v===view ? '<b>'+STEP_LABEL[v]+'</b>' : STEP_LABEL[v]).join(' · ') + '</div>';
+  return '<div class="crumbs"><a id="cb-sel">Articles</a> › '+esc(a?a.title:'')+'</div>';
 }
 function arcNav(view){
   const i = STEP.indexOf(view);
@@ -234,56 +297,199 @@ function wireNav(){
 function stepNext(){ const i = STEP.indexOf(state.view); if(i>=0 && i<STEP.length-1) go(STEP[i+1]); }
 function stepBack(){ const i = STEP.indexOf(state.view); if(i<=0) go('select'); else go(STEP[i-1]); }
 
-/* ---- the four arc screens ------------------------------------------------- */
+function srcCap(a){
+  return '<div class="srccap"><b>Source.</b> '+esc(a.source_org||'')
+    + (a.basis ? ' · '+esc(a.basis) : '')
+    + (a.source_url ? '<br><span class="u">'+esc(a.source_url)+(a.archived?' (archived '+esc(a.archived)+')':'')+'</span>' : '')
+    + '</div>';
+}
+
+/* ---- Select --------------------------------------------------------------- */
+function renderSelect(){
+  const arts = NEWS.articles;
+  const ents = arts.reduce((n,a)=>n+(a.entities||[]).length,0);
+  const flags = arts.reduce((n,a)=>n+(a.red_flags||[]).length,0);
+  const book = (NEWS.book && NEWS.book.rows) ? NEWS.book.rows.length : 0;
+  let h = rail('select');
+  h += '<div class="eyebrow">Adverse-media / negative-news stream</div>';
+  h += '<h1>What aren’t we watching?</h1>';
+  h += '<p class="lead">A second monitoring stream — over unstructured news. For each real enforcement article the '
+     + 'agent extracts the named entities and the red-flag conduct, then fuzzy-matches the entities against the '
+     + 'institution’s client &amp; counterparty book to surface potential exposure: the matches an exact-name '
+     + 'screen would miss. The articles are real US-federal enforcement records (public domain); the book is synthetic.</p>';
+  h += '<div class="tiles">'
+     + tile(arts.length,'real articles') + tile(ents,'entities extracted')
+     + tile(flags,'red flags') + tile(book,'book entries (synthetic)') + '</div>';
+  h += '<h2>Select an article</h2><div class="cards">';
+  for(const a of arts){
+    h += '<button class="card" data-id="'+esc(a.id)+'">'
+       + '<div class="ttl">'+esc(a.title)+'</div>'
+       + '<div class="src">'+esc(a.source_org||'')+'</div>'
+       + '<div class="meta"><span class="chip sig">'+esc(a.doc_type||'News')+'</span>'
+       + (a.typology?'<span class="chip ty">'+esc(a.typology)+'</span>':'')
+       + '<span>'+ (a.entities||[]).length +' entities</span>'
+       + '<span>'+ (a.red_flags||[]).length +' red flags</span></div></button>';
+  }
+  h += '</div>';
+  app.innerHTML = h;
+  app.querySelectorAll('.card').forEach(c =>
+    c.addEventListener('click', () => go('read', c.getAttribute('data-id'))));
+}
+
+/* ---- Read (T3 layers the streaming "agent reading" enhancement over this final state) ---- */
+function ecardHTML(en, streaming){
+  let h = '<div class="ecard'+(streaming?' in':'')+'" data-e="'+esc(en.id)+'">';
+  h += '<div class="eh"><span class="en">'+esc(en.name)+'</span><span class="echip '+esc(en.type)+'">'+esc(en.type)+'</span></div>';
+  const attrs = [['Location',en.location],['Age',en.age],['Profession',en.profession]].filter(x=>x[1]);
+  if(attrs.length){
+    h += '<div class="eattrs">'+attrs.map(x=>'<span class="eattr"><b>'+x[0]+'</b>'+esc(x[1])+'</span>').join('')+'</div>';
+  }
+  if(en.context) h += '<div class="ectx">'+esc(en.context)+'</div>';
+  return h + '</div>';
+}
+function xrowHTML(f, streaming){
+  return '<div class="xrow'+(streaming?' in':'')+'"><div class="xv">“'+esc(f.flag)+'”</div>'
+    + '<div class="xa">↓ translate</div><div class="xr">'+esc(f.red_flag)+'</div>'
+    + (f.category?'<div class="xc">'+esc(f.category)+'</div>':'')+'</div>';
+}
 function renderRead(){
   const a = articleById(state.articleId);
-  let h = crumbs('read');
+  const ents = a.entities||[], flags = a.red_flags||[];
+  let h = rail('read') + crumbs('read');
+  h += '<div class="eyebrow">'+esc(a.source_org||'')+' · Read</div>';
   h += '<h1>'+esc(a.title)+'</h1>';
-  h += '<p class="muted mono">Step 1 · the agent reads the article, grounds each red-flag phrase (verbatim), and tags named entities.</p>';
-  h += '<div class="article" id="article">'+highlightBody(a.article_text, a.red_flags||[], a.entities||[])+'</div>';
-  h += '<h2>Red flags identified</h2><div class="xlist">';
-  (a.red_flags||[]).forEach(f => {
-    h += '<div class="xrow"><div><div class="t">'+esc(f.red_flag)+'</div>'
-       + (f.category ? '<div class="sub mono">'+esc(f.category)+'</div>' : '') + '</div>'
-       + '<div class="v">“'+esc(f.flag)+'”</div></div>';
-  });
-  h += '</div>' + arcNav('read');
+  h += '<p class="lead">The agent reads the source top to bottom. As it reaches each <em>red-flag phrase</em> it highlights '
+     + 'the verbatim quote and writes the AML translation beside it; each named <em>entity</em> is tagged and carded with '
+     + 'its details. Nothing is shown that isn’t in the source.</p>';
+  h += srcCap(a);
+  if(a.typology) h += '<div style="margin:14px 0 2px"><span class="chip sig">typology</span> <span class="chip ty">'+esc(a.typology)+'</span></div>';
+  h += '<div class="artwrap"><div>'
+     + '<div class="collabel" id="doclabel">Source document · '+ents.length+' entit'+(ents.length===1?'y':'ies')+' · '+flags.length+' red flag'+(flags.length===1?'':'s')+'</div>'
+     + '<div class="doc" id="doc">'+highlightBody(a.article_text, flags, ents)+'</div></div>';
+  h += '<div><div class="collabel" id="entlabel">Named entities · '+ents.length+'</div>'
+     + '<div class="xstack" id="entities">'+ents.map(e=>ecardHTML(e,false)).join('')+'</div>';
+  h += '<div class="collabel" id="flaglabel" style="margin-top:16px">Red flags · extract → translate · '+flags.length+'</div>'
+     + '<div class="xstack" id="redflags" style="max-height:none">'+flags.map(f=>xrowHTML(f,false)).join('')+'</div></div>';
+  h += '</div>';
+  h += '<div class="framenote">Every red flag traces to a verbatim phrase in the source (the grounded evidence); the translation '
+     + 'is how an AML programme would name the mechanism. Entity attributes (location / age / profession) are quote-grounded in the article.</div>';
+  h += arcNav('read');
   app.innerHTML = h; wireNav();
+  streamRead(a, ents, flags);   // T3 — progressive enhancement (no-op under reduced-motion / string-DOM harness)
+}
+function streamRead(a, ents, flags){
+  const docEl = document.getElementById('doc');
+  const entEl = document.getElementById('entities'), flagEl = document.getElementById('redflags');
+  const dlbl = document.getElementById('doclabel'), elbl = document.getElementById('entlabel'), flbl = document.getElementById('flaglabel');
+  // template above is the FINAL resting state → reduced-motion + the string-DOM harness already show it.
+  if(REDUCED || !docEl || typeof docEl.insertAdjacentHTML !== 'function') return;
+  const raw = a.article_text;
+  const spans = articleSpans(raw, flags, ents), L = raw.length;
+  // ordered runs: plain text (kind null) + each highlighted span
+  const segs = []; let c0 = 0;
+  for(const sp of spans){ if(sp.s>c0) segs.push({s:c0,e:sp.s,sp:null}); segs.push({s:sp.s,e:sp.e,sp}); c0 = sp.e; }
+  if(c0<L) segs.push({s:c0,e:L,sp:null});
+  if(entEl) entEl.innerHTML=''; if(flagEl) flagEl.innerHTML='';
+  docEl.innerHTML=''; if(docEl.classList) docEl.classList.add('reading');
+  let ec=0, fc=0;
+  const setLabels = ()=>{ if(dlbl)dlbl.textContent='Source document · reading…';
+    if(elbl)elbl.textContent='Named entities · '+ec; if(flbl)flbl.textContent='Red flags · extract → translate · '+fc; };
+  setLabels();
+  const STEP=33, TOTAL=Math.max(6000,Math.min(45000,Math.round(L*1.0)));
+  const TICKS=Math.max(40,Math.round(TOTAL/STEP)), CPS=Math.max(8,Math.ceil(L/TICKS));
+  let si=0, within=0; const eShown=new Set(), fShown=new Set();
+  function read(){
+    let budget=CPS, buf='';
+    while(budget>0 && si<segs.length){
+      const sg=segs[si], rem=(sg.e-sg.s)-within;
+      if(!sg.sp){ const take=Math.min(budget,rem); buf+=esc(raw.slice(sg.s+within, sg.s+within+take)); within+=take; budget-=take; }
+      else {
+        buf += spanHTML(raw, sg.sp);
+        if(sg.sp.kind==='ent' && entEl && !eShown.has(sg.sp.idx)){ eShown.add(sg.sp.idx); ec++; entEl.insertAdjacentHTML('beforeend', ecardHTML(ents[sg.sp.idx], true)); }
+        if(sg.sp.kind==='hl' && flagEl && !fShown.has(sg.sp.idx)){ fShown.add(sg.sp.idx); fc++; flagEl.insertAdjacentHTML('beforeend', xrowHTML(flags[sg.sp.idx], true)); }
+        within=sg.e-sg.s; budget-=rem;
+      }
+      if(within>=sg.e-sg.s){ si++; within=0; }
+    }
+    if(buf) docEl.insertAdjacentHTML('beforeend', buf);
+    if(docEl.scrollHeight) docEl.scrollTop=docEl.scrollHeight;
+    if(elbl)elbl.textContent='Named entities · '+ec; if(flbl)flbl.textContent='Red flags · extract → translate · '+fc;
+    if(si<segs.length){ T(read,STEP); return; }
+    if(docEl.classList) docEl.classList.remove('reading');
+    ents.forEach((e,i)=>{ if(entEl && !eShown.has(i)){ eShown.add(i); ec++; entEl.insertAdjacentHTML('beforeend', ecardHTML(e,true)); } });
+    flags.forEach((f,i)=>{ if(flagEl && !fShown.has(i)){ fShown.add(i); fc++; flagEl.insertAdjacentHTML('beforeend', xrowHTML(f,true)); } });
+    if(dlbl)dlbl.textContent='Source document · '+ents.length+' entit'+(ents.length===1?'y':'ies')+' · '+flags.length+' red flag'+(flags.length===1?'':'s');
+    if(elbl)elbl.textContent='Named entities · '+ents.length; if(flbl)flbl.textContent='Red flags · extract → translate · '+flags.length;
+  }
+  T(read,240);
+}
+
+/* ---- Screen (T4 layers the scan-process enhancement over this final ranked state) ---- */
+function scanRowHTML(x, th, streaming){
+  const below = !x.hit;
+  let sub = x.row ? ('→ '+esc(x.row.name)+' · '+esc(x.row.role)+' · '+esc(x.row.country))
+                  : 'no book entry above threshold';
+  let trap = (x.hit && x.row && x.row.note) ? '<div class="flagtrap">⚠ '+esc(x.row.note)+'</div>' : '';
+  return '<div class="row'+(x.hit?' hit':' below')+(streaming?' in':'')+'"><div><div class="who">'+esc(x.entity.name)
+    + '<span class="tag '+x.kind+'">'+(x.kind==='none'?'no match':x.kind)+'</span></div>'
+    + '<div class="sub">'+sub+'</div>'+trap+'</div>'
+    + '<div class="score'+(x.hit?' s-hi':'')+'">'+x.score.toFixed(3)+'</div></div>';
 }
 function renderScreen(){
   const a = articleById(state.articleId);
   const th = threshold();
-  const m = matchEntities(a);
-  const hits = m.filter(x => x.hit);
-  let h = crumbs('screen');
+  const rows = (NEWS.book && NEWS.book.rows) ? NEWS.book.rows.length : 0;
+  const m = matchEntities(a).slice().sort((x,y)=>y.score-x.score);
+  const hits = m.filter(x=>x.hit), above = hits, below = m.filter(x=>!x.hit);
+  const nears = hits.filter(x=>!x.exact).length;
+  let h = rail('screen') + crumbs('screen');
   h += '<h1>Screen against the book</h1>';
-  h += '<p class="lead">Each extracted entity is fuzzy-matched against the synthetic client &amp; counterparty book. '
-     + 'Scores are real string-similarity (Jaro–Winkler, word-order-robust), computed in-browser. '
-     + 'A match at or above '+th.toFixed(2)+' is surfaced as potential exposure.</p>';
-  h += '<div class="rows" id="screenrows">';
-  m.forEach(x => {
-    h += '<div class="row'+(x.hit?' hit':'')+'"><div><div class="who">'+esc(x.entity.name)
-       + '<span class="tag '+x.kind+'">'+(x.kind==='none'?'no match':x.kind)+'</span></div>'
-       + '<div class="sub">'+(x.row ? ('→ '+esc(x.row.name)+' · '+esc(x.row.role)+' · '+esc(x.row.country))
-                                     : 'no book entry above threshold')+'</div></div>'
-       + '<div class="score'+(x.hit?' s-hi':'')+'">'+x.score.toFixed(3)+'</div></div>';
-  });
-  h += '</div>';
-  const nears = hits.filter(x => !x.exact).length;
+  h += '<p class="lead">Each extracted entity is scored against every row of the synthetic client &amp; counterparty book. '
+     + 'Scores are real string-similarity (Jaro–Winkler over token-sorted, suffix-aware names) computed in-browser — '
+     + 'word-order and transliteration robust. A score at or above '+th.toFixed(2)+' is surfaced as potential exposure.</p>';
+  h += '<div class="scanhead"><span class="scanctr" id="scanctr">'+m.length+' entit'+(m.length===1?'y':'ies')+' × '+rows+' book rows scanned</span></div>';
+  h += '<div class="thline">at / above '+th.toFixed(2)+' — potential exposure</div>';
+  h += '<div class="rows" id="scanabove">'+above.map(x=>scanRowHTML(x,th,false)).join('')+'</div>';
+  if(below.length){
+    h += '<div class="thline">below '+th.toFixed(2)+' — no exposure</div>';
+    h += '<div class="rows" id="scanbelow">'+below.map(x=>scanRowHTML(x,th,false)).join('')+'</div>';
+  }
   h += '<p class="note" id="screennote">'+hits.length+' potential exposure'+(hits.length===1?'':'s')+' surfaced'
      + (nears ? (' — '+nears+' '+(nears===1?'is a near-match':'are near-matches')+' an exact-name screen would have missed.') : '.')+'</p>';
   h += arcNav('screen');
   app.innerHTML = h; wireNav();
+  scanScreen(m, th);   // T4 — progressive enhancement (no-op under reduced-motion / string-DOM harness)
 }
-function dispoKey(aid, eid){ return aid+'|'+eid; }   // key per ENTITY (one surfaced hit per entity), not per book row
+function scanScreen(m, th){
+  const aboveEl = document.getElementById('scanabove'), belowEl = document.getElementById('scanbelow');
+  const ctr = document.getElementById('scanctr');
+  if(REDUCED || !aboveEl || typeof aboveEl.insertAdjacentHTML !== 'function') return;  // final state already rendered
+  const above = m.filter(x=>x.hit), below = m.filter(x=>!x.hit);
+  const rows = (NEWS.book && NEWS.book.rows) ? NEWS.book.rows.length : 0;
+  aboveEl.innerHTML=''; if(belowEl) belowEl.innerHTML='';
+  let i=0; const order = above.concat(below);
+  function tick(){
+    if(i<order.length){
+      const x=order[i]; const el = x.hit ? aboveEl : belowEl;
+      if(el) el.insertAdjacentHTML('beforeend', scanRowHTML(x, th, true));
+      if(ctr) ctr.textContent = (i+1)+' of '+m.length+' entit'+(m.length===1?'y':'ies')+' scanned × '+rows+' book rows';
+      i++; T(tick, 150); return;
+    }
+    if(ctr) ctr.textContent = m.length+' entit'+(m.length===1?'y':'ies')+' × '+rows+' book rows scanned';
+  }
+  T(tick, 200);
+}
+
+/* ---- Disposition (the human gate) ----------------------------------------- */
+function dispoKey(aid, eid){ return aid+'|'+eid; }
 function renderDisposition(){
   const a = articleById(state.articleId);
-  const hits = matchEntities(a).filter(x => x.hit);
+  const hits = matchEntities(a).filter(x=>x.hit).sort((x,y)=>y.score-x.score);
   hits.forEach(x => { const k = dispoKey(a.id, x.entity.id); if(!(k in state.dispo)) state.dispo[k] = true; });
-  let h = crumbs('disposition');
+  let h = rail('disposition') + crumbs('disposition');
   h += '<h1>Disposition — the human gate</h1>';
-  h += '<p class="lead">The agent proposes; the analyst disposes. Confirm true exposures and dismiss false positives '
-     + '— a high score is not a confirmation (a common name can collide with an unrelated person).</p>';
+  h += '<p class="lead">The agent proposes; the analyst disposes. Confirm the true exposures and dismiss the false positives — '
+     + 'a high score is <em>not</em> a confirmation: a common name can collide with an unrelated person at a perfect 1.000.</p>';
   if(!hits.length){
     h += '<p class="note">No exposure surfaced for this article — nothing to disposition.</p>';
   } else {
@@ -293,8 +499,8 @@ function renderDisposition(){
       h += '<button class="hitbtn" data-k="'+esc(k)+'" aria-pressed="'+on+'">'
          + '<div><div class="who">'+esc(x.entity.name)+' → '+esc(x.row.name)
          + '<span class="tag '+x.kind+'">'+x.kind+'</span></div>'
-         + '<div class="sub">'+esc(x.row.role)+' · '+esc(x.row.country)+' · score '+x.score.toFixed(3)
-         + (x.row.note ? (' · '+esc(x.row.note)) : '')+'</div></div>'
+         + '<div class="sub">'+esc(x.row.role)+' · '+esc(x.row.country)+' · score '+x.score.toFixed(3)+'</div>'
+         + (x.row.note ? '<div class="flagtrap">⚠ '+esc(x.row.note)+'</div>' : '')+'</div>'
          + '<span class="disp '+(on?'on':'off')+'">'+(on?'CONFIRMED':'DISMISSED')+'</span></button>';
     });
     h += '</div>';
@@ -306,12 +512,14 @@ function renderDisposition(){
   }));
   wireNav();
 }
+
+/* ---- Exposure (close) ----------------------------------------------------- */
 function renderClose(){
   const a = articleById(state.articleId);
-  const hits = matchEntities(a).filter(x => x.hit);
-  const confirmed = hits.filter(x => state.dispo[dispoKey(a.id, x.entity.id)]);
+  const hits = matchEntities(a).filter(x=>x.hit);
+  const confirmed = hits.filter(x => state.dispo[dispoKey(a.id, x.entity.id)]).sort((x,y)=>y.score-x.score);
   const dismissed = hits.length - confirmed.length;
-  let h = crumbs('close');
+  let h = rail('close') + crumbs('close');
   h += '<h1>Exposure</h1>';
   h += '<div class="tiles">'+tile(confirmed.length,'confirmed exposures')
      + tile(dismissed,'dismissed (false positive)')+tile((a.red_flags||[]).length,'red flags in article')+'</div>';
@@ -341,7 +549,8 @@ function render(){
   document.getElementById('brandsub').textContent = (NEWS.brand&&NEWS.brand.subtitle)||'';
   document.getElementById('badge').textContent = NEWS.badge || 'Illustrative data & outputs';
   document.getElementById('foot').innerHTML =
-    'Illustrative vision prototype · synthetic data — no real customers, accounts, or transactions. '
+    'Illustrative vision prototype · the source articles are real US-federal enforcement records (public domain, '
+    + '17 U.S.C. §105); the client/counterparty book is synthetic — no real customers, accounts, or transactions. '
     + 'Fuzzy-match scores are real string-similarity computed in-browser.';
   (RENDER[state.view]||renderSelect)();
   window.scrollTo(0,0);

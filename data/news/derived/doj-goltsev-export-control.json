@@ -1,0 +1,96 @@
+{
+ "id": "doj-goltsev-export-control",
+ "title": "Canadian National Sentenced to 40 Months in Prison for Multi-Million Dollar Export Control Scheme",
+ "source_md": "data/news/articles/doj-goltsev-export-control.md",
+ "doc_type": "DOJ",
+ "typology": "export-control-evasion",
+ "source_org": "U.S. Department of Justice (USAO, Eastern District of New York)",
+ "source_url": "https://www.justice.gov/usao-edny/pr/canadian-national-sentenced-40-months-prison-multi-million-dollar-export-control",
+ "basis": "Public domain · 17 U.S.C. §105",
+ "archived": "2026-05-24",
+ "provenance": "Real U.S. federal government enforcement record, reproduced verbatim (excerpted) under 17 U.S.C. §105 (public domain). Named entities and red-flag phrases are quote-grounded (verbatim) in the source article (normalize-substring); red_flag is the natural-AML translation beside each grounded flag. The client/counterparty book screened against this article is SYNTHETIC and illustrative — NO real customer data. Illustrative vision demo.",
+ "entities": [
+  {
+   "id": "E1",
+   "name": "Nikolay Goltsev",
+   "type": "person",
+   "age": "38",
+   "location": "Montreal, Canada",
+   "context": "Masterminded a procurement scheme shipping dual-use electronics to sanctioned Russian end-users."
+  },
+  {
+   "id": "E2",
+   "name": "Kristina Puzyreva",
+   "type": "person",
+   "age": "33",
+   "location": "Montreal, Canada",
+   "context": "Goltsev's spouse; laundered the proceeds of the export-control scheme."
+  },
+  {
+   "id": "E3",
+   "name": "Salimdzhon Nasriddinov",
+   "type": "person",
+   "age": "54",
+   "location": "Brooklyn, NY",
+   "context": "Co-defendant who sourced components under the front companies."
+  },
+  {
+   "id": "E4",
+   "name": "SH Brothers Inc.",
+   "type": "org",
+   "location": "Brooklyn",
+   "context": "Brooklyn front company used to source and ship dual-use electronics."
+  },
+  {
+   "id": "E5",
+   "name": "SN Electronics Inc.",
+   "type": "org",
+   "location": "Brooklyn",
+   "context": "Brooklyn front company used alongside SH Brothers."
+  }
+ ],
+ "red_flags": [
+  {
+   "id": "R1",
+   "flag": "used two Brooklyn companies, SH Brothers Inc. and SN Electronics Inc., to unlawfully source, purchase and ship millions of dollars in dual-use electronics",
+   "red_flag": "Front companies used to procure dual-use goods",
+   "category": "Shell company"
+  },
+  {
+   "id": "R2",
+   "flag": "unlawfully shipped the items to a variety of intermediary front companies located in other countries, including Turkey, Hong Kong, India, China and the United Arab Emirates, where they were rerouted to Russia",
+   "red_flag": "Transship through third-country front companies to a sanctioned end-user",
+   "category": "Sanctions evasion"
+  },
+  {
+   "id": "R3",
+   "flag": "Goltsev’s wife, co-defendant Kristina Puzyreva, laundered the funds of the export control scheme",
+   "red_flag": "Proceeds laundered through a related party (spouse)",
+   "category": "Layering"
+  },
+  {
+   "id": "R4",
+   "flag": "is it better to provide them with a Chinese end user",
+   "red_flag": "Falsify the end-user to defeat export screening",
+   "category": "Deception"
+  },
+  {
+   "id": "R5",
+   "flag": "asked me to make 80 accounts",
+   "red_flag": "Open accounts in bulk to fragment the money flow",
+   "category": "Structuring"
+  },
+  {
+   "id": "R6",
+   "flag": "made hundreds of shipments valued at over $7 million to Russia",
+   "red_flag": "High-volume shipments to a sanctioned jurisdiction",
+   "category": "Sanctions evasion"
+  },
+  {
+   "id": "R7",
+   "flag": "write something more substantial [to the U.S. company] so that there are no more questions",
+   "red_flag": "Coach a supplier to paper over diligence questions",
+   "category": "Deception"
+  }
+ ]
+}

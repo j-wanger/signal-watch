@@ -9,79 +9,149 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0e1116; --panel:#161b22; --panel2:#1b2230; --ink:#e8edf4; --muted:#8b97a8;
-  --signal:#f6a623; --line:#26303d; --ok:#54c08a; --warn:#e0654b; --chip:#202a38;
+  --bg:#0e1116; --bg2:#0b0e13; --panel:#161b22; --panel2:#1b2230; --ink:#e8edf4;
+  --muted:#8b97a8; --faint:#5f6b7c; --signal:#f6a623; --line:#26303d; --line2:#313c4b;
+  --ok:#54c08a; --warn:#e0654b; --chip:#202a38;
   --mono:'JetBrains Mono',ui-monospace,monospace; --head:'Archivo',system-ui,sans-serif;
-  --serif:'Newsreader',Georgia,serif;
+  --serif:'Newsreader',Georgia,serif; --body:'Archivo',system-ui,sans-serif;
 }
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--head);
-  -webkit-font-smoothing:antialiased}
-body{line-height:1.5;padding:0 0 80px}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+body{line-height:1.5;padding:0 0 90px}
 a{color:var(--signal)}
+em{color:var(--signal);font-style:italic}
 .badge{position:fixed;top:10px;right:12px;z-index:50;background:rgba(246,166,35,.12);
   border:1px solid var(--signal);color:var(--signal);font:600 11px/1 var(--mono);
   letter-spacing:.03em;padding:6px 9px;border-radius:5px}
-header.top{padding:22px 28px 6px;border-bottom:1px solid var(--line)}
+header.top{padding:20px 28px 14px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:14px}
 header.top .brand{font:700 15px/1.2 var(--head);letter-spacing:.02em}
-header.top .sub{color:var(--muted);font:500 12px/1.4 var(--mono);margin-top:3px}
-main{max-width:1040px;margin:0 auto;padding:26px 28px}
-h1{font:600 26px/1.2 var(--head);margin:0 0 6px}
-h2{font:600 18px/1.25 var(--head);margin:26px 0 10px}
-.lead{color:var(--muted);font:400 16px/1.55 var(--serif);max-width:70ch}
-.muted{color:var(--muted)}
-.mono{font-family:var(--mono)}
-.tiles{display:flex;gap:14px;flex-wrap:wrap;margin:20px 0 8px}
-.tile{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:120px}
-.tile .n{font:600 26px/1 var(--head);color:var(--signal)}
+header.top .sub{color:var(--muted);font:500 12px/1.4 var(--mono)}
+main{max-width:1060px;margin:0 auto;padding:22px 28px}
+h1{font:600 27px/1.2 var(--head);margin:0 0 8px;letter-spacing:-.01em}
+h2{font:600 18px/1.3 var(--head);margin:24px 0 10px}
+h2 em{font-family:var(--serif)}
+.eyebrow{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--signal);margin-bottom:10px}
+.lead{color:var(--muted);font:400 16px/1.6 var(--serif);max-width:74ch;margin:0 0 4px}
+.muted{color:var(--muted)} .mono{font-family:var(--mono)}
+.framenote{color:var(--faint);font:400 13px/1.6 var(--serif);margin-top:16px;max-width:80ch;border-left:2px solid var(--line2);padding-left:13px}
+
+/* the step rail — makes the arc legible: Select › Read › Screen › Disposition › Exposure */
+.rail{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:0 0 20px;font:600 11px/1 var(--mono);letter-spacing:.04em}
+.rail .st{display:flex;align-items:center;gap:7px;color:var(--faint);text-transform:uppercase}
+.rail .st .dot{width:19px;height:19px;border-radius:999px;border:1px solid var(--line2);display:inline-flex;align-items:center;justify-content:center;font:600 10px/1 var(--mono);color:var(--faint)}
+.rail .st.done{color:var(--muted)} .rail .st.done .dot{border-color:var(--ok);color:var(--ok)}
+.rail .st.now{color:var(--signal)} .rail .st.now .dot{border-color:var(--signal);color:var(--signal);background:rgba(246,166,35,.12)}
+.rail .sep{color:var(--line2)}
+
+.tiles{display:flex;gap:14px;flex-wrap:wrap;margin:18px 0 6px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:14px 16px;min-width:128px}
+.tile .n{font:600 27px/1 var(--head);color:var(--signal)}
 .tile .l{color:var(--muted);font:500 11px/1.3 var(--mono);margin-top:6px;text-transform:uppercase;letter-spacing:.04em}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:14px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 17px;
-  cursor:pointer;transition:border-color .12s,transform .12s;text-align:left}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:16px 18px;
+  cursor:pointer;transition:border-color .14s,transform .14s;text-align:left;color:var(--ink);font-family:var(--body)}
 .card:hover,.card:focus-visible{border-color:var(--signal);transform:translateY(-1px);outline:none}
-.card .ttl{font:600 15px/1.3 var(--head)}
-.card .meta{color:var(--muted);font:500 11px/1.4 var(--mono);margin-top:9px;display:flex;gap:10px;flex-wrap:wrap}
+.card .ttl{font:600 15px/1.35 var(--head)}
+.card .src{color:var(--faint);font:500 11px/1.5 var(--mono);margin-top:8px}
+.card .meta{color:var(--muted);font:500 11px/1.4 var(--mono);margin-top:11px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .chip{display:inline-block;background:var(--chip);border:1px solid var(--line);border-radius:999px;
-  padding:2px 9px;font:500 11px/1.5 var(--mono);color:var(--muted)}
+  padding:2px 10px;font:500 11px/1.6 var(--mono);color:var(--muted)}
 .chip.sig{color:var(--signal);border-color:var(--signal)}
-.btn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);font:600 13px/1 var(--head);
-  padding:10px 16px;border-radius:7px;cursor:pointer}
-.btn:hover{border-color:var(--signal)}
-.btn.primary{background:var(--signal);color:#10141a;border-color:var(--signal)}
-.nav{display:flex;gap:10px;align-items:center;margin-top:26px;border-top:1px solid var(--line);padding-top:18px}
-.crumbs{color:var(--muted);font:500 12px/1 var(--mono);margin-bottom:16px}
-footer{max-width:1040px;margin:30px auto 0;padding:16px 28px;border-top:1px solid var(--line);
-  color:var(--muted);font:400 12px/1.6 var(--mono)}
-.crumbs a{cursor:pointer;color:var(--signal)}
-.article{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px 22px;
-  font-family:var(--serif);font-size:16px;line-height:1.75;white-space:pre-wrap;max-height:46vh;overflow:auto;margin-top:8px}
-mark.hl{background:rgba(246,166,35,.20);color:#ffd27a;border-bottom:1px solid var(--signal);padding:0 1px;border-radius:2px}
-.ent{background:rgba(84,192,138,.13);border-bottom:1px dashed var(--ok);color:#bfe9d3;border-radius:2px}
-.xlist{display:grid;gap:8px;margin-top:8px}
-.xrow{display:grid;grid-template-columns:1fr 1fr;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 13px}
-.xrow .v{font-family:var(--serif);color:var(--muted);font-size:14px;line-height:1.5}
-.xrow .t{font:600 13px/1.4 var(--head);color:var(--ink)}
-.rows{display:grid;gap:9px;margin-top:14px}
-.row{display:flex;justify-content:space-between;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
-.row.hit{border-color:var(--signal)}
+.chip.ty{color:var(--ink);border-color:var(--line2)}
+
+.srccap{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--signal);border-radius:8px;
+  padding:10px 14px;margin:14px 0 4px;font:400 12.5px/1.55 var(--mono);color:var(--muted)}
+.srccap b{color:var(--signal);font-weight:600}
+.srccap .u{color:var(--faint);word-break:break-all}
+
+/* Read: article (left) + extraction (right) */
+.artwrap{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start;margin-top:6px}
+@media(max-width:860px){.artwrap{grid-template-columns:1fr}}
+.collabel{font:600 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.doc{position:relative;border:1px solid var(--line);background:var(--bg2);border-radius:11px;padding:16px 18px;
+  max-height:430px;overflow:auto;font-family:var(--serif);font-size:15px;line-height:1.78;color:var(--muted);white-space:pre-wrap;word-break:break-word}
+.doc .hl{border-radius:3px;padding:0 2px;transition:background .35s,box-shadow .35s,color .35s}
+.doc .hl.on{background:rgba(246,166,35,.16);color:var(--ink);box-shadow:inset 0 -1px 0 var(--signal)}
+.doc .ent{border-radius:3px;padding:0 2px;background:rgba(84,192,138,.12);color:#bfe9d3;box-shadow:inset 0 -1px 0 var(--ok);transition:background .35s,box-shadow .35s,color .35s}
+.doc.reading::after{content:'▌';color:var(--signal);animation:cblink 1.05s steps(2) infinite}
+@keyframes cblink{50%{opacity:0}}
+@media(prefers-reduced-motion:no-preference){.doc .hl.on{animation:hlflash .55s ease-out}.doc .ent{animation:entflash .55s ease-out}}
+@keyframes hlflash{from{background:rgba(246,166,35,.5)}}
+@keyframes entflash{from{background:rgba(84,192,138,.4)}}
+.xstack{display:flex;flex-direction:column;gap:18px;max-height:430px;overflow:auto;padding-right:2px}
+.ecard{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:11px 13px;opacity:1}
+.ecard.in{opacity:0;transform:translateX(8px);animation:brin .4s forwards}
+.ecard .eh{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.ecard .en{font:600 14px/1.35 var(--head);color:var(--ink)}
+.echip{font:600 9px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:999px;white-space:nowrap}
+.echip.person{color:#bfe9d3;border:1px solid var(--ok)} .echip.org{color:var(--signal);border:1px solid var(--signal)}
+.eattrs{display:flex;flex-wrap:wrap;gap:5px 10px;margin-top:9px}
+.eattr{font:500 11px/1.4 var(--mono);color:var(--muted)} .eattr b{color:var(--faint);font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-size:9.5px;margin-right:4px}
+.ectx{font:400 12.5px/1.5 var(--serif);color:var(--faint);margin-top:8px}
+.xrow{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:10px 12px;opacity:1}
+.xrow.in{opacity:0;transform:translateX(8px);animation:brin .4s forwards}
+.xrow .xv{font-family:var(--mono);font-size:10.5px;color:var(--faint);line-height:1.5}
+.xrow .xa{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--signal);margin:5px 0}
+.xrow .xr{font-size:13.5px;color:var(--ink);line-height:1.4}
+.xrow .xc{font:500 9.5px/1 var(--mono);color:var(--faint);text-transform:uppercase;letter-spacing:.05em;margin-top:6px}
+@keyframes brin{to{opacity:1;transform:none}}
+
+/* Screen: the scan process */
+.scanhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:14px 0 8px}
+.scanctr{font:600 12px/1 var(--mono);color:var(--signal)}
+.thline{display:flex;align-items:center;gap:10px;margin:14px 0 8px;color:var(--faint);font:600 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.thline::before,.thline::after{content:'';flex:1;height:1px;background:var(--line2)}
+.rows{display:grid;gap:9px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:12px 15px}
+.row.in{opacity:0;animation:rin .34s forwards}
+@keyframes rin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.row.hit{border-color:var(--signal)} .row.below{opacity:.5}
 .row .who{font:600 14px/1.35 var(--head)}
 .row .sub{color:var(--muted);font:500 11px/1.45 var(--mono);margin-top:4px}
-.score{font:600 14px/1 var(--mono);padding:6px 9px;border-radius:6px;background:var(--chip);border:1px solid var(--line);white-space:nowrap}
+.score{font:600 14px/1 var(--mono);padding:7px 10px;border-radius:7px;background:var(--chip);border:1px solid var(--line);white-space:nowrap;color:var(--muted)}
 .score.s-hi{color:var(--signal);border-color:var(--signal)}
-.tag{font:600 10px/1 var(--mono);padding:3px 7px;border-radius:999px;text-transform:uppercase;letter-spacing:.05em;margin-left:6px}
+.tag{font:600 10px/1 var(--mono);padding:3px 7px;border-radius:999px;text-transform:uppercase;letter-spacing:.05em;margin-left:7px}
 .tag.exact{background:rgba(224,101,75,.16);color:#ef8b73;border:1px solid var(--warn)}
 .tag.near{background:rgba(246,166,35,.16);color:var(--signal);border:1px solid var(--signal)}
-.tag.none{color:var(--muted);border:1px solid var(--line)}
-.hitbtn{display:flex;justify-content:space-between;align-items:center;gap:14px;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;cursor:pointer;color:var(--ink);font-family:var(--head)}
+.tag.none{color:var(--faint);border:1px solid var(--line)}
+.flagtrap{color:var(--warn);font:600 11px/1.4 var(--mono);margin-top:4px}
+
+/* Disposition + Exposure */
+.hitbtn{display:flex;justify-content:space-between;align-items:center;gap:14px;width:100%;text-align:left;
+  background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:13px 15px;cursor:pointer;color:var(--ink);font-family:var(--body)}
 .hitbtn:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
-.hitbtn[aria-pressed="true"]{border-color:var(--ok);background:rgba(84,192,138,.08)}
-.hitbtn[aria-pressed="false"]{opacity:.55;border-style:dashed}
-.disp{font:600 11px/1 var(--mono);padding:6px 9px;border-radius:6px;white-space:nowrap}
-.disp.on{color:var(--ok);border:1px solid var(--ok)}
-.disp.off{color:var(--muted);border:1px solid var(--line)}
-.note{color:var(--muted);font:400 13px/1.55 var(--serif);margin-top:12px;max-width:74ch}
-.keyhint{color:var(--muted);font:500 11px/1 var(--mono);margin-left:auto}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.hitbtn[aria-pressed="true"]{border-color:var(--ok);background:rgba(84,192,138,.07)}
+.hitbtn[aria-pressed="false"]{opacity:.6;border-style:dashed}
+.disp{font:600 11px/1 var(--mono);padding:7px 10px;border-radius:6px;white-space:nowrap}
+.disp.on{color:var(--ok);border:1px solid var(--ok)} .disp.off{color:var(--muted);border:1px solid var(--line)}
+.note{color:var(--muted);font:400 14px/1.6 var(--serif);margin-top:14px;max-width:78ch}
+.note b{color:var(--ink)}
+
+.nav{display:flex;gap:10px;align-items:center;margin-top:26px;border-top:1px solid var(--line);padding-top:18px}
+.btn{background:var(--panel2);border:1px solid var(--line2);color:var(--ink);font:600 13px/1 var(--head);padding:11px 18px;border-radius:8px;cursor:pointer;transition:.16s}
+.btn:hover{border-color:var(--signal)}
+.btn.primary{background:var(--signal);color:#10141a;border-color:var(--signal)}
+.keyhint{color:var(--faint);font:500 11px/1 var(--mono);margin-left:auto}
+.crumbs{color:var(--muted);font:500 12px/1 var(--mono);margin-bottom:14px}
+.crumbs a{cursor:pointer;color:var(--signal)}
+footer{max-width:1060px;margin:28px auto 0;padding:16px 28px;border-top:1px solid var(--line);color:var(--faint);font:400 12px/1.65 var(--mono)}
+
+/* accent + affordance polish (dossier feel) */
+::selection{background:var(--signal);color:#10141a}
+header.top{border-top:2px solid var(--signal)}
+.btn:focus-visible,.card:focus-visible,.hitbtn:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.card:hover .ttl{color:var(--signal)}
+.tile:hover{border-color:var(--signal)}
+.ecard:hover{border-color:var(--signal)}
+.xrow:hover{border-color:var(--signal)}
+.row:hover{border-color:var(--signal)}
+.doc::-webkit-scrollbar,.xstack::-webkit-scrollbar{width:9px}
+.doc::-webkit-scrollbar-thumb,.xstack::-webkit-scrollbar-thumb{background:var(--line2);border-radius:9px}
+.doc::-webkit-scrollbar-thumb:hover,.xstack::-webkit-scrollbar-thumb:hover{background:var(--signal)}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
 </style>
 </head>
 <body>
@@ -97,7 +167,9 @@ mark.hl{background:rgba(246,166,35,.20);color:#ffd27a;border-bottom:1px solid va
 /* Phase 31 (M8) — the adverse-media / negative-news stream. A SECOND atom stream: read a news
    article → its grounded entities + red flags → fuzzy-match the entities against a SYNTHETIC
    client/counterparty book → potential exposure → human disposition. All client-side, offline.
-   Data inlined at build time by scripts/build.py (render_news); the fuzzy matcher runs here. */
+   Phase 32 — REAL US-federal gov-enforcement articles (DOJ/OFAC, public domain 17 U.S.C. §105);
+   the book stays synthetic. Presentation elevated to the corpus's bar: a streaming "agent reading"
+   Read with entity cards, and a visible scan PROCESS on Screen. Data inlined at build time. */
 const NEWS = {
   "brand": {
     "title": "Signal Watch",
@@ -106,355 +178,425 @@ const NEWS = {
   "badge": "Illustrative data & outputs",
   "articles": [
     {
-      "id": "mule-romance-002",
-      "title": "Investment-romance scam funneled victim deposits through a web of mule accounts",
-      "source_md": "data/news/articles/mule-romance-002.md",
-      "doc_type": "News",
-      "typology": "romance-and-investment-fraud",
-      "provenance": "Synthetic illustrative scenario (fictional entities) authored for the Signal Watch adverse-media demo. Entities + red-flag phrases are quote-grounded (verbatim) in the source article (normalize-substring); red_flag is the natural-AML translation beside each grounded flag. NO real persons or organizations. Illustrative vision demo.",
+      "id": "doj-goltsev-export-control",
+      "title": "Canadian National Sentenced to 40 Months in Prison for Multi-Million Dollar Export Control Scheme",
+      "source_md": "data/news/articles/doj-goltsev-export-control.md",
+      "doc_type": "DOJ",
+      "typology": "export-control-evasion",
+      "source_org": "U.S. Department of Justice (USAO, Eastern District of New York)",
+      "source_url": "https://www.justice.gov/usao-edny/pr/canadian-national-sentenced-40-months-prison-multi-million-dollar-export-control",
+      "basis": "Public domain · 17 U.S.C. §105",
+      "archived": "2026-05-24",
+      "provenance": "Real U.S. federal government enforcement record, reproduced verbatim (excerpted) under 17 U.S.C. §105 (public domain). Named entities and red-flag phrases are quote-grounded (verbatim) in the source article (normalize-substring); red_flag is the natural-AML translation beside each grounded flag. The client/counterparty book screened against this article is SYNTHETIC and illustrative — NO real customer data. Illustrative vision demo.",
       "entities": [
         {
           "id": "E1",
-          "name": "Sterling Crest Capital",
-          "type": "org",
-          "context": "the bogus trading platform marketed to victims"
+          "name": "Nikolay Goltsev",
+          "type": "person",
+          "age": "38",
+          "location": "Montreal, Canada",
+          "context": "Masterminded a procurement scheme shipping dual-use electronics to sanctioned Russian end-users."
         },
         {
           "id": "E2",
-          "name": "Olena Hrytsenko",
+          "name": "Kristina Puzyreva",
           "type": "person",
-          "context": "recruiter alleged to have opened accounts in others' names"
+          "age": "33",
+          "location": "Montreal, Canada",
+          "context": "Goltsev's spouse; laundered the proceeds of the export-control scheme."
         },
         {
           "id": "E3",
-          "name": "Nguyen Van Thanh",
+          "name": "Salimdzhon Nasriddinov",
           "type": "person",
-          "context": "named account holder of one mule account"
-        }
-      ],
-      "red_flags": [
-        {
-          "id": "R1",
-          "flag": "received deposits from dozens of unrelated senders over a short period and forwarded the funds within hours",
-          "red_flag": "Funnel-in then rapid forward-out (mule pass-through)",
-          "category": "Mule activity"
-        },
-        {
-          "id": "R2",
-          "flag": "funds received from multiple unrelated originators and consolidated into a single account",
-          "red_flag": "Multi-originator consolidation into one account",
-          "category": "Layering"
-        },
-        {
-          "id": "R3",
-          "flag": "no apparent economic rationale for the transfers",
-          "red_flag": "Transfers lacking economic rationale",
-          "category": "Behavioural"
-        },
-        {
-          "id": "R4",
-          "flag": "deposits that were rapidly converted to virtual currency and moved off-platform",
-          "red_flag": "Rapid fiat-to-crypto off-ramp",
-          "category": "Virtual currency"
-        },
-        {
-          "id": "R5",
-          "flag": "accounts that were dormant before suddenly receiving high-volume inflows",
-          "red_flag": "Dormant account reactivated with high-volume inflows",
-          "category": "Behavioural"
-        },
-        {
-          "id": "R6",
-          "flag": "Several accounts shared a common address and device",
-          "red_flag": "Shared address / device across accounts (network linkage)",
-          "category": "Network linkage"
-        }
-      ],
-      "article_text": "Illustrative scenario — fictional entities and events. Synthetic data for demonstration only.\n\nA long-running investment-romance fraud directed hundreds of victims to a bogus trading platform and then laundered their deposits through a network of money-mule accounts, according to a civil complaint filed this week.\n\nThe platform, marketed under the name Sterling Crest Capital, promised guaranteed returns and pressured victims to deposit ever-larger sums, the complaint says. Investigators allege a recruiter, Olena Hrytsenko, opened accounts in the names of others and used them to receive and immediately forward incoming funds.\n\nOne mule account, opened in the name of Nguyen Van Thanh, received deposits from dozens of unrelated senders over a short period and forwarded the funds within hours, the complaint states. Account records showed funds received from multiple unrelated originators and consolidated into a single account before being moved on, with no apparent economic rationale for the transfers.\n\nThe complaint describes deposits that were rapidly converted to virtual currency and moved off-platform, and accounts that were dormant before suddenly receiving high-volume inflows. Several accounts shared a common address and device, the filing notes."
-    },
-    {
-      "id": "prof-ml-004",
-      "title": "Accountant laundered cash for front businesses through client accounts, regulator finds",
-      "source_md": "data/news/articles/prof-ml-004.md",
-      "doc_type": "News",
-      "typology": "professional-money-laundering",
-      "provenance": "Synthetic illustrative scenario (fictional entities) authored for the Signal Watch adverse-media demo. Entities + red-flag phrases are quote-grounded (verbatim) in the source article (normalize-substring); red_flag is the natural-AML translation beside each grounded flag. NO real persons or organizations. Illustrative vision demo.",
-      "entities": [
-        {
-          "id": "E1",
-          "name": "Marcus Bellweather",
-          "type": "person",
-          "context": "accountant accused of running the laundering service"
-        },
-        {
-          "id": "E2",
-          "name": "Harbour Lane Accountancy",
-          "type": "org",
-          "context": "the practice through which the scheme allegedly ran"
-        },
-        {
-          "id": "E3",
-          "name": "Greenfield Car Wash Group",
-          "type": "org",
-          "context": "cash-intensive chain whose deposits exceeded its visible trade"
-        }
-      ],
-      "red_flags": [
-        {
-          "id": "R1",
-          "flag": "cash deposits were far larger than its visible trade could support",
-          "red_flag": "Cash deposits exceeding plausible business volume",
-          "category": "Cash intensity"
-        },
-        {
-          "id": "R2",
-          "flag": "cash deposits broken into smaller amounts and paid in across multiple branches",
-          "red_flag": "Structured cash deposits across branches",
-          "category": "Structuring"
-        },
-        {
-          "id": "R3",
-          "flag": "client-account funds commingled so that legitimate and illicit money could not be distinguished",
-          "red_flag": "Commingling in professional client accounts",
-          "category": "Commingling"
-        },
-        {
-          "id": "R4",
-          "flag": "Invoices were inflated to justify transfers that had no underlying service",
-          "red_flag": "Inflated invoices for non-existent services",
-          "category": "Trade mispricing"
-        },
-        {
-          "id": "R5",
-          "flag": "funds were moved through the firm's client account in rapid succession to obscure their trail",
-          "red_flag": "Rapid layering via professional client account",
-          "category": "Layering"
-        },
-        {
-          "id": "R6",
-          "flag": "deposits that did not match the customer's stated occupation or income",
-          "red_flag": "Deposits inconsistent with stated income / occupation",
-          "category": "Behavioural"
-        },
-        {
-          "id": "R7",
-          "flag": "a pattern of round-sum payments with no supporting documentation",
-          "red_flag": "Round-sum payments without supporting documentation",
-          "category": "Behavioural"
-        }
-      ],
-      "article_text": "Illustrative scenario — fictional entities and events. Synthetic data for demonstration only.\n\nA regulator has accused an accountant of running a professional money-laundering service for a string of cash-intensive businesses, using his firm's client accounts to disguise the origin of the funds.\n\nThe accountant, Marcus Bellweather, operated through a practice called Harbour Lane Accountancy, according to the regulator's findings. Among the businesses he served was Greenfield Car Wash Group, a chain whose cash deposits were far larger than its visible trade could support.\n\nThe findings describe cash deposits broken into smaller amounts and paid in across multiple branches, and client-account funds commingled so that legitimate and illicit money could not be distinguished. Invoices were inflated to justify transfers that had no underlying service, the regulator says, and funds were moved through the firm's client account in rapid succession to obscure their trail.\n\nThe regulator also noted deposits that did not match the customer's stated occupation or income, and a pattern of round-sum payments with no supporting documentation."
-    },
-    {
-      "id": "sanctions-front-003",
-      "title": "Front company hid ownership to move oil revenue past sanctions, indictment says",
-      "source_md": "data/news/articles/sanctions-front-003.md",
-      "doc_type": "News",
-      "typology": "sanctions-evasion",
-      "provenance": "Synthetic illustrative scenario (fictional entities) authored for the Signal Watch adverse-media demo. Entities + red-flag phrases are quote-grounded (verbatim) in the source article (normalize-substring); red_flag is the natural-AML translation beside each grounded flag. NO real persons or organizations. Illustrative vision demo.",
-      "entities": [
-        {
-          "id": "E1",
-          "name": "Caspian Energy Trading",
-          "type": "org",
-          "context": "front company posing as an independent commodities broker"
-        },
-        {
-          "id": "E2",
-          "name": "Reza Daryani",
-          "type": "person",
-          "context": "beneficial owner alleged to have concealed his control"
-        },
-        {
-          "id": "E3",
-          "name": "Aurelia Holdings Ltd",
-          "type": "org",
-          "context": "Cyprus intermediary also named in a separate trade-fraud case"
-        }
-      ],
-      "red_flags": [
-        {
-          "id": "R1",
-          "flag": "concealed his control behind nominee directors who exercised no real authority over the business",
-          "red_flag": "Nominee directors masking beneficial ownership",
-          "category": "Ownership opacity"
-        },
-        {
-          "id": "R2",
-          "flag": "payments that were layered through several jurisdictions in quick succession",
-          "red_flag": "Rapid multi-jurisdiction layering",
-          "category": "Layering"
-        },
-        {
-          "id": "R3",
-          "flag": "an ownership structure deliberately obscured through layers of holding companies",
-          "red_flag": "Opaque layered ownership structure",
-          "category": "Ownership opacity"
-        },
-        {
-          "id": "R4",
-          "flag": "repeatedly changed its banking relationships after brief periods of activity",
-          "red_flag": "Frequent banking-relationship churn",
-          "category": "Behavioural"
-        },
-        {
-          "id": "R5",
-          "flag": "provided incomplete or inconsistent information about the source of its funds when asked",
-          "red_flag": "Evasive / inconsistent source-of-funds answers",
-          "category": "Behavioural"
-        }
-      ],
-      "article_text": "Illustrative scenario — fictional entities and events. Synthetic data for demonstration only.\n\nAn indictment unsealed this week accuses a front company of disguising its ownership to move energy revenue on behalf of a sanctioned producer.\n\nProsecutors say Caspian Energy Trading presented itself as an independent commodities broker while in fact acting for sanctioned interests. The company's beneficial owner, Reza Daryani, concealed his control behind nominee directors who exercised no real authority over the business, the indictment alleges.\n\nThe filing describes payments that were layered through several jurisdictions in quick succession, and an ownership structure deliberately obscured through layers of holding companies. Investigators allege some settlement payments were routed through Aurelia Holdings Ltd, the same Cyprus intermediary named in a separate trade-fraud case.\n\nAccording to prosecutors, the company repeatedly changed its banking relationships after brief periods of activity, and provided incomplete or inconsistent information about the source of its funds when asked."
-    },
-    {
-      "id": "trade-shell-001",
-      "title": "Shell network relabeled dual-use cargo to dodge export controls, prosecutors allege",
-      "source_md": "data/news/articles/trade-shell-001.md",
-      "doc_type": "News",
-      "typology": "trade-based-money-laundering",
-      "provenance": "Synthetic illustrative scenario (fictional entities) authored for the Signal Watch adverse-media demo. Entities + red-flag phrases are quote-grounded (verbatim) in the source article (normalize-substring); red_flag is the natural-AML translation beside each grounded flag. NO real persons or organizations. Illustrative vision demo.",
-      "entities": [
-        {
-          "id": "E1",
-          "name": "Volkov Maritime Logistics",
-          "type": "org",
-          "context": "freight broker prosecutors place at the center of the alleged scheme"
-        },
-        {
-          "id": "E2",
-          "name": "Dmitri Karpov",
-          "type": "person",
-          "context": "director alleged to have directed the re-invoicing"
-        },
-        {
-          "id": "E3",
-          "name": "Aurelia Holdings Ltd",
-          "type": "org",
-          "context": "Cyprus-registered intermediary receiving the excess funds"
+          "age": "54",
+          "location": "Brooklyn, NY",
+          "context": "Co-defendant who sourced components under the front companies."
         },
         {
           "id": "E4",
-          "name": "Eastgate Freight Forwarding",
+          "name": "SH Brothers Inc.",
           "type": "org",
-          "context": "filed customs paperwork that misstated the goods"
+          "location": "Brooklyn",
+          "context": "Brooklyn front company used to source and ship dual-use electronics."
         },
         {
           "id": "E5",
-          "name": "Andrei Petrov",
-          "type": "person",
-          "context": "logistics associate quoted in intercepted messages"
+          "name": "SN Electronics Inc.",
+          "type": "org",
+          "location": "Brooklyn",
+          "context": "Brooklyn front company used alongside SH Brothers."
         }
       ],
       "red_flags": [
         {
           "id": "R1",
-          "flag": "invoices were systematically overstated by as much as 300 percent",
-          "red_flag": "Over-invoicing — value inflated against goods shipped",
-          "category": "Trade mispricing"
+          "flag": "used two Brooklyn companies, SH Brothers Inc. and SN Electronics Inc., to unlawfully source, purchase and ship millions of dollars in dual-use electronics",
+          "red_flag": "Front companies used to procure dual-use goods",
+          "category": "Shell company"
         },
         {
           "id": "R2",
-          "flag": "routing payments through an unrelated intermediary to obscure the true counterparties",
-          "red_flag": "Third-party pass-through to obscure counterparties",
-          "category": "Layering"
+          "flag": "unlawfully shipped the items to a variety of intermediary front companies located in other countries, including Turkey, Hong Kong, India, China and the United Arab Emirates, where they were rerouted to Russia",
+          "red_flag": "Transship through third-country front companies to a sanctioned end-user",
+          "category": "Sanctions evasion"
         },
         {
           "id": "R3",
-          "flag": "no discernible commercial purpose",
-          "red_flag": "Intermediary with no commercial rationale (shell)",
-          "category": "Shell entity"
-        },
-        {
-          "id": "R4",
-          "flag": "Shipping documents listed goods inconsistent with the declared value",
-          "red_flag": "Trade-document / declared-value mismatch",
-          "category": "Trade documentation"
-        },
-        {
-          "id": "R5",
-          "flag": "the same cargo was re-billed under different descriptions across successive invoices",
-          "red_flag": "Repeated re-invoicing of the same cargo",
-          "category": "Trade documentation"
-        },
-        {
-          "id": "R6",
-          "flag": "payments moving rapidly in and out of the intermediary accounts with little time held",
-          "red_flag": "Rapid pass-through — funds not retained",
+          "flag": "Goltsev’s wife, co-defendant Kristina Puzyreva, laundered the funds of the export control scheme",
+          "red_flag": "Proceeds laundered through a related party (spouse)",
           "category": "Layering"
         },
         {
+          "id": "R4",
+          "flag": "is it better to provide them with a Chinese end user",
+          "red_flag": "Falsify the end-user to defeat export screening",
+          "category": "Deception"
+        },
+        {
+          "id": "R5",
+          "flag": "asked me to make 80 accounts",
+          "red_flag": "Open accounts in bulk to fragment the money flow",
+          "category": "Structuring"
+        },
+        {
+          "id": "R6",
+          "flag": "made hundreds of shipments valued at over $7 million to Russia",
+          "red_flag": "High-volume shipments to a sanctioned jurisdiction",
+          "category": "Sanctions evasion"
+        },
+        {
           "id": "R7",
-          "flag": "transactions structured to fall just under the amounts that trigger mandatory reporting",
-          "red_flag": "Structuring below reporting thresholds",
+          "flag": "write something more substantial [to the U.S. company] so that there are no more questions",
+          "red_flag": "Coach a supplier to paper over diligence questions",
+          "category": "Deception"
+        }
+      ],
+      "article_text": "Source: U.S. Department of Justice, U.S. Attorney's Office, Eastern District of New York — justice.gov/usao-edny (archived 2026-05-24). Public-domain U.S. federal government work (17 U.S.C. §105). Excerpted verbatim; the defendant-identification block restores the line structure flattened by HTML extraction.\n\nEarlier today, at the federal courthouse in Brooklyn, Nikolay Goltsev was sentenced by United States District Judge LaShann DeArcy Hall to 40 months’ imprisonment for conspiring to commit export control violations. Goltsev, a Canadian national, masterminded a global procurement scheme on behalf of sanctioned Russian companies, including Russian military companies. The electronic components shipped by Goltsev were later found in seized Russian weapons platforms and signals intelligence equipment in Ukraine.\n\nGoltsev used two Brooklyn companies, SH Brothers Inc. and SN Electronics Inc., to unlawfully source, purchase and ship millions of dollars in dual-use electronics from U.S. manufacturers to sanctioned end users in Russia. Some of the electronic components and integrated circuits shipped by the defendants through SH Brothers have been found in seized Russian weapons platforms and signals intelligence equipment in Ukraine. Some of these components were critical to Russia’s precision-guided weapons systems being used against Ukraine. During the period charged in the indictment, SH Brothers made hundreds of shipments valued at over $7 million to Russia.\n\nTo carry out the criminal scheme, Goltsev, along with co-defendant Salimdzhon Nasriddinov and others, purchased the electronic components from U.S. manufacturers and distributors under the auspices of SH Brothers and SN Electronics and arranged for the items to be shipped from those manufacturers and distributors to various locations in Brooklyn. The co-conspirators then unlawfully shipped the items to a variety of intermediary front companies located in other countries, including Turkey, Hong Kong, India, China and the United Arab Emirates, where they were rerouted to Russia. Goltsev’s wife, co-defendant Kristina Puzyreva, laundered the funds of the export control scheme.\n\nGoltsev’s communications show that he had a sophisticated understanding of export control laws. For example, in a message in February 2023, Goltsev advised another co-defendant to “write something more substantial [to the U.S. company] so that there are no more questions.” The co-defendant responded, “is it better to provide them with a Chinese end user,” to which Goltsev stated, “yes should be ok.”\n\nThe scheme involved millions of dollars and proved to be lucrative for the defendants. In a text message exchange on or about January 13, 2023, Goltsev complained to Puzyreva that a subordinate of a co-conspirator “asked me to make 80 accounts . . . I am making accounts for 3 mln [i.e., million]. Fingers hurting already from the laptop.” Puzyreva responded, “Lot of money? We will get rich.”\n\nThe government seized $20,000 in cash from the New York hotel room in which Goltsev was arrested. In total, the government has seized approximately $1.68 million in connection with this export scheme.\n\nOn July 24, 2024, co-defendant Kristina Puzyreva was sentenced to 24 months’ imprisonment for conspiracy to launder the proceeds of the export scheme. Co-defendant Salimdzhon Nasriddinov is awaiting sentencing.\n\nDefendants — NIKOLAY GOLTSEV, age 38, of Montreal, Canada; SALIMDZHON NASRIDDINOV, age 54, of Brooklyn, NY; KRISTINA PUZYREVA, age 33, of Montreal, Canada."
+    },
+    {
+      "id": "doj-mullings-romance-mule",
+      "title": "Man Sentenced for Laundering Over $4.5M Obtained from Business Email Compromise and Romance Fraud Schemes",
+      "source_md": "data/news/articles/doj-mullings-romance-mule.md",
+      "doc_type": "DOJ",
+      "typology": "romance-and-investment-fraud",
+      "source_org": "U.S. Department of Justice (Office of Public Affairs)",
+      "source_url": "https://www.justice.gov/archives/opa/pr/man-sentenced-laundering-over-45m-obtained-business-email-compromise-and-romance-fraud",
+      "basis": "Public domain · 17 U.S.C. §105",
+      "archived": "2026-05-24",
+      "provenance": "Real U.S. federal government enforcement record, reproduced verbatim (excerpted) under 17 U.S.C. §105 (public domain). Named entities and red-flag phrases are quote-grounded (verbatim) in the source article (normalize-substring); red_flag is the natural-AML translation beside each grounded flag. The client/counterparty book screened against this article is SYNTHETIC and illustrative — NO real customer data. Illustrative vision demo.",
+      "entities": [
+        {
+          "id": "E1",
+          "name": "Malachi Mullings",
+          "type": "person",
+          "age": "31",
+          "location": "Sandy Springs",
+          "context": "Laundered $4.5M of BEC and romance-fraud proceeds through accounts under a sham company."
+        },
+        {
+          "id": "E2",
+          "name": "The Mullings Group LLC",
+          "type": "org",
+          "context": "Sham company in whose name 20 mule bank accounts were opened."
+        }
+      ],
+      "red_flags": [
+        {
+          "id": "R1",
+          "flag": "opened 20 bank accounts in the name of a sham company, The Mullings Group LLC",
+          "red_flag": "Many accounts opened under a shell company (mule infrastructure)",
+          "category": "Shell company"
+        },
+        {
+          "id": "R2",
+          "flag": "used those accounts to launder millions of dollars of fraud proceeds generated by BEC schemes",
+          "red_flag": "Funnel business-email-compromise proceeds through controlled accounts",
+          "category": "Mule activity"
+        },
+        {
+          "id": "R3",
+          "flag": "romance fraud schemes targeting numerous individual victims, several of whom were elderly",
+          "red_flag": "Romance-scam victim deposits, elderly targeted",
+          "category": "Fraud proceeds"
+        },
+        {
+          "id": "R4",
+          "flag": "engaged in financial transactions designed to conceal the fraud proceeds",
+          "red_flag": "Layer fraud proceeds to conceal their origin",
+          "category": "Layering"
+        },
+        {
+          "id": "R5",
+          "flag": "used some of the proceeds to purchase luxury items, such as expensive cars and jewelry",
+          "red_flag": "Spend proceeds on luxury goods (integration)",
+          "category": "Integration"
+        },
+        {
+          "id": "R6",
+          "flag": "obtained $260,000 from a romance scam, which Mullings used to purchase a Ferrari",
+          "red_flag": "Romance-scam proceeds converted to a high-value vehicle",
+          "category": "Integration"
+        },
+        {
+          "id": "R7",
+          "flag": "laundered $310,000 that was fraudulently diverted from a state Medicaid program",
+          "red_flag": "Launder funds diverted from a public health program",
+          "category": "Fraud proceeds"
+        }
+      ],
+      "article_text": "Source: U.S. Department of Justice, Office of Public Affairs — justice.gov/opa (archived 2026-05-24). Public-domain U.S. federal government work (17 U.S.C. §105). Excerpted verbatim.\n\nA Georgia man was sentenced today to 10 years in prison for laundering more than $4.5 million derived from business email compromise (BEC) schemes, including a scheme that defrauded a health care benefit program, and romance fraud schemes.\n\nAccording to court documents and evidence presented at sentencing, Malachi Mullings, 31, of Sandy Springs, opened 20 bank accounts in the name of a sham company, The Mullings Group LLC. From at least 2019 through July 2021, Mullings used those accounts to launder millions of dollars of fraud proceeds generated by BEC schemes targeting, among others, a health care benefit program and private companies, and romance fraud schemes targeting numerous individual victims, several of whom were elderly. Together with his co-conspirators, Mullings engaged in financial transactions designed to conceal the fraud proceeds and used some of the proceeds to purchase luxury items, such as expensive cars and jewelry. In one instance, Mullings laundered $310,000 that was fraudulently diverted from a state Medicaid program and had been intended as reimbursement for a hospital. In another instance, Mullings obtained $260,000 from a romance scam, which Mullings used to purchase a Ferrari.\n\nMullings pleaded guilty in January 2023 to one count of conspiracy to commit money laundering and seven counts of various money laundering offenses."
+    },
+    {
+      "id": "doj-ravenell-attorney-ml",
+      "title": "Baltimore Defense Attorney Sentenced to 57 Months in Federal Prison for Money Laundering Conspiracy",
+      "source_md": "data/news/articles/doj-ravenell-attorney-ml.md",
+      "doc_type": "DOJ",
+      "typology": "professional-money-laundering",
+      "source_org": "U.S. Department of Justice (USAO, District of Maryland)",
+      "source_url": "https://www.justice.gov/usao-md/pr/baltimore-defense-attorney-sentenced-57-months-federal-prison-money-laundering-conspiracy",
+      "basis": "Public domain · 17 U.S.C. §105",
+      "archived": "2026-05-24",
+      "provenance": "Real U.S. federal government enforcement record, reproduced verbatim (excerpted) under 17 U.S.C. §105 (public domain). Named entities and red-flag phrases are quote-grounded (verbatim) in the source article (normalize-substring); red_flag is the natural-AML translation beside each grounded flag. The client/counterparty book screened against this article is SYNTHETIC and illustrative — NO real customer data. Illustrative vision demo.",
+      "entities": [
+        {
+          "id": "E1",
+          "name": "Kenneth Wendell Ravenell",
+          "type": "person",
+          "age": "63",
+          "location": "Monkton, Maryland",
+          "profession": "attorney",
+          "context": "Defense attorney and former law-firm partner; laundered a client's drug proceeds through the firm's accounts."
+        }
+      ],
+      "red_flags": [
+        {
+          "id": "R1",
+          "flag": "used bank accounts of the law firm to launder more than a million dollars",
+          "red_flag": "Launder client funds through the law-firm operating account",
+          "category": "Professional facilitation"
+        },
+        {
+          "id": "R2",
+          "flag": "Ravenell personally laundered his client’s drug proceeds using the firm’s attorney trust account",
+          "red_flag": "Drug proceeds passed through an attorney trust account",
+          "category": "Professional facilitation"
+        },
+        {
+          "id": "R3",
+          "flag": "received substantial cash payments derived from drug sales as compensation for laundering money",
+          "red_flag": "Cash fee for laundering, paid in illicit-source cash",
+          "category": "Cash"
+        },
+        {
+          "id": "R4",
+          "flag": "make various investments on behalf of a drug trafficker client, concealing and misrepresenting the source of the funds",
+          "red_flag": "Invest illicit funds to disguise their origin (integration)",
+          "category": "Layering"
+        },
+        {
+          "id": "R5",
+          "flag": "advised the drug dealer to set up businesses that generated cash themselves",
+          "red_flag": "Stand up cash-intensive front businesses to commingle proceeds",
+          "category": "Structuring"
+        },
+        {
+          "id": "R6",
+          "flag": "mixing cash generated by marijuana sales with cash generated by ticket sales",
+          "red_flag": "Commingle illicit cash with legitimate cash-business takings",
+          "category": "Commingling"
+        },
+        {
+          "id": "R7",
+          "flag": "instructed the associate to convert the drug proceeds into money orders and other instruments to conceal the source of the funds",
+          "red_flag": "Convert cash to money orders to break the audit trail",
           "category": "Structuring"
         }
       ],
-      "article_text": "Illustrative scenario — fictional entities and events. Synthetic data for demonstration only.\n\nFederal prosecutors this week unsealed charges against a network of front companies they say moved controlled dual-use goods to sanctioned end-users while disguising the shipments behind relabeled invoices.\n\nAt the center of the alleged scheme is Volkov Maritime Logistics, a freight broker that prosecutors say arranged shipments on paper for buyers it never identified. Investigators allege the company's director, Dmitri Karpov, directed staff to re-invoice cargo through a third country before onward shipment — routing payments through an unrelated intermediary to obscure the true counterparties.\n\nAccording to the filing, invoices were systematically overstated by as much as 300 percent, with the excess funds routed to accounts controlled by Aurelia Holdings Ltd, a Cyprus-registered intermediary that prosecutors describe as having no discernible commercial purpose. Shipping documents listed goods inconsistent with the declared value, and the same cargo was re-billed under different descriptions across successive invoices.\n\nProsecutors also allege the network relied on Eastgate Freight Forwarding to file customs paperwork that misstated the nature of the goods. A logistics associate named Andrei Petrov is quoted in intercepted messages discussing the arrangements.\n\nThe indictment notes payments moving rapidly in and out of the intermediary accounts with little time held, and transactions structured to fall just under the amounts that trigger mandatory reporting."
+      "article_text": "Source: U.S. Department of Justice, U.S. Attorney's Office, District of Maryland — justice.gov/usao-md (archived 2026-05-24). Public-domain U.S. federal government work (17 U.S.C. §105). Excerpted verbatim.\n\nBaltimore, Maryland – U.S. District Judge Liam O’Grady of the U.S. District Court for the Eastern District of Virginia, who presided over this case in the District of Maryland, today sentenced Kenneth Wendell Ravenell, age 63, of Monkton, Maryland, to 57 months in federal prison, followed by three years of supervised release for conspiracy to commit money laundering conspiracy charge. Ravenell was convicted of that charge on December 28, 2021, after a 16-day trial.\n\nThe trial evidence proved that Ravenell received drug proceeds from clients and associates who engaged in drug trafficking. Evidence was presented that Ravenell also used bank accounts of the law firm to launder more than a million dollars; used the law firm’s bank accounts to receive drug payments and make payments to attorneys retained to represent other members of the conspiracy; and used the law firm’s bank accounts to make various investments on behalf of a drug trafficker client, concealing and misrepresenting the source of the funds and promoting the client’s unlawful activity. According to trial evidence, Ravenell also received substantial cash payments derived from drug sales as compensation for laundering money.\n\nSpecifically, the trial evidence demonstrated that from 2009 through 2014, Ravenell gave a drug dealer advice on how to launder the millions of dollars of cash that the dealer’s marijuana sales generated. Ravenell advised the drug dealer to set up businesses that generated cash themselves and make investments in real estate projects, which the drug dealer did, in order to launder drug proceeds. The drug dealer’s business activities were mainly in entertainment, where he organized concerts and other events. Drug proceeds were used to pay expenses, like renting venues, hiring entertainers, and purchasing food and alcohol for re-sale. Attendees to these events largely paid in cash for their tickets, which provided a second opportunity to launder money, namely, by mixing cash generated by marijuana sales with cash generated by ticket sales. Ravenell and the drug dealer discussed all aspects of these events and the drug dealer’s entertainment-related activities, including the use of drug proceeds to fund the events and the mixing of drug proceeds with ticket sales. In 2011, the drug dealer was arrested and became a formal client of Ravenell’s and the law firm where he was a partner at that time. Between 2011 and 2014, the trial evidence showed that in addition to advising the drug dealer on how to launder money, Ravenell personally laundered his client’s drug proceeds using the firm’s attorney trust account. Ravenell accepted more than $1.8 million in drug proceeds and funds co-mingled with drug proceeds from entities and individuals associated with the drug dealer. Ravenell also directed the payment of more than $1.2 million of these drug proceeds from the law firm’s accounts to various projects and third parties to benefit his client. Ravenell’s purpose in accepting and disbursing these funds was to conceal the source of the funds as drug proceeds and promote his client’s on-going marijuana distribution activities.\n\nAccording to trial evidence in 2013, a client facing federal narcotics charges paid Ravenell more than $350,000 in drug proceeds through an associate of the client. Ravenell instructed the associate to convert the drug proceeds into money orders and other instruments to conceal the source of the funds. After Ravenell withdrew from the case, the client learned that Ravenell had only credited $187,000 to his case, not the more than $350,000 that the client had paid."
+    },
+    {
+      "id": "ofac-tgr-group",
+      "title": "Treasury Targets Russian Illicit Finance Network Using Digital Assets to Evade Sanctions",
+      "source_md": "data/news/articles/ofac-tgr-group.md",
+      "doc_type": "OFAC",
+      "typology": "sanctions-evasion",
+      "source_org": "U.S. Department of the Treasury, Office of Foreign Assets Control",
+      "source_url": "https://home.treasury.gov/news/press-releases/jy2735",
+      "basis": "Public domain · 17 U.S.C. §105",
+      "archived": "2026-05-29",
+      "provenance": "Real U.S. federal government enforcement record, reproduced verbatim (excerpted) under 17 U.S.C. §105 (public domain). Named entities and red-flag phrases are quote-grounded (verbatim) in the source article (normalize-substring); red_flag is the natural-AML translation beside each grounded flag. The client/counterparty book screened against this article is SYNTHETIC and illustrative — NO real customer data. Illustrative vision demo.",
+      "entities": [
+        {
+          "id": "E1",
+          "name": "George Rossi",
+          "type": "person",
+          "location": "Ukrainian national",
+          "profession": "founder of TGR Partners",
+          "context": "Believed to be in overall control of the TGR Group sanctions-evasion network."
+        },
+        {
+          "id": "E2",
+          "name": "Elena Chirkinyan",
+          "type": "person",
+          "location": "Russian national",
+          "profession": "Chief Executive Officer of TGR Corporate Concierge LTD",
+          "context": "Decision-maker within the TGR Group; partner at TGR Partners."
+        },
+        {
+          "id": "E3",
+          "name": "Ekaterina Zhdanova",
+          "type": "person",
+          "location": "Russian national",
+          "profession": "money launderer",
+          "context": "Leads the Smart Group; previously OFAC-designated for laundering via digital assets."
+        },
+        {
+          "id": "E4",
+          "name": "TGR Partners",
+          "type": "org",
+          "location": "Moscow, Russia",
+          "context": "Moscow-based entity providing asset management, crypto trading, and concierge services."
+        },
+        {
+          "id": "E5",
+          "name": "Pullman Global Solutions LLC",
+          "type": "org",
+          "location": "Wyoming",
+          "context": "Wyoming-based entity owned by a designated individual."
+        },
+        {
+          "id": "E6",
+          "name": "Siam Expert Trading Company Limited",
+          "type": "org",
+          "location": "Thailand",
+          "context": "Thailand-based entity that facilitated the export of electronic components to Russia."
+        }
+      ],
+      "red_flags": [
+        {
+          "id": "R1",
+          "flag": "obfuscate the illicit activities of its clients, including through the use digital assets, such as stablecoins like Tether (USDT)",
+          "red_flag": "Launder client funds via stablecoins (USDT)",
+          "category": "Virtual assets"
+        },
+        {
+          "id": "R2",
+          "flag": "providing an unregistered service to exchange cash and cryptocurrency",
+          "red_flag": "Unregistered cash-to-crypto exchange service",
+          "category": "Virtual assets"
+        },
+        {
+          "id": "R3",
+          "flag": "obfuscating the source of funds to allow high-net worth Russian nationals to purchase property in the United Kingdom",
+          "red_flag": "Obscure source of funds for foreign real-estate purchases",
+          "category": "Real estate"
+        },
+        {
+          "id": "R4",
+          "flag": "arranged cash handovers in which USDT was sent to a cryptocurrency address controlled by Zhdanova, and in return cash was received",
+          "red_flag": "Cash-for-crypto handovers to break the trail",
+          "category": "Cash"
+        },
+        {
+          "id": "R5",
+          "flag": "leveraged OFAC-sanctioned Russian cryptocurrency exchange, Garantex OU, to process USDT transactions after its date of designation",
+          "red_flag": "Route transactions through a sanctioned crypto exchange",
+          "category": "Sanctions evasion"
+        },
+        {
+          "id": "R6",
+          "flag": "arrange for intermediaries to deliver and convert bulk cash into cryptocurrency",
+          "red_flag": "Bulk-cash placement converted to cryptocurrency",
+          "category": "Cash"
+        },
+        {
+          "id": "R7",
+          "flag": "used a luxury watch company to facilitate trade-based money laundering",
+          "red_flag": "Trade-based laundering via a luxury-goods company",
+          "category": "Trade-based ML"
+        },
+        {
+          "id": "R8",
+          "flag": "is owned 50 percent or more by a sanctioned individual",
+          "red_flag": "Ownership obfuscation: 50%+ held by a blocked person",
+          "category": "Ownership"
+        }
+      ],
+      "article_text": "Source: U.S. Department of the Treasury, Office of Foreign Assets Control — home.treasury.gov/news/press-releases/jy2735 (archived 2026-05-29). Public-domain U.S. federal government work (17 U.S.C. §105). Excerpted verbatim.\n\nWASHINGTON — Today, the Department of the Treasury’s Office of Foreign Assets Control (OFAC) is sanctioning five individuals and four entities that are associated with or leverage the TGR Group, a sprawling international network of businesses and employees that have facilitated significant sanctions circumvention on behalf of Russian elites. This action also identifies a Wyoming-based entity that is owned 50 percent or more by a sanctioned individual. Today’s action continues the G7 commitment to hold accountable parties that evade or offset the impact of international sanctions, including by using digital assets, and to impose costs on illicit actors that use digital assets to enhance and transfer their wealth. These designations are the result of a collaborative effort with the United Kingdom’s (UK) National Crime Agency, the United Arab Emirates (UAE) government, the Drug Enforcement Administration, and the Financial Crimes Enforcement Network.\n\nWith touchpoints around the world, the TGR Group is an extensive sanctions evasion and money laundering network that works to obfuscate the illicit activities of its clients, including through the use digital assets, such as stablecoins like Tether (USDT). Controlled by Ukrainian national George Rossi, the networkprovides a range of services to place, layer, and integrate illicit financial schemes into the global financial system. These include: the laundering of funds associated with sanctioned entities; providing an unregistered service to exchange cash and cryptocurrency; the receipt of cash and making the value available to clients in the form of cryptocurrency; providing a pre-paid credit card service; and, obfuscating the source of funds to allow high-net worth Russian nationals to purchase property in the United Kingdom.\n\nTo support their illicit activities, the TGR Group has leveraged other illicit actors, such as the Smart Group, led by Russian money launderer Ekaterina Zhdanova (Zhdanova). On November 3, 2023, OFAC designated Zhdanova, a Russian national, pursuant to Executive Order (E.O.) 14024, for operating or having operated in the financial services sector of the Russian Federation economy by laundering and moving funds using digital assets on behalf of Russian elites.\n\nGeorge Rossi (Rossi), a Ukrainian national who was born in Russia, is believed to be in overall control of the TGR Group. Rossi is the founder of TGR Partners and is the non-executive director at TGR Corporate Concierge LTD, both entities that are also being designated pursuant to E.O. 14024. Rossi also controls a TGR Group-related company that leveraged OFAC-sanctioned Russian cryptocurrency exchange, Garantex OU, to process USDT transactions after its date of designation.\n\nElena Chirkinyan (Chirkinyan), a Russian national, is a direct subordinate to Rossi and is considered a decision maker within the TGR Group. Chirkinyan is also a partner at TGR Partners and the Chief Executive Officer of TGR Corporate Concierge LTD. Additionally, Chirkinyan is the manager of TGR DWC-LLC, an entity designated pursuant to E.O. 14024.\n\nSeparately, Chirkinyan coordinated with Zhdanova (via her moniker @monalisa7) to obfuscate the source of Russian client funds to purchase real estate property in the United Kingdom. Chirkinyan and other TGR Group members also arranged cash handovers in which USDT was sent to a cryptocurrency address controlled by Zhdanova, and in return cash was received by the TGR Group.\n\nAndrejs Bradens (Bradens), a Latvian national, is associated with multiple TGR Group companies, including Pullman Global Solutions LLC (Pullman Global) and TGR Corporate Concierge LTD. Pullman Global is a Wyoming-based entity that is owned by Bradens.\n\nTGR Partners is a Moscow, Russia-based entity that provides financial services such as asset management, cryptocurrency trading, foreign exchange market payments, and concierge services. TGR Partners maintains locations in Russia, the UK, and other parts of Europe and Asia. Rossi is the founder of TGR Partners and Chirkinyan is a partner at TGR Partners.\n\nSiam Expert Trading Company Limited (Siam Expert) is a Thailand-based entity. Siam Expert has facilitated the export of electronic components to Russia. Siam Expert is also associated with Bradens.\n\nPullman Global Solutions LLC (Pullman Global) is a Wyoming-based entity that is owned by Bradens.\n\nKhadzi-Murat Dalgatovich Magomedov (Magomedov), a Russian national, and Zhdanova regularly coordinated to facilitate bulk cash and cryptocurrency money laundering transactions internationally. Magomedov and Zhdanova also coordinated a bulk cash hand-over in the United Kingdom.\n\nNikita Vladimirovich Krasnov, a Russian national, worked closely with Zhdanova as a key money laundering partner. As part of their scheme, Krasnov would arrange for intermediaries to deliver and convert bulk cash into cryptocurrency which would be deposited into cryptocurrency wallets in Zhdanova’s name. Among other laundering methods, Krasnov and Zhdanova used a luxury watch company to facilitate trade-based money laundering. Krasnov is associated with the alias “acescom.”"
     }
   ],
   "book": {
     "as_of": "illustrative",
-    "note": "Synthetic client/counterparty book — fictional entities, illustrative demo data. NO real customers, accounts, or transactions. Seeded so the fuzzy matcher demonstrates exact matches, near-matches (typo / transliteration / word-order / suffix variants an exact-string screen would miss), and a common-name false positive that must be dispositioned by a human.",
+    "note": "Synthetic client/counterparty book — fictional clients, illustrative demo data. NO real customers, accounts, or transactions. Seeded against the REAL adverse-media entities so the fuzzy matcher demonstrates: a confirmed exposure (a counterparty exactly matching a sanctioned entity), near-matches an exact-name screen would miss (transliteration / suffix / word-order variants), and a common-name false positive that must be dispositioned by a human.",
     "rows": [
       {
         "id": "bk-01",
-        "name": "Aurelia Holdings Ltd",
+        "name": "Siam Expert Trading Company Limited",
         "type": "org",
         "role": "counterparty",
-        "country": "Cyprus",
-        "segment": "Corporate banking"
-      },
-      {
-        "id": "bk-02",
-        "name": "Volkoff Maritime Logistics LLC",
-        "type": "org",
-        "role": "counterparty",
-        "country": "United Arab Emirates",
+        "country": "Thailand",
         "segment": "Trade finance"
       },
       {
+        "id": "bk-02",
+        "name": "Pullman Global Solutions",
+        "type": "org",
+        "role": "counterparty",
+        "country": "United States",
+        "segment": "Corporate banking"
+      },
+      {
         "id": "bk-03",
-        "name": "Dimitri Karpov",
+        "name": "Nikolai Goltsev",
         "type": "person",
         "role": "client",
-        "country": "Russia",
+        "country": "Canada",
         "segment": "Private banking"
       },
       {
         "id": "bk-04",
-        "name": "Van Thanh Nguyen",
+        "name": "Ekaterina Zhdanov",
         "type": "person",
         "role": "client",
-        "country": "Vietnam",
-        "segment": "Retail"
+        "country": "Latvia",
+        "segment": "Wealth management"
       },
       {
         "id": "bk-05",
-        "name": "Marcus Bellwether",
+        "name": "Puzyreva Kristina",
         "type": "person",
         "role": "client",
-        "country": "United Kingdom",
-        "segment": "Business banking"
+        "country": "Canada",
+        "segment": "Retail"
       },
       {
         "id": "bk-06",
-        "name": "Greenfield Car Wash Group",
-        "type": "org",
-        "role": "counterparty",
-        "country": "United Kingdom",
-        "segment": "Business banking"
-      },
-      {
-        "id": "bk-07",
-        "name": "Andrei Petrov",
+        "name": "George Rossi",
         "type": "person",
         "role": "client",
         "country": "Canada",
         "segment": "Retail",
-        "note": "Common name — Toronto retail client; no link to the named associate established."
+        "note": "Common name — Toronto retail client; no link to the sanctioned individual established."
+      },
+      {
+        "id": "bk-07",
+        "name": "Malaki Mullings",
+        "type": "person",
+        "role": "client",
+        "country": "United States",
+        "segment": "Retail"
       },
       {
         "id": "bk-08",
+        "name": "Kenneth W. Ravenell",
+        "type": "person",
+        "role": "client",
+        "country": "United States",
+        "segment": "Private banking"
+      },
+      {
+        "id": "bk-09",
         "name": "Northwind Grain Exporters",
         "type": "org",
         "role": "counterparty",
@@ -462,7 +604,7 @@ const NEWS = {
         "segment": "Trade finance"
       },
       {
-        "id": "bk-09",
+        "id": "bk-10",
         "name": "Sarah Whitfield",
         "type": "person",
         "role": "client",
@@ -470,15 +612,15 @@ const NEWS = {
         "segment": "Wealth management"
       },
       {
-        "id": "bk-10",
-        "name": "Pinnacle Logistics Inc",
-        "type": "org",
-        "role": "counterparty",
-        "country": "United States",
-        "segment": "Corporate banking"
+        "id": "bk-11",
+        "name": "Helena Vasquez",
+        "type": "person",
+        "role": "client",
+        "country": "Spain",
+        "segment": "Retail"
       },
       {
-        "id": "bk-11",
+        "id": "bk-12",
         "name": "Coastal Bridge Imports",
         "type": "org",
         "role": "counterparty",
@@ -486,12 +628,20 @@ const NEWS = {
         "segment": "Trade finance"
       },
       {
-        "id": "bk-12",
-        "name": "Helena Vasquez",
+        "id": "bk-13",
+        "name": "Marcus Bellwether",
         "type": "person",
         "role": "client",
-        "country": "Spain",
-        "segment": "Retail"
+        "country": "United Kingdom",
+        "segment": "Business banking"
+      },
+      {
+        "id": "bk-14",
+        "name": "Greenfield Car Wash Group",
+        "type": "org",
+        "role": "counterparty",
+        "country": "United Kingdom",
+        "segment": "Business banking"
       }
     ]
   },
@@ -499,50 +649,25 @@ const NEWS = {
     "threshold": 0.85
   }
 };
-const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+const REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
 
 const app = document.getElementById('app');
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
+/* ---- timers (so reduced-motion + the string-DOM harness fold animation into the final state) ---- */
+let timers = [];
+function clearTimers(){ timers.forEach(t => clearTimeout(t)); timers = []; }
+function T(fn, ms){ if(REDUCED){ fn(); return 0; } const id = setTimeout(fn, ms); timers.push(id); return id; }
+
 /* ---- state machine -------------------------------------------------------- */
 const state = { view:'select', articleId:null, dispo:{} };
-function go(view, articleId){ state.view = view; if(articleId!==undefined) state.articleId = articleId; render(); }
+function go(view, articleId){ clearTimers(); state.view = view; if(articleId!==undefined) state.articleId = articleId; render(); }
 function articleById(id){ return NEWS.articles.find(a => a.id === id); }
-
-/* ---- screens (T2: select; T3 fills read/screen/disposition/close) ---------- */
-function renderSelect(){
-  const arts = NEWS.articles;
-  const ents = arts.reduce((n,a)=>n+(a.entities||[]).length,0);
-  const flags = arts.reduce((n,a)=>n+(a.red_flags||[]).length,0);
-  const book = (NEWS.book && NEWS.book.rows) ? NEWS.book.rows.length : 0;
-  let h = '';
-  h += '<h1>Adverse-media exposure stream</h1>';
-  h += '<p class="lead">A second monitoring stream over unstructured news. For each article the agent '
-     + 'extracts named entities and red-flag conduct, then fuzzy-matches the entities against the '
-     + 'institution’s client &amp; counterparty book to surface potential exposure — the matches an '
-     + 'exact-name screen would miss. Every figure is illustrative; the book is synthetic.</p>';
-  h += '<div class="tiles">'
-     + tile(arts.length,'news articles') + tile(ents,'entities extracted')
-     + tile(flags,'red flags') + tile(book,'book entries (synthetic)') + '</div>';
-  h += '<h2>Select an article</h2><div class="cards">';
-  for(const a of arts){
-    h += '<button class="card" data-id="'+esc(a.id)+'">'
-       + '<div class="ttl">'+esc(a.title)+'</div>'
-       + '<div class="meta"><span class="chip sig">'+esc(a.doc_type||'News')+'</span>'
-       + (a.typology?'<span class="chip">'+esc(a.typology)+'</span>':'')
-       + '<span>'+ (a.entities||[]).length +' entities</span>'
-       + '<span>'+ (a.red_flags||[]).length +' red flags</span></div></button>';
-  }
-  h += '</div>';
-  app.innerHTML = h;
-  app.querySelectorAll('.card').forEach(c =>
-    c.addEventListener('click', () => go('read', c.getAttribute('data-id'))));
-}
 
 /* ---- the fuzzy matcher (the new muscle) ----------------------------------- */
 /* Normalize → token-sort → Jaro-Winkler. Real string-similarity, computed in-browser, offline.
-   Mirrors the scripts/build.py prototype exactly. Word-order-robust (token-sort) + typo/prefix
-   tolerant (Jaro-Winkler) — it surfaces the near-matches an exact-name screen would miss. */
+   Word-order-robust (token-sort) + typo/prefix tolerant (Jaro-Winkler) — it surfaces the
+   near-matches an exact-name screen would miss. */
 const M_SUFFIX = new Set(['ltd','llc','inc','co','group','plc','corp','limited','holdings','sa','ag','gmbh']);
 function mnorm(s){ return String(s).toLowerCase().replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim(); }
 function tokensort(s, drop){
@@ -588,36 +713,52 @@ function matchEntities(a){
   });
 }
 
-/* ---- article highlighting (red flags + entities, position-merged) ---------- */
+/* ---- article highlighting: red-flag phrases + entity names, position-merged ---- */
+/* Returns {html, spans}. html = FINAL resting state (every phrase/entity wrapped). spans = sorted,
+   non-overlapping [start,end,kind,idx] used by the renderRead stream to reveal each as the read
+   edge reaches it. kind:'hl' (red flag, idx into red_flags) or 'ent' (entity, idx into entities). */
 function findAll(hay, needle){
   const out = []; if(!needle) return out; let i = 0;
   while((i = hay.indexOf(needle, i)) !== -1){ out.push([i, i+needle.length]); i += needle.length; }
   return out;
 }
-function highlightBody(raw, flags, ents){
+function articleSpans(raw, flags, ents){
   const spans = [];
-  (flags||[]).forEach(f => findAll(raw, f.flag).forEach(([s,e]) => spans.push({s,e,cls:'hl',title:f.red_flag})));
-  (ents||[]).forEach(en => findAll(raw, en.name).forEach(([s,e]) => spans.push({s,e,cls:'ent',title:en.type})));
+  (flags||[]).forEach((f,fi) => findAll(raw, f.flag).forEach(([s,e]) => spans.push({s,e,kind:'hl',idx:fi,title:f.red_flag})));
+  (ents||[]).forEach((en,ei) => findAll(raw, en.name).forEach(([s,e]) => spans.push({s,e,kind:'ent',idx:ei,title:en.type})));
   spans.sort((a,b) => a.s-b.s || (b.e-b.s)-(a.e-a.s));
   const picked = []; let last = -1;
   for(const sp of spans){ if(sp.s >= last){ picked.push(sp); last = sp.e; } }
+  return picked;
+}
+function spanHTML(raw, sp){
+  const cls = sp.kind==='hl' ? 'hl on' : 'ent';
+  const tag = sp.kind==='hl' ? 'span' : 'span';
+  return '<'+tag+' class="'+cls+'" title="'+esc(sp.title)+'">'+esc(raw.slice(sp.s, sp.e))+'</'+tag+'>';
+}
+function highlightBody(raw, flags, ents){
+  const picked = articleSpans(raw, flags, ents);
   let html = '', pos = 0;
-  for(const sp of picked){
-    html += esc(raw.slice(pos, sp.s));
-    const tag = sp.cls==='hl' ? 'mark' : 'span';
-    html += '<'+tag+' class="'+sp.cls+'" title="'+esc(sp.title)+'">'+esc(raw.slice(sp.s, sp.e))+'</'+tag+'>';
-    pos = sp.e;
-  }
+  for(const sp of picked){ html += esc(raw.slice(pos, sp.s)) + spanHTML(raw, sp); pos = sp.e; }
   return html + esc(raw.slice(pos));
 }
 
-/* ---- arc navigation ------------------------------------------------------- */
+/* ---- arc navigation + the step rail --------------------------------------- */
 const STEP = ['read','screen','disposition','close'];
 const STEP_LABEL = { read:'Read', screen:'Screen', disposition:'Disposition', close:'Exposure' };
+const RAIL = [['select','Select'],['read','Read'],['screen','Screen'],['disposition','Disposition'],['close','Exposure']];
+function rail(view){
+  const order = RAIL.map(r=>r[0]); const cur = order.indexOf(view);
+  let h = '<div class="rail">';
+  RAIL.forEach((r,i) => {
+    const cls = i<cur ? 'done' : (i===cur ? 'now' : '');
+    h += (i?'<span class="sep">›</span>':'') + '<span class="st '+cls+'"><span class="dot">'+(i<cur?'✓':(i+1))+'</span>'+r[1]+'</span>';
+  });
+  return h + '</div>';
+}
 function crumbs(view){
   const a = articleById(state.articleId);
-  return '<div class="crumbs"><a id="cb-sel">Articles</a> › '+esc(a?a.title:'')+' › '
-    + STEP.map(v => v===view ? '<b>'+STEP_LABEL[v]+'</b>' : STEP_LABEL[v]).join(' · ') + '</div>';
+  return '<div class="crumbs"><a id="cb-sel">Articles</a> › '+esc(a?a.title:'')+'</div>';
 }
 function arcNav(view){
   const i = STEP.indexOf(view);
@@ -634,56 +775,199 @@ function wireNav(){
 function stepNext(){ const i = STEP.indexOf(state.view); if(i>=0 && i<STEP.length-1) go(STEP[i+1]); }
 function stepBack(){ const i = STEP.indexOf(state.view); if(i<=0) go('select'); else go(STEP[i-1]); }
 
-/* ---- the four arc screens ------------------------------------------------- */
+function srcCap(a){
+  return '<div class="srccap"><b>Source.</b> '+esc(a.source_org||'')
+    + (a.basis ? ' · '+esc(a.basis) : '')
+    + (a.source_url ? '<br><span class="u">'+esc(a.source_url)+(a.archived?' (archived '+esc(a.archived)+')':'')+'</span>' : '')
+    + '</div>';
+}
+
+/* ---- Select --------------------------------------------------------------- */
+function renderSelect(){
+  const arts = NEWS.articles;
+  const ents = arts.reduce((n,a)=>n+(a.entities||[]).length,0);
+  const flags = arts.reduce((n,a)=>n+(a.red_flags||[]).length,0);
+  const book = (NEWS.book && NEWS.book.rows) ? NEWS.book.rows.length : 0;
+  let h = rail('select');
+  h += '<div class="eyebrow">Adverse-media / negative-news stream</div>';
+  h += '<h1>What aren’t we watching?</h1>';
+  h += '<p class="lead">A second monitoring stream — over unstructured news. For each real enforcement article the '
+     + 'agent extracts the named entities and the red-flag conduct, then fuzzy-matches the entities against the '
+     + 'institution’s client &amp; counterparty book to surface potential exposure: the matches an exact-name '
+     + 'screen would miss. The articles are real US-federal enforcement records (public domain); the book is synthetic.</p>';
+  h += '<div class="tiles">'
+     + tile(arts.length,'real articles') + tile(ents,'entities extracted')
+     + tile(flags,'red flags') + tile(book,'book entries (synthetic)') + '</div>';
+  h += '<h2>Select an article</h2><div class="cards">';
+  for(const a of arts){
+    h += '<button class="card" data-id="'+esc(a.id)+'">'
+       + '<div class="ttl">'+esc(a.title)+'</div>'
+       + '<div class="src">'+esc(a.source_org||'')+'</div>'
+       + '<div class="meta"><span class="chip sig">'+esc(a.doc_type||'News')+'</span>'
+       + (a.typology?'<span class="chip ty">'+esc(a.typology)+'</span>':'')
+       + '<span>'+ (a.entities||[]).length +' entities</span>'
+       + '<span>'+ (a.red_flags||[]).length +' red flags</span></div></button>';
+  }
+  h += '</div>';
+  app.innerHTML = h;
+  app.querySelectorAll('.card').forEach(c =>
+    c.addEventListener('click', () => go('read', c.getAttribute('data-id'))));
+}
+
+/* ---- Read (T3 layers the streaming "agent reading" enhancement over this final state) ---- */
+function ecardHTML(en, streaming){
+  let h = '<div class="ecard'+(streaming?' in':'')+'" data-e="'+esc(en.id)+'">';
+  h += '<div class="eh"><span class="en">'+esc(en.name)+'</span><span class="echip '+esc(en.type)+'">'+esc(en.type)+'</span></div>';
+  const attrs = [['Location',en.location],['Age',en.age],['Profession',en.profession]].filter(x=>x[1]);
+  if(attrs.length){
+    h += '<div class="eattrs">'+attrs.map(x=>'<span class="eattr"><b>'+x[0]+'</b>'+esc(x[1])+'</span>').join('')+'</div>';
+  }
+  if(en.context) h += '<div class="ectx">'+esc(en.context)+'</div>';
+  return h + '</div>';
+}
+function xrowHTML(f, streaming){
+  return '<div class="xrow'+(streaming?' in':'')+'"><div class="xv">“'+esc(f.flag)+'”</div>'
+    + '<div class="xa">↓ translate</div><div class="xr">'+esc(f.red_flag)+'</div>'
+    + (f.category?'<div class="xc">'+esc(f.category)+'</div>':'')+'</div>';
+}
 function renderRead(){
   const a = articleById(state.articleId);
-  let h = crumbs('read');
+  const ents = a.entities||[], flags = a.red_flags||[];
+  let h = rail('read') + crumbs('read');
+  h += '<div class="eyebrow">'+esc(a.source_org||'')+' · Read</div>';
   h += '<h1>'+esc(a.title)+'</h1>';
-  h += '<p class="muted mono">Step 1 · the agent reads the article, grounds each red-flag phrase (verbatim), and tags named entities.</p>';
-  h += '<div class="article" id="article">'+highlightBody(a.article_text, a.red_flags||[], a.entities||[])+'</div>';
-  h += '<h2>Red flags identified</h2><div class="xlist">';
-  (a.red_flags||[]).forEach(f => {
-    h += '<div class="xrow"><div><div class="t">'+esc(f.red_flag)+'</div>'
-       + (f.category ? '<div class="sub mono">'+esc(f.category)+'</div>' : '') + '</div>'
-       + '<div class="v">“'+esc(f.flag)+'”</div></div>';
-  });
-  h += '</div>' + arcNav('read');
+  h += '<p class="lead">The agent reads the source top to bottom. As it reaches each <em>red-flag phrase</em> it highlights '
+     + 'the verbatim quote and writes the AML translation beside it; each named <em>entity</em> is tagged and carded with '
+     + 'its details. Nothing is shown that isn’t in the source.</p>';
+  h += srcCap(a);
+  if(a.typology) h += '<div style="margin:14px 0 2px"><span class="chip sig">typology</span> <span class="chip ty">'+esc(a.typology)+'</span></div>';
+  h += '<div class="artwrap"><div>'
+     + '<div class="collabel" id="doclabel">Source document · '+ents.length+' entit'+(ents.length===1?'y':'ies')+' · '+flags.length+' red flag'+(flags.length===1?'':'s')+'</div>'
+     + '<div class="doc" id="doc">'+highlightBody(a.article_text, flags, ents)+'</div></div>';
+  h += '<div><div class="collabel" id="entlabel">Named entities · '+ents.length+'</div>'
+     + '<div class="xstack" id="entities">'+ents.map(e=>ecardHTML(e,false)).join('')+'</div>';
+  h += '<div class="collabel" id="flaglabel" style="margin-top:16px">Red flags · extract → translate · '+flags.length+'</div>'
+     + '<div class="xstack" id="redflags" style="max-height:none">'+flags.map(f=>xrowHTML(f,false)).join('')+'</div></div>';
+  h += '</div>';
+  h += '<div class="framenote">Every red flag traces to a verbatim phrase in the source (the grounded evidence); the translation '
+     + 'is how an AML programme would name the mechanism. Entity attributes (location / age / profession) are quote-grounded in the article.</div>';
+  h += arcNav('read');
   app.innerHTML = h; wireNav();
+  streamRead(a, ents, flags);   // T3 — progressive enhancement (no-op under reduced-motion / string-DOM harness)
+}
+function streamRead(a, ents, flags){
+  const docEl = document.getElementById('doc');
+  const entEl = document.getElementById('entities'), flagEl = document.getElementById('redflags');
+  const dlbl = document.getElementById('doclabel'), elbl = document.getElementById('entlabel'), flbl = document.getElementById('flaglabel');
+  // template above is the FINAL resting state → reduced-motion + the string-DOM harness already show it.
+  if(REDUCED || !docEl || typeof docEl.insertAdjacentHTML !== 'function') return;
+  const raw = a.article_text;
+  const spans = articleSpans(raw, flags, ents), L = raw.length;
+  // ordered runs: plain text (kind null) + each highlighted span
+  const segs = []; let c0 = 0;
+  for(const sp of spans){ if(sp.s>c0) segs.push({s:c0,e:sp.s,sp:null}); segs.push({s:sp.s,e:sp.e,sp}); c0 = sp.e; }
+  if(c0<L) segs.push({s:c0,e:L,sp:null});
+  if(entEl) entEl.innerHTML=''; if(flagEl) flagEl.innerHTML='';
+  docEl.innerHTML=''; if(docEl.classList) docEl.classList.add('reading');
+  let ec=0, fc=0;
+  const setLabels = ()=>{ if(dlbl)dlbl.textContent='Source document · reading…';
+    if(elbl)elbl.textContent='Named entities · '+ec; if(flbl)flbl.textContent='Red flags · extract → translate · '+fc; };
+  setLabels();
+  const STEP=33, TOTAL=Math.max(6000,Math.min(45000,Math.round(L*1.0)));
+  const TICKS=Math.max(40,Math.round(TOTAL/STEP)), CPS=Math.max(8,Math.ceil(L/TICKS));
+  let si=0, within=0; const eShown=new Set(), fShown=new Set();
+  function read(){
+    let budget=CPS, buf='';
+    while(budget>0 && si<segs.length){
+      const sg=segs[si], rem=(sg.e-sg.s)-within;
+      if(!sg.sp){ const take=Math.min(budget,rem); buf+=esc(raw.slice(sg.s+within, sg.s+within+take)); within+=take; budget-=take; }
+      else {
+        buf += spanHTML(raw, sg.sp);
+        if(sg.sp.kind==='ent' && entEl && !eShown.has(sg.sp.idx)){ eShown.add(sg.sp.idx); ec++; entEl.insertAdjacentHTML('beforeend', ecardHTML(ents[sg.sp.idx], true)); }
+        if(sg.sp.kind==='hl' && flagEl && !fShown.has(sg.sp.idx)){ fShown.add(sg.sp.idx); fc++; flagEl.insertAdjacentHTML('beforeend', xrowHTML(flags[sg.sp.idx], true)); }
+        within=sg.e-sg.s; budget-=rem;
+      }
+      if(within>=sg.e-sg.s){ si++; within=0; }
+    }
+    if(buf) docEl.insertAdjacentHTML('beforeend', buf);
+    if(docEl.scrollHeight) docEl.scrollTop=docEl.scrollHeight;
+    if(elbl)elbl.textContent='Named entities · '+ec; if(flbl)flbl.textContent='Red flags · extract → translate · '+fc;
+    if(si<segs.length){ T(read,STEP); return; }
+    if(docEl.classList) docEl.classList.remove('reading');
+    ents.forEach((e,i)=>{ if(entEl && !eShown.has(i)){ eShown.add(i); ec++; entEl.insertAdjacentHTML('beforeend', ecardHTML(e,true)); } });
+    flags.forEach((f,i)=>{ if(flagEl && !fShown.has(i)){ fShown.add(i); fc++; flagEl.insertAdjacentHTML('beforeend', xrowHTML(f,true)); } });
+    if(dlbl)dlbl.textContent='Source document · '+ents.length+' entit'+(ents.length===1?'y':'ies')+' · '+flags.length+' red flag'+(flags.length===1?'':'s');
+    if(elbl)elbl.textContent='Named entities · '+ents.length; if(flbl)flbl.textContent='Red flags · extract → translate · '+flags.length;
+  }
+  T(read,240);
+}
+
+/* ---- Screen (T4 layers the scan-process enhancement over this final ranked state) ---- */
+function scanRowHTML(x, th, streaming){
+  const below = !x.hit;
+  let sub = x.row ? ('→ '+esc(x.row.name)+' · '+esc(x.row.role)+' · '+esc(x.row.country))
+                  : 'no book entry above threshold';
+  let trap = (x.hit && x.row && x.row.note) ? '<div class="flagtrap">⚠ '+esc(x.row.note)+'</div>' : '';
+  return '<div class="row'+(x.hit?' hit':' below')+(streaming?' in':'')+'"><div><div class="who">'+esc(x.entity.name)
+    + '<span class="tag '+x.kind+'">'+(x.kind==='none'?'no match':x.kind)+'</span></div>'
+    + '<div class="sub">'+sub+'</div>'+trap+'</div>'
+    + '<div class="score'+(x.hit?' s-hi':'')+'">'+x.score.toFixed(3)+'</div></div>';
 }
 function renderScreen(){
   const a = articleById(state.articleId);
   const th = threshold();
-  const m = matchEntities(a);
-  const hits = m.filter(x => x.hit);
-  let h = crumbs('screen');
+  const rows = (NEWS.book && NEWS.book.rows) ? NEWS.book.rows.length : 0;
+  const m = matchEntities(a).slice().sort((x,y)=>y.score-x.score);
+  const hits = m.filter(x=>x.hit), above = hits, below = m.filter(x=>!x.hit);
+  const nears = hits.filter(x=>!x.exact).length;
+  let h = rail('screen') + crumbs('screen');
   h += '<h1>Screen against the book</h1>';
-  h += '<p class="lead">Each extracted entity is fuzzy-matched against the synthetic client &amp; counterparty book. '
-     + 'Scores are real string-similarity (Jaro–Winkler, word-order-robust), computed in-browser. '
-     + 'A match at or above '+th.toFixed(2)+' is surfaced as potential exposure.</p>';
-  h += '<div class="rows" id="screenrows">';
-  m.forEach(x => {
-    h += '<div class="row'+(x.hit?' hit':'')+'"><div><div class="who">'+esc(x.entity.name)
-       + '<span class="tag '+x.kind+'">'+(x.kind==='none'?'no match':x.kind)+'</span></div>'
-       + '<div class="sub">'+(x.row ? ('→ '+esc(x.row.name)+' · '+esc(x.row.role)+' · '+esc(x.row.country))
-                                     : 'no book entry above threshold')+'</div></div>'
-       + '<div class="score'+(x.hit?' s-hi':'')+'">'+x.score.toFixed(3)+'</div></div>';
-  });
-  h += '</div>';
-  const nears = hits.filter(x => !x.exact).length;
+  h += '<p class="lead">Each extracted entity is scored against every row of the synthetic client &amp; counterparty book. '
+     + 'Scores are real string-similarity (Jaro–Winkler over token-sorted, suffix-aware names) computed in-browser — '
+     + 'word-order and transliteration robust. A score at or above '+th.toFixed(2)+' is surfaced as potential exposure.</p>';
+  h += '<div class="scanhead"><span class="scanctr" id="scanctr">'+m.length+' entit'+(m.length===1?'y':'ies')+' × '+rows+' book rows scanned</span></div>';
+  h += '<div class="thline">at / above '+th.toFixed(2)+' — potential exposure</div>';
+  h += '<div class="rows" id="scanabove">'+above.map(x=>scanRowHTML(x,th,false)).join('')+'</div>';
+  if(below.length){
+    h += '<div class="thline">below '+th.toFixed(2)+' — no exposure</div>';
+    h += '<div class="rows" id="scanbelow">'+below.map(x=>scanRowHTML(x,th,false)).join('')+'</div>';
+  }
   h += '<p class="note" id="screennote">'+hits.length+' potential exposure'+(hits.length===1?'':'s')+' surfaced'
      + (nears ? (' — '+nears+' '+(nears===1?'is a near-match':'are near-matches')+' an exact-name screen would have missed.') : '.')+'</p>';
   h += arcNav('screen');
   app.innerHTML = h; wireNav();
+  scanScreen(m, th);   // T4 — progressive enhancement (no-op under reduced-motion / string-DOM harness)
 }
-function dispoKey(aid, eid){ return aid+'|'+eid; }   // key per ENTITY (one surfaced hit per entity), not per book row
+function scanScreen(m, th){
+  const aboveEl = document.getElementById('scanabove'), belowEl = document.getElementById('scanbelow');
+  const ctr = document.getElementById('scanctr');
+  if(REDUCED || !aboveEl || typeof aboveEl.insertAdjacentHTML !== 'function') return;  // final state already rendered
+  const above = m.filter(x=>x.hit), below = m.filter(x=>!x.hit);
+  const rows = (NEWS.book && NEWS.book.rows) ? NEWS.book.rows.length : 0;
+  aboveEl.innerHTML=''; if(belowEl) belowEl.innerHTML='';
+  let i=0; const order = above.concat(below);
+  function tick(){
+    if(i<order.length){
+      const x=order[i]; const el = x.hit ? aboveEl : belowEl;
+      if(el) el.insertAdjacentHTML('beforeend', scanRowHTML(x, th, true));
+      if(ctr) ctr.textContent = (i+1)+' of '+m.length+' entit'+(m.length===1?'y':'ies')+' scanned × '+rows+' book rows';
+      i++; T(tick, 150); return;
+    }
+    if(ctr) ctr.textContent = m.length+' entit'+(m.length===1?'y':'ies')+' × '+rows+' book rows scanned';
+  }
+  T(tick, 200);
+}
+
+/* ---- Disposition (the human gate) ----------------------------------------- */
+function dispoKey(aid, eid){ return aid+'|'+eid; }
 function renderDisposition(){
   const a = articleById(state.articleId);
-  const hits = matchEntities(a).filter(x => x.hit);
+  const hits = matchEntities(a).filter(x=>x.hit).sort((x,y)=>y.score-x.score);
   hits.forEach(x => { const k = dispoKey(a.id, x.entity.id); if(!(k in state.dispo)) state.dispo[k] = true; });
-  let h = crumbs('disposition');
+  let h = rail('disposition') + crumbs('disposition');
   h += '<h1>Disposition — the human gate</h1>';
-  h += '<p class="lead">The agent proposes; the analyst disposes. Confirm true exposures and dismiss false positives '
-     + '— a high score is not a confirmation (a common name can collide with an unrelated person).</p>';
+  h += '<p class="lead">The agent proposes; the analyst disposes. Confirm the true exposures and dismiss the false positives — '
+     + 'a high score is <em>not</em> a confirmation: a common name can collide with an unrelated person at a perfect 1.000.</p>';
   if(!hits.length){
     h += '<p class="note">No exposure surfaced for this article — nothing to disposition.</p>';
   } else {
@@ -693,8 +977,8 @@ function renderDisposition(){
       h += '<button class="hitbtn" data-k="'+esc(k)+'" aria-pressed="'+on+'">'
          + '<div><div class="who">'+esc(x.entity.name)+' → '+esc(x.row.name)
          + '<span class="tag '+x.kind+'">'+x.kind+'</span></div>'
-         + '<div class="sub">'+esc(x.row.role)+' · '+esc(x.row.country)+' · score '+x.score.toFixed(3)
-         + (x.row.note ? (' · '+esc(x.row.note)) : '')+'</div></div>'
+         + '<div class="sub">'+esc(x.row.role)+' · '+esc(x.row.country)+' · score '+x.score.toFixed(3)+'</div>'
+         + (x.row.note ? '<div class="flagtrap">⚠ '+esc(x.row.note)+'</div>' : '')+'</div>'
          + '<span class="disp '+(on?'on':'off')+'">'+(on?'CONFIRMED':'DISMISSED')+'</span></button>';
     });
     h += '</div>';
@@ -706,12 +990,14 @@ function renderDisposition(){
   }));
   wireNav();
 }
+
+/* ---- Exposure (close) ----------------------------------------------------- */
 function renderClose(){
   const a = articleById(state.articleId);
-  const hits = matchEntities(a).filter(x => x.hit);
-  const confirmed = hits.filter(x => state.dispo[dispoKey(a.id, x.entity.id)]);
+  const hits = matchEntities(a).filter(x=>x.hit);
+  const confirmed = hits.filter(x => state.dispo[dispoKey(a.id, x.entity.id)]).sort((x,y)=>y.score-x.score);
   const dismissed = hits.length - confirmed.length;
-  let h = crumbs('close');
+  let h = rail('close') + crumbs('close');
   h += '<h1>Exposure</h1>';
   h += '<div class="tiles">'+tile(confirmed.length,'confirmed exposures')
      + tile(dismissed,'dismissed (false positive)')+tile((a.red_flags||[]).length,'red flags in article')+'</div>';
@@ -741,7 +1027,8 @@ function render(){
   document.getElementById('brandsub').textContent = (NEWS.brand&&NEWS.brand.subtitle)||'';
   document.getElementById('badge').textContent = NEWS.badge || 'Illustrative data & outputs';
   document.getElementById('foot').innerHTML =
-    'Illustrative vision prototype · synthetic data — no real customers, accounts, or transactions. '
+    'Illustrative vision prototype · the source articles are real US-federal enforcement records (public domain, '
+    + '17 U.S.C. §105); the client/counterparty book is synthetic — no real customers, accounts, or transactions. '
     + 'Fuzzy-match scores are real string-similarity computed in-browser.';
   (RENDER[state.view]||renderSelect)();
   window.scrollTo(0,0);

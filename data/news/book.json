@@ -1,18 +1,20 @@
 {
  "as_of": "illustrative",
- "note": "Synthetic client/counterparty book — fictional entities, illustrative demo data. NO real customers, accounts, or transactions. Seeded so the fuzzy matcher demonstrates exact matches, near-matches (typo / transliteration / word-order / suffix variants an exact-string screen would miss), and a common-name false positive that must be dispositioned by a human.",
+ "note": "Synthetic client/counterparty book — fictional clients, illustrative demo data. NO real customers, accounts, or transactions. Seeded against the REAL adverse-media entities so the fuzzy matcher demonstrates: a confirmed exposure (a counterparty exactly matching a sanctioned entity), near-matches an exact-name screen would miss (transliteration / suffix / word-order variants), and a common-name false positive that must be dispositioned by a human.",
  "rows": [
-  {"id": "bk-01", "name": "Aurelia Holdings Ltd", "type": "org", "role": "counterparty", "country": "Cyprus", "segment": "Corporate banking"},
-  {"id": "bk-02", "name": "Volkoff Maritime Logistics LLC", "type": "org", "role": "counterparty", "country": "United Arab Emirates", "segment": "Trade finance"},
-  {"id": "bk-03", "name": "Dimitri Karpov", "type": "person", "role": "client", "country": "Russia", "segment": "Private banking"},
-  {"id": "bk-04", "name": "Van Thanh Nguyen", "type": "person", "role": "client", "country": "Vietnam", "segment": "Retail"},
-  {"id": "bk-05", "name": "Marcus Bellwether", "type": "person", "role": "client", "country": "United Kingdom", "segment": "Business banking"},
-  {"id": "bk-06", "name": "Greenfield Car Wash Group", "type": "org", "role": "counterparty", "country": "United Kingdom", "segment": "Business banking"},
-  {"id": "bk-07", "name": "Andrei Petrov", "type": "person", "role": "client", "country": "Canada", "segment": "Retail", "note": "Common name — Toronto retail client; no link to the named associate established."},
-  {"id": "bk-08", "name": "Northwind Grain Exporters", "type": "org", "role": "counterparty", "country": "Canada", "segment": "Trade finance"},
-  {"id": "bk-09", "name": "Sarah Whitfield", "type": "person", "role": "client", "country": "Canada", "segment": "Wealth management"},
-  {"id": "bk-10", "name": "Pinnacle Logistics Inc", "type": "org", "role": "counterparty", "country": "United States", "segment": "Corporate banking"},
-  {"id": "bk-11", "name": "Coastal Bridge Imports", "type": "org", "role": "counterparty", "country": "Australia", "segment": "Trade finance"},
-  {"id": "bk-12", "name": "Helena Vasquez", "type": "person", "role": "client", "country": "Spain", "segment": "Retail"}
+  {"id": "bk-01", "name": "Siam Expert Trading Company Limited", "type": "org", "role": "counterparty", "country": "Thailand", "segment": "Trade finance"},
+  {"id": "bk-02", "name": "Pullman Global Solutions", "type": "org", "role": "counterparty", "country": "United States", "segment": "Corporate banking"},
+  {"id": "bk-03", "name": "Nikolai Goltsev", "type": "person", "role": "client", "country": "Canada", "segment": "Private banking"},
+  {"id": "bk-04", "name": "Ekaterina Zhdanov", "type": "person", "role": "client", "country": "Latvia", "segment": "Wealth management"},
+  {"id": "bk-05", "name": "Puzyreva Kristina", "type": "person", "role": "client", "country": "Canada", "segment": "Retail"},
+  {"id": "bk-06", "name": "George Rossi", "type": "person", "role": "client", "country": "Canada", "segment": "Retail", "note": "Common name — Toronto retail client; no link to the sanctioned individual established."},
+  {"id": "bk-07", "name": "Malaki Mullings", "type": "person", "role": "client", "country": "United States", "segment": "Retail"},
+  {"id": "bk-08", "name": "Kenneth W. Ravenell", "type": "person", "role": "client", "country": "United States", "segment": "Private banking"},
+  {"id": "bk-09", "name": "Northwind Grain Exporters", "type": "org", "role": "counterparty", "country": "Canada", "segment": "Trade finance"},
+  {"id": "bk-10", "name": "Sarah Whitfield", "type": "person", "role": "client", "country": "Canada", "segment": "Wealth management"},
+  {"id": "bk-11", "name": "Helena Vasquez", "type": "person", "role": "client", "country": "Spain", "segment": "Retail"},
+  {"id": "bk-12", "name": "Coastal Bridge Imports", "type": "org", "role": "counterparty", "country": "Australia", "segment": "Trade finance"},
+  {"id": "bk-13", "name": "Marcus Bellwether", "type": "person", "role": "client", "country": "United Kingdom", "segment": "Business banking"},
+  {"id": "bk-14", "name": "Greenfield Car Wash Group", "type": "org", "role": "counterparty", "country": "United Kingdom", "segment": "Business banking"}
  ]
 }

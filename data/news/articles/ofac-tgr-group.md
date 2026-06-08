@@ -1,0 +1,27 @@
+# Treasury Targets Russian Illicit Finance Network Using Digital Assets to Evade Sanctions
+
+*Source: U.S. Department of the Treasury, Office of Foreign Assets Control — home.treasury.gov/news/press-releases/jy2735 (archived 2026-05-29). Public-domain U.S. federal government work (17 U.S.C. §105). Excerpted verbatim.*
+
+WASHINGTON — Today, the Department of the Treasury’s Office of Foreign Assets Control (OFAC) is sanctioning five individuals and four entities that are associated with or leverage the TGR Group, a sprawling international network of businesses and employees that have facilitated significant sanctions circumvention on behalf of Russian elites. This action also identifies a Wyoming-based entity that is owned 50 percent or more by a sanctioned individual. Today’s action continues the G7 commitment to hold accountable parties that evade or offset the impact of international sanctions, including by using digital assets, and to impose costs on illicit actors that use digital assets to enhance and transfer their wealth. These designations are the result of a collaborative effort with the United Kingdom’s (UK) National Crime Agency, the United Arab Emirates (UAE) government, the Drug Enforcement Administration, and the Financial Crimes Enforcement Network.
+
+With touchpoints around the world, the TGR Group is an extensive sanctions evasion and money laundering network that works to obfuscate the illicit activities of its clients, including through the use digital assets, such as stablecoins like Tether (USDT). Controlled by Ukrainian national George Rossi, the networkprovides a range of services to place, layer, and integrate illicit financial schemes into the global financial system. These include: the laundering of funds associated with sanctioned entities; providing an unregistered service to exchange cash and cryptocurrency; the receipt of cash and making the value available to clients in the form of cryptocurrency; providing a pre-paid credit card service; and, obfuscating the source of funds to allow high-net worth Russian nationals to purchase property in the United Kingdom.
+
+To support their illicit activities, the TGR Group has leveraged other illicit actors, such as the Smart Group, led by Russian money launderer Ekaterina Zhdanova (Zhdanova). On November 3, 2023, OFAC designated Zhdanova, a Russian national, pursuant to Executive Order (E.O.) 14024, for operating or having operated in the financial services sector of the Russian Federation economy by laundering and moving funds using digital assets on behalf of Russian elites.
+
+George Rossi (Rossi), a Ukrainian national who was born in Russia, is believed to be in overall control of the TGR Group. Rossi is the founder of TGR Partners and is the non-executive director at TGR Corporate Concierge LTD, both entities that are also being designated pursuant to E.O. 14024. Rossi also controls a TGR Group-related company that leveraged OFAC-sanctioned Russian cryptocurrency exchange, Garantex OU, to process USDT transactions after its date of designation.
+
+Elena Chirkinyan (Chirkinyan), a Russian national, is a direct subordinate to Rossi and is considered a decision maker within the TGR Group. Chirkinyan is also a partner at TGR Partners and the Chief Executive Officer of TGR Corporate Concierge LTD. Additionally, Chirkinyan is the manager of TGR DWC-LLC, an entity designated pursuant to E.O. 14024.
+
+Separately, Chirkinyan coordinated with Zhdanova (via her moniker @monalisa7) to obfuscate the source of Russian client funds to purchase real estate property in the United Kingdom. Chirkinyan and other TGR Group members also arranged cash handovers in which USDT was sent to a cryptocurrency address controlled by Zhdanova, and in return cash was received by the TGR Group.
+
+Andrejs Bradens (Bradens), a Latvian national, is associated with multiple TGR Group companies, including Pullman Global Solutions LLC (Pullman Global) and TGR Corporate Concierge LTD. Pullman Global is a Wyoming-based entity that is owned by Bradens.
+
+TGR Partners is a Moscow, Russia-based entity that provides financial services such as asset management, cryptocurrency trading, foreign exchange market payments, and concierge services. TGR Partners maintains locations in Russia, the UK, and other parts of Europe and Asia. Rossi is the founder of TGR Partners and Chirkinyan is a partner at TGR Partners.
+
+Siam Expert Trading Company Limited (Siam Expert) is a Thailand-based entity. Siam Expert has facilitated the export of electronic components to Russia. Siam Expert is also associated with Bradens.
+
+Pullman Global Solutions LLC (Pullman Global) is a Wyoming-based entity that is owned by Bradens.
+
+Khadzi-Murat Dalgatovich Magomedov (Magomedov), a Russian national, and Zhdanova regularly coordinated to facilitate bulk cash and cryptocurrency money laundering transactions internationally. Magomedov and Zhdanova also coordinated a bulk cash hand-over in the United Kingdom.
+
+Nikita Vladimirovich Krasnov, a Russian national, worked closely with Zhdanova as a key money laundering partner. As part of their scheme, Krasnov would arrange for intermediaries to deliver and convert bulk cash into cryptocurrency which would be deposited into cryptocurrency wallets in Zhdanova’s name. Among other laundering methods, Krasnov and Zhdanova used a luxury watch company to facilitate trade-based money laundering. Krasnov is associated with the alias “acescom.”

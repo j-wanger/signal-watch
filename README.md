@@ -346,39 +346,49 @@ The capability/data-source labels + postures live in one committed overlay (`dat
 validated at the build boundary); the 42 derived records already carry the codes, so they and `build.py` stay
 byte-frozen. No non-negotiable changed.
 
-## The adverse-media / negative-news stream (M8 — Phase 31)
+## The adverse-media / negative-news stream (M8 — Phase 31 + Phase 32)
 
 `dist/news/index.html` is a **third** single-file ship artifact, opening a **second atom stream**:
 adverse-media / negative-news screening. Where the corpus stream derives signals from *regulatory* text,
-this stream points the same loop at *unstructured news* — and proves the muscle the corpus can't: **entity
+this stream points the same loop at *real enforcement news* — and proves the muscle the corpus can't: **entity
 resolution against your own book.** The thesis is unchanged — an adverse-media hit is an **atom** that
 composes with a counterparty's transaction signals — and it makes concrete the "what aren't we watching?"
 anxiety the showcase opens on (TD Bank's 2024 penalty was a CDD/adverse-media failure).
 
+The articles are **real US-federal enforcement records** — DOJ press releases and OFAC sanctions designations
+(an attorney trust-account laundering case, a romance-/BEC-mule case, a Canadian export-control shell network, and
+a Russian shadow-finance designation) — reproduced **verbatim** (excerpted) under **17 U.S.C. §105** (US federal
+works are public domain; the corpus's exact verbatim basis, applied to news). The client/counterparty **book stays
+synthetic** — real adverse-media entity × synthetic book. (Acquisition is build-time only; the runtime never fetches.)
+
 The arc (build with `python3 scripts/build.py news`):
 
-1. **Select** — pick one of the synthetic news articles (fictional entities; honest stat tiles).
-2. **Read** — the article with each grounded red-flag phrase highlighted and each named entity tagged, then
-   a natural-AML `red_flag` translation beside the verbatim (the corpus's two-layer model, reused).
-3. **Screen** — each extracted entity is **fuzzy-matched** against the institution's client & counterparty
-   **book** (normalize → token-sort → **Jaro-Winkler**, real string-similarity computed in-browser, thresholded).
-   The point it makes: it surfaces the **near-matches an exact-name screen would miss** (a typo, a
-   transliteration, a reversed word order).
+1. **Select** — pick one of the real enforcement articles (an honest source chip: DOJ / OFAC; stat tiles).
+2. **Read** — a **streaming "agent reading"** render: the source streams in, each grounded red-flag phrase
+   highlights *as the read reaches it*, and the **named entities** are tagged and **carded** with their grounded
+   details (name · location · age · profession), the **typology**, and a natural-AML `red_flag` translation beside
+   each verbatim quote (the corpus's two-layer model, reused). The source attribution (public domain, §105) is shown.
+3. **Screen** — a visible **scan process**: each extracted entity is scored against every row of the client &
+   counterparty **book** (normalize → token-sort → **Jaro-Winkler**, real string-similarity computed in-browser),
+   swept in and ranked across a threshold line. The point it makes: it surfaces the **near-matches an exact-name
+   screen would miss** (a transliteration, a dropped suffix, a reversed word order) — and the one **exact** hit
+   where a counterparty *is* a designated entity.
 4. **Disposition — the human gate** — every surfaced hit is a keyboard-safe toggle, defaulting to *confirmed*;
    the analyst **dismisses false positives** (a common name can collide with an unrelated person at a perfect
    1.0 score — high score ≠ confirmation). *Agent proposes, human disposes.*
 5. **Exposure** — the confirmed hits, framed as adverse-media **atoms** ready to compose with transaction
    signals (the M8 north star).
 
-**Honesty:** the book and the articles are **synthetic** (no real customers, accounts, or transactions, ever),
-under the always-on illustrative badge; the fuzzy scores are **real** computed similarity (never fabricated);
-counts are honest; the near-match and the false-positive trap are *designed into the synthetic data to teach
-the mechanism*, not claimed as detection rates. Build-time, the entities + red-flag phrases are **quote-grounded**
-in their source article at the build boundary (`validate_news_data` — the same faithfulness discipline as the
-corpus, with a local normalizer so `build.py` never imports the authoring layer); the runtime is pure client-side
-JS (no LLM, no fetch). `node tests/news-stream.test.mjs` drives the whole arc + the matcher against the committed
-`dist/news/index.html`. The showcase, the entire corpus, and the grounding core stay byte-frozen; `build.py` is
-edited only additively (a new `news` target). No non-negotiable changed.
+**Honesty:** the source articles are **real** public-domain US-federal enforcement records; the **book is
+synthetic** (no real customers, accounts, or transactions, ever), under the always-on illustrative badge; the fuzzy
+scores are **real** computed similarity (never fabricated); counts are honest; the near-match and the false-positive
+trap are *designed into the synthetic book to teach the mechanism*, not claimed as detection rates. Build-time, the
+entities (and their attributes) + red-flag phrases are **quote-grounded** in their source article at the build
+boundary (`validate_news_data` — the same faithfulness discipline as the corpus, with a local normalizer so
+`build.py` never imports the authoring layer); the runtime is pure client-side JS (no LLM, no fetch). `node
+tests/news-stream.test.mjs` drives the whole arc + the matcher against the committed `dist/news/index.html` (both
+motion modes). The showcase, the entire corpus, and the grounding core stay byte-frozen; `build.py` is edited only
+additively. No non-negotiable changed (US-federal verbatim public domain is the corpus's existing basis).
 
 ## Present it
 

@@ -747,6 +747,13 @@ def validate_news_data(articles: list, book: dict) -> list:
                     e.append(f"news[{aid}]: entity not grounded in article: {nm!r}")
                 elif nm not in body:
                     e.append(f"news[{aid}]: entity grounds normalized but not raw (would not highlight): {nm!r}")
+                # Phase 32 — the rich entity attributes (location / age / profession) shown on the
+                # entity cards must quote-ground too (normalize-substring): nothing on a card that
+                # isn't in the source article. Optional per entity; grounded only when present.
+                for attr in ("location", "age", "profession"):
+                    av = ent.get(attr)
+                    if av and _news_normalize(str(av)) not in nbody:
+                        e.append(f"news[{aid}]: entity {attr} not grounded in article: {av!r} ({nm})")
         rfs = a.get("red_flags")
         if not isinstance(rfs, list) or not rfs:
             e.append(f"news[{aid}]: red_flags must be a non-empty array")

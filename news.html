@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signal Watch — Adverse-Media Stream</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1116; --panel:#161b22; --panel2:#1b2230; --ink:#e8edf4; --muted:#8b97a8;
+  --signal:#f6a623; --line:#26303d; --ok:#54c08a; --warn:#e0654b; --chip:#202a38;
+  --mono:'JetBrains Mono',ui-monospace,monospace; --head:'Archivo',system-ui,sans-serif;
+  --serif:'Newsreader',Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--head);
+  -webkit-font-smoothing:antialiased}
+body{line-height:1.5;padding:0 0 80px}
+a{color:var(--signal)}
+.badge{position:fixed;top:10px;right:12px;z-index:50;background:rgba(246,166,35,.12);
+  border:1px solid var(--signal);color:var(--signal);font:600 11px/1 var(--mono);
+  letter-spacing:.03em;padding:6px 9px;border-radius:5px}
+header.top{padding:22px 28px 6px;border-bottom:1px solid var(--line)}
+header.top .brand{font:700 15px/1.2 var(--head);letter-spacing:.02em}
+header.top .sub{color:var(--muted);font:500 12px/1.4 var(--mono);margin-top:3px}
+main{max-width:1040px;margin:0 auto;padding:26px 28px}
+h1{font:600 26px/1.2 var(--head);margin:0 0 6px}
+h2{font:600 18px/1.25 var(--head);margin:26px 0 10px}
+.lead{color:var(--muted);font:400 16px/1.55 var(--serif);max-width:70ch}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono)}
+.tiles{display:flex;gap:14px;flex-wrap:wrap;margin:20px 0 8px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:120px}
+.tile .n{font:600 26px/1 var(--head);color:var(--signal)}
+.tile .l{color:var(--muted);font:500 11px/1.3 var(--mono);margin-top:6px;text-transform:uppercase;letter-spacing:.04em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 17px;
+  cursor:pointer;transition:border-color .12s,transform .12s;text-align:left}
+.card:hover,.card:focus-visible{border-color:var(--signal);transform:translateY(-1px);outline:none}
+.card .ttl{font:600 15px/1.3 var(--head)}
+.card .meta{color:var(--muted);font:500 11px/1.4 var(--mono);margin-top:9px;display:flex;gap:10px;flex-wrap:wrap}
+.chip{display:inline-block;background:var(--chip);border:1px solid var(--line);border-radius:999px;
+  padding:2px 9px;font:500 11px/1.5 var(--mono);color:var(--muted)}
+.chip.sig{color:var(--signal);border-color:var(--signal)}
+.btn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);font:600 13px/1 var(--head);
+  padding:10px 16px;border-radius:7px;cursor:pointer}
+.btn:hover{border-color:var(--signal)}
+.btn.primary{background:var(--signal);color:#10141a;border-color:var(--signal)}
+.nav{display:flex;gap:10px;align-items:center;margin-top:26px;border-top:1px solid var(--line);padding-top:18px}
+.crumbs{color:var(--muted);font:500 12px/1 var(--mono);margin-bottom:16px}
+footer{max-width:1040px;margin:30px auto 0;padding:16px 28px;border-top:1px solid var(--line);
+  color:var(--muted);font:400 12px/1.6 var(--mono)}
+.crumbs a{cursor:pointer;color:var(--signal)}
+.article{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px 22px;
+  font-family:var(--serif);font-size:16px;line-height:1.75;white-space:pre-wrap;max-height:46vh;overflow:auto;margin-top:8px}
+mark.hl{background:rgba(246,166,35,.20);color:#ffd27a;border-bottom:1px solid var(--signal);padding:0 1px;border-radius:2px}
+.ent{background:rgba(84,192,138,.13);border-bottom:1px dashed var(--ok);color:#bfe9d3;border-radius:2px}
+.xlist{display:grid;gap:8px;margin-top:8px}
+.xrow{display:grid;grid-template-columns:1fr 1fr;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 13px}
+.xrow .v{font-family:var(--serif);color:var(--muted);font-size:14px;line-height:1.5}
+.xrow .t{font:600 13px/1.4 var(--head);color:var(--ink)}
+.rows{display:grid;gap:9px;margin-top:14px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.row.hit{border-color:var(--signal)}
+.row .who{font:600 14px/1.35 var(--head)}
+.row .sub{color:var(--muted);font:500 11px/1.45 var(--mono);margin-top:4px}
+.score{font:600 14px/1 var(--mono);padding:6px 9px;border-radius:6px;background:var(--chip);border:1px solid var(--line);white-space:nowrap}
+.score.s-hi{color:var(--signal);border-color:var(--signal)}
+.tag{font:600 10px/1 var(--mono);padding:3px 7px;border-radius:999px;text-transform:uppercase;letter-spacing:.05em;margin-left:6px}
+.tag.exact{background:rgba(224,101,75,.16);color:#ef8b73;border:1px solid var(--warn)}
+.tag.near{background:rgba(246,166,35,.16);color:var(--signal);border:1px solid var(--signal)}
+.tag.none{color:var(--muted);border:1px solid var(--line)}
+.hitbtn{display:flex;justify-content:space-between;align-items:center;gap:14px;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;cursor:pointer;color:var(--ink);font-family:var(--head)}
+.hitbtn:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.hitbtn[aria-pressed="true"]{border-color:var(--ok);background:rgba(84,192,138,.08)}
+.hitbtn[aria-pressed="false"]{opacity:.55;border-style:dashed}
+.disp{font:600 11px/1 var(--mono);padding:6px 9px;border-radius:6px;white-space:nowrap}
+.disp.on{color:var(--ok);border:1px solid var(--ok)}
+.disp.off{color:var(--muted);border:1px solid var(--line)}
+.note{color:var(--muted);font:400 13px/1.55 var(--serif);margin-top:12px;max-width:74ch}
+.keyhint{color:var(--muted);font:500 11px/1 var(--mono);margin-left:auto}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="badge" id="badge">Illustrative data &amp; outputs</div>
+<header class="top">
+  <div class="brand" id="brand">Signal Watch</div>
+  <div class="sub" id="brandsub">Adverse-Media Stream · Vision Prototype</div>
+</header>
+<main id="app"></main>
+<footer id="foot"></footer>
+<script>
+"use strict";
+/* Phase 31 (M8) — the adverse-media / negative-news stream. A SECOND atom stream: read a news
+   article → its grounded entities + red flags → fuzzy-match the entities against a SYNTHETIC
+   client/counterparty book → potential exposure → human disposition. All client-side, offline.
+   Data inlined at build time by scripts/build.py (render_news); the fuzzy matcher runs here. */
+const NEWS = __NEWS__;
+const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+const app = document.getElementById('app');
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---- state machine -------------------------------------------------------- */
+const state = { view:'select', articleId:null, dispo:{} };
+function go(view, articleId){ state.view = view; if(articleId!==undefined) state.articleId = articleId; render(); }
+function articleById(id){ return NEWS.articles.find(a => a.id === id); }
+
+/* ---- screens (T2: select; T3 fills read/screen/disposition/close) ---------- */
+function renderSelect(){
+  const arts = NEWS.articles;
+  const ents = arts.reduce((n,a)=>n+(a.entities||[]).length,0);
+  const flags = arts.reduce((n,a)=>n+(a.red_flags||[]).length,0);
+  const book = (NEWS.book && NEWS.book.rows) ? NEWS.book.rows.length : 0;
+  let h = '';
+  h += '<h1>Adverse-media exposure stream</h1>';
+  h += '<p class="lead">A second monitoring stream over unstructured news. For each article the agent '
+     + 'extracts named entities and red-flag conduct, then fuzzy-matches the entities against the '
+     + 'institution’s client &amp; counterparty book to surface potential exposure — the matches an '
+     + 'exact-name screen would miss. Every figure is illustrative; the book is synthetic.</p>';
+  h += '<div class="tiles">'
+     + tile(arts.length,'news articles') + tile(ents,'entities extracted')
+     + tile(flags,'red flags') + tile(book,'book entries (synthetic)') + '</div>';
+  h += '<h2>Select an article</h2><div class="cards">';
+  for(const a of arts){
+    h += '<button class="card" data-id="'+esc(a.id)+'">'
+       + '<div class="ttl">'+esc(a.title)+'</div>'
+       + '<div class="meta"><span class="chip sig">'+esc(a.doc_type||'News')+'</span>'
+       + (a.typology?'<span class="chip">'+esc(a.typology)+'</span>':'')
+       + '<span>'+ (a.entities||[]).length +' entities</span>'
+       + '<span>'+ (a.red_flags||[]).length +' red flags</span></div></button>';
+  }
+  h += '</div>';
+  app.innerHTML = h;
+  app.querySelectorAll('.card').forEach(c =>
+    c.addEventListener('click', () => go('read', c.getAttribute('data-id'))));
+}
+
+/* ---- the fuzzy matcher (the new muscle) ----------------------------------- */
+/* Normalize → token-sort → Jaro-Winkler. Real string-similarity, computed in-browser, offline.
+   Mirrors the scripts/build.py prototype exactly. Word-order-robust (token-sort) + typo/prefix
+   tolerant (Jaro-Winkler) — it surfaces the near-matches an exact-name screen would miss. */
+const M_SUFFIX = new Set(['ltd','llc','inc','co','group','plc','corp','limited','holdings','sa','ag','gmbh']);
+function mnorm(s){ return String(s).toLowerCase().replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim(); }
+function tokensort(s, drop){
+  let t = mnorm(s).split(' ');
+  if(drop){ const f = t.filter(x => !M_SUFFIX.has(x)); if(f.length) t = f; }
+  return t.slice().sort().join(' ');
+}
+function jaro(a,b){
+  if(a===b) return 1; if(!a.length || !b.length) return 0;
+  const md = Math.max(0, (Math.max(a.length,b.length) >> 1) - 1);
+  const am = new Array(a.length).fill(false), bm = new Array(b.length).fill(false);
+  let m = 0;
+  for(let i=0;i<a.length;i++){
+    const lo = Math.max(0, i-md), hi = Math.min(i+md+1, b.length);
+    for(let j=lo;j<hi;j++){ if(!bm[j] && b[j]===a[i]){ am[i]=bm[j]=true; m++; break; } }
+  }
+  if(!m) return 0;
+  let t = 0, k = 0;
+  for(let i=0;i<a.length;i++){ if(am[i]){ while(!bm[k]) k++; if(a[i]!==b[k]) t++; k++; } }
+  t /= 2;
+  return (m/a.length + m/b.length + (m-t)/m) / 3;
+}
+function jw(a,b){
+  const j = jaro(a,b); let p = 0;
+  const lim = Math.min(a.length, b.length, 4);
+  for(let i=0;i<lim;i++){ if(a[i]===b[i]) p++; else break; }
+  return j + p*0.1*(1-j);
+}
+function simScore(a,b){
+  return Math.max(jw(mnorm(a),mnorm(b)), jw(tokensort(a),tokensort(b)), jw(tokensort(a,true),tokensort(b,true)));
+}
+function threshold(){ return (NEWS.match && NEWS.match.threshold) || 0.85; }
+function matchEntities(a){
+  const rows = (NEWS.book && NEWS.book.rows) || [];
+  const th = threshold();
+  return (a.entities||[]).map(en => {
+    let best = null;
+    for(const r of rows){ const sc = simScore(en.name, r.name); if(!best || sc > best.score) best = {row:r, score:sc}; }
+    const score = best ? best.score : 0;
+    const hit = score >= th;
+    const exact = hit && mnorm(en.name) === mnorm(best.row.name);
+    return { entity:en, row: best?best.row:null, score, hit, exact, kind: !hit?'none':(exact?'exact':'near') };
+  });
+}
+
+/* ---- article highlighting (red flags + entities, position-merged) ---------- */
+function findAll(hay, needle){
+  const out = []; if(!needle) return out; let i = 0;
+  while((i = hay.indexOf(needle, i)) !== -1){ out.push([i, i+needle.length]); i += needle.length; }
+  return out;
+}
+function highlightBody(raw, flags, ents){
+  const spans = [];
+  (flags||[]).forEach(f => findAll(raw, f.flag).forEach(([s,e]) => spans.push({s,e,cls:'hl',title:f.red_flag})));
+  (ents||[]).forEach(en => findAll(raw, en.name).forEach(([s,e]) => spans.push({s,e,cls:'ent',title:en.type})));
+  spans.sort((a,b) => a.s-b.s || (b.e-b.s)-(a.e-a.s));
+  const picked = []; let last = -1;
+  for(const sp of spans){ if(sp.s >= last){ picked.push(sp); last = sp.e; } }
+  let html = '', pos = 0;
+  for(const sp of picked){
+    html += esc(raw.slice(pos, sp.s));
+    const tag = sp.cls==='hl' ? 'mark' : 'span';
+    html += '<'+tag+' class="'+sp.cls+'" title="'+esc(sp.title)+'">'+esc(raw.slice(sp.s, sp.e))+'</'+tag+'>';
+    pos = sp.e;
+  }
+  return html + esc(raw.slice(pos));
+}
+
+/* ---- arc navigation ------------------------------------------------------- */
+const STEP = ['read','screen','disposition','close'];
+const STEP_LABEL = { read:'Read', screen:'Screen', disposition:'Disposition', close:'Exposure' };
+function crumbs(view){
+  const a = articleById(state.articleId);
+  return '<div class="crumbs"><a id="cb-sel">Articles</a> › '+esc(a?a.title:'')+' › '
+    + STEP.map(v => v===view ? '<b>'+STEP_LABEL[v]+'</b>' : STEP_LABEL[v]).join(' · ') + '</div>';
+}
+function arcNav(view){
+  const i = STEP.indexOf(view);
+  const nextLabel = i < STEP.length-1 ? STEP_LABEL[STEP[i+1]]+' →' : null;
+  return '<div class="nav"><button class="btn" id="nav-back">← Back</button>'
+    + (nextLabel ? '<button class="btn primary" id="nav-next">'+nextLabel+'</button>' : '')
+    + '<span class="keyhint">← back · → next · Esc articles</span></div>';
+}
+function wireNav(){
+  const cb = document.getElementById('cb-sel'); if(cb) cb.addEventListener('click', ()=>go('select'));
+  const b = document.getElementById('nav-back'); if(b) b.addEventListener('click', stepBack);
+  const n = document.getElementById('nav-next'); if(n) n.addEventListener('click', stepNext);
+}
+function stepNext(){ const i = STEP.indexOf(state.view); if(i>=0 && i<STEP.length-1) go(STEP[i+1]); }
+function stepBack(){ const i = STEP.indexOf(state.view); if(i<=0) go('select'); else go(STEP[i-1]); }
+
+/* ---- the four arc screens ------------------------------------------------- */
+function renderRead(){
+  const a = articleById(state.articleId);
+  let h = crumbs('read');
+  h += '<h1>'+esc(a.title)+'</h1>';
+  h += '<p class="muted mono">Step 1 · the agent reads the article, grounds each red-flag phrase (verbatim), and tags named entities.</p>';
+  h += '<div class="article" id="article">'+highlightBody(a.article_text, a.red_flags||[], a.entities||[])+'</div>';
+  h += '<h2>Red flags identified</h2><div class="xlist">';
+  (a.red_flags||[]).forEach(f => {
+    h += '<div class="xrow"><div><div class="t">'+esc(f.red_flag)+'</div>'
+       + (f.category ? '<div class="sub mono">'+esc(f.category)+'</div>' : '') + '</div>'
+       + '<div class="v">“'+esc(f.flag)+'”</div></div>';
+  });
+  h += '</div>' + arcNav('read');
+  app.innerHTML = h; wireNav();
+}
+function renderScreen(){
+  const a = articleById(state.articleId);
+  const th = threshold();
+  const m = matchEntities(a);
+  const hits = m.filter(x => x.hit);
+  let h = crumbs('screen');
+  h += '<h1>Screen against the book</h1>';
+  h += '<p class="lead">Each extracted entity is fuzzy-matched against the synthetic client &amp; counterparty book. '
+     + 'Scores are real string-similarity (Jaro–Winkler, word-order-robust), computed in-browser. '
+     + 'A match at or above '+th.toFixed(2)+' is surfaced as potential exposure.</p>';
+  h += '<div class="rows" id="screenrows">';
+  m.forEach(x => {
+    h += '<div class="row'+(x.hit?' hit':'')+'"><div><div class="who">'+esc(x.entity.name)
+       + '<span class="tag '+x.kind+'">'+(x.kind==='none'?'no match':x.kind)+'</span></div>'
+       + '<div class="sub">'+(x.row ? ('→ '+esc(x.row.name)+' · '+esc(x.row.role)+' · '+esc(x.row.country))
+                                     : 'no book entry above threshold')+'</div></div>'
+       + '<div class="score'+(x.hit?' s-hi':'')+'">'+x.score.toFixed(3)+'</div></div>';
+  });
+  h += '</div>';
+  const nears = hits.filter(x => !x.exact).length;
+  h += '<p class="note" id="screennote">'+hits.length+' potential exposure'+(hits.length===1?'':'s')+' surfaced'
+     + (nears ? (' — '+nears+' '+(nears===1?'is a near-match':'are near-matches')+' an exact-name screen would have missed.') : '.')+'</p>';
+  h += arcNav('screen');
+  app.innerHTML = h; wireNav();
+}
+function dispoKey(aid, eid){ return aid+'|'+eid; }   // key per ENTITY (one surfaced hit per entity), not per book row
+function renderDisposition(){
+  const a = articleById(state.articleId);
+  const hits = matchEntities(a).filter(x => x.hit);
+  hits.forEach(x => { const k = dispoKey(a.id, x.entity.id); if(!(k in state.dispo)) state.dispo[k] = true; });
+  let h = crumbs('disposition');
+  h += '<h1>Disposition — the human gate</h1>';
+  h += '<p class="lead">The agent proposes; the analyst disposes. Confirm true exposures and dismiss false positives '
+     + '— a high score is not a confirmation (a common name can collide with an unrelated person).</p>';
+  if(!hits.length){
+    h += '<p class="note">No exposure surfaced for this article — nothing to disposition.</p>';
+  } else {
+    h += '<div class="rows">';
+    hits.forEach(x => {
+      const k = dispoKey(a.id, x.entity.id); const on = state.dispo[k];
+      h += '<button class="hitbtn" data-k="'+esc(k)+'" aria-pressed="'+on+'">'
+         + '<div><div class="who">'+esc(x.entity.name)+' → '+esc(x.row.name)
+         + '<span class="tag '+x.kind+'">'+x.kind+'</span></div>'
+         + '<div class="sub">'+esc(x.row.role)+' · '+esc(x.row.country)+' · score '+x.score.toFixed(3)
+         + (x.row.note ? (' · '+esc(x.row.note)) : '')+'</div></div>'
+         + '<span class="disp '+(on?'on':'off')+'">'+(on?'CONFIRMED':'DISMISSED')+'</span></button>';
+    });
+    h += '</div>';
+  }
+  h += arcNav('disposition');
+  app.innerHTML = h;
+  app.querySelectorAll('.hitbtn').forEach(b => b.addEventListener('click', () => {
+    const k = b.getAttribute('data-k'); state.dispo[k] = !state.dispo[k]; render();
+  }));
+  wireNav();
+}
+function renderClose(){
+  const a = articleById(state.articleId);
+  const hits = matchEntities(a).filter(x => x.hit);
+  const confirmed = hits.filter(x => state.dispo[dispoKey(a.id, x.entity.id)]);
+  const dismissed = hits.length - confirmed.length;
+  let h = crumbs('close');
+  h += '<h1>Exposure</h1>';
+  h += '<div class="tiles">'+tile(confirmed.length,'confirmed exposures')
+     + tile(dismissed,'dismissed (false positive)')+tile((a.red_flags||[]).length,'red flags in article')+'</div>';
+  if(confirmed.length){
+    h += '<h2>Confirmed adverse-media exposure</h2><div class="rows">';
+    confirmed.forEach(x => {
+      h += '<div class="row hit"><div><div class="who">'+esc(x.row.name)+'</div>'
+         + '<div class="sub">'+esc(x.row.role)+' · '+esc(x.row.country)+' · via “'+esc(x.entity.name)+'” in this article · match '+x.score.toFixed(3)+'</div></div>'
+         + '<div class="score s-hi">'+(x.exact?'exact':'near')+'</div></div>';
+    });
+    h += '</div>';
+    h += '<p class="note">Each confirmed hit is an adverse-media <b>atom</b>. The next step in the M8 stream composes it '
+       + 'with the same counterparty’s transaction signals into one risk picture — combination over monolithic alerts.</p>';
+  } else {
+    h += '<p class="note">No exposure confirmed for this article.</p>';
+  }
+  h += '<div class="nav"><button class="btn" id="restart">↺ Back to articles</button>'
+     + '<span class="keyhint">← back · → next · Esc articles</span></div>';
+  app.innerHTML = h;
+  document.getElementById('restart').addEventListener('click', ()=>go('select'));
+}
+
+const RENDER = { select:renderSelect, read:renderRead, screen:renderScreen,
+                 disposition:renderDisposition, close:renderClose };
+function render(){
+  document.getElementById('brand').textContent = (NEWS.brand&&NEWS.brand.title)||'Signal Watch';
+  document.getElementById('brandsub').textContent = (NEWS.brand&&NEWS.brand.subtitle)||'';
+  document.getElementById('badge').textContent = NEWS.badge || 'Illustrative data & outputs';
+  document.getElementById('foot').innerHTML =
+    'Illustrative vision prototype · synthetic data — no real customers, accounts, or transactions. '
+    + 'Fuzzy-match scores are real string-similarity computed in-browser.';
+  (RENDER[state.view]||renderSelect)();
+  window.scrollTo(0,0);
+}
+function tile(n,l){ return '<div class="tile"><div class="n">'+esc(n)+'</div><div class="l">'+esc(l)+'</div></div>'; }
+
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape'){ go('select'); }
+  else if(e.key==='ArrowRight' && state.view!=='select'){ stepNext(); }
+  else if(e.key==='ArrowLeft' && state.view!=='select'){ stepBack(); }
+});
+render();
+</script>
+</body>
+</html>

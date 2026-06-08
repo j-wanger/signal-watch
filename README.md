@@ -24,12 +24,14 @@ except a Google Fonts `<link>` when online):
 python3 scripts/build.py fentanyl                     # -> dist/fentanyl/index.html
 python3 scripts/build.py trade-based                  # -> dist/trade-based/index.html
 python3 scripts/build.py elder-financial-exploitation # -> dist/elder-financial-exploitation/index.html
-python3 scripts/build.py corpus                       # -> dist/corpus/index.html (FinCEN corpus explorer)
-python3 scripts/build.py all                          # build every typology + the corpus explorer
+python3 scripts/build.py corpus                       # -> dist/corpus/index.html (AML corpus explorer)
+python3 scripts/build.py news                         # -> dist/news/index.html (adverse-media stream, M8)
+python3 scripts/build.py all                          # build every typology + the corpus explorer + the news stream
 python3 scripts/build.py --check all                  # drift guard: committed dist == fresh build?
 
 open dist/fentanyl/index.html                         # macOS — or just double-click it
 open dist/corpus/index.html                           # the corpus explorer
+open dist/news/index.html                             # the adverse-media stream
 ```
 
 `--check` re-renders every config in memory and byte-compares it against the committed
@@ -47,6 +49,7 @@ All checks are dep-free (no `npm install`, no test framework — they match the 
 ```
 python3 scripts/build.py --check all       # drift: every committed dist == a fresh build
 node tests/corpus-explorer.test.mjs        # corpus-explorer: landing + per-doc arc + wow beats, vs the committed dist
+node tests/news-stream.test.mjs            # adverse-media stream (M8): the screening arc + the fuzzy matcher, vs the committed dist
 python3 scripts/derive_signals.py --selftest   # the derivation GATE checks (matrix + quote-grounding + shape)
 ```
 
@@ -343,6 +346,40 @@ The capability/data-source labels + postures live in one committed overlay (`dat
 validated at the build boundary); the 42 derived records already carry the codes, so they and `build.py` stay
 byte-frozen. No non-negotiable changed.
 
+## The adverse-media / negative-news stream (M8 — Phase 31)
+
+`dist/news/index.html` is a **third** single-file ship artifact, opening a **second atom stream**:
+adverse-media / negative-news screening. Where the corpus stream derives signals from *regulatory* text,
+this stream points the same loop at *unstructured news* — and proves the muscle the corpus can't: **entity
+resolution against your own book.** The thesis is unchanged — an adverse-media hit is an **atom** that
+composes with a counterparty's transaction signals — and it makes concrete the "what aren't we watching?"
+anxiety the showcase opens on (TD Bank's 2024 penalty was a CDD/adverse-media failure).
+
+The arc (build with `python3 scripts/build.py news`):
+
+1. **Select** — pick one of the synthetic news articles (fictional entities; honest stat tiles).
+2. **Read** — the article with each grounded red-flag phrase highlighted and each named entity tagged, then
+   a natural-AML `red_flag` translation beside the verbatim (the corpus's two-layer model, reused).
+3. **Screen** — each extracted entity is **fuzzy-matched** against the institution's client & counterparty
+   **book** (normalize → token-sort → **Jaro-Winkler**, real string-similarity computed in-browser, thresholded).
+   The point it makes: it surfaces the **near-matches an exact-name screen would miss** (a typo, a
+   transliteration, a reversed word order).
+4. **Disposition — the human gate** — every surfaced hit is a keyboard-safe toggle, defaulting to *confirmed*;
+   the analyst **dismisses false positives** (a common name can collide with an unrelated person at a perfect
+   1.0 score — high score ≠ confirmation). *Agent proposes, human disposes.*
+5. **Exposure** — the confirmed hits, framed as adverse-media **atoms** ready to compose with transaction
+   signals (the M8 north star).
+
+**Honesty:** the book and the articles are **synthetic** (no real customers, accounts, or transactions, ever),
+under the always-on illustrative badge; the fuzzy scores are **real** computed similarity (never fabricated);
+counts are honest; the near-match and the false-positive trap are *designed into the synthetic data to teach
+the mechanism*, not claimed as detection rates. Build-time, the entities + red-flag phrases are **quote-grounded**
+in their source article at the build boundary (`validate_news_data` — the same faithfulness discipline as the
+corpus, with a local normalizer so `build.py` never imports the authoring layer); the runtime is pure client-side
+JS (no LLM, no fetch). `node tests/news-stream.test.mjs` drives the whole arc + the matcher against the committed
+`dist/news/index.html`. The showcase, the entire corpus, and the grounding core stay byte-frozen; `build.py` is
+edited only additively (a new `news` target). No non-negotiable changed.
+
 ## Present it
 
 - Build the typology you want and open `dist/<id>/index.html` in the presentation browser,
@@ -381,6 +418,13 @@ byte-frozen. No non-negotiable changed.
 - `CLAUDE.md` — always-loaded project memory / non-negotiables for the agent.
 
 ## Status
+
+**M8 — the adverse-media / negative-news stream (in progress).** Phase 31 opened a **second atom stream** as
+a third single-file artifact (`dist/news/index.html`): synthetic news → grounded entity + red-flag extraction
+→ a client-side **fuzzy match** against a synthetic client/counterparty book → potential exposure → a human
+disposition gate. A walking skeleton — the "compose with the transaction signal" payoff is named and scoped for
+later M8 work. The showcase and the entire corpus stay byte-frozen; `build.py` gained only an additive `news`
+target.
 
 **M7 — corpus-backed demo.** Phase 12 built the derivation backend (the deterministic red-flag spine
 validated across all 14 advisories + an LLM-derived, deterministically-checked proof slice in

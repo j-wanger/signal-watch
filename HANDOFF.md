@@ -229,6 +229,10 @@ README written. See HANDOFF.md §1.2.
 
 **M5 · Ship.** README run/present instructions; compliance self-check (no real data, advisories paraphrased/public, badge present); single-file `dist/index.html` verified offline; human sign-off. *Done when:* §1.2 is fully satisfied.
 
+*(M6 — Signal Watch ingestion pipeline; M7 — corpus-backed demo, multi-source. Both complete; see `CLAUDE.md` for the per-phase detail.)*
+
+**M8 · Adverse-media / negative-news stream (in progress).** A **second atom stream** as a third single-file artifact `dist/news/index.html` (built from `news.html`, mirroring how `dist/corpus` was added): unstructured news → grounded entity + red-flag extraction → a client-side **fuzzy match** (normalize → token-sort → Jaro-Winkler) against a **synthetic** client/counterparty book → potential exposure → a **human disposition gate**. The thesis is unchanged — an adverse-media hit is an **atom** that composes with a counterparty's transaction signals (the compose-with-the-signal payoff is the M8 north star, scoped beyond the walking skeleton). Compliance-clean by construction: the book and articles are **synthetic** (no real data, ever), under the always-on illustrative badge; fuzzy scores are **real** computed similarity, never fabricated; entities + red-flag phrases are **quote-grounded** in their source article at the build boundary (`validate_news_data`), the runtime is pure client-side JS (no LLM/fetch), and `build.py` gained only an additive `news` target — the showcase + the entire corpus + the grounding core stay byte-frozen. *Phase 31* shipped the walking skeleton. **No non-negotiable changed.**
+
 ---
 
 ## 9. Backlog (concrete tasks)

@@ -91,6 +91,19 @@ BUILD_RECS = {"COVERED", "BUILD_NOW", "BUILD_ENRICH", "SOURCE_DATA", "ENHANCE", 
 MIN_RED_FLAG_CHARS = 12
 MAX_RED_FLAG_CHARS = 240
 
+# Phase 31 (M8): the adverse-media / negative-news stream — a SECOND standalone ship artifact (its own
+# template + committed SYNTHETIC data), built alongside the typologies + corpus. Mirrors the corpus pattern:
+# build.py reads committed data (synthetic news articles + their derived entities/red-flags + a synthetic
+# client/counterparty book) and inlines it at __NEWS__; the ship file runs the fuzzy entity-match entirely
+# CLIENT-SIDE (no runtime LLM / fetch). Entities + red-flag phrases are quote-grounded in the source article
+# at the build boundary (validate_news_data) — the same faithfulness discipline as the corpus, with a LOCAL
+# normalizer so build.py stays decoupled from the authoring layer (never imports derive_signals.py).
+NEWS_TEMPLATE = ROOT / "news.html"
+NEWS_PLACEHOLDER = "__NEWS__"
+NEWS_DERIVED = ROOT / "data" / "news" / "derived"
+NEWS_BOOK = ROOT / "data" / "news" / "book.json"
+NEWS_MATCH_THRESHOLD = 0.85  # fuzzy-match surface threshold (shared by the ship artifact + the harness)
+
 STATUS = {"covered", "partial", "gap"}
 POSTURE = {"y", "n", "partial"}   # Phase 29 — the capability-lens interview self-assessment vocabulary
 CAND_TYPE = {"entity", "relationship", "motif"}
@@ -676,6 +689,167 @@ def check_corpus(template: str) -> bool:
     return True
 
 
+def _news_normalize(text: str) -> str:
+    """Position-free quote-grounding key for the news stream — lowercase, keep [a-z0-9] only.
+
+    Mirrors the corpus grounding rule (derive_signals.normalize) so an extracted entity name or a
+    red-flag phrase grounds as a substring of its source article regardless of punctuation / wrapping.
+    A LOCAL copy on purpose: build.py never imports the authoring layer.
+    """
+    return re.sub(r"[^a-z0-9]+", "", text.lower())
+
+
+def _news_article_body(md: str) -> str:
+    """Display body for the Read screen: drop the leading markdown `# Title` (it renders as the screen H1)
+    and the `*…*` emphasis markers (the .article panel is pre-wrap text, so raw `#`/`*` would show
+    literally). Grounding-safe: the entity names + red-flag flags live in the body paragraphs, never the
+    title or the italic disclaimer, so both the normalize-substring gate and the raw highlighter still match.
+    """
+    lines = md.splitlines()
+    if lines and lines[0].lstrip().startswith("# "):
+        lines = lines[1:]
+    return "\n".join(lines).strip().replace("*", "")
+
+
+def validate_news_data(articles: list, book: dict) -> list:
+    """Build-boundary gate for the adverse-media stream. Returns a list of error strings.
+
+    Enforces the FAITHFULNESS invariant (the compliance-load-bearing one): every extracted entity
+    name and every red-flag `flag` must quote-ground (normalize-substring) in its source article —
+    nothing is shown that isn't in the synthetic source — AND must ground as a RAW substring too, which
+    locks the runtime highlighter (it matches raw, so normalize-only grounding would silently fail to
+    highlight). Plus shape checks (ids; red_flag present / distinct / bounded) and book referential
+    sanity. The near-match / false-positive SEEDING is a demo-quality property the harness asserts (it
+    runs the real fuzzy matcher), not here — keeping the build gate free of the matcher (subtraction test).
+    """
+    e = []
+    if not isinstance(articles, list) or not articles:
+        return ["news: articles must be a non-empty array"]
+    seen = set()
+    for a in articles:
+        aid = a.get("id", "?")
+        if aid in seen:
+            e.append(f"news: duplicate article id {aid}")
+        seen.add(aid)
+        body = a.get("article_text")
+        if not body:
+            e.append(f"news[{aid}]: missing inlined article_text"); continue
+        nbody = _news_normalize(body)
+        ents = a.get("entities")
+        if not isinstance(ents, list) or not ents:
+            e.append(f"news[{aid}]: entities must be a non-empty array")
+        else:
+            for ent in ents:
+                nm = ent.get("name", "")
+                if not nm or not ent.get("id") or not ent.get("type"):
+                    e.append(f"news[{aid}]: entity missing id/name/type ({ent})")
+                elif _news_normalize(nm) not in nbody:
+                    e.append(f"news[{aid}]: entity not grounded in article: {nm!r}")
+                elif nm not in body:
+                    e.append(f"news[{aid}]: entity grounds normalized but not raw (would not highlight): {nm!r}")
+        rfs = a.get("red_flags")
+        if not isinstance(rfs, list) or not rfs:
+            e.append(f"news[{aid}]: red_flags must be a non-empty array")
+        else:
+            for rf in rfs:
+                flag = rf.get("flag", ""); tr = rf.get("red_flag", "")
+                if not flag or not rf.get("id"):
+                    e.append(f"news[{aid}]: red_flag missing id/flag ({rf})"); continue
+                if _news_normalize(flag) not in nbody:
+                    e.append(f"news[{aid}]: red-flag not grounded in article: {flag!r}")
+                elif flag not in body:
+                    e.append(f"news[{aid}]: red-flag grounds normalized but not raw (would not highlight): {flag!r}")
+                if not tr or _news_normalize(tr) == _news_normalize(flag):
+                    e.append(f"news[{aid}]/{rf.get('id')}: red_flag missing or not distinct from the verbatim flag")
+                elif not (MIN_RED_FLAG_CHARS <= len(tr) <= MAX_RED_FLAG_CHARS):
+                    e.append(f"news[{aid}]/{rf.get('id')}: red_flag length {len(tr)} outside [{MIN_RED_FLAG_CHARS},{MAX_RED_FLAG_CHARS}]")
+    rows = book.get("rows") if isinstance(book, dict) else None
+    if not isinstance(rows, list) or not rows:
+        e.append("news: book.rows must be a non-empty array")
+    else:
+        bids = set()
+        for r in rows:
+            rid = r.get("id")
+            if not rid or not r.get("name") or not r.get("type") or not r.get("role"):
+                e.append(f"news: book row missing id/name/type/role ({r})")
+            if rid in bids:
+                e.append(f"news: duplicate book row id {rid}")
+            bids.add(rid)
+    return e
+
+
+def load_news() -> tuple:
+    """Read the committed synthetic news data: each derived record + its inlined source article + the book."""
+    if not NEWS_DERIVED.exists():
+        die(f"news derived dir not found: {NEWS_DERIVED.relative_to(ROOT)}")
+    articles = []
+    for p in sorted(NEWS_DERIVED.glob("*.json")):
+        rec = json.loads(p.read_text(encoding="utf-8"))
+        src = rec.get("source_md")
+        if not src or not (ROOT / src).exists():
+            die(f"news record {p.name} has a missing/nonexistent source_md: {src}")
+        rec["article_text"] = _news_article_body((ROOT / src).read_text(encoding="utf-8"))
+        articles.append(rec)
+    if not articles:
+        die("no news derived records found under data/news/derived/")
+    if not NEWS_BOOK.exists():
+        die(f"news book not found: {NEWS_BOOK.relative_to(ROOT)}")
+    book = json.loads(NEWS_BOOK.read_text(encoding="utf-8"))
+    return articles, book
+
+
+def render_news(template: str) -> str:
+    """Validate + assemble the synthetic news dataset and inline it into news.html. Pure (no disk write)."""
+    articles, book = load_news()
+    errors = validate_news_data(articles, book)
+    if errors:
+        die("news data fails boundary validation:\n  - " + "\n  - ".join(errors))
+    news = {
+        "brand": {"title": "Signal Watch", "subtitle": "Adverse-Media Stream · Vision Prototype"},
+        "badge": "Illustrative data & outputs",
+        "articles": articles,
+        "book": book,
+        "match": {"threshold": NEWS_MATCH_THRESHOLD},
+    }
+    n = template.count(NEWS_PLACEHOLDER)
+    if n != 1:
+        die(f"expected exactly one {NEWS_PLACEHOLDER} placeholder in news.html, found {n}")
+    out = template.replace(NEWS_PLACEHOLDER, json.dumps(news, ensure_ascii=False, indent=2))
+    if NEWS_PLACEHOLDER in out:
+        die("news placeholder survived substitution")
+    if "fetch(" in out or "<script src" in out or 'type="module"' in out:
+        die("news ship file is not self-contained (fetch / external script / ES module present)")
+    return out
+
+
+def build_news(template: str) -> None:
+    out = render_news(template)
+    out_dir = ROOT / "dist" / "news"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "index.html"
+    out_path.write_text(out, encoding="utf-8")
+    print(f"build: news -> {out_path.relative_to(ROOT)}  ({len(out):,} bytes)")
+
+
+def check_news(template: str) -> bool:
+    """Drift guard for the news artifact: committed dist/news == a fresh render?"""
+    out_path = ROOT / "dist" / "news" / "index.html"
+    rel = out_path.relative_to(ROOT)
+    try:
+        fresh = render_news(template)
+    except SystemExit:
+        print(f"check: news -> FAIL (news data no longer renders; cannot reproduce {rel})", file=sys.stderr)
+        return False
+    if not out_path.exists():
+        print(f"check: news -> DRIFT (missing built artifact {rel}; run `build.py news`)", file=sys.stderr)
+        return False
+    if out_path.read_text(encoding="utf-8") != fresh:
+        print(f"check: news -> DRIFT ({rel} differs from a fresh build; run `build.py news` and commit)", file=sys.stderr)
+        return False
+    print(f"check: news -> ok ({rel} matches a fresh build)")
+    return True
+
+
 def resolve_targets(target: str) -> list:
     """A single id, or every config/typologies/*.json for 'all' (sorted, stable)."""
     if target == "all":
@@ -696,14 +870,21 @@ def main() -> None:
     positional = [a for a in args if not a.startswith("-")]
     target = positional[0] if positional else DEFAULT_TYPOLOGY
 
-    # 'corpus' = only the corpus explorer; 'all' = every typology + the corpus; else a typology.
+    # 'corpus' = only the corpus explorer; 'news' = only the adverse-media stream;
+    # 'all' = every typology + the corpus + the news stream; else a typology.
     want_corpus = target in ("corpus", "all")
-    want_typologies = target != "corpus"
+    want_news = target in ("news", "all")
+    want_typologies = target not in ("corpus", "news")
     corpus_template = None
     if want_corpus:
         if not CORPUS_TEMPLATE.exists():
             die(f"corpus template not found: {CORPUS_TEMPLATE}")
         corpus_template = CORPUS_TEMPLATE.read_text(encoding="utf-8")
+    news_template = None
+    if want_news:
+        if not NEWS_TEMPLATE.exists():
+            die(f"news template not found: {NEWS_TEMPLATE}")
+        news_template = NEWS_TEMPLATE.read_text(encoding="utf-8")
 
     if check:
         # Non-mutating drift guard: committed dist == fresh build? Touches nothing on disk.
@@ -712,6 +893,8 @@ def main() -> None:
             results += [check_one(t, template) for t in resolve_targets(target)]
         if want_corpus:
             results.append(check_corpus(corpus_template))
+        if want_news:
+            results.append(check_news(news_template))
         drifted = results.count(False)
         if drifted:
             die(f"build-drift check FAILED: {drifted}/{len(results)} artifact(s) drifted "
@@ -725,6 +908,8 @@ def main() -> None:
             build_one(t, template)
     if want_corpus:
         build_corpus(corpus_template)
+    if want_news:
+        build_news(news_template)
 
     # one-time migration: remove the old single-file M1 layout if present
     stale = ROOT / "dist" / "index.html"

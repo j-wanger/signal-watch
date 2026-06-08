@@ -37,7 +37,7 @@ AML transformation framework. Keep vocabulary consistent with it
 - Live mode is optional, isolated, off by default, always has a scripted fallback.
   Never put keys/tokens in the frontend. Copilot is NOT a web backend (HANDOFF §4.5).
 
-## Current state (M7 — corpus-backed derivation, multi-source; M6 pipeline complete)
+## Current state (M8 — adverse-media / negative-news stream in progress; M7 corpus-backed derivation multi-source complete)
 - Generic engine: `index.html` (vanilla HTML/CSS/JS) with a single `__CONFIG__` injection point.
   Typology-agnostic — adding a typology is one JSON file, no engine edits. Presenter controls (M3):
   keyboard nav (←/→/Space/Esc/↺), reset, `prefers-reduced-motion`.
@@ -345,6 +345,34 @@ AML transformation framework. Keep vocabulary consistent with it
   **data/capability-taxonomy.json**, the grounding core `derive_signals.py`, **scripts/build.py**, AND every derived
   `*.json` record (the data_sources axis was already inlined/validated in Phase 29 — NO re-derivation, NO build change).
   dist/corpus ~2.46MB; `--check all` 4/4 ZERO DRIFT, `--selftest` PASS, all 42 `--check-derived` clean. NO non-negotiable change.
+- ADVERSE-MEDIA / NEGATIVE-NEWS STREAM (Phase 31, M8 — a SECOND atom stream; a NEW standalone ship artifact, NOT a
+  corpus/showcase change): Signal Watch was the advisory→signal loop (the six-act showcase + the corpus explorer);
+  Phase 31 opens a SECOND stream over UNSTRUCTURED news as a third single-file artifact `dist/news/index.html` (built
+  from a new `news.html`, mirroring how `dist/corpus` was added). The thesis is unchanged — an adverse-media hit is an
+  ATOM that composes with a counterparty's transaction signals — and it makes concrete the "what aren't we watching?"
+  TD-anxiety the showcase opens on (TD Bank's 2024 penalty was a CDD/adverse-media failure). The WALKING SKELETON proves
+  ONE new muscle end-to-end, offline: unstructured news → grounded entity + red-flag extraction → fuzzy-match against a
+  SYNTHETIC client/counterparty book → potential exposure → human disposition. ARC (in `news.html`): Select → Read
+  (each grounded red-flag phrase highlighted + each named entity tagged, with the natural-AML `red_flag` translation
+  beside the verbatim — the corpus's two-layer model reused) → Screen (the NEW muscle — a client-side fuzzy matcher
+  `normalize → token-sort → Jaro-Winkler`, REAL string-similarity, thresholded at 0.85; it surfaces the NEAR-matches an
+  exact-name screen would miss) → Disposition (the human gate — keyboard-safe `<button>` toggles, default-confirm, the
+  analyst DISMISSES false positives: a common name can collide with an unrelated person at a perfect 1.0 score) →
+  Exposure (confirmed hits framed as adverse-media atoms; the compose-with-the-transaction-signal payoff is the M8
+  NORTH STAR, scoped OUT). DATA (committed, SYNTHETIC — non-negotiable #4): `data/news/articles/*.md` (4 fictional
+  scenarios — trade-shell / mule-romance / sanctions-front / professional-ML) → `data/news/derived/*.json` (named
+  `entities` + red-flag `flag` phrases, each QUOTE-GROUNDED in the article via normalize-substring, + a `red_flag`
+  translation) + `data/news/book.json` (12-row synthetic book, SEEDED with exact matches, near-matches [Volkoff /
+  Dimitri / word-order Van Thanh / Bellwether], and a common-name FALSE-POSITIVE trap [Andrei Petrov, score 1.0, a
+  DIFFERENT person]). BUILD: `build.py news` (added ADDITIVELY — a new `news` target + `validate_news_data` [the
+  build-boundary grounding gate, fail-loud, with a LOCAL `_news_normalize` so build.py STILL never imports the authoring
+  layer] + `render_news`/`build_news`/`check_news`; `news`/`all`/`--check` wired). HONESTY: synthetic data under the
+  always-on badge; fuzzy scores are REAL computed similarity (never fabricated); counts honest; the near-match + the
+  trap are DESIGNED INTO the synthetic data to teach the mechanism, not claimed as detection rates. FROZEN byte-clean:
+  the showcase (index.html + config/** + 3 typology dists), the ENTIRE corpus (corpus.html, dist/corpus, all 4 source
+  dirs, every corpus-status.json, all 42 derived records, data/typology-map.json, data/capability-taxonomy.json), and
+  the grounding core `derive_signals.py`; build.py edited ADDITIVELY (existing dist outputs byte-identical). Harness:
+  `tests/news-stream.test.mjs` (+38, both motion modes). NO non-negotiable change.
 - IMPORTANT — INVERTED extraction boundary (Phase 16) + the SUBTRACTION (Phase 17): the **LLM EXTRACTS, the
   deterministic layer GATES**, and the old extractor is **DELETED**. The earlier deterministic
   `extract_red_flags` accreted format special-casing every phase yet the LLM still had to author/prune its
@@ -387,8 +415,16 @@ AML transformation framework. Keep vocabulary consistent with it
   changes, then rebuild. Acquire a new FinCEN source: `crawl_fincen.py [--alerts] --fetch` then `--write` →
   `acquire_fincen.py --source <dir> <id>` → `pdf_to_md.py --source <dir> <id>` (raw PDFs are gitignored;
   the committed `<dir>/*.md` is the derivation surface).
-- Present: open `dist/<id>/index.html` (or `dist/corpus/index.html`) — single self-contained file,
-  offline, no server. Drift guard before presenting: `python3 scripts/build.py --check all`.
+- News stream (M8, Phase 31): `python3 scripts/build.py news` → `dist/news/index.html` — a SEPARATE,
+  standalone ship artifact (the adverse-media / negative-news stream, a SECOND atom stream), built from
+  `news.html`. Reads the committed SYNTHETIC `data/news/{articles/*.md, derived/*.json, book.json}`,
+  validates grounding at the build boundary (`validate_news_data` — every extracted entity name + red-flag
+  `flag` must quote-ground in its article via a LOCAL normalizer; build.py never imports the authoring
+  layer), inlines at `__NEWS__`. The runtime fuzzy matcher (normalize → token-sort → Jaro-Winkler, REAL
+  scores) runs entirely CLIENT-SIDE (no LLM/fetch). build.py is edited ADDITIVELY (existing dist outputs
+  byte-identical); `--check all` and `all` now include news.
+- Present: open `dist/<id>/index.html` (or `dist/corpus/index.html`, or `dist/news/index.html`) — single
+  self-contained file, offline, no server. Drift guard before presenting: `python3 scripts/build.py --check all`.
 - Test (all dep-free, no install): `node tests/corpus-explorer.test.mjs` drives the story landing + the corpus explorer's
   6-screen per-doc arc (Select → Read advisory → Coverage → Build recs → Signal → Combination lift → Close) against the
   committed `dist/corpus/index.html` (gate toggle, the article screen + red_flag threading, Signal empty states,
@@ -415,8 +451,13 @@ AML transformation framework. Keep vocabulary consistent with it
   symmetric counterpart on the D1–D20 axis; the per-data-source card carries honest demand + the institution's
   data-access posture + the covered/partial/gap split, gap-priority sorted; drilling a data source pools every
   indicator that depends on that feed [with the inverse "Implements capabilities" panel] and drills into a doc's
-  per-doc arc with Back returning to the data source); 217 assertions · `python3 scripts/derive_signals.py --selftest` runs
-  the derivation GATE checks. Pre-present sequence: `--check all` (drift) → `node tests/…` (arc) → walk
+  per-doc arc with Back returning to the data source); 217 assertions. `node tests/news-stream.test.mjs`
+  (M8, Phase 31) drives the adverse-media stream arc (Select → Read → Screen → Disposition → Exposure) +
+  the fuzzy matcher against the committed `dist/news/index.html` — the seeded near-matches surface (Volkoff
+  0.977, Dmitri 0.921, word-order Van Thanh 1.0), the common-name FALSE-POSITIVE trap (Andrei Petrov 1.0) is
+  dismissable at the human gate (confirmed-count drops), Read highlights grounded flags + tags entities, no
+  fabricated precision number; both motion modes; 38 assertions. `python3 scripts/derive_signals.py --selftest`
+  runs the derivation GATE checks. Pre-present sequence: `--check all` (drift) → `node tests/…` (arcs) → walk
   `tests/smoke-checklist.md` (the human-eye checks).
 - Iterate: edit `index.html` / `corpus.html` / a config, rebuild. `python3 -m http.server` optional, never required.
 
@@ -489,6 +530,18 @@ acquires the data), surfaced corpus-wide. The TIGHTEST phase in the series: a pu
 harness + docs — `scripts/build.py`, `data/capability-taxonomy.json`, AND all 42 derived records stay BYTE-FROZEN (the
 data_sources axis was already inlined/validated in Phase 29 — no data/build change). Honest re-projection only (the
 Phase-24/29 model); the always-on badge stays; NO non-negotiable change. Harness 190→217.
+M8 the adverse-media / negative-news stream (Phase 31: a SECOND atom stream as a new standalone artifact
+`dist/news/` from `news.html` — synthetic news → grounded entity + red-flag extraction → a client-side fuzzy
+match (normalize → token-sort → Jaro-Winkler, REAL scores) against a synthetic client/counterparty book →
+potential exposure → a human disposition gate. Surfaces the near-matches an exact-name screen misses (typo /
+transliteration / word-order) and the common-name FALSE-POSITIVE trap, which the human dismisses. Build-time
+data (`data/news/{articles,derived,book}`) grounded at the build boundary (`validate_news_data` — a LOCAL
+normalizer, build.py never imports the authoring layer); runtime is pure client-side JS (no LLM/fetch). A
+WALKING SKELETON — the compose-with-the-transaction-signal payoff is the M8 north star, scoped OUT. build.py
+edited ADDITIVELY (a new `news` target; existing dist outputs byte-identical, `--check all` includes news); the
+showcase + the entire corpus + the grounding core `derive_signals.py` stay byte-frozen. Harness +38
+(`tests/news-stream.test.mjs`, both motion modes). HONEST: synthetic data under the always-on badge, REAL fuzzy
+scores, no fabricated number. NO non-negotiable change).
 See HANDOFF.md §8.
 
 ## Definition of done

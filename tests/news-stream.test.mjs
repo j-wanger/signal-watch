@@ -41,6 +41,18 @@ const close = html.lastIndexOf('</script>');
 if (open < 0 || close < 0) { console.error('FATAL: no <script> in', DIST); process.exit(2); }
 const SCRIPT = html.slice(open + '<script>'.length, close);
 
+// --- Phase 35: the offline ship artifact must carry NO live-mode code (build-time stripped) ---------
+// news.html (the SOURCE template) carries the companion-only live region; build.py render_news strips it
+// for dist/news, so the offline single file stays self-contained (zero network code); the live branch is
+// served only by scripts/serve_news.py.
+{
+  const src = readFileSync(resolve(HERE, '..', 'news.html'), 'utf8');
+  ok(src.includes('/*LIVE_START*/') && src.includes('liveInit') && src.includes('fetch('),
+     'news.html SOURCE carries the live-mode region (served by the companion)');
+  ok(!html.includes('/*LIVE_START*/') && !html.includes('liveInit') && !html.includes('fetch('),
+     'offline dist/news has the live region STRIPPED (zero network code; self-contained)');
+}
+
 ok(/class="badge"/.test(html) && /Illustrative data/.test(html), 'always-on illustrative badge present in the ship chrome');
 
 /* ---------- a DOM/window shim — enriched dynamic nodes + drainable timers ---------- */

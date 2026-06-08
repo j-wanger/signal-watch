@@ -30,6 +30,8 @@ import re
 import sys
 from pathlib import Path
 
+import news_ground  # stdlib grounding primitives shared with the live companion (serve_news.py); NOT the authoring layer
+
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE = ROOT / "index.html"
 TYPOLOGY_DIR = ROOT / "config" / "typologies"
@@ -110,6 +112,10 @@ NEWS_PLACEHOLDER = "__NEWS__"
 NEWS_DERIVED = ROOT / "data" / "news" / "derived"
 NEWS_BOOK = ROOT / "data" / "news" / "book.json"
 NEWS_MATCH_THRESHOLD = 0.85  # fuzzy-match surface threshold (shared by the ship artifact + the harness)
+# Phase 35: the companion-only LIVE-MODE region in news.html — STRIPPED for the offline ship build so the
+# single-file dist/news keeps ZERO network code (the live branch is served only by scripts/serve_news.py).
+# The pattern eats the leading newline so the strip yields the pre-live bytes exactly (drift guard pins it).
+LIVE_REGION_RE = re.compile(r"\n[ \t]*/\*LIVE_START\*/.*?/\*LIVE_END\*/", re.S)
 
 STATUS = {"covered", "partial", "gap"}
 POSTURE = {"y", "n", "partial"}   # Phase 29 — the capability-lens interview self-assessment vocabulary
@@ -696,26 +702,13 @@ def check_corpus(template: str) -> bool:
     return True
 
 
-def _news_normalize(text: str) -> str:
-    """Position-free quote-grounding key for the news stream — lowercase, keep [a-z0-9] only.
-
-    Mirrors the corpus grounding rule (derive_signals.normalize) so an extracted entity name or a
-    red-flag phrase grounds as a substring of its source article regardless of punctuation / wrapping.
-    A LOCAL copy on purpose: build.py never imports the authoring layer.
-    """
-    return re.sub(r"[^a-z0-9]+", "", text.lower())
-
-
-def _news_article_body(md: str) -> str:
-    """Display body for the Read screen: drop the leading markdown `# Title` (it renders as the screen H1)
-    and the `*…*` emphasis markers (the .article panel is pre-wrap text, so raw `#`/`*` would show
-    literally). Grounding-safe: the entity names + red-flag flags live in the body paragraphs, never the
-    title or the italic disclaimer, so both the normalize-substring gate and the raw highlighter still match.
-    """
-    lines = md.splitlines()
-    if lines and lines[0].lstrip().startswith("# "):
-        lines = lines[1:]
-    return "\n".join(lines).strip().replace("*", "")
+# Phase 35: the news grounding PRIMITIVES now live in scripts/news_ground.py (stdlib), SHARED with the
+# live companion (serve_news.py) so live grounding == build grounding by construction. news_ground is
+# pure string grounding (normalize + the article-body transform), NOT the authoring/LLM layer — build.py
+# still imports no derive_signals / markitdown / LLM client. Behavior is byte-identical to the prior
+# local copies (the --check news drift guard pins this).
+_news_normalize = news_ground.news_normalize
+_news_article_body = news_ground.article_body
 
 
 def validate_news_data(articles: list, book: dict) -> list:
@@ -813,7 +806,12 @@ def load_news() -> tuple:
 
 
 def render_news(template: str) -> str:
-    """Validate + assemble the synthetic news dataset and inline it into news.html. Pure (no disk write)."""
+    """Validate + assemble the synthetic news dataset and inline it into news.html. Pure (no disk write).
+
+    Phase 35: STRIP the companion-only live-mode region first, so the offline ship file keeps zero network
+    code (the self-contained guard below then holds). The live branch is served only by serve_news.py.
+    """
+    template = LIVE_REGION_RE.sub("", template)
     articles, book = load_news()
     errors = validate_news_data(articles, book)
     if errors:

@@ -37,536 +37,159 @@ AML transformation framework. Keep vocabulary consistent with it
 - Live mode is optional, isolated, off by default, always has a scripted fallback.
   Never put keys/tokens in the frontend. Copilot is NOT a web backend (HANDOFF §4.5).
 
-## Current state (M7 corpus completeness + typology re-segmentation: Phase 33 — corpus 875→2,251 indicators across 56 derived / 62 publications / 5 sources, +TBML & 4 new typologies; Phase 34 — C/D-assignment verification of the 1,376 new indicators; M8 adverse-media stream: Phase 31 walking skeleton + Phase 32 real-source & presentation elevation)
-- Generic engine: `index.html` (vanilla HTML/CSS/JS) with a single `__CONFIG__` injection point.
-  Typology-agnostic — adding a typology is one JSON file, no engine edits. Presenter controls (M3):
-  keyboard nav (←/→/Space/Esc/↺), reset, `prefers-reduced-motion`.
-- Content: `config/typologies/*.json` (fentanyl, trade-based, elder-financial-exploitation) against
-  `config/schema.md`.
-- Build: `scripts/build.py` validates a config against the schema (fails loud), resolves
-  `text_file`→inline, and inlines everything → `dist/<id>/index.html`. Baseline preserved in `archive/`.
-- Authoring pipeline (M6, build-time ONLY — never in the ship file): `crawl_fincen.py` (Phase 10:
-  discover the FinCEN advisories listing → committed manifest `data/fincen/index.json`; pure
-  `parse_index` + offline `--selftest`, thin live `--fetch`) → `acquire_fincen.py` (read the manifest,
-  resolve each advisory's PDF from its detail page; EFE kept as a zero-hop direct-PDF override) →
-  `pdf_to_md.py` (markitdown PDF→markdown, persisted to `data/fincen/<id>.md` as the source of truth)
-  → `derive_signals.py` (the deterministic GATE — Phase 16 inverted the boundary, Phase 17 deleted the
-  old extractor: the LLM backend reads `<id>.md` and EXTRACTS the red flags + per-indicator judgment into
-  `data/fincen/derived/<id>.json`, and `--check-derived` DISPOSES — see the corpus-derivation bullet).
-  `derive_signals.py` is now stdlib-only (no `anthropic` dep); only `markitdown` (convert) lives in a
-  gitignored uv `.venv` — NO authoring tool is imported by the engine or `build.py`, and the ship artifact
-  never fetches or calls an LLM. The elder typology renders the FULL verbatim EFE advisory (FinCEN
-  FIN-2022-A002, public domain) in Act 1 via the `advisory_full` field.
-- Corpus derivation (Phase 12+, M7 — backend for an expanded, singular corpus-backed demo where the
-  user picks one of 14 advisories): the full 14-advisory FinCEN corpus is committed as md
-  (`data/fincen/*.md`). The LLM backend (a live model session, no key) reads an advisory and EXTRACTS its
-  red flags + per-indicator judgment (status, data, a build recommendation, build logic for the BUILD_NOW
-  gaps) into `data/fincen/derived/<id>.json`; `--check-derived` DISPOSES — `build_rec` must follow the
-  cover×data matrix (`build_rec_category`), every verbatim `flag` must QUOTE-GROUND in the source md
-  (`normalize(flag)` ⊂ `normalize(md)`, inside the red-flag region `rf_region`), BUILD_NOW must carry a
-  full definition. `--corpus` / `--corpus-status` are a cheap rf_region triage HINT (`derivable` = a
-  red-flag region exists, false only for the 2 FATF advisories; + a coarse block count via `_rf_triage`) —
-  never the derivation authority. The LLM proposes (extraction included); the deterministic gate + the two
-  human gates dispose. Derived records are an LLM-derived + checked corpus dataset, NOT ship typology
-  configs (the 3 hand-curated typologies stay the showcase).
-- Corpus explorer (Phase 13, M7 — the demo scope expansion): a SECOND, separate ship artifact
-  `dist/corpus/index.html`, built from a standalone template `corpus.html` (owns its own copy of the
-  dossier theme — the six-act engine `index.html` is left byte-untouched). A staged 6-screen ARC
-  (Phase 18 gave the explorer the showcase's two missing beats — a human gate + a close-the-loop payoff;
-  Phase 25 added the article-processing beat):
-  SELECT one of the 46 public publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC + 10 FINTRAC —
-  Phase 20/21/22/23; honest `doc_type` chip Advisory/Alert/OFAC/FINTRAC + status chips: derived /
-  clean-or-low-not-yet-derived / non-derivable) → READ ADVISORY (Phase 25 — the FULL source document with each
-  verbatim red-flag phrase highlighted, then translated into a natural-AML `red_flag` shown BESIDE the verbatim
-  quote) → COVERAGE gauge → BUILD RECOMMENDATIONS **= the human GATE** (per-indicator cover×data
-  build_rec, sorted BUILD_NOW-first, each row src_line-traceable; the BUILD_NOW rows are SELECTABLE
-  div-toggles [NOT `<input>`, so Space/arrow nav still works] — default all-selected, "agent proposes,
-  human disposes"; non-BUILD_NOW rows read-only) → SIGNAL spec for the PICKED BUILD_NOW gaps → CLOSE THE
-  LOOP (the coverage index animates before→after as the picked gaps flip gap→covered — same model as the
-  showcase's Act 6; 0-picked / 0-BUILD_NOW holds coverage flat with a note, never a fake rise). The payoff
-  is COVERAGE, NOT precision combination-lift: the derived records carry no precision/lift numbers, so
-  porting the showcase lift beat would FABRICATE ~12 per-advisory stats — rejected (the "never present
-  synthetic numbers as real" non-negotiable); coverage is already disclosed illustrative. Phase 18 unfroze
-  ONLY `corpus.html` (the arc reuses existing data fields — no schema/data/`build.py` change). Built by
-  `build.py corpus` (or `all`; guarded by `--check corpus`), which reads two COMMITTED data artifacts —
-  the extraction manifest `data/fincen/corpus-status.json` (emitted by `derive_signals.py
-  --corpus-status`) + the derived records `data/fincen/derived/*.json` — merges them by id, and
-  validates the derived shape at the build boundary (build_rec ∈ matrix vocabulary; BUILD_NOW ⇒ full
-  build_logic). build.py NEVER imports the authoring layer; ships with **12/14 derived** (Phase 17 added
-  health-care fin-2026-a001 [glued, 24 flags] + COVID health-insurance fin-2021-a001 + Iran-terror
-  fin-2024-a001 + ISIS fin-2025-a001 + the EFE corpus record fin-2022-a002 to the Phase-16 seven). Only
-  the 2 FATF jurisdiction advisories (fin-2020-a009, fin-2021-a003 — no enumerated red-flag list) stay
-  non-derivable. The glued advisories (ransomware fin-2021-a004, health-care fin-2026-a001) were
-  unreachable by the deleted structural extractor yet ship derived via the inverted loop (the LLM reads
-  them like a human, the gate grounds each verbatim flag). No fabricated lift/stats; the always-on badge
-  stays, with the verbatim public-domain source attribution kept visually distinct from it.
-- Multi-source corpus (Phase 20, M7 — scale beyond advisories): the corpus explorer is now MULTI-SOURCE.
-  A thin `CORPUS_SOURCES` registry in `build.py` (source-id → {status, derived dir, doc_type}) lets
-  `render_corpus` merge each FinCEN publication TYPE's committed `corpus-status.json` + `derived/*.json` by
-  id into one `__CORPUS__`; the SELECT menu lists all of them with an honest `doc_type` chip (Advisory /
-  Alert). FinCEN ALERTS are source #2 (`data/fincen-alerts/` — 19 alert md, 17 derived): acquired by
-  `crawl_fincen.py --alerts` (the alerts hub lists each PDF DIRECTLY → zero-hop download) →
-  `acquire_fincen.py`/`pdf_to_md.py --source data/fincen-alerts` → derived via the SAME inverted loop +
-  gate. Phase 20 stayed STILL FinCEN, STILL verbatim, STILL public-domain (17 U.S.C. 105) — NO
-  non-negotiable changed by it; the quote-grounding gate (`check_record`/`rf_region`/`normalize`) is
-  source-agnostic. `data/fincen/` (the advisories source) stays byte-frozen — multi-source via the MERGE,
-  not a migration. (Phase 21 then added OFAC as source #3 + Phase 22 added FINTRAC as source #4 + Phase 23
-  DEEPENED FINTRAC 3→10 — see the next bullets; the corpus now ships **42 derived across 46 publications** =
-  12 advisories + 17 alerts + 3 OFAC + 10 FINTRAC, only the 2 FATF advisories + 2 alerts with no enumerated
-  red-flag list non-derivable.)
-- OFAC as source #3 (Phase 21, M7 — cross-agency, US-federal): OFAC (US Treasury) added as the THIRD
-  corpus source (`data/ofac/`, doc_type "OFAC"; 3 derived). Because 17 U.S.C. §105 covers ALL US federal
-  works, the verbatim non-negotiable was extended FinCEN-only → US-federal (FinCEN + OFAC + US federal;
-  at Phase 21 FINTRAC + non-US still paraphrased — Phase 22 then extended verbatim to FINTRAC too under a
-  non-commercial licence, see next bullet). OFAC mostly uses sanctions-RISK vocab ("Risk Indicators" / "Deceptive
-  Practices") rather than FinCEN's "red flags", so `rf_region`'s anchors were WIDENED (`_RF_HEADER_OFAC` +
-  `_RF_INTRO_OFAC`), REGRESSION-GATED: every FinCEN md's rf_region stays byte-unchanged, all 29 FinCEN
-  records + `--selftest` still clean (the new vocab is ~inert for FinCEN); grounding/`normalize` untouched.
-  Acquisition is HAND-CURATED (OFAC's site is a JS SPA — no static crawl; `crawl_fincen.py` stays
-  FinCEN-only): `data/ofac/index.json` lists /media/<id>/download PDFs, acquired via `acquire_fincen.py
-  --source data/ofac`. OFAC content is sanctions/vessel-oriented → records are honestly enrichment/
-  SOURCE_DATA-heavy with few BUILD_NOW (the maritime deceptive practices are vessel-behavior the FI can't
-  observe → SOURCE_DATA, NOT fabricated signals). The cleanly-anchoring OFAC advisory set is small (3:
-  sham-transactions, maritime, virtual-currency — each a different vocab form); most OFAC docs defer red
-  flags to a co-issued FinCEN advisory or use non-anchoring framing (honestly skipped, not forced).
-- FINTRAC as source #4 (Phase 22, M7 — the FIRST CROSS-JURISDICTION source): FINTRAC (Canada's FIU) added
-  as the FOURTH corpus source (`data/fintrac/`, doc_type "FINTRAC"; 3 derived) — the demo's first move
-  beyond US-federal (US Treasury → +Canada). Compliance basis is DIFFERENT from the US sources: FINTRAC is
-  Canadian Crown copyright, NOT public domain, so the verbatim non-negotiable was extended to a SECOND basis
-  — FINTRAC publications are reproducible verbatim for NON-COMMERCIAL use WITH FINTRAC's required attribution
-  (© His Majesty the King in Right of Canada + title + "a copy of the version at <URL>"), per FINTRAC's Terms
-  & Conditions: a reproduction LICENCE, not the US 17 U.S.C. §105 no-copyright basis (updated identically in
-  CLAUDE.md + HANDOFF.md; every OTHER non-US/non-FINTRAC source still paraphrases). FINTRAC OAs head their
-  list with "indicators" (not "red flags"/"risk indicators"), so `rf_region` was WIDENED (`_RF_HEADER_FINTRAC`
-  + `_RF_INTRO_FINTRAC`, ML/TF-QUALIFIED + an optional section-title trailing clause so "Money laundering
-  indicators of <topic>" anchors), REGRESSION-GATED: the ML/TF-qualified phrasing occurs 0× across all 36
-  FinCEN+OFAC mds → every existing rf_region byte-unchanged, all 32 records + `--selftest` still clean;
-  grounding/`normalize` untouched. Acquisition HAND-CURATED (no FINTRAC crawler): FINTRAC serves a PDF at
-  `<page-url>.pdf`, so `data/fintrac/index.json` lists those (the existing `_to_pdf_url` direct-download
-  branch handled them with NO tweak), acquired via `acquire_fincen.py --source data/fintrac` (the
-  `pdf_to_md.py` provenance header was made source-aware so a FINTRAC md is never mislabeled public domain).
-  3 OAs derived (underground-banking, synthetic-opioids [the Canadian counterpart to the fentanyl showcase],
-  terrorist-financing) — 42 indicators / 11 BUILD_NOW; the TF alert is honestly SOURCE_DATA-heavy (4/13 hinge
-  on external listed-entity/jurisdiction attribution a bank can't observe → SOURCE_DATA, never fabricated).
-  corpus.html's source panel renders each doc's OWN basis (FINTRAC shows Crown-copyright, never "public
-  domain"); the prior blanket "all public domain" SELECT/footer copy was corrected to the multi-jurisdiction
-  reality. The always-on "Illustrative data & outputs" badge stays, distinct from the verbatim attribution.
-- FINTRAC DEPTH (Phase 23, M7 — Canadian depth, NO new source/non-negotiable/architecture change): grew the
-  FINTRAC source 3 → 10 by deriving 7 more anchorable FINTRAC strategic-intelligence products — 6 Operational
-  Alerts (human-trafficking/Project Protect, online-child-exploitation/Project Shadow, romance-fraud/Project
-  Chameleon, illegal-wildlife/Project Anton, professional-ML, cannabis/Project Legion) + the real-estate
-  Operational BRIEF (FINTRAC-2016-OB001 — snow-washing, the marquee Canadian typology). The demo's audience is
-  a Canadian bank, so depth weighted Canadian-relevant. Reused the registry + inverted loop + gate UNCHANGED;
-  the ONLY gate touch was a regression-gated WIDENING for the new INVERTED "Indicators of <X>" heading form
-  (Operational Briefs + some OAs lead with "indicators": `_RF_HEADER_FINTRAC_INV`, two narrow branches —
-  "of <ML/TF>" with a CONNECTOR-gated `:?$` that EXCLUDES the boilerplate sentence "Indicators of <ML/TF> can
-  be thought of as red flags …" [which opens the existing 3 OAs before their forward heading], + "relating
-  to | associated with <topic>" using connectors the boilerplate never uses → 0 collision). 0 of 39
-  prior FinCEN+OFAC+FINTRAC rf_regions shifted; grounding core `normalize`/`check_record` byte-UNTOUCHED.
-  225 indicators / 50 BUILD_NOW; honest yield over count — OCSE + wildlife are honestly SOURCE_DATA/
-  BUILD_ENRICH-heavy (external attribution a bank can't observe), cannabis/professional-ml BUILD_NOW-rich
-  (bank-observable EMT/cheque/cash/utility patterns); the human-trafficking record drops its 2016 APPENDIX
-  (a reproduction of a SEPARATE 2016 OA — faithfulness, not a count cap). FINTRAC OAs are far more
-  indicator-dense than FinCEN advisories (house norm ≤24; new range 16-57) — honest, the demo shows real
-  depth. build.py + corpus.html UNCHANGED (the 4-type menu/chips/counts are data-driven). The always-on
-  badge + source-aware Crown-copyright attribution stay.
-- CROSS-CORPUS SYNTHESIS (Phase 24, M7 — the corpus becomes ANALYTICAL; NO new source/non-negotiable change):
-  the explorer can now GROUP the 42 derived docs by money-laundering TYPOLOGY and show COMBINED coverage across
-  a cross-jurisdiction cluster — the new insight being **no single advisory covers a typology; the combined
-  corpus does** (uniquely possible once the corpus spans FinCEN + OFAC + FINTRAC, US + Canada). THE OVERLAY is a
-  SEPARATE committed artifact `data/typology-map.json` (doc-id → ONE closed-vocabulary typology; 22-term vocab;
-  jurisdiction is NOT stored — it's derived from the source registry: FinCEN/OFAC = US, FINTRAC = Canada) — NOT
-  edits to the 42 derived records, so all 4 source dirs + the grounding core `derive_signals.py` stay
-  BYTE-FROZEN. Validated at the BUILD BOUNDARY in `build.py` (`load_typology_map` + `validate_typology` —
-  closed vocab + referential integrity + total live-doc coverage, FAIL-LOUD, where derived-shape validation
-  already lives; the grounding gate is untouched): agent proposes the map, the deterministic gate disposes, the
-  human reviews. `build.py` merges `typology` + `jurisdiction` + the typology vocab into `__CORPUS__`;
-  `corpus.html` adds a Documents/Typologies toggle on Select → a typology's cross-jurisdiction cluster +
-  combined coverage + per-jurisdiction contribution → drill-through into each doc's existing 6-screen per-doc
-  arc (the per-doc arc is the spine, unchanged; the lens is ADDITIVE). 5 cross-jurisdiction clusters
-  (terrorist-financing, synthetic-opioids, human-trafficking, professional-money-laundering,
-  romance-and-investment-fraud) + 2 cross-AGENCY US clusters (sanctions-evasion across Advisory/Alert/OFAC,
-  public-benefits-fraud). HONESTY (ties to the Phase-18 precision-lift rejection): combined coverage is honest
-  UNION arithmetic over the existing per-indicator status (disclosed-illustrative under the always-on badge),
-  per-jurisdiction is an honest COUNT, every clustered indicator stays traceable to its source doc +
-  jurisdiction — NO similarity / overlap / lift number is computed or claimed; indicators are NOT de-duplicated
-  or matched across regulators (that would need fabricated matching). Harness 74 → 98 (24 synthesis asserts).
-  index.html + config/** + the 3 typology dists + the 4 source dirs + 42 derived records + the showcase stay
-  byte-frozen; NO non-negotiable change.
-- RED-FLAG TRANSLATION + ARTICLE-PROCESSING (Phase 25, M7 — corpus OUTPUT QUALITY; NO new source / non-negotiable
-  change): the corpus explorer's red flags were bare VERBATIM article extractions (the grounded `flag` substring) — not
-  how an AML programme writes red flags — and it lacked the showcase's article-processing beat. Phase 25 brings the corpus
-  to the showcase's two-layer model: keep step 1 = the grounded verbatim extraction (the EVIDENCE), ADD step 2 = a
-  `red_flag` TRANSLATION (natural AML-term phrasing) BESIDE it. Every live derived indicator gained a `red_flag` field,
-  re-derived across all 42 docs via the inverted loop (one extraction subagent per doc, self-gated then independently
-  re-checked; the 3 hand-curated showcase typologies are untouched). A NEW per-doc screen (`renderArticle`, inserted
-  AHEAD of Coverage so the arc is Select → Read advisory → Coverage → Build recs → Signal → Close) renders the FULL source
-  article — `build.py` inlines each live doc's `source_md` body via a new `_inline_article`/`_strip_provenance` (mirroring
-  `advisory_full`'s text_file resolution; `render_one` + the 3 typology dists stay BYTE-FROZEN) — with each verbatim
-  red-flag phrase highlighted, then reveals the translation; downstream screens label indicators by `red_flag` with the
-  verbatim kept as a traceable subline. HONESTY (load-bearing): the verbatim `flag` stays the GROUNDED AUTHORITY shown
-  BESIDE the translation (never replaced); the grounding gate logic (`normalize`/`rf_region`/`flag⊂md`) is BYTE-UNCHANGED;
-  the gate's new `red_flag` check is SHAPE only (present / non-empty / distinct-from-verbatim / 12–240 chars), enforced in
-  BOTH `derive_signals.py check_record` AND `build.py validate_corpus_data`. Translation faithfulness is the one NEURAL
-  step — mitigated by show-both + the always-on illustrative badge + the per-doc re-check; paraphrase is the compliance
-  DEFAULT, so the translation ALIGNS with the non-negotiables. dist/corpus 635KB → 2.19MB (the inlined source articles);
-  harness 98 → 108. index.html + config/** + the 3 typology dists + every source md + every corpus-status.json + the
-  showcase + data/typology-map.json stay byte-frozen; NO non-negotiable change.
-- SHOWCASE-QUALITY ELEVATION (Phase 26, M7 — corpus OUTPUT QUALITY raised to the six-act showcase bar; NO new source /
-  non-negotiable change): Phase 25 shipped the two-layer model but the output was still weak — the `red_flag`s read like
-  PROSE (never anchored to `config/typologies/fentanyl.json`), the article render was STATIC, the Signal screen didn't
-  "wow", docs/red-flags weren't grouped, and there was no landing. Phase 26 elevates all of it, workflow-driven. (1)
-  THE REGISTER: every live derived indicator's `red_flag` was RE-TRANSLATED to the showcase's terse, mechanism-named
-  AML-indicator register (fentanyl.json style — "Receive-and-forward to no-relationship payees (mule pass-through)",
-  "Multi-originator geographic funnel-in", "Round-dollar gift-card / prepaid-card retail spend") via a DYNAMIC WORKFLOW
-  (`ph26-register-retranslate`: 84 agents — 42 translate → 42 INDEPENDENT adversarial verify; the LLM proposes, a
-  byte-SURGICAL applier writes ONLY the `red_flag` value + `--check-derived` disposes). All 42 `--check-derived` clean;
-  the verbatim `flag` + the grounding logic + the SHAPE gate are BYTE-UNCHANGED (only `red_flag` VALUES changed); the
-  show-both honesty model holds. (2) PROGRESSIVE ARTICLE RENDER: the Read-advisory screen ports the showcase
-  `streamAdvisory` "agent reading" beat as a progressive ENHANCEMENT (final state in the template → reduced-motion + the
-  string-DOM harness settle on it; full motion types a capped opening → reveals highlights → staggers the translate list).
-  (3) GROUPING/SORT: Select is grouped by SOURCE (FinCEN Advisories / Alerts / OFAC / FINTRAC), newest-first within each;
-  red flags sub-group by `section` on Coverage (the 13 multi-section docs; single-section stays flat). (4) WOW BEATS: a
-  build-log on Signal (Act-4 port — animates the REAL `build_logic`, structural, no numbers) + a NEW Combination-lift
-  screen (Act-5 port) between Signal and Close. The per-doc arc is now Select → Read advisory → Coverage → Build recs →
-  Signal → Combination lift → Close. WOW-NUMBERS HONESTY (a deliberate, user-approved, scoped reversal of the Phase-18
-  no-lift call): the lift figures are a GENERIC illustrative template (18→64→83), IDENTICAL across every doc, behind a
-  LOUD "Illustrative · pending calibration — NOT measured on this document" tag (rose, distinct from the always-on badge)
-  — NEVER 42 fabricated per-doc findings, NEVER presented as real; the records still carry no lift numbers. (5) a
-  story-driven LANDING is the new ENTRY (`renderLanding` before Select; honest data-derived stat tiles 46/42/4/2; "Enter
-  the corpus" CTA; the showcase landing is roadmapped — index.html stays byte-frozen). dist/corpus 2.19MB → 2.17MB;
-  harness 108 → 139. Scope was the 42 `derived/*.json` (`red_flag` VALUES only) + `corpus.html` + `dist/corpus` + tests +
-  docs; FROZEN byte-clean: the showcase (index.html + config/** + the 3 typology dists), every source md, every
-  corpus-status.json, data/typology-map.json, and the grounding core `derive_signals.py`. NO non-negotiable change.
-- SHIPPABILITY FIXES (Phase 27, M7 — corpus OUTPUT QUALITY raised to SHIPPABLE; NO new source / non-negotiable
-  change): the user reviewed the BUILT Phase-26 corpus and judged it NOT shippable — the Read-advisory
-  extract/translate beat "brutally bad", the build animation "not in place". A READ-ONLY assessment (a 44-agent
-  workflow + deterministic metrics) DISPOSED the framing: the brutality was PRESENTATION, not the grounding
-  system (39/42 docs PRESENTATION_ONLY; register already held; the verbatim flags real). Fixes, evidence-led:
-  (1) `cleanArticle()` (corpus.html) markitdown-sanitizes the DISPLAYED source — strips page-break form-feeds,
-  running headers (FINCEN ADVISORY/ALERT, letter-spaced "F I N C E N", FINTRAC OPERATIONAL), bare page-numbers,
-  tab-between-every-word soup — a DISPLAY transform only (source md + grounding byte-untouched; footnote-ref
-  digits KEPT so the cleaned text still grounds 1:1). (2) `highlightArticle` rewritten to NORMALIZE BOTH SIDES
-  (the gate's own `normalize()`) + an index map back to source positions → 634/634 flags highlight (100%, from
-  95.3% raw; the literal matcher would've REGRESSED on cleaned text — so the cleaner + matcher are coupled).
-  (3) the Signal build-log ports the showcase Act-4 ".run working-pulse" rhythm in a proposal grid + the
-  combination-lift gets a lift-side rationale panel, `firestat` OMITTED (its stats would be fabricated). (4) the
-  progressive "agent reading" types the WHOLE article (no 1600-char cap; length-scaled ~6s) — the demo's first
-  wow, now complete. (5) a faithfulness-guarded re-extraction (a 72-agent tighten→verify workflow + a
-  deterministic applier) tightened 121 over-long verbatim flags to crisp CONTIGUOUS SUB-SPANS of the current
-  flag — grounding is transitive (a sub-span of an already-grounded quote can't fabricate), gated by
-  `normalize(new) ⊂ normalize(current)` + ≥24 chars + red_flag-distinct, byte-surgical (only flag lines change);
-  genuinely-long single-sentence advisory indicators KEPT WHOLE (forcing them crisp would drop the qualifying
-  condition = fabricated brevity, rejected). (6) `fin-2022-a001`'s 2 prose-y red_flags re-translated to the
-  mechanism-named register. dist/corpus 2.17MB → 2.15MB; harness 139 → 148; all 42 records `--check-derived`
-  clean; `--check all` 4/4 ZERO DRIFT. FROZEN byte-clean: the showcase (index.html + config/** + the 3 typology
-  dists), every source md, every corpus-status.json, data/typology-map.json, the grounding core `derive_signals.py`
-  (the gate logic byte-UNCHANGED — re-extraction only shrank flag VALUES). NO non-negotiable change.
-- COMPLETENESS + GROUNDED COVERAGE + STREAMING READ (Phase 28, M7 — the corpus made COMPLETE, HONEST, and
-  presentation-finished; NO new source / non-negotiable change): the user found the CORE defect Phase-27's
-  assessment MISSED — verbatim red-flag EXTRACTION was grossly INCOMPLETE (the grounding gate only ever checked
-  each flag was REAL, never that we got them ALL; the opioid doc shipped 15 of ~80). (1) COMPLETE RE-EXTRACTION
-  (the `ph28-complete-sweep` 84-agent LLM-enumerate + completeness-critic workflow — deterministic bullet-detect
-  was too unreliable, glyphs vary per doc): 634 → 903 indicators, every flag re-grounds (terror 13→77,
-  opioids 15→68, human-trafficking 57→98, maritime 7→40). (2) GROUNDED COVERAGE (replaces fabrication): a
-  user-approved 28-capability + 20-data-source taxonomy → each indicator tagged capability/data_source → the
-  user's 28+20 YES/NO/PARTIAL interview answers → deterministic apply (cap→status, data→availability, the
-  cover×data matrix→build_rec); honest SOURCE_DATA where the bank can't observe; 28 capability spec-templates
-  author the BUILD_NOW build_logic. NO fabricated coverage. (3) STREAMING READ (corpus.html, T10 — the
-  Phase-27/T7 phrase-by-phrase render was "staged" + ~48s-hardcoded): `renderArticle` now STREAMS the source in
-  as if read (caret + scroll-follow), each red-flag phrase highlighting ONLY as the read reaches its position +
-  its translation extracting alongside; BOTH the "phrases extracted" and "red flags" labels count UP from 0 (no
-  full count shown up-front); length-scaled ~0.9ms/char, capped ~45s. Reduced-motion + the string-DOM harness
-  settle on the final template; a full-motion harness section (`__drain` + an enriched dynEl) drives the stream.
-  (4) DISPLAY POLISH: `cleanArticle` de-pipes markitdown PIPE-GRID tables (`|---|` rule rows dropped, `|cell|cell|`
-  → readable text) + strips stray `#`/`**` — normalize-INVARIANT (normalize drops `|`/`#`/`*`/spaces), so grounding
-  + highlighting are byte-unchanged. (5) DEDUP: the completeness sweep double-extracted 5 docs (terror under two
-  parallel section schemes = 24 dupes; 4 others 1 each — tab-soup / newline / prefix-truncation artifacts), all
-  confirmed against the source mds; 28 genuine duplicates removed byte-surgically (json `indent=1` round-trip, only
-  the dup objects removed) → 903 → **875 indicators**, terror 77→53, ZERO unique lost. (6) BRANDING "FinCEN Corpus
-  Explorer" → "AML Corpus Explorer" (the `build.py` brand subtitle was overriding the template at runtime — fixed).
-  (7) FINTRAC ATTRIBUTION RELOCATED to a per-doc PAGE FOOTER (the user's compliance call): the on-screen Source
-  LABEL carries the title only; the full Crown-copyright attribution (© His Majesty… + complete title + source URL)
-  renders in the footer for the FINTRAC doc on screen, EMPTY for US public-domain docs (build.py preserves the ©
-  clause as `attribution` + surfaces `url`). The verbatim+attribution non-negotiable is HELD (attribution present,
-  just relocated) — NO deviation. dist/corpus ~2.40MB; harness 148 → **165**. FROZEN byte-clean: the showcase
-  (index.html + config/** + the 3 typology dists), every source md, every corpus-status.json, data/typology-map.json,
-  the grounding core `derive_signals.py` (all 875 re-ground through it byte-UNCHANGED). NO non-negotiable change.
-- CAPABILITY LENS (Phase 29, M7 — the corpus re-projected by DETECTION CAPABILITY; NO new source / non-negotiable
-  change): the Phase-28 interview produced a per-indicator `capability` (C1–C28) + `data_source` (D1–D20) tag on
-  every one of the 875 indicators, but the tags were UNUSED in the ship artifact (neither `corpus.html` nor
-  `build.py` read them). Phase 29 surfaces them as the demo's executive view. (1) THE OVERLAY: a SEPARATE committed
-  artifact `data/capability-taxonomy.json` (code → {name, desc, group, posture}) — labels from the Phase-28
-  taxonomy + the institution's interview posture (y/partial/n) per code — the Phase-24 `data/typology-map.json`
-  pattern; `build.py` must NEVER read `.dev-wiki/`. Validated at the BUILD BOUNDARY (`load_capability_taxonomy` +
-  `validate_capability_taxonomy`: shape + posture vocab + closed-vocab referential integrity — every code a live
-  indicator carries is declared + every live indicator carries both codes; fail-loud), where derived-shape +
-  typology validation already live; the grounding core stays untouched. The per-indicator codes already ride in
-  each derived record, so `build.py` only inlines the taxonomy object into `__CORPUS__`. (2) THE UI (`corpus.html`):
-  a THIRD Select mode — Documents / Typologies / **Capabilities** (the Phase-24 toggle, extended). The capability
-  picker lists one card per demanded capability (all 28): name, group, the institution's posture chip
-  (in place / partial / not yet), honest demand count + docs/typologies + a covered/partial/gap micro-bar — sorted
-  GAP-PRIORITY (not-yet first, then by demand: the exposure list). Drill a capability → `renderCapability`: its
-  indicators pooled across every regulator/jurisdiction (grouped by source document, each a clickable drill row),
-  the data sources it depends on (each with its own posture), and a coverage gauge — then drill into a doc's
-  existing per-doc arc, Back returning to the capability (a new `fromCapability`, mirroring `fromTypology`).
-  (3) HONESTY (the Phase-24 synthesis model): a pure RE-PROJECTION of already-grounded data — demand/coverage are
-  honest counts over the existing per-indicator status, posture is the interview answer (already in the demo as
-  per-doc coverage status, just re-grouped); NO similarity/overlap/lift number is computed or claimed; indicators
-  are NOT de-duplicated across sources; the always-on "Illustrative data & outputs" badge stays. Harness 165→**190**
-  (25 capability-lens asserts). FROZEN byte-clean: the showcase (index.html + config/** + the 3 typology dists),
-  every source md, every corpus-status.json, data/typology-map.json, the grounding core `derive_signals.py`, and
-  every derived `*.json` record (they already carried the codes — NO re-derivation). dist/corpus ~2.43MB; `--check
-  all` 4/4 ZERO DRIFT, `--selftest` PASS, all 42 `--check-derived` clean. NO non-negotiable change.
-- DATA-SOURCE LENS (Phase 30, M7 — the corpus re-projected by DATA SOURCE; the SYMMETRIC counterpart to the Phase-29
-  capability lens, on the D1–D20 axis; NO new source / non-negotiable / data / build change): the Phase-28 interview
-  tagged every indicator with a `data_source` (D1–D20) code AND Phase 29 ALREADY committed the `data_sources` block in
-  `data/capability-taxonomy.json` + had `build.py` validate (referential integrity) + inline it into `__CORPUS__` —
-  so only the capability (C) axis had a UI; the data (D) axis shipped INERT. Phase 30 surfaces it as the demo's
-  data-access view, ENTIRELY in `corpus.html` (the TIGHTEST phase in the series — `build.py`, the taxonomy, and all
-  42 derived records stay BYTE-FROZEN). (1) THE UI: a FOURTH Select mode — Documents / Typologies / Capabilities /
-  **Data sources** (the Phase-24/29 toggle, extended). The data-source picker lists one card per demanded feed (all
-  20): name, the institution's data-access posture chip (available / partial / not yet), honest demand count + docs/
-  typologies + a covered/partial/gap micro-bar — sorted GAP-PRIORITY (not-yet first, the data-access exposure list).
-  Cards OMIT the group line (data sources are a flat 20-item taxonomy — no D-axis group analogue). Drill a data source
-  → `renderDataSource`: its indicators pooled across every regulator/jurisdiction (grouped by source document, each a
-  clickable drill row), the detection CAPABILITIES those indicators implement (the INVERSE of the capability view's
-  "depends on data" panel, each with its own posture), and a coverage gauge — then drill into a doc's existing per-doc
-  arc, Back returning to the data source (a new `fromDataSource`, mirroring `fromCapability`). (2) THE DISTINCT STORY
-  (why it's not "the same lens twice"): a capability is a BUILD problem ("do we have the detection logic"); a data
-  source is an ACCESS problem ("do we even have the feed"). The payoff: **7 of 20 data sources have posture "not yet"**
-  — those are exactly the SOURCE_DATA indicators (the bank can't action them until it acquires e.g. blockchain
-  analytics / beneficial-ownership data), previously buried per-doc, now legible corpus-wide. (3) HONESTY (the Phase-24
-  synthesis model): a pure RE-PROJECTION of already-grounded data — demand/coverage are honest counts over the existing
-  per-indicator status, posture is the interview answer (already in the demo as per-doc coverage, just re-grouped); NO
-  similarity/overlap/lift number; indicators are NOT de-duplicated across sources; the always-on "Illustrative data &
-  outputs" badge stays. Harness 190→**217** (27 data-source-lens asserts). FROZEN byte-clean: the showcase (index.html
-  + config/** + the 3 typology dists), every source md, every corpus-status.json, data/typology-map.json,
-  **data/capability-taxonomy.json**, the grounding core `derive_signals.py`, **scripts/build.py**, AND every derived
-  `*.json` record (the data_sources axis was already inlined/validated in Phase 29 — NO re-derivation, NO build change).
-  dist/corpus ~2.46MB; `--check all` 4/4 ZERO DRIFT, `--selftest` PASS, all 42 `--check-derived` clean. NO non-negotiable change.
-- CORPUS COMPLETENESS + FULL TYPOLOGY RE-SEGMENTATION (Phase 33, M7 — workflow-driven; the corpus SOURCE SET closed
-  and the typology axis re-segmented; the showcase + the entire news stream + the 42 EXISTING derived records BYTE-FROZEN,
-  all new derivation ADDITIVE): the user found the corpus SOURCE SET incomplete (distinct from Phase-28's within-doc
-  completeness) — missing the latest + back-catalog FinCEN advisories, and ALL of FINTRAC's `/guidance-directives/`
-  ML/TF-indicator area unpulled. SCALE: +16 acquired docs, **14 derivable**, **corpus 875 → 2,251 indicators (2.6×)** across
-  **56 derived / 62 publications / 5 sources**. (1) SOURCES: +5 FinCEN advisories to `data/fincen/` (FIN-2026-A002 latest +
-  the 2018-19 back-catalog A006 fentanyl-original / A003 CVC / fin-2018-A003 PEP; BEC fin-2019-a005 honestly NON-DERIVABLE
-  — defers to the 2016 advisory, no own list), and a NEW 5th corpus source `data/fintrac-guidance/` (all 11 FINTRAC
-  per-sector ML/TF indicator pages, doc_type "FINTRAC Guidance"; 10 derivable, crown-agents NON-DERIVABLE — no own list).
-  HTML→md acquisition added (FINTRAC guidance is HTML not PDF: `acquire_fincen.py --html` + `pdf_to_md.py` HTML input +
-  "indicators guidance" provenance; existing PDF branches byte-identical). (2) DERIVATION: a dedicated dynamic Workflow
-  (`ph33-derive-corpus`, 28 agents — extract → completeness-critic per doc, full Phase-28 treatment: grounded verbatim
-  flags + fentanyl-register `red_flag` + C/D taxonomy tags), then a DETERMINISTIC apply (`.dev-wiki/tmp/ph33_apply.py`:
-  grounding-drop + within-doc dedup + the gate's ≥24-char floor + posture→status/data→`build_rec` matrix + `build_logic`
-  from the per-capability templates). 0 indicators FLAGGED (all 1,376 mapped to the existing 28+20 taxonomy — T3 a no-op,
-  validating the Phase-28 interview's comprehensiveness; NO fabricated posture). (3) GROUNDING CORE — the conditional
-  regression-gated touch (Decision 3): three rf_region anchor additions for the HTML-sourced / 2019-era heading forms — a
-  markdown-ATX-prefix tolerance (markitdown renders `<h3>` as `### `; **0-shift across all 46 frozen mds**), a FINTRAC
-  topic-leading "<topic> ML/TF indicators" anchor (ML/TF-abbreviation-only, **0-shift**), and a FinCEN "Red Flag Indicators
-  for <topic>" anchor (fentanyl A006; the ONE deviation — it CORRECTS fin-2024-alert005's region 27→444, which stays
-  `--check-derived` clean). The grounding LOGIC (`normalize`/`check_record`/matrix) is byte-UNCHANGED; 3 new `--selftest`
-  fixtures pin the anchors. (4) RE-SEGMENTATION: `data/typology-map.json` 22→**27 vocab terms** (+trade-based-money-laundering,
-  virtual-currency, unlawful-employment, casino-gaming, fintrac-sector-baselines), all 56 live docs mapped; TBML is now its
-  own typology (ofac-sham-transactions re-segmented). The 10 sector-guidance pages map per the user's "closest crime typology
-  each" choice (real-estate→real-estate, virtual-currency→virtual-currency, casinos→casino-gaming, the rest→fintrac-sector-
-  baselines). Validated at the build boundary (`validate_typology` closed-vocab + referential + total-coverage, fail-loud).
-  (5) BUILD/UI: a 5th `CORPUS_SOURCES` entry (additive); `corpus.html` SELECT menu now renders 5 source groups (the
-  `SRC_ORDER` got the FINTRAC Guidance group + a stat count). HONESTY: per-doc extraction (the FINTRAC sector pages share a
-  common spine — disclosed, NOT de-duped across sources, the Phase-24 gate); coverage inherited from the interview posture,
-  never fabricated; always-on badge stays. Harness 217→**233** (+16). dist/corpus 2.46→**4.87MB** (the +1,376 inlined
-  indicators); `--check all` 5/5 ZERO DRIFT (frozen dists byte-identical), `--selftest` PASS, all **56 `--check-derived`
-  clean**. FROZEN byte-clean (git-confirmed): the six-act showcase (index.html + config/** + 3 typology dists), the ENTIRE
-  news stream (news.html, dist/news, data/news/**), `data/capability-taxonomy.json`, the 42 EXISTING derived records + their
-  source mds. NO non-negotiable change (both compliance bases — FinCEN §105 public-domain + FINTRAC Crown-copyright
-  non-commercial — already established).
-- C/D-ASSIGNMENT VERIFICATION (Phase 34, M7 — the one NEURAL step of Phase 33 audited for CORRECTNESS, not just
-  validity; NO new source / non-negotiable / UI change): Phase 33 inherited each of the 1,376 new indicators'
-  `capability`(C1–C28) / `data_source`(D1–D20) codes from the extraction workflow, gated ONLY for vocab VALIDITY
-  (`ph33_apply.py` flagged 0), never CORRECTNESS — yet those codes drive every coverage field (status/data/build_rec/
-  build_logic) AND the Phase-29 capability + Phase-30 data-source executive lenses. The grounding gate checks the verbatim
-  `flag` is FAITHFUL, never that the C/D tag is RIGHT — the unguarded dimension (memory: a grounding gate ≠ a completeness
-  gate). Phase 34 verified + corrected them MEASURE-FIRST and HUMAN-adjudicated, a DATA-correctness phase (only the 14 new
-  derived records change; `corpus.html`/`build.py` are data-driven — corrected codes flow through on rebuild, NO UI work).
-  (1) A DETERMINISTIC consistency audit (no LLM) found **30.5% of the new indicators (419/1,376) in hard same-text-different-
-  code contradictions** — concentrated in the FINTRAC sector-page common spine (the same verbatim indicator repeated across
-  accountants/casinos/securities/… got inconsistent codes). (2) A BLIND re-assignment workflow (`ph34-blind-reassign`, 30
-  agents over the **589 unique texts** — 57% fewer judgments than per-indicator, and one canonical code per text structurally
-  prevents re-introducing inconsistency) re-tagged each text BLIND to its existing code → an **INTER-RATER AGREEMENT of C
-  74.4% / D 77.9%** (reported HONESTLY as agreement/consensus, NEVER "proven correct" — a 2nd LLM pass is consensus, not
-  ground truth). (3) HUMAN adjudication at the CLUSTER level (the user is the accepted truth source, the Phase-28 model): the
-  systematic (existing→blind) code-pairs disposed with the user's two rulings — **adverse-media (C19/D13) ≠ KYC (C14/D8)**
-  (the C19/D13 cluster examined = all direct-KYC mis-files, never real adverse-media, so the distinction HELD) and **cash
-  (C5/D2) ≠ PEP (C17)** (the cash→PEP mis-tags collapse to the cash majority); genuinely-ambiguous clusters KEPT existing
-  (no churn). (4) A BYTE-SURGICAL apply (`ph34_apply.py` + a synonym-aware straggler pass) reusing `ph33_apply.py`'s
-  deterministic downstream corrected **213 indicators** (114 C-moves + 129 D-moves + 3 client/customer wording-drift
-  stragglers); the grounded `flag` + `red_flag` stay BYTE-IDENTICAL (git-confirmed: 0 +/- on flag/red_flag/section/src_line/
-  id). Consistency **30.5% → 2.0%** — the 28 residual are all either NEW-vs-FROZEN-old (unfixable without unfreezing the 42
-  protected records) or different verbatim flags sharing one translation (independent-assessment-defensible). The MEASURED
-  agreement + 213 corrections are a journal/quality artifact, NOT a demo number (the always-on illustrative badge stays the
-  only claim — NO false precision). Harness corpus 235/235 + news 65/65; `--check all` 5/5 ZERO DRIFT; `--selftest` PASS; all
-  56 `--check-derived` clean. FROZEN byte-clean: the showcase (index.html + config/** + 3 typology dists), the entire news
-  stream, `data/typology-map.json`, `data/capability-taxonomy.json` (definitions unchanged — only which code an indicator
-  carries moves), the grounding core `derive_signals.py`, `build.py`, and the 42 EXISTING records / 875 old indicators. NO
-  non-negotiable change.
-- ADVERSE-MEDIA / NEGATIVE-NEWS STREAM (Phase 31, M8 — a SECOND atom stream; a NEW standalone ship artifact, NOT a
-  corpus/showcase change): Signal Watch was the advisory→signal loop (the six-act showcase + the corpus explorer);
-  Phase 31 opens a SECOND stream over UNSTRUCTURED news as a third single-file artifact `dist/news/index.html` (built
-  from a new `news.html`, mirroring how `dist/corpus` was added). The thesis is unchanged — an adverse-media hit is an
-  ATOM that composes with a counterparty's transaction signals — and it makes concrete the "what aren't we watching?"
-  TD-anxiety the showcase opens on (TD Bank's 2024 penalty was a CDD/adverse-media failure). The WALKING SKELETON proves
-  ONE new muscle end-to-end, offline: unstructured news → grounded entity + red-flag extraction → fuzzy-match against a
-  SYNTHETIC client/counterparty book → potential exposure → human disposition. ARC (in `news.html`): Select → Read
-  (each grounded red-flag phrase highlighted + each named entity tagged, with the natural-AML `red_flag` translation
-  beside the verbatim — the corpus's two-layer model reused) → Screen (the NEW muscle — a client-side fuzzy matcher
-  `normalize → token-sort → Jaro-Winkler`, REAL string-similarity, thresholded at 0.85; it surfaces the NEAR-matches an
-  exact-name screen would miss) → Disposition (the human gate — keyboard-safe `<button>` toggles, default-confirm, the
-  analyst DISMISSES false positives: a common name can collide with an unrelated person at a perfect 1.0 score) →
-  Exposure (confirmed hits framed as adverse-media atoms; the compose-with-the-transaction-signal payoff is the M8
-  NORTH STAR, scoped OUT). DATA (committed, SYNTHETIC — non-negotiable #4): `data/news/articles/*.md` (4 fictional
-  scenarios — trade-shell / mule-romance / sanctions-front / professional-ML) → `data/news/derived/*.json` (named
-  `entities` + red-flag `flag` phrases, each QUOTE-GROUNDED in the article via normalize-substring, + a `red_flag`
-  translation) + `data/news/book.json` (12-row synthetic book, SEEDED with exact matches, near-matches [Volkoff /
-  Dimitri / word-order Van Thanh / Bellwether], and a common-name FALSE-POSITIVE trap [Andrei Petrov, score 1.0, a
-  DIFFERENT person]). BUILD: `build.py news` (added ADDITIVELY — a new `news` target + `validate_news_data` [the
-  build-boundary grounding gate, fail-loud, with a LOCAL `_news_normalize` so build.py STILL never imports the authoring
-  layer] + `render_news`/`build_news`/`check_news`; `news`/`all`/`--check` wired). HONESTY: synthetic data under the
-  always-on badge; fuzzy scores are REAL computed similarity (never fabricated); counts honest; the near-match + the
-  trap are DESIGNED INTO the synthetic data to teach the mechanism, not claimed as detection rates. FROZEN byte-clean:
-  the showcase (index.html + config/** + 3 typology dists), the ENTIRE corpus (corpus.html, dist/corpus, all 4 source
-  dirs, every corpus-status.json, all 42 derived records, data/typology-map.json, data/capability-taxonomy.json), and
-  the grounding core `derive_signals.py`; build.py edited ADDITIVELY (existing dist outputs byte-identical). Harness:
-  `tests/news-stream.test.mjs` (+38, both motion modes). NO non-negotiable change.
-- REAL-SOURCE + PRESENTATION ELEVATION (Phase 32, M8 — the news stream's articles switched SYNTHETIC→REAL + the
-  presentation raised to the corpus's bar; NO new artifact, NO non-negotiable change): the user reviewed the BUILT
-  Phase-31 dist/news and judged it "very low effort … a poorly staged slide show … repeating the same mistakes" (the
-  Phase-27 corpus failure — a RESULT not a PROCESS), and asked to use REAL online news. PUSHBACK reframed "ignore
-  copyright / non-commercial" (verbatim commercial news = copyright reproduction + defamation of real named persons +
-  undercuts the demo's own compliance story) to the CLEAN path: REAL US-FEDERAL GOV-ENFORCEMENT adverse media (DOJ
-  press releases + OFAC designations), PUBLIC DOMAIN under 17 U.S.C. §105 — the corpus's EXACT verbatim basis (Phase
-  21), the MOST AML-relevant adverse media. NOT a non-negotiable change: the existing US-federal verbatim basis applied
-  to the news artifact; the COUNTERPARTY BOOK STAYS SYNTHETIC (#4 held) — the bridge is REAL adverse-media entity ×
-  SYNTHETIC book. (1) DATA: 4 real docs (`data/news/articles/*.md`, verbatim-excerpted with a source + public-domain
-  provenance header; acquired BUILD-TIME via the Wayback Machine [DOJ bot-blocks WebFetch/curl] — authoring-only, the
-  ship stays offline/no-fetch) — Ravenell (attorney trust-account ML), Mullings (romance/BEC mule), Goltsev (Canadian
-  export-control shells SH Brothers / SN Electronics), OFAC TGR Group (Russian shadow-finance network); re-derived
-  `data/news/derived/*.json` (14 entities with grounded name+location+age+profession, 29 red-flags + red_flag
-  translations, all normalize-grounded); `validate_news_data` EXTENDED to ground the entity attributes (additive — news
-  path only; build.py STILL never imports the authoring layer). The SYNTHETIC book reseeded against the REAL entities:
-  1 EXACT true-positive (Siam Expert — a designated entity IS your counterparty) + 5 near-matches an exact-name screen
-  misses (transliteration / suffix / word-order, 0.95–1.0) + a common-name FALSE-POSITIVE trap (George Rossi 1.0, a
-  DIFFERENT person, dismissed at the gate). (2) PRESENTATION (`news.html`, rewritten): the FULL corpus dossier theme +
-  a step rail (Select › Read › Screen › Disposition › Exposure) + per-doc source attribution; a STREAMING "agent
-  reading" Read (the source streams in, each red-flag phrase + entity tag reveals as the read reaches it, entity CARDS
-  [name/location/age/profession] + the typology + translate rows reveal alongside, the labels counting up from 0); a
-  VISIBLE SCAN PROCESS on Screen (each book row swept + scored REAL Jaro-Winkler, ranked, threshold line, near-match
-  surfaced, trap flagged) — the template renders the FINAL resting state (reduced-motion + the string-DOM harness settle
-  on it), the stream/scan a progressive ENHANCEMENT guarded by `insertAdjacentHTML`. HONESTY: entity attributes ground
-  or drop; the scan shows REAL computed scores (no fake progress bar); the book synthetic; the always-on badge stays.
-  dist/news 40.6KB → ~70KB. Harness 38 → **65** (reduced-motion final state + a full-motion enriched-shim drive of the
-  stream + scan). FROZEN byte-clean: the showcase (index.html + config/** + 3 typology dists), the ENTIRE corpus, and
-  the grounding core `derive_signals.py`; build.py edited ADDITIVELY (existing dist outputs byte-identical). NO
-  non-negotiable change.
-- IMPORTANT — INVERTED extraction boundary (Phase 16) + the SUBTRACTION (Phase 17): the **LLM EXTRACTS, the
-  deterministic layer GATES**, and the old extractor is **DELETED**. The earlier deterministic
-  `extract_red_flags` accreted format special-casing every phase yet the LLM still had to author/prune its
-  output, so the subtraction test inverted it: the LLM (the model session as backend) extracts the candidate
-  red flags + per-indicator status/data judgment + build recommendation + signal logic; the deterministic
-  layer DISPOSES via `check_record` — **quote-GROUNDING** (each verbatim `flag` is a substring of the source
-  md under `normalize()`, the traceability authority, replacing src_line ∈ extractor) + a cheap section-cite
-  RELEVANCE region (`rf_region`) + the cover×data matrix + BUILD_NOW⇒full-build_logic shape. Complexity moved
-  from brittle section-PARSING (open problem — every advisory differs) to a closed-set md NORMALIZER and
-  SHRANK. **Phase 17 then DELETED `extract_red_flags` and the whole `--scaffold` / `--draft` /
-  `--scaffold-derived` authoring stack it fed** (`derive_signals.py` ~1200 → ~600 lines), leaving exactly the
-  gate (`normalize` + `rf_region` + `check_record`) + a ~14-line `rf_region`-bounded triage counter
-  (`_rf_triage` — the only counting role the extractor kept; it reuses the already-computed region span). The
-  inverted loop is the SOLE derivation path; the LLM proposes (extraction too), the deterministic gate + the
-  two human gates dispose.
-- Extraction faithfulness (the LLM extracts; the gate grounds): faithfulness is now enforced by the gate, not
-  a structural parser — every verbatim `flag` must QUOTE-GROUND in the source md. Two heterogeneous formats
-  the deleted deterministic extractor could not parse are handled by the LLM reading like a human:
-  **footnote-interrupted** lists (a clause split across a page-break footnote run — the LLM extracts a
-  CONTIGUOUS grounded span and drops the across-the-break continuation rather than bridging it, e.g.
-  fin-2021-a001 IND-01) and **glued-no-separator** advisories (fin-2021-a004 ransomware, fin-2026-a001
-  health-care — markitdown dropped both bullets AND blank lines so flags fuse into one block; the `_rf_triage`
-  counter sizes them as a few blocks, but the LLM extracts every genuine flag, e.g. health-care 24, and the
-  gate grounds each). No structure-preserving converter and no post-hoc splitter were needed. Convention:
-  derived records store RAW text; corpus.html's `esc()` is the sole escaper (never pre-escape `&gt;`/`&lt;`
-  in a record — it double-escapes). `normalize()` drops the glued `FINCEN ADVISORY` running header and
-  collapses smart quotes / hyphen-wraps / footnote digits, so a header-glued or marker-glued flag still
-  grounds (keep an in-flag footnote marker verbatim where it falls mid-span, e.g. `NPO84`).
+## Current state
+> **Maintenance contract** (this file bloated to 689 lines once — this is the guard against a repeat).
+> No automated process writes this file: there's no `AGENTS.md`/`sync-rules` here, and `/dev-debrief`'s
+> refresh only ever rewrites four MACHINE sections (Project Rule Modules / Dynamic State / Project
+> Pointers / Project Scope) which this file doesn't have. The implementing agent edits it BY HAND each
+> phase — so this discipline is the only guard:
+> - `## Current state` is a SNAPSHOT of what is TRUE NOW — **replace facts in place; NEVER append a
+>   per-phase bullet.** `## Milestones` is one line per milestone — **never a per-phase line.**
+> - Per-phase narrative (what a phase changed, harness/size deltas, frozen-set proofs) goes to the
+>   `.dev-wiki/` journal + the git commit message + HANDOFF.md §8 — **not here.**
+> - Target ≤ ~200 lines. If it's growing, a phase log is leaking in — move it out.
+
+This section is the DURABLE, currently-true architecture — not a changelog.
+
+### Three ship artifacts (each a single self-contained offline file)
+1. **Showcase** — `index.html` → `dist/<id>/index.html`. The generic six-act engine (vanilla
+   HTML/CSS/JS), single `__CONFIG__` injection point, typology-agnostic (adding a typology is one
+   JSON file, no engine edits). Presenter controls (M3): keyboard nav (←/→/Space/Esc/↺), reset,
+   `prefers-reduced-motion`. Content: `config/typologies/*.json` (fentanyl, trade-based,
+   elder-financial-exploitation) against `config/schema.md`. The elder typology renders the FULL
+   verbatim EFE advisory (FinCEN FIN-2022-A002, public domain) in Act 1 via `advisory_full`.
+2. **Corpus explorer** — `corpus.html` → `dist/corpus/index.html`. A SEPARATE artifact that owns
+   its own copy of the dossier theme (`index.html` stays byte-untouched). 6-screen per-doc arc:
+   Select → Read advisory → Coverage → Build recs (**the human GATE** — per-indicator cover×data,
+   BUILD_NOW rows selectable) → Signal → Combination lift → Close. FOUR Select lenses: Documents /
+   Typologies / Capabilities / Data sources. Scale: **2,251 indicators / 56 derived / 62
+   publications / 5 sources**.
+3. **News stream** (M8) — `news.html` → `dist/news/index.html`. The adverse-media / negative-news
+   stream (a SECOND atom stream: an adverse-media hit is an ATOM that composes with a counterparty's
+   transaction signals — the compose payoff is the M8 north star, scoped OUT). Arc: Select → Read →
+   Screen → Disposition (the human gate) → Exposure. Runtime fuzzy matcher (normalize → token-sort →
+   Jaro-Winkler, REAL scores, 0.85 threshold) is pure client-side JS — the OFFLINE ship file makes no
+   LLM/fetch call. **Optional LIVE mode (Phase 35):** `scripts/serve_news.py` (a stdlib companion) serves
+   the page over http://localhost + proxies a local llama-cpp model so a pasted article is extracted in
+   REAL TIME → grounded server-side via `news_ground.py` (ungrounded dropped) → the same arc. The live
+   branch is build-time STRIPPED from the offline `dist/news` (zero network code there); the offline file
+   stays the default + fallback. See `docs/news-live.md`. (Persistence + a feedback watchlist = Phase 36.)
+
+### Build (`scripts/build.py`)
+Validates a config against the schema (fail-loud), resolves `text_file`→inline, inlines everything →
+the single ship file. Targets: `<id>`, `corpus`, `news`, `all`; `--check <target>` is the drift
+guard (frozen dists must be byte-identical). **build.py NEVER imports the authoring layer.** Baseline
+preserved in `archive/`.
+
+### Corpus sources & overlays (committed; merged at build time)
+5 sources via the `CORPUS_SOURCES` registry in build.py (source-id → {status dir, derived dir,
+doc_type}); each contributes a committed `corpus-status.json` (the extraction manifest from
+`derive_signals.py --corpus-status`) + `derived/*.json`, merged by id into `__CORPUS__`, derived
+shape validated at the build boundary:
+- `data/fincen/` — FinCEN advisories · `data/fincen-alerts/` — FinCEN alerts · `data/ofac/` — OFAC ·
+  `data/fintrac/` — FINTRAC OAs/Briefs · `data/fintrac-guidance/` — FINTRAC per-sector ML/TF
+  indicator pages (doc_type "FINTRAC Guidance").
+- Non-derivable (no enumerated red-flag list, honestly skipped): the 2 FATF advisories, BEC
+  fin-2019-a005, FINTRAC crown-agents.
+
+Two committed OVERLAYS, each validated at the build boundary (closed-vocab + referential integrity
+against the live corpus; the grounding core is untouched — agent proposes, the gate disposes, the
+human reviews):
+- `data/typology-map.json` — doc-id → ONE typology (27-term closed vocab); jurisdiction is DERIVED
+  from the source registry (FinCEN/OFAC = US, FINTRAC = Canada), not stored. Powers the Typologies
+  lens + cross-corpus synthesis (combined coverage across a cross-jurisdiction cluster).
+- `data/capability-taxonomy.json` — C1–C28 capabilities + D1–D20 data sources (code → {name, group,
+  interview posture}). Powers the Capabilities + Data-sources lenses.
+
+### Authoring pipeline (build-time ONLY — the ship file never fetches or calls an LLM)
+`crawl_fincen.py` (discover a listing → committed manifest) → `acquire_fincen.py` (resolve each
+doc's PDF, or `--html` for FINTRAC guidance) → `pdf_to_md.py` (markitdown PDF/HTML → committed
+`<id>.md`, the derivation SURFACE & source of truth) → `derive_signals.py` (the deterministic GATE).
+`derive_signals.py` is stdlib-only; only `markitdown` (convert) lives in a gitignored uv `.venv`. No
+authoring tool is imported by the engine or build.py.
+
+### The inverted extraction boundary (LOAD-BEARING — Phase 16/17)
+**The LLM EXTRACTS, the deterministic layer GATES.** The old structural `extract_red_flags` is
+DELETED. The LLM (a model session as backend, no key) reads `<id>.md` and EXTRACTS the red flags +
+per-indicator judgment (status, data, build_rec, build_logic, the `red_flag` translation, C/D tags)
+into `derived/<id>.json`. `derive_signals.py --check-derived` DISPOSES via `check_record`:
+- **Quote-grounding** — every verbatim `flag` is a substring of the source md under `normalize()`
+  (the traceability authority), inside the red-flag region `rf_region`.
+- The cover×data matrix (`build_rec_category`); BUILD_NOW ⇒ a full build_logic definition.
+- `red_flag` SHAPE check (present / non-empty / distinct-from-verbatim / 12–240 chars).
+
+The LLM proposes (extraction included); the deterministic gate + the two human gates dispose. The
+**two-layer model**: the grounded verbatim `flag` (the EVIDENCE) is shown BESIDE a natural-AML
+`red_flag` TRANSLATION (the one neural step — mitigated by show-both + the always-on badge). The gate
+checks each flag is FAITHFUL and (per-doc) that we got the list; it does NOT check the C/D tag is
+correct — that dimension is verified separately (a grounding gate ≠ a completeness gate ≠ a
+correctness gate).
+
+### Coverage is GROUNDED, not fabricated
+Each indicator's coverage (status / data / build_rec / build_logic) is DERIVED deterministically from
+its C/D codes + the institution's 28+20 YES/NO/PARTIAL interview posture (the Phase-28 interview) via
+the cover×data matrix + per-capability spec templates. Honest SOURCE_DATA where the bank can't
+observe. NO fabricated coverage.
+
+### Honesty constraints (LOAD-BEARING)
+- Cross-corpus / lens coverage is honest UNION arithmetic / honest COUNTS over the existing
+  per-indicator status. NO similarity / overlap / lift number is computed or claimed; indicators are
+  NOT de-duplicated across regulators. The always-on "Illustrative data & outputs" badge stays.
+- The ONE approved fabrication-shaped reversal: the corpus combination-lift figures are a GENERIC
+  illustrative template (18→64→83), identical across docs, behind a LOUD "Illustrative · pending
+  calibration — NOT measured" tag (distinct from the always-on badge). The derived records carry no
+  lift numbers.
+
+### News data (`data/news/{articles/*.md, derived/*.json, book.json}`)
+`articles` are REAL US-federal gov-enforcement docs (DOJ + OFAC, verbatim-excerpted under 17 U.S.C.
+§105 public domain — the corpus's basis, applied to news). `book.json` is SYNTHETIC (non-negotiable
+#4) — the bridge is REAL adverse-media entity × SYNTHETIC book, seeded with an exact true-positive,
+near-matches an exact-name screen misses, and a common-name false-positive trap dismissed at the
+gate. `validate_news_data` grounds every entity name + attribute + red-flag `flag` at the build
+boundary (a LOCAL normalizer — build.py never imports the authoring layer).
+
+### Conventions (LOAD-BEARING)
+- Derived records store RAW text; corpus.html's `esc()` is the SOLE escaper (never pre-escape
+  `&gt;`/`&lt;` in a record — it double-escapes).
+- `normalize()` drops glued running headers (e.g. `FINCEN ADVISORY`), collapses smart quotes /
+  hyphen-wraps / footnote digits, and drops `|`/`#`/`*`/spaces (so de-piped tables + markdown-ATX
+  headers stay grounding-INVARIANT). Keep an in-flag footnote marker verbatim where it falls mid-span
+  (e.g. `NPO84`).
+- The grounding gate logic (`normalize` / `rf_region` / `check_record`) is the STABLE core — extend
+  `rf_region` ANCHORS only, REGRESSION-GATED (every existing md's region must stay byte-unchanged;
+  `--selftest` fixtures pin each anchor).
+- Heterogeneous formats handled by the LLM reading like a human (no structural parser): footnote-
+  interrupted lists (extract a contiguous grounded span, drop the across-the-break continuation) and
+  glued-no-separator advisories (markitdown dropped bullets + blank lines; the LLM extracts every
+  genuine flag, the gate grounds each).
 
 ## How to run
-- Build: `python3 scripts/build.py <id>` (or `all`) → `dist/<id>/index.html`.
-- Corpus explorer (MULTI-SOURCE): `python3 scripts/build.py corpus` → `dist/corpus/index.html`, merging
-  every source in `build.py`'s `CORPUS_SOURCES` registry — `data/fincen/` (advisories) + `data/fincen-alerts/`
-  (alerts) + `data/ofac/` (OFAC) + `data/fintrac/` (FINTRAC OAs) + `data/fintrac-guidance/` (Phase 33 — the 11
-  FINTRAC per-sector ML/TF indicator pages, doc_type "FINTRAC Guidance"), each contributing `corpus-status.json` +
-  `derived/*.json`. Acquire FINTRAC guidance (HTML, not PDF): `acquire_fincen.py --source data/fintrac-guidance
-  --html <id>` then `pdf_to_md.py --source data/fintrac-guidance <id>`. The build also merges two committed overlays — `data/typology-map.json` (Phase 24) and
-  `data/capability-taxonomy.json` (Phase 29: code→{name, group, interview posture} for the capability lens) —
-  each validated at the build boundary (referential integrity against the live corpus; the grounding core is
-  untouched). Regenerate a source's manifest with
-  `python3 scripts/derive_signals.py --corpus-status [source_dir]` (default `data/fincen`) after its md set
-  changes, then rebuild. Acquire a new FinCEN source: `crawl_fincen.py [--alerts] --fetch` then `--write` →
-  `acquire_fincen.py --source <dir> <id>` → `pdf_to_md.py --source <dir> <id>` (raw PDFs are gitignored;
-  the committed `<dir>/*.md` is the derivation surface).
-- News stream (M8, Phase 31 + Phase 32): `python3 scripts/build.py news` → `dist/news/index.html` — a SEPARATE,
-  standalone ship artifact (the adverse-media / negative-news stream, a SECOND atom stream), built from
-  `news.html`. Reads the committed `data/news/{articles/*.md, derived/*.json, book.json}` — Phase 32: the
-  `articles/*.md` are now REAL US-federal gov-enforcement docs (DOJ press releases + OFAC designations),
-  reproduced VERBATIM (excerpted) under 17 U.S.C. §105 public domain (the corpus's basis, applied to news); the
-  `book.json` STAYS SYNTHETIC (non-negotiable #4) — REAL adverse-media entity × SYNTHETIC book. Validates grounding
-  at the build boundary (`validate_news_data` — every extracted entity name, each entity ATTRIBUTE
-  [location/age/profession], and every red-flag `flag` must quote-ground in its article via a LOCAL normalizer;
-  build.py never imports the authoring layer), inlines at `__NEWS__`. The runtime fuzzy matcher (normalize →
-  token-sort → Jaro-Winkler, REAL scores) runs entirely CLIENT-SIDE (no LLM/fetch). Real-doc acquisition is
-  BUILD-TIME/authoring ONLY (the Wayback Machine routes around DOJ bot-blocks; raw fetches gitignored, the committed
-  `articles/*.md` is the surface). build.py is edited ADDITIVELY (existing dist outputs byte-identical); `--check
-  all` and `all` include news.
-- Present: open `dist/<id>/index.html` (or `dist/corpus/index.html`, or `dist/news/index.html`) — single
-  self-contained file, offline, no server. Drift guard before presenting: `python3 scripts/build.py --check all`.
-- Test (all dep-free, no install): `node tests/corpus-explorer.test.mjs` drives the story landing + the corpus explorer's
-  6-screen per-doc arc (Select → Read advisory → Coverage → Build recs → Signal → Combination lift → Close) against the
-  committed `dist/corpus/index.html` (gate toggle, the article screen + red_flag threading, Signal empty states,
-  close-the-loop coverage math, reduced-motion) + the multi-source menu (advisories + alerts + OFAC +
-  FINTRAC, doc_type chips; an alert, an OFAC advisory, AND a FINTRAC OA each walk the arc; the FINTRAC
-  Crown-copyright attribution renders in the page FOOTER for the doc on screen — Phase 28, the on-screen
-  Source label carries the title only; US public-domain docs show no footer attribution) + the cross-corpus synthesis view
-  (Phase 24: typology-mode picker, a cross-jurisdiction cluster's combined coverage = honest union over
-  the pooled indicators, the no-similarity/overlap/lift honesty gate, drill-through + Back-to-cluster)
-  + the Phase-26 register beats (the story landing as entry; Select grouped by source / newest-first;
-  red-flag section sub-grouping on Coverage; the Act-4 build-log + the Act-5 combination-lift with its LOUD
-  "illustrative · pending calibration" honest-illustrative gate — a generic template, never per-doc fabricated)
-  + the Phase-27 shippability fixes (the Read-advisory source panel is markitdown-CLEANED — no running
-  headers / letter-spaced headers / tab-soup; normalize-both-sides highlighting lands ~every grounded flag;
-  the Signal build-log runs in a proposal grid + the combination-lift carries a lift-side panel with firestat
-  OMITTED) + the Phase-28 beats (the FULL-MOTION STREAMING read — the source streams in, each phrase highlights
-  as the read reaches it, both labels count up from 0, settles with the caret removed; de-piped markdown tables;
-  the FINTRAC footer attribution present for a FINTRAC doc / empty for a US doc)
-  + the Phase-29 CAPABILITY LENS (a third Select mode Documents / Typologies / Capabilities; the per-capability
-  card carries honest demand + the institution's interview posture + the covered/partial/gap split, gap-priority
-  sorted; drilling a capability pools every indicator that depends on it as honest set arithmetic — NO
-  similarity/overlap/lift — and drills into a doc's per-doc arc with Back returning to the capability)
-  + the Phase-30 DATA-SOURCE LENS (a FOURTH Select mode Documents / Typologies / Capabilities / Data sources — the
-  symmetric counterpart on the D1–D20 axis; the per-data-source card carries honest demand + the institution's
-  data-access posture + the covered/partial/gap split, gap-priority sorted; drilling a data source pools every
-  indicator that depends on that feed [with the inverse "Implements capabilities" panel] and drills into a doc's
-  per-doc arc with Back returning to the data source) + the Phase-33 corpus completeness (the 5th source FINTRAC
-  Guidance walks the per-doc arc; corpus 62 publications / 56 derived / 2,251 indicators; TBML + the 4 new typologies
-  in the synthesis view); 233 assertions. `node tests/news-stream.test.mjs`
-  (M8, Phase 31 + Phase 32) drives the adverse-media stream arc (Select → Read → Screen → Disposition → Exposure)
-  + the fuzzy matcher against the committed `dist/news/index.html` — the seeded matches surface (Siam Expert EXACT
-  1.0 = a designated entity IS your counterparty; near-matches an exact-name screen misses: Pullman suffix 1.0,
-  Zhdanova 0.989, Nikolay translit 0.973, Puzyreva word-order 1.0, Malachi typo 0.962, Ravenell 0.950), the
-  common-name FALSE-POSITIVE trap (George Rossi 1.0, a different person) is dismissable at the human gate
-  (confirmed-count drops), the STREAMING Read highlights grounded flags + tags entities + shows entity cards with
-  grounded attributes + the typology + the real-source attribution, the SCAN PROCESS sweeps real per-row scores, no
-  fabricated precision number; both motion modes (reduced-motion final state + a full-motion enriched-shim drive of
-  the stream + scan); 65 assertions. `python3 scripts/derive_signals.py --selftest`
-  runs the derivation GATE checks. Pre-present sequence: `--check all` (drift) → `node tests/…` (arcs) → walk
-  `tests/smoke-checklist.md` (the human-eye checks).
-- Iterate: edit `index.html` / `corpus.html` / a config, rebuild. `python3 -m http.server` optional, never required.
+- Build: `python3 scripts/build.py <id>` (or `corpus` / `news` / `all`) → the ship file.
+  - `corpus` merges every source in `CORPUS_SOURCES` (the 5 `data/*` dirs) + the two overlays.
+  - `news` reads `data/news/{articles,derived,book}`. Both are grounded/validated at the build boundary.
+- Present: open `dist/<id>/index.html` (or `dist/corpus/index.html`, `dist/news/index.html`) — single
+  self-contained file, offline, no server.
+- News LIVE mode (Phase 35, optional, dev/authoring-time): start a local llama-cpp server, then
+  `python3 scripts/serve_news.py --llm-url <chat-endpoint> --model <name>` and open http://localhost:8000.
+  Real-time extraction is grounded server-side (ungrounded dropped); the offline `dist/news` is unaffected
+  (the live branch is stripped from it). Details: `docs/news-live.md`.
+- Drift guard before presenting: `python3 scripts/build.py --check all` (frozen dists byte-identical).
+- Test (all dep-free, no install):
+  - `node tests/corpus-explorer.test.mjs` — the story landing + the 6-screen per-doc arc + the
+    multi-source menu (doc_type chips, FINTRAC footer attribution) + the 4 lenses + cross-corpus synthesis.
+  - `node tests/news-stream.test.mjs` — the adverse-media arc + the fuzzy matcher (seeded matches,
+    near-matches, the common-name trap dismissable at the gate); both motion modes.
+  - `python3 scripts/derive_signals.py --selftest` — the derivation GATE checks + anchor fixtures.
+  - `python3 tests/news_live_test.py` — the live extraction pipeline (build_record + grounding + the
+    `/extract` route over HTTP, model stubbed) · `python3 scripts/news_ground.py --selftest` (the shared
+    gate) · `python3 scripts/serve_news.py --selftest` (the companion assembles the live page).
+  - Pre-present sequence: `--check all` (drift) → `node tests/…` (arcs) → walk `tests/smoke-checklist.md`.
+- Authoring a new corpus source (build-time only; raw PDFs gitignored, the committed `<dir>/*.md` is
+  the surface): `crawl_fincen.py [--alerts] --fetch`/`--write` → `acquire_fincen.py --source <dir>
+  [--html] <id>` → `pdf_to_md.py --source <dir> <id>` → derive via the inverted loop →
+  `derive_signals.py --corpus-status <dir>` to regenerate the manifest → rebuild.
+- Iterate: edit `index.html` / `corpus.html` / `news.html` / a config, rebuild. `python3 -m
+  http.server` optional, never required.
 
 ## Knowledge wiki
 Domain reference comes from the registered **aml-wiki** (central store at
@@ -587,102 +210,10 @@ JetBrains Mono. Theme lives in `:root` CSS variables. Refined, not flashy.
 ## Milestones
 M0 bootstrap · M1 config-driven refactor · M2 multi-typology · M3 presenter polish ·
 M4 (skipped) live/pre-gen mode · M5 ship · M6 Signal Watch ingestion pipeline (FinCEN verbatim) ·
-M7 corpus-backed demo (Phase 12 derivation backend + Phase 13 corpus explorer `dist/corpus/` +
-Phase 20 multi-source: FinCEN advisories + alerts; Phase 21: OFAC source #3; Phase 22: FINTRAC source #4
-(first cross-jurisdiction, Crown-copyright non-commercial licence); Phase 23: FINTRAC depth 3→10 (OAs +
-the real-estate Operational Brief; inverted-anchor widening) — 42 derived across 46 publications, 4 sources;
-Phase 24: cross-corpus synthesis — a `data/typology-map.json` overlay groups the corpus by typology + shows
-combined coverage across cross-jurisdiction clusters (honest union arithmetic, no fabricated cross-corpus metric);
-Phase 25: red-flag translation + the article-processing screen — every derived indicator gains a natural-AML `red_flag`
-beside its grounded verbatim quote, and the corpus explorer renders the full source document (highlight → translate)
-ahead of Coverage (honest show-both; NO non-negotiable change);
-Phase 26: showcase-quality elevation — all 42 `red_flag`s re-translated to the fentanyl-register AML-indicator style
-(via a dynamic translate→adversarial-verify workflow; verbatim + grounding byte-unchanged), progressive "agent reading"
-article render, Select grouped by source / newest-first + red-flag section sub-grouping, the Act-4 build-log + an Act-5
-combination-lift wow beat (generic illustrative template, loud "pending calibration" tag — never per-doc fabricated),
-and a story-driven landing as the entry (NO non-negotiable change);
-Phase 27: shippability fixes — an assessment workflow disposed the framing (the brutality was PRESENTATION not
-the grounding system), then markitdown-cleaned the Read-advisory source + normalize-both-sides highlighting (100%)
-+ the Act-4 build-log in a proposal grid + a combination-lift lift-side panel (firestat omitted) + the whole-article
-progressive read + a faithfulness-guarded re-extraction tightening 121 over-long verbatim flags to crisp grounded
-sub-spans (grounding transitive; long single-sentence indicators kept whole) — corpus made SHIPPABLE, gate logic
-byte-unchanged, NO non-negotiable change);
-Phase 28: completeness + grounded coverage + streaming read — the user found EXTRACTION was grossly INCOMPLETE
-(the gate checked each flag was REAL, never that we got them ALL): a complete re-extraction 634→903 indicators (every
-flag re-grounds), coverage now GROUNDED in the user's 28-capability + 20-data-source YES/NO/PARTIAL interview (not
-fabricated), a full-motion STREAMING "agent reading" render (source streams in, each phrase highlights as the read
-reaches it, both labels count up from 0), de-piped markdown tables, "AML Corpus Explorer" branding, the FINTRAC
-attribution relocated to a per-doc page footer (verbatim+attribution non-negotiable HELD), and a dedup of 28 genuine
-duplicate indicators from the sweep (terror 77→53) → 875 indicators; grounding core byte-unchanged, NO non-negotiable change);
-Phase 29: capability lens — the Phase-28 capability/data-source taxonomy (28 capabilities + 20 data sources), unused
-in the ship artifact, is promoted to a committed build-validated `data/capability-taxonomy.json` (code→{name, group,
-interview posture}) and surfaced as a THIRD Select mode (Documents / Typologies / Capabilities). The corpus is
-re-projected by DETECTION CAPABILITY: per-capability honest demand count + the institution's interview posture
-(have/partial/gap) + the covered/partial/gap split, gap-priority sorted; drill a capability → its indicators pooled
-across every regulator/jurisdiction (honest set arithmetic, NO similarity/overlap/lift) grouped by source doc → drill
-into a doc's per-doc arc, Back returns to the capability. Honest re-projection only (the Phase-24 synthesis model); the
-derived records + the grounding core stay byte-frozen (they already carried the codes — no re-derivation); the always-on
-badge stays; NO non-negotiable change. Harness 165→190.
-Phase 30: data-source lens — the SYMMETRIC counterpart to the Phase-29 capability lens on the D1–D20 data-source
-axis. The Phase-28 interview tagged every indicator with a `data_source` code AND Phase 29 already committed the
-`data_sources` block in `data/capability-taxonomy.json` + had `build.py` validate/inline it — but only the capability
-(C) axis had a UI. Phase 30 surfaces the D axis as a FOURTH Select mode (Documents / Typologies / Capabilities /
-Data sources). The corpus is re-projected by DATA SOURCE: per-data-source honest demand count + the institution's
-data-access posture (available/partial/not-yet) + the covered/partial/gap split, gap-priority sorted; drill a data
-source → its indicators pooled across every regulator/jurisdiction (honest set arithmetic, NO similarity/overlap/lift)
-grouped by source doc, with an inverse "Implements capabilities" panel → drill into a doc's per-doc arc, Back returns
-to the data source. The DISTINCT story vs the capability lens: a capability is a build problem, a data source is an
-ACCESS problem — 7 of 20 feeds are "not yet" available (the SOURCE_DATA indicators the bank can't action until it
-acquires the data), surfaced corpus-wide. The TIGHTEST phase in the series: a pure `corpus.html` UI re-projection +
-harness + docs — `scripts/build.py`, `data/capability-taxonomy.json`, AND all 42 derived records stay BYTE-FROZEN (the
-data_sources axis was already inlined/validated in Phase 29 — no data/build change). Honest re-projection only (the
-Phase-24/29 model); the always-on badge stays; NO non-negotiable change. Harness 190→217.
-Phase 33: corpus completeness + full typology re-segmentation (workflow-driven) — the user found the corpus SOURCE SET
-incomplete (distinct from Phase-28's within-doc completeness): missing the latest + back-catalog FinCEN advisories, and
-ALL of FINTRAC's `/guidance-directives/` ML/TF-indicator area unpulled. +16 acquired docs / 14 derivable → corpus 875 →
-**2,251 indicators (2.6×)** across **56 derived / 62 publications / 5 sources** (+5 FinCEN advisories incl. FIN-2026-A002
-and the original 2019 fentanyl advisory; a NEW 5th source `data/fintrac-guidance/` = all 11 FINTRAC per-sector ML/TF
-indicator pages via a new HTML→md path). A dedicated dynamic Workflow (28 agents: extract → completeness-critic) +
-deterministic apply (grounding gate + within-doc dedup + interview-posture coverage; 0 fabricated, 0 flagged — the 28+20
-taxonomy covered everything). The grounding core got 3 regression-gated rf_region anchors (markdown-prefix tolerance +
-FINTRAC topic-leading + FinCEN "Red Flag Indicators for" — the LOGIC byte-unchanged, fixtures pin them, 1 frozen-region
-CORRECTION on alert005 that stays clean). Typology axis re-segmented: `data/typology-map.json` 22→27 vocab (+TBML,
-virtual-currency, unlawful-employment, casino-gaming, fintrac-sector-baselines), all 56 live docs mapped (sector pages by
-the user's "closest crime typology each" choice). 2 honestly NON-DERIVABLE (BEC fin-2019-a005 defers to the 2016
-advisory; FINTRAC crown-agents has no own list). Harness 217→233; dist/corpus 2.46→4.87MB; `--check all` 5/5 ZERO DRIFT;
-the showcase + entire news stream + 42 existing derived records BYTE-FROZEN; NO non-negotiable change.
-Phase 34: C/D-assignment verification — the one NEURAL step of Phase 33 (the 1,376 new indicators' capability/data-source
-codes, inherited and gated only for vocab validity, never correctness) audited and corrected MEASURE-FIRST + HUMAN-adjudicated,
-a DATA-correctness phase (only the 14 new derived records change; corpus.html/build.py data-driven — NO UI work). A deterministic
-consistency audit found 30.5% of the new indicators (419/1,376) in hard same-text-different-code contradictions (the FINTRAC
-sector-page common spine); a BLIND re-assignment workflow over the 589 unique texts measured INTER-RATER AGREEMENT C 74.4% /
-D 77.9% (honest consensus, never "proven correct"); the user adjudicated the systematic clusters (rulings: adverse-media ≠ KYC,
-cash ≠ PEP; ambiguous clusters kept); a byte-surgical apply reusing ph33_apply.py's deterministic downstream corrected 213
-indicators (flag/red_flag byte-frozen), taking consistency 30.5% → 2.0% (residual = new-vs-frozen-old + translation-shared
-flags). Harness 235 + news 65; --check all 5/5 zero drift; --selftest PASS; 56/56 --check-derived clean; the showcase + entire
-news stream + data/typology-map.json + data/capability-taxonomy.json + the grounding core + build.py + the 42 existing records
-BYTE-FROZEN. The measured agreement + 213 corrections are a journal/quality artifact, NOT a demo number. NO non-negotiable change.
-M8 the adverse-media / negative-news stream (Phase 31: a SECOND atom stream as a new standalone artifact
-`dist/news/` from `news.html` — synthetic news → grounded entity + red-flag extraction → a client-side fuzzy
-match (normalize → token-sort → Jaro-Winkler, REAL scores) against a synthetic client/counterparty book →
-potential exposure → a human disposition gate. Surfaces the near-matches an exact-name screen misses (typo /
-transliteration / word-order) and the common-name FALSE-POSITIVE trap, which the human dismisses. Build-time
-data (`data/news/{articles,derived,book}`) grounded at the build boundary (`validate_news_data` — a LOCAL
-normalizer, build.py never imports the authoring layer); runtime is pure client-side JS (no LLM/fetch). A
-WALKING SKELETON — the compose-with-the-transaction-signal payoff is the M8 north star, scoped OUT. build.py
-edited ADDITIVELY (a new `news` target; existing dist outputs byte-identical, `--check all` includes news); the
-showcase + the entire corpus + the grounding core `derive_signals.py` stay byte-frozen. Harness +38
-(`tests/news-stream.test.mjs`, both motion modes). HONEST: synthetic data under the always-on badge, REAL fuzzy
-scores, no fabricated number. NO non-negotiable change. Phase 32: the news ARTICLES switched SYNTHETIC→REAL
-US-federal gov-enforcement docs (DOJ + OFAC, verbatim-excerpted under 17 U.S.C. §105 public domain — the corpus's
-basis applied to news; the BOOK stays synthetic, non-negotiable #4 held), and the presentation was raised to the
-corpus's bar — the full dossier theme + a step rail + per-doc source attribution + a STREAMING "agent reading" Read
-[entity cards with grounded name/location/age/profession + the typology, counts up from 0] + a VISIBLE SCAN PROCESS
-[real per-row Jaro-Winkler sweep, threshold line, near-match surfaced, trap flagged]. The book reseeds against the
-real entities: 1 exact true-positive [Siam Expert] + 5 near-matches an exact screen misses + a common-name trap
-[George Rossi]. `validate_news_data` extended to ground the entity attributes (additive). Harness 38→65; dist/news
-~70KB; NO non-negotiable change).
-See HANDOFF.md §8.
+M7 corpus-backed demo (the corpus explorer `dist/corpus/`: the inverted derivation loop, 5 sources,
+the 4 lenses, cross-corpus synthesis, grounded coverage) ·
+M8 adverse-media / negative-news stream (`dist/news/`).
+Per-phase detail: git log + `.dev-wiki/` journal + HANDOFF.md §8.
 
 ## Definition of done
 Reliable offline · multi-typology from config · presenter controls · compliance-clean ·

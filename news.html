@@ -562,6 +562,72 @@ document.addEventListener('keydown', e => {
   else if(e.key==='ArrowRight' && state.view!=='select'){ stepNext(); }
   else if(e.key==='ArrowLeft' && state.view!=='select'){ stepBack(); }
 });
+/*LIVE_START*/
+/* Phase 35 LIVE MODE — companion-served ONLY. build.py render_news STRIPS this whole region for the
+   offline dist/news (which therefore keeps ZERO network code; the self-contained guard holds). When
+   NEWS.live is set, a "process a new article" control is injected into Select; submit -> POST /extract
+   -> the grounded record is pushed into NEWS.articles -> the existing Read/Screen/Disposition arc runs. */
+function liveInjectSelect(){
+  const tiles = document.querySelector('.tiles');
+  if(!tiles || document.getElementById('livebar')) return;
+  tiles.insertAdjacentHTML('afterend',
+    '<div class="livebar" id="livebar">'
+    + '<div class="livehead"><span class="livedot">●</span> Real-time extraction'
+    + '<span class="lsub"> — paste an article; a local model extracts entities + red flags, grounded against the source (ungrounded dropped).</span>'
+    + '<button class="btn" id="live-toggle">＋ Process a new article</button></div>'
+    + '<div class="liveform" id="liveform" hidden>'
+    + '<div class="liverow"><input class="livein" id="live-title" placeholder="Title (optional)">'
+    + '<input class="livein" id="live-source" placeholder="Source / organisation (optional)"></div>'
+    + '<textarea class="livetext" id="live-text" placeholder="Paste the article text here…"></textarea>'
+    + '<div class="liveact"><button class="btn primary" id="live-run">Run extraction</button>'
+    + '<span class="lstatus" id="live-status"></span></div></div></div>');
+  document.getElementById('live-toggle').addEventListener('click', () => {
+    const f = document.getElementById('liveform'); f.hidden = !f.hidden;
+  });
+  document.getElementById('live-run').addEventListener('click', liveRun);
+}
+async function liveRun(){
+  const status = document.getElementById('live-status');
+  const text = (document.getElementById('live-text').value || '').trim();
+  if(!text){ status.textContent = 'Paste some article text first.'; return; }
+  status.textContent = 'Extracting via the local model…';
+  try{
+    const r = await fetch(NEWS.live.extract, { method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ text,
+        title: (document.getElementById('live-title').value || '').trim(),
+        source_org: (document.getElementById('live-source').value || '').trim() }) });
+    const data = await r.json();
+    if(!r.ok){ status.textContent = 'Extraction failed: ' + (data.error || ('HTTP ' + r.status)); return; }
+    const rec = data.record, drop = (data.dropped || []).length;
+    const i = NEWS.articles.findIndex(a => a.id === rec.id);
+    if(i >= 0) NEWS.articles[i] = rec; else NEWS.articles.unshift(rec);
+    status.textContent = rec.entities.length + ' entities · ' + rec.red_flags.length + ' red flags grounded'
+      + (drop ? (' · ' + drop + ' ungrounded dropped') : '');
+    go('read', rec.id);
+  }catch(ex){
+    status.textContent = 'Could not reach the local companion (' + NEWS.live.extract + ') — ' + ex.message;
+  }
+}
+function liveInit(){
+  const css = '.livebar{border:1px solid var(--line);border-left:3px solid var(--signal);border-radius:10px;padding:14px 16px;margin:18px 0;background:rgba(246,166,35,.045)}'
+    + '.livehead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:600 14px/1.3 var(--head);color:var(--ink)}'
+    + '.livedot{color:var(--signal)}'
+    + '.lsub{font-weight:400;color:var(--muted);flex:1 1 300px}'
+    + '#livebar .btn{margin-left:auto}'
+    + '.liveform[hidden]{display:none}'
+    + '.liveform{margin-top:12px;display:flex;flex-direction:column;gap:8px}'
+    + '.liverow{display:flex;gap:8px;flex-wrap:wrap}'
+    + '.livein{flex:1 1 220px;padding:9px 11px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2);color:var(--ink);font:13px var(--body)}'
+    + '.livetext{min-height:170px;padding:11px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2);color:var(--ink);font:13px/1.5 var(--body);resize:vertical}'
+    + '.liveact{display:flex;align-items:center;gap:12px;flex-wrap:wrap}'
+    + '.lstatus{color:var(--muted);font:13px var(--mono)}';
+  const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s);
+  const baseSelect = RENDER.select;
+  RENDER.select = function(){ baseSelect(); liveInjectSelect(); };
+}
+if(NEWS.live){ liveInit(); }
+/*LIVE_END*/
 render();
 </script>
 </body>

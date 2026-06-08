@@ -98,6 +98,19 @@ that table.
   verbatim under 17 U.S.C. §105); the client/counterparty **book is synthetic** (no real customer data);
   scores are real computed similarity; nothing reads as a real detection/precision rate.
 
+### Live mode (Phase 35, optional — needs a local llama-cpp server; see `docs/news-live.md`)
+- [ ] **Automated (no model):** `python3 tests/news_live_test.py`, `python3 scripts/news_ground.py --selftest`,
+  and `python3 scripts/serve_news.py --selftest` all exit **0** (the grounding gate, the build_record
+  pipeline, the `/extract` route over HTTP with the model stubbed, and the served live page).
+- [ ] **Offline artifact still pure:** `dist/news/index.html` contains **no** `fetch(` / `liveInit` /
+  `LIVE_START` (the live region is build-time stripped); it opens standalone as the scripted fallback.
+- [ ] **Live (with a model):** start llama-cpp, then `python3 scripts/serve_news.py --llm-url <endpoint>
+  --model <name>`; open **http://localhost:8000**, click **＋ Process a new article**, paste a public-domain
+  enforcement article, **Run extraction** → entities + red flags appear in the streaming Read, each **grounded**
+  in the pasted text (ungrounded items are dropped; the status line reports how many), then the normal
+  Screen → Disposition → Exposure arc runs. Pasting gibberish returns an honest "nothing grounded" message,
+  never a fabricated record.
+
 ## Walk the six-act arc (Next / Back) — read values from the table
 - [ ] **Act 0 — Blind spot:** coverage map renders; gauge animates to the **table value**; red (not-covered) rows visible
 - [ ] **Act 1 — Read advisory:** advisory text streams with highlighted phrases; candidate signals appear staggered, count climbs

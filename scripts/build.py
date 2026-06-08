@@ -47,6 +47,13 @@ CORPUS_PLACEHOLDER = "__CORPUS__"
 # sources/jurisdictions. Kept separate from the 42 derived records (which stay byte-frozen); validated
 # at the build boundary (validate_typology — closed vocab + referential integrity + total coverage).
 TYPOLOGY_MAP = ROOT / "data" / "typology-map.json"
+# Phase 29: the capability-lens overlay — labels + group + the institution's interview posture per
+# capability (C*) / data-source (D*) code. The per-indicator codes already ride in each derived record
+# (riding along with the indicators array); this SEPARATE committed artifact supplies the human label +
+# the Phase-28 interview self-assessment (y/partial/n), so the explorer can re-project the corpus by
+# DETECTION CAPABILITY. Kept separate from the 42 derived records (which stay byte-frozen); validated at
+# the build boundary (validate_capability_taxonomy — shape + closed vocab + referential integrity).
+CAPABILITY_TAXONOMY = ROOT / "data" / "capability-taxonomy.json"
 # Multi-source corpus registry (Phase 20): each source is one FinCEN publication TYPE with its own
 # committed corpus-status.json + derived/*.json; render_corpus merges them by id into one __CORPUS__.
 # Decoupling source-id from storage dir means adding the Nth FinCEN source (or, later, OFAC — also
@@ -85,6 +92,7 @@ MIN_RED_FLAG_CHARS = 12
 MAX_RED_FLAG_CHARS = 240
 
 STATUS = {"covered", "partial", "gap"}
+POSTURE = {"y", "n", "partial"}   # Phase 29 — the capability-lens interview self-assessment vocabulary
 CAND_TYPE = {"entity", "relationship", "motif"}
 DATA = {"available", "partial", "insufficient"}
 STRENGTH = {"weak", "mid", "strong"}
@@ -423,6 +431,73 @@ def validate_typology(advisories: list, vocab: dict, mapping: dict) -> list:
     return e
 
 
+def load_capability_taxonomy() -> tuple:
+    """Load + shape-check the capability-lens overlay (data/capability-taxonomy.json).
+
+    Returns (capabilities: list[dict], data_sources: list[dict]) — each entry {id, name, posture, …}.
+    The per-indicator `capability`/`data_source` codes already ride in each derived record; this overlay
+    supplies the human label + group + the institution's Phase-28 interview posture (y/partial/n) per code,
+    so the explorer can re-project the corpus by DETECTION CAPABILITY. A SEPARATE committed artifact (the
+    derived records stay byte-frozen); referential integrity against the live corpus is checked in
+    validate_capability_taxonomy once the merged corpus is known.
+    """
+    rel = CAPABILITY_TAXONOMY.relative_to(ROOT)
+    if not CAPABILITY_TAXONOMY.exists():
+        die(f"capability taxonomy not found: {rel}")
+    try:
+        doc = json.loads(CAPABILITY_TAXONOMY.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as ex:
+        die(f"invalid JSON in {rel}: {ex}")
+    caps = doc.get("capabilities")
+    srcs = doc.get("data_sources")
+    if not isinstance(caps, list) or not caps:
+        die(f"{rel}: 'capabilities' must be a non-empty array")
+    if not isinstance(srcs, list) or not srcs:
+        die(f"{rel}: 'data_sources' must be a non-empty array")
+    return caps, srcs
+
+
+def validate_capability_taxonomy(advisories: list, caps: list, srcs: list) -> list:
+    """Boundary check on the capability taxonomy against the merged corpus. Returns error strings.
+
+    The build-boundary GATE for the lens overlay (agent-proposed labels + interview posture, this
+    disposes — mirrors validate_typology; the grounding gate derive_signals.py stays untouched):
+      1. shape        — every entry has an id + name + posture ∈ {y,n,partial}; no repeated id;
+      2. closed vocab + referential integrity — every capability/data_source code a LIVE indicator
+         carries is a declared taxonomy id (no dangling code with no label/posture);
+      3. completeness — every LIVE indicator carries BOTH a capability and a data_source code (the lens
+         re-projects by these; a missing code would silently drop an indicator from the capability view).
+    """
+    e = []
+    cap_ids, src_ids = set(), set()
+    for label, items, ids in (("capability", caps, cap_ids), ("data_source", srcs, src_ids)):
+        for x in items:
+            cid = x.get("id")
+            if not cid or not x.get("name"):
+                e.append(f"{label} entry missing id or name: {x!r}")
+                continue
+            if cid in ids:
+                e.append(f"{label} id repeated: {cid}")
+            ids.add(cid)
+            if x.get("posture") not in POSTURE:
+                e.append(f"{label} {cid}: posture {x.get('posture')!r} not in {sorted(POSTURE)}")
+    for a in advisories:
+        if not a.get("derived"):
+            continue
+        for i in a.get("indicators") or []:
+            iid = f"{a.get('id', '?')}/{i.get('id', '?')}"
+            c, d = i.get("capability"), i.get("data_source")
+            if not c:
+                e.append(f"{iid}: indicator missing capability code")
+            elif c not in cap_ids:
+                e.append(f"{iid}: capability {c!r} not in the taxonomy")
+            if not d:
+                e.append(f"{iid}: indicator missing data_source code")
+            elif d not in src_ids:
+                e.append(f"{iid}: data_source {d!r} not in the taxonomy")
+    return e
+
+
 def _strip_provenance(md: str) -> str:
     """Strip a corpus md's leading provenance HTML-comment header + blank lines → the body only.
 
@@ -547,11 +622,19 @@ def render_corpus(template: str) -> str:
         if entry.get("derived") and entry["id"] in tmap:
             entry["typology"] = tmap[entry["id"]]
 
+    # Phase 29: the capability-lens overlay — labels + group + interview posture per capability/data-source
+    # code (the codes already ride in each derived indicator). Gated at the boundary; derived records frozen.
+    caps, srcs = load_capability_taxonomy()
+    cerrors = validate_capability_taxonomy(merged, caps, srcs)
+    if cerrors:
+        die("capability taxonomy fails boundary validation:\n  - " + "\n  - ".join(cerrors))
+
     corpus = {
         "brand": {"title": "Signal Watch", "subtitle": "AML Corpus Explorer · Vision Prototype"},
         "badge": "Illustrative data & outputs",
         "advisories": merged,
         "typologies": vocab,   # closed-vocab typology -> description (for the cross-corpus synthesis view)
+        "taxonomy": {"capabilities": caps, "data_sources": srcs},   # Phase 29 — the capability lens
     }
 
     n = template.count(CORPUS_PLACEHOLDER)

@@ -292,6 +292,32 @@ AML transformation framework. Keep vocabulary consistent with it
   just relocated) — NO deviation. dist/corpus ~2.40MB; harness 148 → **165**. FROZEN byte-clean: the showcase
   (index.html + config/** + the 3 typology dists), every source md, every corpus-status.json, data/typology-map.json,
   the grounding core `derive_signals.py` (all 875 re-ground through it byte-UNCHANGED). NO non-negotiable change.
+- CAPABILITY LENS (Phase 29, M7 — the corpus re-projected by DETECTION CAPABILITY; NO new source / non-negotiable
+  change): the Phase-28 interview produced a per-indicator `capability` (C1–C28) + `data_source` (D1–D20) tag on
+  every one of the 875 indicators, but the tags were UNUSED in the ship artifact (neither `corpus.html` nor
+  `build.py` read them). Phase 29 surfaces them as the demo's executive view. (1) THE OVERLAY: a SEPARATE committed
+  artifact `data/capability-taxonomy.json` (code → {name, desc, group, posture}) — labels from the Phase-28
+  taxonomy + the institution's interview posture (y/partial/n) per code — the Phase-24 `data/typology-map.json`
+  pattern; `build.py` must NEVER read `.dev-wiki/`. Validated at the BUILD BOUNDARY (`load_capability_taxonomy` +
+  `validate_capability_taxonomy`: shape + posture vocab + closed-vocab referential integrity — every code a live
+  indicator carries is declared + every live indicator carries both codes; fail-loud), where derived-shape +
+  typology validation already live; the grounding core stays untouched. The per-indicator codes already ride in
+  each derived record, so `build.py` only inlines the taxonomy object into `__CORPUS__`. (2) THE UI (`corpus.html`):
+  a THIRD Select mode — Documents / Typologies / **Capabilities** (the Phase-24 toggle, extended). The capability
+  picker lists one card per demanded capability (all 28): name, group, the institution's posture chip
+  (in place / partial / not yet), honest demand count + docs/typologies + a covered/partial/gap micro-bar — sorted
+  GAP-PRIORITY (not-yet first, then by demand: the exposure list). Drill a capability → `renderCapability`: its
+  indicators pooled across every regulator/jurisdiction (grouped by source document, each a clickable drill row),
+  the data sources it depends on (each with its own posture), and a coverage gauge — then drill into a doc's
+  existing per-doc arc, Back returning to the capability (a new `fromCapability`, mirroring `fromTypology`).
+  (3) HONESTY (the Phase-24 synthesis model): a pure RE-PROJECTION of already-grounded data — demand/coverage are
+  honest counts over the existing per-indicator status, posture is the interview answer (already in the demo as
+  per-doc coverage status, just re-grouped); NO similarity/overlap/lift number is computed or claimed; indicators
+  are NOT de-duplicated across sources; the always-on "Illustrative data & outputs" badge stays. Harness 165→**190**
+  (25 capability-lens asserts). FROZEN byte-clean: the showcase (index.html + config/** + the 3 typology dists),
+  every source md, every corpus-status.json, data/typology-map.json, the grounding core `derive_signals.py`, and
+  every derived `*.json` record (they already carried the codes — NO re-derivation). dist/corpus ~2.43MB; `--check
+  all` 4/4 ZERO DRIFT, `--selftest` PASS, all 42 `--check-derived` clean. NO non-negotiable change.
 - IMPORTANT — INVERTED extraction boundary (Phase 16) + the SUBTRACTION (Phase 17): the **LLM EXTRACTS, the
   deterministic layer GATES**, and the old extractor is **DELETED**. The earlier deterministic
   `extract_red_flags` accreted format special-casing every phase yet the LLM still had to author/prune its
@@ -326,7 +352,10 @@ AML transformation framework. Keep vocabulary consistent with it
 - Corpus explorer (MULTI-SOURCE): `python3 scripts/build.py corpus` → `dist/corpus/index.html`, merging
   every source in `build.py`'s `CORPUS_SOURCES` registry — `data/fincen/` (advisories) + `data/fincen-alerts/`
   (alerts) + `data/ofac/` (OFAC) + `data/fintrac/` (FINTRAC), each contributing `corpus-status.json` +
-  `derived/*.json`. Regenerate a source's manifest with
+  `derived/*.json`. The build also merges two committed overlays — `data/typology-map.json` (Phase 24) and
+  `data/capability-taxonomy.json` (Phase 29: code→{name, group, interview posture} for the capability lens) —
+  each validated at the build boundary (referential integrity against the live corpus; the grounding core is
+  untouched). Regenerate a source's manifest with
   `python3 scripts/derive_signals.py --corpus-status [source_dir]` (default `data/fincen`) after its md set
   changes, then rebuild. Acquire a new FinCEN source: `crawl_fincen.py [--alerts] --fetch` then `--write` →
   `acquire_fincen.py --source <dir> <id>` → `pdf_to_md.py --source <dir> <id>` (raw PDFs are gitignored;
@@ -350,7 +379,11 @@ AML transformation framework. Keep vocabulary consistent with it
   the Signal build-log runs in a proposal grid + the combination-lift carries a lift-side panel with firestat
   OMITTED) + the Phase-28 beats (the FULL-MOTION STREAMING read — the source streams in, each phrase highlights
   as the read reaches it, both labels count up from 0, settles with the caret removed; de-piped markdown tables;
-  the FINTRAC footer attribution present for a FINTRAC doc / empty for a US doc); 165 assertions · `python3 scripts/derive_signals.py --selftest` runs
+  the FINTRAC footer attribution present for a FINTRAC doc / empty for a US doc)
+  + the Phase-29 CAPABILITY LENS (a third Select mode Documents / Typologies / Capabilities; the per-capability
+  card carries honest demand + the institution's interview posture + the covered/partial/gap split, gap-priority
+  sorted; drilling a capability pools every indicator that depends on it as honest set arithmetic — NO
+  similarity/overlap/lift — and drills into a doc's per-doc arc with Back returning to the capability); 190 assertions · `python3 scripts/derive_signals.py --selftest` runs
   the derivation GATE checks. Pre-present sequence: `--check all` (drift) → `node tests/…` (arc) → walk
   `tests/smoke-checklist.md` (the human-eye checks).
 - Iterate: edit `index.html` / `corpus.html` / a config, rebuild. `python3 -m http.server` optional, never required.
@@ -400,7 +433,16 @@ flag re-grounds), coverage now GROUNDED in the user's 28-capability + 20-data-so
 fabricated), a full-motion STREAMING "agent reading" render (source streams in, each phrase highlights as the read
 reaches it, both labels count up from 0), de-piped markdown tables, "AML Corpus Explorer" branding, the FINTRAC
 attribution relocated to a per-doc page footer (verbatim+attribution non-negotiable HELD), and a dedup of 28 genuine
-duplicate indicators from the sweep (terror 77→53) → 875 indicators; grounding core byte-unchanged, NO non-negotiable change).
+duplicate indicators from the sweep (terror 77→53) → 875 indicators; grounding core byte-unchanged, NO non-negotiable change);
+Phase 29: capability lens — the Phase-28 capability/data-source taxonomy (28 capabilities + 20 data sources), unused
+in the ship artifact, is promoted to a committed build-validated `data/capability-taxonomy.json` (code→{name, group,
+interview posture}) and surfaced as a THIRD Select mode (Documents / Typologies / Capabilities). The corpus is
+re-projected by DETECTION CAPABILITY: per-capability honest demand count + the institution's interview posture
+(have/partial/gap) + the covered/partial/gap split, gap-priority sorted; drill a capability → its indicators pooled
+across every regulator/jurisdiction (honest set arithmetic, NO similarity/overlap/lift) grouped by source doc → drill
+into a doc's per-doc arc, Back returns to the capability. Honest re-projection only (the Phase-24 synthesis model); the
+derived records + the grounding core stay byte-frozen (they already carried the codes — no re-derivation); the always-on
+badge stays; NO non-negotiable change. Harness 165→190.
 See HANDOFF.md §8.
 
 ## Definition of done

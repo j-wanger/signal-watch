@@ -164,9 +164,11 @@ function makeEnv(reduced) {
 // Run the script in a fresh vm context; the epilogue hands the internals back via __capture.
 const EPILOGUE = `;__capture({coverageIndex,buildNows,isLive,curAdv,pick,gotoScreen,toSelect,back,render,renderClose,renderSignal,ADVISORIES,
   clusters,clusterFor,enterSynthesis,renderSelect,
+  capAgg,enterCapability,renderCapability,indsForCap,CAPS,CAP_BY,DS_BY,
   get selected(){return selected}, set selected(v){selected=v},
   get view(){return view}, get screen(){return screen},
   get currentTypology(){return currentTypology}, get fromTypology(){return fromTypology},
+  get currentCapability(){return currentCapability}, get fromCapability(){return fromCapability},
   get selMode(){return selMode}, set selMode(v){selMode=v}});`;
 function boot(reduced, raw) {
   const env = makeEnv(reduced);
@@ -524,6 +526,75 @@ apiS.toSelect();
 eq(apiS.view, 'select', 'toSelect() returns to the picker');
 ok(apiS.currentTypology === null && apiS.fromTypology === null, 'toSelect() clears the synthesis state');
 ok(envS.__errors.length === 0, 'the full synthesis flow produced no console errors');
+
+/* ===================== Phase 29 — the CAPABILITY LENS ===================== */
+// re-project the corpus by DETECTION CAPABILITY: a third Select mode → per-capability DEMAND (honest
+// count) + the institution's interview POSTURE + the covered/partial/gap split, gap-priority sorted →
+// drill into a capability → its indicators grouped by source document → drill into a doc's per-doc arc →
+// Back returns to the capability. Honest counts only (NO similarity/overlap/lift); the derived records
+// already carry the capability/data_source codes — this re-projects them, it does not re-derive.
+console.log('\n— Phase 29: the capability lens —');
+const envC = boot(true);
+const apiC = envC.__api;
+
+// (C1) the taxonomy is present + well-shaped (referential integrity is gated upstream in build.py)
+ok(Array.isArray(apiC.CAPS) && apiC.CAPS.length === 28, `taxonomy carries 28 capabilities (got ${apiC.CAPS && apiC.CAPS.length})`);
+ok(apiC.CAPS.every(c => c.id && c.name && ['y', 'n', 'partial'].includes(c.posture)),
+  'every capability has an id + name + a posture ∈ {y,n,partial}');
+
+// (C2) the Capabilities Select mode renders one card per demanded capability, gap-priority sorted
+apiC.selMode = 'capability'; apiC.renderSelect();
+const ag = apiC.capAgg();
+ok(ag.length > 0 && ag.every(x => x.demand > 0), `capAgg() returns only demanded capabilities (${ag.length})`);
+const capCards = (envC.__stage._html.match(/class="advcard live cap"/g) || []).length;
+eq(capCards, ag.length, 'capability mode renders one card per demanded capability');
+ok(/Capabilities<\/button>/.test(envC.__stage._html), 'the Documents/Typologies/Capabilities toggle shows the third mode');
+const prank = { n: 0, partial: 1, y: 2 };
+ok(ag.every((x, i) => i === 0 || prank[ag[i - 1].c.posture] <= prank[x.c.posture]),
+  'capabilities are sorted gap-priority (not-yet first, then partial, then in-place)');
+ok(envC.__errors.length === 0, 'capability-mode picker rendered with no console errors');
+
+// (C2b) HONESTY — demand/coverage are honest counts; no fabricated cross-capability metric in the picker
+ok(!/\blift\b/i.test(envC.__stage._html) && !/\d+\s*%\s*(similar|overlap|match)/i.test(envC.__stage._html),
+  'capability picker claims NO similarity/overlap/lift metric');
+// the per-capability demand on each card is the honest count from capAgg (not a fabricated figure)
+ok(ag.every(x => envC.__stage._html.includes(`${x.demand} indicator${x.demand === 1 ? '' : 's'} · ${x.docs} doc`)),
+  'each capability card shows its honest demand + document count');
+
+// (C3) drill into the highest-exposure capability — its pool = every live indicator carrying that code
+const topCap = ag[0];
+apiC.enterCapability(topCap.c.id);
+eq(apiC.view, 'capability', 'enterCapability() enters the capability view');
+eq(apiC.currentCapability, topCap.c.id, 'currentCapability is the chosen capability');
+const poolC = apiC.indsForCap(topCap.c.id).map(r => r.i);
+eq(poolC.length, topCap.demand, 'the capability view pools exactly the indicators carrying that capability code');
+eq(numText(envC, 'gnum'), apiC.coverageIndex(poolC),
+  'capability coverage = coverageIndex over the indicators that depend on it (honest set arithmetic)');
+ok(/Capability coverage/.test(envC.__stage._html), 'the capability gauge labels honestly');
+ok(/NOT de-duplicated or matched across sources/.test(envC.__stage._html),
+  'honesty note: indicators are NOT de-duplicated/matched across sources');
+ok(envC.__errors.length === 0, 'capability drill rendered with no console errors');
+
+// (C3b) one clickable drill row per contributing document, each traceable by id
+const docsC = [...new Set(apiC.indsForCap(topCap.c.id).map(r => r.a.id))];
+const capRows = (envC.__stage._html.match(/class="covrow synthrow"/g) || []).length;
+eq(capRows, docsC.length, 'the capability view lists one clickable row per contributing document');
+ok(docsC.every(id => envC.__stage._html.includes(`data-id="${id}"`)),
+  'each capability document row is traceable to its source (data-id)');
+
+// (C4) drill into a doc's per-doc arc; Back returns to the origin capability (not the picker)
+apiC.pick(docsC[0], null, topCap.c.id);
+eq(apiC.view, 'detail', 'clicking a capability document row drills into the per-doc arc');
+eq(apiC.fromCapability, topCap.c.id, 'the drilled doc remembers its origin capability');
+apiC.back();
+eq(apiC.view, 'capability', 'Back from the first detail screen returns to the origin capability (not the picker)');
+eq(apiC.currentCapability, topCap.c.id, 'Back lands on the same capability');
+
+// (C5) toSelect() fully resets the capability state
+apiC.toSelect();
+eq(apiC.view, 'select', 'toSelect() returns to the picker');
+ok(apiC.currentCapability === null && apiC.fromCapability === null, 'toSelect() clears the capability state');
+ok(envC.__errors.length === 0, 'the full capability-lens flow produced no console errors');
 
 /* ===== Phase 26 — register beats: source grouping/sort, section grouping, build-log, combination-lift ===== */
 const env26 = boot(true);

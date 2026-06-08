@@ -96,6 +96,17 @@
   .chip.jur.xx{color:var(--muted)}
   .chip.xjuris{color:var(--green)}
   .chip.xagency{color:var(--blue)}
+  /* capability lens (Phase 29) — posture chips (the institution self-assessment) + a segmented
+     covered/partial/gap demand bar. Reuses .advcard / .covrow / .gauge. */
+  .chip.grp{color:var(--muted);text-transform:none;letter-spacing:.02em}
+  .chip.postu.have{color:var(--green)}
+  .chip.postu.partialp{color:var(--signal)}
+  .chip.postu.gap{color:var(--rose)}
+  .cbar{display:flex;height:6px;border-radius:4px;overflow:hidden;background:var(--bg2);border:1px solid var(--line);margin-top:2px}
+  .cbar .cseg{height:100%}
+  .capdep{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:2px 0 4px}
+  .capdep .dl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .capdep .capdepitem{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
   .modetoggle{display:flex;gap:4px}
   .modetoggle button{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;border:1px solid var(--line2);background:var(--panel);color:var(--muted);cursor:pointer;transition:.18s}
   .modetoggle button:hover{color:var(--ink)}
@@ -359,11 +370,56 @@ function clusters(){
 }
 function jchip(j){const cls=j==='Canada'?'ca':j==='US'?'us':'xx';return `<span class="chip jur ${cls}">${esc(j)}</span>`;}
 
+/* ---------- capability lens (Phase 29) ---------- */
+// the capability/data-source taxonomy (build.py injects it from data/capability-taxonomy.json):
+// {capabilities:[{id,name,desc,group,posture}], data_sources:[{id,name,desc,posture}]}. The per-indicator
+// capability/data_source CODES already ride in each derived record; this overlay supplies the human label
+// + the institution's Phase-28 interview posture (y/partial/n), so the corpus can be re-projected by
+// DETECTION CAPABILITY — "across every regulator red flag, here are the capabilities they imply, ranked
+// by where the institution is most exposed". Pure honest counts: NO similarity/overlap/lift number.
+const TAXONOMY=(CORPUS.taxonomy && typeof CORPUS.taxonomy==='object')?CORPUS.taxonomy:{};
+const CAPS=Array.isArray(TAXONOMY.capabilities)?TAXONOMY.capabilities:[];
+const DSRC=Array.isArray(TAXONOMY.data_sources)?TAXONOMY.data_sources:[];
+const CAP_BY={}; CAPS.forEach(c=>{if(c&&c.id)CAP_BY[c.id]=c;});
+const DS_BY={};  DSRC.forEach(d=>{if(d&&d.id)DS_BY[d.id]=d;});
+// posture (y/partial/n) → executive label + color + gap-priority rank (not-yet first).
+const POSTURE_LABEL={y:'in place',partial:'partial',n:'not yet'};
+const POSTURE_CLASS={y:'have',partial:'partialp',n:'gap'};
+const POSTURE_RANK={n:0,partial:1,y:2};
+function postureChip(p,title){return `<span class="chip postu ${POSTURE_CLASS[p]||'gap'}"${title?` title="${esc(title)}"`:''}>${esc(POSTURE_LABEL[p]||'—')}</span>`;}
+function dsNum(d){return (typeof d==='string'&&/^D\d+$/.test(d))?(+d.slice(1)):999;}
+// every LIVE indicator that depends on `code`, paired with its owning advisory (for drill + jurisdiction).
+function indsForCap(code){const rows=[];ADVISORIES.forEach(a=>{if(!isLive(a))return;
+  a.indicators.forEach(i=>{if(i.capability===code)rows.push({i,a});});});return rows;}
+// aggregate the corpus by capability — honest demand + covered/partial/gap split + contributing docs/
+// typologies/jurisdictions. Sorted GAP-PRIORITY: not-yet posture first, then by demand (the exposure list).
+function capAgg(){
+  return CAPS.map(c=>{
+    const rows=indsForCap(c.id), inds=rows.map(r=>r.i);
+    const covered=inds.filter(i=>i.status==='covered').length;
+    const partial=inds.filter(i=>i.status==='partial').length;
+    const gap=inds.filter(i=>i.status==='gap').length;
+    return {c, rows, demand:inds.length, covered, partial, gap, cov:coverageIndex(inds),
+      docs:new Set(rows.map(r=>r.a.id)).size,
+      typols:new Set(rows.map(r=>r.a.typology).filter(Boolean)).size,
+      juris:[...new Set(rows.map(r=>r.a.jurisdiction||'—'))].sort()};
+  }).filter(x=>x.demand>0)
+    .sort((a,b)=>(POSTURE_RANK[a.c.posture]??3)-(POSTURE_RANK[b.c.posture]??3) || b.demand-a.demand || String(a.c.name).localeCompare(String(b.c.name)));
+}
+// a tiny segmented covered/partial/gap bar — honest counts, shared color vocabulary.
+function covSeg(covered,partial,gap){
+  const t=covered+partial+gap||1;
+  const seg=(n,col)=>n?`<span class="cseg" style="width:${(n/t*100).toFixed(2)}%;background:${col}" title="${n}"></span>`:'';
+  return `<div class="cbar">${seg(covered,'var(--green)')}${seg(partial,'var(--signal)')}${seg(gap,'var(--rose)')}</div>`;
+}
+
 /* ---------- state + chrome ---------- */
 let view='landing', current=null, screen=0, maxScreen=0, timers=[];  // Phase 26: the story landing is the entry
-let selMode='doc';          // Select picker mode: 'doc' (by document) | 'typology' (by typology)
+let selMode='doc';          // Select picker mode: 'doc' | 'typology' | 'capability' (Phase 29)
 let currentTypology=null;   // the active cluster when view==='synthesis'
 let fromTypology=null;      // the cluster a doc was drilled from (so Back returns to it)
+let currentCapability=null; // the active capability when view==='capability' (Phase 29)
+let fromCapability=null;    // the capability a doc was drilled from (so Back returns to it)
 // the human gate: which BUILD_NOW indicators the presenter has picked to build (per-advisory,
 // reset on pick()). Drives the Signal cards and the close-the-loop coverage rise.
 let selected=new Set();
@@ -377,7 +433,7 @@ function clearTimers(){timers.forEach(t=>clearTimeout(t));timers=[];}
 function T(fn,ms){if(REDUCED){fn();return 0;}const id=setTimeout(fn,ms);timers.push(id);return id;}
 
 function curAdv(){return ADVISORIES.find(a=>a.id===current)||null;}
-function stepIndex(){return (view==='landing'||view==='select'||view==='synthesis')?0:screen+1;}  // landing/Select/synthesis=0, then detail screens
+function stepIndex(){return (view==='landing'||view==='select'||view==='synthesis'||view==='capability')?0:screen+1;}  // landing/Select/synthesis/capability=0, then detail screens
 
 function renderStepper(){
   if(view==='landing'){stepper.innerHTML='';return;}   // the landing is a cover page — no stepper
@@ -424,18 +480,29 @@ function renderSelect(){
   const fintracN=ADVISORIES.filter(a=>a.doc_type==='FINTRAC').length;
   const cl=clusters();
   const xjN=cl.filter(c=>c.xj).length;
-  const byTyp=selMode==='typology';
+  const byTyp=selMode==='typology', byCap=selMode==='capability';
+  const ag = byCap ? capAgg() : null;
+  const capHave = byCap ? ag.filter(x=>x.c.posture==='y').length : 0;
+  const capPart = byCap ? ag.filter(x=>x.c.posture==='partial').length : 0;
+  const capGap  = byCap ? ag.filter(x=>x.c.posture==='n').length : 0;
   const toggle=`<div class="modetoggle">
-      <button data-mode="doc" class="${byTyp?'':'on'}">Documents</button>
+      <button data-mode="doc" class="${(!byTyp&&!byCap)?'on':''}">Documents</button>
       <button data-mode="typology" class="${byTyp?'on':''}">Typologies</button>
+      <button data-mode="capability" class="${byCap?'on':''}">Capabilities</button>
     </div>`;
-  const count = byTyp
+  const count = byCap
+    ? `<span class="sct">${ag.length} detection capabilities · ${capHave} in place · ${capPart} partial · ${capGap} not yet · across ${live} derived documents</span>`
+    : byTyp
     ? `<span class="sct">${cl.length} typologies · ${xjN} cross-jurisdiction · ${live} derived documents</span>`
     : `<span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${fintracN} FINTRAC · ${live} derived · ${nd} non-derivable</span>`;
-  const lead = byTyp
+  const lead = byCap
+    ? `Every red flag in the corpus implies a <b>detection capability</b>. Pooled across all regulators and jurisdictions, here is what the corpus demands — each capability tagged with the institution's own posture and the number of indicators that depend on it. Sorted by <b>where you're most exposed</b>: capabilities not yet in place, by how many indicators need them. Pick one to see the indicators and drill into any document.`
+    : byTyp
     ? `Group the corpus by money-laundering typology and see the <b>combined</b> picture: the same typology often appears across regulators and jurisdictions, and no single advisory enumerates it all. <b>${xjN}</b> typolog${xjN===1?'y spans':'ies span'} both the US and Canada. Pick a typology to see its cluster and combined coverage, then drill into any document's loop.`
     : `The same signal engine, pointed at a multi-jurisdiction public corpus — US-federal FinCEN advisories + alerts and OFAC sanctions advisories, plus Canadian <b>FINTRAC</b> operational alerts. Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.`;
-  const note = byTyp
+  const note = byCap
+    ? `Capabilities are a fixed taxonomy; each indicator is tagged to exactly one. Demand, coverage, and the covered/partial/gap split are honest counts over the existing per-indicator statuses — no capability score, similarity, or overlap is computed or claimed. Posture is the institution's own assessment (illustrative).`
+    : byTyp
     ? `Documents are grouped by their typology (a closed-vocabulary overlay, traceable to each document's stated subject). Combined coverage is honest union arithmetic over the existing per-indicator statuses — no similarity, overlap, or lift between regulators is computed or claimed.`
     : `Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the cited source documents (each carries its own public-source attribution).`;
   // doc-mode: group by SOURCE (FinCEN advisories / alerts / OFAC / FINTRAC), newest-first within each.
@@ -449,10 +516,12 @@ function renderSelect(){
     return `<div class="srcgroup"><div class="srchead"><span class="srcname">${esc(label)}</span><span class="srcsub">${docs.length} document${docs.length===1?'':'s'} · ${dl} derived · newest first</span></div>
       <div class="advgrid">${docs.map(a=>advCard(a)).join('')}</div></div>`;
   }).join('');
-  const gridHtml = byTyp ? `<div class="advgrid">${cl.map(typoCard).join('')}</div>` : groupsHtml;
+  const gridHtml = byCap ? `<div class="advgrid">${ag.map(capCard).join('')}</div>`
+                 : byTyp ? `<div class="advgrid">${cl.map(typoCard).join('')}</div>`
+                 : groupsHtml;
   stage.innerHTML=`<div class="scene">
     <div class="eyebrow">FinCEN + OFAC + FINTRAC corpus</div>
-    <h2>${byTyp?'Pick a typology. <em>See the corpus combine.</em>':'Pick a document. <em>Watch the loop derive it.</em>'}</h2>
+    <h2>${byCap?'Pick a capability. <em>See where you\'re exposed.</em>':byTyp?'Pick a typology. <em>See the corpus combine.</em>':'Pick a document. <em>Watch the loop derive it.</em>'}</h2>
     <p class="lead">${lead}</p>
     <div class="selhead">
       ${count}
@@ -462,8 +531,19 @@ function renderSelect(){
     <div class="framenote">${note}</div>
   </div>`;
   stage.querySelectorAll('.modetoggle button').forEach(b=>b.onclick=()=>{selMode=b.dataset.mode;render();});
-  if(byTyp) stage.querySelectorAll('.advcard.typo').forEach(el=>el.onclick=()=>enterSynthesis(el.dataset.typ));
+  if(byCap) stage.querySelectorAll('.advcard.cap').forEach(el=>el.onclick=()=>enterCapability(el.dataset.cap));
+  else if(byTyp) stage.querySelectorAll('.advcard.typo').forEach(el=>el.onclick=()=>enterSynthesis(el.dataset.typ));
   else stage.querySelectorAll('.advcard.live').forEach(el=>el.onclick=()=>pick(el.dataset.id));
+}
+// a capability card (capabilities mode of the picker) — reuses .advcard styling.
+function capCard(x){
+  const c=x.c;
+  return `<div class="advcard live cap" data-cap="${esc(c.id)}">
+    <div class="actop"><span class="acleft"><span class="acno">${esc(c.id)}</span><span class="chip grp">${esc(c.group||'')}</span></span>${postureChip(c.posture)}</div>
+    <div class="actitle">${esc(c.name)}</div>
+    <div class="acmeta">${x.demand} indicator${x.demand===1?'':'s'} · ${x.docs} doc${x.docs===1?'':'s'} · ${x.typols} typolog${x.typols===1?'y':'ies'} · coverage ${x.cov}%</div>
+    ${covSeg(x.covered,x.partial,x.gap)}
+  </div>`;
 }
 // a typology cluster card (typology mode of the picker) — reuses .advcard styling.
 function typoCard(c){
@@ -519,6 +599,57 @@ function renderSynthesis(t){
     <div class="framenote">Combined coverage is the union of each regulator's enumerated red flags — counted as enumerated, NOT de-duplicated or matched across regulators (no similarity or overlap is computed or claimed). Coverage is illustrative; pick any document to walk its own loop.</div>
   </div>`;
   stage.querySelectorAll('.synthrow').forEach(el=>el.onclick=()=>pick(el.dataset.id,t));
+  T(()=>{const f=document.getElementById('gfill');if(f)f.style.width=cov+'%';animVal('gnum',0,cov,900,'%');},250);
+}
+
+/* ---------- capability drill view (Phase 29) — one detection capability across the whole corpus ---------- */
+function renderCapability(code){
+  const c=CAP_BY[code]; if(!c){toSelect();return;}
+  const rows=indsForCap(code); if(!rows.length){toSelect();return;}
+  const inds=rows.map(r=>r.i), cov=coverageIndex(inds);
+  const covered=inds.filter(i=>i.status==='covered').length;
+  const partial=inds.filter(i=>i.status==='partial').length;
+  const gap=inds.filter(i=>i.status==='gap').length;
+  const juris=[...new Set(rows.map(r=>r.a.jurisdiction||'—'))].sort();
+  // data sources this capability's indicators draw on, each with its OWN interview posture (colored dot) —
+  // honest distinct codes, ties the capability to the data it depends on.
+  const dsCodes=[...new Set(rows.map(r=>r.i.data_source).filter(Boolean))].sort((x,y)=>dsNum(x)-dsNum(y));
+  const dsItem=d=>{const ds=DS_BY[d];if(!ds)return '';
+    const col=ds.posture==='y'?'var(--green)':ds.posture==='partial'?'var(--signal)':'var(--rose)';
+    return `<span class="capdepitem"><span class="dot" style="background:${col}"></span>${esc(ds.name)}</span>`;};
+  const dsChips=dsCodes.map(dsItem).join('');
+  // group the indicators by source document; the document HEADER row is the drill target (→ its per-doc arc).
+  const byDoc=new Map();
+  rows.forEach(r=>{if(!byDoc.has(r.a.id))byDoc.set(r.a.id,{a:r.a,inds:[]});byDoc.get(r.a.id).inds.push(r.i);});
+  const groups=[...byDoc.values()].sort((x,y)=>
+    String(x.a.jurisdiction||'').localeCompare(String(y.a.jurisdiction||'')) || String(x.a.id).localeCompare(String(y.a.id)));
+  const indRow=i=>`<div class="covrow"><div class="clabel">${esc(i.red_flag||shortFlag(i.flag,170))}<div class="csub">"${esc(shortFlag(i.flag,110))}"</div></div><span class="pill ${i.status||'gap'}">${i.status==='gap'?'not covered':esc(i.status||'gap')}</span></div>`;
+  const body=groups.map(g=>{
+    const dc=coverageIndex(g.inds);
+    const head=`<div class="covrow synthrow" data-id="${esc(g.a.id)}" role="button">
+      <div class="clabel">${esc(g.a.title||g.a.id)}<div class="csub">${esc(g.a.advisory||g.a.id)} · ${g.inds.length} indicator${g.inds.length===1?'':'s'} for this capability · coverage ${dc}%</div></div>
+      <span class="acleft">${jchip(g.a.jurisdiction||'—')}<span class="chip doc">${esc(g.a.doc_type||'')}</span></span>
+    </div>`;
+    return head + g.inds.map(indRow).join('');
+  }).join('');
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">Capability lens · ${esc(c.group||'')}</div>
+    <h2>${esc(c.name)}</h2>
+    <div class="srccap"><b>Your posture.</b> ${postureChip(c.posture)} &nbsp;${esc(c.desc||'')}</div>
+    <p class="lead"><b>${inds.length}</b> red flag${inds.length===1?'':'s'} across <b>${byDoc.size}</b> document${byDoc.size===1?'':'s'} and ${juris.map(esc).join(' + ')} depend on this capability — ${covered} covered · ${partial} partial · ${gap} gap today.${gap?` Closing it would raise coverage on <b>${gap}</b> indicator${gap===1?'':'s'} the corpus already enumerates.`:''} Pick a document to walk its loop.</p>
+    ${dsChips?`<div class="capdep"><span class="dl">Depends on data</span> ${dsChips}</div>`:''}
+    <div class="covwrap">
+      <div class="covgrid">${body}</div>
+      <div class="gauge">
+        <div class="gh">Capability coverage</div>
+        <div class="gnum" id="gnum">${cov}%</div>
+        <div class="gd">of ${inds.length} indicator${inds.length===1?'':'s'} · ${byDoc.size} doc${byDoc.size===1?'':'s'}</div>
+        <div class="gbar"><div class="gfill" id="gfill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="framenote">Indicators are pooled by capability across every regulator and jurisdiction — counted as enumerated, NOT de-duplicated or matched across sources (no similarity or overlap is computed or claimed). Posture and coverage are illustrative. Pick any document to walk its own loop.</div>
+  </div>`;
+  stage.querySelectorAll('.synthrow').forEach(el=>el.onclick=()=>pick(el.dataset.id,null,code));
   T(()=>{const f=document.getElementById('gfill');if(f)f.style.width=cov+'%';animVal('gnum',0,cov,900,'%');},250);
 }
 function advCard(a){
@@ -919,6 +1050,10 @@ function render(){
       if(!currentTypology){ toSelect(); return; }
       renderSynthesis(currentTypology);
     }
+    else if(view==='capability'){
+      if(!currentCapability){ toSelect(); return; }
+      renderCapability(currentCapability);
+    }
     else {
       const a=curAdv();
       if(!isLive(a)){ toSelect(); return; }   // defensive: never strand on a non-live detail view
@@ -950,25 +1085,29 @@ function updateAttribution(){
 }
 
 /* ---------- navigation ---------- */
-// `from` (optional) = the typology cluster a doc was drilled from, so Back returns there (Phase 24).
-function pick(id,from){const a=ADVISORIES.find(x=>x.id===id);if(!isLive(a))return;fromTypology=from||null;current=id;view='detail';screen=0;maxScreen=0;
+// `from` (optional) = the typology cluster a doc was drilled from; `fromCap` = the capability it was
+// drilled from (Phase 29). Either makes Back from the first detail screen return to that lens.
+function pick(id,from,fromCap){const a=ADVISORIES.find(x=>x.id===id);if(!isLive(a))return;
+  fromTypology=from||null;fromCapability=fromCap||null;current=id;view='detail';screen=0;maxScreen=0;
   selected=new Set(buildNows(a).map(i=>i.id));  // default: all build-now gaps selected — the presenter deselects to opt out
   render();}
 function enterSynthesis(t){currentTypology=t;view='synthesis';screen=0;maxScreen=0;render();}
+function enterCapability(code){currentCapability=code;view='capability';screen=0;maxScreen=0;render();}
 function gotoScreen(s){screen=Math.max(0,Math.min(DETAIL.length-1,s));maxScreen=Math.max(maxScreen,screen);render();}
-function toSelect(){view='select';current=null;currentTypology=null;fromTypology=null;screen=0;maxScreen=0;render();}
-function toLanding(){view='landing';current=null;currentTypology=null;fromTypology=null;screen=0;maxScreen=0;render();}
+function toSelect(){view='select';current=null;currentTypology=null;fromTypology=null;currentCapability=null;fromCapability=null;screen=0;maxScreen=0;render();}
+function toLanding(){view='landing';current=null;currentTypology=null;fromTypology=null;currentCapability=null;fromCapability=null;screen=0;maxScreen=0;render();}
 function advance(){
-  if(view==='landing'){toSelect();return;}          // Enter the corpus
-  if(view==='select'||view==='synthesis')return;    // pick by clicking a card / cluster row
+  if(view==='landing'){toSelect();return;}                       // Enter the corpus
+  if(view==='select'||view==='synthesis'||view==='capability')return;  // pick by clicking a card / row
   if(screen>=DETAIL.length-1){toSelect();return;}
   gotoScreen(screen+1);
 }
 function back(){
   if(view==='landing')return;
-  if(view==='synthesis'){toSelect();return;}                  // cluster → the picker
-  if(view==='select'){toLanding();return;}                    // Select → back to the cover
-  if(screen<=0){ if(fromTypology){enterSynthesis(fromTypology);return;} toSelect();return; }  // drilled from a cluster → back to it
+  if(view==='synthesis'||view==='capability'){toSelect();return;}  // cluster / capability → the picker
+  if(view==='select'){toLanding();return;}                         // Select → back to the cover
+  // drilled from a lens → Back from the first detail screen returns to it (capability takes precedence)
+  if(screen<=0){ if(fromCapability){enterCapability(fromCapability);return;} if(fromTypology){enterSynthesis(fromTypology);return;} toSelect();return; }
   gotoScreen(screen-1);
 }
 function updateControls(){
@@ -983,11 +1122,18 @@ function updateControls(){
     backBtn.style.visibility='hidden';
     resetBtn.style.visibility='hidden';
     nextBtn.style.visibility='hidden';
-    hint.textContent=selMode==='typology'?'Pick a typology to see the corpus combine →':'Pick a derived document to explore →';
+    hint.textContent=selMode==='typology'?'Pick a typology to see the corpus combine →':selMode==='capability'?'Pick a capability to see where you\'re exposed →':'Pick a derived document to explore →';
     return;
   }
   if(view==='synthesis'){
     backBtn.style.visibility='visible'; backBtn.textContent='‹ Typologies';
+    resetBtn.style.visibility='visible';
+    nextBtn.style.visibility='hidden';
+    hint.textContent='Pick a document to walk its loop →';
+    return;
+  }
+  if(view==='capability'){
+    backBtn.style.visibility='visible'; backBtn.textContent='‹ Capabilities';
     resetBtn.style.visibility='visible';
     nextBtn.style.visibility='hidden';
     hint.textContent='Pick a document to walk its loop →';
@@ -999,8 +1145,10 @@ function updateControls(){
   const backLabels=['‹ Advisories','‹ Read advisory','‹ Coverage','‹ Build recs','‹ Signal','‹ Combination lift'];
   const nextLabels=['Assess coverage ›','Build recommendations ›','Signal spec ›','See the lift ›','Close the loop ›','↺ Another document'];
   const hints=['The agent reads the source and translates each red flag','Each red flag scored against the library','Pick the build-now gaps to commit','The agent builds your committed signals','Why composition beats a signal alone — illustrative','Coverage closes on what you built'];
-  // when drilled from a typology cluster, Back from Coverage returns to that cluster (not the picker)
-  backBtn.textContent=(screen===0 && fromTypology)?('‹ '+typoLabel(fromTypology)):(backLabels[screen]||'‹ Back');
+  // when drilled from a lens, Back from the first detail screen returns to it (capability takes precedence)
+  backBtn.textContent=(screen===0 && fromCapability && CAP_BY[fromCapability])?('‹ '+CAP_BY[fromCapability].name)
+    :(screen===0 && fromTypology)?('‹ '+typoLabel(fromTypology))
+    :(backLabels[screen]||'‹ Back');
   nextBtn.textContent=nextLabels[screen]||'Next ›';
   hint.textContent=hints[screen]||'';
 }

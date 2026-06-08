@@ -44,6 +44,13 @@ that table.
   Build recs (gate) → Signal → Close the loop**; deselect a build-now row and confirm the Signal cards +
   the closing coverage rise both shrink to match (the automated check pins this, but eyeball it on the
   presentation browser).
+- [ ] **Capabilities mode (Phase 29):** on Select, click the **Capabilities** toggle (third button, after
+  Documents / Typologies). Confirm: one card per detection capability, each with a posture chip
+  (**in place / partial / not yet**), an honest indicator-demand count + a covered/partial/gap micro-bar;
+  the list is **gap-priority** sorted (not-yet capabilities lead). Click a capability → its indicators
+  appear grouped by source document with a coverage gauge + a "Depends on data" row; click a document row
+  to **drill into that doc's per-doc arc**, then **Back** returns to the capability (not the picker). No
+  fabricated number — only honest counts + the always-on "Illustrative data & outputs" badge.
 
 ## Walk the six-act arc (Next / Back) — read values from the table
 - [ ] **Act 0 — Blind spot:** coverage map renders; gauge animates to the **table value**; red (not-covered) rows visible

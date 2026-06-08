@@ -96,6 +96,17 @@
   .chip.jur.xx{color:var(--muted)}
   .chip.xjuris{color:var(--green)}
   .chip.xagency{color:var(--blue)}
+  /* capability lens (Phase 29) — posture chips (the institution self-assessment) + a segmented
+     covered/partial/gap demand bar. Reuses .advcard / .covrow / .gauge. */
+  .chip.grp{color:var(--muted);text-transform:none;letter-spacing:.02em}
+  .chip.postu.have{color:var(--green)}
+  .chip.postu.partialp{color:var(--signal)}
+  .chip.postu.gap{color:var(--rose)}
+  .cbar{display:flex;height:6px;border-radius:4px;overflow:hidden;background:var(--bg2);border:1px solid var(--line);margin-top:2px}
+  .cbar .cseg{height:100%}
+  .capdep{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:2px 0 4px}
+  .capdep .dl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .capdep .capdepitem{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
   .modetoggle{display:flex;gap:4px}
   .modetoggle button{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;border:1px solid var(--line2);background:var(--panel);color:var(--muted);cursor:pointer;transition:.18s}
   .modetoggle button:hover{color:var(--ink)}
@@ -15925,6 +15936,328 @@ const CORPUS = {
     "illegal-wildlife-trade": "Laundering of illegal-wildlife-trade proceeds",
     "child-sexual-exploitation": "Laundering of online child sexual exploitation proceeds",
     "underground-banking": "Informal value transfer / underground banking schemes"
+  },
+  "taxonomy": {
+    "capabilities": [
+      {
+        "id": "C1",
+        "name": "Customer-profile / out-of-pattern transaction monitoring",
+        "desc": "Baseline each customer's expected activity (volume, value, instrument mix, counterparties) and alert on out-of-profile deviation, sudden onset on a previously-unrelated account, dormant-account reactivation, and post-closure migration of payment identifiers to unrelated parties.",
+        "group": "Transaction patterns",
+        "posture": "partial"
+      },
+      {
+        "id": "C2",
+        "name": "Rapid pass-through / flow-through (receive-and-forward) detection",
+        "desc": "Detect funds-in then rapid funds-out with low residual balance — deposit→drain, reimbursement→pass-through, EMT/wire/CVC in-and-out velocity, conduit accounts that are not an economic endpoint; the core mule/layering signature.",
+        "group": "Transaction patterns",
+        "posture": "y"
+      },
+      {
+        "id": "C3",
+        "name": "Multi-originator funnel-in / fan-out network detection",
+        "desc": "Identify many-to-one aggregation (multiple unrelated originators, addresses or jurisdictions converging on one beneficiary off the holder's geography/profile) and the inverse one-to-many disbursement to unrelated payees.",
+        "group": "Transaction patterns",
+        "posture": "y"
+      },
+      {
+        "id": "C4",
+        "name": "Structuring / sub-threshold & reporting-trigger evasion",
+        "desc": "Detect deposits/transactions kept below CTR/CMIR/aggregation thresholds, same-day multi-location structured cash, small-to-large denomination exchange, transactions cancelled when a report is triggered, and DD-avoidance account closures.",
+        "group": "Transaction patterns",
+        "posture": "y"
+      },
+      {
+        "id": "C5",
+        "name": "Cash-intensity / cash-placement anomaly detection",
+        "desc": "Profile expected cash behaviour and flag oversized, off-hours or peer-divergent cash activity — cash inconsistent with the business line, cash-funded cashier's cheques/drafts and OTC bills, bulk-cash vault/armored-car deposits, and large card cash advances.",
+        "group": "Transaction patterns",
+        "posture": "partial"
+      },
+      {
+        "id": "C6",
+        "name": "Transaction-velocity & dormancy / baseline-deviation monitoring",
+        "desc": "Behavioural baselining that fires on high-velocity throughput unrelated to expected activity, volume far above the account's own history or its profession peers, multiple no-rationale accounts, and dormant accounts reactivating into outflows.",
+        "group": "Transaction patterns",
+        "posture": "y"
+      },
+      {
+        "id": "C7",
+        "name": "Peer / business-activity anomaly (revenue-vs-operations) detection",
+        "desc": "Reconcile inflows against stated size, headcount and line of business and against same-segment peers, and against expected operating outflows (payroll, opex, copayments); fires when reimbursements/benefits/ERC exceed peer baseline or have no matching opex.",
+        "group": "Transaction patterns",
+        "posture": "n"
+      },
+      {
+        "id": "C8",
+        "name": "Income / occupation-vs-activity profile-inconsistency detection",
+        "desc": "Compare inflows, spend and asset acquisition against KYC-declared occupation, income and expected scale — unexplained wealth, low-income-vs-wealth, business income not commensurate, and declared-industry-vs-procurement mismatch (e.g. non-chemical buyer purchasing precursors).",
+        "group": "Transaction patterns",
+        "posture": "n"
+      },
+      {
+        "id": "C9",
+        "name": "Merchant-category (MCC) / spend-pattern screening",
+        "desc": "Score card/POS spend by merchant category for typology-indicative baskets — bulk gift-card/prepaid retail, escort-advertising, lodging clustering, lab/pill-press/heavy-machinery, capture-gear, hydroponics/grow-supply, wildlife/traditional-medicine merchants, luxury/auto/real-estate with no business nexus.",
+        "group": "Transaction patterns",
+        "posture": "n"
+      },
+      {
+        "id": "C10",
+        "name": "Transaction-narrative / memo-line keyword screening",
+        "desc": "Keyword and pattern screening over payment memos, EMT/P2P notes and reference fields — drug street-names, escort names, wildlife species, CSE/sextortion phrases, micro-value advertising memos, terrorism/charity language, and no-purpose / round-dollar narratives.",
+        "group": "Transaction patterns",
+        "posture": "n"
+      },
+      {
+        "id": "C11",
+        "name": "Counterfeit / altered negotiable-instrument & check-fraud screening",
+        "desc": "Examine deposited or cashed checks/drafts for altered amounts, inconsistent stock, counterfeit Treasury/government checks, mail-theft markers and unverifiable items — supports check-fraud, ERC-check and check-cashing indicators.",
+        "group": "Entity, KYC & screening",
+        "posture": "n"
+      },
+      {
+        "id": "C12",
+        "name": "Identity-verification, synthetic-identity & deepfake detection",
+        "desc": "At onboarding/re-verification detect document tampering, cross-document mismatch, GenAI/deepfake photos and text, MFA refusal, channel-switching, and geo/device-vs-document mismatch — the impersonation and synthetic-identity surface.",
+        "group": "Entity, KYC & screening",
+        "posture": "n"
+      },
+      {
+        "id": "C13",
+        "name": "Account-opening / KYC risk profiling",
+        "desc": "Risk-score new and thin-history accounts at opening — non-resident or inexperienced owners, single-purpose accounts (ERC-only, benefit-only, deposit-only), and beneficial owners with prior fraud convictions.",
+        "group": "Entity, KYC & screening",
+        "posture": "y"
+      },
+      {
+        "id": "C14",
+        "name": "KYC integrity & customer-cooperation screening",
+        "desc": "Treat onboarding-data quality and responsiveness as a signal — incomplete/inaccurate KYC, refusal to disclose UBO, evasive answers about a blocked person, and non-response to KYC-refresh/RFI requests.",
+        "group": "Entity, KYC & screening",
+        "posture": "n"
+      },
+      {
+        "id": "C15",
+        "name": "Beneficial-ownership, shell / front-company & nominee network analysis",
+        "desc": "Resolve UBO and link customers by shared owners, addresses, devices/IPs, TINs or counterparties — front/shell companies at residential/co-located addresses, shared-owner rings, beneficiary-swap-with-unchanged-name, slight-name-variant clusters, and nominee/proxy control hiding a blocked party.",
+        "group": "Entity, KYC & screening",
+        "posture": "n"
+      },
+      {
+        "id": "C16",
+        "name": "Third-party / nominee funding & legal-professional channel detection",
+        "desc": "Detect funds moving through nominee channels — lawyer/notary trust-account closings, third-party-funded deposits, mirror settlement of unrelated parties' cards, and drafts/EMTs from low-footprint legal professionals.",
+        "group": "Entity, KYC & screening",
+        "posture": "partial"
+      },
+      {
+        "id": "C17",
+        "name": "PEP & sanctioned-elite proxy screening",
+        "desc": "Identify PEPs, close associates and proxies and link asset/transaction activity to them — including ownership dilution or transfers that drop a sanctioned/PEP party below disclosure thresholds.",
+        "group": "Cross-border & sanctions",
+        "posture": "y"
+      },
+      {
+        "id": "C18",
+        "name": "Sanctions / watchlist screening",
+        "desc": "Screen all parties and identifiers (name, address, email, phone, passport, IMO, crypto address) against OFAC/SDN, BIS Entity/debarred, Section 311 and FinCEN-registration/imposter references with fuzzy/near-match to catch identifier-nexus and name-variant hits.",
+        "group": "Cross-border & sanctions",
+        "posture": "y"
+      },
+      {
+        "id": "C19",
+        "name": "Adverse-media / OSINT & web-presence verification",
+        "desc": "Enrich entities with negative news, prior convictions, extremist affiliation, and web-presence checks — minimal/PHE-timed online presence, residential/CMRA addresses, government-lookalike domains, and thin/absent footprint of shells and facilitators.",
+        "group": "Cross-border & sanctions",
+        "posture": "partial"
+      },
+      {
+        "id": "C20",
+        "name": "Cross-border / high-risk-jurisdiction & corridor anomaly detection",
+        "desc": "Score wires/EFT against expected geography — no-nexus inbound foreign wires, bidirectional/round-trip CN-HK-UAE-LatAm corridors, conflict-zone/ISIS-prevalent/precursor-source jurisdictions, capital-control routing, and domestic-purpose funds routed cross-border.",
+        "group": "Cross-border & sanctions",
+        "posture": "y"
+      },
+      {
+        "id": "C21",
+        "name": "Virtual-currency / blockchain exposure & VASP screening",
+        "desc": "Screen CVC/stablecoin addresses and VASP counterparties against illicit-cluster attribution (darknet, CSAM, ransomware, mixer/tumbler, sanctions), trace chain-hopping into AECs, and flag first-time/off-profile/cash-funded conversions and kiosk transfers.",
+        "group": "Cross-border & sanctions",
+        "posture": "n"
+      },
+      {
+        "id": "C22",
+        "name": "Trade-based money-laundering & documentary anomaly detection",
+        "desc": "Analyze trade documents, HS codes, consignee/end-user, routing and pricing — over/under-invoicing, transshipment-corridor routing, dual-use/EAR99 goods, freight-forwarder-as-end-customer, round-dollar goods payments, and deposits with no offsetting inventory purchasing.",
+        "group": "Sector / specialized",
+        "posture": "partial"
+      },
+      {
+        "id": "C23",
+        "name": "Vessel & maritime screening (AIS / IMO)",
+        "desc": "Reconcile shipping/payment parties against vessel and maritime databases to flag AIS gaps/manipulation, IMO spoofing, name/flag churn, false-flag use, ship-to-ship transfers, and shadow-fleet/sanctioned-vessel nexus.",
+        "group": "Sector / specialized",
+        "posture": "n"
+      },
+      {
+        "id": "C24",
+        "name": "Trade / shipping & parcel-movement anomaly detection",
+        "desc": "Detect physical-movement anomalies in the financial trail — sub-1kg/mislabeled parcels, bulk mailing-material buys, hazmat/waste-oil purchases without EPA registration, drop-shipping/PO-box/storage-locker use, and freight/postal/cargo payment frequency.",
+        "group": "Sector / specialized",
+        "posture": "n"
+      },
+      {
+        "id": "C25",
+        "name": "Government-payment & reimbursement-integrity screening",
+        "desc": "Validate that government disbursements (EIP, ERC, Medicare/Medicaid/relief reimbursement, enrollee payments) reach a legitimate, enrolled, operating recipient — reconciling enrollment/eligibility, prior-year existence and concurrent-claim conflicts.",
+        "group": "Sector / specialized",
+        "posture": "n"
+      },
+      {
+        "id": "C26",
+        "name": "Scam-typology / vulnerable-customer behavioral screening",
+        "desc": "Combine scam-marker memos (tech-support, winnings, taxes, fees, FinCEN-imposter), never-met/unknown counterparties, urgency/distress and vulnerable-customer attributes (senior, widowed, divorced) to flag elder-exploitation, romance and imposter scams from human-context signals.",
+        "group": "Sector / specialized",
+        "posture": "n"
+      },
+      {
+        "id": "C27",
+        "name": "High-value-asset value, flipping & loan-structure anomaly detection",
+        "desc": "Flag under-recorded purchase price with off-book balance, loans/mortgages above market value, successive flipping/buy-backs, over-market rushed bids, penalty-disregarding early payoffs, and unjustified collateral-light loan structures.",
+        "group": "Sector / specialized",
+        "posture": "n"
+      },
+      {
+        "id": "C28",
+        "name": "Lifestyle / utility & sector-specific spend-anomaly detection",
+        "desc": "Detect spend signatures inconsistent with the stated business — excess packaging/shipping spend, utility/hydro anomalies (multiple/shared accounts, above-consumption, cross-province mismatch), and heavy electronics/luxury card spend.",
+        "group": "Sector / specialized",
+        "posture": "n"
+      }
+    ],
+    "data_sources": [
+      {
+        "id": "D1",
+        "name": "Core transaction monitoring (deposit/account ledger)",
+        "desc": "Booked deposits, withdrawals, ATM/cash, debit-card, P2P, NSF, cheques/drafts and internal transfers with balances and timestamps — the baseline feed for profiling, pass-through, structuring, velocity/dormancy and peer-anomaly logic.",
+        "posture": "y"
+      },
+      {
+        "id": "D2",
+        "name": "Cash & instrument channel data (ATM/ABM, teller, money orders, prepaid)",
+        "desc": "Teller and ATM/ABM (incl. white-label) cash detail, denominations, money-order and cashier's-cheque issuance, and reloadable-prepaid load/spend — feeds cash-intensity, structuring, bulk-cash and prepaid fan-out logic.",
+        "posture": "y"
+      },
+      {
+        "id": "D3",
+        "name": "Wire / ACH / EFT & cross-border payment data (incl. EMT, P2P, remittance)",
+        "desc": "Inbound/outbound wires, ACH, EMT/e-transfer, P2P and remittance/MSB flows with originator/beneficiary, amount, memo and jurisdiction — drives funnel-in, fan-out, corridor, no-purpose-payment and escalating-transfer logic.",
+        "posture": "y"
+      },
+      {
+        "id": "D4",
+        "name": "Card & merchant-category (MCC) transaction data",
+        "desc": "Debit/credit-card and POS streams with MCC codes, merchant names and acquirer/PSP identifiers — drives MCC/spend-pattern and escort/equipment/wildlife/luxury-merchant screening.",
+        "posture": "y"
+      },
+      {
+        "id": "D5",
+        "name": "Transaction narrative / free-text fields",
+        "desc": "Payment memos, EMT/P2P notes, email/reference and invoice-description fields — the surface for keyword/pattern screening of street-names, escort names, wildlife species, CSE/sextortion markers and round-dollar/no-purpose narratives.",
+        "posture": "partial"
+      },
+      {
+        "id": "D6",
+        "name": "Check / negotiable-instrument image & metadata",
+        "desc": "Check images, MICR, stock, payee/issuer data plus reported mail-theft / never-received items — required for counterfeit, altered-instrument and Treasury/ERC-check screening.",
+        "posture": "n"
+      },
+      {
+        "id": "D7",
+        "name": "Virtual-currency / blockchain analytics",
+        "desc": "On-chain transaction graphs, address attribution/clustering (darknet, CSAM, ransomware, mixer/tumbler, OFAC-linked), VASP/kiosk identifiers and stablecoin mint/redemption — required for all CVC/VASP exposure screening and crypto pass-through tracing.",
+        "posture": "n"
+      },
+      {
+        "id": "D8",
+        "name": "KYC / CDD & beneficial-ownership data",
+        "desc": "Onboarding records — declared occupation/income/line-of-business and scale, account-open date, single-purpose flags, owner residency/experience, identity documents, registration status, UBO/TIN graph and KYC-refresh/RFI responses.",
+        "posture": "y"
+      },
+      {
+        "id": "D9",
+        "name": "Identity-verification, document & device/session telemetry",
+        "desc": "ID-document images and cross-document checks, biometric/deepfake and GenAI-gallery results, MFA outcome, channel/webcam signals, and device/IP/geolocation/VPN telemetry — the impersonation, synthetic-identity and multi-country-access feed.",
+        "posture": "n"
+      },
+      {
+        "id": "D10",
+        "name": "Customer & account reference / entity-resolution data",
+        "desc": "Static customer/account attributes and linkage keys — phone numbers, addresses, shared identifiers, common-ownership graph and account-relationship maps — powering shared-identifier ring, common-owner and counterparty-network analytics.",
+        "posture": "partial"
+      },
+      {
+        "id": "D11",
+        "name": "Sanctions / watchlist & regulator-action data",
+        "desc": "OFAC/SDN, BIS Entity/debarred, Section 311 designations, FinCEN registration/imposter references and state-regulator fraud flags, keyed by name and identifier (email/phone/passport/IMO/crypto-address) — the authority for party screening and near-match resolution.",
+        "posture": "y"
+      },
+      {
+        "id": "D12",
+        "name": "PEP & beneficial-ownership intelligence",
+        "desc": "PEP lists, close-associate and proxy linkage data, and corporate-ownership graphs — feeds PEP/sanctioned-elite proxy screening and entity-cluster resolution.",
+        "posture": "y"
+      },
+      {
+        "id": "D13",
+        "name": "Adverse-media / OSINT & web-presence intelligence",
+        "desc": "Negative-news, conviction/litigation records, business-registration, web/social-presence, address-type (residential/CMRA) and domain-reputation data — for entity enrichment, government-impersonation and thin-footprint/shell detection.",
+        "posture": "y"
+      },
+      {
+        "id": "D14",
+        "name": "Government-program enrollment & eligibility data",
+        "desc": "Provider/enrollee enrollment and eligibility status, program identifiers, expected reimbursement profiles and prior-year-existence checks (Medicare/Medicaid, EIP, ERC, benefit programs) for reimbursement-integrity screening.",
+        "posture": "n"
+      },
+      {
+        "id": "D15",
+        "name": "Trade-finance / customs / shipping & logistics data",
+        "desc": "Trade documents (invoices, bills of lading, LCs), HS codes, consignee/end-user and end-use detail, pricing references, freight-forwarder/parcel-weight/EPA-registration and routing/transshipment records — feeds documentary, transshipment and parcel-anomaly detection.",
+        "posture": "partial"
+      },
+      {
+        "id": "D16",
+        "name": "Maritime / vessel data (AIS & registries)",
+        "desc": "AIS transponder tracks, IMO numbers, vessel name/flag/ownership-and-management registries and port-call history — feeds vessel/maritime screening for AIS gaps, spoofing, flag-hopping and shadow-fleet nexus.",
+        "posture": "n"
+      },
+      {
+        "id": "D17",
+        "name": "Geographic / jurisdiction risk reference",
+        "desc": "Jurisdiction and corridor risk ratings, high-risk-country lists (terror, CSE, wildlife-crime, precursor-source), border/migrant-corridor and tax-haven reference data — the lookup layer for corridor screening and travel-spend geo-coincidence.",
+        "posture": "y"
+      },
+      {
+        "id": "D18",
+        "name": "Real-estate / property & valuation data",
+        "desc": "Property registries, recorded purchase prices, market-valuation references, mortgage/loan terms and conveyancing/closing records — required for value, flipping, loan-above-value and rushed-close anomaly detection.",
+        "posture": "n"
+      },
+      {
+        "id": "D19",
+        "name": "Legal/notary trust-account & third-party-funding data",
+        "desc": "Visibility into solicitor/notary trust-account flows, deposit-cheque payer identity and third-party funding sources — for nominee-channel, anonymous-closing, deposit-cleansing round-trip and mirror-settlement detection.",
+        "posture": "n"
+      },
+      {
+        "id": "D20",
+        "name": "External / lifestyle reference data (utilities, registries, merchant classification)",
+        "desc": "Third-party feeds — utility/hydro consumption and billing, registered-vs-operating address, falsified-document/licence checks, and MCC/counterparty classification (luxury, auto, real estate, brokerage, betting, dating-platform processors) — for sector-specific spend and no-nexus-outflow flags.",
+        "posture": "partial"
+      }
+    ]
   }
 };
 validateCorpus(CORPUS);
@@ -15992,11 +16325,56 @@ function clusters(){
 }
 function jchip(j){const cls=j==='Canada'?'ca':j==='US'?'us':'xx';return `<span class="chip jur ${cls}">${esc(j)}</span>`;}
 
+/* ---------- capability lens (Phase 29) ---------- */
+// the capability/data-source taxonomy (build.py injects it from data/capability-taxonomy.json):
+// {capabilities:[{id,name,desc,group,posture}], data_sources:[{id,name,desc,posture}]}. The per-indicator
+// capability/data_source CODES already ride in each derived record; this overlay supplies the human label
+// + the institution's Phase-28 interview posture (y/partial/n), so the corpus can be re-projected by
+// DETECTION CAPABILITY — "across every regulator red flag, here are the capabilities they imply, ranked
+// by where the institution is most exposed". Pure honest counts: NO similarity/overlap/lift number.
+const TAXONOMY=(CORPUS.taxonomy && typeof CORPUS.taxonomy==='object')?CORPUS.taxonomy:{};
+const CAPS=Array.isArray(TAXONOMY.capabilities)?TAXONOMY.capabilities:[];
+const DSRC=Array.isArray(TAXONOMY.data_sources)?TAXONOMY.data_sources:[];
+const CAP_BY={}; CAPS.forEach(c=>{if(c&&c.id)CAP_BY[c.id]=c;});
+const DS_BY={};  DSRC.forEach(d=>{if(d&&d.id)DS_BY[d.id]=d;});
+// posture (y/partial/n) → executive label + color + gap-priority rank (not-yet first).
+const POSTURE_LABEL={y:'in place',partial:'partial',n:'not yet'};
+const POSTURE_CLASS={y:'have',partial:'partialp',n:'gap'};
+const POSTURE_RANK={n:0,partial:1,y:2};
+function postureChip(p,title){return `<span class="chip postu ${POSTURE_CLASS[p]||'gap'}"${title?` title="${esc(title)}"`:''}>${esc(POSTURE_LABEL[p]||'—')}</span>`;}
+function dsNum(d){return (typeof d==='string'&&/^D\d+$/.test(d))?(+d.slice(1)):999;}
+// every LIVE indicator that depends on `code`, paired with its owning advisory (for drill + jurisdiction).
+function indsForCap(code){const rows=[];ADVISORIES.forEach(a=>{if(!isLive(a))return;
+  a.indicators.forEach(i=>{if(i.capability===code)rows.push({i,a});});});return rows;}
+// aggregate the corpus by capability — honest demand + covered/partial/gap split + contributing docs/
+// typologies/jurisdictions. Sorted GAP-PRIORITY: not-yet posture first, then by demand (the exposure list).
+function capAgg(){
+  return CAPS.map(c=>{
+    const rows=indsForCap(c.id), inds=rows.map(r=>r.i);
+    const covered=inds.filter(i=>i.status==='covered').length;
+    const partial=inds.filter(i=>i.status==='partial').length;
+    const gap=inds.filter(i=>i.status==='gap').length;
+    return {c, rows, demand:inds.length, covered, partial, gap, cov:coverageIndex(inds),
+      docs:new Set(rows.map(r=>r.a.id)).size,
+      typols:new Set(rows.map(r=>r.a.typology).filter(Boolean)).size,
+      juris:[...new Set(rows.map(r=>r.a.jurisdiction||'—'))].sort()};
+  }).filter(x=>x.demand>0)
+    .sort((a,b)=>(POSTURE_RANK[a.c.posture]??3)-(POSTURE_RANK[b.c.posture]??3) || b.demand-a.demand || String(a.c.name).localeCompare(String(b.c.name)));
+}
+// a tiny segmented covered/partial/gap bar — honest counts, shared color vocabulary.
+function covSeg(covered,partial,gap){
+  const t=covered+partial+gap||1;
+  const seg=(n,col)=>n?`<span class="cseg" style="width:${(n/t*100).toFixed(2)}%;background:${col}" title="${n}"></span>`:'';
+  return `<div class="cbar">${seg(covered,'var(--green)')}${seg(partial,'var(--signal)')}${seg(gap,'var(--rose)')}</div>`;
+}
+
 /* ---------- state + chrome ---------- */
 let view='landing', current=null, screen=0, maxScreen=0, timers=[];  // Phase 26: the story landing is the entry
-let selMode='doc';          // Select picker mode: 'doc' (by document) | 'typology' (by typology)
+let selMode='doc';          // Select picker mode: 'doc' | 'typology' | 'capability' (Phase 29)
 let currentTypology=null;   // the active cluster when view==='synthesis'
 let fromTypology=null;      // the cluster a doc was drilled from (so Back returns to it)
+let currentCapability=null; // the active capability when view==='capability' (Phase 29)
+let fromCapability=null;    // the capability a doc was drilled from (so Back returns to it)
 // the human gate: which BUILD_NOW indicators the presenter has picked to build (per-advisory,
 // reset on pick()). Drives the Signal cards and the close-the-loop coverage rise.
 let selected=new Set();
@@ -16010,7 +16388,7 @@ function clearTimers(){timers.forEach(t=>clearTimeout(t));timers=[];}
 function T(fn,ms){if(REDUCED){fn();return 0;}const id=setTimeout(fn,ms);timers.push(id);return id;}
 
 function curAdv(){return ADVISORIES.find(a=>a.id===current)||null;}
-function stepIndex(){return (view==='landing'||view==='select'||view==='synthesis')?0:screen+1;}  // landing/Select/synthesis=0, then detail screens
+function stepIndex(){return (view==='landing'||view==='select'||view==='synthesis'||view==='capability')?0:screen+1;}  // landing/Select/synthesis/capability=0, then detail screens
 
 function renderStepper(){
   if(view==='landing'){stepper.innerHTML='';return;}   // the landing is a cover page — no stepper
@@ -16057,18 +16435,29 @@ function renderSelect(){
   const fintracN=ADVISORIES.filter(a=>a.doc_type==='FINTRAC').length;
   const cl=clusters();
   const xjN=cl.filter(c=>c.xj).length;
-  const byTyp=selMode==='typology';
+  const byTyp=selMode==='typology', byCap=selMode==='capability';
+  const ag = byCap ? capAgg() : null;
+  const capHave = byCap ? ag.filter(x=>x.c.posture==='y').length : 0;
+  const capPart = byCap ? ag.filter(x=>x.c.posture==='partial').length : 0;
+  const capGap  = byCap ? ag.filter(x=>x.c.posture==='n').length : 0;
   const toggle=`<div class="modetoggle">
-      <button data-mode="doc" class="${byTyp?'':'on'}">Documents</button>
+      <button data-mode="doc" class="${(!byTyp&&!byCap)?'on':''}">Documents</button>
       <button data-mode="typology" class="${byTyp?'on':''}">Typologies</button>
+      <button data-mode="capability" class="${byCap?'on':''}">Capabilities</button>
     </div>`;
-  const count = byTyp
+  const count = byCap
+    ? `<span class="sct">${ag.length} detection capabilities · ${capHave} in place · ${capPart} partial · ${capGap} not yet · across ${live} derived documents</span>`
+    : byTyp
     ? `<span class="sct">${cl.length} typologies · ${xjN} cross-jurisdiction · ${live} derived documents</span>`
     : `<span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${fintracN} FINTRAC · ${live} derived · ${nd} non-derivable</span>`;
-  const lead = byTyp
+  const lead = byCap
+    ? `Every red flag in the corpus implies a <b>detection capability</b>. Pooled across all regulators and jurisdictions, here is what the corpus demands — each capability tagged with the institution's own posture and the number of indicators that depend on it. Sorted by <b>where you're most exposed</b>: capabilities not yet in place, by how many indicators need them. Pick one to see the indicators and drill into any document.`
+    : byTyp
     ? `Group the corpus by money-laundering typology and see the <b>combined</b> picture: the same typology often appears across regulators and jurisdictions, and no single advisory enumerates it all. <b>${xjN}</b> typolog${xjN===1?'y spans':'ies span'} both the US and Canada. Pick a typology to see its cluster and combined coverage, then drill into any document's loop.`
     : `The same signal engine, pointed at a multi-jurisdiction public corpus — US-federal FinCEN advisories + alerts and OFAC sanctions advisories, plus Canadian <b>FINTRAC</b> operational alerts. Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.`;
-  const note = byTyp
+  const note = byCap
+    ? `Capabilities are a fixed taxonomy; each indicator is tagged to exactly one. Demand, coverage, and the covered/partial/gap split are honest counts over the existing per-indicator statuses — no capability score, similarity, or overlap is computed or claimed. Posture is the institution's own assessment (illustrative).`
+    : byTyp
     ? `Documents are grouped by their typology (a closed-vocabulary overlay, traceable to each document's stated subject). Combined coverage is honest union arithmetic over the existing per-indicator statuses — no similarity, overlap, or lift between regulators is computed or claimed.`
     : `Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the cited source documents (each carries its own public-source attribution).`;
   // doc-mode: group by SOURCE (FinCEN advisories / alerts / OFAC / FINTRAC), newest-first within each.
@@ -16082,10 +16471,12 @@ function renderSelect(){
     return `<div class="srcgroup"><div class="srchead"><span class="srcname">${esc(label)}</span><span class="srcsub">${docs.length} document${docs.length===1?'':'s'} · ${dl} derived · newest first</span></div>
       <div class="advgrid">${docs.map(a=>advCard(a)).join('')}</div></div>`;
   }).join('');
-  const gridHtml = byTyp ? `<div class="advgrid">${cl.map(typoCard).join('')}</div>` : groupsHtml;
+  const gridHtml = byCap ? `<div class="advgrid">${ag.map(capCard).join('')}</div>`
+                 : byTyp ? `<div class="advgrid">${cl.map(typoCard).join('')}</div>`
+                 : groupsHtml;
   stage.innerHTML=`<div class="scene">
     <div class="eyebrow">FinCEN + OFAC + FINTRAC corpus</div>
-    <h2>${byTyp?'Pick a typology. <em>See the corpus combine.</em>':'Pick a document. <em>Watch the loop derive it.</em>'}</h2>
+    <h2>${byCap?'Pick a capability. <em>See where you\'re exposed.</em>':byTyp?'Pick a typology. <em>See the corpus combine.</em>':'Pick a document. <em>Watch the loop derive it.</em>'}</h2>
     <p class="lead">${lead}</p>
     <div class="selhead">
       ${count}
@@ -16095,8 +16486,19 @@ function renderSelect(){
     <div class="framenote">${note}</div>
   </div>`;
   stage.querySelectorAll('.modetoggle button').forEach(b=>b.onclick=()=>{selMode=b.dataset.mode;render();});
-  if(byTyp) stage.querySelectorAll('.advcard.typo').forEach(el=>el.onclick=()=>enterSynthesis(el.dataset.typ));
+  if(byCap) stage.querySelectorAll('.advcard.cap').forEach(el=>el.onclick=()=>enterCapability(el.dataset.cap));
+  else if(byTyp) stage.querySelectorAll('.advcard.typo').forEach(el=>el.onclick=()=>enterSynthesis(el.dataset.typ));
   else stage.querySelectorAll('.advcard.live').forEach(el=>el.onclick=()=>pick(el.dataset.id));
+}
+// a capability card (capabilities mode of the picker) — reuses .advcard styling.
+function capCard(x){
+  const c=x.c;
+  return `<div class="advcard live cap" data-cap="${esc(c.id)}">
+    <div class="actop"><span class="acleft"><span class="acno">${esc(c.id)}</span><span class="chip grp">${esc(c.group||'')}</span></span>${postureChip(c.posture)}</div>
+    <div class="actitle">${esc(c.name)}</div>
+    <div class="acmeta">${x.demand} indicator${x.demand===1?'':'s'} · ${x.docs} doc${x.docs===1?'':'s'} · ${x.typols} typolog${x.typols===1?'y':'ies'} · coverage ${x.cov}%</div>
+    ${covSeg(x.covered,x.partial,x.gap)}
+  </div>`;
 }
 // a typology cluster card (typology mode of the picker) — reuses .advcard styling.
 function typoCard(c){
@@ -16152,6 +16554,57 @@ function renderSynthesis(t){
     <div class="framenote">Combined coverage is the union of each regulator's enumerated red flags — counted as enumerated, NOT de-duplicated or matched across regulators (no similarity or overlap is computed or claimed). Coverage is illustrative; pick any document to walk its own loop.</div>
   </div>`;
   stage.querySelectorAll('.synthrow').forEach(el=>el.onclick=()=>pick(el.dataset.id,t));
+  T(()=>{const f=document.getElementById('gfill');if(f)f.style.width=cov+'%';animVal('gnum',0,cov,900,'%');},250);
+}
+
+/* ---------- capability drill view (Phase 29) — one detection capability across the whole corpus ---------- */
+function renderCapability(code){
+  const c=CAP_BY[code]; if(!c){toSelect();return;}
+  const rows=indsForCap(code); if(!rows.length){toSelect();return;}
+  const inds=rows.map(r=>r.i), cov=coverageIndex(inds);
+  const covered=inds.filter(i=>i.status==='covered').length;
+  const partial=inds.filter(i=>i.status==='partial').length;
+  const gap=inds.filter(i=>i.status==='gap').length;
+  const juris=[...new Set(rows.map(r=>r.a.jurisdiction||'—'))].sort();
+  // data sources this capability's indicators draw on, each with its OWN interview posture (colored dot) —
+  // honest distinct codes, ties the capability to the data it depends on.
+  const dsCodes=[...new Set(rows.map(r=>r.i.data_source).filter(Boolean))].sort((x,y)=>dsNum(x)-dsNum(y));
+  const dsItem=d=>{const ds=DS_BY[d];if(!ds)return '';
+    const col=ds.posture==='y'?'var(--green)':ds.posture==='partial'?'var(--signal)':'var(--rose)';
+    return `<span class="capdepitem"><span class="dot" style="background:${col}"></span>${esc(ds.name)}</span>`;};
+  const dsChips=dsCodes.map(dsItem).join('');
+  // group the indicators by source document; the document HEADER row is the drill target (→ its per-doc arc).
+  const byDoc=new Map();
+  rows.forEach(r=>{if(!byDoc.has(r.a.id))byDoc.set(r.a.id,{a:r.a,inds:[]});byDoc.get(r.a.id).inds.push(r.i);});
+  const groups=[...byDoc.values()].sort((x,y)=>
+    String(x.a.jurisdiction||'').localeCompare(String(y.a.jurisdiction||'')) || String(x.a.id).localeCompare(String(y.a.id)));
+  const indRow=i=>`<div class="covrow"><div class="clabel">${esc(i.red_flag||shortFlag(i.flag,170))}<div class="csub">"${esc(shortFlag(i.flag,110))}"</div></div><span class="pill ${i.status||'gap'}">${i.status==='gap'?'not covered':esc(i.status||'gap')}</span></div>`;
+  const body=groups.map(g=>{
+    const dc=coverageIndex(g.inds);
+    const head=`<div class="covrow synthrow" data-id="${esc(g.a.id)}" role="button">
+      <div class="clabel">${esc(g.a.title||g.a.id)}<div class="csub">${esc(g.a.advisory||g.a.id)} · ${g.inds.length} indicator${g.inds.length===1?'':'s'} for this capability · coverage ${dc}%</div></div>
+      <span class="acleft">${jchip(g.a.jurisdiction||'—')}<span class="chip doc">${esc(g.a.doc_type||'')}</span></span>
+    </div>`;
+    return head + g.inds.map(indRow).join('');
+  }).join('');
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">Capability lens · ${esc(c.group||'')}</div>
+    <h2>${esc(c.name)}</h2>
+    <div class="srccap"><b>Your posture.</b> ${postureChip(c.posture)} &nbsp;${esc(c.desc||'')}</div>
+    <p class="lead"><b>${inds.length}</b> red flag${inds.length===1?'':'s'} across <b>${byDoc.size}</b> document${byDoc.size===1?'':'s'} and ${juris.map(esc).join(' + ')} depend on this capability — ${covered} covered · ${partial} partial · ${gap} gap today.${gap?` Closing it would raise coverage on <b>${gap}</b> indicator${gap===1?'':'s'} the corpus already enumerates.`:''} Pick a document to walk its loop.</p>
+    ${dsChips?`<div class="capdep"><span class="dl">Depends on data</span> ${dsChips}</div>`:''}
+    <div class="covwrap">
+      <div class="covgrid">${body}</div>
+      <div class="gauge">
+        <div class="gh">Capability coverage</div>
+        <div class="gnum" id="gnum">${cov}%</div>
+        <div class="gd">of ${inds.length} indicator${inds.length===1?'':'s'} · ${byDoc.size} doc${byDoc.size===1?'':'s'}</div>
+        <div class="gbar"><div class="gfill" id="gfill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="framenote">Indicators are pooled by capability across every regulator and jurisdiction — counted as enumerated, NOT de-duplicated or matched across sources (no similarity or overlap is computed or claimed). Posture and coverage are illustrative. Pick any document to walk its own loop.</div>
+  </div>`;
+  stage.querySelectorAll('.synthrow').forEach(el=>el.onclick=()=>pick(el.dataset.id,null,code));
   T(()=>{const f=document.getElementById('gfill');if(f)f.style.width=cov+'%';animVal('gnum',0,cov,900,'%');},250);
 }
 function advCard(a){
@@ -16552,6 +17005,10 @@ function render(){
       if(!currentTypology){ toSelect(); return; }
       renderSynthesis(currentTypology);
     }
+    else if(view==='capability'){
+      if(!currentCapability){ toSelect(); return; }
+      renderCapability(currentCapability);
+    }
     else {
       const a=curAdv();
       if(!isLive(a)){ toSelect(); return; }   // defensive: never strand on a non-live detail view
@@ -16583,25 +17040,29 @@ function updateAttribution(){
 }
 
 /* ---------- navigation ---------- */
-// `from` (optional) = the typology cluster a doc was drilled from, so Back returns there (Phase 24).
-function pick(id,from){const a=ADVISORIES.find(x=>x.id===id);if(!isLive(a))return;fromTypology=from||null;current=id;view='detail';screen=0;maxScreen=0;
+// `from` (optional) = the typology cluster a doc was drilled from; `fromCap` = the capability it was
+// drilled from (Phase 29). Either makes Back from the first detail screen return to that lens.
+function pick(id,from,fromCap){const a=ADVISORIES.find(x=>x.id===id);if(!isLive(a))return;
+  fromTypology=from||null;fromCapability=fromCap||null;current=id;view='detail';screen=0;maxScreen=0;
   selected=new Set(buildNows(a).map(i=>i.id));  // default: all build-now gaps selected — the presenter deselects to opt out
   render();}
 function enterSynthesis(t){currentTypology=t;view='synthesis';screen=0;maxScreen=0;render();}
+function enterCapability(code){currentCapability=code;view='capability';screen=0;maxScreen=0;render();}
 function gotoScreen(s){screen=Math.max(0,Math.min(DETAIL.length-1,s));maxScreen=Math.max(maxScreen,screen);render();}
-function toSelect(){view='select';current=null;currentTypology=null;fromTypology=null;screen=0;maxScreen=0;render();}
-function toLanding(){view='landing';current=null;currentTypology=null;fromTypology=null;screen=0;maxScreen=0;render();}
+function toSelect(){view='select';current=null;currentTypology=null;fromTypology=null;currentCapability=null;fromCapability=null;screen=0;maxScreen=0;render();}
+function toLanding(){view='landing';current=null;currentTypology=null;fromTypology=null;currentCapability=null;fromCapability=null;screen=0;maxScreen=0;render();}
 function advance(){
-  if(view==='landing'){toSelect();return;}          // Enter the corpus
-  if(view==='select'||view==='synthesis')return;    // pick by clicking a card / cluster row
+  if(view==='landing'){toSelect();return;}                       // Enter the corpus
+  if(view==='select'||view==='synthesis'||view==='capability')return;  // pick by clicking a card / row
   if(screen>=DETAIL.length-1){toSelect();return;}
   gotoScreen(screen+1);
 }
 function back(){
   if(view==='landing')return;
-  if(view==='synthesis'){toSelect();return;}                  // cluster → the picker
-  if(view==='select'){toLanding();return;}                    // Select → back to the cover
-  if(screen<=0){ if(fromTypology){enterSynthesis(fromTypology);return;} toSelect();return; }  // drilled from a cluster → back to it
+  if(view==='synthesis'||view==='capability'){toSelect();return;}  // cluster / capability → the picker
+  if(view==='select'){toLanding();return;}                         // Select → back to the cover
+  // drilled from a lens → Back from the first detail screen returns to it (capability takes precedence)
+  if(screen<=0){ if(fromCapability){enterCapability(fromCapability);return;} if(fromTypology){enterSynthesis(fromTypology);return;} toSelect();return; }
   gotoScreen(screen-1);
 }
 function updateControls(){
@@ -16616,11 +17077,18 @@ function updateControls(){
     backBtn.style.visibility='hidden';
     resetBtn.style.visibility='hidden';
     nextBtn.style.visibility='hidden';
-    hint.textContent=selMode==='typology'?'Pick a typology to see the corpus combine →':'Pick a derived document to explore →';
+    hint.textContent=selMode==='typology'?'Pick a typology to see the corpus combine →':selMode==='capability'?'Pick a capability to see where you\'re exposed →':'Pick a derived document to explore →';
     return;
   }
   if(view==='synthesis'){
     backBtn.style.visibility='visible'; backBtn.textContent='‹ Typologies';
+    resetBtn.style.visibility='visible';
+    nextBtn.style.visibility='hidden';
+    hint.textContent='Pick a document to walk its loop →';
+    return;
+  }
+  if(view==='capability'){
+    backBtn.style.visibility='visible'; backBtn.textContent='‹ Capabilities';
     resetBtn.style.visibility='visible';
     nextBtn.style.visibility='hidden';
     hint.textContent='Pick a document to walk its loop →';
@@ -16632,8 +17100,10 @@ function updateControls(){
   const backLabels=['‹ Advisories','‹ Read advisory','‹ Coverage','‹ Build recs','‹ Signal','‹ Combination lift'];
   const nextLabels=['Assess coverage ›','Build recommendations ›','Signal spec ›','See the lift ›','Close the loop ›','↺ Another document'];
   const hints=['The agent reads the source and translates each red flag','Each red flag scored against the library','Pick the build-now gaps to commit','The agent builds your committed signals','Why composition beats a signal alone — illustrative','Coverage closes on what you built'];
-  // when drilled from a typology cluster, Back from Coverage returns to that cluster (not the picker)
-  backBtn.textContent=(screen===0 && fromTypology)?('‹ '+typoLabel(fromTypology)):(backLabels[screen]||'‹ Back');
+  // when drilled from a lens, Back from the first detail screen returns to it (capability takes precedence)
+  backBtn.textContent=(screen===0 && fromCapability && CAP_BY[fromCapability])?('‹ '+CAP_BY[fromCapability].name)
+    :(screen===0 && fromTypology)?('‹ '+typoLabel(fromTypology))
+    :(backLabels[screen]||'‹ Back');
   nextBtn.textContent=nextLabels[screen]||'Next ›';
   hint.textContent=hints[screen]||'';
 }

@@ -62,3 +62,6 @@ config/typologies/*.draft.json
 .dev-wiki/.session-end
 .dev-wiki/.pending-commit
 .dev-wiki/enforcement.log
+
+# dev-wiki scratch / intermediate workflow artifacts
+.dev-wiki/tmp/

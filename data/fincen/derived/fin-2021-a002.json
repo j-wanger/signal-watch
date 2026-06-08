@@ -1,72 +1,207 @@
 {
-  "id": "fin-2021-a002",
-  "advisory": "FIN-2021-A002",
-  "source_md": "data/fincen/fin-2021-a002.md",
-  "extraction_quality": "clean",
-  "provenance": "LLM-backend-derived + deterministic-checked (Phase 16 inverted boundary — the LLM EXTRACTED the genuine red flags; the deterministic gate GROUNDS each verbatim `flag` in the source md + the red-flag relevance region and checks the cover×data matrix) — NOT a ship typology config. The deterministic extractor fragmented this advisory's (i)/(ii) sub-clauses into 7 noisy blocks; the LLM consolidated them to the 3 genuine enumerated indicators. build_rec follows the cover×data matrix (build_rec_category). Coverage/data values are ILLUSTRATIVE (vision demo).",
-  "indicators": [
-    {
-      "id": "IND-01",
-      "section": "financial",
-      "flag": "An account holder attempts to deposit one or more checks that appear to be issued by the U.S. Treasury, but are fraudulent or counterfeit checks.",
-      "red_flag": "Fraudulent / counterfeit U.S. Treasury check deposit",
-      "src_line": 152,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "Distinguishing a genuine U.S. Treasury EIP check from a fraudulent or counterfeit one needs Treasury check-authentication data (the Treasury Check Verification System) we hold only partially; build the deposit-time check-validity signal after wiring that enrichment."
-    },
-    {
-      "id": "IND-02",
-      "section": "financial",
-      "flag": "An existing account receives, or an account holder makes, multiple EIP-related deposits for individuals other than the account holder(s), and the individuals named on the checks reside outside the geographic region of the account holder, or do not have a history at the account holder’s purported address.",
-      "red_flag": "EIP-deposit funnel-in to non-account-holders with geographic / address mismatch",
-      "src_line": 164,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "Multiple EIP deposits payable to non-account-holders with a geographic / address-history mismatch is an uncovered funnel-account pattern, and deposit payee names, addresses, and geography are all in repo — immediately buildable.",
-      "build_logic": {
-        "signal_name": "S-EIP-FUNNEL-NONHOLDER-DEPOSITS",
-        "class": "account · relationship-level · stateful",
-        "features": [
-          "eip_deposit_count_30d",
-          "nonaccountholder_payee_count",
-          "payee_geo_mismatch_count",
-          "payee_no_address_history_count",
-          "distinct_payee_states_30d"
-        ],
-        "logic": "an account receives several EIP-type deposits (U.S. Treasury check, ACH, or prepaid card) payable to individuals other than the account holder, where at least three named payees reside outside the account holder's geographic region or have no history at the account address — a funnel-account pattern",
-        "window": "rolling 30 days",
-        "source": "Core deposit + payee name/address features (Gold); EIP / U.S. Treasury check deposit typing",
-        "route": "Tier-1 alert → EIP-fraud / money-mule review gate"
-      }
-    },
-    {
-      "id": "IND-03",
-      "section": "financial",
-      "flag": "An existing account receives an excessive number of EIPs via U.S. Treasury check or deposits related to a prepaid debit card linked to the same address.",
-      "red_flag": "Excessive EIP inflow aggregated to one address (address-cluster)",
-      "src_line": 171,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "An excessive count of EIP deposits aggregating to one address relative to the customer's profile is uncovered, and inbound EIP counts, address-cluster linkage, and the CDD expected-activity baseline are all in repo — immediately buildable.",
-      "build_logic": {
-        "signal_name": "S-EIP-SAME-ADDRESS-AGGREGATION",
-        "class": "account · address-cluster · stateful",
-        "features": [
-          "eip_inbound_count_30d",
-          "shared_address_account_count",
-          "eip_inbound_value_30d",
-          "profile_expected_eip_count",
-          "prepaid_card_link_flag"
-        ],
-        "logic": "one account, or a cluster of accounts linked to a single physical address, receives an excessive number of EIPs by U.S. Treasury check or prepaid-debit-card deposit — more inbound EIPs than the customer's due-diligence profile and expected activity predict",
-        "window": "rolling 30 days",
-        "source": "Core deposit features (Gold); address-cluster linkage; CDD expected-activity baseline",
-        "route": "Tier-1 alert → EIP-fraud review gate"
-      }
-    }
-  ]
+ "id": "fin-2021-a002",
+ "advisory": "FIN-2021-A002",
+ "source_md": "data/fincen/fin-2021-a002.md",
+ "extraction_quality": "clean",
+ "provenance": "LLM-backend-derived + deterministic-checked (Phase 16 inverted boundary — the LLM EXTRACTED the genuine red flags; the deterministic gate GROUNDS each verbatim `flag` in the source md + the red-flag relevance region and checks the cover×data matrix) — NOT a ship typology config. The deterministic extractor fragmented this advisory's (i)/(ii) sub-clauses into 7 noisy blocks; the LLM consolidated them to the 3 genuine enumerated indicators. build_rec follows the cover×data matrix (build_rec_category). Coverage/data values are ILLUSTRATIVE (vision demo).",
+ "indicators": [
+  {
+   "id": "IND-01",
+   "section": "Fraudulent, altered, counterfeit, or stolen EIP checks, ACH deposits, prepaid de",
+   "flag": "An account holder attempts to deposit one or more checks that appear to be issued by the U.S. Treasury, but are fraudulent or counterfeit checks.",
+   "red_flag": "Counterfeit U.S. Treasury EIP check deposit attempt",
+   "src_line": 152,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C11",
+   "data_source": "D6",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D6 (Check / negotiable-instrument image & metadata), not currently held → source data first."
+  },
+  {
+   "id": "IND-02",
+   "section": "Fraudulent, altered, counterfeit, or stolen EIP checks, ACH deposits, prepaid de",
+   "flag": "An existing account receives, or an account holder makes, multiple EIP-related deposits for individuals other than the account holder(s), and the individuals named on the checks reside outside the geographic region of the account holder, or do not have a history at the account holder’s purported address.",
+   "red_flag": "Multi-payee EIP funnel-in for non-accountholders out of geographic region (mule consolidation)",
+   "src_line": 164,
+   "status": "covered",
+   "data": "available",
+   "capability": "C3",
+   "data_source": "D1",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C3 (Multi-originator funnel-in / fan-out network detection)."
+  },
+  {
+   "id": "IND-03",
+   "section": "Fraudulent, altered, counterfeit, or stolen EIP checks, ACH deposits, prepaid de",
+   "flag": "An existing account receives an excessive number of EIPs via U.S. Treasury check or deposits related to a prepaid debit card linked to the same address (e.g., an account receiving more checks than expected relative to the customer’s profile and financial institution’s customer due diligence).",
+   "red_flag": "EIP check/prepaid-card volume above customer profile, shared address",
+   "src_line": 171,
+   "status": "partial",
+   "data": "available",
+   "capability": "C1",
+   "data_source": "D1",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C1 (Customer-profile / out-of-pattern transaction monitoring); data D1."
+  },
+  {
+   "id": "IND-04",
+   "section": "Fraudulent, altered, counterfeit, or stolen EIP checks, ACH deposits, prepaid de",
+   "flag": "A customer opens a new account with an EIP check or debit card, and the name of the potential account holder is different from that of the depositor or the payee of EIP.",
+   "red_flag": "Account-open on EIP check with name-payee-depositor mismatch",
+   "src_line": 185,
+   "status": "covered",
+   "data": "available",
+   "capability": "C13",
+   "data_source": "D8",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C13 (Account-opening / KYC risk profiling)."
+  },
+  {
+   "id": "IND-05",
+   "section": "Fraudulent, altered, counterfeit, or stolen EIP checks, ACH deposits, prepaid de",
+   "flag": "The EIP check is deposited, or the debit card’s funds are transferred, into dormant accounts with little or no prior activity.",
+   "red_flag": "EIP deposit into dormant low-activity account",
+   "src_line": 188,
+   "status": "covered",
+   "data": "available",
+   "capability": "C6",
+   "data_source": "D1",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C6 (Transaction-velocity & dormancy / baseline-deviation monitoring)."
+  },
+  {
+   "id": "IND-06",
+   "section": "Theft of multiple EIPs",
+   "flag": "Individual accounts opened after the U.S. government announced the EIP program, receive U.S. Treasury checks or direct deposits from the U.S. Treasury that could indicate multiple EIPs, and for individuals other than the account holder.",
+   "red_flag": "Newly-opened account receiving multiple EIPs for non-accountholders",
+   "src_line": 193,
+   "status": "covered",
+   "data": "available",
+   "capability": "C13",
+   "data_source": "D1",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C13 (Account-opening / KYC risk profiling)."
+  },
+  {
+   "id": "IND-07",
+   "section": "Theft of multiple EIPs",
+   "flag": "The account holder is a child under age 17 at the end of the taxable year, but the account received numerous EIPs.",
+   "red_flag": "Numerous EIPs into a minor-held account (income-vs-eligibility mismatch)",
+   "src_line": 197,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C25",
+   "data_source": "D14",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D14 (Government-program enrollment & eligibility data), not currently held → source data first."
+  },
+  {
+   "id": "IND-08",
+   "section": "Theft of multiple EIPs",
+   "flag": "Rapid transfers of multiple EIPs into one account could indicate that bad actors are consolidating the payments.  After the funds are consolidated, the funds may be quickly (a) withdrawn via large cash withdrawals or serial ATM withdrawals; (b) used to purchase convertible virtual currencies (CVC); (c) transferred out of the account via a money services business such as cryptocurrency exchangers and peer-to-peer mobile payment systems, or wire transfers to other accounts; (d) used for large purchases at merchants that offer cash back as an option, in amounts not typical of this type of merchant; or (e) transferred onto prepaid debit or gift cards.",
+   "red_flag": "Rapid EIP funnel-in then layer-out via cash / CVC / MSB / cash-back / prepaid cards",
+   "src_line": 200,
+   "status": "covered",
+   "data": "available",
+   "capability": "C2",
+   "data_source": "D1",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C2 (Rapid pass-through / flow-through (receive-and-forward) detection)."
+  },
+  {
+   "id": "IND-09",
+   "section": "Theft of multiple EIPs",
+   "flag": "An account receives several EIP-related deposits and almost immediately thereafter (a) disburses funds for large purchases at merchants that offer cash back as an option, in amounts not typical of this type of merchant, or (b) has funds transferred onto prepaid debit or gift cards.",
+   "red_flag": "EIP deposit → immediate cash-back merchant spend / prepaid-gift-card load",
+   "src_line": 209,
+   "status": "gap",
+   "data": "available",
+   "capability": "C9",
+   "data_source": "D4",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D4 (Card & merchant-category (MCC) transaction data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-MCC-SPEND-PATTERN",
+    "class": "entity Â· card/account-level Â· windowed",
+    "features": [
+     "high_risk_mcc_share",
+     "mcc_mix_drift",
+     "atypical_mcc_for_segment_flag",
+     "round_dollar_spend_ratio",
+     "prepaid_giftcard_spend_share",
+     "mcc_value_concentration"
+    ],
+    "logic": "Flag a card or account whose merchant-category spend distribution shifts toward high-risk or atypical MCCs for the customer's segment, escalating when spend concentrates in cash-equivalent categories such as gift cards, prepaid, or money-services merchants.",
+    "window": "rolling 60 days vs segment MCC baseline",
+    "source": "card authorization/settlement feed enriched with MCC reference",
+    "route": "Tier-1 alert â AML analyst review gate"
+   }
+  },
+  {
+   "id": "IND-10",
+   "section": "Theft of multiple EIPs",
+   "flag": "Deposits of one or more EIP U.S. Treasury checks or electronic deposits made into an account held by (a) a retail business, or (b) a personal account of a business owner or employee and the account holder is not the payee/endorser.",
+   "red_flag": "EIP deposits into business/owner account where holder is not payee (employee-identity EIP harvesting)",
+   "src_line": 214,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C25",
+   "data_source": "D14",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D14 (Government-program enrollment & eligibility data), not currently held → source data first."
+  },
+  {
+   "id": "IND-11",
+   "section": "Theft of multiple EIPs",
+   "flag": "The same Internet Protocol (IP) address is used to transfer funds from several EIP debit cards to a bank account, especially if that IP address is located outside of the United States or associated with a business.",
+   "red_flag": "Shared/foreign IP draining multiple EIP debit cards to one account",
+   "src_line": 220,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C12",
+   "data_source": "D9",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D9 (Identity-verification, document & device/session telemetry), not currently held → source data first."
+  },
+  {
+   "id": "IND-12",
+   "section": "Other frauds and thefts occurring in an account receiving EIPs",
+   "flag": "An account receives (a) numerous deposits or electronic funds transfers (EFTs) that indicate the payments are linked to EIPs, and (b) unemployment insurance payments9 from one or more states in names that do not match the account holder(s).",
+   "red_flag": "EIP plus multi-state unemployment-insurance payments for non-accountholders",
+   "src_line": 226,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C25",
+   "data_source": "D14",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D14 (Government-program enrollment & eligibility data), not currently held → source data first."
+  },
+  {
+   "id": "IND-13",
+   "section": "Other frauds and thefts occurring in an account receiving EIPs",
+   "flag": "An account with several EIP deposits also receives numerous tax refunds from federal and state governments for individuals other than the account holder(s).  The names indicated on the EIPs and tax returns may be the same but are not those of the account holder(s).",
+   "red_flag": "EIP plus numerous federal/state tax refunds for non-accountholders",
+   "src_line": 237,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C25",
+   "data_source": "D14",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D14 (Government-program enrollment & eligibility data), not currently held → source data first."
+  },
+  {
+   "id": "IND-14",
+   "section": "Other frauds and thefts occurring in an account receiving EIPs",
+   "flag": "Deposits of one or more EIP checks or electronic deposits are made into a nursing home or assisted living facility’s business account and those payments have not been returned to the resident.",
+   "red_flag": "EIP deposits into care-facility business account, not returned to resident (vulnerable-resident benefit theft)",
+   "src_line": 241,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C26",
+   "data_source": "D14",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D14 (Government-program enrollment & eligibility data), not currently held → source data first."
+  }
+ ]
 }

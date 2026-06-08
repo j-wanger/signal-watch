@@ -1,117 +1,206 @@
 {
-  "id": "fin-2023-alert002",
-  "advisory": "FIN-2023-ALERT002",
-  "source_md": "data/fincen-alerts/fin-2023-alert002.md",
-  "extraction_quality": "clean",
-  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
-  "indicators": [
-    {
-      "id": "IND-01",
-      "section": "redflag",
-      "flag": "The use of a private investment vehicle that is based offshore to purchase CRE and that\nincludes PEPs or other foreign nationals (particularly family members or close associates of\nsanctioned Russian elites and their proxies) as investors.",
-      "red_flag": "Offshore investment vehicle buying CRE with sanctioned-proxy / PEP investors",
-      "src_line": 325,
-      "status": "partial",
-      "data": "partial",
-      "build_rec": "ENHANCE",
-      "rationale": "A bank can flag offshore investment-vehicle counterparties, but tying them to PEP/sanctioned-elite proxies needs beneficial-ownership enrichment it only partially holds."
-    },
-    {
-      "id": "IND-02",
-      "section": "redflag",
-      "flag": "When asked questions about the ultimate beneficial owners or controllers of a legal entity or\narrangement, customers decline to provide information.",
-      "red_flag": "Refusal to disclose ultimate beneficial owner / controller",
-      "src_line": 329,
-      "status": "covered",
-      "data": "available",
-      "build_rec": "COVERED",
-      "rationale": "Refusal-to-provide-UBO is a standard CDD onboarding/EDD checkpoint already captured in KYC workflows at a mid-size bank."
-    },
-    {
-      "id": "IND-03",
-      "section": "redflag",
-      "flag": "Multiple limited liability companies, corporations, partnerships, or trusts are involved in a\ntransaction with ties to sanctioned Russian elites and their proxies, and the entities have slight\nname variations.",
-      "red_flag": "Slight-name-variant entity cluster co-transacting (sanctioned-elite ties)",
-      "src_line": 332,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "Slight-name-variation clusters of counterparty entities transacting together are detectable from the bank's own counterparty-name and wire data via fuzzy-match — a defensible build-now transaction pattern.",
-      "build_logic": {
-        "signal_name": "S-CRE-NAME-VARIANT-CLUSTER",
-        "class": "entity · account-level · windowed",
-        "features": ["counterparty_name_fuzzy_cluster_size", "shared_address_or_signatory_count", "cre_transaction_flag", "intra_cluster_transfer_volume"],
-        "logic": "Cluster counterparty legal entities (LLC/corp/partnership/trust) by normalized-name edit-distance and shared address/signatory; alert when ≥3 slight-name-variant entities co-transact in a single CRE-coded financing within the window.",
-        "window": "rolling 30 days",
-        "source": "counterparty master + wire/ACH ledger + CRE loan-coding",
-        "route": "Tier-1 alert → enhanced-due-diligence analyst review gate"
-      }
-    },
-    {
-      "id": "IND-04",
-      "section": "redflag",
-      "flag": "The use of legal entities or arrangements, such as trusts, to purchase CRE that involves\nfriends, associates, family members, or others with a close connection to sanctioned Russian\nelites and their proxies.",
-      "red_flag": "Trust / entity CRE purchase by close associates of sanctioned elites",
-      "src_line": 336,
-      "status": "gap",
-      "data": "insufficient",
-      "build_rec": "SOURCE_DATA",
-      "rationale": "Establishing a close personal connection between an entity's parties and sanctioned elites requires external sanctions-network/relationship attribution the bank does not hold."
-    },
-    {
-      "id": "IND-05",
-      "section": "redflag",
-      "flag": "Ownership of CRE through legal entities in multiple jurisdictions (often involving a trust\nbased outside the United States) without a clear business purpose.",
-      "red_flag": "Multi-jurisdiction CRE ownership layering with no business purpose",
-      "src_line": 340,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "Multi-jurisdiction ownership layering is visible only with beneficial-ownership/corporate-registry enrichment beyond core transaction data."
-    },
-    {
-      "id": "IND-06",
-      "section": "redflag",
-      "flag": "Transfers of assets from a PEP or Russian elite to a family member, business associate, or\nassociated trust in close temporal proximity to a legal event such as an arrest or an OFAC\ndesignation.",
-      "red_flag": "Asset transfer from PEP to associate / trust near an arrest or OFAC designation",
-      "src_line": 343,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "Transfer-timing relative to an OFAC designation is computable, but identifying the originator as a PEP/elite and the recipient relationship needs external designation-feed and relationship enrichment."
-    },
-    {
-      "id": "IND-07",
-      "section": "redflag",
-      "flag": "legal instruments (e.g., deeds of exclusion) that are intended to transfer\nan interest in CRE from a PEP or Russian elite to a family member, business associate, or\nassociated trust following a legal event such as an arrest or an OFAC designation",
-      "red_flag": "Title-instrument transfer of CRE interest post-arrest / OFAC designation",
-      "src_line": 347,
-      "status": "gap",
-      "data": "insufficient",
-      "build_rec": "SOURCE_DATA",
-      "rationale": "Deed-of-exclusion and CRE-title instruments live in external asset/property registries the bank does not ingest."
-    },
-    {
-      "id": "IND-08",
-      "section": "redflag",
-      "flag": "submit revised ownership disclosures to\nfinancial institutions showing sanctioned individuals or PEPs that previously owned more\nthan 50 percent of a fund changing their ownership to less than 50 percent",
-      "red_flag": "Revised disclosure dropping sanctioned / PEP owner below 50%",
-      "src_line": 352,
-      "status": "partial",
-      "data": "available",
-      "build_rec": "ENHANCE",
-      "rationale": "Revised ownership-disclosure deltas across the 50 percent threshold are in the bank's KYC-refresh records; enhancing existing disclosure-change monitoring catches them."
-    },
-    {
-      "id": "IND-09",
-      "section": "redflag",
-      "flag": "There is limited discernable business value in the CRE investment or the investment is outside\nof the client’s normal business operations.",
-      "red_flag": "Out-of-profile CRE with no discernable business purpose",
-      "src_line": 356,
-      "status": "partial",
-      "data": "available",
-      "build_rec": "ENHANCE",
-      "rationale": "Out-of-profile / no-apparent-business-purpose activity is already part of transaction-monitoring scenarios; enhancing the client-profile model sharpens it."
-    }
-  ]
+ "id": "fin-2023-alert002",
+ "advisory": "FIN-2023-ALERT002",
+ "source_md": "data/fincen-alerts/fin-2023-alert002.md",
+ "extraction_quality": "clean",
+ "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+ "indicators": [
+  {
+   "id": "IND-01",
+   "section": "Financial Red Flags Involving Commercial Real Estate",
+   "flag": "The use of a private investment vehicle that is based offshore to purchase CRE and that includes PEPs or other foreign nationals (particularly family members or close associates of sanctioned Russian elites and their proxies) as investors.",
+   "red_flag": "Offshore pooled-investment vehicle with PEP / sanctioned-elite-linked investors funding CRE",
+   "src_line": 325,
+   "status": "covered",
+   "data": "available",
+   "capability": "C17",
+   "data_source": "D12",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C17 (PEP & sanctioned-elite proxy screening)."
+  },
+  {
+   "id": "IND-02",
+   "section": "Financial Red Flags Involving Commercial Real Estate",
+   "flag": "When asked questions about the ultimate beneficial owners or controllers of a legal entity or arrangement, customers decline to provide information.",
+   "red_flag": "Customer refuses to disclose ultimate beneficial owners / controllers on request",
+   "src_line": 329,
+   "status": "gap",
+   "data": "available",
+   "capability": "C14",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-KYC-INTEGRITY-SCREEN",
+    "class": "entity Â· account-level Â· event+windowed",
+    "features": [
+     "edd_document_overdue_flag",
+     "information_request_refusal_count",
+     "kyc_field_inconsistency_score",
+     "evasive_response_indicator",
+     "beneficial_owner_disclosure_gap",
+     "periodic_review_failure_flag"
+    ],
+    "logic": "Flag a customer whose KYC record shows integrity gaps or non-cooperation â overdue EDD documents, refused or evasive responses to information requests, or unresolved inconsistencies â escalating when cooperation failures persist past defined deadlines.",
+    "window": "event-driven, with rolling 60-day cooperation window",
+    "source": "case-management / KYC remediation system + customer correspondence log",
+    "route": "Tier-1 alert â AML analyst review & EDD gate"
+   }
+  },
+  {
+   "id": "IND-03",
+   "section": "Financial Red Flags Involving Commercial Real Estate",
+   "flag": "Multiple limited liability companies, corporations, partnerships, or trusts are involved in a transaction with ties to sanctioned Russian elites and their proxies, and the entities have slight name variations.",
+   "red_flag": "Near-identical-name entity cluster (slight-variation LLC/trust web) tied to sanctioned proxies",
+   "src_line": 332,
+   "status": "gap",
+   "data": "partial",
+   "capability": "C15",
+   "data_source": "D10",
+   "build_rec": "BUILD_ENRICH",
+   "rationale": "Gap; requires D10 (Customer & account reference / entity-resolution data), not currently held → source data first."
+  },
+  {
+   "id": "IND-04",
+   "section": "Financial Red Flags Involving Commercial Real Estate",
+   "flag": "The use of legal entities or arrangements, such as trusts, to purchase CRE that involves friends, associates, family members, or others with a close connection to sanctioned Russian elites and their proxies.",
+   "red_flag": "Trust / nominee purchase by close associate of sanctioned elite (proxy ownership)",
+   "src_line": 336,
+   "status": "gap",
+   "data": "available",
+   "capability": "C15",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-SHELL-NOMINEE-NETWORK",
+    "class": "network Â· ownership-graph Â· windowed",
+    "features": [
+     "shared_address_director_overlap",
+     "ubo_opacity_score",
+     "incorporation_recency_flag",
+     "no_observable_operations_flag",
+     "circular_ownership_indicator",
+     "nominee_director_reuse_count"
+    ],
+    "logic": "Flag an entity exhibiting shell or front-company markers â opaque or circular beneficial ownership, shared registered addresses or directors, recent incorporation with no observable operations â escalating when nominees or addresses recur across a cluster of related entities.",
+    "window": "rolling 90 days over the ownership/address graph",
+    "source": "corporate registry + KYC beneficial-ownership records + entity-resolution graph",
+    "route": "Tier-2 network alert â AML investigations gate"
+   }
+  },
+  {
+   "id": "IND-05",
+   "section": "Financial Red Flags Involving Commercial Real Estate",
+   "flag": "Ownership of CRE through legal entities in multiple jurisdictions (often involving a trust based outside the United States) without a clear business purpose.",
+   "red_flag": "Multi-jurisdiction offshore-trust ownership layering with no clear business purpose",
+   "src_line": 340,
+   "status": "gap",
+   "data": "available",
+   "capability": "C15",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-SHELL-NOMINEE-NETWORK",
+    "class": "network Â· ownership-graph Â· windowed",
+    "features": [
+     "shared_address_director_overlap",
+     "ubo_opacity_score",
+     "incorporation_recency_flag",
+     "no_observable_operations_flag",
+     "circular_ownership_indicator",
+     "nominee_director_reuse_count"
+    ],
+    "logic": "Flag an entity exhibiting shell or front-company markers â opaque or circular beneficial ownership, shared registered addresses or directors, recent incorporation with no observable operations â escalating when nominees or addresses recur across a cluster of related entities.",
+    "window": "rolling 90 days over the ownership/address graph",
+    "source": "corporate registry + KYC beneficial-ownership records + entity-resolution graph",
+    "route": "Tier-2 network alert â AML investigations gate"
+   }
+  },
+  {
+   "id": "IND-06",
+   "section": "Financial Red Flags Involving Commercial Real Estate",
+   "flag": "Transfers of assets from a PEP or Russian elite to a family member, business associate, or associated trust in close temporal proximity to a legal event such as an arrest or an OFAC designation.",
+   "red_flag": "Asset transfer to associate / trust timed to an arrest or OFAC designation (pre-sanction divestment)",
+   "src_line": 343,
+   "status": "covered",
+   "data": "available",
+   "capability": "C17",
+   "data_source": "D11",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C17 (PEP & sanctioned-elite proxy screening)."
+  },
+  {
+   "id": "IND-07",
+   "section": "Financial Red Flags Involving Commercial Real Estate",
+   "flag": "Implementation of legal instruments (e.g., deeds of exclusion) that are intended to transfer an interest in CRE from a PEP or Russian elite to a family member, business associate, or associated trust following a legal event such as an arrest or an OFAC designation of that person.",
+   "red_flag": "Deed-of-exclusion interest transfer to proxy following a sanction / arrest event",
+   "src_line": 347,
+   "status": "covered",
+   "data": "available",
+   "capability": "C17",
+   "data_source": "D11",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C17 (PEP & sanctioned-elite proxy screening)."
+  },
+  {
+   "id": "IND-08",
+   "section": "Financial Red Flags Involving Commercial Real Estate",
+   "flag": "Private investment funds or other companies that submit revised ownership disclosures to financial institutions showing sanctioned individuals or PEPs that previously owned more than 50 percent of a fund changing their ownership to less than 50 percent.",
+   "red_flag": "Revised ownership disclosure drops sanctioned/PEP stake just below threshold (UBO-screening evasion)",
+   "src_line": 352,
+   "status": "gap",
+   "data": "available",
+   "capability": "C15",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-SHELL-NOMINEE-NETWORK",
+    "class": "network Â· ownership-graph Â· windowed",
+    "features": [
+     "shared_address_director_overlap",
+     "ubo_opacity_score",
+     "incorporation_recency_flag",
+     "no_observable_operations_flag",
+     "circular_ownership_indicator",
+     "nominee_director_reuse_count"
+    ],
+    "logic": "Flag an entity exhibiting shell or front-company markers â opaque or circular beneficial ownership, shared registered addresses or directors, recent incorporation with no observable operations â escalating when nominees or addresses recur across a cluster of related entities.",
+    "window": "rolling 90 days over the ownership/address graph",
+    "source": "corporate registry + KYC beneficial-ownership records + entity-resolution graph",
+    "route": "Tier-2 network alert â AML investigations gate"
+   }
+  },
+  {
+   "id": "IND-09",
+   "section": "Financial Red Flags Involving Commercial Real Estate",
+   "flag": "There is limited discernable business value in the CRE investment or the investment is outside of the client’s normal business operations.",
+   "red_flag": "CRE investment with no discernible business value / outside client's normal operations",
+   "src_line": 356,
+   "status": "gap",
+   "data": "available",
+   "capability": "C7",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-REVENUE-OPERATIONS-MISMATCH",
+    "class": "entity Â· business-account Â· windowed",
+    "features": [
+     "inflow_vs_declared_revenue_ratio",
+     "inflow_per_employee",
+     "payroll_to_revenue_ratio",
+     "operating_expense_share",
+     "industry_peer_revenue_zscore",
+     "transaction_volume_vs_footprint"
+    ],
+    "logic": "Flag a business account whose transaction inflows are disproportionate to its declared revenue, headcount, payroll, or operating-expense footprint relative to industry peers, escalating when revenue appears decoupled from any observable operational activity.",
+    "window": "rolling 90 days vs declared profile and peer cohort",
+    "source": "business deposit ledger joined to KYC business profile + industry peer benchmarks",
+    "route": "Tier-2 alert â AML analyst review gate"
+   }
+  }
+ ]
 }

@@ -264,8 +264,10 @@ not forced. The 10 FINTRAC documents contribute **225 indicators / 50 build-now*
 the OCSE and wildlife alerts are deliberately `SOURCE_DATA`-heavy (their indicators hinge on external
 attribution a bank can't see), while cannabis and professional-ML are build-now-rich (bank-observable
 EMT / cheque / cash / utility patterns) — and FINTRAC alerts run far denser than FinCEN advisories. The
-explorer's source panel renders each document's own basis, so a FINTRAC document shows its Crown-copyright
-attribution, never the US public-domain line.
+explorer renders each document's own compliance basis. (Phase 28, the owner's compliance call: a FINTRAC
+document's Crown-copyright attribution — © His Majesty… + complete title + source URL — now renders in the
+**page footer** for the document on screen rather than in the per-doc Source label; US public-domain documents
+show no footer attribution, and never the US public-domain line is claimed for FINTRAC.)
 
 **Read advisory + red-flag translation (Phase 25) — red flags that read like red flags.** The grounded
 indicator text is a *verbatim quote* lifted from the source document — faithful, but it reads like advisory
@@ -290,8 +292,11 @@ terse, mechanism-named AML-indicator style (*"Receive-and-forward to no-relation
 *"Multi-originator geographic funnel-in"*) — done with a **dynamic workflow** (42 translate agents → 42 *independent*
 adversarial verifiers; the model proposes, a byte-surgical applier writes only the `red_flag` value, and
 `--check-derived` disposes), so the verbatim quote and the grounding logic stay byte-unchanged and only the
-translation register changed. **The render:** the Read-advisory screen now progressively "reads" the document
-(types an opening → reveals highlights → staggers the translations; reduced-motion settles in one paint).
+translation register changed. **The render:** the Read-advisory screen now **streams** the source document in as
+if the agent were reading it (a blinking caret trails the read edge, the panel scroll-follows) — each red-flag
+phrase highlights *only as the read reaches its position*, its translation extracting alongside, and both the
+"phrases extracted" and "red flags" counters climb from 0 (Phase 28 — replacing the Phase-26/27 render that placed
+the whole text up front; reduced-motion settles in one paint).
 **Grouping:** Select is grouped by source (newest-first); red flags sub-group by section on Coverage. **The wow
 beats:** the Signal screen gained the showcase's build-log (animating the *real* `build_logic`), and a new
 **Combination-lift** screen ports the "alone it's noise, together it's a case" beat — with its lift figures held

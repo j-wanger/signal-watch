@@ -1,103 +1,103 @@
 {
-  "id": "fin-2020-alert001",
-  "advisory": "FIN-2020-ALERT001",
-  "source_md": "data/fincen-alerts/fin-2020-alert001.md",
-  "extraction_quality": "clean",
-  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
-  "indicators": [
-    {
-      "id": "IND-01",
-      "section": "redflag",
-      "flag": "Promises of high or guaranteed investment or donation returns for payments made to\naccounts with which you have no prior business relationship.",
-      "red_flag": "Guaranteed-return lure to a no-prior-relationship payee",
-      "src_line": 50,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "Outbound payments to counterparties with no prior business relationship are visible in core account/transaction data, but a mid-size bank does not flag them on a 'guaranteed-returns' scam pattern.",
-      "build_logic": {
-        "signal_name": "S-no-prior-relationship-outbound",
-        "class": "entity · account-level · windowed",
-        "features": [
-          "first_payment_to_counterparty",
-          "no_prior_inbound_from_counterparty",
-          "outbound_to_new_payee_count",
-          "counterparty_account_age_days"
-        ],
-        "logic": "Flag outbound payments to a counterparty with which the account holder has no prior bidirectional transaction history, weighting first-ever payees and recently-opened destination accounts.",
-        "window": "rolling 30 days",
-        "source": "core transaction ledger + payee/counterparty graph",
-        "route": "Tier-1 alert → no-prior-relationship payment review gate"
-      }
-    },
-    {
-      "id": "IND-02",
-      "section": "redflag",
-      "flag": "Communications, including social media posts, soliciting payments with misspellings\nor messages out of profile for the counterparty",
-      "red_flag": "Misspelled / out-of-profile payment solicitations from no-relationship counterparties",
-      "src_line": 53,
-      "status": "gap",
-      "data": "insufficient",
-      "build_rec": "SOURCE_DATA",
-      "rationale": "Detecting misspelled or out-of-profile social-media solicitations requires an external social-content and linguistic-anomaly corpus the bank does not hold."
-    },
-    {
-      "id": "IND-03",
-      "section": "redflag",
-      "flag": "Solicitations requesting donations via social media where the solicitor is not affiliated with a\nreputable organization.",
-      "red_flag": "Donation solicitation from a solicitor unaffiliated with a reputable organization",
-      "src_line": 58,
-      "status": "gap",
-      "data": "insufficient",
-      "build_rec": "SOURCE_DATA",
-      "rationale": "Verifying a solicitor's affiliation with a reputable organization needs an external charity/org registry and adverse-media corpus outside core banking data."
-    },
-    {
-      "id": "IND-04",
-      "section": "redflag",
-      "flag": "Social media posts that solicit donations or advertise give-aways that appear from accounts\nthat are not “verified” through the social media platform account verification processes or that\nmisspell the celebrity or financial institution’s name.",
-      "red_flag": "Unverified / name-misspelling account soliciting donations or give-aways",
-      "src_line": 61,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "Linking a payment to an unverified or name-misspelling social account is partly serviceable via a scam-domain/handle feed but needs enrichment beyond core data."
-    },
-    {
-      "id": "IND-05",
-      "section": "redflag",
-      "flag": "Multiple social media accounts communicating the same message soliciting funds for an\nunknown purpose or to an unknown account.",
-      "red_flag": "Multiple accounts pushing the same fund-solicitation message",
-      "src_line": 65,
-      "status": "partial",
-      "data": "available",
-      "build_rec": "ENHANCE",
-      "rationale": "The bank can partly see fan-in — many originators paying one destination — in transaction data, and can enhance the existing rule rather than build new.",
-      "build_logic": {
-        "signal_name": "S-coordinated-fanin-to-destination",
-        "class": "entity · account-level · windowed",
-        "features": [
-          "distinct_originator_count",
-          "destination_account_id",
-          "originators_previously_unaffiliated",
-          "inbound_volume_short_window"
-        ],
-        "logic": "Detect a single destination account receiving a high volume of payments in a short window from many previously-unaffiliated originators, mirroring the alert's coordinated-solicitation fan-in.",
-        "window": "rolling 30 days",
-        "source": "core transaction ledger + originator/destination graph",
-        "route": "Tier-1 alert → coordinated fan-in review gate"
-      }
-    },
-    {
-      "id": "IND-06",
-      "section": "redflag",
-      "flag": "Communications, including social media posts, that provide the same CVC address across\nmultiple celebrity or prominent financial institution social media accounts.",
-      "red_flag": "Same CVC address reused across multiple celebrity / FI social media accounts",
-      "src_line": 68,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "Correlating a shared CVC address across solicitations needs crypto chain-analytics / VASP exposure enrichment on top of any transaction record."
-    }
-  ]
+ "id": "fin-2020-alert001",
+ "advisory": "FIN-2020-ALERT001",
+ "source_md": "data/fincen-alerts/fin-2020-alert001.md",
+ "extraction_quality": "clean",
+ "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+ "indicators": [
+  {
+   "id": "IND-01",
+   "section": "Indicators to detect, prevent, and report this scam",
+   "flag": "Promises of high or guaranteed investment or donation returns for payments made to accounts with which you have no prior business relationship.",
+   "red_flag": "Guaranteed-return solicitation to no-relationship payee (CVC double-your-money scam)",
+   "src_line": 50,
+   "status": "gap",
+   "data": "available",
+   "capability": "C26",
+   "data_source": "D1",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D1 (Core transaction monitoring (deposit/account ledger)), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-SCAM-VULNERABLE-BEHAVIOR",
+    "class": "entity Â· account-level Â· windowed",
+    "features": [
+     "out_of_pattern_payee_flag",
+     "first_party_transfer_to_new_beneficiary",
+     "vulnerable_customer_segment_flag",
+     "romance_investment_payee_indicator",
+     "escalating_payment_sequence",
+     "customer_hesitation_signal"
+    ],
+    "logic": "Flag behavioural patterns consistent with scam victimization or vulnerable-customer exploitation â out-of-pattern payments to new beneficiaries, escalating transfer sequences to investment or romance-typed payees â escalating when the customer falls in a vulnerable segment.",
+    "window": "rolling 30 days per emerging payee relationship",
+    "source": "payment ledger + customer vulnerability segment + payee risk reference",
+    "route": "Tier-1 alert â fraud/AML & customer-protection review gate"
+   }
+  },
+  {
+   "id": "IND-02",
+   "section": "Indicators to detect, prevent, and report this scam",
+   "flag": "Communications, including social media posts, soliciting payments with misspellings or messages out of profile for the counterparty, soliciting payments from individuals or organizations with whom you have no prior existing business relationship, including celebrities or public figures.",
+   "red_flag": "Out-of-profile / misspelled solicitation impersonating a public figure (compromised-account spoof)",
+   "src_line": 53,
+   "status": "partial",
+   "data": "available",
+   "capability": "C19",
+   "data_source": "D13",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C19 (Adverse-media / OSINT & web-presence verification); data D13."
+  },
+  {
+   "id": "IND-03",
+   "section": "Indicators to detect, prevent, and report this scam",
+   "flag": "Solicitations requesting donations via social media where the solicitor is not affiliated with a reputable organization.",
+   "red_flag": "Donation solicitation from unaffiliated / non-reputable entity",
+   "src_line": 58,
+   "status": "partial",
+   "data": "available",
+   "capability": "C19",
+   "data_source": "D13",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C19 (Adverse-media / OSINT & web-presence verification); data D13."
+  },
+  {
+   "id": "IND-04",
+   "section": "Indicators to detect, prevent, and report this scam",
+   "flag": "Social media posts that solicit donations or advertise give-aways that appear from accounts that are not “verified” through the social media platform account verification processes or that misspell the celebrity or financial institution’s name.",
+   "red_flag": "Unverified / name-misspelling impersonation account soliciting give-away payments",
+   "src_line": 61,
+   "status": "partial",
+   "data": "available",
+   "capability": "C19",
+   "data_source": "D13",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C19 (Adverse-media / OSINT & web-presence verification); data D13."
+  },
+  {
+   "id": "IND-05",
+   "section": "Indicators to detect, prevent, and report this scam",
+   "flag": "Multiple social media accounts communicating the same message soliciting funds for an unknown purpose or to an unknown account.",
+   "red_flag": "Coordinated multi-account same-message fund solicitation (amplification ring)",
+   "src_line": 65,
+   "status": "covered",
+   "data": "available",
+   "capability": "C3",
+   "data_source": "D13",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C3 (Multi-originator funnel-in / fan-out network detection)."
+  },
+  {
+   "id": "IND-06",
+   "section": "Indicators to detect, prevent, and report this scam",
+   "flag": "Communications, including social media posts, that provide the same CVC address across multiple celebrity or prominent financial institution social media accounts.",
+   "red_flag": "Single shared CVC wallet address across multiple impersonation accounts (funnel-in deposit address)",
+   "src_line": 68,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C21",
+   "data_source": "D7",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D7 (Virtual-currency / blockchain analytics), not currently held → source data first."
+  }
+ ]
 }

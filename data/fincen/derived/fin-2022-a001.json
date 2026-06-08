@@ -1,94 +1,171 @@
 {
-  "id": "fin-2022-a001",
-  "advisory": "FIN-2022-A001",
-  "source_md": "data/fincen/fin-2022-a001.md",
-  "extraction_quality": "clean",
-  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo).",
-  "indicators": [
-    {
-      "id": "IND-01",
-      "section": "financial",
-      "flag": "Transactions involving long-term government contracts consistently awarded, through an opaque selection process, to the same legal entity or entities that share similar beneficial ownership structures.36",
-      "red_flag": "Opaque repeat government-contract awards to commonly-owned entities",
-      "src_line": 436,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "Repeated-award + shared-beneficial-ownership patterns need external procurement records and resolved BO graphs we only hold partially; build after enriching BO + contract-award data."
-    },
-    {
-      "id": "IND-02",
-      "section": "financial",
-      "flag": "Transactions involving services provided to state-owned companies or public institutions by companies registered in high-risk jurisdictions.",
-      "red_flag": "State-entity services billed through high-risk-jurisdiction intermediaries",
-      "src_line": 440,
-      "status": "partial",
-      "data": "available",
-      "build_rec": "ENHANCE",
-      "rationale": "Counterparty-jurisdiction risk + state-owned-entity screening already partially covered by sanctions/geo rules; enhance the existing screen with an SOE-counterparty + high-risk-jurisdiction conjunction."
-    },
-    {
-      "id": "IND-03",
-      "section": "financial",
-      "flag": "Transactions involving official embassy or foreign government business conducted through personal accounts.",
-      "red_flag": "Foreign-government / embassy business routed through personal accounts",
-      "src_line": 443,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "Account-type vs counterparty mismatch (foreign-government / embassy business on a personal account) is uncovered, and both account class and counterparty-entity type are in repo — immediately buildable.",
-      "build_logic": {
-        "signal_name": "S-GOVBIZ-PERSONAL-ACCT",
-        "class": "entity · account-level · stateless",
-        "features": [
-          "account_class",
-          "counterparty_govt_entity_flag",
-          "counterparty_embassy_flag",
-          "inbound_outbound_value_30d",
-          "foreign_gov_nexus_count"
-        ],
-        "logic": "personal-class account transacts with counterparties tagged foreign-government or embassy entities, with >= 2 distinct government-nexus counterparties in a 30-day window",
-        "window": "rolling 30 days",
-        "source": "Core account + counterparty features (Gold); counterparty entity-type registry",
-        "route": "Tier-1 alert → corruption/PEP review gate"
-      }
-    },
-    {
-      "id": "IND-04",
-      "section": "financial",
-      "flag": "Transactions involving public officials related to high-value assets, such as real estate or other luxury goods, that are not commensurate with the reported source of wealth for the public official",
-      "red_flag": "PEP luxury / real-estate purchases beyond declared source of wealth",
-      "src_line": 446,
-      "status": "partial",
-      "data": "partial",
-      "build_rec": "ENHANCE",
-      "rationale": "PEP screening + high-value-purchase detection exist partially, but source-of-wealth commensurability needs declared-wealth + asset-valuation data we hold only partially; enhance the PEP monitor with a wealth-mismatch factor as data matures."
-    },
-    {
-      "id": "IND-05",
-      "section": "financial",
-      "flag": "Transactions involving public officials and funds moving to and from countries with which the public officials do not appear to have ties.37",
-      "red_flag": "PEP cross-border flow to / from no-nexus jurisdictions",
-      "src_line": 450,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "PEP cross-border flows to/from jurisdictions outside the official's documented nexus are uncovered, and PEP flag + counterparty geography + the customer's known-ties set are all in repo — immediately buildable.",
-      "build_logic": {
-        "signal_name": "S-PEP-NO-NEXUS-CROSSBORDER",
-        "class": "relationship · entity-level · stateful",
-        "features": [
-          "pep_flag",
-          "counterparty_country",
-          "customer_documented_ties_set",
-          "cross_border_value_30d",
-          "unexplained_jurisdiction_count"
-        ],
-        "logic": "PEP-flagged customer sends or receives cross-border funds to/from >= 1 jurisdiction not in the customer's documented ties set, with aggregate cross-border value above the PEP baseline over 30 days",
-        "window": "rolling 30 days",
-        "source": "Core transaction + KYC features (Gold); PEP register; customer documented-jurisdiction nexus",
-        "route": "Tier-1 alert → corruption/PEP review gate"
-      }
-    }
-  ]
+ "id": "fin-2022-a001",
+ "advisory": "FIN-2022-A001",
+ "source_md": "data/fincen/fin-2022-a001.md",
+ "extraction_quality": "clean",
+ "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo).",
+ "indicators": [
+  {
+   "id": "IND-01",
+   "section": "Financial Red Flag Indicators of Kleptocracy and Foreign Public Corruption",
+   "flag": "Transactions involving long-term government contracts consistently awarded, through an opaque selection process, to the same legal entity or entities that share similar beneficial ownership structures.",
+   "red_flag": "Repeat opaque-tender award to common-UBO entity cluster (procurement capture)",
+   "src_line": 436,
+   "status": "gap",
+   "data": "available",
+   "capability": "C15",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-SHELL-NOMINEE-NETWORK",
+    "class": "network Â· ownership-graph Â· windowed",
+    "features": [
+     "shared_address_director_overlap",
+     "ubo_opacity_score",
+     "incorporation_recency_flag",
+     "no_observable_operations_flag",
+     "circular_ownership_indicator",
+     "nominee_director_reuse_count"
+    ],
+    "logic": "Flag an entity exhibiting shell or front-company markers â opaque or circular beneficial ownership, shared registered addresses or directors, recent incorporation with no observable operations â escalating when nominees or addresses recur across a cluster of related entities.",
+    "window": "rolling 90 days over the ownership/address graph",
+    "source": "corporate registry + KYC beneficial-ownership records + entity-resolution graph",
+    "route": "Tier-2 network alert â AML investigations gate"
+   }
+  },
+  {
+   "id": "IND-02",
+   "section": "Financial Red Flag Indicators of Kleptocracy and Foreign Public Corruption",
+   "flag": "Transactions involving services provided to state-owned companies or public institutions by companies registered in high-risk jurisdictions.",
+   "red_flag": "State-entity vendor incorporated in high-risk jurisdiction (corridor anomaly)",
+   "src_line": 440,
+   "status": "covered",
+   "data": "available",
+   "capability": "C20",
+   "data_source": "D17",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C20 (Cross-border / high-risk-jurisdiction & corridor anomaly detection)."
+  },
+  {
+   "id": "IND-03",
+   "section": "Financial Red Flag Indicators of Kleptocracy and Foreign Public Corruption",
+   "flag": "Transactions involving official embassy or foreign government business conducted through personal accounts.",
+   "red_flag": "Government/embassy business routed through personal accounts (account-type mismatch)",
+   "src_line": 443,
+   "status": "covered",
+   "data": "available",
+   "capability": "C17",
+   "data_source": "D12",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C17 (PEP & sanctioned-elite proxy screening)."
+  },
+  {
+   "id": "IND-04",
+   "section": "Financial Red Flag Indicators of Kleptocracy and Foreign Public Corruption",
+   "flag": "Transactions involving public officials related to high-value assets, such as real estate or other luxury goods, that are not commensurate with the reported source of wealth for the public official or that fall outside that individual’s normal pattern of activity or lifestyle.",
+   "red_flag": "PEP high-value-asset spend exceeding declared source-of-wealth (lifestyle mismatch)",
+   "src_line": 446,
+   "status": "covered",
+   "data": "available",
+   "capability": "C17",
+   "data_source": "D12",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C17 (PEP & sanctioned-elite proxy screening)."
+  },
+  {
+   "id": "IND-05",
+   "section": "Financial Red Flag Indicators of Kleptocracy and Foreign Public Corruption",
+   "flag": "Transactions involving public officials and funds moving to and from countries with which the public officials do not appear to have ties.",
+   "red_flag": "PEP flows to/from no-nexus jurisdictions (corridor anomaly)",
+   "src_line": 450,
+   "status": "covered",
+   "data": "available",
+   "capability": "C17",
+   "data_source": "D17",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C17 (PEP & sanctioned-elite proxy screening)."
+  },
+  {
+   "id": "IND-06",
+   "section": "Financial Red Flag Indicators of Kleptocracy and Foreign Public Corruption",
+   "flag": "Use of third parties to shield the identity of foreign public officials seeking to hide the origin or ownership of funds, for example, to hide the purchase or sale of real estate.",
+   "red_flag": "Third-party proxy concealing PEP ownership of funds/property (nominee shielding)",
+   "src_line": 467,
+   "status": "covered",
+   "data": "available",
+   "capability": "C17",
+   "data_source": "D12",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C17 (PEP & sanctioned-elite proxy screening)."
+  },
+  {
+   "id": "IND-07",
+   "section": "Financial Red Flag Indicators of Kleptocracy and Foreign Public Corruption",
+   "flag": "Documents corroborating transactions involving government contracts (e.g., invoices) that include charges at substantially higher prices than market rates or that include overly simple documentation or lack traditional details (e.g., valuations for good and services).",
+   "red_flag": "Government-contract invoice over-pricing / thin documentation (documentary anomaly)",
+   "src_line": 470,
+   "status": "partial",
+   "data": "partial",
+   "capability": "C22",
+   "data_source": "D15",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C22 (Trade-based money-laundering & documentary anomaly detection); data D15."
+  },
+  {
+   "id": "IND-08",
+   "section": "Financial Red Flag Indicators of Kleptocracy and Foreign Public Corruption",
+   "flag": "Transactions involving payments that do not match the total amounts set out in the underlying documentation, or that involve vague payment details or the use of old or fraudulent documentation to justify transfer of funds.",
+   "red_flag": "Payment-vs-supporting-document mismatch with stale/fraudulent paperwork (documentary anomaly)",
+   "src_line": 474,
+   "status": "partial",
+   "data": "partial",
+   "capability": "C22",
+   "data_source": "D15",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C22 (Trade-based money-laundering & documentary anomaly detection); data D15."
+  },
+  {
+   "id": "IND-09",
+   "section": "Financial Red Flag Indicators of Kleptocracy and Foreign Public Corruption",
+   "flag": "Transactions involving fictitious email addresses and false invoices to justify payments, particularly for international transactions.",
+   "red_flag": "Fictitious-email / false-invoice justification for cross-border payment (BEC-style documentary fraud)",
+   "src_line": 478,
+   "status": "partial",
+   "data": "partial",
+   "capability": "C22",
+   "data_source": "D15",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C22 (Trade-based money-laundering & documentary anomaly detection); data D15."
+  },
+  {
+   "id": "IND-10",
+   "section": "Financial Red Flag Indicators of Kleptocracy and Foreign Public Corruption",
+   "flag": "Assets held in the name of intermediate legal entities whose beneficial owner or owners are tied to a kleptocrat or his or her family member.",
+   "red_flag": "Assets held via intermediate entities with kleptocrat-linked UBO (shell-layer concealment)",
+   "src_line": 481,
+   "status": "gap",
+   "data": "available",
+   "capability": "C15",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-SHELL-NOMINEE-NETWORK",
+    "class": "network Â· ownership-graph Â· windowed",
+    "features": [
+     "shared_address_director_overlap",
+     "ubo_opacity_score",
+     "incorporation_recency_flag",
+     "no_observable_operations_flag",
+     "circular_ownership_indicator",
+     "nominee_director_reuse_count"
+    ],
+    "logic": "Flag an entity exhibiting shell or front-company markers â opaque or circular beneficial ownership, shared registered addresses or directors, recent incorporation with no observable operations â escalating when nominees or addresses recur across a cluster of related entities.",
+    "window": "rolling 90 days over the ownership/address graph",
+    "source": "corporate registry + KYC beneficial-ownership records + entity-resolution graph",
+    "route": "Tier-2 network alert â AML investigations gate"
+   }
+  }
+ ]
 }

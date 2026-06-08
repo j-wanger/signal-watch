@@ -1,138 +1,190 @@
 {
-  "id": "fin-2024-a001",
-  "advisory": "FIN-2024-A001",
-  "source_md": "data/fincen/fin-2024-a001.md",
-  "extraction_quality": "llm-extracted",
-  "provenance": "LLM-backend-derived + deterministic-checked (Phase 16/17 inverted boundary) — NOT a ship typology config. Previously triaged LOW (the deleted extractor under-counted through this advisory's interleaved footnote runs). The LLM backend read the source and EXTRACTED the 9 enumerated red flags directly; the deterministic gate GROUNDS each verbatim `flag` in the source md within the red-flag region + checks the cover×data matrix. Footnote markers glued mid-flag are kept verbatim where they fall inside the span (e.g. 'NPO84') so the quote grounds. build_rec follows the cover×data matrix (build_rec_category). Coverage/data values are ILLUSTRATIVE (vision demo). Terrorist-finance indicators lean enrichment-heavy (much depends on external attribution), so the buildable-now surface is deliberately narrow.",
-  "indicators": [
-    {
-      "id": "IND-01",
-      "section": "financial",
-      "flag": "A customer or a customer's counterparty conducts transactions with Office of Foreign Assets Control (OFAC)-designated entities and individuals",
-      "red_flag": "OFAC-designated counterparty or identifier-nexus match (email / address / phone / passport / CVC address)",
-      "src_line": 667,
-      "status": "partial",
-      "data": "available",
-      "build_rec": "ENHANCE",
-      "rationale": "Name-based OFAC screening is a mature baseline control; enhance it to match the broader identifier nexus (email, physical address, phone, passport, CVC address) rather than building net-new."
-    },
-    {
-      "id": "IND-02",
-      "section": "financial",
-      "flag": "Information included in a transaction between customers or in a note accompanying a peer-to-peer transfer include key terms known to be associated with terrorism or terrorist organizations.",
-      "red_flag": "Terrorism key-terms in transaction details / P2P transfer notes",
-      "src_line": 672,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "Screening P2P notes for terrorism-associated key terms needs transaction free-text captured only partially as structured data; enrich with memo NLP plus a curated term list, then build."
-    },
-    {
-      "id": "IND-03",
-      "section": "financial",
-      "flag": "money services business (MSB) or other financial institution, including a VASP, that operates in jurisdictions known for, or at high risk for, terrorist activity and is reasonably believed to have lax customer identification",
-      "red_flag": "MSB / VASP counterparty in high-risk-for-terrorism jurisdiction with lax CDD / opaque ownership",
-      "src_line": 676,
-      "status": "partial",
-      "data": "available",
-      "build_rec": "ENHANCE",
-      "rationale": "Counterparty-institution geography and risk are partially covered by existing correspondent/VASP screening; enhance with a high-risk-jurisdiction + lax-AML/CFT MSB/VASP conjunction."
-    },
-    {
-      "id": "IND-04",
-      "section": "financial",
-      "flag": "front companies, general \"trading companies\" with unclear business purposes, or other companies whose beneficial ownership information indicates that they may have a nexus with Iran or other Iran-supported terrorist groups",
-      "red_flag": "Front-company / vague \"trading company\" with Iran-terror nexus (opaque ownership, residential / co-located address)",
-      "src_line": 681,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "Front-company detection (opaque ownership, residential/co-located addresses, Iran nexus) needs a beneficial-ownership graph and address-type enrichment we hold only partially; enrich, then build."
-    },
-    {
-      "id": "IND-05",
-      "section": "financial",
-      "flag": "A customer that is or purports to be a charitable organization or NPO84 solicits donations but does not appear to provide any charitable services or openly supports terrorist activity or operations",
-      "red_flag": "Sham charity / NPO soliciting donations (incl. CVC) with no services or open terror support",
-      "src_line": 703,
-      "status": "gap",
-      "data": "insufficient",
-      "build_rec": "SOURCE_DATA",
-      "rationale": "Whether a purported charity provides real services or openly supports terrorism is an external open-source / social-media signal not held in the AML repo; source that feed before any detection can use it."
-    },
-    {
-      "id": "IND-06",
-      "section": "financial",
-      "flag": "A customer receives numerous small CVC payments from many wallets, then transfers the funds to another wallet, particularly if the customer logs in using an Internet Protocol (IP) based in a jurisdiction known for, or at high risk for, terrorist activity.",
-      "red_flag": "Small-CVC wallet fan-in → onward forward, login from high-risk-terror IP",
-      "src_line": 708,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "Aggregating many small inbound CVC payments then forwarding, paired with a login IP in a high-risk jurisdiction, is uncovered and computable — CVC inflow fan-in, the onward transfer, and login-IP geo are all in repo — immediately buildable.",
-      "build_logic": {
-        "signal_name": "S-SMALL-CVC-AGGREGATION-HIGHRISK-IP",
-        "class": "account · flow-level · stateful",
-        "features": [
-          "distinct_inbound_wallet_count",
-          "small_cvc_payment_count_7d",
-          "onward_transfer_value_ratio",
-          "login_ip_highrisk_jurisdiction_flag",
-          "aggregation_to_transfer_hours"
-        ],
-        "logic": "a customer receives numerous small CVC payments from many distinct wallets over a short period and then forwards the aggregated funds to another wallet, while logging in from an IP based in a jurisdiction known for or at high risk for terrorist activity",
-        "window": "rolling 7 days",
-        "source": "Core CVC transaction + wallet-graph features (Gold); login-IP geolocation; high-risk-jurisdiction list",
-        "route": "Tier-1 alert → terrorist-financing review gate"
-      }
-    },
-    {
-      "id": "IND-07",
-      "section": "financial",
-      "flag": "A customer makes money transfers to a jurisdiction known for, or at high risk for, terrorist activity that are inconsistent with their stated occupation or business purpose",
-      "red_flag": "Vague-purpose transfers to high-risk-terror jurisdiction, occupation-inconsistent",
-      "src_line": 714,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "Transfers to a high-risk jurisdiction that are inconsistent with the customer's stated occupation and carry vague purposes are uncovered, and destination geo, customer occupation/profile, and stated transfer purpose are in repo — immediately buildable.",
-      "build_logic": {
-        "signal_name": "S-VAGUE-PURPOSE-HIGHRISK-TRANSFER",
-        "class": "account · behavioral · stateful",
-        "features": [
-          "destination_highrisk_jurisdiction_flag",
-          "stated_purpose_vague_flag",
-          "transfer_value_vs_occupation_profile",
-          "occupation_business_mismatch_flag",
-          "transfer_count_90d"
-        ],
-        "logic": "a customer makes money transfers to a jurisdiction known for or at high risk for terrorist activity that are inconsistent with their stated occupation or business purpose and carry vague stated purposes such as travel expenses, charity, aid, or gifts",
-        "window": "rolling 90 days",
-        "source": "Core transaction + KYC occupation-profile features (Gold); destination-geo + high-risk-jurisdiction list; stated-purpose field",
-        "route": "Tier-1 alert → terrorist-financing review gate"
-      }
-    },
-    {
-      "id": "IND-08",
-      "section": "financial",
-      "flag": "A customer account receives large payouts from social media fundraisers or crowdfunding platforms and is then accessed from an IP address in a jurisdiction known for, or at high risk for, terrorist activity",
-      "red_flag": "Crowdfunding payout fan-in → high-risk-terror IP access, pro-terror contributors",
-      "src_line": 718,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "Crowdfunding-payout inflow and login-IP geo are in repo, but tying the contributing social-media accounts to terrorist-supportive content needs external content enrichment we hold only partially; enrich, then build."
-    },
-    {
-      "id": "IND-09",
-      "section": "financial",
-      "flag": "A customer company is incorporated in the United States or a third-country jurisdiction, but its activities occur solely in jurisdictions known for, or at high risk for, terrorist activity",
-      "red_flag": "Incorporation-vs-activity mismatch: operating solely in high-risk-terror jurisdiction",
-      "src_line": 723,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "Comparing a company's incorporation jurisdiction against where its activity actually occurs needs counterparty/transaction geo attribution and a stated-business-purpose mapping we hold only partially; enrich, then build the incorporation-vs-activity mismatch signal."
-    }
-  ]
+ "id": "fin-2024-a001",
+ "advisory": "FIN-2024-A001",
+ "source_md": "data/fincen/fin-2024-a001.md",
+ "extraction_quality": "llm-extracted",
+ "provenance": "LLM-backend-derived + deterministic-checked (Phase 16/17 inverted boundary) — NOT a ship typology config. Previously triaged LOW (the deleted extractor under-counted through this advisory's interleaved footnote runs). The LLM backend read the source and EXTRACTED the 9 enumerated red flags directly; the deterministic gate GROUNDS each verbatim `flag` in the source md within the red-flag region + checks the cover×data matrix. Footnote markers glued mid-flag are kept verbatim where they fall inside the span (e.g. 'NPO84') so the quote grounds. build_rec follows the cover×data matrix (build_rec_category). Coverage/data values are ILLUSTRATIVE (vision demo). Terrorist-finance indicators lean enrichment-heavy (much depends on external attribution), so the buildable-now surface is deliberately narrow.",
+ "indicators": [
+  {
+   "id": "IND-01",
+   "section": "Red Flag Indicators — Iran-backed terrorist orgs",
+   "flag": "A customer or a customer’s counterparty conducts transactions with Office of Foreign Assets Control (OFAC)-designated entities and individuals, or transactions that contain a nexus to identifiers listed for OFAC-designated entities and individuals, to include email addresses, physical addresses, phone numbers, passport numbers, or CVC addresses.",
+   "red_flag": "Counterparty or identifier nexus to OFAC-designated entity (incl. CVC address)",
+   "src_line": 667,
+   "status": "covered",
+   "data": "available",
+   "capability": "C18",
+   "data_source": "D11",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C18 (Sanctions / watchlist screening)."
+  },
+  {
+   "id": "IND-02",
+   "section": "Red Flag Indicators — Iran-backed terrorist orgs",
+   "flag": "Information included in a transaction between customers or in a note accompanying a peer-to-peer transfer include key terms known to be associated with terrorism or terrorist organizations.",
+   "red_flag": "Terrorism-associated key terms in P2P memo/narrative",
+   "src_line": 672,
+   "status": "gap",
+   "data": "partial",
+   "capability": "C10",
+   "data_source": "D5",
+   "build_rec": "BUILD_ENRICH",
+   "rationale": "Gap; requires D5 (Transaction narrative / free-text fields), not currently held → source data first."
+  },
+  {
+   "id": "IND-03",
+   "section": "Red Flag Indicators — Iran-backed terrorist orgs",
+   "flag": "A customer conducts transactions with a money services business (MSB) or other financial institution, including a VASP, that operates in jurisdictions known for, or at high risk for, terrorist activity and is reasonably believed to have lax customer identification and verification processes, opaque ownership, or otherwise fails to comply with AML/CFT best practices.",
+   "red_flag": "Flow through high-risk-corridor MSB/VASP with lax CDD",
+   "src_line": 676,
+   "status": "covered",
+   "data": "available",
+   "capability": "C20",
+   "data_source": "D17",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C20 (Cross-border / high-risk-jurisdiction & corridor anomaly detection)."
+  },
+  {
+   "id": "IND-04",
+   "section": "Red Flag Indicators — Iran-backed terrorist orgs",
+   "flag": "A customer conducts transactions that originate with, are directed to, or otherwise involve entities that are front companies, general “trading companies” with unclear business purposes, or other companies whose beneficial ownership information indicates that they may have a nexus with Iran or other Iran-supported terrorist groups.  Indicators of possible front companies include opaque ownership structures, individuals and/or entities with obscure names that direct the company, or business addresses that are residential or co-located with other companies.",
+   "red_flag": "Front-company / opaque-UBO counterparty with Iran nexus",
+   "src_line": 681,
+   "status": "gap",
+   "data": "available",
+   "capability": "C15",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-SHELL-NOMINEE-NETWORK",
+    "class": "network Â· ownership-graph Â· windowed",
+    "features": [
+     "shared_address_director_overlap",
+     "ubo_opacity_score",
+     "incorporation_recency_flag",
+     "no_observable_operations_flag",
+     "circular_ownership_indicator",
+     "nominee_director_reuse_count"
+    ],
+    "logic": "Flag an entity exhibiting shell or front-company markers â opaque or circular beneficial ownership, shared registered addresses or directors, recent incorporation with no observable operations â escalating when nominees or addresses recur across a cluster of related entities.",
+    "window": "rolling 90 days over the ownership/address graph",
+    "source": "corporate registry + KYC beneficial-ownership records + entity-resolution graph",
+    "route": "Tier-2 network alert â AML investigations gate"
+   }
+  },
+  {
+   "id": "IND-05",
+   "section": "Red Flag Indicators — Iran-backed terrorist orgs",
+   "flag": "A customer that is or purports to be a charitable organization or NPO84  solicits donations but does not appear to provide any charitable services or openly supports terrorist activity or operations.  In some cases, these organizations may post on social media platforms or encrypted messaging apps to solicit donations, including in CVC.",
+   "red_flag": "Sham-charity / NPO donation solicitation with no charitable output",
+   "src_line": 703,
+   "status": "partial",
+   "data": "available",
+   "capability": "C19",
+   "data_source": "D13",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C19 (Adverse-media / OSINT & web-presence verification); data D13."
+  },
+  {
+   "id": "IND-06",
+   "section": "Red Flag Indicators — Iran-backed terrorist orgs",
+   "flag": "A customer receives numerous small CVC payments from many wallets, then transfers the funds to another wallet, particularly if the customer logs in using an Internet Protocol (IP) based in a jurisdiction known for, or at high risk for, terrorist activity.",
+   "red_flag": "Multi-wallet CVC funnel-in then forward-out (terror-corridor IP)",
+   "src_line": 708,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C21",
+   "data_source": "D7",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D7 (Virtual-currency / blockchain analytics), not currently held → source data first."
+  },
+  {
+   "id": "IND-07",
+   "section": "Red Flag Indicators — Iran-backed terrorist orgs",
+   "flag": "A customer makes money transfers to a jurisdiction known for, or at high risk for, terrorist activity that are inconsistent with their stated occupation or business purpose with vague stated purposes such as “travel expenses,” “charity,” “aid,” or “gifts.",
+   "red_flag": "Occupation-inconsistent transfers to terror corridor with vague stated purpose",
+   "src_line": 714,
+   "status": "gap",
+   "data": "available",
+   "capability": "C8",
+   "data_source": "D3",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D3 (Wire / ACH / EFT & cross-border payment data (incl. EMT, P2P, remittance)), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-INCOME-ACTIVITY-INCONSISTENCY",
+    "class": "entity Â· account-level Â· windowed",
+    "features": [
+     "inflow_vs_declared_income_ratio",
+     "occupation_expected_volume_deviation",
+     "unexplained_large_credit_count",
+     "source_of_funds_gap_flag",
+     "income_band_peer_zscore",
+     "wealth_velocity_vs_stated_income"
+    ],
+    "logic": "Flag a personal account whose inflow volume or wealth velocity is inconsistent with the customer's declared income, occupation, or stated source of funds, escalating when large credits lack a plausible origin for the customer's profile.",
+    "window": "rolling 90 days vs declared income profile",
+    "source": "personal deposit ledger joined to onboarding income/occupation KYC data",
+    "route": "Tier-1 alert â AML analyst review gate"
+   }
+  },
+  {
+   "id": "IND-08",
+   "section": "Red Flag Indicators — Iran-backed terrorist orgs",
+   "flag": "A customer account receives large payouts from social media fundraisers or crowdfunding platforms and is then accessed from an IP address in a jurisdiction known for, or at high risk for, terrorist activity, particularly if the social media accounts that contribute to the fundraisers contain content supportive of terrorist campaigns.",
+   "red_flag": "Crowdfunding payout-in then terror-corridor IP access",
+   "src_line": 718,
+   "status": "gap",
+   "data": "available",
+   "capability": "C26",
+   "data_source": "D3",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D3 (Wire / ACH / EFT & cross-border payment data (incl. EMT, P2P, remittance)), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-SCAM-VULNERABLE-BEHAVIOR",
+    "class": "entity Â· account-level Â· windowed",
+    "features": [
+     "out_of_pattern_payee_flag",
+     "first_party_transfer_to_new_beneficiary",
+     "vulnerable_customer_segment_flag",
+     "romance_investment_payee_indicator",
+     "escalating_payment_sequence",
+     "customer_hesitation_signal"
+    ],
+    "logic": "Flag behavioural patterns consistent with scam victimization or vulnerable-customer exploitation â out-of-pattern payments to new beneficiaries, escalating transfer sequences to investment or romance-typed payees â escalating when the customer falls in a vulnerable segment.",
+    "window": "rolling 30 days per emerging payee relationship",
+    "source": "payment ledger + customer vulnerability segment + payee risk reference",
+    "route": "Tier-1 alert â fraud/AML & customer-protection review gate"
+   }
+  },
+  {
+   "id": "IND-09",
+   "section": "Red Flag Indicators — Iran-backed terrorist orgs",
+   "flag": "A customer company is incorporated in the United States or a third-country jurisdiction, but its activities occur solely in jurisdictions known for, or at high risk for, terrorist activity and show no relationship to the company’s stated business purpose.",
+   "red_flag": "Domicile-vs-activity mismatch — incorporated locally, operates only in terror corridor",
+   "src_line": 723,
+   "status": "gap",
+   "data": "available",
+   "capability": "C7",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-REVENUE-OPERATIONS-MISMATCH",
+    "class": "entity Â· business-account Â· windowed",
+    "features": [
+     "inflow_vs_declared_revenue_ratio",
+     "inflow_per_employee",
+     "payroll_to_revenue_ratio",
+     "operating_expense_share",
+     "industry_peer_revenue_zscore",
+     "transaction_volume_vs_footprint"
+    ],
+    "logic": "Flag a business account whose transaction inflows are disproportionate to its declared revenue, headcount, payroll, or operating-expense footprint relative to industry peers, escalating when revenue appears decoupled from any observable operational activity.",
+    "window": "rolling 90 days vs declared profile and peer cohort",
+    "source": "business deposit ledger joined to KYC business profile + industry peer benchmarks",
+    "route": "Tier-2 alert â AML analyst review gate"
+   }
+  }
+ ]
 }

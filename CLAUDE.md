@@ -29,8 +29,11 @@ AML transformation framework. Keep vocabulary consistent with it
   King in Right of Canada + complete title + "a copy of the version available at <URL>"), per FINTRAC's
   Terms & Conditions: a reproduction LICENCE, distinct from the US 17 USC §105 no-copyright basis. NOT
   commercial redistribution (needs FINTRAC's written permission). The verbatim relaxation is US-FEDERAL +
-  FINTRAC ONLY — every OTHER non-US / non-FINTRAC / non-government source still paraphrases (corpus.html's
-  source panel renders each document's OWN basis; the fentanyl showcase still paraphrases its FINTRAC OA).
+  FINTRAC ONLY — every OTHER non-US / non-FINTRAC / non-government source still paraphrases (the fentanyl
+  showcase still paraphrases its FINTRAC OA). Phase 28 (the user's compliance call): in the corpus explorer the
+  per-doc Source LABEL carries the document title only; the FINTRAC Crown-copyright attribution (© His Majesty…
+  + complete title + source URL) renders in the PAGE FOOTER for the FINTRAC doc on screen (empty for US
+  public-domain docs) — verbatim-with-attribution HELD, the attribution relocated, not removed.
 - Live mode is optional, isolated, off by default, always has a scripted fallback.
   Never put keys/tokens in the frontend. Copilot is NOT a web backend (HANDOFF §4.5).
 
@@ -259,6 +262,36 @@ AML transformation framework. Keep vocabulary consistent with it
   clean; `--check all` 4/4 ZERO DRIFT. FROZEN byte-clean: the showcase (index.html + config/** + the 3 typology
   dists), every source md, every corpus-status.json, data/typology-map.json, the grounding core `derive_signals.py`
   (the gate logic byte-UNCHANGED — re-extraction only shrank flag VALUES). NO non-negotiable change.
+- COMPLETENESS + GROUNDED COVERAGE + STREAMING READ (Phase 28, M7 — the corpus made COMPLETE, HONEST, and
+  presentation-finished; NO new source / non-negotiable change): the user found the CORE defect Phase-27's
+  assessment MISSED — verbatim red-flag EXTRACTION was grossly INCOMPLETE (the grounding gate only ever checked
+  each flag was REAL, never that we got them ALL; the opioid doc shipped 15 of ~80). (1) COMPLETE RE-EXTRACTION
+  (the `ph28-complete-sweep` 84-agent LLM-enumerate + completeness-critic workflow — deterministic bullet-detect
+  was too unreliable, glyphs vary per doc): 634 → 903 indicators, every flag re-grounds (terror 13→77,
+  opioids 15→68, human-trafficking 57→98, maritime 7→40). (2) GROUNDED COVERAGE (replaces fabrication): a
+  user-approved 28-capability + 20-data-source taxonomy → each indicator tagged capability/data_source → the
+  user's 28+20 YES/NO/PARTIAL interview answers → deterministic apply (cap→status, data→availability, the
+  cover×data matrix→build_rec); honest SOURCE_DATA where the bank can't observe; 28 capability spec-templates
+  author the BUILD_NOW build_logic. NO fabricated coverage. (3) STREAMING READ (corpus.html, T10 — the
+  Phase-27/T7 phrase-by-phrase render was "staged" + ~48s-hardcoded): `renderArticle` now STREAMS the source in
+  as if read (caret + scroll-follow), each red-flag phrase highlighting ONLY as the read reaches its position +
+  its translation extracting alongside; BOTH the "phrases extracted" and "red flags" labels count UP from 0 (no
+  full count shown up-front); length-scaled ~0.9ms/char, capped ~45s. Reduced-motion + the string-DOM harness
+  settle on the final template; a full-motion harness section (`__drain` + an enriched dynEl) drives the stream.
+  (4) DISPLAY POLISH: `cleanArticle` de-pipes markitdown PIPE-GRID tables (`|---|` rule rows dropped, `|cell|cell|`
+  → readable text) + strips stray `#`/`**` — normalize-INVARIANT (normalize drops `|`/`#`/`*`/spaces), so grounding
+  + highlighting are byte-unchanged. (5) DEDUP: the completeness sweep double-extracted 5 docs (terror under two
+  parallel section schemes = 24 dupes; 4 others 1 each — tab-soup / newline / prefix-truncation artifacts), all
+  confirmed against the source mds; 28 genuine duplicates removed byte-surgically (json `indent=1` round-trip, only
+  the dup objects removed) → 903 → **875 indicators**, terror 77→53, ZERO unique lost. (6) BRANDING "FinCEN Corpus
+  Explorer" → "AML Corpus Explorer" (the `build.py` brand subtitle was overriding the template at runtime — fixed).
+  (7) FINTRAC ATTRIBUTION RELOCATED to a per-doc PAGE FOOTER (the user's compliance call): the on-screen Source
+  LABEL carries the title only; the full Crown-copyright attribution (© His Majesty… + complete title + source URL)
+  renders in the footer for the FINTRAC doc on screen, EMPTY for US public-domain docs (build.py preserves the ©
+  clause as `attribution` + surfaces `url`). The verbatim+attribution non-negotiable is HELD (attribution present,
+  just relocated) — NO deviation. dist/corpus ~2.40MB; harness 148 → **165**. FROZEN byte-clean: the showcase
+  (index.html + config/** + the 3 typology dists), every source md, every corpus-status.json, data/typology-map.json,
+  the grounding core `derive_signals.py` (all 875 re-ground through it byte-UNCHANGED). NO non-negotiable change.
 - IMPORTANT — INVERTED extraction boundary (Phase 16) + the SUBTRACTION (Phase 17): the **LLM EXTRACTS, the
   deterministic layer GATES**, and the old extractor is **DELETED**. The earlier deterministic
   `extract_red_flags` accreted format special-casing every phase yet the LLM still had to author/prune its
@@ -305,7 +338,8 @@ AML transformation framework. Keep vocabulary consistent with it
   committed `dist/corpus/index.html` (gate toggle, the article screen + red_flag threading, Signal empty states,
   close-the-loop coverage math, reduced-motion) + the multi-source menu (advisories + alerts + OFAC +
   FINTRAC, doc_type chips; an alert, an OFAC advisory, AND a FINTRAC OA each walk the arc; the FINTRAC
-  source panel shows its Crown-copyright basis, not US public domain) + the cross-corpus synthesis view
+  Crown-copyright attribution renders in the page FOOTER for the doc on screen — Phase 28, the on-screen
+  Source label carries the title only; US public-domain docs show no footer attribution) + the cross-corpus synthesis view
   (Phase 24: typology-mode picker, a cross-jurisdiction cluster's combined coverage = honest union over
   the pooled indicators, the no-similarity/overlap/lift honesty gate, drill-through + Back-to-cluster)
   + the Phase-26 register beats (the story landing as entry; Select grouped by source / newest-first;
@@ -314,7 +348,9 @@ AML transformation framework. Keep vocabulary consistent with it
   + the Phase-27 shippability fixes (the Read-advisory source panel is markitdown-CLEANED — no running
   headers / letter-spaced headers / tab-soup; normalize-both-sides highlighting lands ~every grounded flag;
   the Signal build-log runs in a proposal grid + the combination-lift carries a lift-side panel with firestat
-  OMITTED; the whole-article progressive "agent reading"); 148 assertions · `python3 scripts/derive_signals.py --selftest` runs
+  OMITTED) + the Phase-28 beats (the FULL-MOTION STREAMING read — the source streams in, each phrase highlights
+  as the read reaches it, both labels count up from 0, settles with the caret removed; de-piped markdown tables;
+  the FINTRAC footer attribution present for a FINTRAC doc / empty for a US doc); 165 assertions · `python3 scripts/derive_signals.py --selftest` runs
   the derivation GATE checks. Pre-present sequence: `--check all` (drift) → `node tests/…` (arc) → walk
   `tests/smoke-checklist.md` (the human-eye checks).
 - Iterate: edit `index.html` / `corpus.html` / a config, rebuild. `python3 -m http.server` optional, never required.
@@ -357,7 +393,14 @@ the grounding system), then markitdown-cleaned the Read-advisory source + normal
 + the Act-4 build-log in a proposal grid + a combination-lift lift-side panel (firestat omitted) + the whole-article
 progressive read + a faithfulness-guarded re-extraction tightening 121 over-long verbatim flags to crisp grounded
 sub-spans (grounding transitive; long single-sentence indicators kept whole) — corpus made SHIPPABLE, gate logic
-byte-unchanged, NO non-negotiable change).
+byte-unchanged, NO non-negotiable change);
+Phase 28: completeness + grounded coverage + streaming read — the user found EXTRACTION was grossly INCOMPLETE
+(the gate checked each flag was REAL, never that we got them ALL): a complete re-extraction 634→903 indicators (every
+flag re-grounds), coverage now GROUNDED in the user's 28-capability + 20-data-source YES/NO/PARTIAL interview (not
+fabricated), a full-motion STREAMING "agent reading" render (source streams in, each phrase highlights as the read
+reaches it, both labels count up from 0), de-piped markdown tables, "AML Corpus Explorer" branding, the FINTRAC
+attribution relocated to a per-doc page footer (verbatim+attribution non-negotiable HELD), and a dedup of 28 genuine
+duplicate indicators from the sweep (terror 77→53) → 875 indicators; grounding core byte-unchanged, NO non-negotiable change).
 See HANDOFF.md §8.
 
 ## Definition of done

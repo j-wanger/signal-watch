@@ -26,6 +26,7 @@ typology) on any drift or a missing built artifact. Run it before committing or 
 Stdlib only. Exits non-zero on a missing or schema-invalid config, or (under --check) on drift.
 """
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -496,7 +497,16 @@ def _load_source(source: dict) -> list:
         if not isinstance(a, dict) or not a.get("id"):
             die(f"{rel}: every advisory needs an id")
         entry = {k: a.get(k) for k in
-                 ("id", "advisory", "title", "date", "source", "extraction", "flag_count", "derivable")}
+                 ("id", "advisory", "title", "date", "source", "url", "extraction", "flag_count", "derivable")}
+        # Phase 28: the on-screen Source LABEL carries the title only (per the user's compliance call), but
+        # the reproduction/copyright clause (" · © …") is preserved as `attribution` so the page FOOTER can
+        # render the full licence attribution (© His Majesty… + title + URL) for the document on screen —
+        # shown only for the doc being reproduced (FINTRAC's Crown-copyright basis), never for US sources.
+        if isinstance(entry.get("source"), str):
+            m = re.split(r"\s+·\s+©|\s+©", entry["source"], maxsplit=1)
+            entry["source"] = m[0].strip()
+            if len(m) > 1:
+                entry["attribution"] = "© " + m[1].strip()
         entry["doc_type"] = source["doc_type"]   # honest menu label (Advisory / Alert)
         entry["jurisdiction"] = source["jurisdiction"]   # US / Canada — for cross-corpus grouping
         rec = derived.get(a["id"])
@@ -538,7 +548,7 @@ def render_corpus(template: str) -> str:
             entry["typology"] = tmap[entry["id"]]
 
     corpus = {
-        "brand": {"title": "Signal Watch", "subtitle": "FinCEN Corpus Explorer · Vision Prototype"},
+        "brand": {"title": "Signal Watch", "subtitle": "AML Corpus Explorer · Vision Prototype"},
         "badge": "Illustrative data & outputs",
         "advisories": merged,
         "typologies": vocab,   # closed-vocab typology -> description (for the cross-corpus synthesis view)

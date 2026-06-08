@@ -1,282 +1,371 @@
 {
-  "id": "fin-2025-a003",
-  "advisory": "FIN-2025-A003",
-  "source_md": "data/fincen/fin-2025-a003.md",
-  "extraction_quality": "clean",
-  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo).",
-  "indicators": [
-    {
-      "id": "IND-01",
-      "section": "redflag",
-      "flag": "regularly receives funds that are not commensurate with the reported occupation or income, and the source of the funds cannot be attributed to payroll or other legitimate sources of income (i.e., unexplained wealth",
-      "red_flag": "Unexplained-wealth inflows inconsistent with stated occupation/income",
-      "src_line": 452,
-      "status": "partial",
-      "data": "available",
-      "build_rec": "ENHANCE",
-      "rationale": "Receiving funds out of line with reported occupation/income (unexplained wealth) is partially covered by income-vs-activity profiling; enhance with the onboarding-passport-nationality and source-attribution features."
-    },
-    {
-      "id": "IND-02",
-      "section": "redflag",
-      "flag": "During the onboarding process, a customer presents a Chinese passport and a visa that contain the same photograph despite being allegedly issued years apart.44",
-      "red_flag": "Passport and visa share one photo despite years-apart issuance",
-      "src_line": 457,
-      "status": "gap",
-      "data": "insufficient",
-      "build_rec": "SOURCE_DATA",
-      "rationale": "Detecting a passport and visa that share one photo despite years-apart issuance needs identity-document image forensics we do not hold today — acquire document-integrity data before building."
-    },
-    {
-      "id": "IND-03",
-      "section": "redflag",
-      "flag": "creates an account at a financial institution and reports their occupation as a student during the onboarding process.  This customer then regularly deposits cash into their account or receives wire transfers notated as “tuition” or “living expenses” that are not commensurate with the reported information.  After receiving the funds, the customer may subsequently initiate wire transfers or P2P transactions to unknown individuals who are unrelated to the purpose of the wire transfers",
-      "red_flag": "Student-account tuition/living-expense inflows then forward to unrelated parties (mule funnel)",
-      "src_line": 460,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "A student-occupation account taking tuition/living-expense-memo inflows then forwarding them via P2P/wire to unrelated parties is uncovered, and occupation, deposit, wire-memo and P2P features are all in repo — immediately buildable.",
-      "build_logic": {
-        "signal_name": "S-STUDENT-MULE-FUNNEL",
-        "class": "entity · account-level · windowed",
-        "features": [
-          "onboarding_occupation",
-          "inbound_cash_value_30d",
-          "wire_memo_tuition_living_flag",
-          "outbound_p2p_to_unrelated_count_30d",
-          "inflow_to_stated_income_ratio"
-        ],
-        "logic": "account opened with a student occupation receives recurring cash deposits or wires memo-tagged tuition / living-expenses out of line with stated income, then forwards the funds via P2P or wire to unrelated parties in the window",
-        "window": "rolling 30 days",
-        "source": "KYC occupation + core deposit / wire / P2P features (Gold); wire-memo text tags",
-        "route": "Tier-1 alert → CMLN money-mule review gate"
-      }
-    },
-    {
-      "id": "IND-04",
-      "section": "redflag",
-      "flag": "A customer, especially a Chinese national, reports their occupation during customer onboarding as a student, retiree, housewife, or other low-income occupation but has unexplained wealth.",
-      "red_flag": "Low-income occupation (student/retiree/housewife) vs unexplained wealth",
-      "src_line": 468,
-      "status": "partial",
-      "data": "available",
-      "build_rec": "ENHANCE",
-      "rationale": "A low-income stated occupation (student/retiree/housewife) paired with unexplained wealth is the same occupation-vs-wealth mismatch — partially covered; enhance the profile with the stated-occupation band feature."
-    },
-    {
-      "id": "IND-05",
-      "section": "redflag",
-      "flag": "initiates a wire transfer related to a real estate purchase or purchases cashier’s checks made payable to a real estate company",
-      "red_flag": "Unexplained-wealth funds to real estate via wire or cashier's check",
-      "src_line": 472,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "Unexplained-wealth wires for real estate or cashier's checks payable to a real-estate company are visible, but classifying the payee as a real-estate company and the realtor-accompaniment context needs payee enrichment we hold only partially — build after enrichment."
-    },
-    {
-      "id": "IND-06",
-      "section": "redflag",
-      "flag": "regularly deposits large volumes of cash or cashier’s checks, or receives multiple wire, ACH, or P2P transfers for no business or apparent lawful purpose.  The customer then subsequently uses the funds to purchase a cashier’s check or disperses the funds to other individuals using P2P and wire transfers, often to other high- risk jurisdictions",
-      "red_flag": "Cash/cashier's-check + multi-rail inflows layered out to high-risk jurisdictions",
-      "src_line": 477,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "Aggregating large cash / cashier's-check and wire/ACH/P2P inflows with no apparent purpose then dispersing to high-risk jurisdictions is uncovered, and deposit, cashier's-check, P2P, wire and jurisdiction features are all in repo — immediately buildable.",
-      "build_logic": {
-        "signal_name": "S-CASH-LAYER-HIGHRISK-DISPERSAL",
-        "class": "entity · account-level · windowed",
-        "features": [
-          "inbound_cash_cashiers_value_30d",
-          "inbound_wire_ach_p2p_count_30d",
-          "cashiers_check_purchase_count_30d",
-          "outbound_highrisk_jurisdiction_value_30d",
-          "no_business_purpose_flag"
-        ],
-        "logic": "account aggregates large cash or cashier's-check deposits and multiple wire / ACH / P2P inflows with no apparent business purpose, then disperses the funds by purchasing cashier's checks or sending P2P / wire transfers to high-risk jurisdictions",
-        "window": "rolling 30 days",
-        "source": "Core deposit + cashier's-check + wire / P2P features (Gold); high-risk-jurisdiction reference list",
-        "route": "Tier-1 alert → CMLN layering review gate"
-      }
-    },
-    {
-      "id": "IND-07",
-      "section": "redflag",
-      "flag": "receives numerous transfers or deposits, and has a significant number of withdrawals or transfers, none of which appear to be related to routine payroll, living expenses, or customer’s stated expected activity",
-      "red_flag": "High-velocity pass-through unrelated to payroll or expected activity",
-      "src_line": 483,
-      "status": "covered",
-      "data": "available",
-      "build_rec": "COVERED",
-      "rationale": "An account churning numerous deposits and withdrawals unrelated to payroll, living expenses, or expected activity is classic pass-through behaviour already covered by existing velocity / pass-through monitoring."
-    },
-    {
-      "id": "IND-08",
-      "section": "redflag",
-      "flag": "A customer, especially a Chinese national, has large amounts of cash funding cashier’s checks, which are then deposited at another financial institution.",
-      "red_flag": "Cash-funded cashier's checks deposited at another institution",
-      "src_line": 487,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "Large cash funding cashier's checks is visible on the issuance side, but the subsequent deposit at another institution is outside our view — build on the issuance pattern after enriching with cashier's-check clearing data."
-    },
-    {
-      "id": "IND-09",
-      "section": "redflag",
-      "flag": "is reluctant or refuses to provide information regarding the source of funds deposited or transferred into their account or acts evasive when questioned about the purpose of a transaction or may explain it as repayment of a loan",
-      "red_flag": "Evasive / refused source-of-funds, explained as loan repayment",
-      "src_line": 490,
-      "status": "gap",
-      "data": "insufficient",
-      "build_rec": "SOURCE_DATA",
-      "rationale": "Reluctance or evasiveness about source of funds is an interaction observation captured in RFI / case notes, not structured transaction data — source the investigator-note signal before building."
-    },
-    {
-      "id": "IND-10",
-      "section": "redflag",
-      "flag": "A business45 owned by a Chinese national regularly receives deposits from online marketplaces, but rarely, or never, engages in transactions that indicate the purchase of goods to maintain inventory.",
-      "red_flag": "Online-marketplace deposits with no offsetting inventory purchasing",
-      "src_line": 505,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "A business taking recurring online-marketplace deposits with little or no offsetting inventory purchasing is uncovered, and deposit-source tagging plus supplier / inventory-MCC features are in repo — immediately buildable.",
-      "build_logic": {
-        "signal_name": "S-MARKETPLACE-INCOME-NO-INVENTORY",
-        "class": "entity · business-account · windowed",
-        "features": [
-          "marketplace_source_deposit_value_30d",
-          "inventory_purchase_mcc_value_30d",
-          "inventory_to_revenue_ratio",
-          "outbound_supplier_payment_count_30d",
-          "business_age_months"
-        ],
-        "logic": "a business account receives recurring deposits sourced from online marketplaces but shows little or no offsetting inventory or supplier purchasing, so revenue is not matched by the goods purchases a genuine reseller would make",
-        "window": "rolling 30 days",
-        "source": "Core deposit-source tagging + merchant / supplier payment features (Gold)",
-        "route": "Tier-1 alert → CMLN TBML review gate"
-      }
-    },
-    {
-      "id": "IND-11",
-      "section": "redflag",
-      "flag": "regularly receives wire transfers indicating the export of goods to foreign countries including Mexico, China, Hong Kong, and the United Arab Emirates, but rarely, or never, engages in transactions that indicate the purchase of goods to maintain inventory",
-      "red_flag": "Export-indicating wires with no offsetting inventory purchasing",
-      "src_line": 509,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "Export-indicating wire inflows with no inventory purchasing point to TBML, but reading 'export of goods' intent from wire narrative needs memo parsing we hold only partially — build after enriching wire-narrative classification."
-    },
-    {
-      "id": "IND-12",
-      "section": "redflag",
-      "flag": "A small U.S.-based business in the electronics or real estate industry receives wires from Mexico, China, Hong Kong, and the United Arab Emirates and has no known nexus to these countries.",
-      "red_flag": "No-nexus inbound foreign wires to a small US business",
-      "src_line": 514,
-      "status": "partial",
-      "data": "available",
-      "build_rec": "ENHANCE",
-      "rationale": "Wires from Mexico/China/Hong Kong/UAE with no business nexus are partially covered by cross-border high-risk-geography monitoring; enhance with the no-known-nexus business-profile feature."
-    },
-    {
-      "id": "IND-13",
-      "section": "redflag",
-      "flag": "regularly receives P2P or wire transfers from unknown individuals and subsequently uses those funds to make a substantial credit card payment",
-      "red_flag": "Aggregated third-party inflows settling one credit card (mirror transfer)",
-      "src_line": 518,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "Aggregating P2P/wire inflows from unknown individuals to settle a substantial credit-card payment is an uncovered mirror / value-transfer pattern, and inbound-transfer and card-payment features are both in repo — immediately buildable.",
-      "build_logic": {
-        "signal_name": "S-INBOUND-AGG-CARD-MIRROR",
-        "class": "entity · account-level · windowed",
-        "features": [
-          "inbound_p2p_wire_from_unknown_count_30d",
-          "inbound_value_30d",
-          "credit_card_payment_value_30d",
-          "distinct_inbound_counterparties_30d",
-          "inbound_to_card_payment_ratio"
-        ],
-        "logic": "account regularly receives P2P or wire transfers from numerous unknown individuals and applies the aggregated funds to a substantial credit-card payment — a mirror / value-transfer pattern where many third-party inflows settle one card",
-        "window": "rolling 30 days",
-        "source": "Core P2P / wire inbound + credit-card payment features (Gold)",
-        "route": "Tier-1 alert → CMLN value-transfer review gate"
-      }
-    },
-    {
-      "id": "IND-14",
-      "section": "redflag",
-      "flag": "A customer, especially a Chinese national, regularly uses a credit card to purchase large volumes of electronics or other luxury goods.",
-      "red_flag": "Heavy card spend on electronics / luxury goods",
-      "src_line": 524,
-      "status": "partial",
-      "data": "insufficient",
-      "build_rec": "MONITOR",
-      "rationale": "Heavy credit-card spend on electronics or luxury goods is mostly legitimate; absent corroborating context the data is insufficient to separate illicit purchasing-agent activity — monitor rather than alert."
-    },
-    {
-      "id": "IND-15",
-      "section": "redflag",
-      "flag": "A business that sells electronics or other luxury goods has income that is not commensurate with the size and scale of the business.",
-      "red_flag": "Business income not commensurate with size and scale",
-      "src_line": 527,
-      "status": "partial",
-      "data": "available",
-      "build_rec": "ENHANCE",
-      "rationale": "Business income not commensurate with its size and scale is a revenue-anomaly already partially covered by expected-activity baselines; enhance with the goods-resale sector benchmark."
-    },
-    {
-      "id": "IND-16",
-      "section": "redflag",
-      "flag": "A business that sells electronics or other luxury goods makes payments for multiple credit cards associated with various individuals, who are seemingly unrelated to the business.",
-      "red_flag": "Business pays down multiple unrelated third-party credit cards",
-      "src_line": 530,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "A goods-reselling business paying down multiple unrelated individuals' credit cards is an uncovered third-party-card-settlement pattern, and outbound-payment and card-account linkage features are in repo — immediately buildable.",
-      "build_logic": {
-        "signal_name": "S-BIZ-PAYS-THIRDPARTY-CARDS",
-        "class": "entity · business-account · windowed",
-        "features": [
-          "outbound_card_payment_count_30d",
-          "distinct_cardholders_paid_30d",
-          "cardholder_business_link_flag",
-          "outbound_card_payment_value_30d",
-          "goods_resale_mcc_share"
-        ],
-        "logic": "a goods-reselling business makes payments toward multiple credit-card accounts held by various individuals with no apparent relationship to the business, settling third-party card debt rather than its own obligations",
-        "window": "rolling 30 days",
-        "source": "Core outbound-payment + card-account linkage features (Gold)",
-        "route": "Tier-1 alert → CMLN TBML review gate"
-      }
-    },
-    {
-      "id": "IND-17",
-      "section": "redflag",
-      "flag": "Hong Kong registered trading companies with shell-like characteristics send funds to Chinese nationals residing in the United States, real estate escrow or title insurance companies, and other international destinations with no apparent business or economic purpose.",
-      "red_flag": "Shell-like Hong Kong trading companies remit to no-purpose destinations",
-      "src_line": 533,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "Hong Kong trading companies with shell-like characteristics sending funds to U.S. individuals and escrow/title companies are visible as inbound wires, but the shell-characteristic classification needs corporate-registry enrichment we hold only partially — build after enrichment."
-    },
-    {
-      "id": "IND-18",
-      "section": "redflag",
-      "flag": "A customer that is a U.S.-based escrow company receives funds from an unaffiliated, foreign- based shell company or entity in a disparate line of business that are used to purchase real estate in the United States.",
-      "red_flag": "Escrow company funded by foreign shell for U.S. real estate purchase",
-      "src_line": 499,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "A U.S.-based escrow company receiving funds from a foreign counterparty in a disparate line of business to buy U.S. real estate is visible from the escrow account type + inbound wire + real-estate purpose, but classifying the originator as a foreign shell needs corporate-registry enrichment we hold only partially — build after enrichment."
-    }
-  ]
+ "id": "fin-2025-a003",
+ "advisory": "FIN-2025-A003",
+ "source_md": "data/fincen/fin-2025-a003.md",
+ "extraction_quality": "clean",
+ "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo).",
+ "indicators": [
+  {
+   "id": "IND-01",
+   "section": "CMLN-Affiliated Money Mules",
+   "flag": "A customer, especially a customer who presented a Chinese passport as identification during the onboarding process, regularly receives funds that are not commensurate with the reported occupation or income, and the source of the funds cannot be attributed to payroll or other legitimate sources of income (i.e., unexplained wealth).",
+   "red_flag": "Inbound funds inconsistent with stated occupation/income — unexplained wealth (Chinese-passport onboarding)",
+   "src_line": 452,
+   "status": "gap",
+   "data": "available",
+   "capability": "C8",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-INCOME-ACTIVITY-INCONSISTENCY",
+    "class": "entity Â· account-level Â· windowed",
+    "features": [
+     "inflow_vs_declared_income_ratio",
+     "occupation_expected_volume_deviation",
+     "unexplained_large_credit_count",
+     "source_of_funds_gap_flag",
+     "income_band_peer_zscore",
+     "wealth_velocity_vs_stated_income"
+    ],
+    "logic": "Flag a personal account whose inflow volume or wealth velocity is inconsistent with the customer's declared income, occupation, or stated source of funds, escalating when large credits lack a plausible origin for the customer's profile.",
+    "window": "rolling 90 days vs declared income profile",
+    "source": "personal deposit ledger joined to onboarding income/occupation KYC data",
+    "route": "Tier-1 alert â AML analyst review gate"
+   }
+  },
+  {
+   "id": "IND-02",
+   "section": "CMLN-Affiliated Money Mules",
+   "flag": "During the onboarding process, a customer presents a Chinese passport and a visa that contain the same photograph despite being allegedly issued years apart.",
+   "red_flag": "Identity-document photo reuse across separately-issued passport and visa (synthetic/altered ID)",
+   "src_line": 457,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C12",
+   "data_source": "D9",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D9 (Identity-verification, document & device/session telemetry), not currently held → source data first."
+  },
+  {
+   "id": "IND-03",
+   "section": "CMLN-Affiliated Money Mules",
+   "flag": "A customer, especially a Chinese national, creates an account at a financial institution and reports their occupation as a student during the onboarding process.  This customer then regularly deposits cash into their account or receives wire transfers notated as “tuition” or “living expenses” that are not commensurate with the reported information.  After receiving the funds, the customer may subsequently initiate wire transfers or P2P transactions to unknown individuals who are unrelated to the purpose of the wire transfers or may make credit or debit card payments.",
+   "red_flag": "Student account funded as \"tuition\"/\"living expenses\" → receive-and-forward to no-relationship payees (mule pass-through)",
+   "src_line": 460,
+   "status": "covered",
+   "data": "available",
+   "capability": "C2",
+   "data_source": "D3",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C2 (Rapid pass-through / flow-through (receive-and-forward) detection)."
+  },
+  {
+   "id": "IND-04",
+   "section": "CMLN-Affiliated Money Mules",
+   "flag": "A customer, especially a Chinese national, reports their occupation during customer onboarding as a student, retiree, housewife, or other low-income occupation but has unexplained wealth.",
+   "red_flag": "Low-income occupation (student/retiree/housewife) vs unexplained wealth mismatch",
+   "src_line": 468,
+   "status": "gap",
+   "data": "available",
+   "capability": "C8",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-INCOME-ACTIVITY-INCONSISTENCY",
+    "class": "entity Â· account-level Â· windowed",
+    "features": [
+     "inflow_vs_declared_income_ratio",
+     "occupation_expected_volume_deviation",
+     "unexplained_large_credit_count",
+     "source_of_funds_gap_flag",
+     "income_band_peer_zscore",
+     "wealth_velocity_vs_stated_income"
+    ],
+    "logic": "Flag a personal account whose inflow volume or wealth velocity is inconsistent with the customer's declared income, occupation, or stated source of funds, escalating when large credits lack a plausible origin for the customer's profile.",
+    "window": "rolling 90 days vs declared income profile",
+    "source": "personal deposit ledger joined to onboarding income/occupation KYC data",
+    "route": "Tier-1 alert â AML analyst review gate"
+   }
+  },
+  {
+   "id": "IND-05",
+   "section": "CMLN-Affiliated Money Mules",
+   "flag": "A customer, especially a Chinese national with unexplained wealth, initiates a wire transfer related to a real estate purchase or purchases cashier’s checks made payable to a real estate company.  The customer may be accompanied by a real estate agent at the time of purchasing the cashier’s checks.",
+   "red_flag": "Unexplained-wealth customer funds real-estate purchase via wire / cashier's checks to realty company",
+   "src_line": 472,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C27",
+   "data_source": "D18",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D18 (Real-estate / property & valuation data), not currently held → source data first."
+  },
+  {
+   "id": "IND-06",
+   "section": "CMLN-Affiliated Money Mules",
+   "flag": "A customer, especially a Chinese national, regularly deposits large volumes of cash or cashier’s checks, or receives multiple wire, ACH, or P2P transfers for no business or apparent lawful purpose.  The customer then subsequently uses the funds to purchase a cashier’s check or disperses the funds to other individuals using P2P and wire transfers, often to other high-risk jurisdictions.",
+   "red_flag": "Cash / multi-channel inflow → disperse via cashier's check, P2P, wire to high-risk corridors (mule pass-through)",
+   "src_line": 477,
+   "status": "covered",
+   "data": "available",
+   "capability": "C2",
+   "data_source": "D3",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C2 (Rapid pass-through / flow-through (receive-and-forward) detection)."
+  },
+  {
+   "id": "IND-07",
+   "section": "CMLN-Affiliated Money Mules",
+   "flag": "A customer’s account, especially a Chinese national, receives numerous transfers or deposits, and has a significant number of withdrawals or transfers, none of which appear to be related to routine payroll, living expenses, or customer’s stated expected activity.",
+   "red_flag": "High in/out transfer churn unrelated to stated expected activity (flow-through)",
+   "src_line": 483,
+   "status": "covered",
+   "data": "available",
+   "capability": "C2",
+   "data_source": "D1",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C2 (Rapid pass-through / flow-through (receive-and-forward) detection)."
+  },
+  {
+   "id": "IND-08",
+   "section": "CMLN-Affiliated Money Mules",
+   "flag": "A customer, especially a Chinese national, has large amounts of cash funding cashier’s checks, which are then deposited at another financial institution.",
+   "red_flag": "Cash-funded cashier's checks redeposited at a second institution (cash placement layering)",
+   "src_line": 487,
+   "status": "partial",
+   "data": "available",
+   "capability": "C5",
+   "data_source": "D2",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C5 (Cash-intensity / cash-placement anomaly detection); data D2."
+  },
+  {
+   "id": "IND-09",
+   "section": "CMLN-Affiliated Money Mules",
+   "flag": "A customer, especially a Chinese national, is reluctant or refuses to provide information regarding the source of funds deposited or transferred into their account or acts evasive when questioned about the purpose of a transaction or may explain it as repayment of a loan.",
+   "red_flag": "Customer evasive on source-of-funds / \"loan repayment\" cover story (KYC non-cooperation)",
+   "src_line": 490,
+   "status": "gap",
+   "data": "available",
+   "capability": "C14",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-KYC-INTEGRITY-SCREEN",
+    "class": "entity Â· account-level Â· event+windowed",
+    "features": [
+     "edd_document_overdue_flag",
+     "information_request_refusal_count",
+     "kyc_field_inconsistency_score",
+     "evasive_response_indicator",
+     "beneficial_owner_disclosure_gap",
+     "periodic_review_failure_flag"
+    ],
+    "logic": "Flag a customer whose KYC record shows integrity gaps or non-cooperation â overdue EDD documents, refused or evasive responses to information requests, or unresolved inconsistencies â escalating when cooperation failures persist past defined deadlines.",
+    "window": "event-driven, with rolling 60-day cooperation window",
+    "source": "case-management / KYC remediation system + customer correspondence log",
+    "route": "Tier-1 alert â AML analyst review & EDD gate"
+   }
+  },
+  {
+   "id": "IND-10",
+   "section": "CMLN-Affiliated Money Mules",
+   "flag": "A customer that is a U.S.-based escrow company receives funds from an unaffiliated, foreign-based shell company or entity in a disparate line of business that are used to purchase real estate in the United States.",
+   "red_flag": "Escrow account funded by unaffiliated foreign shell in disparate line of business → US real estate",
+   "src_line": 499,
+   "status": "gap",
+   "data": "available",
+   "capability": "C15",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-SHELL-NOMINEE-NETWORK",
+    "class": "network Â· ownership-graph Â· windowed",
+    "features": [
+     "shared_address_director_overlap",
+     "ubo_opacity_score",
+     "incorporation_recency_flag",
+     "no_observable_operations_flag",
+     "circular_ownership_indicator",
+     "nominee_director_reuse_count"
+    ],
+    "logic": "Flag an entity exhibiting shell or front-company markers â opaque or circular beneficial ownership, shared registered addresses or directors, recent incorporation with no observable operations â escalating when nominees or addresses recur across a cluster of related entities.",
+    "window": "rolling 90 days over the ownership/address graph",
+    "source": "corporate registry + KYC beneficial-ownership records + entity-resolution graph",
+    "route": "Tier-2 network alert â AML investigations gate"
+   }
+  },
+  {
+   "id": "IND-11",
+   "section": "CMLN-Affiliated TBML Schemes",
+   "flag": "A business45 owned by a Chinese national regularly receives deposits from online marketplaces, but rarely, or never, engages in transactions that indicate the purchase of goods to maintain inventory.",
+   "red_flag": "Online-marketplace revenue with no inventory-purchase activity (revenue-vs-operations anomaly)",
+   "src_line": 505,
+   "status": "gap",
+   "data": "available",
+   "capability": "C7",
+   "data_source": "D1",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D1 (Core transaction monitoring (deposit/account ledger)), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-REVENUE-OPERATIONS-MISMATCH",
+    "class": "entity Â· business-account Â· windowed",
+    "features": [
+     "inflow_vs_declared_revenue_ratio",
+     "inflow_per_employee",
+     "payroll_to_revenue_ratio",
+     "operating_expense_share",
+     "industry_peer_revenue_zscore",
+     "transaction_volume_vs_footprint"
+    ],
+    "logic": "Flag a business account whose transaction inflows are disproportionate to its declared revenue, headcount, payroll, or operating-expense footprint relative to industry peers, escalating when revenue appears decoupled from any observable operational activity.",
+    "window": "rolling 90 days vs declared profile and peer cohort",
+    "source": "business deposit ledger joined to KYC business profile + industry peer benchmarks",
+    "route": "Tier-2 alert â AML analyst review gate"
+   }
+  },
+  {
+   "id": "IND-12",
+   "section": "CMLN-Affiliated TBML Schemes",
+   "flag": "A business owned by a Chinese national regularly receives wire transfers indicating the export of goods to foreign countries including Mexico, China, Hong Kong, and the United Arab Emirates, but rarely, or never, engages in transactions that indicate the purchase of goods to maintain inventory.",
+   "red_flag": "Export-receipt wires without matching inventory procurement (TBML documentary mismatch)",
+   "src_line": 509,
+   "status": "partial",
+   "data": "partial",
+   "capability": "C22",
+   "data_source": "D15",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C22 (Trade-based money-laundering & documentary anomaly detection); data D15."
+  },
+  {
+   "id": "IND-13",
+   "section": "CMLN-Affiliated TBML Schemes",
+   "flag": "A small U.S.-based business in the electronics or real estate industry receives wires from Mexico, China, Hong Kong, and the United Arab Emirates and has no known nexus to these countries.",
+   "red_flag": "Small business receives wires from high-risk corridors with no business nexus",
+   "src_line": 514,
+   "status": "covered",
+   "data": "available",
+   "capability": "C20",
+   "data_source": "D17",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C20 (Cross-border / high-risk-jurisdiction & corridor anomaly detection)."
+  },
+  {
+   "id": "IND-14",
+   "section": "CMLN-Affiliated TBML Schemes",
+   "flag": "A customer, especially a Chinese national, regularly receives P2P or wire transfers from unknown individuals and subsequently uses those funds to make a substantial credit card payment.  If questioned about the source of the funds, the customer may state that the transfers are from U.S.-based family members of Chinese citizens who are sending the customer funds to purchase goods.",
+   "red_flag": "Inbound P2P/wire from unknown parties → large credit-card paydown (third-party card-payment funnel)",
+   "src_line": 518,
+   "status": "covered",
+   "data": "available",
+   "capability": "C3",
+   "data_source": "D3",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C3 (Multi-originator funnel-in / fan-out network detection)."
+  },
+  {
+   "id": "IND-15",
+   "section": "CMLN-Affiliated TBML Schemes",
+   "flag": "A customer, especially a Chinese national, regularly uses a credit card to purchase large volumes of electronics or other luxury goods.",
+   "red_flag": "High-volume card spend on electronics / luxury goods (trade-good acquisition spend)",
+   "src_line": 524,
+   "status": "gap",
+   "data": "available",
+   "capability": "C9",
+   "data_source": "D4",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D4 (Card & merchant-category (MCC) transaction data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-MCC-SPEND-PATTERN",
+    "class": "entity Â· card/account-level Â· windowed",
+    "features": [
+     "high_risk_mcc_share",
+     "mcc_mix_drift",
+     "atypical_mcc_for_segment_flag",
+     "round_dollar_spend_ratio",
+     "prepaid_giftcard_spend_share",
+     "mcc_value_concentration"
+    ],
+    "logic": "Flag a card or account whose merchant-category spend distribution shifts toward high-risk or atypical MCCs for the customer's segment, escalating when spend concentrates in cash-equivalent categories such as gift cards, prepaid, or money-services merchants.",
+    "window": "rolling 60 days vs segment MCC baseline",
+    "source": "card authorization/settlement feed enriched with MCC reference",
+    "route": "Tier-1 alert â AML analyst review gate"
+   }
+  },
+  {
+   "id": "IND-16",
+   "section": "CMLN-Affiliated TBML Schemes",
+   "flag": "A business that sells electronics or other luxury goods has income that is not commensurate with the size and scale of the business.",
+   "red_flag": "Electronics/luxury-goods merchant revenue out of scale with business size (peer-revenue anomaly)",
+   "src_line": 527,
+   "status": "gap",
+   "data": "available",
+   "capability": "C7",
+   "data_source": "D1",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D1 (Core transaction monitoring (deposit/account ledger)), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-REVENUE-OPERATIONS-MISMATCH",
+    "class": "entity Â· business-account Â· windowed",
+    "features": [
+     "inflow_vs_declared_revenue_ratio",
+     "inflow_per_employee",
+     "payroll_to_revenue_ratio",
+     "operating_expense_share",
+     "industry_peer_revenue_zscore",
+     "transaction_volume_vs_footprint"
+    ],
+    "logic": "Flag a business account whose transaction inflows are disproportionate to its declared revenue, headcount, payroll, or operating-expense footprint relative to industry peers, escalating when revenue appears decoupled from any observable operational activity.",
+    "window": "rolling 90 days vs declared profile and peer cohort",
+    "source": "business deposit ledger joined to KYC business profile + industry peer benchmarks",
+    "route": "Tier-2 alert â AML analyst review gate"
+   }
+  },
+  {
+   "id": "IND-17",
+   "section": "CMLN-Affiliated TBML Schemes",
+   "flag": "A business that sells electronics or other luxury goods makes payments for multiple credit cards associated with various individuals, who are seemingly unrelated to the business.",
+   "red_flag": "Merchant pays down multiple unrelated individuals' credit cards (third-party card-payment fan-out)",
+   "src_line": 530,
+   "status": "covered",
+   "data": "available",
+   "capability": "C3",
+   "data_source": "D4",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C3 (Multi-originator funnel-in / fan-out network detection)."
+  },
+  {
+   "id": "IND-18",
+   "section": "CMLN-Affiliated TBML Schemes",
+   "flag": "Hong Kong registered trading companies with shell-like characteristics send funds to Chinese nationals residing in the United States, real estate escrow or title insurance companies, and other international destinations with no apparent business or economic purpose.",
+   "red_flag": "Shell-like HK trading companies remit to US nationals / escrow / title firms with no economic purpose",
+   "src_line": 533,
+   "status": "gap",
+   "data": "available",
+   "capability": "C15",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-SHELL-NOMINEE-NETWORK",
+    "class": "network Â· ownership-graph Â· windowed",
+    "features": [
+     "shared_address_director_overlap",
+     "ubo_opacity_score",
+     "incorporation_recency_flag",
+     "no_observable_operations_flag",
+     "circular_ownership_indicator",
+     "nominee_director_reuse_count"
+    ],
+    "logic": "Flag an entity exhibiting shell or front-company markers â opaque or circular beneficial ownership, shared registered addresses or directors, recent incorporation with no observable operations â escalating when nominees or addresses recur across a cluster of related entities.",
+    "window": "rolling 90 days over the ownership/address graph",
+    "source": "corporate registry + KYC beneficial-ownership records + entity-resolution graph",
+    "route": "Tier-2 network alert â AML investigations gate"
+   }
+  }
+ ]
 }

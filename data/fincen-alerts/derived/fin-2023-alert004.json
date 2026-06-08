@@ -1,150 +1,220 @@
 {
-  "id": "fin-2023-alert004",
-  "advisory": "FIN-2023-ALERT004",
-  "source_md": "data/fincen-alerts/fin-2023-alert004.md",
-  "extraction_quality": "clean",
-  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
-  "indicators": [
-    {
-      "id": "IND-01",
-      "section": "redflag",
-      "flag": "Transactions\trelated\tto\tpayments\tfor\tdefense\tor\tdual-use\tproducts\tfrom\ta\tcompany\nincorporated\tafter\tFebruary\t24,\t2022,\tand\tbased\tin\ta\tnon-GECC\tcountry.",
-      "red_flag": "Defense / dual-use payment from a post-cutoff-incorporated non-GECC company",
-      "src_line": 452,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "The bank sees the payment and counterparty country, but tying a payment to defense/dual-use goods and confirming the counterparty's incorporation date needs trade-document and external registry enrichment."
-    },
-    {
-      "id": "IND-02",
-      "section": "redflag",
-      "flag": "A\tnew\tcustomer\twhose\tline\tof\tbusiness\tis\tin\ttrade\tof\tproducts\tassociated\twith\tthe\tnine\tHS\ncodes,\tis\tbased\tin\ta\tnon-GECC\tcountry,\tand\twas\tincorporated\tafter\tFebruary\t24,\t2022.",
-      "red_flag": "New nine-HS-code trader, non-GECC, incorporated post-cutoff",
-      "src_line": 455,
-      "status": "gap",
-      "data": "insufficient",
-      "build_rec": "SOURCE_DATA",
-      "rationale": "Resolving a new customer's HS-code product line and post-Feb-2022 incorporation depends on external corporate-registry and goods-classification data the bank does not hold at onboarding."
-    },
-    {
-      "id": "IND-03",
-      "section": "redflag",
-      "flag": "An\texisting\tcustomer\twho\tdid\tnot\treceive\texports\tassociated\twith\tthe\tnine\tHS\tcodes\tprior\tto\nFebruary\t24,\t2022,\tbut\twho\tis\treceiving\tsuch\titems\tnow.",
-      "red_flag": "First-appearance receipt of nine-HS-code exports after Feb-2022 cutoff",
-      "src_line": 458,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "The bank holds the customer's full trade-payment history, so a first-appearance of nine-HS-code activity after a fixed cutoff date is directly computable from internal data.",
-      "build_logic": {
-        "signal_name": "S-HS-CODE-FIRST-APPEARANCE",
-        "class": "entity · account-level · windowed",
-        "features": [
-          "hs_code_set_pre_cutoff",
-          "hs_code_set_current_window",
-          "first_appearance_flag",
-          "trade_payment_count_current"
-        ],
-        "logic": "For each customer, compute the set of the nine high-priority HS codes seen in trade payments before 2022-02-24; flag when one or more of those HS codes appears in the current window with no pre-cutoff history.",
-        "window": "rolling 30 days",
-        "source": "trade-finance payment records + commercial-invoice HS-code tags",
-        "route": "Tier-1 alert → trade-finance compliance review gate"
-      }
-    },
-    {
-      "id": "IND-04",
-      "section": "redflag",
-      "flag": "An\texisting\tcustomer,\tbased\toutside\tthe\tUnited\tStates,\treceived\texports\tassociated\twith\tone\tor\nmore\tof\tthe\tnine\tHS\tcodes\tprior\tto\tFebruary\t24,\t2022,\tand\trequested\tor\treceived\ta\tsignificant\nincrease\tin\texports\twith\tthose\tsame\tcodes\tthereafter.",
-      "red_flag": "Post-cutoff nine-HS-code export volume spike off own baseline",
-      "src_line": 461,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "A post-cutoff volume spike against a customer's own pre-cutoff baseline for the same HS codes is a windowed comparison fully derivable from internal trade-payment history.",
-      "build_logic": {
-        "signal_name": "S-HS-CODE-VOLUME-SPIKE",
-        "class": "entity · account-level · windowed",
-        "features": [
-          "hs_code_volume_pre_cutoff_baseline",
-          "hs_code_volume_current_window",
-          "volume_ratio_to_baseline",
-          "customer_country_non_us"
-        ],
-        "logic": "For non-US customers with pre-2022-02-24 activity in any of the nine HS codes, compute the ratio of current-window export volume to the pre-cutoff baseline for those same codes; flag when the ratio exceeds a configurable spike threshold.",
-        "window": "rolling 30 days",
-        "source": "trade-finance payment records with HS-code tags + customer domicile from KYC",
-        "route": "Tier-1 alert → trade-finance compliance review gate"
-      }
-    },
-    {
-      "id": "IND-05",
-      "section": "redflag",
-      "flag": "A\tcustomer\tlacks\tor\trefuses\tto\tprovide\tdetails\tto\tbanks,\tshippers,\tor\tthird\tparties,\tincluding\nabout\tend\tusers,\tintended\tend-use,\tor\tcompany\townership.",
-      "red_flag": "Withheld end-user, end-use, or ownership details",
-      "src_line": 465,
-      "status": "partial",
-      "data": "partial",
-      "build_rec": "ENHANCE",
-      "rationale": "Refusal-to-provide is partly captured in KYC/EDD case notes but end-user and ownership gaps need document-request workflow and external attribution to fully assess."
-    },
-    {
-      "id": "IND-06",
-      "section": "redflag",
-      "flag": "Transactions\tinvolving\tsmaller-volume\tpayments\tfrom\tthe\tsame\tend\tuser’s\tforeign\tbank\naccount\tto\tmultiple,\tsimilar\tsuppliers\tof\tdual-use\tproducts.",
-      "red_flag": "Small-payment fan-out to multiple similar dual-use suppliers",
-      "src_line": 468,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "Fan-out of small payments from one foreign account to many similar suppliers is a structuring-style graph pattern computable from wire and payment data the bank already processes.",
-      "build_logic": {
-        "signal_name": "S-SUPPLIER-FANOUT-SMURFING",
-        "class": "entity · account-level · windowed",
-        "features": [
-          "source_account_id",
-          "distinct_supplier_count",
-          "mean_payment_amount",
-          "supplier_business_similarity_score"
-        ],
-        "logic": "Aggregate outbound payments by source foreign bank account over the window; flag accounts dispersing below-threshold payments to a count of distinct, business-similar suppliers above a configurable fan-out threshold.",
-        "window": "rolling 30 days",
-        "source": "wire and correspondent-banking payment records + supplier MCC/line-of-business tags",
-        "route": "Tier-1 alert → AML transaction-monitoring review gate"
-      }
-    },
-    {
-      "id": "IND-07",
-      "section": "redflag",
-      "flag": "Parties\tto\ttransactions\tlisted\tas\tultimate\tconsignees\tor\tlisted\tin\tthe\t“consign\tto”\tfield\tdo\tnot\ntypically\tengage\tin\tbusiness\tconsistent\twith\tconsuming\tor\totherwise\tusing\tcommodities",
-      "red_flag": "Consignee inconsistent with goods consumption (FI / mail / logistics)",
-      "src_line": 471,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "The consignee fields live on trade documents the bank handles but classifying whether the consignee's business is consistent with consuming the goods needs document parsing and entity-type enrichment."
-    },
-    {
-      "id": "IND-08",
-      "section": "redflag",
-      "flag": "The\tcustomer\tis\tsignificantly\toverpaying\tfor\ta\tcommodity\tbased\ton\tknown\tmarket\tprices.",
-      "red_flag": "Commodity overpayment versus market price",
-      "src_line": 475,
-      "status": "gap",
-      "data": "partial",
-      "build_rec": "BUILD_ENRICH",
-      "rationale": "The invoiced price is in the trade-payment record, but detecting significant overpayment requires an external market-price reference for the commodity to benchmark against."
-    },
-    {
-      "id": "IND-09",
-      "section": "redflag",
-      "flag": "The\tcustomer\tor\tits\taddress\tis\tsimilar\tto\tone\tof\tthe\tparties\ton\ta\tproscribed\tparties\tlist,\tsuch\tas\tthe\nBIS\tEntity\tList,\tthe\tSDN\tList,\tor\tthe\tU.S.\tDepartment\tof\tState’s\tStatutorily\tDebarred\tParties\tList.33",
-      "red_flag": "Customer / address near-match to BIS Entity, SDN, or debarred-parties list",
-      "src_line": 477,
-      "status": "covered",
-      "data": "available",
-      "build_rec": "COVERED",
-      "rationale": "Name and address fuzzy-matching against the SDN, BIS Entity, and debarred-parties lists is standard sanctions-screening that a mid-size US bank already runs at onboarding and on transactions."
-    }
-  ]
+ "id": "fin-2023-alert004",
+ "advisory": "FIN-2023-ALERT004",
+ "source_md": "data/fincen-alerts/fin-2023-alert004.md",
+ "extraction_quality": "clean",
+ "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+ "indicators": [
+  {
+   "id": "IND-01",
+   "section": "BIS diversion-concern fact patterns (non-GECC importers)",
+   "flag": "The company never received exports prior to February 24, 2022;",
+   "red_flag": "Non-GECC importer with no pre-Feb-2022 export history newly receiving controlled goods",
+   "src_line": 397,
+   "status": "gap",
+   "data": "partial",
+   "capability": "C24",
+   "data_source": "D15",
+   "build_rec": "BUILD_ENRICH",
+   "rationale": "Gap; requires D15 (Trade-finance / customs / shipping & logistics data), not currently held → source data first."
+  },
+  {
+   "id": "IND-02",
+   "section": "BIS diversion-concern fact patterns (non-GECC importers)",
+   "flag": "The company received exports that did not include any of the nine HS Codes prior to February 24, 2022;",
+   "red_flag": "Importer with no prior nine-HS-code history now receiving High-Priority-Items-List goods",
+   "src_line": 398,
+   "status": "gap",
+   "data": "partial",
+   "capability": "C24",
+   "data_source": "D15",
+   "build_rec": "BUILD_ENRICH",
+   "rationale": "Gap; requires D15 (Trade-finance / customs / shipping & logistics data), not currently held → source data first."
+  },
+  {
+   "id": "IND-03",
+   "section": "BIS diversion-concern fact patterns (non-GECC importers)",
+   "flag": "The company received exports involving the nine HS Codes prior to February 24, 2022, but also saw a significant spike in exports thereafter.",
+   "red_flag": "Post-invasion spike in nine-HS-code export volume vs baseline",
+   "src_line": 402,
+   "status": "gap",
+   "data": "partial",
+   "capability": "C24",
+   "data_source": "D15",
+   "build_rec": "BUILD_ENRICH",
+   "rationale": "Gap; requires D15 (Trade-finance / customs / shipping & logistics data), not currently held → source data first."
+  },
+  {
+   "id": "IND-04",
+   "section": "New-customer trade due diligence",
+   "flag": "Evaluating the customer’s date of incorporation (e.g., incorporation after February 24, 2022),",
+   "red_flag": "Newly-incorporated (post-Feb-2022) trade counterparty at onboarding",
+   "src_line": 411,
+   "status": "covered",
+   "data": "available",
+   "capability": "C13",
+   "data_source": "D8",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C13 (Account-opening / KYC risk profiling)."
+  },
+  {
+   "id": "IND-05",
+   "section": "New-customer trade due diligence",
+   "flag": "Evaluating the end user and end use of the item (e.g., whether the customer’s line of business is consistent with the ordered items),",
+   "red_flag": "End-use / line-of-business inconsistent with ordered dual-use items",
+   "src_line": 412,
+   "status": "partial",
+   "data": "partial",
+   "capability": "C22",
+   "data_source": "D15",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C22 (Trade-based money-laundering & documentary anomaly detection); data D15."
+  },
+  {
+   "id": "IND-06",
+   "section": "New-customer trade due diligence",
+   "flag": "Evaluating whether the customer’s physical location and public-facing website raise any red flags (e.g., business address is a residence, no website is available).",
+   "red_flag": "Residential business address / no web presence on trade counterparty (OSINT)",
+   "src_line": 416,
+   "status": "partial",
+   "data": "available",
+   "capability": "C19",
+   "data_source": "D13",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C19 (Adverse-media / OSINT & web-presence verification); data D13."
+  },
+  {
+   "id": "IND-07",
+   "section": "New Transactional and Behavioral Red Flags",
+   "flag": "Transactions related to payments for defense or dual-use products from a company incorporated after February 24, 2022, and based in a non-GECC country.",
+   "red_flag": "Dual-use-goods payment from post-Feb-2022 non-GECC newco",
+   "src_line": 452,
+   "status": "covered",
+   "data": "available",
+   "capability": "C20",
+   "data_source": "D3",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C20 (Cross-border / high-risk-jurisdiction & corridor anomaly detection)."
+  },
+  {
+   "id": "IND-08",
+   "section": "New Transactional and Behavioral Red Flags",
+   "flag": "A new customer whose line of business is in trade of products associated with the nine HS codes, is based in a non-GECC country, and was incorporated after February 24, 2022.",
+   "red_flag": "New non-GECC newco trading the nine controlled HS-code commodities",
+   "src_line": 455,
+   "status": "covered",
+   "data": "available",
+   "capability": "C13",
+   "data_source": "D8",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C13 (Account-opening / KYC risk profiling)."
+  },
+  {
+   "id": "IND-09",
+   "section": "New Transactional and Behavioral Red Flags",
+   "flag": "An existing customer who did not receive exports associated with the nine HS codes prior to February 24, 2022, but who is receiving such items now.",
+   "red_flag": "Existing customer newly receiving nine-HS-code goods vs no prior history (out-of-pattern)",
+   "src_line": 458,
+   "status": "partial",
+   "data": "partial",
+   "capability": "C1",
+   "data_source": "D15",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C1 (Customer-profile / out-of-pattern transaction monitoring); data D15."
+  },
+  {
+   "id": "IND-10",
+   "section": "New Transactional and Behavioral Red Flags",
+   "flag": "An existing customer, based outside the United States, received exports associated with one or more of the nine HS codes prior to February 24, 2022, and requested or received a significant increase in exports with those same codes thereafter.",
+   "red_flag": "Foreign existing customer spikes nine-HS-code export volume post-invasion vs baseline",
+   "src_line": 461,
+   "status": "covered",
+   "data": "partial",
+   "capability": "C6",
+   "data_source": "D15",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C6 (Transaction-velocity & dormancy / baseline-deviation monitoring)."
+  },
+  {
+   "id": "IND-11",
+   "section": "New Transactional and Behavioral Red Flags",
+   "flag": "A customer lacks or refuses to provide details to banks, shippers, or third parties, including about end users, intended end-use, or company ownership.",
+   "red_flag": "Customer refuses end-user / end-use / ownership disclosure (KYC non-cooperation)",
+   "src_line": 465,
+   "status": "gap",
+   "data": "available",
+   "capability": "C14",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-KYC-INTEGRITY-SCREEN",
+    "class": "entity Â· account-level Â· event+windowed",
+    "features": [
+     "edd_document_overdue_flag",
+     "information_request_refusal_count",
+     "kyc_field_inconsistency_score",
+     "evasive_response_indicator",
+     "beneficial_owner_disclosure_gap",
+     "periodic_review_failure_flag"
+    ],
+    "logic": "Flag a customer whose KYC record shows integrity gaps or non-cooperation â overdue EDD documents, refused or evasive responses to information requests, or unresolved inconsistencies â escalating when cooperation failures persist past defined deadlines.",
+    "window": "event-driven, with rolling 60-day cooperation window",
+    "source": "case-management / KYC remediation system + customer correspondence log",
+    "route": "Tier-1 alert â AML analyst review & EDD gate"
+   }
+  },
+  {
+   "id": "IND-12",
+   "section": "New Transactional and Behavioral Red Flags",
+   "flag": "Transactions involving smaller-volume payments from the same end user’s foreign bank account to multiple, similar suppliers of dual-use products.",
+   "red_flag": "One foreign end-user fanning small payments out to multiple similar dual-use suppliers",
+   "src_line": 468,
+   "status": "covered",
+   "data": "available",
+   "capability": "C3",
+   "data_source": "D3",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C3 (Multi-originator funnel-in / fan-out network detection)."
+  },
+  {
+   "id": "IND-13",
+   "section": "New Transactional and Behavioral Red Flags",
+   "flag": "Parties to transactions listed as ultimate consignees or listed in the “consign to” field do not typically engage in business consistent with consuming or otherwise using commodities (e.g., other financial institutions, mail centers, or logistics companies).",
+   "red_flag": "Ultimate consignee is a pass-through (FI / mail-center / logistics), not an end-user",
+   "src_line": 471,
+   "status": "partial",
+   "data": "partial",
+   "capability": "C22",
+   "data_source": "D15",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C22 (Trade-based money-laundering & documentary anomaly detection); data D15."
+  },
+  {
+   "id": "IND-14",
+   "section": "New Transactional and Behavioral Red Flags",
+   "flag": "The customer is significantly overpaying for a commodity based on known market prices.",
+   "red_flag": "Commodity over-pricing vs known market value (TBML over-invoicing)",
+   "src_line": 475,
+   "status": "partial",
+   "data": "partial",
+   "capability": "C22",
+   "data_source": "D15",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C22 (Trade-based money-laundering & documentary anomaly detection); data D15."
+  },
+  {
+   "id": "IND-15",
+   "section": "New Transactional and Behavioral Red Flags",
+   "flag": "The customer or its address is similar to one of the parties on a proscribed parties list, such as the BIS Entity List, the SDN List, or the U.S. Department of State’s Statutorily Debarred Parties List.",
+   "red_flag": "Customer / address near-match to BIS Entity / SDN / Debarred-Parties list (watchlist screening)",
+   "src_line": 477,
+   "status": "covered",
+   "data": "available",
+   "capability": "C18",
+   "data_source": "D11",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C18 (Sanctions / watchlist screening)."
+  }
+ ]
 }

@@ -11,13 +11,16 @@
 // beside it)
 // + the multi-source menu (Phase 20 FinCEN advisories + alerts, Phase 21 OFAC, Phase 22 FINTRAC — 4
 // source types, honest doc_type chips; an alert, an OFAC advisory, AND a FINTRAC operational alert each
-// walk the full arc; the FINTRAC source panel carries the Crown-copyright basis, not US public domain)
+// walk the full arc; Phase 28 — the FINTRAC source panel no longer renders the Crown-copyright clause
+// (the user's compliance call); it never claims US public domain either)
 // + the cross-corpus SYNTHESIS view (Phase 24: group by typology, combined coverage across a
 // cross-jurisdiction cluster as honest union arithmetic — no similarity/overlap/lift — with drill-through)
 // + the Phase-26 register beats: the story LANDING (entry before Select), Select grouped by source /
 // newest-first, red-flag section sub-grouping on Coverage, the Act-4 build-log (real build_logic) + the
 // Act-5 combination-lift (a GENERIC illustrative template, loudly badged "pending calibration" — never
 // per-doc fabricated). Boot auto-enters Select (the landing is the new entry); raw=true stays on the cover.
+// + the Phase-28 FULL-MOTION streaming read: the source STREAMS in (caret + scroll-follow), each red-flag
+// phrase highlights only as the read reaches it, every translation extracts, then settles (caret removed).
 //
 // Why a vm + shim instead of a third-party DOM library: the ship artifact is a single file:// offline
 // HTML; the project's whole test idiom is dep-free (derive_signals.py --selftest, build.py --check).
@@ -101,8 +104,14 @@ function makeEnv(reduced) {
   let dynCache = {};                                          // dynamic getElementById results, reset on stage repaint
 
   function dynEl() {
-    return { _html: '', style: {}, textContent: '',
-      get innerHTML() { return this._html; }, set innerHTML(v) { this._html = String(v); } };
+    const set = new Set();
+    // Phase 28: #doc/#xlate need append + classList + scroll props so the FULL-MOTION streaming read
+    // (renderArticle) can run under the shim (the reduced-motion path never touches these). scrollHeight=0
+    // keeps the `if(scrollHeight)` scroll-follow a no-op (no layout in the shim).
+    return { _html: '', style: {}, textContent: '', scrollTop: 0, scrollHeight: 0,
+      get innerHTML() { return this._html; }, set innerHTML(v) { this._html = String(v); },
+      insertAdjacentHTML(_pos, h) { this._html += String(h); },
+      classList: { add: (...c) => c.forEach(x => set.add(x)), remove: (...c) => c.forEach(x => set.delete(x)), contains: c => set.has(c) } };
   }
   function chromeEl(id) {
     const lastQS = {};
@@ -119,7 +128,7 @@ function makeEnv(reduced) {
 
   const stage = chromeEl('stage'), stepper = chromeEl('stepper');
   const chrome = { stage, stepper, next: chromeEl('next'), back: chromeEl('back'),
-    reset: chromeEl('reset'), hint: chromeEl('hint') };
+    reset: chromeEl('reset'), hint: chromeEl('hint'), attribution: chromeEl('attribution') };
 
   const document = {
     getElementById(id) {
@@ -147,6 +156,7 @@ function makeEnv(reduced) {
     __errors: errors,
     __stage: stage,
     __flush: () => { const q = timers.splice(0); q.forEach(fn => fn()); },
+    __drain: (max = 20000) => { let i = 0; while (timers.length && i++ < max) { const q = timers.splice(0); q.forEach(fn => fn()); } },
   };
   return env;
 }
@@ -234,7 +244,7 @@ eq(api.screen, 0, 'pick() starts on Read advisory (screen 0)');
 ok(/· Read the source/.test(env.__stage._html) && /Extract → translate/.test(env.__stage._html),
   'Article screen renders (extract → translate)');
 ok(/class="doc"/.test(env.__stage._html), 'Article renders the full source-document panel');
-ok(/class="hl"/.test(env.__stage._html), 'at least one verbatim red-flag phrase is highlighted in the source');
+ok(/class="hl on"/.test(env.__stage._html), 'at least one verbatim red-flag phrase is highlighted in the source');
 const xrows = (env.__stage._html.match(/class="xrow"/g) || []).length;
 eq(xrows, adv.indicators.length, 'one extract→translate row per indicator');
 ok(adv.indicators.every(i => typeof i.red_flag === 'string' && i.red_flag.trim()),
@@ -360,9 +370,9 @@ eq(numText(envO, 'gnum'), afterO, 'ofac: close gauge lands on the recomputed aft
 ok(envO.__errors.length === 0, 'ofac: full 6-screen arc walked with no console errors');
 
 // ---- a FINTRAC operational alert walks the full 5-screen arc (Phase 22 — 4th source / FIRST
-//      cross-jurisdiction proof) + the source attribution is the FINTRAC Crown-copyright basis,
-//      NOT the US "public domain" string (compliance: FINTRAC is reproduced under a non-commercial
-//      licence, distinct from the US-federal 17 U.S.C. 105 sources). ----
+//      cross-jurisdiction proof). Phase 28 (user's compliance call): the FINTRAC Crown-copyright
+//      reproduction clause is REMOVED from the per-doc Source line — it now shows ONLY the document
+//      title, and still NEVER the US "public domain" string. ----
 const envF = boot(true);
 const apiF = envF.__api;
 const fintrac = apiF.ADVISORIES.filter(a => a.doc_type === 'FINTRAC' && apiF.isLive(a))
@@ -370,12 +380,15 @@ const fintrac = apiF.ADVISORIES.filter(a => a.doc_type === 'FINTRAC' && apiF.isL
 ok(fintrac, `found a live FINTRAC operational alert with a buildable BUILD_NOW gap (${fintrac && fintrac.id})`);
 apiF.pick(fintrac.id);
 eq(apiF.view, 'detail', 'fintrac: pick() enters detail view (Read advisory)');
-// srcCap renders on every detail screen (incl. Read advisory) — it carries the FINTRAC Crown-copyright
-// attribution and NEVER the US public-domain line (the footer's mixed-basis note is outside #stage).
-ok(/His Majesty the King in Right of Canada/.test(envF.__stage._html),
-  'fintrac: source panel renders the FINTRAC Crown-copyright attribution (© His Majesty…)');
+// Phase 28 (user's compliance call): the on-screen Source LABEL carries the title only — no "© His Majesty…"
+// clause inside #stage, and never the US public-domain line. The full Crown-copyright attribution (© + title
+// + source URL) moved to the page FOOTER (#attribution), shown only for the FINTRAC doc being reproduced.
+ok(!/His Majesty the King in Right of Canada/.test(envF.__stage._html),
+  'fintrac: the on-screen Source label carries no © attribution (it moved to the page footer)');
 ok(!/public domain/i.test(envF.__stage._html),
   'fintrac: the FINTRAC source panel does NOT claim US public domain');
+ok(/His Majesty the King in Right of Canada/.test(envF.document.getElementById('attribution').innerHTML),
+  'fintrac: the page footer carries the full Crown-copyright attribution for the doc on screen');
 apiF.gotoScreen(1);
 const covF = apiF.coverageIndex(fintrac.indicators);
 eq(numText(envF, 'gnum'), covF, 'fintrac: Coverage gauge lands on coverageIndex(indicators)');
@@ -407,9 +420,27 @@ ok(apiB.buildNows(brief).some(i => i.build_logic && typeof i.build_logic === 'ob
   'fintrac-brief: the Brief carries a buildable BUILD_NOW gap (inverted-anchor derivation produced real signals)');
 apiB.pick(brief.id);
 eq(apiB.view, 'detail', 'fintrac-brief: pick() enters detail view (Read advisory)');
-ok(/His Majesty the King in Right of Canada/.test(envB.__stage._html),
-  'fintrac-brief: source panel renders the FINTRAC Crown-copyright attribution');
+ok(!/His Majesty the King in Right of Canada/.test(envB.__stage._html),
+  'fintrac-brief: the on-screen Source label carries no © attribution (it moved to the page footer)');
 ok(!/public domain/i.test(envB.__stage._html), 'fintrac-brief: the source panel does NOT claim US public domain');
+ok(/His Majesty the King in Right of Canada/.test(envB.document.getElementById('attribution').innerHTML),
+  'fintrac-brief: the page footer carries the full Crown-copyright attribution for the doc on screen');
+
+// Phase 28 — the footer licence attribution is PER-DOCUMENT: the full © + complete title + source URL for
+// the FINTRAC doc being reproduced, and EMPTY for US public-domain docs (a static © line would misattribute
+// US federal works to the Canadian Crown — so it must be conditional on the doc on screen).
+const envAt = boot(true);
+const apiAt = envAt.__api;
+const finAt = apiAt.ADVISORIES.find(a => a.doc_type === 'FINTRAC' && apiAt.isLive(a) && a.url && a.title);
+ok(finAt, `found a FINTRAC doc with a title + URL for the footer-attribution check (${finAt && finAt.id})`);
+apiAt.pick(finAt.id);
+const finAttrib = envAt.document.getElementById('attribution').innerHTML;
+ok(finAttrib.includes(finAt.url) && finAttrib.includes(escH(finAt.title)),
+  'footer attribution: the FINTRAC attribution is licence-complete (© clause + complete title + source URL)');
+const usAt = apiAt.ADVISORIES.find(a => a.jurisdiction === 'US' && apiAt.isLive(a));
+apiAt.pick(usAt.id);
+eq(envAt.document.getElementById('attribution').innerHTML, '',
+  'footer attribution: a US public-domain doc shows NO Crown-copyright attribution (the .attrib slot is empty)');
 apiB.gotoScreen(1);
 const covB = apiB.coverageIndex(brief.indicators);
 eq(numText(envB, 'gnum'), covB, 'fintrac-brief: Coverage gauge lands on coverageIndex(indicators)');
@@ -517,9 +548,14 @@ const multi = api26.ADVISORIES.find(a => api26.isLive(a) &&
 ok(multi, `found a multi-section doc for section grouping (${multi && multi.id})`);
 api26.pick(multi.id); api26.gotoScreen(1);
 ok(/class="secthead"/.test(env26.__stage._html), 'Coverage of a multi-section doc renders section sub-headers');
-const efe = api26.ADVISORIES.find(a => a.id === 'fin-2022-a002');     // EFE — a single 'financial' section
-api26.pick(efe.id); api26.gotoScreen(1);
-ok(!/class="secthead"/.test(env26.__stage._html), 'Coverage of a single-section doc (EFE) renders flat — no section noise');
+// a single-section doc renders flat (no sub-headers). The complete re-extraction (Phase 28) gave EFE two
+// sections (Behavioral/Financial Red Flags), so pick a genuinely single-section live doc dynamically.
+const flat = api26.ADVISORIES.find(a => api26.isLive(a) &&
+  (new Set(a.indicators.map(i => i.section || '')).size <= 1 || !a.indicators.every(i => i.section)));
+ok(flat, `found a single-section doc for the flat-render check (${flat && flat.id})`);
+api26.pick(flat.id); api26.gotoScreen(1);
+ok(!/class="secthead"/.test(env26.__stage._html), `Coverage of a single-section doc (${flat && flat.id}) renders flat — no section noise`);
+const efe = api26.ADVISORIES.find(a => a.id === 'fin-2022-a002');     // EFE — for the progressive-render settle check
 
 // (P26-3) progressive article render SETTLES to the final state (reduced motion = the resting paint)
 api26.pick(efe.id);
@@ -579,7 +615,7 @@ api27.pick(dirty27.id);
 const doc27 = (env27.__stage._html.match(/<div class="doc"[^>]*>([\s\S]*?)<\/div>/) || [])[1] || '';
 ok(doc27.length > 100 && !/FINCEN ADVISORY|FINCEN ALERT|F I N C E N/.test(doc27) && !doc27.includes('\t'),
   'T2: cleaned article panel carries no running-header / letter-spaced / tab-soup markitdown artifacts');
-const hl27 = (env27.__stage._html.match(/class="hl"/g) || []).length;
+const hl27 = (env27.__stage._html.match(/class="hl on"/g) || []).length;
 ok(hl27 >= Math.ceil(dirty27.indicators.length * 0.8),
   `T3: normalize-both-sides highlighting lands on ≥80% of grounded flags (${hl27}/${dirty27.indicators.length})`);
 ok(env27.__errors.length === 0, 'T2/T3: cleaned + highlighted article rendered with no console errors');
@@ -600,6 +636,53 @@ ok(/class="liftwrap"/.test(env27.__stage._html) && /class="liftside"/.test(env27
 ok(!/firestat/.test(env27.__stage._html),
   'T4: lift OMITS firestat (no fabricated fire-count / precision stats — only the badged illustrative template)');
 ok(env27.__errors.length === 0, 'T4: Signal build-log + lift rendered with no console errors');
+
+/* ===================== Phase 28 — display polish (de-piped tables) + the streaming read ===================== */
+// markitdown renders figures/tables as markdown PIPE GRIDS (`| --- |` rule rows + `| CELL | CELL |`); the
+// cleaner de-pipes them to readable text (display only — normalize() drops `|`/spaces, so grounding +
+// highlighting are unchanged). The worst offender (fin-2021-a004's ransomware-flow figure) must render no grid.
+const envTbl = boot(true);
+const apiTbl = envTbl.__api;
+const tableDoc = (apiTbl.ADVISORIES.find(a => a.id === 'fin-2021-a004' && apiTbl.isLive(a))
+  || apiTbl.ADVISORIES.filter(apiTbl.isLive).find(a => typeof a.article_text === 'string' && /\n\s*\|.*\|/.test(a.article_text)));
+ok(tableDoc, `found a doc whose markitdown source had pipe-grid tables (${tableDoc && tableDoc.id})`);
+apiTbl.pick(tableDoc.id);
+const docTbl = (envTbl.__stage._html.match(/<div class="doc"[^>]*>([\s\S]*?)<\/div>/) || [])[1] || '';
+ok(docTbl.length > 100 && !/\|[^|\n]*\|[^|\n]*\|/.test(docTbl),
+  'display polish: the source panel carries no markdown pipe-grid rows (de-piped to readable prose)');
+
+/* ===================== Phase 28 — the streaming "agent reading" read (renderArticle redo) ===================== */
+// The reduced-motion settle test (P26-3) only covers the resting paint; the bug it MISSED was that the
+// full-motion read was "staged" (whole text placed at once, ~48s of highlight-popping). This drives the
+// FULL-MOTION path the reduced shim skips: under motion the source STREAMS in (the panel fills, the
+// `reading` caret trails), each red-flag phrase highlights ONLY as the read reaches it, every translation
+// extracts, and it settles to all-highlighted with the caret removed. (dynEl now backs append/classList;
+// __drain runs the whole nested T(read) chain — the shim ignores delays, so this is timeline-agnostic.)
+const env28 = boot(false);
+const api28 = env28.__api;
+const small28 = api28.ADVISORIES.filter(api28.isLive)
+  .find(a => typeof a.article_text === 'string' && a.article_text.length > 0
+    && a.indicators.length >= 3 && a.indicators.length <= 12);
+ok(small28, `found a small live doc for the full-motion streaming read (${small28 && small28.id})`);
+api28.pick(small28.id);
+const doc28 = () => env28.document.getElementById('doc');
+const xlabel28 = () => env28.document.getElementById('xlabel');
+ok(doc28().classList.contains('reading') && doc28()._html === '',
+  'streaming read: the panel starts EMPTY with the reading caret (progressive, not staged)');
+ok(/·\s*0 red flag/.test(xlabel28().textContent),
+  'streaming read: the translate count starts at 0 and counts up — NOT the full count shown up-front (staged tell)');
+env28.__drain();                                                // run the entire T(read) streaming chain
+const streamed28 = doc28()._html;
+const hl28 = (streamed28.match(/class="hl on"/g) || []).length;
+ok(streamed28.length > 200, 'streaming read: the source streamed into the panel (text present after the read)');
+ok(hl28 >= Math.ceil(small28.indicators.length * 0.8),
+  `streaming read: each reached phrase highlighted as the read passed it (${hl28}/${small28.indicators.length})`);
+eq((env28.document.getElementById('xlate')._html.match(/class="xrow"/g) || []).length, small28.indicators.length,
+  'streaming read: every indicator extracted a translation row by the end');
+ok(new RegExp(`· ${small28.indicators.length} red flag`).test(xlabel28().textContent),
+  'streaming read: the translate count finishes at the full count once the read completes');
+ok(!doc28().classList.contains('reading'), 'streaming read: the caret is removed once the read completes (settled)');
+ok(env28.__errors.length === 0, 'streaming read: full-motion streaming produced no console errors');
 
 /* ============================ report ============================ */
 console.log(`\n${pass} passed, ${fails.length} failed`);

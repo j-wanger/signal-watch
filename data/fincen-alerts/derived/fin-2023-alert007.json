@@ -1,177 +1,200 @@
 {
-  "id": "fin-2023-alert007",
-  "advisory": "FIN-2023-ALERT007",
-  "source_md": "data/fincen-alerts/fin-2023-alert007.md",
-  "extraction_quality": "clean",
-  "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
-  "indicators": [
-    {
-      "id": "IND-01",
-      "section": "redflag",
-      "flag": "A business account receives more than one ERC check deposit over multiple days.",
-      "red_flag": "Repeated ERC check deposits to one business account over days",
-      "src_line": 380,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "Repeated Treasury ERC check deposits to one business account over a short window are fully observable in core deposit data but few banks model the ERC-specific multi-deposit pattern.",
-      "build_logic": {
-        "signal_name": "S-ERC-MULTI-DEPOSIT",
-        "class": "entity · account-level · windowed",
-        "features": ["erc_check_deposit_count", "distinct_deposit_days", "treasury_check_form_code", "business_account_flag"],
-        "logic": "Flag a business account with two or more Treasury ERC check deposits (identified by F-941/F-943/F-944/F-7200 form codes) posted across multiple days within the window.",
-        "window": "rolling 30 days",
-        "source": "core deposit ledger + Treasury check metadata (form code / lower-left tax quarter)",
-        "route": "Tier-1 alert → BSA analyst review gate"
-      }
-    },
-    {
-      "id": "IND-02",
-      "section": "redflag",
-      "flag": "Small business accounts receive an ERC check deposit that is not commensurate with the size\nof the business, the number of employees, and the volume of transactions.37",
-      "red_flag": "ERC deposit not commensurate with business size / headcount / activity",
-      "src_line": 382,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "An ERC deposit disproportionate to the account's payroll/employee/transaction footprint is computable from existing account history, but the size-commensurate ratio is rarely operationalized as a signal.",
-      "build_logic": {
-        "signal_name": "S-ERC-SIZE-MISMATCH",
-        "class": "entity · account-level · windowed",
-        "features": ["erc_deposit_amount", "trailing_payroll_volume", "estimated_employee_count", "trailing_transaction_count"],
-        "logic": "Flag when an ERC check deposit amount exceeds a multiple of the account's trailing payroll/transaction volume relative to its estimated headcount, indicating a credit not commensurate with business size.",
-        "window": "rolling 30 days",
-        "source": "core deposit ledger + 12-month account transaction history",
-        "route": "Tier-1 alert → BSA analyst review gate"
-      }
-    },
-    {
-      "id": "IND-03",
-      "section": "redflag",
-      "flag": "A large ERC is deposited into a business account and is subsequently transferred using P2P\nservices or to an online banking institution, or withdrawn as cash at an ATM.  Funds may be\nsubsequently transferred from the account into separate accounts or payments may be made\nto new businesses that a customer has not had transactions with prior to receiving an ERC\ncheck deposit.",
-      "red_flag": "Large ERC deposit disbursed (P2P / online-bank / ATM cash) to new counterparties",
-      "src_line": 385,
-      "status": "partial",
-      "data": "available",
-      "build_rec": "ENHANCE",
-      "rationale": "Banks already run rapid-movement-of-funds detection; the enhancement is anchoring the disbursement window specifically to an ERC check deposit event and the novel-counterparty leg.",
-      "build_logic": null
-    },
-    {
-      "id": "IND-04",
-      "section": "redflag",
-      "flag": "The account receiving an ERC check deposit has no deposits other than Treasury-issued\nchecks, or the account has no regular business transactions.38",
-      "red_flag": "Treasury-check-only funding / no regular business activity",
-      "src_line": 391,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "Whether an account's only inflows are Treasury checks (no genuine business activity) is directly derivable from the deposit ledger yet is not a standard funnel-account signal.",
-      "build_logic": {
-        "signal_name": "S-ERC-SOLE-FUNDING",
-        "class": "entity · account-level · windowed",
-        "features": ["treasury_check_deposit_share", "non_treasury_deposit_count", "regular_business_txn_count", "account_inflow_diversity"],
-        "logic": "Flag a business account whose deposit history is composed solely (or near-solely) of Treasury-issued checks, or that shows no recurring business transactions, around an ERC check deposit.",
-        "window": "rolling 30 days",
-        "source": "core deposit ledger + account transaction history",
-        "route": "Tier-1 alert → BSA analyst review gate"
-      }
-    },
-    {
-      "id": "IND-05",
-      "section": "redflag",
-      "flag": "A customer attempts to deposit an altered Treasury ERC check, or financial institutions are\nunable to verify the validity of the checks that customers attempt to deposit.39",
-      "red_flag": "Altered or unverifiable ERC check deposit attempt",
-      "src_line": 394,
-      "status": "covered",
-      "data": "available",
-      "build_rec": "COVERED",
-      "rationale": "Altered-check and check-validity detection is a mature, established control at the deposit boundary in most mid-size banks.",
-      "build_logic": null
-    },
-    {
-      "id": "IND-06",
-      "section": "redflag",
-      "flag": "The ERC check is deposited into a new business account that did not exist in 2020 or 2021.",
-      "red_flag": "ERC deposited to a new business account that did not exist in 2020 or 2021",
-      "src_line": 397,
-      "status": "partial",
-      "data": "available",
-      "build_rec": "ENHANCE",
-      "rationale": "Account-open date versus the eligibility period is a known KYC field; banks flag new accounts but rarely tie account-age to the ERC eligibility window specifically.",
-      "build_logic": null
-    },
-    {
-      "id": "IND-07",
-      "section": "redflag",
-      "flag": "A new business account is created for an established business, but no other business activity\noccurs in the account except the deposit of the ERC",
-      "red_flag": "New ERC-only account on an established business (front / identity-theft pattern)",
-      "src_line": 399,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "A newly opened account for an established entity whose only activity is the ERC deposit is fully observable in account-open and ledger data but is not a stock signal.",
-      "build_logic": {
-        "signal_name": "S-ERC-FRONT-ACCOUNT",
-        "class": "entity · account-level · windowed",
-        "features": ["account_age_days", "established_business_indicator", "post_open_txn_count", "erc_only_activity_flag"],
-        "logic": "Flag a recently opened business account tied to an otherwise established business whose only post-opening activity is an ERC check deposit, consistent with an identity-theft front.",
-        "window": "rolling 30 days",
-        "source": "account-open record + KYC business-age data + post-open transaction ledger",
-        "route": "Tier-1 alert → BSA analyst review gate"
-      }
-    },
-    {
-      "id": "IND-08",
-      "section": "redflag",
-      "flag": "A dormant business account suddenly receives an ERC check deposit.",
-      "red_flag": "Dormant business account reactivated by an incoming ERC deposit",
-      "src_line": 403,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "Sudden reactivation of a dormant account by an ERC deposit is computable from inactivity history, but dormancy-reactivation tied to the ERC event is not a standard signal.",
-      "build_logic": {
-        "signal_name": "S-ERC-DORMANT-REACTIVATION",
-        "class": "entity · account-level · windowed",
-        "features": ["days_since_last_activity", "dormancy_flag", "erc_deposit_event", "pre_deposit_balance"],
-        "logic": "Flag a business account that has been dormant (no activity beyond a long inactivity threshold) and is reactivated by an incoming Treasury ERC check deposit.",
-        "window": "rolling 30 days",
-        "source": "account activity history (dormancy state) + core deposit ledger",
-        "route": "Tier-1 alert → BSA analyst review gate"
-      }
-    },
-    {
-      "id": "IND-09",
-      "section": "redflag",
-      "flag": "An ERC is deposited into a business account with no payroll history.",
-      "red_flag": "ERC deposit into a business account with no payroll history",
-      "src_line": 405,
-      "status": "gap",
-      "data": "available",
-      "build_rec": "BUILD_NOW",
-      "rationale": "The ERC is a payroll-retention credit, so a deposit into an account that has never run payroll is a strong contradiction that is directly checkable against transaction history but rarely modeled.",
-      "build_logic": {
-        "signal_name": "S-ERC-NO-PAYROLL",
-        "class": "entity · account-level · windowed",
-        "features": ["payroll_disbursement_count", "payroll_history_months", "erc_deposit_event", "ach_payroll_indicator"],
-        "logic": "Flag a business account that receives an ERC check deposit while showing no prior payroll disbursements, contradicting the payroll-retention basis of the credit.",
-        "window": "rolling 30 days",
-        "source": "ACH/payroll disbursement history + core deposit ledger",
-        "route": "Tier-1 alert → BSA analyst review gate"
-      }
-    },
-    {
-      "id": "IND-10",
-      "section": "redflag",
-      "flag": "A customer reports or provides documents indicating that their ERC was obtained by a third-\nparty firm whose credentials cannot be verified or is the subject of adverse media.",
-      "red_flag": "ERC obtained via an unverifiable / adverse-media third-party firm",
-      "src_line": 419,
-      "status": "gap",
-      "data": "insufficient",
-      "build_rec": "SOURCE_DATA",
-      "rationale": "Attribution to an unverifiable or adverse-media third-party ERC promoter depends on external adverse-media and preparer-network intelligence the bank does not hold internally.",
-      "build_logic": null
-    }
-  ]
+ "id": "fin-2023-alert007",
+ "advisory": "FIN-2023-ALERT007",
+ "source_md": "data/fincen-alerts/fin-2023-alert007.md",
+ "extraction_quality": "clean",
+ "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+ "indicators": [
+  {
+   "id": "IND-01",
+   "section": "Financial Red Flag Indicators of ERC Fraud",
+   "flag": "A business account receives more than one ERC check deposit over multiple days.",
+   "red_flag": "Multiple Treasury ERC check deposits across consecutive days into one business account",
+   "src_line": 380,
+   "status": "covered",
+   "data": "insufficient",
+   "capability": "C6",
+   "data_source": "D6",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C6 (Transaction-velocity & dormancy / baseline-deviation monitoring)."
+  },
+  {
+   "id": "IND-02",
+   "section": "Financial Red Flag Indicators of ERC Fraud",
+   "flag": "Small business accounts receive an ERC check deposit that is not commensurate with the size of the business, the number of employees, and the volume of transactions.",
+   "red_flag": "ERC credit size disproportionate to business headcount / transaction volume",
+   "src_line": 382,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C7",
+   "data_source": "D6",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D6 (Check / negotiable-instrument image & metadata), not currently held → source data first."
+  },
+  {
+   "id": "IND-03",
+   "section": "Financial Red Flag Indicators of ERC Fraud",
+   "flag": "A large ERC is deposited into a business account and is subsequently transferred using P2P services or to an online banking institution, or withdrawn as cash at an ATM.  Funds may be subsequently transferred from the account into separate accounts or payments may be made to new businesses that a customer has not had transactions with prior to receiving an ERC check deposit.",
+   "red_flag": "ERC deposit immediately swept out via P2P / online-bank / ATM cash to no-relationship payees (pass-through)",
+   "src_line": 385,
+   "status": "covered",
+   "data": "available",
+   "capability": "C2",
+   "data_source": "D3",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C2 (Rapid pass-through / flow-through (receive-and-forward) detection)."
+  },
+  {
+   "id": "IND-04",
+   "section": "Financial Red Flag Indicators of ERC Fraud",
+   "flag": "The account receiving an ERC check deposit has no deposits other than Treasury-issued checks, or the account has no regular business transactions.",
+   "red_flag": "Account funded solely by Treasury checks, no genuine operating activity",
+   "src_line": 391,
+   "status": "gap",
+   "data": "available",
+   "capability": "C25",
+   "data_source": "D1",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D1 (Core transaction monitoring (deposit/account ledger)), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-GOV-PAYMENT-INTEGRITY",
+    "class": "entity Â· account-level Â· windowed",
+    "features": [
+     "gov_program_inflow_share",
+     "duplicate_benefit_deposit_flag",
+     "ineligible_recipient_indicator",
+     "multi_identity_same_account_flag",
+     "reimbursement_velocity_anomaly",
+     "benefit_immediately_withdrawn_flag"
+    ],
+    "logic": "Flag an account receiving government-payment or reimbursement flows with integrity markers â duplicate or multi-identity benefit deposits, ineligible-recipient indicators, or anomalous reimbursement velocity â escalating when benefits are rapidly withdrawn or forwarded after credit.",
+    "window": "rolling 90 days per program flow",
+    "source": "deposit ledger + government-payment / benefit-program reference data",
+    "route": "Tier-1 alert â AML / fraud analyst review gate"
+   }
+  },
+  {
+   "id": "IND-05",
+   "section": "Financial Red Flag Indicators of ERC Fraud",
+   "flag": "A customer attempts to deposit an altered Treasury ERC check, or financial institutions are unable to verify the validity of the checks that customers attempt to deposit.",
+   "red_flag": "Altered / unverifiable Treasury ERC check presented for deposit",
+   "src_line": 394,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C11",
+   "data_source": "D6",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D6 (Check / negotiable-instrument image & metadata), not currently held → source data first."
+  },
+  {
+   "id": "IND-06",
+   "section": "Financial Red Flag Indicators of ERC Fraud",
+   "flag": "The ERC check is deposited into a new business account that did not exist in 2020 or 2021.",
+   "red_flag": "ERC check deposited to account opened after the eligibility period (2020/2021)",
+   "src_line": 397,
+   "status": "covered",
+   "data": "available",
+   "capability": "C13",
+   "data_source": "D8",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C13 (Account-opening / KYC risk profiling)."
+  },
+  {
+   "id": "IND-07",
+   "section": "Financial Red Flag Indicators of ERC Fraud",
+   "flag": "A new business account is created for an established business, but no other business activity occurs in the account except the deposit of the ERC.  This may be indicative of identity theft, where the established business was used as a fraudulent front to file for the ERC.",
+   "red_flag": "Single-purpose new account for an established business, ERC-only (identity-theft front)",
+   "src_line": 399,
+   "status": "gap",
+   "data": "available",
+   "capability": "C12",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-SYNTHETIC-IDENTITY-DETECT",
+    "class": "entity Â· identity-level Â· onboarding+windowed",
+    "features": [
+     "identity_attribute_inconsistency_score",
+     "ssn_sin_velocity",
+     "shared_pii_across_accounts",
+     "credit_thin_file_flag",
+     "deepfake_liveness_failure_score",
+     "device_identity_mismatch"
+    ],
+    "logic": "Flag an identity whose verification attributes show fabrication markers â recombined PII shared across accounts, thin or velocity-anomalous credit footprint, or failed biometric liveness/deepfake checks â escalating when multiple synthetic-identity indicators co-occur at onboarding or step-up.",
+    "window": "at onboarding + rolling 180-day cross-account context",
+    "source": "identity-verification / liveness service + bureau + cross-account PII graph",
+    "route": "Tier-1 onboarding hold â identity verification & AML review gate"
+   }
+  },
+  {
+   "id": "IND-08",
+   "section": "Financial Red Flag Indicators of ERC Fraud",
+   "flag": "A dormant business account suddenly receives an ERC check deposit.",
+   "red_flag": "Dormant business account reactivated by an inbound ERC deposit",
+   "src_line": 403,
+   "status": "covered",
+   "data": "available",
+   "capability": "C6",
+   "data_source": "D1",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C6 (Transaction-velocity & dormancy / baseline-deviation monitoring)."
+  },
+  {
+   "id": "IND-09",
+   "section": "Financial Red Flag Indicators of ERC Fraud",
+   "flag": "An ERC is deposited into a business account with no payroll history.",
+   "red_flag": "ERC (a payroll-tax credit) deposited to account with no payroll history",
+   "src_line": 405,
+   "status": "gap",
+   "data": "available",
+   "capability": "C25",
+   "data_source": "D1",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D1 (Core transaction monitoring (deposit/account ledger)), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-GOV-PAYMENT-INTEGRITY",
+    "class": "entity Â· account-level Â· windowed",
+    "features": [
+     "gov_program_inflow_share",
+     "duplicate_benefit_deposit_flag",
+     "ineligible_recipient_indicator",
+     "multi_identity_same_account_flag",
+     "reimbursement_velocity_anomaly",
+     "benefit_immediately_withdrawn_flag"
+    ],
+    "logic": "Flag an account receiving government-payment or reimbursement flows with integrity markers â duplicate or multi-identity benefit deposits, ineligible-recipient indicators, or anomalous reimbursement velocity â escalating when benefits are rapidly withdrawn or forwarded after credit.",
+    "window": "rolling 90 days per program flow",
+    "source": "deposit ledger + government-payment / benefit-program reference data",
+    "route": "Tier-1 alert â AML / fraud analyst review gate"
+   }
+  },
+  {
+   "id": "IND-10",
+   "section": "Financial Red Flag Indicators of ERC Fraud",
+   "flag": "A customer reports or provides documents indicating that their ERC was obtained by a third-party firm whose credentials cannot be verified or is the subject of adverse media.",
+   "red_flag": "ERC obtained via unverifiable / adverse-media third-party filing firm",
+   "src_line": 419,
+   "status": "partial",
+   "data": "available",
+   "capability": "C19",
+   "data_source": "D13",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C19 (Adverse-media / OSINT & web-presence verification); data D13."
+  },
+  {
+   "id": "IND-11",
+   "section": "Financial Red Flag Indicators of ERC Fraud",
+   "flag": "payments may be made to new businesses that a customer has not had transactions with prior to receiving an ERC check deposit",
+   "red_flag": "Onward pay-out to no-prior-relationship new-business payees post-ERC (layering fan-out)",
+   "src_line": 387,
+   "status": "covered",
+   "data": "available",
+   "capability": "C2",
+   "data_source": "D3",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C2 (Rapid pass-through / flow-through (receive-and-forward) detection)."
+  }
+ ]
 }

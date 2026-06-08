@@ -12,11 +12,27 @@
    "red_flag": "Unverifiable / contested client identity",
    "src_line": 111,
    "status": "gap",
-   "data": "insufficient",
-   "capability": "C12",
-   "data_source": "D9",
-   "build_rec": "SOURCE_DATA",
-   "rationale": "Gap; requires D9 (Identity-verification, document & device/session telemetry), not currently held → source data first."
+   "data": "available",
+   "capability": "C14",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; buildable now with C14 (KYC integrity & customer-cooperation screening) on D8 (KYC / CDD & beneficial-ownership data).",
+   "build_logic": {
+    "signal_name": "S-KYC-INTEGRITY-SCREEN",
+    "class": "entity Â· account-level Â· event+windowed",
+    "features": [
+     "edd_document_overdue_flag",
+     "information_request_refusal_count",
+     "kyc_field_inconsistency_score",
+     "evasive_response_indicator",
+     "beneficial_owner_disclosure_gap",
+     "periodic_review_failure_flag"
+    ],
+    "logic": "Flag a customer whose KYC record shows integrity gaps or non-cooperation â overdue EDD documents, refused or evasive responses to information requests, or unresolved inconsistencies â escalating when cooperation failures persist past defined deadlines.",
+    "window": "event-driven, with rolling 60-day cooperation window",
+    "source": "case-management / KYC remediation system + customer correspondence log",
+    "route": "Tier-1 alert â AML analyst review & EDD gate"
+   }
   },
   {
    "id": "IND-02",
@@ -147,12 +163,28 @@
    "flag": "The client provides only a non-civic address or disguises a post office box as a civic address for the purpose of concealing their physical residence.",
    "red_flag": "PO-box-as-civic-address concealment",
    "src_line": 119,
-   "status": "partial",
+   "status": "gap",
    "data": "available",
-   "capability": "C19",
-   "data_source": "D13",
-   "build_rec": "ENHANCE",
-   "rationale": "Partially covered by C19 (Adverse-media / OSINT & web-presence verification); data D13 (Adverse-media / OSINT & web-presence intelligence)."
+   "capability": "C14",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; buildable now with C14 (KYC integrity & customer-cooperation screening) on D8 (KYC / CDD & beneficial-ownership data).",
+   "build_logic": {
+    "signal_name": "S-KYC-INTEGRITY-SCREEN",
+    "class": "entity Â· account-level Â· event+windowed",
+    "features": [
+     "edd_document_overdue_flag",
+     "information_request_refusal_count",
+     "kyc_field_inconsistency_score",
+     "evasive_response_indicator",
+     "beneficial_owner_disclosure_gap",
+     "periodic_review_failure_flag"
+    ],
+    "logic": "Flag a customer whose KYC record shows integrity gaps or non-cooperation â overdue EDD documents, refused or evasive responses to information requests, or unresolved inconsistencies â escalating when cooperation failures persist past defined deadlines.",
+    "window": "event-driven, with rolling 60-day cooperation window",
+    "source": "case-management / KYC remediation system + customer correspondence log",
+    "route": "Tier-1 alert â AML analyst review & EDD gate"
+   }
   },
   {
    "id": "IND-10",
@@ -215,12 +247,28 @@
    "flag": "Client makes statements about involvement in criminal activities.",
    "red_flag": "Self-disclosed criminal involvement",
    "src_line": 128,
-   "status": "partial",
+   "status": "gap",
    "data": "available",
-   "capability": "C19",
-   "data_source": "D13",
-   "build_rec": "ENHANCE",
-   "rationale": "Partially covered by C19 (Adverse-media / OSINT & web-presence verification); data D13 (Adverse-media / OSINT & web-presence intelligence)."
+   "capability": "C14",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; buildable now with C14 (KYC integrity & customer-cooperation screening) on D8 (KYC / CDD & beneficial-ownership data).",
+   "build_logic": {
+    "signal_name": "S-KYC-INTEGRITY-SCREEN",
+    "class": "entity Â· account-level Â· event+windowed",
+    "features": [
+     "edd_document_overdue_flag",
+     "information_request_refusal_count",
+     "kyc_field_inconsistency_score",
+     "evasive_response_indicator",
+     "beneficial_owner_disclosure_gap",
+     "periodic_review_failure_flag"
+    ],
+    "logic": "Flag a customer whose KYC record shows integrity gaps or non-cooperation â overdue EDD documents, refused or evasive responses to information requests, or unresolved inconsistencies â escalating when cooperation failures persist past defined deadlines.",
+    "window": "event-driven, with rolling 60-day cooperation window",
+    "source": "case-management / KYC remediation system + customer correspondence log",
+    "route": "Tier-1 alert â AML analyst review & EDD gate"
+   }
   },
   {
    "id": "IND-14",
@@ -317,6 +365,93 @@
    "src_line": 132,
    "status": "gap",
    "data": "available",
+   "capability": "C26",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; buildable now with C26 (Scam-typology / vulnerable-customer behavioral screening) on D8 (KYC / CDD & beneficial-ownership data).",
+   "build_logic": {
+    "signal_name": "S-SCAM-VULNERABLE-BEHAVIOR",
+    "class": "entity Â· account-level Â· windowed",
+    "features": [
+     "out_of_pattern_payee_flag",
+     "first_party_transfer_to_new_beneficiary",
+     "vulnerable_customer_segment_flag",
+     "romance_investment_payee_indicator",
+     "escalating_payment_sequence",
+     "customer_hesitation_signal"
+    ],
+    "logic": "Flag behavioural patterns consistent with scam victimization or vulnerable-customer exploitation â out-of-pattern payments to new beneficiaries, escalating transfer sequences to investment or romance-typed payees â escalating when the customer falls in a vulnerable segment.",
+    "window": "rolling 30 days per emerging payee relationship",
+    "source": "payment ledger + customer vulnerability segment + payee risk reference",
+    "route": "Tier-1 alert â fraud/AML & customer-protection review gate"
+   }
+  },
+  {
+   "id": "IND-18",
+   "section": "ML/TF indicators related to client behaviour",
+   "flag": "Client presents confusing details about the transaction or knows few details about its purpose.",
+   "red_flag": "Little knowledge of own transaction purpose",
+   "src_line": 133,
+   "status": "gap",
+   "data": "available",
+   "capability": "C26",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; buildable now with C26 (Scam-typology / vulnerable-customer behavioral screening) on D8 (KYC / CDD & beneficial-ownership data).",
+   "build_logic": {
+    "signal_name": "S-SCAM-VULNERABLE-BEHAVIOR",
+    "class": "entity Â· account-level Â· windowed",
+    "features": [
+     "out_of_pattern_payee_flag",
+     "first_party_transfer_to_new_beneficiary",
+     "vulnerable_customer_segment_flag",
+     "romance_investment_payee_indicator",
+     "escalating_payment_sequence",
+     "customer_hesitation_signal"
+    ],
+    "logic": "Flag behavioural patterns consistent with scam victimization or vulnerable-customer exploitation â out-of-pattern payments to new beneficiaries, escalating transfer sequences to investment or romance-typed payees â escalating when the customer falls in a vulnerable segment.",
+    "window": "rolling 30 days per emerging payee relationship",
+    "source": "payment ledger + customer vulnerability segment + payee risk reference",
+    "route": "Tier-1 alert â fraud/AML & customer-protection review gate"
+   }
+  },
+  {
+   "id": "IND-19",
+   "section": "ML/TF indicators related to client behaviour",
+   "flag": "Client avoids contact with reporting entity employees.",
+   "red_flag": "Avoids direct contact with staff",
+   "src_line": 134,
+   "status": "gap",
+   "data": "available",
+   "capability": "C26",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; buildable now with C26 (Scam-typology / vulnerable-customer behavioral screening) on D8 (KYC / CDD & beneficial-ownership data).",
+   "build_logic": {
+    "signal_name": "S-SCAM-VULNERABLE-BEHAVIOR",
+    "class": "entity Â· account-level Â· windowed",
+    "features": [
+     "out_of_pattern_payee_flag",
+     "first_party_transfer_to_new_beneficiary",
+     "vulnerable_customer_segment_flag",
+     "romance_investment_payee_indicator",
+     "escalating_payment_sequence",
+     "customer_hesitation_signal"
+    ],
+    "logic": "Flag behavioural patterns consistent with scam victimization or vulnerable-customer exploitation â out-of-pattern payments to new beneficiaries, escalating transfer sequences to investment or romance-typed payees â escalating when the customer falls in a vulnerable segment.",
+    "window": "rolling 30 days per emerging payee relationship",
+    "source": "payment ledger + customer vulnerability segment + payee risk reference",
+    "route": "Tier-1 alert â fraud/AML & customer-protection review gate"
+   }
+  },
+  {
+   "id": "IND-20",
+   "section": "ML/TF indicators related to client behaviour",
+   "flag": "The client refuses to identify a source of funds, or provides information that is false, misleading, or substantially incorrect.",
+   "red_flag": "Concealed / false source of funds",
+   "src_line": 135,
+   "status": "gap",
+   "data": "available",
    "capability": "C14",
    "data_source": "D8",
    "build_rec": "BUILD_NOW",
@@ -339,61 +474,6 @@
    }
   },
   {
-   "id": "IND-18",
-   "section": "ML/TF indicators related to client behaviour",
-   "flag": "Client presents confusing details about the transaction or knows few details about its purpose.",
-   "red_flag": "Little knowledge of own transaction purpose",
-   "src_line": 133,
-   "status": "partial",
-   "data": "available",
-   "capability": "C16",
-   "data_source": "D8",
-   "build_rec": "ENHANCE",
-   "rationale": "Partially covered by C16 (Third-party / nominee funding & legal-professional channel detection); data D8 (KYC / CDD & beneficial-ownership data)."
-  },
-  {
-   "id": "IND-19",
-   "section": "ML/TF indicators related to client behaviour",
-   "flag": "Client avoids contact with reporting entity employees.",
-   "red_flag": "Avoids direct contact with staff",
-   "src_line": 134,
-   "status": "partial",
-   "data": "available",
-   "capability": "C16",
-   "data_source": "D8",
-   "build_rec": "ENHANCE",
-   "rationale": "Partially covered by C16 (Third-party / nominee funding & legal-professional channel detection); data D8 (KYC / CDD & beneficial-ownership data)."
-  },
-  {
-   "id": "IND-20",
-   "section": "ML/TF indicators related to client behaviour",
-   "flag": "The client refuses to identify a source of funds, or provides information that is false, misleading, or substantially incorrect.",
-   "red_flag": "Concealed / false source of funds",
-   "src_line": 135,
-   "status": "gap",
-   "data": "available",
-   "capability": "C8",
-   "data_source": "D8",
-   "build_rec": "BUILD_NOW",
-   "rationale": "Gap; buildable now with C8 (Income / occupation-vs-activity profile-inconsistency detection) on D8 (KYC / CDD & beneficial-ownership data).",
-   "build_logic": {
-    "signal_name": "S-INCOME-ACTIVITY-INCONSISTENCY",
-    "class": "entity Â· account-level Â· windowed",
-    "features": [
-     "inflow_vs_declared_income_ratio",
-     "occupation_expected_volume_deviation",
-     "unexplained_large_credit_count",
-     "source_of_funds_gap_flag",
-     "income_band_peer_zscore",
-     "wealth_velocity_vs_stated_income"
-    ],
-    "logic": "Flag a personal account whose inflow volume or wealth velocity is inconsistent with the customer's declared income, occupation, or stated source of funds, escalating when large credits lack a plausible origin for the customer's profile.",
-    "window": "rolling 90 days vs declared income profile",
-    "source": "personal deposit ledger joined to onboarding income/occupation KYC data",
-    "route": "Tier-1 alert â AML analyst review gate"
-   }
-  },
-  {
    "id": "IND-21",
    "section": "ML/TF indicators related to client behaviour",
    "flag": "The client exhibits a lack of concern about higher than normal transaction costs or fees.",
@@ -402,9 +482,9 @@
    "status": "gap",
    "data": "available",
    "capability": "C26",
-   "data_source": "D8",
+   "data_source": "D1",
    "build_rec": "BUILD_NOW",
-   "rationale": "Gap; buildable now with C26 (Scam-typology / vulnerable-customer behavioral screening) on D8 (KYC / CDD & beneficial-ownership data).",
+   "rationale": "Gap; buildable now with C26 (Scam-typology / vulnerable-customer behavioral screening) on D1 (Core transaction monitoring (deposit/account ledger)).",
    "build_logic": {
     "signal_name": "S-SCAM-VULNERABLE-BEHAVIOR",
     "class": "entity Â· account-level Â· windowed",
@@ -443,25 +523,25 @@
    "src_line": 138,
    "status": "gap",
    "data": "available",
-   "capability": "C8",
+   "capability": "C14",
    "data_source": "D8",
    "build_rec": "BUILD_NOW",
-   "rationale": "Gap; buildable now with C8 (Income / occupation-vs-activity profile-inconsistency detection) on D8 (KYC / CDD & beneficial-ownership data).",
+   "rationale": "Gap; buildable now with C14 (KYC integrity & customer-cooperation screening) on D8 (KYC / CDD & beneficial-ownership data).",
    "build_logic": {
-    "signal_name": "S-INCOME-ACTIVITY-INCONSISTENCY",
-    "class": "entity Â· account-level Â· windowed",
+    "signal_name": "S-KYC-INTEGRITY-SCREEN",
+    "class": "entity Â· account-level Â· event+windowed",
     "features": [
-     "inflow_vs_declared_income_ratio",
-     "occupation_expected_volume_deviation",
-     "unexplained_large_credit_count",
-     "source_of_funds_gap_flag",
-     "income_band_peer_zscore",
-     "wealth_velocity_vs_stated_income"
+     "edd_document_overdue_flag",
+     "information_request_refusal_count",
+     "kyc_field_inconsistency_score",
+     "evasive_response_indicator",
+     "beneficial_owner_disclosure_gap",
+     "periodic_review_failure_flag"
     ],
-    "logic": "Flag a personal account whose inflow volume or wealth velocity is inconsistent with the customer's declared income, occupation, or stated source of funds, escalating when large credits lack a plausible origin for the customer's profile.",
-    "window": "rolling 90 days vs declared income profile",
-    "source": "personal deposit ledger joined to onboarding income/occupation KYC data",
-    "route": "Tier-1 alert â AML analyst review gate"
+    "logic": "Flag a customer whose KYC record shows integrity gaps or non-cooperation â overdue EDD documents, refused or evasive responses to information requests, or unresolved inconsistencies â escalating when cooperation failures persist past defined deadlines.",
+    "window": "event-driven, with rolling 60-day cooperation window",
+    "source": "case-management / KYC remediation system + customer correspondence log",
+    "route": "Tier-1 alert â AML analyst review & EDD gate"
    }
   },
   {
@@ -677,9 +757,9 @@
    "status": "partial",
    "data": "available",
    "capability": "C1",
-   "data_source": "D1",
+   "data_source": "D13",
    "build_rec": "ENHANCE",
-   "rationale": "Partially covered by C1 (Customer-profile / out-of-pattern transaction monitoring); data D1 (Core transaction monitoring (deposit/account ledger))."
+   "rationale": "Partially covered by C1 (Customer-profile / out-of-pattern transaction monitoring); data D13 (Adverse-media / OSINT & web-presence intelligence)."
   },
   {
    "id": "IND-37",
@@ -1050,9 +1130,9 @@
    "status": "gap",
    "data": "available",
    "capability": "C15",
-   "data_source": "D12",
+   "data_source": "D8",
    "build_rec": "BUILD_NOW",
-   "rationale": "Gap; buildable now with C15 (Beneficial-ownership, shell / front-company & nominee network analysis) on D12 (PEP & beneficial-ownership intelligence).",
+   "rationale": "Gap; buildable now with C15 (Beneficial-ownership, shell / front-company & nominee network analysis) on D8 (KYC / CDD & beneficial-ownership data).",
    "build_logic": {
     "signal_name": "S-SHELL-NOMINEE-NETWORK",
     "class": "network Â· ownership-graph Â· windowed",
@@ -1118,28 +1198,12 @@
    "flag": "Did not take part in the related project.",
    "red_flag": "Intermediary absent from underlying project",
    "src_line": 266,
-   "status": "gap",
+   "status": "partial",
    "data": "available",
-   "capability": "C15",
+   "capability": "C16",
    "data_source": "D8",
-   "build_rec": "BUILD_NOW",
-   "rationale": "Gap; buildable now with C15 (Beneficial-ownership, shell / front-company & nominee network analysis) on D8 (KYC / CDD & beneficial-ownership data).",
-   "build_logic": {
-    "signal_name": "S-SHELL-NOMINEE-NETWORK",
-    "class": "network Â· ownership-graph Â· windowed",
-    "features": [
-     "shared_address_director_overlap",
-     "ubo_opacity_score",
-     "incorporation_recency_flag",
-     "no_observable_operations_flag",
-     "circular_ownership_indicator",
-     "nominee_director_reuse_count"
-    ],
-    "logic": "Flag an entity exhibiting shell or front-company markers â opaque or circular beneficial ownership, shared registered addresses or directors, recent incorporation with no observable operations â escalating when nominees or addresses recur across a cluster of related entities.",
-    "window": "rolling 90 days over the ownership/address graph",
-    "source": "corporate registry + KYC beneficial-ownership records + entity-resolution graph",
-    "route": "Tier-2 network alert â AML investigations gate"
-   }
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C16 (Third-party / nominee funding & legal-professional channel detection); data D8 (KYC / CDD & beneficial-ownership data)."
   },
   {
    "id": "IND-65",
@@ -1147,28 +1211,12 @@
    "flag": "Would not typically be involved in the client’s industry or line of business.",
    "red_flag": "Consultant outside client's line of business",
    "src_line": 267,
-   "status": "gap",
+   "status": "partial",
    "data": "available",
-   "capability": "C15",
+   "capability": "C16",
    "data_source": "D8",
-   "build_rec": "BUILD_NOW",
-   "rationale": "Gap; buildable now with C15 (Beneficial-ownership, shell / front-company & nominee network analysis) on D8 (KYC / CDD & beneficial-ownership data).",
-   "build_logic": {
-    "signal_name": "S-SHELL-NOMINEE-NETWORK",
-    "class": "network Â· ownership-graph Â· windowed",
-    "features": [
-     "shared_address_director_overlap",
-     "ubo_opacity_score",
-     "incorporation_recency_flag",
-     "no_observable_operations_flag",
-     "circular_ownership_indicator",
-     "nominee_director_reuse_count"
-    ],
-    "logic": "Flag an entity exhibiting shell or front-company markers â opaque or circular beneficial ownership, shared registered addresses or directors, recent incorporation with no observable operations â escalating when nominees or addresses recur across a cluster of related entities.",
-    "window": "rolling 90 days over the ownership/address graph",
-    "source": "corporate registry + KYC beneficial-ownership records + entity-resolution graph",
-    "route": "Tier-2 network alert â AML investigations gate"
-   }
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C16 (Third-party / nominee funding & legal-professional channel detection); data D8 (KYC / CDD & beneficial-ownership data)."
   },
   {
    "id": "IND-66",
@@ -1179,7 +1227,7 @@
    "status": "covered",
    "data": "available",
    "capability": "C20",
-   "data_source": "D17",
+   "data_source": "D3",
    "build_rec": "COVERED",
    "rationale": "Already covered by C20 (Cross-border / high-risk-jurisdiction & corridor anomaly detection)."
   },
@@ -1286,12 +1334,12 @@
    "flag": "Vague or incomplete payment details.",
    "red_flag": "Vague / incomplete payment details",
    "src_line": 297,
-   "status": "gap",
+   "status": "partial",
    "data": "partial",
-   "capability": "C10",
+   "capability": "C22",
    "data_source": "D5",
-   "build_rec": "BUILD_ENRICH",
-   "rationale": "Gap; C10 (Transaction-narrative / memo-line keyword screening) needs D5 (Transaction narrative / free-text fields) enrichment."
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C22 (Trade-based money-laundering & documentary anomaly detection); data D5 (Transaction narrative / free-text fields)."
   },
   {
    "id": "IND-73",
@@ -1299,12 +1347,12 @@
    "flag": "Fraudulent documentation used to justify the transfer of funds.",
    "red_flag": "Fraudulent documentation justifying transfer",
    "src_line": 298,
-   "status": "partial",
+   "status": "gap",
    "data": "partial",
-   "capability": "C22",
+   "capability": "C14",
    "data_source": "D15",
-   "build_rec": "ENHANCE",
-   "rationale": "Partially covered by C22 (Trade-based money-laundering & documentary anomaly detection); data D15 (Trade-finance / customs / shipping & logistics data)."
+   "build_rec": "BUILD_ENRICH",
+   "rationale": "Gap; C14 (KYC integrity & customer-cooperation screening) needs D15 (Trade-finance / customs / shipping & logistics data) enrichment."
   },
   {
    "id": "IND-74",
@@ -1444,10 +1492,10 @@
    "src_line": 343,
    "status": "covered",
    "data": "available",
-   "capability": "C2",
+   "capability": "C17",
    "data_source": "D3",
    "build_rec": "COVERED",
-   "rationale": "Already covered by C2 (Rapid pass-through / flow-through (receive-and-forward) detection)."
+   "rationale": "Already covered by C17 (PEP & sanctioned-elite proxy screening)."
   },
   {
    "id": "IND-85",
@@ -1667,11 +1715,11 @@
    "red_flag": "Insists on fax-only signature",
    "src_line": 373,
    "status": "partial",
-   "data": "available",
+   "data": "insufficient",
    "capability": "C16",
-   "data_source": "D8",
-   "build_rec": "ENHANCE",
-   "rationale": "Partially covered by C16 (Third-party / nominee funding & legal-professional channel detection); data D8 (KYC / CDD & beneficial-ownership data)."
+   "data_source": "D19",
+   "build_rec": "MONITOR",
+   "rationale": "Partially covered by C16 (Third-party / nominee funding & legal-professional channel detection); D19 (Legal/notary trust-account & third-party-funding data) insufficient → monitor."
   },
   {
    "id": "IND-101",
@@ -1708,12 +1756,28 @@
    "flag": "Client's home or business telephone number has been disconnected or there is no such number.",
    "red_flag": "Disconnected / non-existent contact number",
    "src_line": 375,
-   "status": "partial",
+   "status": "gap",
    "data": "available",
-   "capability": "C19",
-   "data_source": "D13",
-   "build_rec": "ENHANCE",
-   "rationale": "Partially covered by C19 (Adverse-media / OSINT & web-presence verification); data D13 (Adverse-media / OSINT & web-presence intelligence)."
+   "capability": "C14",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; buildable now with C14 (KYC integrity & customer-cooperation screening) on D8 (KYC / CDD & beneficial-ownership data).",
+   "build_logic": {
+    "signal_name": "S-KYC-INTEGRITY-SCREEN",
+    "class": "entity Â· account-level Â· event+windowed",
+    "features": [
+     "edd_document_overdue_flag",
+     "information_request_refusal_count",
+     "kyc_field_inconsistency_score",
+     "evasive_response_indicator",
+     "beneficial_owner_disclosure_gap",
+     "periodic_review_failure_flag"
+    ],
+    "logic": "Flag a customer whose KYC record shows integrity gaps or non-cooperation â overdue EDD documents, refused or evasive responses to information requests, or unresolved inconsistencies â escalating when cooperation failures persist past defined deadlines.",
+    "window": "event-driven, with rolling 60-day cooperation window",
+    "source": "case-management / KYC remediation system + customer correspondence log",
+    "route": "Tier-1 alert â AML analyst review & EDD gate"
+   }
   },
   {
    "id": "IND-103",

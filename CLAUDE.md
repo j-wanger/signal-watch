@@ -37,7 +37,7 @@ AML transformation framework. Keep vocabulary consistent with it
 - Live mode is optional, isolated, off by default, always has a scripted fallback.
   Never put keys/tokens in the frontend. Copilot is NOT a web backend (HANDOFF §4.5).
 
-## Current state (M7 corpus completeness + typology re-segmentation: Phase 33 — corpus 875→2,251 indicators across 56 derived / 62 publications / 5 sources, +TBML & 4 new typologies; M8 adverse-media stream: Phase 31 walking skeleton + Phase 32 real-source & presentation elevation)
+## Current state (M7 corpus completeness + typology re-segmentation: Phase 33 — corpus 875→2,251 indicators across 56 derived / 62 publications / 5 sources, +TBML & 4 new typologies; Phase 34 — C/D-assignment verification of the 1,376 new indicators; M8 adverse-media stream: Phase 31 walking skeleton + Phase 32 real-source & presentation elevation)
 - Generic engine: `index.html` (vanilla HTML/CSS/JS) with a single `__CONFIG__` injection point.
   Typology-agnostic — adding a typology is one JSON file, no engine edits. Presenter controls (M3):
   keyboard nav (←/→/Space/Esc/↺), reset, `prefers-reduced-motion`.
@@ -380,6 +380,35 @@ AML transformation framework. Keep vocabulary consistent with it
   news stream (news.html, dist/news, data/news/**), `data/capability-taxonomy.json`, the 42 EXISTING derived records + their
   source mds. NO non-negotiable change (both compliance bases — FinCEN §105 public-domain + FINTRAC Crown-copyright
   non-commercial — already established).
+- C/D-ASSIGNMENT VERIFICATION (Phase 34, M7 — the one NEURAL step of Phase 33 audited for CORRECTNESS, not just
+  validity; NO new source / non-negotiable / UI change): Phase 33 inherited each of the 1,376 new indicators'
+  `capability`(C1–C28) / `data_source`(D1–D20) codes from the extraction workflow, gated ONLY for vocab VALIDITY
+  (`ph33_apply.py` flagged 0), never CORRECTNESS — yet those codes drive every coverage field (status/data/build_rec/
+  build_logic) AND the Phase-29 capability + Phase-30 data-source executive lenses. The grounding gate checks the verbatim
+  `flag` is FAITHFUL, never that the C/D tag is RIGHT — the unguarded dimension (memory: a grounding gate ≠ a completeness
+  gate). Phase 34 verified + corrected them MEASURE-FIRST and HUMAN-adjudicated, a DATA-correctness phase (only the 14 new
+  derived records change; `corpus.html`/`build.py` are data-driven — corrected codes flow through on rebuild, NO UI work).
+  (1) A DETERMINISTIC consistency audit (no LLM) found **30.5% of the new indicators (419/1,376) in hard same-text-different-
+  code contradictions** — concentrated in the FINTRAC sector-page common spine (the same verbatim indicator repeated across
+  accountants/casinos/securities/… got inconsistent codes). (2) A BLIND re-assignment workflow (`ph34-blind-reassign`, 30
+  agents over the **589 unique texts** — 57% fewer judgments than per-indicator, and one canonical code per text structurally
+  prevents re-introducing inconsistency) re-tagged each text BLIND to its existing code → an **INTER-RATER AGREEMENT of C
+  74.4% / D 77.9%** (reported HONESTLY as agreement/consensus, NEVER "proven correct" — a 2nd LLM pass is consensus, not
+  ground truth). (3) HUMAN adjudication at the CLUSTER level (the user is the accepted truth source, the Phase-28 model): the
+  systematic (existing→blind) code-pairs disposed with the user's two rulings — **adverse-media (C19/D13) ≠ KYC (C14/D8)**
+  (the C19/D13 cluster examined = all direct-KYC mis-files, never real adverse-media, so the distinction HELD) and **cash
+  (C5/D2) ≠ PEP (C17)** (the cash→PEP mis-tags collapse to the cash majority); genuinely-ambiguous clusters KEPT existing
+  (no churn). (4) A BYTE-SURGICAL apply (`ph34_apply.py` + a synonym-aware straggler pass) reusing `ph33_apply.py`'s
+  deterministic downstream corrected **213 indicators** (114 C-moves + 129 D-moves + 3 client/customer wording-drift
+  stragglers); the grounded `flag` + `red_flag` stay BYTE-IDENTICAL (git-confirmed: 0 +/- on flag/red_flag/section/src_line/
+  id). Consistency **30.5% → 2.0%** — the 28 residual are all either NEW-vs-FROZEN-old (unfixable without unfreezing the 42
+  protected records) or different verbatim flags sharing one translation (independent-assessment-defensible). The MEASURED
+  agreement + 213 corrections are a journal/quality artifact, NOT a demo number (the always-on illustrative badge stays the
+  only claim — NO false precision). Harness corpus 235/235 + news 65/65; `--check all` 5/5 ZERO DRIFT; `--selftest` PASS; all
+  56 `--check-derived` clean. FROZEN byte-clean: the showcase (index.html + config/** + 3 typology dists), the entire news
+  stream, `data/typology-map.json`, `data/capability-taxonomy.json` (definitions unchanged — only which code an indicator
+  carries moves), the grounding core `derive_signals.py`, `build.py`, and the 42 EXISTING records / 875 old indicators. NO
+  non-negotiable change.
 - ADVERSE-MEDIA / NEGATIVE-NEWS STREAM (Phase 31, M8 — a SECOND atom stream; a NEW standalone ship artifact, NOT a
   corpus/showcase change): Signal Watch was the advisory→signal loop (the six-act showcase + the corpus explorer);
   Phase 31 opens a SECOND stream over UNSTRUCTURED news as a third single-file artifact `dist/news/index.html` (built
@@ -622,6 +651,17 @@ virtual-currency, unlawful-employment, casino-gaming, fintrac-sector-baselines),
 the user's "closest crime typology each" choice). 2 honestly NON-DERIVABLE (BEC fin-2019-a005 defers to the 2016
 advisory; FINTRAC crown-agents has no own list). Harness 217→233; dist/corpus 2.46→4.87MB; `--check all` 5/5 ZERO DRIFT;
 the showcase + entire news stream + 42 existing derived records BYTE-FROZEN; NO non-negotiable change.
+Phase 34: C/D-assignment verification — the one NEURAL step of Phase 33 (the 1,376 new indicators' capability/data-source
+codes, inherited and gated only for vocab validity, never correctness) audited and corrected MEASURE-FIRST + HUMAN-adjudicated,
+a DATA-correctness phase (only the 14 new derived records change; corpus.html/build.py data-driven — NO UI work). A deterministic
+consistency audit found 30.5% of the new indicators (419/1,376) in hard same-text-different-code contradictions (the FINTRAC
+sector-page common spine); a BLIND re-assignment workflow over the 589 unique texts measured INTER-RATER AGREEMENT C 74.4% /
+D 77.9% (honest consensus, never "proven correct"); the user adjudicated the systematic clusters (rulings: adverse-media ≠ KYC,
+cash ≠ PEP; ambiguous clusters kept); a byte-surgical apply reusing ph33_apply.py's deterministic downstream corrected 213
+indicators (flag/red_flag byte-frozen), taking consistency 30.5% → 2.0% (residual = new-vs-frozen-old + translation-shared
+flags). Harness 235 + news 65; --check all 5/5 zero drift; --selftest PASS; 56/56 --check-derived clean; the showcase + entire
+news stream + data/typology-map.json + data/capability-taxonomy.json + the grounding core + build.py + the 42 existing records
+BYTE-FROZEN. The measured agreement + 213 corrections are a journal/quality artifact, NOT a demo number. NO non-negotiable change.
 M8 the adverse-media / negative-news stream (Phase 31: a SECOND atom stream as a new standalone artifact
 `dist/news/` from `news.html` — synthetic news → grounded entity + red-flag extraction → a client-side fuzzy
 match (normalize → token-sort → Jaro-Winkler, REAL scores) against a synthetic client/counterparty book →

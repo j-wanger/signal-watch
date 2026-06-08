@@ -163,12 +163,28 @@
    "flag": "The customer provides only a non-civic address or disguises a post office box as a civic address for the purpose of concealing their physical residence.",
    "red_flag": "PO-box disguised as civic address",
    "src_line": 120,
-   "status": "partial",
+   "status": "gap",
    "data": "available",
-   "capability": "C19",
-   "data_source": "D13",
-   "build_rec": "ENHANCE",
-   "rationale": "Partially covered by C19 (Adverse-media / OSINT & web-presence verification); data D13 (Adverse-media / OSINT & web-presence intelligence)."
+   "capability": "C14",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; buildable now with C14 (KYC integrity & customer-cooperation screening) on D8 (KYC / CDD & beneficial-ownership data).",
+   "build_logic": {
+    "signal_name": "S-KYC-INTEGRITY-SCREEN",
+    "class": "entity Â· account-level Â· event+windowed",
+    "features": [
+     "edd_document_overdue_flag",
+     "information_request_refusal_count",
+     "kyc_field_inconsistency_score",
+     "evasive_response_indicator",
+     "beneficial_owner_disclosure_gap",
+     "periodic_review_failure_flag"
+    ],
+    "logic": "Flag a customer whose KYC record shows integrity gaps or non-cooperation â overdue EDD documents, refused or evasive responses to information requests, or unresolved inconsistencies â escalating when cooperation failures persist past defined deadlines.",
+    "window": "event-driven, with rolling 60-day cooperation window",
+    "source": "case-management / KYC remediation system + customer correspondence log",
+    "route": "Tier-1 alert â AML analyst review & EDD gate"
+   }
   },
   {
    "id": "IND-10",
@@ -517,25 +533,25 @@
    "src_line": 141,
    "status": "gap",
    "data": "available",
-   "capability": "C8",
+   "capability": "C14",
    "data_source": "D8",
    "build_rec": "BUILD_NOW",
-   "rationale": "Gap; buildable now with C8 (Income / occupation-vs-activity profile-inconsistency detection) on D8 (KYC / CDD & beneficial-ownership data).",
+   "rationale": "Gap; buildable now with C14 (KYC integrity & customer-cooperation screening) on D8 (KYC / CDD & beneficial-ownership data).",
    "build_logic": {
-    "signal_name": "S-INCOME-ACTIVITY-INCONSISTENCY",
-    "class": "entity Â· account-level Â· windowed",
+    "signal_name": "S-KYC-INTEGRITY-SCREEN",
+    "class": "entity Â· account-level Â· event+windowed",
     "features": [
-     "inflow_vs_declared_income_ratio",
-     "occupation_expected_volume_deviation",
-     "unexplained_large_credit_count",
-     "source_of_funds_gap_flag",
-     "income_band_peer_zscore",
-     "wealth_velocity_vs_stated_income"
+     "edd_document_overdue_flag",
+     "information_request_refusal_count",
+     "kyc_field_inconsistency_score",
+     "evasive_response_indicator",
+     "beneficial_owner_disclosure_gap",
+     "periodic_review_failure_flag"
     ],
-    "logic": "Flag a personal account whose inflow volume or wealth velocity is inconsistent with the customer's declared income, occupation, or stated source of funds, escalating when large credits lack a plausible origin for the customer's profile.",
-    "window": "rolling 90 days vs declared income profile",
-    "source": "personal deposit ledger joined to onboarding income/occupation KYC data",
-    "route": "Tier-1 alert â AML analyst review gate"
+    "logic": "Flag a customer whose KYC record shows integrity gaps or non-cooperation â overdue EDD documents, refused or evasive responses to information requests, or unresolved inconsistencies â escalating when cooperation failures persist past defined deadlines.",
+    "window": "event-driven, with rolling 60-day cooperation window",
+    "source": "case-management / KYC remediation system + customer correspondence log",
+    "route": "Tier-1 alert â AML analyst review & EDD gate"
    }
   },
   {
@@ -667,12 +683,12 @@
    "flag": "A product and/or service opened on behalf of a person or entity that is inconsistent based on what you know about that customer.",
    "red_flag": "Out-of-profile product opened for third party",
    "src_line": 159,
-   "status": "partial",
+   "status": "covered",
    "data": "available",
-   "capability": "C16",
+   "capability": "C13",
    "data_source": "D8",
-   "build_rec": "ENHANCE",
-   "rationale": "Partially covered by C16 (Third-party / nominee funding & legal-professional channel detection); data D8 (KYC / CDD & beneficial-ownership data)."
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C13 (Account-opening / KYC risk profiling)."
   },
   {
    "id": "IND-34",
@@ -722,12 +738,12 @@
    "flag": "Transaction is unnecessarily complex for its stated purpose.",
    "red_flag": "Needlessly complex transaction structure",
    "src_line": 167,
-   "status": "partial",
+   "status": "covered",
    "data": "available",
-   "capability": "C1",
+   "capability": "C2",
    "data_source": "D1",
-   "build_rec": "ENHANCE",
-   "rationale": "Partially covered by C1 (Customer-profile / out-of-pattern transaction monitoring); data D1 (Core transaction monitoring (deposit/account ledger))."
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C2 (Rapid pass-through / flow-through (receive-and-forward) detection)."
   },
   {
    "id": "IND-37",
@@ -764,9 +780,9 @@
    "status": "partial",
    "data": "available",
    "capability": "C1",
-   "data_source": "D1",
+   "data_source": "D13",
    "build_rec": "ENHANCE",
-   "rationale": "Partially covered by C1 (Customer-profile / out-of-pattern transaction monitoring); data D1 (Core transaction monitoring (deposit/account ledger))."
+   "rationale": "Partially covered by C1 (Customer-profile / out-of-pattern transaction monitoring); data D13 (Adverse-media / OSINT & web-presence intelligence)."
   },
   {
    "id": "IND-40",
@@ -1244,7 +1260,7 @@
    "status": "covered",
    "data": "available",
    "capability": "C20",
-   "data_source": "D17",
+   "data_source": "D3",
    "build_rec": "COVERED",
    "rationale": "Already covered by C20 (Cross-border / high-risk-jurisdiction & corridor anomaly detection)."
   },
@@ -1257,7 +1273,7 @@
    "status": "covered",
    "data": "available",
    "capability": "C20",
-   "data_source": "D17",
+   "data_source": "D3",
    "build_rec": "COVERED",
    "rationale": "Already covered by C20 (Cross-border / high-risk-jurisdiction & corridor anomaly detection)."
   },
@@ -1299,7 +1315,7 @@
    "status": "covered",
    "data": "available",
    "capability": "C20",
-   "data_source": "D17",
+   "data_source": "D3",
    "build_rec": "COVERED",
    "rationale": "Already covered by C20 (Cross-border / high-risk-jurisdiction & corridor anomaly detection)."
   },
@@ -1364,12 +1380,12 @@
    "flag": "Fraudulent documentation used to justify the transfer of funds.",
    "red_flag": "Fraudulent documentation justifying transfers",
    "src_line": 302,
-   "status": "partial",
+   "status": "gap",
    "data": "partial",
-   "capability": "C22",
+   "capability": "C14",
    "data_source": "D15",
-   "build_rec": "ENHANCE",
-   "rationale": "Partially covered by C22 (Trade-based money-laundering & documentary anomaly detection); data D15 (Trade-finance / customs / shipping & logistics data)."
+   "build_rec": "BUILD_ENRICH",
+   "rationale": "Gap; C14 (KYC integrity & customer-cooperation screening) needs D15 (Trade-finance / customs / shipping & logistics data) enrichment."
   },
   {
    "id": "IND-79",
@@ -1481,12 +1497,12 @@
    "flag": "Multiple cash deposits into their account.",
    "red_flag": "PEP multiple cash deposits",
    "src_line": 345,
-   "status": "covered",
+   "status": "partial",
    "data": "available",
-   "capability": "C17",
+   "capability": "C5",
    "data_source": "D2",
-   "build_rec": "COVERED",
-   "rationale": "Already covered by C17 (PEP & sanctioned-elite proxy screening)."
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C5 (Cash-intensity / cash-placement anomaly detection); data D2 (Cash & instrument channel data (ATM/ABM, teller, money orders, prepaid))."
   },
   {
    "id": "IND-88",
@@ -1509,10 +1525,10 @@
    "src_line": 347,
    "status": "covered",
    "data": "available",
-   "capability": "C2",
+   "capability": "C17",
    "data_source": "D3",
    "build_rec": "COVERED",
-   "rationale": "Already covered by C2 (Rapid pass-through / flow-through (receive-and-forward) detection)."
+   "rationale": "Already covered by C17 (PEP & sanctioned-elite proxy screening)."
   },
   {
    "id": "IND-90",
@@ -1937,7 +1953,7 @@
    "status": "covered",
    "data": "available",
    "capability": "C20",
-   "data_source": "D17",
+   "data_source": "D3",
    "build_rec": "COVERED",
    "rationale": "Already covered by C20 (Cross-border / high-risk-jurisdiction & corridor anomaly detection)."
   },

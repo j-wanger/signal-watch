@@ -169,25 +169,25 @@
    "src_line": 666,
    "status": "gap",
    "data": "available",
-   "capability": "C8",
+   "capability": "C14",
    "data_source": "D8",
    "build_rec": "BUILD_NOW",
-   "rationale": "Gap; buildable now with C8 (Income / occupation-vs-activity profile-inconsistency detection) on D8 (KYC / CDD & beneficial-ownership data).",
+   "rationale": "Gap; buildable now with C14 (KYC integrity & customer-cooperation screening) on D8 (KYC / CDD & beneficial-ownership data).",
    "build_logic": {
-    "signal_name": "S-INCOME-ACTIVITY-INCONSISTENCY",
-    "class": "entity Â· account-level Â· windowed",
+    "signal_name": "S-KYC-INTEGRITY-SCREEN",
+    "class": "entity Â· account-level Â· event+windowed",
     "features": [
-     "inflow_vs_declared_income_ratio",
-     "occupation_expected_volume_deviation",
-     "unexplained_large_credit_count",
-     "source_of_funds_gap_flag",
-     "income_band_peer_zscore",
-     "wealth_velocity_vs_stated_income"
+     "edd_document_overdue_flag",
+     "information_request_refusal_count",
+     "kyc_field_inconsistency_score",
+     "evasive_response_indicator",
+     "beneficial_owner_disclosure_gap",
+     "periodic_review_failure_flag"
     ],
-    "logic": "Flag a personal account whose inflow volume or wealth velocity is inconsistent with the customer's declared income, occupation, or stated source of funds, escalating when large credits lack a plausible origin for the customer's profile.",
-    "window": "rolling 90 days vs declared income profile",
-    "source": "personal deposit ledger joined to onboarding income/occupation KYC data",
-    "route": "Tier-1 alert â AML analyst review gate"
+    "logic": "Flag a customer whose KYC record shows integrity gaps or non-cooperation â overdue EDD documents, refused or evasive responses to information requests, or unresolved inconsistencies â escalating when cooperation failures persist past defined deadlines.",
+    "window": "event-driven, with rolling 60-day cooperation window",
+    "source": "case-management / KYC remediation system + customer correspondence log",
+    "route": "Tier-1 alert â AML analyst review & EDD gate"
    }
   },
   {

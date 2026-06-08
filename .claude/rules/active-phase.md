@@ -1,6 +1,6 @@
 # Active Phase Context
 
-Phase: 34 — C/D-assignment verification pass (M7). DELIVERED (all 5 tasks [x]; exit criteria met; delivery accepted by the user 2026-06-08; awaiting commit + push to main — the delivery gate flips to [x] after the commit verifies).
+Phase: 34 — C/D-assignment verification pass (M7). DELIVERED + ACCEPTED + COMMITTED (all 5 tasks [x]; exit criteria met; delivery accepted by the user 2026-06-08; committed 83a79c3 + pushed to main 2026-06-08).
 
 Objective: verify + correct the 1,376 NEW capability(C)/data_source(D) assignments Phase 33 added — the ONE neural step, gated only for vocabulary VALIDITY, never CORRECTNESS — measure-first and human-adjudicated, changing only the 14 new derived records. flag/red_flag stay byte-identical; only C/D + their deterministic downstream (status/data/build_rec/build_logic) move.
 
@@ -10,4 +10,4 @@ Next: nothing queued. Run /dev-plan for Phase 35 — candidates: a flag-complete
 
 Gates:
 - [x] Direction confirmed by user (verify the 1,376 new C/D assignments, over a 3rd jurisdiction + a Sector axis at the dev-plan gate; approved 2026-06-08)
-- [ ] Delivery accepted (post-implementation report 2026-06-08 — agreement C 74.4% / D 77.9%, 213 corrected, consistency 30.5%→2.0%; --check all 5/5 zero drift, 56/56 --check-derived clean, harness 235, news 65; frozen set byte-clean; NO non-negotiable change — gate flips to [x] after the commit verifies)
+- [x] Delivery accepted (post-implementation report 2026-06-08 — agreement C 74.4% / D 77.9%, 213 corrected, consistency 30.5%→2.0%; --check all 5/5 zero drift, 56/56 --check-derived clean, harness 235, news 65; frozen set byte-clean; NO non-negotiable change; committed 83a79c3 + pushed to main)

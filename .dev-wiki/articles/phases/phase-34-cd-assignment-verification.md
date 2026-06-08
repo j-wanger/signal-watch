@@ -7,8 +7,8 @@ parents: []
 created: 2026-06-08
 updated: 2026-06-08
 source: plan
-status: active
-delivery: accepted-2026-06-08-pending-commit
+status: completed
+delivery: accepted-2026-06-08 (committed 83a79c3, pushed to main)
 scope: [".dev-wiki/tmp/ph34_audit.py", ".dev-wiki/tmp/ph34_reassign.json", ".dev-wiki/tmp/ph34_dispositions.json", "data/fincen/derived/*.json", "data/fintrac-guidance/derived/*.json", "dist/corpus/index.html", "tests/corpus-explorer.test.mjs", "tests/news-stream.test.mjs", "CLAUDE.md", "HANDOFF.md", "tests/smoke-checklist.md"]
 entry_criteria: "Phase 33 (corpus completeness + full typology re-segmentation) DELIVERED + accepted + committed 823c0c2 + pushed to main; the corpus is the primary demo (Phase 27). Phase 33 tripled the corpus to 2,251 indicators, but the 1,376 NEW ones (61%, in the 14 new derived records) carry C/D codes assigned as the ONE neural step in Phase 33, gated only for vocabulary VALIDITY (in-set; ph33_apply.py reported 0 flagged), never CORRECTNESS. Direction approved at the goal gate 2026-06-08: verify the 1,376 new C/D assignments (the user picked this over 'add a 3rd jurisdiction' and 'a proper Sector axis' at the dev-plan priority gate)."
 exit_criteria: "The 1,376 new C/D assignments verified (deterministic contradictions resolved + blind-re-assignment disagreements adjudicated by the user) and corrected; the MEASURED inter-rater agreement rate + correction count recorded (the honest quality artifact, not a demo number); flag/red_flag byte-frozen; only the 14 new derived records changed; all 56 --check-derived clean; --check all 5/5 zero drift; --selftest PASS; harness green (corpus + news byte-frozen); the frozen set byte-clean; NO non-negotiable change."

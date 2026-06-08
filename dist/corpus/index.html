@@ -39988,7 +39988,7 @@ function renderArticle(a){
   // reading it — the text fills progressively (a blinking caret trails the read edge, the panel scroll-
   // follows), and ONLY when the read reaches a red-flag phrase does that phrase appear highlighted (it
   // flashes via CSS) and its translation extract on the right. It looks processed, not staged. Length-
-  // scaled (~0.9ms/char) and capped at ~45s so long source docs read as a brisk scan, short ones methodical.
+  // scaled (~0.9ms/char) and capped at ~22s so long source docs read as a brisk scan, short ones methodical.
   const docEl=document.getElementById('doc'), xEl=document.getElementById('xlate'), lbl=document.getElementById('doclabel'), xlbl=document.getElementById('xlabel');
   if(REDUCED || !art || !docEl || typeof docEl.insertAdjacentHTML!=='function') return;   // final state already rendered
   const xlab=k=>{ if(xlbl)xlbl.textContent=`Extract → translate · ${k} red flag${k===1?'':'s'}`; };  // count up with extraction
@@ -40001,12 +40001,12 @@ function renderArticle(a){
   // zone reads FAST; (cat2) each red-flag PHRASE reveals whole (one clean .hl span — its flash plays) then
   // the read DWELLS, a processing beat while the caret pauses + the translation writes (slower than the old
   // instant reveal); (cat3) general text AFTER the last phrase BLASTS — the wow is over, don't drag the demo.
-  // SCALE compresses the whole timeline to keep the ~45s cap on dense docs; relative tier speeds are preserved.
+  // SCALE compresses the whole timeline to keep the ~22s cap on dense docs; relative tier speeds are preserved.
   const STEP=33, MS1=0.45, MS3=0.12;                       // ms/char: cat1 active text · cat3 post-phrase text
-  const dwellMs=segLen=>Math.min(750,220+segLen*6);        // cat2 per-phrase processing dwell (length-scaled, capped)
+  const dwellMs=segLen=>Math.min(360,120+segLen*4);        // cat2 per-phrase processing dwell (length-scaled, capped) — Phase-36-prelude QOL: ~halved (was 750/220/6) so phrase extraction reads briskly
   let lastP=-1; segs.forEach((s,i)=>{ if(s[2]>=0)lastP=i; });   // index of the LAST phrase run (cat1/cat3 boundary)
   let raw=0; segs.forEach((s,i)=>{ const len=s[1]-s[0]; raw += s[2]>=0 ? dwellMs(len) : len*(i>lastP?MS3:MS1); });
-  const SCALE=raw>45000?45000/raw:1;
+  const SCALE=raw>22000?22000/raw:1;
   docEl.innerHTML=''; if(docEl.classList)docEl.classList.add('reading');     // empty panel + trailing caret
   if(xEl)xEl.innerHTML='';
   if(lbl)lbl.textContent='Source document · reading…';

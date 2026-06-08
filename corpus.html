@@ -902,11 +902,11 @@ function renderArticle(a){
   // Phase 33 QOL — 3-TIER read pacing (replaces the uniform char/frame budget). The read edge spends a
   // per-frame TIME budget (STEP ms); each character costs ms by category: (cat1) general text in the active
   // zone reads FAST; (cat2) each red-flag PHRASE reveals whole (one clean .hl span — its flash plays) then
-  // the read DWELLS, a processing beat while the caret pauses + the translation writes (slower than the old
-  // instant reveal); (cat3) general text AFTER the last phrase BLASTS — the wow is over, don't drag the demo.
-  // SCALE compresses the whole timeline to keep the ~22s cap on dense docs; relative tier speeds are preserved.
+  // the read costs ~1.5× the plain-text per-char rate (the flash plays + the translation writes — brisk,
+  // barely slower than text, NOT a long pause); (cat3) general text AFTER the last phrase BLASTS — the wow
+  // is over, don't drag the demo. SCALE compresses the timeline to a ~22s cap on dense docs; tiers preserved.
   const STEP=33, MS1=0.45, MS3=0.12;                       // ms/char: cat1 active text · cat3 post-phrase text
-  const dwellMs=segLen=>Math.min(360,120+segLen*4);        // cat2 per-phrase processing dwell (length-scaled, capped) — Phase-36-prelude QOL: ~halved (was 750/220/6) so phrase extraction reads briskly
+  const dwellMs=segLen=>segLen*MS1*1.5;                    // cat2 phrase reveal: ~1.5× the plain-text rate (per-char now, not a fixed dwell) — QOL: even faster phrase rendering
   let lastP=-1; segs.forEach((s,i)=>{ if(s[2]>=0)lastP=i; });   // index of the LAST phrase run (cat1/cat3 boundary)
   let raw=0; segs.forEach((s,i)=>{ const len=s[1]-s[0]; raw += s[2]>=0 ? dwellMs(len) : len*(i>lastP?MS3:MS1); });
   const SCALE=raw>22000?22000/raw:1;

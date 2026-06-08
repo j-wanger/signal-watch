@@ -318,6 +318,33 @@ AML transformation framework. Keep vocabulary consistent with it
   every source md, every corpus-status.json, data/typology-map.json, the grounding core `derive_signals.py`, and
   every derived `*.json` record (they already carried the codes — NO re-derivation). dist/corpus ~2.43MB; `--check
   all` 4/4 ZERO DRIFT, `--selftest` PASS, all 42 `--check-derived` clean. NO non-negotiable change.
+- DATA-SOURCE LENS (Phase 30, M7 — the corpus re-projected by DATA SOURCE; the SYMMETRIC counterpart to the Phase-29
+  capability lens, on the D1–D20 axis; NO new source / non-negotiable / data / build change): the Phase-28 interview
+  tagged every indicator with a `data_source` (D1–D20) code AND Phase 29 ALREADY committed the `data_sources` block in
+  `data/capability-taxonomy.json` + had `build.py` validate (referential integrity) + inline it into `__CORPUS__` —
+  so only the capability (C) axis had a UI; the data (D) axis shipped INERT. Phase 30 surfaces it as the demo's
+  data-access view, ENTIRELY in `corpus.html` (the TIGHTEST phase in the series — `build.py`, the taxonomy, and all
+  42 derived records stay BYTE-FROZEN). (1) THE UI: a FOURTH Select mode — Documents / Typologies / Capabilities /
+  **Data sources** (the Phase-24/29 toggle, extended). The data-source picker lists one card per demanded feed (all
+  20): name, the institution's data-access posture chip (available / partial / not yet), honest demand count + docs/
+  typologies + a covered/partial/gap micro-bar — sorted GAP-PRIORITY (not-yet first, the data-access exposure list).
+  Cards OMIT the group line (data sources are a flat 20-item taxonomy — no D-axis group analogue). Drill a data source
+  → `renderDataSource`: its indicators pooled across every regulator/jurisdiction (grouped by source document, each a
+  clickable drill row), the detection CAPABILITIES those indicators implement (the INVERSE of the capability view's
+  "depends on data" panel, each with its own posture), and a coverage gauge — then drill into a doc's existing per-doc
+  arc, Back returning to the data source (a new `fromDataSource`, mirroring `fromCapability`). (2) THE DISTINCT STORY
+  (why it's not "the same lens twice"): a capability is a BUILD problem ("do we have the detection logic"); a data
+  source is an ACCESS problem ("do we even have the feed"). The payoff: **7 of 20 data sources have posture "not yet"**
+  — those are exactly the SOURCE_DATA indicators (the bank can't action them until it acquires e.g. blockchain
+  analytics / beneficial-ownership data), previously buried per-doc, now legible corpus-wide. (3) HONESTY (the Phase-24
+  synthesis model): a pure RE-PROJECTION of already-grounded data — demand/coverage are honest counts over the existing
+  per-indicator status, posture is the interview answer (already in the demo as per-doc coverage, just re-grouped); NO
+  similarity/overlap/lift number; indicators are NOT de-duplicated across sources; the always-on "Illustrative data &
+  outputs" badge stays. Harness 190→**217** (27 data-source-lens asserts). FROZEN byte-clean: the showcase (index.html
+  + config/** + the 3 typology dists), every source md, every corpus-status.json, data/typology-map.json,
+  **data/capability-taxonomy.json**, the grounding core `derive_signals.py`, **scripts/build.py**, AND every derived
+  `*.json` record (the data_sources axis was already inlined/validated in Phase 29 — NO re-derivation, NO build change).
+  dist/corpus ~2.46MB; `--check all` 4/4 ZERO DRIFT, `--selftest` PASS, all 42 `--check-derived` clean. NO non-negotiable change.
 - IMPORTANT — INVERTED extraction boundary (Phase 16) + the SUBTRACTION (Phase 17): the **LLM EXTRACTS, the
   deterministic layer GATES**, and the old extractor is **DELETED**. The earlier deterministic
   `extract_red_flags` accreted format special-casing every phase yet the LLM still had to author/prune its
@@ -383,7 +410,12 @@ AML transformation framework. Keep vocabulary consistent with it
   + the Phase-29 CAPABILITY LENS (a third Select mode Documents / Typologies / Capabilities; the per-capability
   card carries honest demand + the institution's interview posture + the covered/partial/gap split, gap-priority
   sorted; drilling a capability pools every indicator that depends on it as honest set arithmetic — NO
-  similarity/overlap/lift — and drills into a doc's per-doc arc with Back returning to the capability); 190 assertions · `python3 scripts/derive_signals.py --selftest` runs
+  similarity/overlap/lift — and drills into a doc's per-doc arc with Back returning to the capability)
+  + the Phase-30 DATA-SOURCE LENS (a FOURTH Select mode Documents / Typologies / Capabilities / Data sources — the
+  symmetric counterpart on the D1–D20 axis; the per-data-source card carries honest demand + the institution's
+  data-access posture + the covered/partial/gap split, gap-priority sorted; drilling a data source pools every
+  indicator that depends on that feed [with the inverse "Implements capabilities" panel] and drills into a doc's
+  per-doc arc with Back returning to the data source); 217 assertions · `python3 scripts/derive_signals.py --selftest` runs
   the derivation GATE checks. Pre-present sequence: `--check all` (drift) → `node tests/…` (arc) → walk
   `tests/smoke-checklist.md` (the human-eye checks).
 - Iterate: edit `index.html` / `corpus.html` / a config, rebuild. `python3 -m http.server` optional, never required.
@@ -443,6 +475,20 @@ across every regulator/jurisdiction (honest set arithmetic, NO similarity/overla
 into a doc's per-doc arc, Back returns to the capability. Honest re-projection only (the Phase-24 synthesis model); the
 derived records + the grounding core stay byte-frozen (they already carried the codes — no re-derivation); the always-on
 badge stays; NO non-negotiable change. Harness 165→190.
+Phase 30: data-source lens — the SYMMETRIC counterpart to the Phase-29 capability lens on the D1–D20 data-source
+axis. The Phase-28 interview tagged every indicator with a `data_source` code AND Phase 29 already committed the
+`data_sources` block in `data/capability-taxonomy.json` + had `build.py` validate/inline it — but only the capability
+(C) axis had a UI. Phase 30 surfaces the D axis as a FOURTH Select mode (Documents / Typologies / Capabilities /
+Data sources). The corpus is re-projected by DATA SOURCE: per-data-source honest demand count + the institution's
+data-access posture (available/partial/not-yet) + the covered/partial/gap split, gap-priority sorted; drill a data
+source → its indicators pooled across every regulator/jurisdiction (honest set arithmetic, NO similarity/overlap/lift)
+grouped by source doc, with an inverse "Implements capabilities" panel → drill into a doc's per-doc arc, Back returns
+to the data source. The DISTINCT story vs the capability lens: a capability is a build problem, a data source is an
+ACCESS problem — 7 of 20 feeds are "not yet" available (the SOURCE_DATA indicators the bank can't action until it
+acquires the data), surfaced corpus-wide. The TIGHTEST phase in the series: a pure `corpus.html` UI re-projection +
+harness + docs — `scripts/build.py`, `data/capability-taxonomy.json`, AND all 42 derived records stay BYTE-FROZEN (the
+data_sources axis was already inlined/validated in Phase 29 — no data/build change). Honest re-projection only (the
+Phase-24/29 model); the always-on badge stays; NO non-negotiable change. Harness 190→217.
 See HANDOFF.md §8.
 
 ## Definition of done

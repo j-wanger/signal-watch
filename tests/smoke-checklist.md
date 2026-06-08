@@ -51,6 +51,14 @@ that table.
   appear grouped by source document with a coverage gauge + a "Depends on data" row; click a document row
   to **drill into that doc's per-doc arc**, then **Back** returns to the capability (not the picker). No
   fabricated number — only honest counts + the always-on "Illustrative data & outputs" badge.
+- [ ] **Data sources mode (Phase 30):** on Select, click the **Data sources** toggle (fourth button, after
+  Documents / Typologies / Capabilities). Confirm: one card per data source, each with a data-access posture
+  chip (**available / partial / not yet**), an honest indicator-demand count + a covered/partial/gap micro-bar;
+  the list is **gap-priority** sorted (not-yet feeds lead — the data-access exposure). Click a data source →
+  its indicators appear grouped by source document with a coverage gauge + an **"Implements capabilities"** row
+  (the inverse of the capability view); click a document row to **drill into that doc's per-doc arc**, then
+  **Back** returns to the data source (not the picker). No fabricated number — only honest counts + the
+  always-on badge. (Sanity: the lens is genuinely distinct — at least one feed reads **"not yet"**.)
 
 ## Walk the six-act arc (Next / Back) — read values from the table
 - [ ] **Act 0 — Blind spot:** coverage map renders; gauge animates to the **table value**; red (not-covered) rows visible

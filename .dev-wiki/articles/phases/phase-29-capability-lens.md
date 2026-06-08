@@ -5,9 +5,9 @@ category: phases
 tags: [m7, corpus-explorer, capability-lens, taxonomy, re-projection]
 parents: []
 created: 2026-06-07
-updated: 2026-06-07
+updated: 2026-06-08
 source: plan
-status: active
+status: completed
 scope: ["data/capability-taxonomy.json", "scripts/build.py", "corpus.html", "dist/corpus/index.html", "tests/corpus-explorer.test.mjs", "tests/smoke-checklist.md", "CLAUDE.md", "HANDOFF.md"]
 entry_criteria: "Phase 28 complete + accepted + committed (24e4a08); the corpus is the primary demo; the per-indicator capability/data_source taxonomy from the Phase-28 interview is committed in every derived record but UNUSED in the ship artifact. Direction approved at the goal gate 2026-06-07."
 exit_criteria: "A committed, build-validated data/capability-taxonomy.json; a Capabilities Select mode (per-capability demand count + institution posture + coverage breakdown, gap-sorted) with drill-through into the per-doc arc + Back; honest counts only (no fabricated/similarity/overlap/lift number; always-on badge stays); --check all 4/4 zero drift; --selftest PASS; all 42 records --check-derived clean; harness extended + green; NO non-negotiable change."

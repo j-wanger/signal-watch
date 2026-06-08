@@ -165,10 +165,12 @@ function makeEnv(reduced) {
 const EPILOGUE = `;__capture({coverageIndex,buildNows,isLive,curAdv,pick,gotoScreen,toSelect,back,render,renderClose,renderSignal,ADVISORIES,
   clusters,clusterFor,enterSynthesis,renderSelect,
   capAgg,enterCapability,renderCapability,indsForCap,CAPS,CAP_BY,DS_BY,
+  dsAgg,enterDataSource,renderDataSource,indsForDS,DSRC,
   get selected(){return selected}, set selected(v){selected=v},
   get view(){return view}, get screen(){return screen},
   get currentTypology(){return currentTypology}, get fromTypology(){return fromTypology},
   get currentCapability(){return currentCapability}, get fromCapability(){return fromCapability},
+  get currentDataSource(){return currentDataSource}, get fromDataSource(){return fromDataSource},
   get selMode(){return selMode}, set selMode(v){selMode=v}});`;
 function boot(reduced, raw) {
   const env = makeEnv(reduced);
@@ -595,6 +597,80 @@ apiC.toSelect();
 eq(apiC.view, 'select', 'toSelect() returns to the picker');
 ok(apiC.currentCapability === null && apiC.fromCapability === null, 'toSelect() clears the capability state');
 ok(envC.__errors.length === 0, 'the full capability-lens flow produced no console errors');
+
+/* ===================== Phase 30 — the DATA-SOURCE LENS ===================== */
+// the symmetric counterpart to the capability lens on the D1–D20 data axis: a FOURTH Select mode →
+// per-data-source DEMAND (honest count) + the institution's access POSTURE + the covered/partial/gap
+// split, gap-priority sorted → drill into a data source → its indicators grouped by source document
+// (+ the capabilities they implement, the inverse panel) → drill into a doc's per-doc arc → Back returns
+// to the data source. Honest counts only (NO similarity/overlap/lift); build.py + the taxonomy + the 42
+// records were already inlined/validated in Phase 29 — this is a pure UI re-projection of the data_source codes.
+console.log('\n— Phase 30: the data-source lens —');
+const envD = boot(true);
+const apiD = envD.__api;
+
+// (D1) the data-source taxonomy is present + well-shaped (referential integrity gated upstream in build.py)
+ok(Array.isArray(apiD.DSRC) && apiD.DSRC.length === 20, `taxonomy carries 20 data sources (got ${apiD.DSRC && apiD.DSRC.length})`);
+ok(apiD.DSRC.every(d => d.id && d.name && ['y', 'n', 'partial'].includes(d.posture)),
+  'every data source has an id + name + a posture ∈ {y,n,partial}');
+
+// (D2) the Data-sources Select mode renders one card per demanded data source, gap-priority sorted
+apiD.selMode = 'datasource'; apiD.renderSelect();
+const dag = apiD.dsAgg();
+ok(dag.length > 0 && dag.every(x => x.demand > 0), `dsAgg() returns only demanded data sources (${dag.length})`);
+const dsCards = (envD.__stage._html.match(/class="advcard live ds"/g) || []).length;
+eq(dsCards, dag.length, 'data-source mode renders one card per demanded data source');
+ok(/Data sources<\/button>/.test(envD.__stage._html), 'the Documents/Typologies/Capabilities/Data sources toggle shows the fourth mode');
+const drank = { n: 0, partial: 1, y: 2 };
+ok(dag.every((x, i) => i === 0 || drank[dag[i - 1].d.posture] <= drank[x.d.posture]),
+  'data sources are sorted gap-priority (not-yet first, then partial, then in-place)');
+ok(envD.__errors.length === 0, 'data-source-mode picker rendered with no console errors');
+
+// (D2b) HONESTY — demand/coverage are honest counts; no fabricated cross-source metric in the picker
+ok(!/\blift\b/i.test(envD.__stage._html) && !/\d+\s*%\s*(similar|overlap|match)/i.test(envD.__stage._html),
+  'data-source picker claims NO similarity/overlap/lift metric');
+ok(dag.every(x => envD.__stage._html.includes(`${x.demand} indicator${x.demand === 1 ? '' : 's'} · ${x.docs} doc`)),
+  'each data-source card shows its honest demand + document count');
+
+// (D2c) the lens is genuinely DISTINCT from the capability lens — at least one feed is "not yet" available
+// (the SOURCE_DATA / data-access exposure the capability lens can't surface)
+ok(dag.some(x => x.d.posture === 'n'), 'at least one demanded data source is "not yet" available (the data-access exposure)');
+
+// (D3) drill into the highest-exposure data source — its pool = every live indicator carrying that code
+const topDS = dag[0];
+apiD.enterDataSource(topDS.d.id);
+eq(apiD.view, 'datasource', 'enterDataSource() enters the data-source view');
+eq(apiD.currentDataSource, topDS.d.id, 'currentDataSource is the chosen data source');
+const poolD = apiD.indsForDS(topDS.d.id).map(r => r.i);
+eq(poolD.length, topDS.demand, 'the data-source view pools exactly the indicators carrying that data_source code');
+eq(numText(envD, 'gnum'), apiD.coverageIndex(poolD),
+  'data-source coverage = coverageIndex over the indicators that depend on it (honest set arithmetic)');
+ok(/Data-source coverage/.test(envD.__stage._html), 'the data-source gauge labels honestly');
+ok(/Implements capabilities/.test(envD.__stage._html), 'the data-source view shows the capabilities its indicators implement (the inverse panel)');
+ok(/NOT de-duplicated or matched across sources/.test(envD.__stage._html),
+  'honesty note: indicators are NOT de-duplicated/matched across sources');
+ok(envD.__errors.length === 0, 'data-source drill rendered with no console errors');
+
+// (D3b) one clickable drill row per contributing document, each traceable by id
+const docsD = [...new Set(apiD.indsForDS(topDS.d.id).map(r => r.a.id))];
+const dsRows = (envD.__stage._html.match(/class="covrow synthrow"/g) || []).length;
+eq(dsRows, docsD.length, 'the data-source view lists one clickable row per contributing document');
+ok(docsD.every(id => envD.__stage._html.includes(`data-id="${id}"`)),
+  'each data-source document row is traceable to its source (data-id)');
+
+// (D4) drill into a doc's per-doc arc; Back returns to the origin data source (not the picker)
+apiD.pick(docsD[0], null, null, topDS.d.id);
+eq(apiD.view, 'detail', 'clicking a data-source document row drills into the per-doc arc');
+eq(apiD.fromDataSource, topDS.d.id, 'the drilled doc remembers its origin data source');
+apiD.back();
+eq(apiD.view, 'datasource', 'Back from the first detail screen returns to the origin data source (not the picker)');
+eq(apiD.currentDataSource, topDS.d.id, 'Back lands on the same data source');
+
+// (D5) toSelect() fully resets the data-source state
+apiD.toSelect();
+eq(apiD.view, 'select', 'toSelect() returns to the picker');
+ok(apiD.currentDataSource === null && apiD.fromDataSource === null, 'toSelect() clears the data-source state');
+ok(envD.__errors.length === 0, 'the full data-source-lens flow produced no console errors');
 
 /* ===== Phase 26 — register beats: source grouping/sort, section grouping, build-log, combination-lift ===== */
 const env26 = boot(true);

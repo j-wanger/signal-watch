@@ -406,6 +406,27 @@ function capAgg(){
   }).filter(x=>x.demand>0)
     .sort((a,b)=>(POSTURE_RANK[a.c.posture]??3)-(POSTURE_RANK[b.c.posture]??3) || b.demand-a.demand || String(a.c.name).localeCompare(String(b.c.name)));
 }
+// Phase 30 — the DATA-SOURCE lens (D1–D20), the symmetric counterpart to the capability lens on the
+// data axis. The capability lens asks "do we have the detection CAPABILITY" (a build problem); this asks
+// "do we even have the DATA FEED" (an access/vendor problem). The payoff: the SOURCE_DATA indicators —
+// the ones the bank can't act on because the feed is "not yet" available — pooled corpus-wide.
+function indsForDS(code){const rows=[];ADVISORIES.forEach(a=>{if(!isLive(a))return;
+  a.indicators.forEach(i=>{if(i.data_source===code)rows.push({i,a});});});return rows;}
+// aggregate the corpus by data source — honest demand + covered/partial/gap split + contributing docs/
+// typologies/jurisdictions. Sorted GAP-PRIORITY: not-yet posture first, then by demand (the exposure list).
+function dsAgg(){
+  return DSRC.map(d=>{
+    const rows=indsForDS(d.id), inds=rows.map(r=>r.i);
+    const covered=inds.filter(i=>i.status==='covered').length;
+    const partial=inds.filter(i=>i.status==='partial').length;
+    const gap=inds.filter(i=>i.status==='gap').length;
+    return {d, rows, demand:inds.length, covered, partial, gap, cov:coverageIndex(inds),
+      docs:new Set(rows.map(r=>r.a.id)).size,
+      typols:new Set(rows.map(r=>r.a.typology).filter(Boolean)).size,
+      juris:[...new Set(rows.map(r=>r.a.jurisdiction||'—'))].sort()};
+  }).filter(x=>x.demand>0)
+    .sort((a,b)=>(POSTURE_RANK[a.d.posture]??3)-(POSTURE_RANK[b.d.posture]??3) || b.demand-a.demand || String(a.d.name).localeCompare(String(b.d.name)));
+}
 // a tiny segmented covered/partial/gap bar — honest counts, shared color vocabulary.
 function covSeg(covered,partial,gap){
   const t=covered+partial+gap||1;
@@ -415,11 +436,13 @@ function covSeg(covered,partial,gap){
 
 /* ---------- state + chrome ---------- */
 let view='landing', current=null, screen=0, maxScreen=0, timers=[];  // Phase 26: the story landing is the entry
-let selMode='doc';          // Select picker mode: 'doc' | 'typology' | 'capability' (Phase 29)
+let selMode='doc';          // Select picker mode: 'doc' | 'typology' | 'capability' | 'datasource'
 let currentTypology=null;   // the active cluster when view==='synthesis'
 let fromTypology=null;      // the cluster a doc was drilled from (so Back returns to it)
 let currentCapability=null; // the active capability when view==='capability' (Phase 29)
 let fromCapability=null;    // the capability a doc was drilled from (so Back returns to it)
+let currentDataSource=null; // the active data source when view==='datasource' (Phase 30)
+let fromDataSource=null;    // the data source a doc was drilled from (so Back returns to it)
 // the human gate: which BUILD_NOW indicators the presenter has picked to build (per-advisory,
 // reset on pick()). Drives the Signal cards and the close-the-loop coverage rise.
 let selected=new Set();
@@ -433,7 +456,7 @@ function clearTimers(){timers.forEach(t=>clearTimeout(t));timers=[];}
 function T(fn,ms){if(REDUCED){fn();return 0;}const id=setTimeout(fn,ms);timers.push(id);return id;}
 
 function curAdv(){return ADVISORIES.find(a=>a.id===current)||null;}
-function stepIndex(){return (view==='landing'||view==='select'||view==='synthesis'||view==='capability')?0:screen+1;}  // landing/Select/synthesis/capability=0, then detail screens
+function stepIndex(){return (view==='landing'||view==='select'||view==='synthesis'||view==='capability'||view==='datasource')?0:screen+1;}  // landing/Select/synthesis/capability/datasource=0, then detail screens
 
 function renderStepper(){
   if(view==='landing'){stepper.innerHTML='';return;}   // the landing is a cover page — no stepper
@@ -480,28 +503,39 @@ function renderSelect(){
   const fintracN=ADVISORIES.filter(a=>a.doc_type==='FINTRAC').length;
   const cl=clusters();
   const xjN=cl.filter(c=>c.xj).length;
-  const byTyp=selMode==='typology', byCap=selMode==='capability';
+  const byTyp=selMode==='typology', byCap=selMode==='capability', byDS=selMode==='datasource';
   const ag = byCap ? capAgg() : null;
   const capHave = byCap ? ag.filter(x=>x.c.posture==='y').length : 0;
   const capPart = byCap ? ag.filter(x=>x.c.posture==='partial').length : 0;
   const capGap  = byCap ? ag.filter(x=>x.c.posture==='n').length : 0;
+  const dsa = byDS ? dsAgg() : null;
+  const dsHave = byDS ? dsa.filter(x=>x.d.posture==='y').length : 0;
+  const dsPart = byDS ? dsa.filter(x=>x.d.posture==='partial').length : 0;
+  const dsGap  = byDS ? dsa.filter(x=>x.d.posture==='n').length : 0;
   const toggle=`<div class="modetoggle">
-      <button data-mode="doc" class="${(!byTyp&&!byCap)?'on':''}">Documents</button>
+      <button data-mode="doc" class="${(!byTyp&&!byCap&&!byDS)?'on':''}">Documents</button>
       <button data-mode="typology" class="${byTyp?'on':''}">Typologies</button>
       <button data-mode="capability" class="${byCap?'on':''}">Capabilities</button>
+      <button data-mode="datasource" class="${byDS?'on':''}">Data sources</button>
     </div>`;
   const count = byCap
     ? `<span class="sct">${ag.length} detection capabilities · ${capHave} in place · ${capPart} partial · ${capGap} not yet · across ${live} derived documents</span>`
+    : byDS
+    ? `<span class="sct">${dsa.length} data sources · ${dsHave} available · ${dsPart} partial · ${dsGap} not yet · across ${live} derived documents</span>`
     : byTyp
     ? `<span class="sct">${cl.length} typologies · ${xjN} cross-jurisdiction · ${live} derived documents</span>`
     : `<span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${fintracN} FINTRAC · ${live} derived · ${nd} non-derivable</span>`;
   const lead = byCap
     ? `Every red flag in the corpus implies a <b>detection capability</b>. Pooled across all regulators and jurisdictions, here is what the corpus demands — each capability tagged with the institution's own posture and the number of indicators that depend on it. Sorted by <b>where you're most exposed</b>: capabilities not yet in place, by how many indicators need them. Pick one to see the indicators and drill into any document.`
+    : byDS
+    ? `Every red flag depends on a <b>data source</b> — a feed the institution must actually have to act on it. A capability you could build is worthless if you can't see the data. Pooled across all regulators and jurisdictions, here is what the corpus <b>requires</b> — each feed tagged with the institution's own access posture and the number of indicators that depend on it. Sorted by <b>where you're most exposed</b>: data you don't yet have, by how many indicators need it. Pick one to see the indicators it gates and drill into any document.`
     : byTyp
     ? `Group the corpus by money-laundering typology and see the <b>combined</b> picture: the same typology often appears across regulators and jurisdictions, and no single advisory enumerates it all. <b>${xjN}</b> typolog${xjN===1?'y spans':'ies span'} both the US and Canada. Pick a typology to see its cluster and combined coverage, then drill into any document's loop.`
     : `The same signal engine, pointed at a multi-jurisdiction public corpus — US-federal FinCEN advisories + alerts and OFAC sanctions advisories, plus Canadian <b>FINTRAC</b> operational alerts. Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.`;
   const note = byCap
     ? `Capabilities are a fixed taxonomy; each indicator is tagged to exactly one. Demand, coverage, and the covered/partial/gap split are honest counts over the existing per-indicator statuses — no capability score, similarity, or overlap is computed or claimed. Posture is the institution's own assessment (illustrative).`
+    : byDS
+    ? `Data sources are a fixed taxonomy; each indicator is tagged to exactly one. Demand, coverage, and the covered/partial/gap split are honest counts over the existing per-indicator statuses — no data-source score, similarity, or overlap is computed or claimed. Posture is the institution's own data-access assessment (illustrative).`
     : byTyp
     ? `Documents are grouped by their typology (a closed-vocabulary overlay, traceable to each document's stated subject). Combined coverage is honest union arithmetic over the existing per-indicator statuses — no similarity, overlap, or lift between regulators is computed or claimed.`
     : `Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the cited source documents (each carries its own public-source attribution).`;
@@ -517,11 +551,12 @@ function renderSelect(){
       <div class="advgrid">${docs.map(a=>advCard(a)).join('')}</div></div>`;
   }).join('');
   const gridHtml = byCap ? `<div class="advgrid">${ag.map(capCard).join('')}</div>`
+                 : byDS ? `<div class="advgrid">${dsa.map(dsCard).join('')}</div>`
                  : byTyp ? `<div class="advgrid">${cl.map(typoCard).join('')}</div>`
                  : groupsHtml;
   stage.innerHTML=`<div class="scene">
     <div class="eyebrow">FinCEN + OFAC + FINTRAC corpus</div>
-    <h2>${byCap?'Pick a capability. <em>See where you\'re exposed.</em>':byTyp?'Pick a typology. <em>See the corpus combine.</em>':'Pick a document. <em>Watch the loop derive it.</em>'}</h2>
+    <h2>${byCap?'Pick a capability. <em>See where you\'re exposed.</em>':byDS?'Pick a data source. <em>See what you can\'t yet see.</em>':byTyp?'Pick a typology. <em>See the corpus combine.</em>':'Pick a document. <em>Watch the loop derive it.</em>'}</h2>
     <p class="lead">${lead}</p>
     <div class="selhead">
       ${count}
@@ -532,6 +567,7 @@ function renderSelect(){
   </div>`;
   stage.querySelectorAll('.modetoggle button').forEach(b=>b.onclick=()=>{selMode=b.dataset.mode;render();});
   if(byCap) stage.querySelectorAll('.advcard.cap').forEach(el=>el.onclick=()=>enterCapability(el.dataset.cap));
+  else if(byDS) stage.querySelectorAll('.advcard.ds').forEach(el=>el.onclick=()=>enterDataSource(el.dataset.ds));
   else if(byTyp) stage.querySelectorAll('.advcard.typo').forEach(el=>el.onclick=()=>enterSynthesis(el.dataset.typ));
   else stage.querySelectorAll('.advcard.live').forEach(el=>el.onclick=()=>pick(el.dataset.id));
 }
@@ -541,6 +577,17 @@ function capCard(x){
   return `<div class="advcard live cap" data-cap="${esc(c.id)}">
     <div class="actop"><span class="acleft"><span class="acno">${esc(c.id)}</span><span class="chip grp">${esc(c.group||'')}</span></span>${postureChip(c.posture)}</div>
     <div class="actitle">${esc(c.name)}</div>
+    <div class="acmeta">${x.demand} indicator${x.demand===1?'':'s'} · ${x.docs} doc${x.docs===1?'':'s'} · ${x.typols} typolog${x.typols===1?'y':'ies'} · coverage ${x.cov}%</div>
+    ${covSeg(x.covered,x.partial,x.gap)}
+  </div>`;
+}
+// a data-source card (data-source mode of the picker) — reuses .advcard styling. No `group` line: data
+// sources are a flat 20-item taxonomy (the C-lens card's group chip has no D-axis analogue).
+function dsCard(x){
+  const d=x.d;
+  return `<div class="advcard live ds" data-ds="${esc(d.id)}">
+    <div class="actop"><span class="acleft"><span class="acno">${esc(d.id)}</span></span>${postureChip(d.posture)}</div>
+    <div class="actitle">${esc(d.name)}</div>
     <div class="acmeta">${x.demand} indicator${x.demand===1?'':'s'} · ${x.docs} doc${x.docs===1?'':'s'} · ${x.typols} typolog${x.typols===1?'y':'ies'} · coverage ${x.cov}%</div>
     ${covSeg(x.covered,x.partial,x.gap)}
   </div>`;
@@ -650,6 +697,62 @@ function renderCapability(code){
     <div class="framenote">Indicators are pooled by capability across every regulator and jurisdiction — counted as enumerated, NOT de-duplicated or matched across sources (no similarity or overlap is computed or claimed). Posture and coverage are illustrative. Pick any document to walk its own loop.</div>
   </div>`;
   stage.querySelectorAll('.synthrow').forEach(el=>el.onclick=()=>pick(el.dataset.id,null,code));
+  T(()=>{const f=document.getElementById('gfill');if(f)f.style.width=cov+'%';animVal('gnum',0,cov,900,'%');},250);
+}
+
+/* ---------- data-source drill view (Phase 30) — one data feed across the whole corpus ---------- */
+// the inverse of the capability drill: pool every indicator that DEPENDS ON this data source, show the
+// detection CAPABILITIES they implement (each with its own posture), and the coverage that this one feed
+// gates. The honesty model is identical — pooled honest counts, NO similarity/overlap/lift.
+function capNum(c){return (typeof c==='string'&&/^C\d+$/.test(c))?(+c.slice(1)):999;}
+function renderDataSource(code){
+  const d=DS_BY[code]; if(!d){toSelect();return;}
+  const rows=indsForDS(code); if(!rows.length){toSelect();return;}
+  const inds=rows.map(r=>r.i), cov=coverageIndex(inds);
+  const covered=inds.filter(i=>i.status==='covered').length;
+  const partial=inds.filter(i=>i.status==='partial').length;
+  const gap=inds.filter(i=>i.status==='gap').length;
+  const juris=[...new Set(rows.map(r=>r.a.jurisdiction||'—'))].sort();
+  // the detection CAPABILITIES these indicators implement, each with its OWN interview posture (colored
+  // dot) — the inverse of the capability view's "depends on data". Honest distinct codes.
+  const capCodes=[...new Set(rows.map(r=>r.i.capability).filter(Boolean))].sort((x,y)=>capNum(x)-capNum(y));
+  const capItem=c=>{const cp=CAP_BY[c];if(!cp)return '';
+    const col=cp.posture==='y'?'var(--green)':cp.posture==='partial'?'var(--signal)':'var(--rose)';
+    return `<span class="capdepitem"><span class="dot" style="background:${col}"></span>${esc(cp.name)}</span>`;};
+  const capChips=capCodes.map(capItem).join('');
+  // group the indicators by source document; the document HEADER row is the drill target (→ its per-doc arc).
+  const byDoc=new Map();
+  rows.forEach(r=>{if(!byDoc.has(r.a.id))byDoc.set(r.a.id,{a:r.a,inds:[]});byDoc.get(r.a.id).inds.push(r.i);});
+  const groups=[...byDoc.values()].sort((x,y)=>
+    String(x.a.jurisdiction||'').localeCompare(String(y.a.jurisdiction||'')) || String(x.a.id).localeCompare(String(y.a.id)));
+  const indRow=i=>`<div class="covrow"><div class="clabel">${esc(i.red_flag||shortFlag(i.flag,170))}<div class="csub">"${esc(shortFlag(i.flag,110))}"</div></div><span class="pill ${i.status||'gap'}">${i.status==='gap'?'not covered':esc(i.status||'gap')}</span></div>`;
+  const body=groups.map(g=>{
+    const dc=coverageIndex(g.inds);
+    const head=`<div class="covrow synthrow" data-id="${esc(g.a.id)}" role="button">
+      <div class="clabel">${esc(g.a.title||g.a.id)}<div class="csub">${esc(g.a.advisory||g.a.id)} · ${g.inds.length} indicator${g.inds.length===1?'':'s'} need this feed · coverage ${dc}%</div></div>
+      <span class="acleft">${jchip(g.a.jurisdiction||'—')}<span class="chip doc">${esc(g.a.doc_type||'')}</span></span>
+    </div>`;
+    return head + g.inds.map(indRow).join('');
+  }).join('');
+  const exposed=d.posture==='n';
+  stage.innerHTML=`<div class="scene">
+    <div class="eyebrow">Data-source lens</div>
+    <h2>${esc(d.name)}</h2>
+    <div class="srccap"><b>Your access.</b> ${postureChip(d.posture)} &nbsp;${esc(d.desc||'')}</div>
+    <p class="lead"><b>${inds.length}</b> red flag${inds.length===1?'':'s'} across <b>${byDoc.size}</b> document${byDoc.size===1?'':'s'} and ${juris.map(esc).join(' + ')} depend on this data source — ${covered} covered · ${partial} partial · ${gap} gap today.${exposed&&inds.length?` Until this feed is in place, <b>${inds.length}</b> indicator${inds.length===1?'':'s'} the corpus enumerates can't be actioned — no matter what you build.`:gap?` Acquiring it would unblock <b>${gap}</b> indicator${gap===1?'':'s'} still uncovered.`:''} Pick a document to walk its loop.</p>
+    ${capChips?`<div class="capdep"><span class="dl">Implements capabilities</span> ${capChips}</div>`:''}
+    <div class="covwrap">
+      <div class="covgrid">${body}</div>
+      <div class="gauge">
+        <div class="gh">Data-source coverage</div>
+        <div class="gnum" id="gnum">${cov}%</div>
+        <div class="gd">of ${inds.length} indicator${inds.length===1?'':'s'} · ${byDoc.size} doc${byDoc.size===1?'':'s'}</div>
+        <div class="gbar"><div class="gfill" id="gfill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="framenote">Indicators are pooled by data source across every regulator and jurisdiction — counted as enumerated, NOT de-duplicated or matched across sources (no similarity or overlap is computed or claimed). Posture and coverage are illustrative. Pick any document to walk its own loop.</div>
+  </div>`;
+  stage.querySelectorAll('.synthrow').forEach(el=>el.onclick=()=>pick(el.dataset.id,null,null,code));
   T(()=>{const f=document.getElementById('gfill');if(f)f.style.width=cov+'%';animVal('gnum',0,cov,900,'%');},250);
 }
 function advCard(a){
@@ -1054,6 +1157,10 @@ function render(){
       if(!currentCapability){ toSelect(); return; }
       renderCapability(currentCapability);
     }
+    else if(view==='datasource'){
+      if(!currentDataSource){ toSelect(); return; }
+      renderDataSource(currentDataSource);
+    }
     else {
       const a=curAdv();
       if(!isLive(a)){ toSelect(); return; }   // defensive: never strand on a non-live detail view
@@ -1087,27 +1194,28 @@ function updateAttribution(){
 /* ---------- navigation ---------- */
 // `from` (optional) = the typology cluster a doc was drilled from; `fromCap` = the capability it was
 // drilled from (Phase 29). Either makes Back from the first detail screen return to that lens.
-function pick(id,from,fromCap){const a=ADVISORIES.find(x=>x.id===id);if(!isLive(a))return;
-  fromTypology=from||null;fromCapability=fromCap||null;current=id;view='detail';screen=0;maxScreen=0;
+function pick(id,from,fromCap,fromDS){const a=ADVISORIES.find(x=>x.id===id);if(!isLive(a))return;
+  fromTypology=from||null;fromCapability=fromCap||null;fromDataSource=fromDS||null;current=id;view='detail';screen=0;maxScreen=0;
   selected=new Set(buildNows(a).map(i=>i.id));  // default: all build-now gaps selected — the presenter deselects to opt out
   render();}
 function enterSynthesis(t){currentTypology=t;view='synthesis';screen=0;maxScreen=0;render();}
 function enterCapability(code){currentCapability=code;view='capability';screen=0;maxScreen=0;render();}
+function enterDataSource(code){currentDataSource=code;view='datasource';screen=0;maxScreen=0;render();}
 function gotoScreen(s){screen=Math.max(0,Math.min(DETAIL.length-1,s));maxScreen=Math.max(maxScreen,screen);render();}
-function toSelect(){view='select';current=null;currentTypology=null;fromTypology=null;currentCapability=null;fromCapability=null;screen=0;maxScreen=0;render();}
-function toLanding(){view='landing';current=null;currentTypology=null;fromTypology=null;currentCapability=null;fromCapability=null;screen=0;maxScreen=0;render();}
+function toSelect(){view='select';current=null;currentTypology=null;fromTypology=null;currentCapability=null;fromCapability=null;currentDataSource=null;fromDataSource=null;screen=0;maxScreen=0;render();}
+function toLanding(){view='landing';current=null;currentTypology=null;fromTypology=null;currentCapability=null;fromCapability=null;currentDataSource=null;fromDataSource=null;screen=0;maxScreen=0;render();}
 function advance(){
   if(view==='landing'){toSelect();return;}                       // Enter the corpus
-  if(view==='select'||view==='synthesis'||view==='capability')return;  // pick by clicking a card / row
+  if(view==='select'||view==='synthesis'||view==='capability'||view==='datasource')return;  // pick by clicking a card / row
   if(screen>=DETAIL.length-1){toSelect();return;}
   gotoScreen(screen+1);
 }
 function back(){
   if(view==='landing')return;
-  if(view==='synthesis'||view==='capability'){toSelect();return;}  // cluster / capability → the picker
+  if(view==='synthesis'||view==='capability'||view==='datasource'){toSelect();return;}  // cluster / capability / data source → the picker
   if(view==='select'){toLanding();return;}                         // Select → back to the cover
-  // drilled from a lens → Back from the first detail screen returns to it (capability takes precedence)
-  if(screen<=0){ if(fromCapability){enterCapability(fromCapability);return;} if(fromTypology){enterSynthesis(fromTypology);return;} toSelect();return; }
+  // drilled from a lens → Back from the first detail screen returns to it (each pick() sets exactly one)
+  if(screen<=0){ if(fromCapability){enterCapability(fromCapability);return;} if(fromDataSource){enterDataSource(fromDataSource);return;} if(fromTypology){enterSynthesis(fromTypology);return;} toSelect();return; }
   gotoScreen(screen-1);
 }
 function updateControls(){
@@ -1122,7 +1230,7 @@ function updateControls(){
     backBtn.style.visibility='hidden';
     resetBtn.style.visibility='hidden';
     nextBtn.style.visibility='hidden';
-    hint.textContent=selMode==='typology'?'Pick a typology to see the corpus combine →':selMode==='capability'?'Pick a capability to see where you\'re exposed →':'Pick a derived document to explore →';
+    hint.textContent=selMode==='typology'?'Pick a typology to see the corpus combine →':selMode==='capability'?'Pick a capability to see where you\'re exposed →':selMode==='datasource'?'Pick a data source to see what it gates →':'Pick a derived document to explore →';
     return;
   }
   if(view==='synthesis'){
@@ -1139,6 +1247,13 @@ function updateControls(){
     hint.textContent='Pick a document to walk its loop →';
     return;
   }
+  if(view==='datasource'){
+    backBtn.style.visibility='visible'; backBtn.textContent='‹ Data sources';
+    resetBtn.style.visibility='visible';
+    nextBtn.style.visibility='hidden';
+    hint.textContent='Pick a document to walk its loop →';
+    return;
+  }
   backBtn.style.visibility='visible';
   resetBtn.style.visibility='visible';
   nextBtn.style.visibility='visible';
@@ -1147,6 +1262,7 @@ function updateControls(){
   const hints=['The agent reads the source and translates each red flag','Each red flag scored against the library','Pick the build-now gaps to commit','The agent builds your committed signals','Why composition beats a signal alone — illustrative','Coverage closes on what you built'];
   // when drilled from a lens, Back from the first detail screen returns to it (capability takes precedence)
   backBtn.textContent=(screen===0 && fromCapability && CAP_BY[fromCapability])?('‹ '+CAP_BY[fromCapability].name)
+    :(screen===0 && fromDataSource && DS_BY[fromDataSource])?('‹ '+DS_BY[fromDataSource].name)
     :(screen===0 && fromTypology)?('‹ '+typoLabel(fromTypology))
     :(backLabels[screen]||'‹ Back');
   nextBtn.textContent=nextLabels[screen]||'Next ›';

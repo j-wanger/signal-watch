@@ -326,6 +326,23 @@ byte-frozen; `build.py` validates it at the build boundary (closed vocabulary + 
 total live-document coverage, fail-loud) — agent proposes the map, the deterministic gate disposes. No
 non-negotiable changed.
 
+**Capability & data-source lenses (Phase 29–30) — coverage by what you *have*.** The **Select** toggle now
+carries four modes: **Documents / Typologies / Capabilities / Data sources**. The Phase-28 interview tagged
+every indicator with both a detection-**capability** code (C1–C28) and a **data-source** code (D1–D20), each
+with the institution's own posture (in place / partial / not yet) — these two lenses re-project the whole
+corpus by those axes. In **Capabilities** mode you see, per detection capability, how many corpus indicators
+demand it + your posture + the covered/partial/gap split (gap-priority sorted); drill one to pool its
+indicators across every regulator and jurisdiction, then into any document's loop. **Data sources** mode is
+the symmetric counterpart on the data axis — and it makes a *distinct* point: a capability is a **build**
+problem, a data source is an **access** problem. **7 of 20 feeds are "not yet" available** (blockchain
+analytics, beneficial-ownership data, …) — exactly the indicators the bank can't action until it acquires the
+data, now legible corpus-wide instead of buried per document. Both lenses are **pure honest re-projection** —
+demand and coverage are counts over the existing per-indicator statuses, posture is the interview answer; **no
+similarity, overlap, or "lift" is computed or claimed**, and indicators are *not* de-duplicated across sources.
+The capability/data-source labels + postures live in one committed overlay (`data/capability-taxonomy.json`,
+validated at the build boundary); the 42 derived records already carry the codes, so they and `build.py` stay
+byte-frozen. No non-negotiable changed.
+
 ## Present it
 
 - Build the typology you want and open `dist/<id>/index.html` in the presentation browser,

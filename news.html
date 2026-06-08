@@ -600,14 +600,99 @@ async function liveRun(){
     const data = await r.json();
     if(!r.ok){ status.textContent = 'Extraction failed: ' + (data.error || ('HTTP ' + r.status)); return; }
     const rec = data.record, drop = (data.dropped || []).length;
+    rec.scan_id = data.scan_id || null;            // Phase 36: lets the Disposition gate escalate THIS scan's entities
     const i = NEWS.articles.findIndex(a => a.id === rec.id);
     if(i >= 0) NEWS.articles[i] = rec; else NEWS.articles.unshift(rec);
     status.textContent = rec.entities.length + ' entities · ' + rec.red_flags.length + ' red flags grounded'
       + (drop ? (' · ' + drop + ' ungrounded dropped') : '');
+    await liveRefreshWatchlist();                  // screen this scan against the current escalated watchlist
     go('read', rec.id);
   }catch(ex){
     status.textContent = 'Could not reach the local companion (' + NEWS.live.extract + ') — ' + ex.message;
   }
+}
+/* ── Phase 36 — escalated-only feedback watchlist (companion-served ONLY; render_news STRIPS this whole
+   region for the offline dist/news, so zero store/network code ships). The Screen step scores entities
+   against book ∪ the escalated watchlist; the Disposition gate escalates ANY extracted entity, which POSTs
+   to the companion and grows the watchlist for the NEXT scan — the screen surface compounds. ── */
+let _baseRenderDisposition = null;
+NEWS._watch = [];                                   // escalated scanned rows, mapped to the screening shape
+async function liveRefreshWatchlist(){
+  if(!NEWS.live || !NEWS.live.watchlist) return;
+  try{
+    const r = await fetch(NEWS.live.watchlist);
+    if(!r.ok) return;
+    const d = await r.json();
+    NEWS._watch = (d.rows || []).filter(x => x.kind === 'scanned').map(x => ({
+      id:x.id, name:x.name, type:x.type, kind:'scanned',
+      role:'watchlist', country:(x.provenance || 'escalated from a prior scan') }));
+  }catch(ex){ /* keep the prior watchlist on a transient failure */ }
+}
+/* Screen against book ∪ watchlist. A live-only REASSIGNMENT (the offline matchEntities, byte-frozen via the
+   strip, stays book-only); when the watchlist is empty it defers to the base, so this is inert until
+   something is escalated. The body mirrors the base deliberately — refactoring the base signature would
+   change dist/news, which must stay byte-identical. */
+const _baseMatchEntities = matchEntities;
+matchEntities = function(a){
+  const extra = NEWS._watch || [];
+  if(!extra.length) return _baseMatchEntities(a);
+  const th = threshold();
+  const rows = ((NEWS.book && NEWS.book.rows) || []).concat(extra);
+  return (a.entities || []).map(en => {
+    let best = null;
+    for(const r of rows){ const sc = simScore(en.name, r.name); if(!best || sc > best.score) best = {row:r, score:sc}; }
+    const score = best ? best.score : 0, hit = score >= th, exact = hit && mnorm(en.name) === mnorm(best.row.name);
+    return { entity:en, row: best?best.row:null, score, hit, exact, kind: !hit?'none':(exact?'exact':'near') };
+  });
+};
+async function livePostDisposition(eid, decision){
+  const a = articleById(state.articleId);
+  if(!a || !a.scan_id || !NEWS.live.disposition) return false;
+  try{
+    const r = await fetch(NEWS.live.disposition, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ scan_id:a.scan_id, entity_id:eid, decision }) });
+    if(!r.ok) return false;
+    await liveRefreshWatchlist();                   // reflect the new (or removed) watchlist row immediately
+    return true;
+  }catch(ex){ return false; }
+}
+/* Disposition (live): escalate ANY extracted entity to the watchlist. Escalating a book/watchlist HIT also
+   confirms it as an exposure (state.dispo) so the Exposure view shows it. Committed (non-persisted) articles
+   have no scan_id → fall back to the base gate. */
+function liveRenderDisposition(){
+  const a = articleById(state.articleId);
+  if(!a || !a.scan_id) return _baseRenderDisposition();
+  if(!a._escal) a._escal = {};
+  const m = matchEntities(a).sort((x,y) => y.score - x.score);
+  const byId = {}; m.forEach(x => byId[x.entity.id] = x);
+  let h = rail('disposition') + crumbs('disposition');
+  h += '<h1>Disposition — the human gate</h1>';
+  h += '<p class="lead">The agent proposes; the analyst disposes. <b>Escalate</b> an entity to add it to the '
+     + 'live watchlist — every article you screen next is matched against it too. Escalation is how the screen '
+     + 'surface compounds; a high score is <em>not</em> a confirmation.</p>';
+  h += '<div class="rows">';
+  (a.entities || []).forEach(en => {
+    const x = byId[en.id] || { score:0, hit:false, kind:'none', row:null };
+    const on = !!a._escal[en.id];
+    const sub = x.hit ? ('matches '+esc(x.row.name)+' · '+esc(x.row.role || '')+' · score '+x.score.toFixed(3))
+                      : 'no current book or watchlist exposure';
+    h += '<button class="hitbtn'+(x.hit?'':' below')+'" data-e="'+esc(en.id)+'" aria-pressed="'+on+'">'
+       + '<div><div class="who">'+esc(en.name)+'<span class="tag '+x.kind+'">'+(x.hit?x.kind:'no match')+'</span></div>'
+       + '<div class="sub">'+sub+'</div></div>'
+       + '<span class="disp '+(on?'on':'off')+'">'+(on?'ESCALATED':'＋ WATCHLIST')+'</span></button>';
+  });
+  h += '</div>';
+  h += arcNav('disposition');
+  app.innerHTML = h;
+  app.querySelectorAll('.hitbtn').forEach(b => b.addEventListener('click', async () => {
+    const eid = b.getAttribute('data-e'); const next = !a._escal[eid]; const x = byId[eid];
+    a._escal[eid] = next;
+    if(x && x.hit) state.dispo[dispoKey(a.id, eid)] = next;   // an escalated hit is a confirmed exposure
+    const ok = await livePostDisposition(eid, next ? 'escalate' : 'dismiss');
+    if(!ok){ a._escal[eid] = !next; if(x && x.hit) state.dispo[dispoKey(a.id, eid)] = !next; }
+    render();
+  }));
+  wireNav();
 }
 function liveInit(){
   const css = '.livebar{border:1px solid var(--line);border-left:3px solid var(--signal);border-radius:10px;padding:14px 16px;margin:18px 0;background:rgba(246,166,35,.045)}'
@@ -625,6 +710,9 @@ function liveInit(){
   const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s);
   const baseSelect = RENDER.select;
   RENDER.select = function(){ baseSelect(); liveInjectSelect(); };
+  _baseRenderDisposition = RENDER.disposition;
+  RENDER.disposition = liveRenderDisposition;
+  liveRefreshWatchlist();          // pick up entities escalated in a prior session (the persisted store)
 }
 if(NEWS.live){ liveInit(); }
 /*LIVE_END*/

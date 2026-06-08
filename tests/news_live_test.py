@@ -20,7 +20,10 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import news_ground  # noqa: E402
+import news_store   # noqa: E402
 import serve_news   # noqa: E402
+
+HAS_DUCKDB = news_store.duckdb is not None  # the watchlist/disposition store test is DuckDB-gated (runs under .venv)
 
 ARTICLE_MD = (ROOT / "data" / "news" / "articles" / "ofac-tgr-group.md").read_text(encoding="utf-8")
 
@@ -59,6 +62,7 @@ def http_route_test() -> None:
     serve_news.call_llm = lambda text, **kw: json.dumps(CANNED)  # stub the only model-dependent step
     httpd = serve_news.ThreadingHTTPServer(("127.0.0.1", 0), serve_news.Handler)
     httpd.llm_url, httpd.model, httpd.page = "stub://", "stub", "<html></html>"
+    httpd.store, httpd.book = None, []  # Phase 36: this route runs persistence-OFF (scan_id None, /extract unchanged)
     port = httpd.server_address[1]
     t = threading.Thread(target=httpd.serve_forever, daemon=True)
     t.start()
@@ -88,6 +92,101 @@ def http_route_test() -> None:
         httpd.shutdown()
         serve_news.call_llm = orig
     print("  http route: /extract 200 grounded (stubbed model) · empty-text 400 · dropped reported")
+
+
+def watchlist_disposition_route_test() -> None:
+    """Phase 36: drive /extract → /watchlist → /disposition(escalate) → /watchlist over HTTP against a
+    temp DuckDB store. Proves the escalated-only loop: a scan persists (scan_id echoed), the watchlist
+    starts book-only, escalating an entity at the gate adds it (with provenance), a dismiss does not."""
+    if not HAS_DUCKDB:
+        print("  watchlist/disposition route: SKIP (duckdb not installed — run under .venv)")
+        return
+    book = [{"id": "bk-1", "name": "Globex Bank", "type": "org", "role": "counterparty",
+             "country": "United States", "segment": "Trade finance"}]  # deliberately NOT containing George Rossi
+    orig = serve_news.call_llm
+    serve_news.call_llm = lambda text, **kw: json.dumps(CANNED)
+    store = news_store.NewsStore(":memory:")
+    httpd = serve_news.ThreadingHTTPServer(("127.0.0.1", 0), serve_news.Handler)
+    httpd.llm_url, httpd.model, httpd.page = "stub://", "stub", "<html></html>"
+    httpd.store, httpd.book = store, book
+    port = httpd.server_address[1]
+    base = f"http://127.0.0.1:{port}"
+    t = threading.Thread(target=httpd.serve_forever, daemon=True)
+    t.start()
+
+    def post(path, obj):
+        req = urllib.request.Request(base + path, data=json.dumps(obj).encode("utf-8"),
+                                     headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.status, json.loads(r.read().decode("utf-8"))
+
+    def get(path):
+        with urllib.request.urlopen(base + path, timeout=10) as r:
+            return r.status, json.loads(r.read().decode("utf-8"))
+
+    try:
+        _, data = post("/extract", {"text": ARTICLE_MD, "source_org": "OFAC"})
+        scan_id = data.get("scan_id")
+        assert scan_id and len(scan_id) == 32, f"persisted scan should echo a scan_id, got {scan_id!r}"
+
+        _, wl0 = get("/watchlist")
+        kinds0 = {r["kind"] for r in wl0["rows"]}
+        assert wl0["persist"] is True, "watchlist should report persistence on"
+        assert [r for r in wl0["rows"] if r["kind"] == "scanned"] == [], "no escalations yet — book-only"
+        assert any(r["name"] == "Globex Bank" and r["kind"] == "book" for r in wl0["rows"]), kinds0
+
+        # escalate E1 (George Rossi) at the gate -> joins the watchlist; dismiss E2 -> does not
+        s, d = post("/disposition", {"scan_id": scan_id, "entity_id": "E1", "decision": "escalate"})
+        assert s == 200 and d["updated"] == 1, d
+        post("/disposition", {"scan_id": scan_id, "entity_id": "E2", "decision": "dismiss"})
+
+        _, wl1 = get("/watchlist")
+        scanned = [r for r in wl1["rows"] if r["kind"] == "scanned"]
+        assert len(scanned) == 1 and scanned[0]["name"] == "George Rossi", scanned
+        assert "escalated from" in scanned[0]["provenance"], scanned[0]["provenance"]
+        assert all(r["name"] != "Siam Expert Trading Company Limited" or r["kind"] == "book"
+                   for r in wl1["rows"]), "a dismissed entity must not appear as a scanned watchlist row"
+
+        # a bad disposition target -> 404
+        code = 0
+        try:
+            post("/disposition", {"scan_id": scan_id, "entity_id": "E99", "decision": "escalate"})
+        except urllib.error.HTTPError as he:
+            code = he.code
+        assert code == 404, f"unknown entity should 404, got {code}"
+    finally:
+        httpd.shutdown()
+        serve_news.call_llm = orig
+        store.close()
+    print("  watchlist/disposition route: /extract persists (scan_id) · /watchlist book→escalated · dismiss excluded · bad target 404")
+
+
+def disposition_persist_off_test() -> None:
+    """Persistence OFF (store None): /watchlist serves the static book reconciled; /disposition returns 503.
+    Runs WITHOUT duckdb — proves the graceful-degradation path."""
+    book = [{"id": "bk-1", "name": "Globex Bank", "type": "org", "role": "counterparty", "country": "US"}]
+    httpd = serve_news.ThreadingHTTPServer(("127.0.0.1", 0), serve_news.Handler)
+    httpd.llm_url, httpd.model, httpd.page = "stub://", "stub", "<html></html>"
+    httpd.store, httpd.book = None, book
+    port = httpd.server_address[1]
+    base = f"http://127.0.0.1:{port}"
+    t = threading.Thread(target=httpd.serve_forever, daemon=True)
+    t.start()
+    try:
+        with urllib.request.urlopen(base + "/watchlist", timeout=10) as r:
+            wl = json.loads(r.read().decode("utf-8"))
+        assert wl["persist"] is False and len(wl["rows"]) == 1 and wl["rows"][0]["kind"] == "book", wl
+        code = 0
+        try:
+            req = urllib.request.Request(base + "/disposition", data=b'{"scan_id":"x","entity_id":"E1","decision":"escalate"}',
+                                         headers={"Content-Type": "application/json"}, method="POST")
+            urllib.request.urlopen(req, timeout=10)
+        except urllib.error.HTTPError as he:
+            code = he.code
+        assert code == 503, f"disposition with persistence off should 503, got {code}"
+    finally:
+        httpd.shutdown()
+    print("  persistence-off: /watchlist book-only (persist=false) · /disposition 503")
 
 
 def main() -> int:
@@ -136,9 +235,12 @@ def main() -> int:
     assert serve_news.parse_llm_json('{"c": 3}') == {"c": 3}
 
     http_route_test()
+    watchlist_disposition_route_test()
+    disposition_persist_off_test()
 
     print(f"news_live_test: PASS (kept {len(rec['entities'])} entities, {len(rec['red_flags'])} red flag; "
-          f"dropped {len(dropped)} ungrounded; ids contiguous; idempotent; parse robust)")
+          f"dropped {len(dropped)} ungrounded; ids contiguous; idempotent; parse robust; "
+          f"watchlist loop {'exercised' if HAS_DUCKDB else 'SKIPPED (no duckdb)'})")
     return 0
 
 

@@ -31,14 +31,22 @@ import re
 import sys
 import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import build  # scripts/ is on sys.path[0] when run as `python3 scripts/serve_news.py`; stdlib-only import
 import news_ground  # the shared grounding gate — drops ungrounded live extractions (live == build by construction)
+import news_store  # Phase 36: DuckDB persistence + the escalated-only watchlist (companion-only; build.py never imports it)
+
+
+def _now() -> str:
+    """UTC timestamp stamped on each persisted scan (the watchlist provenance reads from it)."""
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 DEFAULT_PORT = 8000
 DEFAULT_LLM_URL = "http://localhost:8080/v1/chat/completions"
 DEFAULT_MODEL = "qwen"  # any model swappable behind llama-cpp's OpenAI-compatible /v1
+DEFAULT_DB = "data/news/.live/store.duckdb"  # Phase 36: gitignored runtime store (never on the ship path)
 
 # ---- live extraction: the model PROPOSES, the deterministic gate (news_ground) DISPOSES ----------
 # The schema constrains the model's shape; news_ground.ground_record then DROPS anything that doesn't
@@ -193,9 +201,11 @@ def extract(text: str, meta: dict = None, *, llm_url: str = DEFAULT_LLM_URL, mod
     return build_record(parse_llm_json(call_llm(text, llm_url=llm_url, model=model)), text, meta)
 
 
-def live_config(args) -> dict:
-    """The `NEWS.live` block the served page reads to enable the live branch (absent in the offline build)."""
-    return {"extract": "/extract", "model": args.model, "llm_url": args.llm_url}
+def live_config(args, persist: bool = False) -> dict:
+    """The `NEWS.live` block the served page reads to enable the live branch (absent in the offline build).
+    Phase 36 adds the watchlist/disposition endpoints + a `persist` flag the live UI reflects."""
+    return {"extract": "/extract", "watchlist": "/watchlist", "disposition": "/disposition",
+            "persist": persist, "model": args.model, "llm_url": args.llm_url}
 
 
 def news_payload(live_cfg: dict) -> dict:
@@ -247,19 +257,37 @@ class Handler(BaseHTTPRequestHandler):
         if path in ("/", "/index.html"):
             self._send(200, self.server.page.encode("utf-8"), "text/html; charset=utf-8")
         elif path == "/health":
-            self._json(200, {"ok": True, "live": True})
+            self._json(200, {"ok": True, "live": True, "persist": self.server.store is not None})
+        elif path == "/watchlist":
+            # the live screening surface: book ∪ escalated (reconciled + provenance). With persistence off
+            # this is the static book reconciled to the same shape (no growth) — never an error.
+            store = self.server.store
+            rows = (store.watchlist_rows(self.server.book) if store
+                    else news_store.reconcile_book(self.server.book))
+            self._json(200, {"rows": rows, "persist": store is not None})
         else:
             self._json(404, {"error": f"not found: {path}"})
 
     def do_POST(self) -> None:
         path = self.path.split("?", 1)[0]
-        if path != "/extract":
-            self._json(404, {"error": f"not found: {path}"}); return
+        if path == "/extract":
+            self._extract(); return
+        if path == "/disposition":
+            self._disposition(); return
+        self._json(404, {"error": f"not found: {path}"})
+
+    def _read_json(self):
+        """Parse a JSON request body; returns (obj, None) or (None, error_str)."""
         try:
             length = int(self.headers.get("Content-Length") or 0)
-            payload = json.loads(self.rfile.read(length) or b"{}")
+            return json.loads(self.rfile.read(length) or b"{}"), None
         except (ValueError, json.JSONDecodeError):
-            self._json(400, {"error": "invalid JSON body"}); return
+            return None, "invalid JSON body"
+
+    def _extract(self) -> None:
+        payload, err = self._read_json()
+        if err:
+            self._json(400, {"error": err}); return
         text = (payload.get("text") or "").strip()
         if not text:
             self._json(400, {"error": "missing 'text' (the article to process)"}); return
@@ -275,7 +303,32 @@ class Handler(BaseHTTPRequestHandler):
         if not record["entities"] and not record["red_flags"]:
             self._json(422, {"error": "nothing in the model output grounded in the submitted article",
                              "dropped": dropped}); return
-        self._json(200, {"record": record, "dropped": dropped})
+        # Persist the grounded scan (best-effort — a store failure must NEVER fail the scan). The scan_id is
+        # echoed so the client's later /disposition can target a specific entity of THIS scan.
+        scan_id = None
+        if self.server.store is not None:
+            try:
+                scan_id = self.server.store.append_scan(record, dropped, ts=_now())
+            except Exception as ex:  # noqa: BLE001 — persistence is optional; degrade, don't drop the result
+                self.log_message("persist failed: %s", ex)
+        self._json(200, {"record": record, "dropped": dropped, "scan_id": scan_id})
+
+    def _disposition(self) -> None:
+        # The human Disposition gate posts back here; 'escalate' adds the entity to the watchlist.
+        if self.server.store is None:
+            self._json(503, {"error": "persistence disabled (duckdb not installed) — dispositions are not recorded"}); return
+        payload, err = self._read_json()
+        if err:
+            self._json(400, {"error": err}); return
+        scan_id = (payload.get("scan_id") or "").strip()
+        entity_id = (payload.get("entity_id") or "").strip()
+        decision = (payload.get("decision") or "").strip()
+        if not scan_id or not entity_id or decision not in ("escalate", "dismiss"):
+            self._json(400, {"error": "need scan_id, entity_id, and decision ('escalate'|'dismiss')"}); return
+        updated = self.server.store.set_disposition(scan_id, entity_id, decision)
+        if not updated:
+            self._json(404, {"error": f"no entity '{entity_id}' in scan '{scan_id}'"}); return
+        self._json(200, {"ok": True, "updated": updated, "decision": decision})
 
     def log_message(self, fmt, *a):  # quieter than the default stderr spam
         sys.stderr.write("[serve_news] " + (fmt % a) + "\n")
@@ -289,6 +342,8 @@ def selftest() -> int:
     payload = news_payload(cfg)
     assert build.NEWS_PLACEHOLDER not in page, "placeholder survived"
     assert '"live"' in page and '"extract": "/extract"' in page, "live config not inlined"
+    assert '"watchlist": "/watchlist"' in page and '"disposition": "/disposition"' in page, \
+        "live config missing the Phase-36 watchlist/disposition endpoints"
     assert "const NEWS = {" in page, "NEWS object not inlined as expected"
     assert "liveInit" in page and "fetch(NEWS.live.extract" in page, "companion page missing the live branch"
     assert page.rstrip().endswith("</html>"), "served page is not a complete HTML document"
@@ -305,17 +360,32 @@ def main() -> int:
     ap.add_argument("--port", type=int, default=DEFAULT_PORT)
     ap.add_argument("--llm-url", default=DEFAULT_LLM_URL, help="llama-cpp OpenAI-compatible chat endpoint")
     ap.add_argument("--model", default=DEFAULT_MODEL, help="model name passed to llama-cpp (swappable)")
+    ap.add_argument("--db", default=DEFAULT_DB, help="DuckDB store path (gitignored runtime data; Phase 36)")
+    ap.add_argument("--no-persist", action="store_true",
+                    help="disable the DuckDB store — screen against the static book only (no watchlist growth)")
+    ap.add_argument("--export-parquet", metavar="DIR", help="export the store tables to DIR/*.parquet and exit")
     ap.add_argument("--selftest", action="store_true", help="assemble the page offline, assert, exit")
     args = ap.parse_args()
 
     if args.selftest:
         return selftest()
 
-    page = render_page(live_config(args))
+    store = _open_store(args)
+
+    if args.export_parquet:
+        if store is None:
+            print("[serve_news] cannot export — persistence unavailable (install duckdb in the .venv)."); return 1
+        paths = store.export_parquet(args.export_parquet)
+        print("[serve_news] exported parquet: " + ", ".join(f"{k}={v}" for k, v in paths.items()))
+        return 0
+
+    page = render_page(live_config(args, persist=store is not None))
     httpd = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     httpd.page = page
     httpd.llm_url = args.llm_url
     httpd.model = args.model
+    httpd.store = store
+    httpd.book = (build.load_news()[1].get("rows") or [])     # the static book — the watchlist base
     url = f"http://localhost:{args.port}/"
     print(f"[serve_news] live companion on {url}  (model={args.model} via {args.llm_url})")
     print(f"[serve_news] the offline dist/news/index.html remains the scripted fallback. Ctrl-C to stop.")
@@ -323,7 +393,25 @@ def main() -> int:
         httpd.serve_forever()
     except KeyboardInterrupt:
         print("\n[serve_news] stopped.")
+    finally:
+        if store is not None:
+            store.close()
     return 0
+
+
+def _open_store(args):
+    """Open the DuckDB store, or return None (persistence disabled) — gracefully, so the companion still
+    serves the page + /extract when duckdb is absent or --no-persist is set."""
+    if args.no_persist:
+        print("[serve_news] persistence disabled (--no-persist) — screening against the static book only.")
+        return None
+    try:
+        store = news_store.NewsStore(args.db)
+        print(f"[serve_news] persistence: DuckDB store at {args.db} — escalations feed the watchlist.")
+        return store
+    except Exception as ex:  # noqa: BLE001 — duckdb missing / unopenable: degrade, don't crash the companion
+        print(f"[serve_news] persistence disabled ({ex}). Install duckdb in the .venv to enable the watchlist.")
+        return None
 
 
 if __name__ == "__main__":

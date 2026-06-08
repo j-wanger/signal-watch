@@ -98,18 +98,27 @@ that table.
   verbatim under 17 U.S.C. §105); the client/counterparty **book is synthetic** (no real customer data);
   scores are real computed similarity; nothing reads as a real detection/precision rate.
 
-### Live mode (Phase 35, optional — needs a local llama-cpp server; see `docs/news-live.md`)
+### Live mode (Phase 35 extraction + Phase 36 persistence, optional — needs a local llama-cpp server; see `docs/news-live.md`)
 - [ ] **Automated (no model):** `python3 tests/news_live_test.py`, `python3 scripts/news_ground.py --selftest`,
   and `python3 scripts/serve_news.py --selftest` all exit **0** (the grounding gate, the build_record
-  pipeline, the `/extract` route over HTTP with the model stubbed, and the served live page).
+  pipeline, the `/extract` route over HTTP with the model stubbed, and the served live page). Under the
+  **`.venv`** (`.venv/bin/python tests/news_live_test.py` + `.venv/bin/python scripts/news_store.py --selftest`)
+  the DuckDB store + the `/watchlist` + `/disposition` escalated-only loop + parquet roundtrip are exercised too.
 - [ ] **Offline artifact still pure:** `dist/news/index.html` contains **no** `fetch(` / `liveInit` /
-  `LIVE_START` (the live region is build-time stripped); it opens standalone as the scripted fallback.
+  `LIVE_START` / `/watchlist` / `/disposition` / `NEWS._watch` (the live + persistence code is build-time
+  stripped); it opens standalone as the scripted fallback, screening the static book only.
 - [ ] **Live (with a model):** start llama-cpp, then `python3 scripts/serve_news.py --llm-url <endpoint>
   --model <name>`; open **http://localhost:8000**, click **＋ Process a new article**, paste a public-domain
   enforcement article, **Run extraction** → entities + red flags appear in the streaming Read, each **grounded**
   in the pasted text (ungrounded items are dropped; the status line reports how many), then the normal
   Screen → Disposition → Exposure arc runs. Pasting gibberish returns an honest "nothing grounded" message,
   never a fabricated record.
+- [ ] **Persistence + the feedback watchlist (Phase 36, run the companion under `.venv/bin/python`):** scan
+  an article, then at **Disposition** click **＋ WATCHLIST** to **escalate** an entity that is *not* in the
+  book (its label flips to **ESCALATED**). Process a **second** article that re-mentions that entity → at
+  **Screen** it now surfaces as a hit against the watchlist, provenance *"escalated from &lt;first article&gt;"* —
+  the screen surface compounds. Dismissed / never-escalated entities do **not** join the watchlist. The store
+  lives at `data/news/.live/store.duckdb` (gitignored); `--export-parquet <dir>` writes the parquet interchange.
 
 ## Walk the six-act arc (Next / Back) — read values from the table
 - [ ] **Act 0 — Blind spot:** coverage map renders; gauge animates to the **table value**; red (not-covered) rows visible

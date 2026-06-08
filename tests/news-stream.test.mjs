@@ -51,6 +51,10 @@ const SCRIPT = html.slice(open + '<script>'.length, close);
      'news.html SOURCE carries the live-mode region (served by the companion)');
   ok(!html.includes('/*LIVE_START*/') && !html.includes('liveInit') && !html.includes('fetch('),
      'offline dist/news has the live region STRIPPED (zero network code; self-contained)');
+  // Phase 36: the watchlist/disposition (persistence feedback) code is companion-only — none survives the strip
+  ok(!html.includes('NEWS._watch') && !html.includes('liveRenderDisposition')
+     && !html.includes('/watchlist') && !html.includes('/disposition'),
+     'offline dist/news carries NO Phase-36 watchlist/disposition code (screens the static book only)');
 }
 
 ok(/class="badge"/.test(html) && /Illustrative data/.test(html), 'always-on illustrative badge present in the ship chrome');
@@ -94,7 +98,9 @@ function makeEnv(reduced) {
     if (!(id in cache)) { const re = new RegExp('<([a-z]+)([^>]*\\sid="' + id + '"[^>]*)>', 'i'); const m = re.exec(app._html); cache[id] = m ? (DYN.has(id) ? enriched() : mkPseudo(m[2])) : null; }
     return cache[id];
   };
-  const document = { getElementById: gid, querySelectorAll: qsa, addEventListener() {} };
+  const document = { getElementById: gid, querySelector: () => null, querySelectorAll: qsa,
+                     createElement: () => ({ textContent: '', style: {}, appendChild() {}, setAttribute() {} }),
+                     head: { appendChild() {} }, addEventListener() {} };
   const window = { matchMedia: () => ({ matches: reduced }), scrollTo() {} };
   const setTimeout = (fn) => { queue.push(fn); return queue.length; };
   const clearTimeout = () => {};
@@ -108,6 +114,18 @@ function boot(reduced) {
   try {
     vm.runInContext(SCRIPT + '\n;globalThis.__t={go,state,matchEntities,articleById,threshold};', ctx);
   } catch (e) { threw = e; }
+  return { env, ctx, threw };
+}
+// Phase 36: boot the companion-SERVED script (live region present, NEWS.live set) with a fetch stub, to
+// behaviorally exercise the client-side overrides that the stripped offline dist never carries.
+function bootLive(scriptText, reduced) {
+  const env = makeEnv(reduced);
+  const fetchStub = () => Promise.resolve({ ok: true, json: () => Promise.resolve({ rows: [] }) });
+  const ctx = vm.createContext({ window: env.window, document: env.document, console,
+    fetch: fetchStub, setTimeout: env.setTimeout, clearTimeout: env.clearTimeout });
+  let threw = null;
+  try { vm.runInContext(scriptText + '\n;globalThis.__L={go,state,matchEntities,articleById,NEWS,RENDER};', ctx); }
+  catch (e) { threw = e; }
   return { env, ctx, threw };
 }
 
@@ -235,6 +253,56 @@ console.log('\n[full-motion] enriched shim drives the streaming Read + scan PROC
   } catch (e) { threw4 = e; }
   ok(!threw4, 'full-motion full arc on a second article throws no error' + (threw4 ? ` (${threw4})` : ''));
   ok(/Exposure/.test(env.app._html), 'full-motion reaches Close on the second article');
+}
+
+/* ===================== live mode (companion-served page) — Phase 36 ===================== */
+// The offline dist has the live region STRIPPED; here we eval the SERVED page (news.html with a minimal
+// live NEWS substituted) under the same shim to behaviorally verify the CLIENT overrides the Python HTTP
+// tests can't reach: the Screen step scores against book ∪ watchlist, and the Disposition gate renders
+// per-entity escalate controls. (The fetch-driven escalate→persist→refetch loop is covered server-side in
+// tests/news_live_test.py; here we set NEWS._watch directly to isolate the client screen/render logic.)
+console.log('\n[live mode] companion-served client overrides (book ∪ watchlist screen + escalate gate)');
+{
+  const SRC = readFileSync(resolve(HERE, '..', 'news.html'), 'utf8');
+  const liveNEWS = {
+    brand: { title: 'Signal Watch', subtitle: 'Adverse-Media Stream' }, badge: 'Illustrative data & outputs',
+    articles: [
+      { id: 'live-a', scan_id: 'aaa', title: 'Article A', doc_type: 'News', typology: 'fraud', source_org: 'Live',
+        article_text: 'Acme Holdings and Beta Corp moved funds offshore.',
+        entities: [{ id: 'E1', name: 'Acme Holdings', type: 'org' }, { id: 'E2', name: 'Beta Corp', type: 'org' }], red_flags: [] },
+      { id: 'live-b', scan_id: 'bbb', title: 'Article B', doc_type: 'News', typology: 'fraud', source_org: 'Live',
+        article_text: 'Acme Holdings surfaced again in a later filing.',
+        entities: [{ id: 'E1', name: 'Acme Holdings', type: 'org' }], red_flags: [] },
+    ],
+    book: { rows: [{ id: 'bk-1', name: 'Zzz Unrelated Bank', type: 'org', role: 'counterparty', country: 'US', segment: 'Trade' }] },
+    match: { threshold: 0.85 },
+    live: { extract: '/extract', watchlist: '/watchlist', disposition: '/disposition', persist: true, model: 'm', llm_url: 'u' },
+  };
+  const liveScript = SRC.slice(SRC.indexOf('<script>') + '<script>'.length, SRC.lastIndexOf('</script>'))
+    .replace('__NEWS__', JSON.stringify(liveNEWS));
+  const { env, ctx, threw } = bootLive(liveScript, true);
+  ok(!threw, 'companion-served live page evaluates without throwing' + (threw ? ` (${threw})` : ''));
+  await new Promise(r => setImmediate(r));   // flush the init liveRefreshWatchlist() microtask (resolves to [])
+  const L = ctx.__L;
+  ok(L && L.RENDER && typeof L.RENDER.disposition === 'function', 'liveInit installed the live Disposition gate (RENDER.disposition overridden)');
+
+  // 1) book ∪ watchlist screen — an EMPTY watchlist defers to book-only: Acme does NOT hit (book is unrelated)
+  L.NEWS._watch = [];
+  const aHit0 = L.matchEntities(L.articleById('live-a')).find(x => x.entity.name === 'Acme Holdings');
+  ok(aHit0 && aHit0.hit === false, 'empty watchlist → the override is inert (book-only screen; Acme does not hit)');
+
+  // 2) once escalation populates the watchlist, a LATER article re-mentioning the entity HITS against it
+  L.NEWS._watch = [{ name: 'Acme Holdings', type: 'org', kind: 'scanned', role: 'watchlist', country: 'escalated from Article A' }];
+  const bHit = L.matchEntities(L.articleById('live-b')).find(x => x.entity.name === 'Acme Holdings');
+  ok(bHit && bHit.hit && bHit.row && bHit.row.kind === 'scanned', 'escalated entity on the watchlist → a re-mention HITS (the screen surface compounds)');
+  ok(bHit && bHit.score === 1, 'the watchlist re-mention scores 1.000 (exact) against the escalated row');
+
+  // 3) the Disposition gate renders per-entity escalate controls for a live-scanned article (scan_id present)
+  L.go('disposition', 'live-b');
+  const dh = env.app._html;
+  ok(/Disposition — the human gate/.test(dh), 'live Disposition renders');
+  ok(/data-e="E1"/.test(dh) && /(＋ WATCHLIST|ESCALATED)/.test(dh), 'Disposition shows a per-entity escalate control (data-e + watchlist label)');
+  ok(/the screen surface compounds/.test(dh), 'Disposition explains the escalation → watchlist loop');
 }
 
 console.log(`\n${pass} passed, ${fails.length} failed`);

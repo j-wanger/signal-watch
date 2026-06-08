@@ -45,6 +45,12 @@ data/fintrac/raw/
 # Phase 33: FINTRAC per-sector ML/TF indicator GUIDANCE (HTML, not PDF) — same convention (raw HTML local +
 # regenerable from the hand-curated data/fintrac-guidance/index.json via acquire_fincen.py --html; *.md ships).
 data/fintrac-guidance/raw/
+# Phase 36: the live companion's runtime persistence — the DuckDB scan store + its parquet exports are
+# regenerable LOCAL runtime data (scan history from pasted/picked articles), NEVER committed; DuckDB is
+# venv-only and never on the ship path. The offline dist/news carries zero store code.
+data/news/.live/
+*.duckdb
+*.parquet
 
 # Authoring scratch: scaffolded config SKELETONS from scripts/derive_signals.py --scaffold
 # (Phase 11). A draft is reviewed, has its JUDGMENT fields filled, then RENAMED to

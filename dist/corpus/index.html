@@ -39852,24 +39852,35 @@ function renderArticle(a){
   const segs=[]; let c0=0;                                  // ordered runs: plain text (fi<0) + each phrase
   for(const [s,e,fi] of phr){ if(s>c0)segs.push([c0,s,-1]); segs.push([s,e+1,fi]); c0=e+1; }
   if(c0<L)segs.push([c0,L,-1]);
-  const STEP=33, TOTAL=Math.max(7000,Math.min(45000,Math.round(L*0.9)));
-  const TICKS=Math.max(40,Math.round(TOTAL/STEP)), CPS=Math.max(8,Math.ceil(L/TICKS));
+  // Phase 33 QOL — 3-TIER read pacing (replaces the uniform char/frame budget). The read edge spends a
+  // per-frame TIME budget (STEP ms); each character costs ms by category: (cat1) general text in the active
+  // zone reads FAST; (cat2) each red-flag PHRASE reveals whole (one clean .hl span — its flash plays) then
+  // the read DWELLS, a processing beat while the caret pauses + the translation writes (slower than the old
+  // instant reveal); (cat3) general text AFTER the last phrase BLASTS — the wow is over, don't drag the demo.
+  // SCALE compresses the whole timeline to keep the ~45s cap on dense docs; relative tier speeds are preserved.
+  const STEP=33, MS1=0.45, MS3=0.12;                       // ms/char: cat1 active text · cat3 post-phrase text
+  const dwellMs=segLen=>Math.min(750,220+segLen*6);        // cat2 per-phrase processing dwell (length-scaled, capped)
+  let lastP=-1; segs.forEach((s,i)=>{ if(s[2]>=0)lastP=i; });   // index of the LAST phrase run (cat1/cat3 boundary)
+  let raw=0; segs.forEach((s,i)=>{ const len=s[1]-s[0]; raw += s[2]>=0 ? dwellMs(len) : len*(i>lastP?MS3:MS1); });
+  const SCALE=raw>45000?45000/raw:1;
   docEl.innerHTML=''; if(docEl.classList)docEl.classList.add('reading');     // empty panel + trailing caret
   if(xEl)xEl.innerHTML='';
   if(lbl)lbl.textContent='Source document · reading…';
   xlab(0);
-  let si=0, within=0; const shown=new Set();
+  let si=0, within=0, debt=0; const shown=new Set();
   function read(){
-    let budget=CPS, buf='';
+    let budget=STEP, buf='';
+    if(debt>0){ const pay=Math.min(budget,debt); debt-=pay; budget-=pay; }   // cat2 dwell: pay down the phrase-processing pause first
     while(budget>0 && si<segs.length){
       const seg=segs[si], a=seg[0], b=seg[1], fi=seg[2], rem=(b-a)-within;
-      if(fi<0){                                             // plain text run — reveal up to `budget` chars
-        const take=Math.min(budget,rem);
-        buf+=esc(art.slice(a+within, a+within+take)); within+=take; budget-=take;
-      }else{                                                // a red-flag phrase — reveal whole + highlight + extract
+      if(fi<0){                                             // plain run — reveal chars by the ms budget (cat1 fast / cat3 fastest)
+        const msPer=(si>lastP?MS3:MS1)*SCALE;
+        const take=Math.max(1,Math.min(rem,Math.floor(budget/Math.max(0.001,msPer))));
+        buf+=esc(art.slice(a+within, a+within+take)); within+=take; budget-=take*msPer;
+      }else{                                                // a red-flag phrase — reveal whole + highlight + extract, then DWELL
         buf+=`<span class="hl on" data-i="${fi}">`+esc(art.slice(a,b))+'</span>';
         if(xEl && !shown.has(fi)){ shown.add(fi); xEl.insertAdjacentHTML('beforeend',xrowFor(fi)); if(xEl.scrollHeight)xEl.scrollTop=xEl.scrollHeight; }
-        within=b-a; budget-=rem;
+        within=b-a; debt+=dwellMs(b-a)*SCALE; budget=0;     // the processing pause carries into following frames
       }
       if(within>=b-a){ si++; within=0; }
     }

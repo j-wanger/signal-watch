@@ -16,4 +16,4 @@ Abort rule: if DuckDB can't confine to the `.venv` → stdlib sqlite3 + (DuckDB-
 
 Gates:
 - [x] Direction confirmed by user (escalated-only feedback watchlist + DuckDB→parquet persistence, served-by-companion; approved 2026-06-08)
-- [ ] Delivery accepted (post-implementation; the delivery flow flips this after the commit lands)
+- [x] Delivery accepted (post-implementation report 2026-06-08; committed e96f31d + pushed to main)

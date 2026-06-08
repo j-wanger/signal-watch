@@ -14,4 +14,4 @@ Abort: n/a (delivered, no deviations). Blocked >3 attempts → ask the user: ski
 
 Gates:
 - [x] Direction confirmed by user (D-lens only chosen at the goal gate; OSFI disposed as non-derivable; no second Canadian source exists; 2026-06-08)
-- [ ] Delivery accepted (post-implementation report)
+- [x] Delivery accepted (post-implementation report 2026-06-08)

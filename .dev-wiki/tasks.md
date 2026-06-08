@@ -3,7 +3,7 @@
 > Last updated: 2026-06-08 by /dev-plan (Phase 30 — data-source lens: surface the D1–D20 data-source axis as an institution coverage-by-data-source view in the corpus explorer. Planned, direction approved (D-lens only), 3 lite tasks T1–T3 (all M). The backend is ALREADY BUILT in Phase 29 — build.py + data/capability-taxonomy.json + all 42 derived records are BYTE-FROZEN this phase; the whole feature is a corpus.html mirror of the capability mode onto the D-axis + harness + docs + dist rebuild.)
 
 <!-- phase:phase-30-data-source-lens -->
-<!-- gate-log:phase-30 direction=approved delivery=pending -->
+<!-- gate-log:phase-30 direction=approved delivery=accepted -->
 
 ## Phase 30: Data-source lens — surface the D1–D20 data-source axis as an institution coverage-by-data-source view — M7
 

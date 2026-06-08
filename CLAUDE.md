@@ -37,7 +37,7 @@ AML transformation framework. Keep vocabulary consistent with it
 - Live mode is optional, isolated, off by default, always has a scripted fallback.
   Never put keys/tokens in the frontend. Copilot is NOT a web backend (HANDOFF §4.5).
 
-## Current state (M8 — adverse-media / negative-news stream: Phase 31 walking skeleton + Phase 32 real-source & presentation elevation; M7 corpus-backed derivation multi-source complete)
+## Current state (M7 corpus completeness + typology re-segmentation: Phase 33 — corpus 875→2,251 indicators across 56 derived / 62 publications / 5 sources, +TBML & 4 new typologies; M8 adverse-media stream: Phase 31 walking skeleton + Phase 32 real-source & presentation elevation)
 - Generic engine: `index.html` (vanilla HTML/CSS/JS) with a single `__CONFIG__` injection point.
   Typology-agnostic — adding a typology is one JSON file, no engine edits. Presenter controls (M3):
   keyboard nav (←/→/Space/Esc/↺), reset, `prefers-reduced-motion`.
@@ -345,6 +345,41 @@ AML transformation framework. Keep vocabulary consistent with it
   **data/capability-taxonomy.json**, the grounding core `derive_signals.py`, **scripts/build.py**, AND every derived
   `*.json` record (the data_sources axis was already inlined/validated in Phase 29 — NO re-derivation, NO build change).
   dist/corpus ~2.46MB; `--check all` 4/4 ZERO DRIFT, `--selftest` PASS, all 42 `--check-derived` clean. NO non-negotiable change.
+- CORPUS COMPLETENESS + FULL TYPOLOGY RE-SEGMENTATION (Phase 33, M7 — workflow-driven; the corpus SOURCE SET closed
+  and the typology axis re-segmented; the showcase + the entire news stream + the 42 EXISTING derived records BYTE-FROZEN,
+  all new derivation ADDITIVE): the user found the corpus SOURCE SET incomplete (distinct from Phase-28's within-doc
+  completeness) — missing the latest + back-catalog FinCEN advisories, and ALL of FINTRAC's `/guidance-directives/`
+  ML/TF-indicator area unpulled. SCALE: +16 acquired docs, **14 derivable**, **corpus 875 → 2,251 indicators (2.6×)** across
+  **56 derived / 62 publications / 5 sources**. (1) SOURCES: +5 FinCEN advisories to `data/fincen/` (FIN-2026-A002 latest +
+  the 2018-19 back-catalog A006 fentanyl-original / A003 CVC / fin-2018-A003 PEP; BEC fin-2019-a005 honestly NON-DERIVABLE
+  — defers to the 2016 advisory, no own list), and a NEW 5th corpus source `data/fintrac-guidance/` (all 11 FINTRAC
+  per-sector ML/TF indicator pages, doc_type "FINTRAC Guidance"; 10 derivable, crown-agents NON-DERIVABLE — no own list).
+  HTML→md acquisition added (FINTRAC guidance is HTML not PDF: `acquire_fincen.py --html` + `pdf_to_md.py` HTML input +
+  "indicators guidance" provenance; existing PDF branches byte-identical). (2) DERIVATION: a dedicated dynamic Workflow
+  (`ph33-derive-corpus`, 28 agents — extract → completeness-critic per doc, full Phase-28 treatment: grounded verbatim
+  flags + fentanyl-register `red_flag` + C/D taxonomy tags), then a DETERMINISTIC apply (`.dev-wiki/tmp/ph33_apply.py`:
+  grounding-drop + within-doc dedup + the gate's ≥24-char floor + posture→status/data→`build_rec` matrix + `build_logic`
+  from the per-capability templates). 0 indicators FLAGGED (all 1,376 mapped to the existing 28+20 taxonomy — T3 a no-op,
+  validating the Phase-28 interview's comprehensiveness; NO fabricated posture). (3) GROUNDING CORE — the conditional
+  regression-gated touch (Decision 3): three rf_region anchor additions for the HTML-sourced / 2019-era heading forms — a
+  markdown-ATX-prefix tolerance (markitdown renders `<h3>` as `### `; **0-shift across all 46 frozen mds**), a FINTRAC
+  topic-leading "<topic> ML/TF indicators" anchor (ML/TF-abbreviation-only, **0-shift**), and a FinCEN "Red Flag Indicators
+  for <topic>" anchor (fentanyl A006; the ONE deviation — it CORRECTS fin-2024-alert005's region 27→444, which stays
+  `--check-derived` clean). The grounding LOGIC (`normalize`/`check_record`/matrix) is byte-UNCHANGED; 3 new `--selftest`
+  fixtures pin the anchors. (4) RE-SEGMENTATION: `data/typology-map.json` 22→**27 vocab terms** (+trade-based-money-laundering,
+  virtual-currency, unlawful-employment, casino-gaming, fintrac-sector-baselines), all 56 live docs mapped; TBML is now its
+  own typology (ofac-sham-transactions re-segmented). The 10 sector-guidance pages map per the user's "closest crime typology
+  each" choice (real-estate→real-estate, virtual-currency→virtual-currency, casinos→casino-gaming, the rest→fintrac-sector-
+  baselines). Validated at the build boundary (`validate_typology` closed-vocab + referential + total-coverage, fail-loud).
+  (5) BUILD/UI: a 5th `CORPUS_SOURCES` entry (additive); `corpus.html` SELECT menu now renders 5 source groups (the
+  `SRC_ORDER` got the FINTRAC Guidance group + a stat count). HONESTY: per-doc extraction (the FINTRAC sector pages share a
+  common spine — disclosed, NOT de-duped across sources, the Phase-24 gate); coverage inherited from the interview posture,
+  never fabricated; always-on badge stays. Harness 217→**233** (+16). dist/corpus 2.46→**4.87MB** (the +1,376 inlined
+  indicators); `--check all` 5/5 ZERO DRIFT (frozen dists byte-identical), `--selftest` PASS, all **56 `--check-derived`
+  clean**. FROZEN byte-clean (git-confirmed): the six-act showcase (index.html + config/** + 3 typology dists), the ENTIRE
+  news stream (news.html, dist/news, data/news/**), `data/capability-taxonomy.json`, the 42 EXISTING derived records + their
+  source mds. NO non-negotiable change (both compliance bases — FinCEN §105 public-domain + FINTRAC Crown-copyright
+  non-commercial — already established).
 - ADVERSE-MEDIA / NEGATIVE-NEWS STREAM (Phase 31, M8 — a SECOND atom stream; a NEW standalone ship artifact, NOT a
   corpus/showcase change): Signal Watch was the advisory→signal loop (the six-act showcase + the corpus explorer);
   Phase 31 opens a SECOND stream over UNSTRUCTURED news as a third single-file artifact `dist/news/index.html` (built
@@ -436,8 +471,10 @@ AML transformation framework. Keep vocabulary consistent with it
 - Build: `python3 scripts/build.py <id>` (or `all`) → `dist/<id>/index.html`.
 - Corpus explorer (MULTI-SOURCE): `python3 scripts/build.py corpus` → `dist/corpus/index.html`, merging
   every source in `build.py`'s `CORPUS_SOURCES` registry — `data/fincen/` (advisories) + `data/fincen-alerts/`
-  (alerts) + `data/ofac/` (OFAC) + `data/fintrac/` (FINTRAC), each contributing `corpus-status.json` +
-  `derived/*.json`. The build also merges two committed overlays — `data/typology-map.json` (Phase 24) and
+  (alerts) + `data/ofac/` (OFAC) + `data/fintrac/` (FINTRAC OAs) + `data/fintrac-guidance/` (Phase 33 — the 11
+  FINTRAC per-sector ML/TF indicator pages, doc_type "FINTRAC Guidance"), each contributing `corpus-status.json` +
+  `derived/*.json`. Acquire FINTRAC guidance (HTML, not PDF): `acquire_fincen.py --source data/fintrac-guidance
+  --html <id>` then `pdf_to_md.py --source data/fintrac-guidance <id>`. The build also merges two committed overlays — `data/typology-map.json` (Phase 24) and
   `data/capability-taxonomy.json` (Phase 29: code→{name, group, interview posture} for the capability lens) —
   each validated at the build boundary (referential integrity against the live corpus; the grounding core is
   untouched). Regenerate a source's manifest with
@@ -486,7 +523,9 @@ AML transformation framework. Keep vocabulary consistent with it
   symmetric counterpart on the D1–D20 axis; the per-data-source card carries honest demand + the institution's
   data-access posture + the covered/partial/gap split, gap-priority sorted; drilling a data source pools every
   indicator that depends on that feed [with the inverse "Implements capabilities" panel] and drills into a doc's
-  per-doc arc with Back returning to the data source); 217 assertions. `node tests/news-stream.test.mjs`
+  per-doc arc with Back returning to the data source) + the Phase-33 corpus completeness (the 5th source FINTRAC
+  Guidance walks the per-doc arc; corpus 62 publications / 56 derived / 2,251 indicators; TBML + the 4 new typologies
+  in the synthesis view); 233 assertions. `node tests/news-stream.test.mjs`
   (M8, Phase 31 + Phase 32) drives the adverse-media stream arc (Select → Read → Screen → Disposition → Exposure)
   + the fuzzy matcher against the committed `dist/news/index.html` — the seeded matches surface (Siam Expert EXACT
   1.0 = a designated entity IS your counterparty; near-matches an exact-name screen misses: Pullman suffix 1.0,
@@ -569,6 +608,20 @@ acquires the data), surfaced corpus-wide. The TIGHTEST phase in the series: a pu
 harness + docs — `scripts/build.py`, `data/capability-taxonomy.json`, AND all 42 derived records stay BYTE-FROZEN (the
 data_sources axis was already inlined/validated in Phase 29 — no data/build change). Honest re-projection only (the
 Phase-24/29 model); the always-on badge stays; NO non-negotiable change. Harness 190→217.
+Phase 33: corpus completeness + full typology re-segmentation (workflow-driven) — the user found the corpus SOURCE SET
+incomplete (distinct from Phase-28's within-doc completeness): missing the latest + back-catalog FinCEN advisories, and
+ALL of FINTRAC's `/guidance-directives/` ML/TF-indicator area unpulled. +16 acquired docs / 14 derivable → corpus 875 →
+**2,251 indicators (2.6×)** across **56 derived / 62 publications / 5 sources** (+5 FinCEN advisories incl. FIN-2026-A002
+and the original 2019 fentanyl advisory; a NEW 5th source `data/fintrac-guidance/` = all 11 FINTRAC per-sector ML/TF
+indicator pages via a new HTML→md path). A dedicated dynamic Workflow (28 agents: extract → completeness-critic) +
+deterministic apply (grounding gate + within-doc dedup + interview-posture coverage; 0 fabricated, 0 flagged — the 28+20
+taxonomy covered everything). The grounding core got 3 regression-gated rf_region anchors (markdown-prefix tolerance +
+FINTRAC topic-leading + FinCEN "Red Flag Indicators for" — the LOGIC byte-unchanged, fixtures pin them, 1 frozen-region
+CORRECTION on alert005 that stays clean). Typology axis re-segmented: `data/typology-map.json` 22→27 vocab (+TBML,
+virtual-currency, unlawful-employment, casino-gaming, fintrac-sector-baselines), all 56 live docs mapped (sector pages by
+the user's "closest crime typology each" choice). 2 honestly NON-DERIVABLE (BEC fin-2019-a005 defers to the 2016
+advisory; FINTRAC crown-agents has no own list). Harness 217→233; dist/corpus 2.46→4.87MB; `--check all` 5/5 ZERO DRIFT;
+the showcase + entire news stream + 42 existing derived records BYTE-FROZEN; NO non-negotiable change.
 M8 the adverse-media / negative-news stream (Phase 31: a SECOND atom stream as a new standalone artifact
 `dist/news/` from `news.html` — synthetic news → grounded entity + red-flag extraction → a client-side fuzzy
 match (normalize → token-sort → Jaro-Winkler, REAL scores) against a synthetic client/counterparty book →

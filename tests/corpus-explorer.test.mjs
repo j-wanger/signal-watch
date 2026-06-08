@@ -223,10 +223,11 @@ const advisoryChips = (env.__stage._html.match(/<span class="chip doc">Advisory<
 const alertChips = (env.__stage._html.match(/<span class="chip doc">Alert<\/span>/g) || []).length;
 const ofacChips = (env.__stage._html.match(/<span class="chip doc">OFAC<\/span>/g) || []).length;
 const fintracChips = (env.__stage._html.match(/<span class="chip doc">FINTRAC<\/span>/g) || []).length;
-ok(advisoryChips > 0 && alertChips > 0 && ofacChips > 0 && fintracChips > 0,
-  `unified menu lists all 4 source types (${advisoryChips} advisories + ${alertChips} alerts + ${ofacChips} OFAC + ${fintracChips} FINTRAC)`);
-eq(advisoryChips + alertChips + ofacChips + fintracChips, api.ADVISORIES.length,
-  'every card carries an honest doc_type chip (Advisory/Alert/OFAC/FINTRAC)');
+const guidanceChips = (env.__stage._html.match(/<span class="chip doc">FINTRAC Guidance<\/span>/g) || []).length;  // Phase 33: 5th source
+ok(advisoryChips > 0 && alertChips > 0 && ofacChips > 0 && fintracChips > 0 && guidanceChips > 0,
+  `unified menu lists all 5 source types (${advisoryChips} advisories + ${alertChips} alerts + ${ofacChips} OFAC + ${fintracChips} FINTRAC OAs + ${guidanceChips} FINTRAC guidance)`);
+eq(advisoryChips + alertChips + ofacChips + fintracChips + guidanceChips, api.ADVISORIES.length,
+  'every card carries an honest doc_type chip (Advisory/Alert/OFAC/FINTRAC/FINTRAC Guidance)');
 const liveAlerts = api.ADVISORIES.filter(a => a.doc_type === 'Alert' && api.isLive(a));
 ok(liveAlerts.length > 0, `at least one FinCEN Alert is derived/live (${liveAlerts.length})`);
 const liveOfac = api.ADVISORIES.filter(a => a.doc_type === 'OFAC' && api.isLive(a));
@@ -678,9 +679,9 @@ const api26 = env26.__api;
 const s26 = env26.__stage._html;
 
 // (P26-1) Select grouped by SOURCE, newest-first within each group
-eq((s26.match(/class="srcgroup"/g) || []).length, 4,
-  'Select groups documents into 4 source sections (Advisories / Alerts / OFAC / FINTRAC)');
-['FinCEN Advisories', 'FinCEN Alerts', 'OFAC advisories', 'FINTRAC operational alerts'].forEach(l =>
+eq((s26.match(/class="srcgroup"/g) || []).length, 5,
+  'Select groups documents into 5 source sections (Advisories / Alerts / OFAC / FINTRAC OAs / FINTRAC guidance)');
+['FinCEN Advisories', 'FinCEN Alerts', 'OFAC advisories', 'FINTRAC operational alerts', 'FINTRAC sector guidance'].forEach(l =>
   ok(s26.includes(l), `source-group header present: "${l}"`));
 const advBlock = s26.slice(s26.indexOf('FinCEN Advisories'), s26.indexOf('FinCEN Alerts'));
 const renderedAdvIds = [...advBlock.matchAll(/class="advcard [^"]*" data-id="([^"]+)"/g)].map(m => m[1]);
@@ -830,6 +831,51 @@ ok(new RegExp(`· ${small28.indicators.length} red flag`).test(xlabel28().textCo
   'streaming read: the translate count finishes at the full count once the read completes');
 ok(!doc28().classList.contains('reading'), 'streaming read: the caret is removed once the read completes (settled)');
 ok(env28.__errors.length === 0, 'streaming read: full-motion streaming produced no console errors');
+
+/* ===== Phase 33 — corpus completeness (FINTRAC sector-guidance source #5) + typology re-segmentation ===== */
+const env33 = boot(true);
+const api33 = env33.__api;
+// (P33-1) the 5th source — FINTRAC per-sector ML/TF indicator guidance — is live and dense
+const guid33 = api33.ADVISORIES.filter(a => a.doc_type === 'FINTRAC Guidance' && api33.isLive(a));
+ok(guid33.length >= 10, `FINTRAC sector-guidance source present and derived (${guid33.length} live sector pages)`);
+const fe33 = api33.ADVISORIES.find(a => a.id === 'fintrac-guid-financial-entities');
+ok(fe33 && api33.isLive(fe33) && fe33.indicators.length > 100,
+  `financial-entities guidance is dense (${fe33 && fe33.indicators.length} indicators)`);
+// (P33-2) corpus scale — +5 FinCEN advisories + 11 FINTRAC guidance docs; indicators more than doubled
+eq(api33.ADVISORIES.length, 62, 'corpus has 62 publications (Phase 33: +5 FinCEN + 11 FINTRAC guidance)');
+eq(api33.ADVISORIES.filter(a => api33.isLive(a)).length, 56, 'corpus has 56 derived documents');
+const totalInd33 = api33.ADVISORIES.filter(a => api33.isLive(a)).reduce((s, a) => s + a.indicators.length, 0);
+ok(totalInd33 > 2000, `corpus indicators more than doubled (${totalInd33}, was 875)`);
+// (P33-3) a FINTRAC guidance doc walks the full per-doc arc — Crown-copyright held, no US public-domain claim
+api33.pick(fe33.id);
+eq(api33.view, 'detail', 'guidance: pick() enters detail view');
+ok(!/public domain/i.test(env33.__stage._html), 'guidance: source panel does NOT claim US public domain');
+ok(/His Majesty the King in Right of Canada/.test(env33.document.getElementById('attribution').innerHTML),
+  'guidance: page footer carries the Crown-copyright attribution for the doc on screen');
+// (P33-3b) the FINTRAC-guidance HTML→markitdown glossary links are DISPLAY-stripped — the rendered Read
+// panel (article + verbatim flag quotes) carries no "[text](/url)" residue, and the de-linked flags still
+// highlight in the de-linked article (the strip is applied consistently at article + flag + matcher).
+const readHtml33 = env33.__stage._html;
+ok(!/\]\((\/|#)/.test(readHtml33),
+  'guidance: rendered Read panel strips markitdown glossary-link syntax (no "](/" or "](#" residue)');
+ok((readHtml33.match(/class="hl on"/g) || []).length > 0,
+  'guidance: de-linked flags still highlight in the de-linked dense article');
+for (let s = 1; s <= 5; s++) api33.gotoScreen(s);
+ok(/· Close the loop/.test(env33.__stage._html), 'guidance: Close-the-loop screen renders');
+ok(env33.__errors.length === 0, 'guidance: full per-doc arc walked with no console errors');
+// (P33-4) typology re-segmentation — TBML is now its own typology; the sector baselines + new crime typologies
+const env33t = boot(true);
+const api33t = env33t.__api;
+api33t.selMode = 'typology'; api33t.renderSelect();
+const typset33 = new Set(api33t.clusters().map(c => c.t));
+ok(typset33.has('trade-based-money-laundering'), 'TBML is now its own typology (ofac-sham-transactions re-segmented)');
+ok(typset33.has('fintrac-sector-baselines'), 'the FINTRAC sector baselines form their own cluster');
+ok(typset33.has('virtual-currency') && typset33.has('unlawful-employment') && typset33.has('casino-gaming'),
+  'new crime typologies present: virtual-currency, unlawful-employment, casino-gaming');
+const tbml33 = api33t.clusterFor('trade-based-money-laundering');
+ok(tbml33.some(d => d.id === 'ofac-sham-transactions'),
+  'TBML cluster contains the re-segmented ofac-sham-transactions doc');
+ok(env33t.__errors.length === 0, 'typology re-segmentation view rendered with no console errors');
 
 /* ============================ report ============================ */
 console.log(`\n${pass} passed, ${fails.length} failed`);

@@ -164,6 +164,23 @@ _RF_HEADER_FINTRAC_INV = re.compile(
     r"(?:\s+(?:by|through|of|related\s+to|for|associated\s+with|in)\b.*)?"
     r"|(?:relating\s+to|associated\s+with)\s+\w.*"
     r")\s*:?$", re.I)
+# Phase 33 — FINTRAC topic-LEADING "<topic> ML/TF indicators" heading. The /guidance-directives/
+# pages whose sections lead with the SECTOR/topic before the "ML/TF indicators" abbreviation
+# ("Virtual Currency (VC) ML/TF indicators", "General ML/TF indicators") — the inverse of the
+# forward _RF_HEADER_FINTRAC ("ML/TF indicators related to <topic>"). DELIBERATELY restricted to the
+# "ML/TF" ABBREVIATION (a FINTRAC-ism): FinCEN advisories spell out "money laundering indicators",
+# so restricting to "ml/tf indicators" keeps this 0-shift across all 46 frozen FinCEN/OFAC/FINTRAC-OA
+# rf_regions (verified). A heading line only (1-7 leading words, ends at the phrase).
+_RF_HEADER_FINTRAC_LEAD = re.compile(
+    r"^(?:[\w()&/.,’'\-]+\s+){1,7}ml\s*[/&]\s*tf\s+indicators?$", re.I)
+# Phase 33 — FinCEN topic-trailing "Red Flag Indicators for <topic>" heading (the 2019-era fentanyl
+# advisory fin-2019-a006 heads its list this way; the existing _RF_HEADER_LOOSE stops at "Indicators"
+# and has no "for" connector). NARROW: REQUIRES the word "indicators" between "red flag" and "for"
+# (so a bare "<x> red flags for <y>" line does NOT match) — fin-2024-alert005 uses the IDENTICAL form,
+# so this anchor's effect on that one frozen alert is empirically gated by --check-derived (its derived
+# record must stay clean), not just rf_region byte-stability.
+_RF_HEADER_RFI_FOR = re.compile(
+    r"^(?:[A-Z][\w’'/-]*\s+){0,3}red\s+flags?\s+indicators?\s+for\b.*$", re.I)
 # A block that is itself a footnote/citation, not a red flag (Phase-12 filter, retained for the
 # _rf_triage block counter): a footnote-numbered line, a legal "supra note"/"Id." marker, a
 # federal case-docket number, or a block ending in a "(Mon[ DD], YYYY)" citation date — real red
@@ -289,6 +306,16 @@ _RF_REGION_END = re.compile(
     r"^(?:reminder of\b|for further information|sar (?:filing|reporting)"
     r"|frequently asked|the information contained in this advisory)", re.I)
 
+# Phase 33 — a leading markdown ATX header prefix ("## ", "### ") stripped before the rf_region anchor
+# match. markitdown renders HTML <h2>/<h3> headings (FINTRAC's /guidance-directives/ ML/TF-indicator
+# pages are HTML, not PDF) as "## …" — so a category heading the FINTRAC anchor WOULD match
+# ("### ML/TF indicators related to identifying the person …") is otherwise blocked by its "### " prefix,
+# starting the region late and dropping that category's indicators. REGRESSION-GATED: the 46 existing
+# (PDF-sourced) FinCEN/OFAC/FINTRAC-OA mds carry no "#"-prefixed line that newly matches an anchor, so
+# every frozen rf_region is byte-unchanged (verified across all 46). Applied ONLY in rf_region (the gate
+# relevance path); _clean / _rf_triage / normalize / check_record are byte-untouched.
+_RF_MD_HEADER_PREFIX = re.compile(r"^#{1,6}\s+")
+
 
 def rf_region(md: str):
     """PURE: (start_line, end_line) bounding the red-flag region, or None if no anchor found.
@@ -298,14 +325,16 @@ def rf_region(md: str):
     terminal — no per-flag parsing. Used ONLY for the section-cite relevance guard (decision A),
     so over-inclusiveness is safe; the strong guarantee is grounding.
     """
-    lines = [(ln, _clean(raw)) for ln, raw in enumerate(md.split("\n"), 1)]
+    lines = [(ln, _RF_MD_HEADER_PREFIX.sub("", _clean(raw))) for ln, raw in enumerate(md.split("\n"), 1)]
     start = None
     for ln, t in lines:
         if t and (_RF_HEADER.match(t) or _RF_HEADER_LOOSE.match(t)
                   or _RF_INTRO.search(t) or _RF_INTRO_WEAK.search(t)
                   or _RF_HEADER_OFAC.match(t) or _RF_INTRO_OFAC.search(t)  # Phase 21: OFAC vocab
                   or _RF_HEADER_FINTRAC.match(t) or _RF_INTRO_FINTRAC.search(t)  # Phase 22: FINTRAC vocab
-                  or _RF_HEADER_FINTRAC_INV.match(t)):  # Phase 23: FINTRAC inverted "Indicators of X" form
+                  or _RF_HEADER_FINTRAC_INV.match(t)  # Phase 23: FINTRAC inverted "Indicators of X" form
+                  or _RF_HEADER_FINTRAC_LEAD.match(t)  # Phase 33: FINTRAC topic-leading "<topic> ML/TF indicators"
+                  or _RF_HEADER_RFI_FOR.match(t)):  # Phase 33: FinCEN "Red Flag Indicators for <topic>"
             start = ln
             break
     if start is None:
@@ -591,6 +620,35 @@ def _checks_selftest() -> list:
                                 "", "Body text describing methodology, not a heading.", "", "x"])
     if rf_region(fintrac_boiler) is not None:
         fails.append("the FINTRAC boilerplate 'Indicators of <ML/TF> can be thought of as red flags …' sentence falsely opened an rf_region (inverted anchor too loose)")
+    # Phase 33 — three anchors for the heterogeneous HTML-sourced (markitdown) headings the FINTRAC
+    # `/guidance-directives/` pages + the 2019-era FinCEN advisories use. Each is regression-gated
+    # 0-shift on the frozen corpus (the markdown-prefix tolerance verified 0-shift across all 46 frozen
+    # mds; the topic-leading + RFI-for anchors restricted to the FINTRAC "ML/TF" abbreviation / the
+    # "indicators for" form so they don't fire in the spelled-out FinCEN docs).
+    # (1) a markdown ATX-prefixed FINTRAC category heading (markitdown renders HTML <h3> as "### ") opens a region:
+    md_hdr = "\n".join(["# Money laundering and terrorist financing indicators—Financial entities", "",
+                        "### ML/TF indicators related to identifying the person or entity", "",
+                        "The client provides identification documents that are inconsistent or appear altered.",
+                        "", "For further information", "", "x"])
+    if rf_region(md_hdr) is None:
+        fails.append("a markdown-prefixed FINTRAC '### ML/TF indicators related to …' heading did not open an rf_region")
+    # (2) topic-LEADING "<topic> ML/TF indicators" heading (FINTRAC guidance: "Virtual Currency (VC) ML/TF indicators"):
+    md_lead = "\n".join(["## Virtual Currency (VC) ML/TF indicators", "",
+                         "A client conducts virtual-currency transactions through an unregistered foreign exchange.",
+                         "", "For further information", "", "x"])
+    if rf_region(md_lead) is None:
+        fails.append("FINTRAC topic-leading '<topic> ML/TF indicators' heading did not open an rf_region")
+    # the spelled-out FinCEN form "<topic> money laundering indicators" must NOT be caught by the ML/TF-only lead anchor:
+    fincen_spelled = "\n".join(["# Advisory", "", "General money laundering indicators of concern", "",
+                                "Body text, not a heading.", "", "x"])
+    if rf_region(fincen_spelled) is not None and _RF_HEADER_FINTRAC_LEAD.match("General money laundering indicators of concern"):
+        fails.append("the topic-leading ML/TF anchor wrongly fired on a spelled-out FinCEN 'money laundering indicators' line")
+    # (3) FinCEN "Red Flag Indicators for <topic>" heading (fin-2019-a006 fentanyl), 'indicators' REQUIRED before 'for':
+    rfi_for = "\n".join(["# Advisory", "", "Red Flag Indicators for Fentanyl-related Activity", "",
+                        "A customer purchases pill-press equipment inconsistent with a stated legitimate business.",
+                        "", "SAR filing", "", "x"])
+    if rf_region(rfi_for) is None:
+        fails.append("FinCEN 'Red Flag Indicators for <topic>' heading did not open an rf_region")
     return fails
 
 

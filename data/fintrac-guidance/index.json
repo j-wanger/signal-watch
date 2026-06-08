@@ -1,0 +1,79 @@
+[
+  {
+    "id": "fintrac-guid-financial-entities",
+    "title": "Money laundering and terrorist financing indicators \u2013 Financial entities",
+    "date": "2024-01-01",
+    "type": "guidance",
+    "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/fin_mltf-eng"
+  },
+  {
+    "id": "fintrac-guid-msb",
+    "title": "Money laundering and terrorist financing indicators \u2013 Money services businesses",
+    "date": "2024-01-01",
+    "type": "guidance",
+    "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/msb_mltf-eng"
+  },
+  {
+    "id": "fintrac-guid-real-estate",
+    "title": "Money laundering and terrorist financing indicators \u2013 Real estate",
+    "date": "2024-01-01",
+    "type": "guidance",
+    "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/real_mltf-eng"
+  },
+  {
+    "id": "fintrac-guid-securities",
+    "title": "Money laundering and terrorist financing indicators \u2013 Securities dealers",
+    "date": "2024-01-01",
+    "type": "guidance",
+    "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/sec_mltf-eng"
+  },
+  {
+    "id": "fintrac-guid-life-insurance",
+    "title": "Money laundering and terrorist financing indicators \u2013 Life insurance companies, brokers and agents",
+    "date": "2024-01-01",
+    "type": "guidance",
+    "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/li_mltf-eng"
+  },
+  {
+    "id": "fintrac-guid-dpms",
+    "title": "Money laundering and terrorist financing indicators \u2013 Dealers in precious metals and precious stones",
+    "date": "2024-01-01",
+    "type": "guidance",
+    "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/dpms_mltf-eng"
+  },
+  {
+    "id": "fintrac-guid-casinos",
+    "title": "Money laundering and terrorist financing indicators \u2013 Casinos",
+    "date": "2024-01-01",
+    "type": "guidance",
+    "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/casinos_mltf-eng"
+  },
+  {
+    "id": "fintrac-guid-accountants",
+    "title": "Money laundering and terrorist financing indicators \u2013 Accountants",
+    "date": "2024-01-01",
+    "type": "guidance",
+    "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/accts_mltf-eng"
+  },
+  {
+    "id": "fintrac-guid-bc-notaries",
+    "title": "Money laundering and terrorist financing indicators \u2013 British Columbia notaries",
+    "date": "2024-01-01",
+    "type": "guidance",
+    "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/BCnot_mltf-eng"
+  },
+  {
+    "id": "fintrac-guid-crown-agents",
+    "title": "Money laundering and terrorist financing indicators \u2013 Agents of the Crown",
+    "date": "2024-01-01",
+    "type": "guidance",
+    "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/agents_mltf-eng"
+  },
+  {
+    "id": "fintrac-guid-virtual-currency",
+    "title": "Money laundering and terrorist financing indicators \u2013 Virtual currency",
+    "date": "2024-01-01",
+    "type": "guidance",
+    "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/vc_mltf-eng"
+  }
+]

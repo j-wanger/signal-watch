@@ -59,6 +59,15 @@ that table.
   (the inverse of the capability view); click a document row to **drill into that doc's per-doc arc**, then
   **Back** returns to the data source (not the picker). No fabricated number — only honest counts + the
   always-on badge. (Sanity: the lens is genuinely distinct — at least one feed reads **"not yet"**.)
+- [ ] **Corpus completeness + typology re-segmentation (Phase 33):** on Select, confirm the menu now shows
+  **five** source groups — the new **"FINTRAC sector guidance (ML/TF indicators)"** group with **10 derived**
+  pages (Financial entities, MSB, Real estate, Securities, Life insurance, DPMS, Casinos, Accountants, BC
+  notaries, Virtual currency; Agents of the Crown shows non-derivable). The header stat reads **62 publications
+  · 56 derived**. Pick **Financial entities** → it walks the full per-doc arc (a dense ~150-indicator doc) and
+  the page **footer carries the FINTRAC Crown-copyright attribution** (never the US "public domain" line). On the
+  **Typologies** toggle, confirm **Trade-based money laundering** appears as its own cluster (the re-segmented
+  `ofac-sham-transactions`) alongside the **FINTRAC sector baselines** cluster. No fabricated number; the new
+  source is verbatim FINTRAC under the non-commercial licence; the always-on badge stays.
 
 ## Adverse-media / negative-news stream (`dist/news/`) — M8, Phase 31 + Phase 32
 - [ ] **Automated arc:** `node tests/news-stream.test.mjs` exits **0** — drives the committed

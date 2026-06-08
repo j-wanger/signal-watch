@@ -2,12 +2,66 @@
   "_generated_by": "scripts/derive_signals.py --corpus-status",
   "_note": "Deterministic per-advisory manifest for the corpus-explorer build (scripts/build.py corpus reads this + data/fincen/derived/*.json). `derivable` = a red-flag region exists (rf_region; false only for the 2 FATF advisories); `extraction`/`flag_count` are a cheap rf_region-bounded triage HINT (_rf_triage), NOT the derivability authority — an advisory goes live via a gate-passing derived/<id>.json (the LLM extracts; check_record grounds), and build.py ignores the manifest count for a live advisory. Authoring artifact, NOT a ship config. Regenerate after the corpus md set changes.",
   "summary": {
-    "clean": 11,
+    "clean": 15,
     "low": 1,
-    "needs": 2,
-    "total": 14
+    "needs": 3,
+    "total": 19
   },
   "advisories": [
+    {
+      "id": "fin-2018-a003",
+      "advisory": "FIN-2018-A003",
+      "title": "Advisory on Human Rights Abuses Enabled by Corrupt Senior Foreign Political Figures and their Financial Facilitators",
+      "date": "2018-06-12",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2018-a003",
+      "source": "FinCEN FIN-2018-A003 · Advisory on Human Rights Abuses Enabled by Corrupt Senior Foreign Political Figures and their Financial Facilitators · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 28,
+      "sections": {
+        "redflag": 28
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2019-a003",
+      "advisory": "FIN-2019-A003",
+      "title": "Advisory on Illicit Activity Involving Convertible Virtual Currency",
+      "date": "2019-05-09",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2019-a003",
+      "source": "FinCEN FIN-2019-A003 · Advisory on Illicit Activity Involving Convertible Virtual Currency · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 85,
+      "sections": {
+        "redflag": 85
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2019-a005",
+      "advisory": "FIN-2019-A005",
+      "title": "Updated Advisory on Email Compromise Fraud Schemes Targeting Vulnerable Business Processes",
+      "date": "2019-07-16",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2019-a005",
+      "source": "FinCEN FIN-2019-A005 · Updated Advisory on Email Compromise Fraud Schemes Targeting Vulnerable Business Processes · public domain (17 U.S.C. 105)",
+      "extraction": "none",
+      "flag_count": 0,
+      "sections": {},
+      "derivable": false
+    },
+    {
+      "id": "fin-2019-a006",
+      "advisory": "FIN-2019-A006",
+      "title": "Advisory to Financial Institutions on Illicit Financial Schemes and Methods Related to the Trafficking of Fentanyl and Other Synthetic Opioids",
+      "date": "2019-08-21",
+      "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2019-a006",
+      "source": "FinCEN FIN-2019-A006 · Advisory to Financial Institutions on Illicit Financial Schemes and Methods Related to the Trafficking of Fentanyl and Other Synthetic Opioids · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 56,
+      "sections": {
+        "redflag": 56
+      },
+      "derivable": true
+    },
     {
       "id": "fin-2020-a008",
       "advisory": "FIN-2020-A008",
@@ -197,6 +251,20 @@
       "flag_count": 6,
       "sections": {
         "redflag": 6
+      },
+      "derivable": true
+    },
+    {
+      "id": "fin-2026-a002",
+      "advisory": "FIN-2026-A002",
+      "title": "FinCEN Advisory on the Unlawful Employment of Illegal Aliens and Related Money Laundering by Non-Work-Authorized Populations",
+      "date": "2026-06-05",
+      "url": "https://www.fincen.gov/system/files/2026-06/FinCEN-Advisory-Non-Work-Authorized-Populations.pdf",
+      "source": "FinCEN FIN-2026-A002 · FinCEN Advisory on the Unlawful Employment of Illegal Aliens and Related Money Laundering by Non-Work-Authorized Populations · public domain (17 U.S.C. 105)",
+      "extraction": "clean",
+      "flag_count": 29,
+      "sections": {
+        "redflag": 29
       },
       "derivable": true
     }

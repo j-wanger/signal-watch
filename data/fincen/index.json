@@ -96,5 +96,40 @@
     "date": "2026-03-30",
     "type": "advisory",
     "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2026-a001"
+  },
+  {
+    "id": "fin-2018-a003",
+    "title": "Advisory on Human Rights Abuses Enabled by Corrupt Senior Foreign Political Figures and their Financial Facilitators",
+    "date": "2018-06-12",
+    "type": "advisory",
+    "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2018-a003"
+  },
+  {
+    "id": "fin-2019-a003",
+    "title": "Advisory on Illicit Activity Involving Convertible Virtual Currency",
+    "date": "2019-05-09",
+    "type": "advisory",
+    "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2019-a003"
+  },
+  {
+    "id": "fin-2019-a005",
+    "title": "Updated Advisory on Email Compromise Fraud Schemes Targeting Vulnerable Business Processes",
+    "date": "2019-07-16",
+    "type": "advisory",
+    "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2019-a005"
+  },
+  {
+    "id": "fin-2019-a006",
+    "title": "Advisory to Financial Institutions on Illicit Financial Schemes and Methods Related to the Trafficking of Fentanyl and Other Synthetic Opioids",
+    "date": "2019-08-21",
+    "type": "advisory",
+    "url": "https://www.fincen.gov/resources/advisories/fincen-advisory-fin-2019-a006"
+  },
+  {
+    "id": "fin-2026-a002",
+    "title": "FinCEN Advisory on the Unlawful Employment of Illegal Aliens and Related Money Laundering by Non-Work-Authorized Populations",
+    "date": "2026-06-05",
+    "type": "advisory",
+    "url": "https://www.fincen.gov/system/files/2026-06/FinCEN-Advisory-Non-Work-Authorized-Populations.pdf"
   }
 ]

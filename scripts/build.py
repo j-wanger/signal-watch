@@ -81,6 +81,13 @@ CORPUS_SOURCES = [
     {"id": "fintrac-advisories", "doc_type": "FINTRAC", "jurisdiction": "Canada",
      "status": ROOT / "data" / "fintrac" / "corpus-status.json",
      "derived": ROOT / "data" / "fintrac" / "derived"},
+    # Phase 33: FINTRAC `/guidance-directives/` per-sector ML/TF INDICATOR pages — a SECOND FINTRAC
+    # product area (the Operational Alerts above are /intel/ strategic intelligence). Same Crown-copyright
+    # non-commercial basis; far denser (each sector page is a 100+-indicator baseline). A distinct doc_type
+    # so the SELECT menu separates the sector baselines from the OAs.
+    {"id": "fintrac-guidance", "doc_type": "FINTRAC Guidance", "jurisdiction": "Canada",
+     "status": ROOT / "data" / "fintrac-guidance" / "corpus-status.json",
+     "derived": ROOT / "data" / "fintrac-guidance" / "derived"},
 ]
 # the cover×data build-recommendation vocabulary (mirrors derive_signals.py _REC_MATRIX values;
 # re-declared here so build.py's boundary check stays independent of the authoring tool).

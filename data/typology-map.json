@@ -22,7 +22,12 @@
     "cannabis": "Laundering of illicit-cannabis proceeds",
     "illegal-wildlife-trade": "Laundering of illegal-wildlife-trade proceeds",
     "child-sexual-exploitation": "Laundering of online child sexual exploitation proceeds",
-    "underground-banking": "Informal value transfer / underground banking schemes"
+    "underground-banking": "Informal value transfer / underground banking schemes",
+    "trade-based-money-laundering": "Laundering value through sham/fictitious trade transactions, mis-invoicing, and goods-based value transfer",
+    "virtual-currency": "Illicit activity involving convertible virtual currency (broad CVC laundering and movement)",
+    "unlawful-employment": "Laundering tied to unlawful employment of non-work-authorized labour and labour-broker payroll schemes",
+    "casino-gaming": "Money laundering through casinos and the gaming sector",
+    "fintrac-sector-baselines": "FINTRAC per-regulated-sector ML/TF baseline indicator lists (multi-typology sector guidance)"
   },
   "map": {
     "fin-2020-a008": "human-trafficking",
@@ -37,7 +42,6 @@
     "fin-2025-a002": "sanctions-evasion",
     "fin-2025-a003": "professional-money-laundering",
     "fin-2026-a001": "healthcare-fraud",
-
     "fin-2020-alert001": "virtual-currency-scam",
     "fin-2022-alert002": "sanctions-evasion",
     "fin-2022-alert003": "export-control-evasion",
@@ -55,11 +59,9 @@
     "fin-2025-alert002": "transnational-organized-crime",
     "fin-2026-alert001": "public-benefits-fraud",
     "fin-2026-alert002": "sanctions-evasion",
-
     "ofac-maritime-shipping": "sanctions-evasion",
-    "ofac-sham-transactions": "sanctions-evasion",
+    "ofac-sham-transactions": "trade-based-money-laundering",
     "ofac-virtual-currency": "sanctions-evasion",
-
     "fintrac-cannabis": "cannabis",
     "fintrac-human-trafficking": "human-trafficking",
     "fintrac-illegal-wildlife": "illegal-wildlife-trade",
@@ -69,6 +71,20 @@
     "fintrac-romance-fraud": "romance-and-investment-fraud",
     "fintrac-synthetic-opioids": "synthetic-opioids",
     "fintrac-terrorist-financing": "terrorist-financing",
-    "fintrac-underground-banking": "underground-banking"
+    "fintrac-underground-banking": "underground-banking",
+    "fin-2019-a006": "synthetic-opioids",
+    "fin-2018-a003": "corruption",
+    "fin-2019-a003": "virtual-currency",
+    "fin-2026-a002": "unlawful-employment",
+    "fintrac-guid-real-estate": "real-estate",
+    "fintrac-guid-virtual-currency": "virtual-currency",
+    "fintrac-guid-casinos": "casino-gaming",
+    "fintrac-guid-financial-entities": "fintrac-sector-baselines",
+    "fintrac-guid-msb": "fintrac-sector-baselines",
+    "fintrac-guid-securities": "fintrac-sector-baselines",
+    "fintrac-guid-life-insurance": "fintrac-sector-baselines",
+    "fintrac-guid-dpms": "fintrac-sector-baselines",
+    "fintrac-guid-accountants": "fintrac-sector-baselines",
+    "fintrac-guid-bc-notaries": "fintrac-sector-baselines"
   }
 }

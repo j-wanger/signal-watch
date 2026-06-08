@@ -326,6 +326,13 @@ const STEPS=['Select document','Read advisory','Coverage','Build recs','Signal',
 
 // escapes text AND attribute positions (quotes included) — corpus.html interpolates into both.
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+// Phase 33: FINTRAC `/guidance-directives/` pages are HTML → markitdown rendered glossary cross-references as
+// markdown links (`[no apparent reason](/guidance-directives/glossary…)`). DISPLAY-strip `[text](url)`→`text`
+// (the committed verbatim flag + the grounding gate are untouched). normalize() drops `[](){}/#` AND keeps the
+// URL-slug alphanumerics, so this is NOT normalize-invariant — it is applied CONSISTENTLY at all three display
+// sites (shortFlag, cleanArticle, highlightArticle's flag match) so the link-stripped flag still highlights in
+// the link-stripped article. A no-op on the 47 PDF-sourced docs (no markdown links) → their display is unchanged.
+function stripLinks(s){return String(s==null?'':s).replace(/\[([^\]]+)\]\([^)]*\)/g,'$1');}
 
 /* ---------- defensive rendering ---------- */
 function validateCorpus(c){
@@ -346,7 +353,7 @@ function coverageIndex(indicators){
   let v=0;indicators.forEach(i=>{v+=i.status==='covered'?1:i.status==='partial'?0.5:0;});
   return Math.round(v/indicators.length*100);
 }
-function shortFlag(t,cap){cap=cap||150;t=String(t||'').replace(/\s+/g,' ').trim();return t.length<=cap?t:t.slice(0,cap-1).trimEnd()+'…';}
+function shortFlag(t,cap){cap=cap||150;t=stripLinks(String(t||'')).replace(/\s+/g,' ').trim();return t.length<=cap?t:t.slice(0,cap-1).trimEnd()+'…';}
 
 /* ---------- cross-corpus typology synthesis (Phase 24) ---------- */
 // typology -> human-readable description (injected by build.py from data/typology-map.json).
@@ -501,6 +508,7 @@ function renderSelect(){
   const alertN=ADVISORIES.filter(a=>a.doc_type==='Alert').length;
   const ofacN=ADVISORIES.filter(a=>a.doc_type==='OFAC').length;
   const fintracN=ADVISORIES.filter(a=>a.doc_type==='FINTRAC').length;
+  const guidN=ADVISORIES.filter(a=>a.doc_type==='FINTRAC Guidance').length;
   const cl=clusters();
   const xjN=cl.filter(c=>c.xj).length;
   const byTyp=selMode==='typology', byCap=selMode==='capability', byDS=selMode==='datasource';
@@ -524,14 +532,14 @@ function renderSelect(){
     ? `<span class="sct">${dsa.length} data sources · ${dsHave} available · ${dsPart} partial · ${dsGap} not yet · across ${live} derived documents</span>`
     : byTyp
     ? `<span class="sct">${cl.length} typologies · ${xjN} cross-jurisdiction · ${live} derived documents</span>`
-    : `<span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${fintracN} FINTRAC · ${live} derived · ${nd} non-derivable</span>`;
+    : `<span class="sct">${ADVISORIES.length} publications · ${advN} FinCEN advisories · ${alertN} FinCEN alerts · ${ofacN} OFAC · ${fintracN} FINTRAC OAs · ${guidN} FINTRAC guidance · ${live} derived · ${nd} non-derivable</span>`;
   const lead = byCap
     ? `Every red flag in the corpus implies a <b>detection capability</b>. Pooled across all regulators and jurisdictions, here is what the corpus demands — each capability tagged with the institution's own posture and the number of indicators that depend on it. Sorted by <b>where you're most exposed</b>: capabilities not yet in place, by how many indicators need them. Pick one to see the indicators and drill into any document.`
     : byDS
     ? `Every red flag depends on a <b>data source</b> — a feed the institution must actually have to act on it. A capability you could build is worthless if you can't see the data. Pooled across all regulators and jurisdictions, here is what the corpus <b>requires</b> — each feed tagged with the institution's own access posture and the number of indicators that depend on it. Sorted by <b>where you're most exposed</b>: data you don't yet have, by how many indicators need it. Pick one to see the indicators it gates and drill into any document.`
     : byTyp
     ? `Group the corpus by money-laundering typology and see the <b>combined</b> picture: the same typology often appears across regulators and jurisdictions, and no single advisory enumerates it all. <b>${xjN}</b> typolog${xjN===1?'y spans':'ies span'} both the US and Canada. Pick a typology to see its cluster and combined coverage, then drill into any document's loop.`
-    : `The same signal engine, pointed at a multi-jurisdiction public corpus — US-federal FinCEN advisories + alerts and OFAC sanctions advisories, plus Canadian <b>FINTRAC</b> operational alerts. Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.`;
+    : `The same signal engine, pointed at a multi-jurisdiction public corpus — US-federal FinCEN advisories + alerts and OFAC sanctions advisories, plus Canadian <b>FINTRAC</b> operational alerts and <b>per-sector ML/TF indicator guidance</b>. Choose a <b>derived</b> document and walk its coverage, the per-indicator <b>build recommendations</b>, and the signals that are immediately buildable.`;
   const note = byCap
     ? `Capabilities are a fixed taxonomy; each indicator is tagged to exactly one. Demand, coverage, and the covered/partial/gap split are honest counts over the existing per-indicator statuses — no capability score, similarity, or overlap is computed or claimed. Posture is the institution's own assessment (illustrative).`
     : byDS
@@ -539,9 +547,9 @@ function renderSelect(){
     : byTyp
     ? `Documents are grouped by their typology (a closed-vocabulary overlay, traceable to each document's stated subject). Combined coverage is honest union arithmetic over the existing per-indicator statuses — no similarity, overlap, or lift between regulators is computed or claimed.`
     : `Coverage and data-availability are illustrative; the titles and red-flag text are verbatim from the cited source documents (each carries its own public-source attribution).`;
-  // doc-mode: group by SOURCE (FinCEN advisories / alerts / OFAC / FINTRAC), newest-first within each.
-  // doc_type comes from the source registry → always one of these four; dates are ISO (lexical = chronological).
-  const SRC_ORDER=[['Advisory','FinCEN Advisories'],['Alert','FinCEN Alerts'],['OFAC','OFAC advisories'],['FINTRAC','FINTRAC operational alerts']];
+  // doc-mode: group by SOURCE (FinCEN advisories / alerts / OFAC / FINTRAC OAs / FINTRAC guidance), newest-first within each.
+  // doc_type comes from the source registry → always one of these five; dates are ISO (lexical = chronological).
+  const SRC_ORDER=[['Advisory','FinCEN Advisories'],['Alert','FinCEN Alerts'],['OFAC','OFAC advisories'],['FINTRAC','FINTRAC operational alerts'],['FINTRAC Guidance','FINTRAC sector guidance (ML/TF indicators)']];
   const byDateDesc=(x,y)=>String(y.date||'').localeCompare(String(x.date||'')) || String(x.id).localeCompare(String(y.id));
   const groupsHtml=SRC_ORDER.map(([dt,label])=>{
     const docs=ADVISORIES.filter(a=>(a.doc_type||'Advisory')===dt).slice().sort(byDateDesc);
@@ -819,6 +827,7 @@ function cleanArticle(text){
     .join('\n')
     .replace(/FINCEN\s+(?:ADVISORY|ALERT)(?=[A-Z0-9])/g,'')   // glued caps header prefix
     .replace(/^#{1,6}\s+/gm,'').replace(/\*\*/g,'')           // markdown heading markers + bold (display only)
+    .replace(/\[([^\]]+)\]\([^)]*\)/g,'$1')                   // Phase 33: de-link markitdown glossary refs (display)
     .replace(/[ \t]{2,}/g,' ').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
 }
 // Phase 27 (T3): highlight by NORMALIZING BOTH SIDES — the same collapse derive_signals.normalize()
@@ -837,7 +846,7 @@ function highlightArticle(text, flags){
   let k; while((k=norm.indexOf('fincenadvisory'))>=0){norm=norm.slice(0,k)+norm.slice(k+14);map.splice(k,14);}
   const spans=[];
   flags.forEach((f,fi)=>{
-    const nf=String(f==null?'':f).toLowerCase().replace(/[^a-z0-9]+/g,'').replace(/fincenadvisory/g,'');
+    const nf=stripLinks(String(f==null?'':f)).toLowerCase().replace(/[^a-z0-9]+/g,'').replace(/fincenadvisory/g,'');  // Phase 33: strip links so the flag matches the de-linked article
     if(nf.length<6) return;
     const at=norm.indexOf(nf); if(at<0) return;
     spans.push([map[at], map[at+nf.length-1], fi]);

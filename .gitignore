@@ -42,6 +42,9 @@ data/ofac/raw/
 # verbatim for NON-COMMERCIAL use with attribution per FINTRAC's Terms & Conditions, NOT public domain) —
 # same convention (raw PDFs local + regenerable from the hand-curated data/fintrac/index.json; *.md ships).
 data/fintrac/raw/
+# Phase 33: FINTRAC per-sector ML/TF indicator GUIDANCE (HTML, not PDF) — same convention (raw HTML local +
+# regenerable from the hand-curated data/fintrac-guidance/index.json via acquire_fincen.py --html; *.md ships).
+data/fintrac-guidance/raw/
 
 # Authoring scratch: scaffolded config SKELETONS from scripts/derive_signals.py --scaffold
 # (Phase 11). A draft is reviewed, has its JUDGMENT fields filled, then RENAMED to

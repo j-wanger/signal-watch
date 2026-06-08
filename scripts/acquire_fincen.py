@@ -117,6 +117,32 @@ def acquire(advisory_id: str, source_dir: Path) -> Path:
     return out
 
 
+def acquire_html(doc_id: str, source_dir: Path) -> Path:
+    """Phase 33 — fetch an HTML source page verbatim into <source>/raw/<id>.html.
+
+    FINTRAC's `/guidance-directives/` ML/TF-indicator pages are served as HTML (no
+    `<page>.pdf` sibling, unlike the Phase-22 Operational Alerts), so this saves the raw
+    HTML for `pdf_to_md.py` (markitdown converts HTML too). Authoring-only; the manifest
+    url is fetched DIRECTLY (no detail-page->PDF resolution hop, no %PDF check)."""
+    manifest = load_manifest(source_dir)
+    if doc_id not in manifest:
+        known = ", ".join(sorted(manifest)) or "(none — write <source>/index.json)"
+        sys.exit(f"unknown id '{doc_id}'. Known: {known}")
+    url = manifest[doc_id]
+    raw_dir = source_dir / "raw"
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    out = raw_dir / f"{doc_id}.html"
+    print(f"fetching {url}\n     -> {out}")
+    data = _get(url)
+    if data[:3] == b"\xef\xbb\xbf":            # strip a leading UTF-8 BOM before the sniff
+        data = data[3:]
+    if not data.lstrip()[:1] == b"<":
+        sys.exit(f"refusing to write: response is not HTML (first bytes: {data[:16]!r})")
+    out.write_bytes(data)
+    print(f"ok: {len(data):,} bytes")
+    return out
+
+
 def _source_arg(argv) -> tuple:
     """Pull an optional `--source <dir>` (relative to ROOT or absolute); return (source_dir, rest)."""
     if "--source" in argv:
@@ -143,6 +169,10 @@ def main(argv):
         for k in sorted(manifest):
             tag = " [direct-pdf]" if k in DIRECT_PDF or manifest[k].lower().endswith(".pdf") else ""
             print(f"{k}\t{manifest[k]}{tag}")
+        return
+    if "--html" in argv:                                  # Phase 33: HTML source (FINTRAC guidance)
+        argv = [a for a in argv if a != "--html"]
+        acquire_html(argv[0], source_dir)
         return
     acquire(argv[0], source_dir)
 

@@ -139,7 +139,8 @@ non-derivable).
 
 `dist/corpus/index.html` is a **second, separate** single-file ship artifact: a FinCEN **corpus
 explorer**. Where the six-act typology demos each tell one scripted story, the explorer points the same
-loop at the *whole public corpus* — FinCEN advisories + alerts, OFAC, and FINTRAC — you pick one of the 46 publications
+loop at the *whole public corpus* — FinCEN advisories + alerts, OFAC, and FINTRAC (operational alerts **and**, as of
+Phase 33, the per-sector ML/TF indicator guidance) — you pick one of the 62 publications
 and watch it derive. Phase 26 elevated it to the showcase's bar; **Phase 27 made it shippable** — an assessment
 workflow showed the remaining weakness was *presentation, not the grounding system*, so the Read-advisory source
 is now **markitdown-cleaned** (no running headers / tab-soup), highlighting **normalizes both sides** to land
@@ -150,12 +151,14 @@ genuinely-long advisory indicators are kept whole). It opens on a
 runs a **staged 6-screen per-doc arc** (Phase 18 gave it the human gate + the close-the-loop payoff; Phase 25
 added the article-processing "read advisory" beat; Phase 26 added the combination-lift beat):
 
-1. **Select** — all 46 publications (14 FinCEN advisories + 19 FinCEN alerts + 3 OFAC advisories +
-   10 FINTRAC publications — 9 operational alerts + 1 operational brief), **grouped by source** (FinCEN
-   Advisories / Alerts / OFAC / FINTRAC), newest-first within each, each with an honest `doc_type` chip
-   (*Advisory* / *Alert* / *OFAC* / *FINTRAC*) and a status chip: *derived* (live, clickable — 42 of them), or *no
-   enumerated red-flag list* (non-derivable — the 4 remaining: the 2 FATF jurisdiction advisories + 2
-   alerts whose text mentions red flags but carries no anchorable enumerated list). The *clean / low*
+1. **Select** — all 62 publications (19 FinCEN advisories + 19 FinCEN alerts + 3 OFAC advisories +
+   10 FINTRAC operational alerts/brief + 11 FINTRAC per-sector ML/TF indicator guidance pages — Phase 33),
+   **grouped by source** (FinCEN Advisories / Alerts / OFAC / FINTRAC OAs / FINTRAC sector guidance),
+   newest-first within each, each with an honest `doc_type` chip (*Advisory* / *Alert* / *OFAC* / *FINTRAC* /
+   *FINTRAC Guidance*) and a status chip: *derived* (live, clickable — 56 of them), or *no
+   enumerated red-flag list* (non-derivable — the 6 remaining: the 2 FATF jurisdiction advisories + 2
+   alerts + 2 Phase-33 additions that defer rather than enumerate — the 2019 BEC advisory defers to the 2016
+   advisory, and the FINTRAC Agents-of-the-Crown guidance defers to the general indicators). The *clean / low*
    "ready to derive, not yet derived" chip state remains for any future publication added before it is derived.
 2. **Read advisory** *(Phase 25; Phase 26 progressive render)* — the **full source document**, rendered with
    the showcase's "agent reading" beat (it types a capped opening, then reveals the full text with each verbatim
@@ -199,9 +202,11 @@ indicator must carry a full signal definition). `build.py` never imports `derive
 and red-flag text are verbatim from their public sources (US-federal public domain, or FINTRAC under its
 non-commercial reproduction licence); the coverage/data/build judgments are illustrative (the
 "Illustrative data & outputs" badge stays on, with the per-document source attribution — each carrying its
-own basis — kept visually distinct from it). The explorer ships with **42 derived across 46 publications**
-(12 of 14 FinCEN advisories + 17 of 19 FinCEN alerts + 3 of 3 OFAC advisories + 10 of 10 FINTRAC publications
-— 9 operational alerts + 1 operational brief) — the non-derivable documents (the 2 FATF advisories + 2 alerts with no enumerated red-flag list) are labelled as such. The menu is deliberately varied: the transaction-pattern-rich
+own basis — kept visually distinct from it). The explorer ships with **56 derived across 62 publications**
+(16 of 19 FinCEN advisories + 17 of 19 FinCEN alerts + 3 of 3 OFAC advisories + 10 of 10 FINTRAC operational
+alerts/brief + 10 of 11 FINTRAC per-sector guidance pages — Phase 33: the FINTRAC `/guidance-directives/` ML/TF
+indicator area, **2,251 indicators total**) — the non-derivable documents (the 2 FATF advisories + 2 alerts + the
+2019 BEC advisory + the FINTRAC Agents-of-the-Crown guidance, each with no anchorable enumerated red-flag list) are labelled as such. The menu is deliberately varied: the transaction-pattern-rich
 Chinese money-laundering-networks typology (`fin-2025-a003`) surfaces five immediately-buildable signals;
 the enrichment-hungry Iran (`fin-2025-a002`) and Iran-backed-terror-finance (`fin-2024-a001`) typologies
 lean to *build + enrich*; the **glued-no-separator** advisories — ransomware (`fin-2021-a004`) and

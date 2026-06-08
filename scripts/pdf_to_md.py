@@ -36,8 +36,10 @@ DEFAULT_SOURCE = ROOT / "data" / "fincen"
 
 def convert(advisory_id: str, source_dir: Path) -> Path:
     pdf = source_dir / "raw" / f"{advisory_id}.pdf"
-    if not pdf.exists():
-        sys.exit(f"missing {pdf} — run acquire_fincen.py {advisory_id} first")
+    html = source_dir / "raw" / f"{advisory_id}.html"      # Phase 33: HTML source (FINTRAC guidance)
+    src = pdf if pdf.exists() else html
+    if not src.exists():
+        sys.exit(f"missing {pdf} (or {html}) — run acquire_fincen.py {advisory_id} first")
     try:
         from markitdown import MarkItDown
     except ImportError:
@@ -45,7 +47,7 @@ def convert(advisory_id: str, source_dir: Path) -> Path:
             "markitdown not importable. This is an AUTHORING tool — run it in the "
             "uv venv:\n    .venv/bin/python scripts/pdf_to_md.py " + advisory_id
         )
-    result = MarkItDown().convert(str(pdf))
+    result = MarkItDown().convert(str(src))
     text = getattr(result, "markdown", None) or result.text_content
     out = source_dir / f"{advisory_id}.md"
     # Per-source issuer + publication noun + LICENCE basis for the provenance header. Phase 22 added the
@@ -55,7 +57,12 @@ def convert(advisory_id: str, source_dir: Path) -> Path:
     # FinCEN + OFAC md reproduces byte-identically (those sources are frozen).
     name = source_dir.name.lower()
     if "fintrac" in name:
-        issuer, kind = "FINTRAC", "operational alert"
+        # Phase 33 — FINTRAC `/guidance-directives/` ML/TF-indicator pages are a SEPARATE source
+        # area (data/fintrac-guidance/) from the Phase-22 Operational Alerts (data/fintrac/). The OA
+        # branch is left byte-identical (kind "operational alert") so the frozen data/fintrac/ md
+        # reproduce; only the new guidance dir takes the "indicators guidance" noun.
+        issuer = "FINTRAC"
+        kind = "indicators guidance" if "guidance" in name else "operational alert"
         licence = ("Crown copyright (© His Majesty the King in Right of Canada); reproduced for "
                    "non-commercial use with attribution per FINTRAC's Terms & Conditions — NOT public domain")
         # Provenance header so the corpus file self-documents its source + reproduction basis.

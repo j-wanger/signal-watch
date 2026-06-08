@@ -1,0 +1,164 @@
+{
+  "_generated_by": "scripts/derive_signals.py --corpus-status",
+  "_note": "Deterministic per-advisory manifest for the corpus-explorer build (scripts/build.py corpus reads this + data/fintrac-guidance/derived/*.json). `derivable` = a red-flag region exists (rf_region; false only for the 2 FATF advisories); `extraction`/`flag_count` are a cheap rf_region-bounded triage HINT (_rf_triage), NOT the derivability authority — an advisory goes live via a gate-passing derived/<id>.json (the LLM extracts; check_record grounds), and build.py ignores the manifest count for a live advisory. Authoring artifact, NOT a ship config. Regenerate after the corpus md set changes.",
+  "summary": {
+    "clean": 10,
+    "low": 0,
+    "needs": 1,
+    "total": 11
+  },
+  "advisories": [
+    {
+      "id": "fintrac-guid-accountants",
+      "advisory": "FINTRAC-GUID-ACCOUNTANTS",
+      "title": "Money laundering and terrorist financing indicators – Accountants",
+      "date": "2024-01-01",
+      "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/accts_mltf-eng",
+      "source": "FINTRAC-GUID-ACCOUNTANTS · Money laundering and terrorist financing indicators – Accountants · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 377,
+      "sections": {
+        "redflag": 377
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-guid-bc-notaries",
+      "advisory": "FINTRAC-GUID-BC-NOTARIES",
+      "title": "Money laundering and terrorist financing indicators – British Columbia notaries",
+      "date": "2024-01-01",
+      "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/BCnot_mltf-eng",
+      "source": "FINTRAC-GUID-BC-NOTARIES · Money laundering and terrorist financing indicators – British Columbia notaries · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 371,
+      "sections": {
+        "redflag": 371
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-guid-casinos",
+      "advisory": "FINTRAC-GUID-CASINOS",
+      "title": "Money laundering and terrorist financing indicators – Casinos",
+      "date": "2024-01-01",
+      "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/casinos_mltf-eng",
+      "source": "FINTRAC-GUID-CASINOS · Money laundering and terrorist financing indicators – Casinos · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 374,
+      "sections": {
+        "redflag": 374
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-guid-crown-agents",
+      "advisory": "FINTRAC-GUID-CROWN-AGENTS",
+      "title": "Money laundering and terrorist financing indicators – Agents of the Crown",
+      "date": "2024-01-01",
+      "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/agents_mltf-eng",
+      "source": "FINTRAC-GUID-CROWN-AGENTS · Money laundering and terrorist financing indicators – Agents of the Crown · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "none",
+      "flag_count": 0,
+      "sections": {},
+      "derivable": false
+    },
+    {
+      "id": "fintrac-guid-dpms",
+      "advisory": "FINTRAC-GUID-DPMS",
+      "title": "Money laundering and terrorist financing indicators – Dealers in precious metals and precious stones",
+      "date": "2024-01-01",
+      "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/dpms_mltf-eng",
+      "source": "FINTRAC-GUID-DPMS · Money laundering and terrorist financing indicators – Dealers in precious metals and precious stones · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 373,
+      "sections": {
+        "redflag": 373
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-guid-financial-entities",
+      "advisory": "FINTRAC-GUID-FINANCIAL-ENTITIES",
+      "title": "Money laundering and terrorist financing indicators – Financial entities",
+      "date": "2024-01-01",
+      "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/fin_mltf-eng",
+      "source": "FINTRAC-GUID-FINANCIAL-ENTITIES · Money laundering and terrorist financing indicators – Financial entities · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 376,
+      "sections": {
+        "redflag": 376
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-guid-life-insurance",
+      "advisory": "FINTRAC-GUID-LIFE-INSURANCE",
+      "title": "Money laundering and terrorist financing indicators – Life insurance companies, brokers and agents",
+      "date": "2024-01-01",
+      "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/li_mltf-eng",
+      "source": "FINTRAC-GUID-LIFE-INSURANCE · Money laundering and terrorist financing indicators – Life insurance companies, brokers and agents · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 377,
+      "sections": {
+        "redflag": 377
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-guid-msb",
+      "advisory": "FINTRAC-GUID-MSB",
+      "title": "Money laundering and terrorist financing indicators – Money services businesses",
+      "date": "2024-01-01",
+      "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/msb_mltf-eng",
+      "source": "FINTRAC-GUID-MSB · Money laundering and terrorist financing indicators – Money services businesses · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 375,
+      "sections": {
+        "redflag": 375
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-guid-real-estate",
+      "advisory": "FINTRAC-GUID-REAL-ESTATE",
+      "title": "Money laundering and terrorist financing indicators – Real estate",
+      "date": "2024-01-01",
+      "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/real_mltf-eng",
+      "source": "FINTRAC-GUID-REAL-ESTATE · Money laundering and terrorist financing indicators – Real estate · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 374,
+      "sections": {
+        "redflag": 374
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-guid-securities",
+      "advisory": "FINTRAC-GUID-SECURITIES",
+      "title": "Money laundering and terrorist financing indicators – Securities dealers",
+      "date": "2024-01-01",
+      "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/sec_mltf-eng",
+      "source": "FINTRAC-GUID-SECURITIES · Money laundering and terrorist financing indicators – Securities dealers · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 380,
+      "sections": {
+        "redflag": 380
+      },
+      "derivable": true
+    },
+    {
+      "id": "fintrac-guid-virtual-currency",
+      "advisory": "FINTRAC-GUID-VIRTUAL-CURRENCY",
+      "title": "Money laundering and terrorist financing indicators – Virtual currency",
+      "date": "2024-01-01",
+      "url": "https://fintrac-canafe.canada.ca/guidance-directives/transaction-operation/indicators-indicateurs/vc_mltf-eng",
+      "source": "FINTRAC-GUID-VIRTUAL-CURRENCY · Money laundering and terrorist financing indicators – Virtual currency · © His Majesty the King in Right of Canada — reproduced for non-commercial use per FINTRAC's Terms & Conditions",
+      "extraction": "clean",
+      "flag_count": 278,
+      "sections": {
+        "redflag": 278
+      },
+      "derivable": true
+    }
+  ]
+}

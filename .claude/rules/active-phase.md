@@ -1,6 +1,6 @@
 # Active Phase Context
 
-Phase: 35 — News live local-model backend (M8). DELIVERED 2026-06-08 (all 5 tasks [x]; exit criteria met; --check all 5/5 zero drift; both harnesses + the live tests green; frozen set byte-clean; delivery acceptance pending). Direction approved 2026-06-08.
+Phase: 35 — News live local-model backend (M8). DELIVERED + ACCEPTED + COMMITTED (all 5 tasks [x]; exit criteria met; --check all 5/5 zero drift; both harnesses + the live tests green; frozen set byte-clean; delivery accepted by the user 2026-06-08; committed 4408dd9 + pushed to main). Direction approved 2026-06-08. Next: /dev-plan for Phase 36 (persistence — DuckDB→parquet — + the feedback watchlist).
 
 Objective: hook the M8 adverse-media news stream to a REAL local-hosted model (llama-cpp serving a Qwen ~30B-A3B-class MoE) for REAL-TIME, on-demand extraction. Paste/pick an article → the live model extracts entities + red flags + the AML translation → server-side deterministic grounding (ungrounded drops) → the existing client-side fuzzy screen vs the static book → human disposition → exposure. This is the long-anticipated "live mode" the non-negotiable already sanctions (optional, isolated, off by default, scripted fallback). Phase 35 = the live-extraction BACKBONE; persistence (DuckDB→parquet) + the feedback watchlist (book ∪ prior-scanned entities) is Phase 36.
 
@@ -26,4 +26,4 @@ FROZEN byte-clean: the six-act showcase (index.html + config/** + the 3 typology
 
 Gates:
 - [x] Direction confirmed by user (live local-model backend for the news stream; served-by-companion + DuckDB→parquet [Ph36] + feedback watchlist [Ph36]; approved 2026-06-08)
-- [ ] Delivery accepted (post-implementation report)
+- [x] Delivery accepted (post-implementation report 2026-06-08; committed 4408dd9 + pushed to main)

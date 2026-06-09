@@ -14,4 +14,4 @@ Abort rule: (closed) blocked >3 attempts → mark [blocked: …] + ask the user:
 
 Gates:
 - [x] Direction confirmed by user (assumption-approval gate 2026-06-09: A1 accept-with-condition, A2–A4 accept)
-- [ ] Delivery accepted
+- [x] Delivery accepted (post-implementation report 2026-06-09; commit 3786042 verified)

@@ -140,6 +140,23 @@ class NewsStore:
                 [decision, scan_id, entity_id])
         return int(n)
 
+    def prune(self, name: str) -> int:
+        """Remove an escalated entity from the watchlist surface BY NAME (the watchlist is keyed by
+        normalized name, so a scanned row carries no entity_id). Un-escalates EVERY escalated row whose
+        normalized name matches — sets disposition='pruned' rather than deleting, so the scan/audit trail
+        survives. Returns the number of rows un-escalated (0 if no escalated row matches)."""
+        key = _norm(name)
+        if not key:
+            return 0
+        with self._lock:
+            rows = self.con.execute(
+                "SELECT scan_id, entity_id, name FROM entities WHERE disposition='escalate'").fetchall()
+            targets = [(sid, eid) for sid, eid, nm in rows if _norm(nm) == key]
+            for sid, eid in targets:
+                self.con.execute(
+                    "UPDATE entities SET disposition='pruned' WHERE scan_id=? AND entity_id=?", [sid, eid])
+        return len(targets)
+
     # ---- reads ---------------------------------------------------------------------------------
     def escalated(self) -> list:
         """The DISTINCT escalated entities — one row per normalized name (re-escalations collapse), with
@@ -237,6 +254,17 @@ def _selftest() -> int:
     sid2 = st.append_scan({**rec, "id": "live-2", "title": "Second Article"}, ts="2026-06-08T12:00:00")
     st.set_disposition(sid2, "E1", "escalate")
     assert len([r for r in st.watchlist_rows(book) if r["kind"] == "scanned"]) == 1, "re-escalation must dedup by name"
+
+    # prune BY NAME un-escalates every matching row (both scans) → leaves the watchlist; book is untouched
+    pruned = st.prune("Acme Holdings Ltd")
+    assert pruned == 2, f"prune should un-escalate both escalations of the name, got {pruned}"
+    wl2 = st.watchlist_rows(book)
+    assert [r for r in wl2 if r["kind"] == "scanned"] == [], "pruned name must leave the watchlist"
+    assert any(r["kind"] == "book" and r["name"] == "Globex Bank" for r in wl2), "prune must not touch the book"
+    assert st.prune("Nonexistent Name") == 0, "pruning an unknown name un-escalates nothing"
+    # re-escalate so the parquet roundtrip below still sees the 2 escalations (prune retained the audit rows)
+    st.set_disposition(sid, "E1", "escalate")
+    st.set_disposition(sid2, "E1", "escalate")
 
     d = tempfile.mkdtemp()
     paths = st.export_parquet(d)

@@ -94,6 +94,12 @@ SYSTEM_PROMPT = (
     "VERBATIM from the article (exact characters). `type` is 'person' or 'org'. location/age/profession/"
     "context are optional and, when given, MUST be quoted or directly paraphrased from words present in the "
     "article.\n"
+    "- SUBJECTS ONLY (Phase 38 — the highest-leverage control): extract ONLY the subjects of the financial "
+    "crime — perpetrators, defendants, designated/sanctioned parties, and the companies, accounts, or "
+    "aliases they used. DO NOT extract law-enforcement or government personnel, prosecutors, judges, "
+    "investigating agencies or their field offices, officials who announce or comment on the action, "
+    "government programs, or prosecuting/court districts. If a person or org appears ONLY because they "
+    "announced, investigated, or prosecuted the case, EXCLUDE it.\n"
     "- red_flags: each suspicious behaviour. `flag` MUST be a VERBATIM, CONTIGUOUS quote from the article "
     "(an exact substring — do not paraphrase it, do not stitch across gaps). `red_flag` is a TERSE, "
     "mechanism-named AML translation (e.g. 'Cash-for-crypto handovers to break the trail', "
@@ -189,6 +195,11 @@ def build_record(llm_json: dict, text: str, meta: dict = None):
         ],
     }
     kept, dropped = news_ground.ground_record(pre, body)
+    # Phase 38 — LIVE-mode entity-precision pass: drop institutional noise + surname-alias duplicates the
+    # model over-extracts (faithful; never invents; preserves every grounded subject). LIVE PATH ONLY —
+    # build.py does not call this, so the committed records + offline dist/news stay byte-frozen.
+    kept["entities"], ent_dropped = news_ground.screen_entities(kept["entities"], text)
+    dropped = list(dropped) + ent_dropped
     for i, e in enumerate(kept["entities"], 1):
         e["id"] = f"E{i}"
     for i, f in enumerate(kept["red_flags"], 1):
@@ -196,16 +207,88 @@ def build_record(llm_json: dict, text: str, meta: dict = None):
     return kept, dropped
 
 
-def extract(text: str, meta: dict = None, *, llm_url: str = DEFAULT_LLM_URL, model: str = DEFAULT_MODEL):
-    """Full live pipeline: model -> parse -> assemble -> ground. Returns (record, dropped)."""
-    return build_record(parse_llm_json(call_llm(text, llm_url=llm_url, model=model)), text, meta)
+# ── Phase 38 — second-pass entity verification (LIVE only; on by default) ───────────────────────────
+# A focused, KEEP-BIASED per-entity check that cleans the residual institutional noise the extraction
+# prompt's subjects-only rule leaves on articles where the model is inconsistent (e.g. agency/court names
+# that survive the first pass). Measured on the stress corpus: drops the residual with ZERO real-subject
+# loss (the naive forced-choice variant lost 6 designated parties — the keep-bias is load-bearing). It is
+# NEURAL, so it lives in the LIVE pipeline (extract), NOT in the deterministic build_record core that the
+# offline replay fixtures pin. It only DROPS, never adds → the grounding gate's faithfulness floor holds.
+VERIFY_SYS = (
+    "You are an AML analyst reviewing ONE entity extracted from a news/enforcement article. Answer NONSUBJECT "
+    "ONLY if the entity is CLEARLY just one of: an announcing official, a prosecutor, a judge, an investigating "
+    "agency or its field office, a court, a prosecuting district, or a government program. In EVERY other case "
+    "— a perpetrator, defendant, sanctioned/designated party, or ANY company, account, or alias connected to "
+    "the scheme — answer SUBJECT. When in doubt, answer SUBJECT (missing a real subject is the costlier error). "
+    "Answer with EXACTLY one word: SUBJECT or NONSUBJECT."
+)
+
+
+def _entity_context(name: str, body: str) -> str:
+    """Local article context for the verify call: sentences mentioning the name OR its distinctive key
+    token (catches alias/short-form mentions — e.g. the '<Alias> was designated…' sentence that
+    establishes subject status). Capped; falls back to the article head."""
+    sents = re.split(r"(?<=[.!?])\s+", body)
+    words = re.findall(r"[A-Za-z]{5,}", name)
+    key = max(words, key=len) if words else name
+    hit = list(dict.fromkeys(s.strip() for s in sents if name in s or (key and key in s)))
+    return " ".join(hit[:4])[:900] or body[:400]
+
+
+def verify_subject(name: str, etype: str, context: str, *, llm_url: str, model: str) -> bool:
+    """One keep-biased classification call. Returns True (KEEP) unless the model clearly says NONSUBJECT.
+    Fail-OPEN: any error → KEEP (never drop a subject because the verifier was unreachable)."""
+    body = {
+        "model": model, "temperature": 0, "max_tokens": 4,
+        "messages": [
+            {"role": "system", "content": VERIFY_SYS},
+            {"role": "user", "content": f"Entity: {name}\nType: {etype}\nContext from the article:\n{context}\n\nSUBJECT or NONSUBJECT?"},
+        ],
+        "chat_template_kwargs": {"enable_thinking": False},
+    }
+    try:
+        req = urllib.request.Request(llm_url, data=json.dumps(body).encode("utf-8"),
+                                     headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=60) as r:
+            out = json.loads(r.read().decode("utf-8"))["choices"][0]["message"]["content"]
+        return "NONSUBJECT" not in out.upper()
+    except Exception:  # noqa: BLE001 — the verifier is an enhancement; degrade to KEEP, never drop on error
+        return True
+
+
+def verify_entities(record: dict, article: str, *, llm_url: str, model: str):
+    """Second pass over a grounded record's entities — drop the ones the keep-biased verifier rejects as
+    NON-subjects, then re-id the survivors E1.. contiguously. Returns (record, dropped). Pure aside from
+    the model calls; mutates a copy."""
+    body = news_ground.article_body(article)
+    kept, dropped = [], []
+    for e in record.get("entities") or []:
+        if verify_subject(e.get("name", ""), e.get("type", ""), _entity_context(e.get("name", ""), body),
+                          llm_url=llm_url, model=model):
+            kept.append(e)
+        else:
+            dropped.append({"kind": "entity", "value": e.get("name"), "reason": "second-pass: not a subject of the financial crime"})
+    out = dict(record)
+    out["entities"] = [{**e, "id": f"E{i}"} for i, e in enumerate(kept, 1)]
+    return out, dropped
+
+
+def extract(text: str, meta: dict = None, *, llm_url: str = DEFAULT_LLM_URL, model: str = DEFAULT_MODEL,
+            verify: bool = True):
+    """Full live pipeline: model -> parse -> assemble -> ground (deterministic core) -> optional keep-biased
+    second-pass entity verify (Phase 38, on by default). Returns (record, dropped)."""
+    record, dropped = build_record(parse_llm_json(call_llm(text, llm_url=llm_url, model=model)), text, meta)
+    if verify:
+        record, vdropped = verify_entities(record, text, llm_url=llm_url, model=model)
+        dropped = list(dropped) + vdropped
+    return record, dropped
 
 
 def live_config(args, persist: bool = False) -> dict:
     """The `NEWS.live` block the served page reads to enable the live branch (absent in the offline build).
     Phase 36 adds the watchlist/disposition endpoints + a `persist` flag the live UI reflects."""
     return {"extract": "/extract", "watchlist": "/watchlist", "disposition": "/disposition",
-            "persist": persist, "model": args.model, "llm_url": args.llm_url}
+            "prune": "/watchlist/prune", "persist": persist, "model": args.model, "llm_url": args.llm_url}
 
 
 def news_payload(live_cfg: dict) -> dict:
@@ -274,6 +357,8 @@ class Handler(BaseHTTPRequestHandler):
             self._extract(); return
         if path == "/disposition":
             self._disposition(); return
+        if path == "/watchlist/prune":
+            self._prune(); return
         self._json(404, {"error": f"not found: {path}"})
 
     def _read_json(self):
@@ -294,7 +379,8 @@ class Handler(BaseHTTPRequestHandler):
         meta = {k: payload[k] for k in ("title", "source_org", "source_url", "doc_type", "typology")
                 if payload.get(k)}
         try:
-            record, dropped = extract(text, meta, llm_url=self.server.llm_url, model=self.server.model)
+            record, dropped = extract(text, meta, llm_url=self.server.llm_url, model=self.server.model,
+                                      verify=getattr(self.server, "verify", True))
         except (urllib.error.URLError, OSError) as ex:
             self._json(502, {"error": f"local model unreachable at {self.server.llm_url}: {ex}"}); return
         except (ValueError, KeyError, json.JSONDecodeError) as ex:
@@ -330,6 +416,22 @@ class Handler(BaseHTTPRequestHandler):
             self._json(404, {"error": f"no entity '{entity_id}' in scan '{scan_id}'"}); return
         self._json(200, {"ok": True, "updated": updated, "decision": decision})
 
+    def _prune(self) -> None:
+        # Watchlist management (Phase 38): un-escalate (remove) an escalated entity from the screening
+        # surface BY NAME. The book is never touched — only escalated rows leave; the audit trail survives.
+        if self.server.store is None:
+            self._json(503, {"error": "persistence disabled (duckdb not installed) — the watchlist is the static book only"}); return
+        payload, err = self._read_json()
+        if err:
+            self._json(400, {"error": err}); return
+        name = (payload.get("name") or "").strip()
+        if not name:
+            self._json(400, {"error": "need a 'name' to prune from the watchlist"}); return
+        removed = self.server.store.prune(name)
+        if not removed:
+            self._json(404, {"error": f"no escalated entity named {name!r} on the watchlist"}); return
+        self._json(200, {"ok": True, "pruned": removed, "name": name})
+
     def log_message(self, fmt, *a):  # quieter than the default stderr spam
         sys.stderr.write("[serve_news] " + (fmt % a) + "\n")
 
@@ -344,6 +446,7 @@ def selftest() -> int:
     assert '"live"' in page and '"extract": "/extract"' in page, "live config not inlined"
     assert '"watchlist": "/watchlist"' in page and '"disposition": "/disposition"' in page, \
         "live config missing the Phase-36 watchlist/disposition endpoints"
+    assert '"prune": "/watchlist/prune"' in page, "live config missing the Phase-38 watchlist prune endpoint"
     assert "const NEWS = {" in page, "NEWS object not inlined as expected"
     assert "liveInit" in page and "fetch(NEWS.live.extract" in page, "companion page missing the live branch"
     assert page.rstrip().endswith("</html>"), "served page is not a complete HTML document"
@@ -364,6 +467,8 @@ def main() -> int:
     ap.add_argument("--no-persist", action="store_true",
                     help="disable the DuckDB store — screen against the static book only (no watchlist growth)")
     ap.add_argument("--export-parquet", metavar="DIR", help="export the store tables to DIR/*.parquet and exit")
+    ap.add_argument("--no-verify-entities", action="store_true",
+                    help="disable the Phase-38 keep-biased second-pass entity verify (on by default; one extra model call per extracted entity)")
     ap.add_argument("--selftest", action="store_true", help="assemble the page offline, assert, exit")
     args = ap.parse_args()
 
@@ -386,8 +491,10 @@ def main() -> int:
     httpd.model = args.model
     httpd.store = store
     httpd.book = (build.load_news()[1].get("rows") or [])     # the static book — the watchlist base
+    httpd.verify = not args.no_verify_entities                # Phase 38 — second-pass entity verify (default ON)
     url = f"http://localhost:{args.port}/"
-    print(f"[serve_news] live companion on {url}  (model={args.model} via {args.llm_url})")
+    print(f"[serve_news] live companion on {url}  (model={args.model} via {args.llm_url}; "
+          f"entity-verify {'ON' if httpd.verify else 'off'})")
     print(f"[serve_news] the offline dist/news/index.html remains the scripted fallback. Ctrl-C to stop.")
     try:
         httpd.serve_forever()

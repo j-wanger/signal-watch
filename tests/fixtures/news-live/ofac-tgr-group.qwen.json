@@ -1,0 +1,115 @@
+{
+  "entities": [
+    {
+      "name": "TGR Group",
+      "type": "org"
+    },
+    {
+      "name": "George Rossi",
+      "type": "person"
+    },
+    {
+      "name": "Ekaterina Zhdanova",
+      "type": "person"
+    },
+    {
+      "name": "Smart Group",
+      "type": "org"
+    },
+    {
+      "name": "TGR Partners",
+      "type": "org"
+    },
+    {
+      "name": "TGR Corporate Concierge LTD",
+      "type": "org"
+    },
+    {
+      "name": "Garantex OU",
+      "type": "org"
+    },
+    {
+      "name": "Elena Chirkinyan",
+      "type": "person"
+    },
+    {
+      "name": "TGR DWC-LLC",
+      "type": "org"
+    },
+    {
+      "name": "@monalisa7",
+      "type": "person"
+    },
+    {
+      "name": "Andrejs Bradens",
+      "type": "person"
+    },
+    {
+      "name": "Pullman Global Solutions LLC",
+      "type": "org"
+    },
+    {
+      "name": "Siam Expert Trading Company Limited",
+      "type": "org"
+    },
+    {
+      "name": "Khadzi-Murat Dalgatovich Magomedov",
+      "type": "person"
+    },
+    {
+      "name": "Nikita Vladimirovich Krasnov",
+      "type": "person"
+    },
+    {
+      "name": "acescom",
+      "type": "person"
+    }
+  ],
+  "red_flags": [
+    {
+      "flag": "facilitated significant sanctions circumvention on behalf of Russian elites",
+      "red_flag": "Sanctions evasion: Facilitating illicit finance for designated Russian elites",
+      "category": "Sanctions Evasion"
+    },
+    {
+      "flag": "obfuscate the illicit activities of its clients, including through the use digital assets, such as stablecoins like Tether (USDT)",
+      "red_flag": "Use of stablecoins (USDT) to obfuscate illicit client activities",
+      "category": "Obfuscation"
+    },
+    {
+      "flag": "providing an unregistered service to exchange cash and cryptocurrency",
+      "red_flag": "Operating unregistered money transmission services for cash-crypto exchange",
+      "category": "Unlicensed Money Transmission"
+    },
+    {
+      "flag": "obfuscating the source of funds to allow high-net worth Russian nationals to purchase property in the United Kingdom",
+      "red_flag": "Source of funds obfuscation for real estate purchases by sanctioned nationals",
+      "category": "Trade-Based Money Laundering"
+    },
+    {
+      "flag": "leveraged OFAC-sanctioned Russian cryptocurrency exchange, Garantex OU, to process USDT transactions after its date of designation",
+      "red_flag": "Processing transactions via designated sanctioned entity (Garantex OU)",
+      "category": "Sanctions Violation"
+    },
+    {
+      "flag": "USDT was sent to a cryptocurrency address controlled by Zhdanova, and in return cash was received by the TGR Group",
+      "red_flag": "Cash-for-crypto handovers to break the audit trail",
+      "category": "Layering"
+    },
+    {
+      "flag": "facilitate bulk cash and cryptocurrency money laundering transactions internationally",
+      "red_flag": "International bulk cash and cryptocurrency money laundering",
+      "category": "Money Laundering"
+    },
+    {
+      "flag": "arrange for intermediaries to deliver and convert bulk cash into cryptocurrency which would be deposited into cryptocurrency wallets in Zhdanova’s name",
+      "red_flag": "Use of intermediaries to convert bulk cash into crypto in third-party wallets",
+      "category": "Layering"
+    },
+    {
+      "flag": "used a luxury watch company to facilitate trade-based money laundering",
+      "red_flag": "Trade-based money laundering via luxury watch company",
+      "category": "Trade-Based Money Laundering"
+    }
+  ]
+}

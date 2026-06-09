@@ -1,0 +1,125 @@
+{
+  "entities": [
+    {
+      "name": "Sinaloa Cartel",
+      "type": "org"
+    },
+    {
+      "name": "Los Chapitos",
+      "type": "org"
+    },
+    {
+      "name": "Joaquin ‘El Chapo’ Guzman Loera",
+      "type": "person"
+    },
+    {
+      "name": "Archivaldo Ivan Guzman Salazar",
+      "type": "person"
+    },
+    {
+      "name": "Jesus Alfredo Guzman Salazar",
+      "type": "person"
+    },
+    {
+      "name": "Sumilab, S.A. de C.V.",
+      "type": "org"
+    },
+    {
+      "name": "Favela Lopez family",
+      "type": "org"
+    },
+    {
+      "name": "Victor Andres Favela Lopez",
+      "type": "person"
+    },
+    {
+      "name": "Francisco Favela Lopez",
+      "type": "person"
+    },
+    {
+      "name": "Jorge Luis Favela Lopez",
+      "type": "person"
+    },
+    {
+      "name": "Maria Gabriela Favela Lopez",
+      "type": "person"
+    },
+    {
+      "name": "Jairo Verdugo Araujo",
+      "type": "person"
+    },
+    {
+      "name": "Gilberto Gallardo Garcia",
+      "type": "person"
+    },
+    {
+      "name": "Agrolaren, S.P.R. de R.L. de C.V.",
+      "type": "org"
+    },
+    {
+      "name": "Distribuidora de Productors y Servicios Viand, S.A. de C.V.",
+      "type": "org"
+    },
+    {
+      "name": "Favelab, S.A. de C.V.",
+      "type": "org"
+    },
+    {
+      "name": "Favela Pro, S.A. de C.V.",
+      "type": "org"
+    },
+    {
+      "name": "Qui Lab, S.A. de C.V.",
+      "type": "org"
+    },
+    {
+      "name": "Storelab, S.A. de C.V.",
+      "type": "org"
+    },
+    {
+      "name": "Cesar Elias Lopez Araujo",
+      "type": "person"
+    },
+    {
+      "name": "Importaciones y Nacional Marcerlab, S.A. de C.V.",
+      "type": "org"
+    },
+    {
+      "name": "Martha Emilia Conde Uraga",
+      "type": "person"
+    },
+    {
+      "name": "Comercial Viosma del Noroeste, S.A. de C.V.",
+      "type": "org"
+    },
+    {
+      "name": "Prolimph Quimicos en General, S.A. de C.V.",
+      "type": "org"
+    },
+    {
+      "name": "Proveedora de Servicios de Salud Mental del Pacifico, S.A. de C.V.",
+      "type": "org"
+    },
+    {
+      "name": "Roco del Pacifico Inmobiliaria, S.A. de C.V.",
+      "type": "org"
+    }
+  ],
+  "red_flags": [
+    {
+      "flag": "removed signage from Sumilab storefronts and changed tactics",
+      "red_flag": "Operational obfuscation: Removing physical identifiers to evade detection after sanctions",
+      "category": "Evasion"
+    },
+    {
+      "flag": "removed themselves and/or other family members from numerous corporate filings... and installed front persons in their place",
+      "red_flag": "Ownership obfuscation: Using front persons to hide beneficial ownership in corporate filings",
+      "category": "Shell Companies"
+    },
+    {
+      "flag": "Utilizing fraudulent invoicing and other concealment methods",
+      "red_flag": "Trade-based money laundering: Fraudulent invoicing to conceal illicit transactions",
+      "category": "Fraud"
+    }
+  ]
+}

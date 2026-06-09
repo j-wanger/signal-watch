@@ -1,0 +1,64 @@
+{
+  "entities": [
+    {
+      "name": "Enhua Fang",
+      "type": "person",
+      "age": "38",
+      "context": "organizer within the CMLO"
+    },
+    {
+      "name": "Jianfei Lu",
+      "type": "person",
+      "age": "30",
+      "context": "manager for the CMLO"
+    },
+    {
+      "name": "Shu Jun Zhen",
+      "type": "person",
+      "age": "36",
+      "context": "courier"
+    },
+    {
+      "name": "Chinese money laundering organization",
+      "type": "org",
+      "context": "prolific Chinese money laundering organization"
+    },
+    {
+      "name": "CMLO",
+      "type": "org",
+      "context": "money laundering organization"
+    }
+  ],
+  "red_flags": [
+    {
+      "flag": "directed a group of couriers to pick up bulk cash proceeds from unlawful activities",
+      "red_flag": "Use of courier network for bulk cash collection from illicit sources",
+      "category": "Structuring / Cash Handling"
+    },
+    {
+      "flag": "deposited these illicit funds... into shell company bank accounts controlled by the CMLO in order to conceal the nature of the illicit funds",
+      "red_flag": "Placement of illicit cash into shell company accounts to obscure origin",
+      "category": "Shell Companies / Placement"
+    },
+    {
+      "flag": "used multiple cellphones, changing phone numbers regularly, and several encrypted messaging applications to communicate",
+      "red_flag": "Operational security: rotating phone numbers and encrypted comms to evade detection",
+      "category": "Counter-surveillance"
+    },
+    {
+      "flag": "collected drug trafficking proceeds... deposited those illicit funds, using both real and fake identities, into shell company bank accounts",
+      "red_flag": "Use of fake identities for account opening and cash deposits",
+      "category": "Identity Fraud / Placement"
+    },
+    {
+      "flag": "procured fake driver’s licenses for the CMLO’s couriers, which were used to deposit illicit funds at major U.S. banks",
+      "red_flag": "Procurement of forged identification documents for banking transactions",
+      "category": "Document Fraud"
+    },
+    {
+      "flag": "picked up and deposited — using both her real and fake identities — nearly $25 million of illicit bulk cash",
+      "red_flag": "High-volume cash deposits using mixed real and fictitious identities",
+      "category": "Placement / Identity Fraud"
+    }
+  ]
+}

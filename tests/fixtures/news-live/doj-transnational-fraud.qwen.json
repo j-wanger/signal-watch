@@ -1,0 +1,58 @@
+{
+  "entities": [
+    {
+      "name": "Michael Young",
+      "type": "person",
+      "location": "Hollywood, Florida",
+      "age": "44",
+      "context": "member of a transnational criminal network"
+    },
+    {
+      "name": "U.S. Department of Justice",
+      "type": "org",
+      "context": "prosecuting agency"
+    },
+    {
+      "name": "Justice Department’s Criminal Division",
+      "type": "org",
+      "context": "prosecuting agency"
+    },
+    {
+      "name": "Central District of California",
+      "type": "org",
+      "context": "prosecuting agency"
+    },
+    {
+      "name": "U.S. Postal Inspection Service Criminal Investigations Group",
+      "type": "org",
+      "context": "investigating agency"
+    }
+  ],
+  "red_flags": [
+    {
+      "flag": "obtained “lead lists” that contained victims’ banking information – some of which derived from payday loan applications",
+      "red_flag": "Data harvesting: Acquisition of victim PII and banking details via compromised or scraped lead lists",
+      "category": "Data Theft"
+    },
+    {
+      "flag": "used it to make unauthorized debits against victims’ bank accounts",
+      "red_flag": "Unauthorized transactions: Direct debiting of victim accounts without consent",
+      "category": "Fraudulent Transaction"
+    },
+    {
+      "flag": "Members of the enterprise falsely claimed to banks that victims had authorized the transactions",
+      "red_flag": "Bank deception: False representation of customer authorization to financial institutions",
+      "category": "Misrepresentation"
+    },
+    {
+      "flag": "used numerous shell entities and money laundering techniques to conceal its actions",
+      "red_flag": "Obfuscation: Use of shell companies and laundering methods to hide illicit proceeds",
+      "category": "Money Laundering"
+    },
+    {
+      "flag": "coordinating nominal owners or “signers” for shell entities",
+      "red_flag": "Nominee structures: Utilization of straw owners to mask true beneficial ownership",
+      "category": "Ownership Obfuscation"
+    }
+  ]
+}

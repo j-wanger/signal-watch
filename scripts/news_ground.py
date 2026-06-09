@@ -91,6 +91,68 @@ def ground_record(record, article_text=None, min_chars=MIN_RED_FLAG_CHARS, max_c
     return kept, dropped
 
 
+# ── Phase 38 — LIVE-mode entity-precision filter (STRUCTURAL backstop) ──────────────────────────────
+# A deterministic precision pass over LIVE model extraction. serve_news.build_record calls this AFTER
+# ground_record; build.py does NOT (committed records + offline dist/news stay byte-frozen). FAITHFUL:
+# only DROPS — never invents, preserves every real (grounded) subject.
+#
+# Phase-38 stress test (3 NEW articles) finding: the PRIMARY entity-precision control is the system
+# PROMPT's SUBJECTS-ONLY rule (context shaping) — one exclusion line cut Qwen's institutional noise
+# (officials/prosecutors/agencies — an OPEN vocabulary) ~90%. An enumerated denylist OVERFIT the 4
+# calibration articles and did not generalize, so it was REMOVED. What remains here are only the rules
+# that GENERALIZE structurally: alias-dedup, moniker handles, judicial officers, and source-attribution
+# publishers (grounded only in the *Source: citation line).
+_JUDICIAL = ("judge", "justice")
+
+
+def _toks(s):
+    return set(re.findall(r"[a-z0-9]+", str(s).lower()))
+
+
+def _without_source_line(md):
+    """Article text minus the leading `*Source: …*` citation line (publishers belong there, not the
+    subject list). Used to detect source-attribution orgs structurally (grounded ONLY in that line)."""
+    keep, src = [], ""
+    for ln in str(md).splitlines():
+        s = ln.strip().lstrip("*").strip()
+        if s.lower().startswith("source:"):
+            src = news_normalize(s)
+        else:
+            keep.append(ln)
+    return "\n".join(keep), src
+
+
+def screen_entities(entities, text=""):
+    """Deterministic LIVE-mode entity-precision pass (see module note). Returns (kept, dropped); each
+    dropped item is {"kind": "entity", "value": name, "reason": …}. Pure — does not mutate inputs.
+    Idempotent: re-screening the kept list drops nothing.
+    """
+    ents = list(entities or [])
+    toksets = [_toks(e.get("name", "")) for e in ents]
+    body_ex_src, source_line = _without_source_line(text)
+    nbody_ex_src = news_normalize(body_ex_src)
+    njudge = news_normalize(text)
+    kept, dropped = [], []
+    for i, e in enumerate(ents):
+        name = (e.get("name") or "").strip()
+        nn = news_normalize(name)
+        tx, typ = toksets[i], (e.get("type") or "").strip().lower()
+        # (a) alias-dedup — a strict token-subset of ANOTHER extracted entity (keep the fuller name)
+        if tx and any(j != i and tx < toksets[j] for j in range(len(ents))):
+            dropped.append({"kind": "entity", "value": name, "reason": "alias-duplicate of a fuller name"}); continue
+        # (b) moniker / handle — @… or a lone all-lowercase token for a person
+        if name.startswith("@") or (typ == "person" and len(tx) == 1 and name == name.lower()):
+            dropped.append({"kind": "entity", "value": name, "reason": "moniker/alias handle"}); continue
+        # (c) judicial officer — a person whose name is preceded by Judge/Justice in the article
+        if typ == "person" and nn and any((jt + nn) in njudge for jt in _JUDICIAL):
+            dropped.append({"kind": "entity", "value": name, "reason": "judicial officer (not a subject)"}); continue
+        # (d) source-attribution org — grounds ONLY in the *Source: citation line, not the body prose
+        if typ == "org" and source_line and nn and nn in source_line and nn not in nbody_ex_src:
+            dropped.append({"kind": "entity", "value": name, "reason": "source-attribution publisher (not a subject)"}); continue
+        kept.append(e)
+    return kept, dropped
+
+
 def _selftest() -> int:
     # normalize matches the build-boundary formula
     assert news_normalize("Acme, Corp. 123!") == "acmecorp123"
@@ -129,8 +191,38 @@ def _selftest() -> int:
     assert dropped2 == [], f"ground_record not idempotent: {dropped2}"
     assert kept2["entities"] == kept["entities"] and kept2["red_flags"] == kept["red_flags"]
 
+    # ── screen_entities (Phase 38 live-mode precision pass) ──
+    se_text = ("# Headline\n\n*Source: U.S. Department of Justice, Office of Public Affairs — justice.gov*\n\n"
+               "Judge Jane Doe sentenced George Rossi. Rossi controls the TGR Group with Elena Chirkinyan "
+               "(@monalisa7) and an associate, acescom. SH Brothers Inc. shipped the goods. The law firm helped.")
+    se_in = [
+        {"name": "George Rossi", "type": "person"},        # kept (real subject)
+        {"name": "Rossi", "type": "person"},               # alias-dup of George Rossi → drop
+        {"name": "Elena Chirkinyan", "type": "person"},    # kept
+        {"name": "@monalisa7", "type": "person"},          # moniker → drop
+        {"name": "acescom", "type": "person"},             # lone-lowercase handle → drop
+        {"name": "Jane Doe", "type": "person"},            # judicial officer (Judge Jane Doe) → drop
+        {"name": "TGR Group", "type": "org"},              # kept (NOT dropped by a bare 'group')
+        {"name": "SH Brothers Inc.", "type": "org"},       # kept
+        {"name": "U.S. Department of Justice", "type": "org"},  # source-attribution (only in *Source: line) → drop
+        {"name": "Office of Public Affairs", "type": "org"},   # source-attribution publisher → drop
+    ]
+    skept, sdrop = screen_entities(se_in, se_text)
+    sk = [e["name"] for e in skept]
+    # institutional noise (agencies, courts-by-name, generics) is the PROMPT's job now — the structural
+    # filter keeps real subjects and drops only alias-dups / monikers / judicial officers / source publishers.
+    assert sk == ["George Rossi", "Elena Chirkinyan", "TGR Group", "SH Brothers Inc."], sk
+    reasons = {d["value"]: d["reason"] for d in sdrop}
+    assert reasons["Rossi"].startswith("alias-duplicate")
+    assert reasons["@monalisa7"].startswith("moniker") and reasons["acescom"].startswith("moniker")
+    assert reasons["Jane Doe"].startswith("judicial")
+    assert reasons["U.S. Department of Justice"].startswith("source-attribution")
+    # idempotent + faithful (never invents): re-screening the survivors drops nothing
+    skept2, sdrop2 = screen_entities(skept, se_text)
+    assert sdrop2 == [] and [e["name"] for e in skept2] == sk, "screen_entities not idempotent"
+
     print(f"news_ground --selftest: PASS (kept {len(kept['entities'])} entities, {len(kept['red_flags'])} red flags; "
-          f"dropped {len(dropped)} ungrounded; idempotent)")
+          f"dropped {len(dropped)} ungrounded; screen_entities {len(sk)} kept / {len(sdrop)} noise dropped; idempotent)")
     return 0
 
 

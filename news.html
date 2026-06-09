@@ -585,6 +585,9 @@ function liveInjectSelect(){
     const f = document.getElementById('liveform'); f.hidden = !f.hidden;
   });
   document.getElementById('live-run').addEventListener('click', liveRun);
+  document.getElementById('livebar').insertAdjacentHTML('afterend', '<div class="watchpanel" id="watchpanel"></div>');
+  liveRenderWatchlistPanel();        // render from the cached surface immediately…
+  liveRefreshWatchlist();            // …then refresh from the companion (re-renders the panel on return)
 }
 async function liveRun(){
   const status = document.getElementById('live-status');
@@ -626,7 +629,40 @@ async function liveRefreshWatchlist(){
     NEWS._watch = (d.rows || []).filter(x => x.kind === 'scanned').map(x => ({
       id:x.id, name:x.name, type:x.type, kind:'scanned',
       role:'watchlist', country:(x.provenance || 'escalated from a prior scan') }));
+    liveRenderWatchlistPanel();      // reflect the refreshed surface if the panel is on screen
   }catch(ex){ /* keep the prior watchlist on a transient failure */ }
+}
+/* The watchlist VIEW (Phase 38): the escalated-only surface made visible + manageable. Renders the
+   compounding feedback loop the Disposition gate grows; each row prunes back out via /watchlist/prune. */
+function liveRenderWatchlistPanel(){
+  const el = document.getElementById('watchpanel');
+  if(!el) return;
+  const rows = NEWS._watch || [];
+  let h = '<div class="watchhead"><span class="livedot">◆</span> Feedback watchlist'
+    + '<span class="lsub"> — entities you escalated; every new article is screened against them too. Prune to remove.</span></div>';
+  if(!rows.length){
+    h += '<div class="watchempty">No escalated entities yet — escalate one at the Disposition gate and the screening surface compounds.</div>';
+  }else{
+    h += '<div class="watchrows">';
+    rows.forEach(r => { h += '<div class="watchrow"><div class="wmeta"><span class="wname">'+esc(r.name)+'</span>'
+      + '<span class="wprov">'+esc(r.country || 'escalated')+'</span></div>'
+      + '<button class="wprune" data-n="'+esc(r.name)+'">✕ Prune</button></div>'; });
+    h += '</div>';
+  }
+  el.innerHTML = h;
+  el.onclick = (ev) => {                  // delegation — idempotent across re-renders, no per-row rewiring
+    const b = ev.target && ev.target.closest && ev.target.closest('.wprune');
+    if(b) livePrune(b.getAttribute('data-n'));
+  };
+}
+async function livePrune(name){
+  if(!NEWS.live || !NEWS.live.prune || !name) return;
+  try{
+    const r = await fetch(NEWS.live.prune, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name }) });
+    if(!r.ok) return;
+    await liveRefreshWatchlist();    // re-renders the panel (the pruned row is gone)
+  }catch(ex){ /* transient — leave the panel as-is */ }
 }
 /* Screen against book ∪ watchlist. A live-only REASSIGNMENT (the offline matchEntities, byte-frozen via the
    strip, stays book-only); when the watchlist is empty it defers to the base, so this is inert until
@@ -706,7 +742,17 @@ function liveInit(){
     + '.livein{flex:1 1 220px;padding:9px 11px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2);color:var(--ink);font:13px var(--body)}'
     + '.livetext{min-height:170px;padding:11px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2);color:var(--ink);font:13px/1.5 var(--body);resize:vertical}'
     + '.liveact{display:flex;align-items:center;gap:12px;flex-wrap:wrap}'
-    + '.lstatus{color:var(--muted);font:13px var(--mono)}';
+    + '.lstatus{color:var(--muted);font:13px var(--mono)}'
+    + '.watchpanel{margin:14px 0}'
+    + '.watchhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:600 14px/1.3 var(--head);color:var(--ink);margin-bottom:8px}'
+    + '.watchempty{color:var(--muted);font:13px/1.5 var(--body);border:1px dashed var(--line2);border-radius:8px;padding:12px 14px}'
+    + '.watchrows{display:flex;flex-direction:column;gap:6px}'
+    + '.watchrow{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--panel2)}'
+    + '.wmeta{display:flex;flex-direction:column;gap:2px;min-width:0}'
+    + '.wname{font:600 13px var(--body);color:var(--ink)}'
+    + '.wprov{font:11px var(--mono);color:var(--muted)}'
+    + '.wprune{flex:none;border:1px solid var(--line2);background:transparent;color:var(--muted);border-radius:6px;padding:5px 10px;font:600 12px var(--body);cursor:pointer}'
+    + '.wprune:hover{border-color:var(--signal);color:var(--signal)}';
   const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s);
   const baseSelect = RENDER.select;
   RENDER.select = function(){ baseSelect(); liveInjectSelect(); };

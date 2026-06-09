@@ -1,0 +1,71 @@
+{
+  "entities": [
+    {
+      "name": "Nikolay Goltsev",
+      "type": "person",
+      "context": "Canadian national, sentenced to 40 months imprisonment for conspiring to commit export control violations"
+    },
+    {
+      "name": "Salimdzhon Nasriddinov",
+      "type": "person",
+      "context": "co-defendant, awaiting sentencing"
+    },
+    {
+      "name": "Kristina Puzyreva",
+      "type": "person",
+      "context": "Goltsev’s wife, co-defendant, sentenced to 24 months imprisonment for conspiracy to launder proceeds"
+    },
+    {
+      "name": "SH Brothers Inc.",
+      "type": "org",
+      "context": "Brooklyn company used to unlawfully source, purchase and ship electronics"
+    },
+    {
+      "name": "SN Electronics Inc.",
+      "type": "org",
+      "context": "Brooklyn company used to unlawfully source, purchase and ship electronics"
+    },
+    {
+      "name": "Russian military companies",
+      "type": "org",
+      "context": "sanctioned end users"
+    }
+  ],
+  "red_flags": [
+    {
+      "flag": "masterminded a global procurement scheme on behalf of sanctioned Russian companies",
+      "red_flag": "Procurement scheme for sanctioned entities",
+      "category": "Sanctions Evasion"
+    },
+    {
+      "flag": "unlawfully source, purchase and ship millions of dollars in dual-use electronics from U.S. manufacturers to sanctioned end users in Russia",
+      "red_flag": "Exporting dual-use goods to sanctioned jurisdiction",
+      "category": "Export Control Violation"
+    },
+    {
+      "flag": "shipped the items to a variety of intermediary front companies located in other countries, including Turkey, Hong Kong, India, China and the United Arab Emirates, where they were rerouted to Russia",
+      "red_flag": "Use of intermediary front companies for transshipment to evade controls",
+      "category": "Trade-Based Money Laundering"
+    },
+    {
+      "flag": "Goltsev’s wife, co-defendant Kristina Puzyreva, laundered the funds of the export control scheme",
+      "red_flag": "Spouse laundering proceeds of financial crime",
+      "category": "Money Laundering"
+    },
+    {
+      "flag": "write something more substantial [to the U.S. company] so that there are no more questions",
+      "red_flag": "Deceptive communication to bypass export compliance checks",
+      "category": "Export Control Violation"
+    },
+    {
+      "flag": "is it better to provide them with a Chinese end user,” to which Goltsev stated, “yes should be ok",
+      "red_flag": "Misrepresentation of end-user to facilitate illicit export",
+      "category": "Export Control Violation"
+    },
+    {
+      "flag": "asked me to make 80 accounts . . . I am making accounts for 3 mln [i.e., million]",
+      "red_flag": "Creation of multiple accounts to facilitate large-scale illicit transactions",
+      "category": "Structuring / Account Layering"
+    }
+  ]
+}

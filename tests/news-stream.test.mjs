@@ -55,6 +55,13 @@ const SCRIPT = html.slice(open + '<script>'.length, close);
   ok(!html.includes('NEWS._watch') && !html.includes('liveRenderDisposition')
      && !html.includes('/watchlist') && !html.includes('/disposition'),
      'offline dist/news carries NO Phase-36 watchlist/disposition code (screens the static book only)');
+  // Phase 38: the watchlist-VIEW + prune is companion-only too — none survives the strip
+  ok(!html.includes('watchpanel') && !html.includes('liveRenderWatchlistPanel')
+     && !html.includes('livePrune') && !html.includes('/watchlist/prune'),
+     'offline dist/news carries NO Phase-38 watchlist-view/prune code (stripped)');
+  // …and the SOURCE template DOES carry the companion-only watchlist view + prune
+  ok(src.includes('liveRenderWatchlistPanel') && src.includes('livePrune') && src.includes('/watchlist/prune'),
+     'news.html SOURCE carries the Phase-38 watchlist view + prune (companion-served)');
 }
 
 ok(/class="badge"/.test(html) && /Illustrative data/.test(html), 'always-on illustrative badge present in the ship chrome');
@@ -124,7 +131,7 @@ function bootLive(scriptText, reduced) {
   const ctx = vm.createContext({ window: env.window, document: env.document, console,
     fetch: fetchStub, setTimeout: env.setTimeout, clearTimeout: env.clearTimeout });
   let threw = null;
-  try { vm.runInContext(scriptText + '\n;globalThis.__L={go,state,matchEntities,articleById,NEWS,RENDER};', ctx); }
+  try { vm.runInContext(scriptText + '\n;globalThis.__L={go,state,matchEntities,articleById,NEWS,RENDER,liveRenderWatchlistPanel,livePrune};', ctx); }
   catch (e) { threw = e; }
   return { env, ctx, threw };
 }
@@ -276,7 +283,7 @@ console.log('\n[live mode] companion-served client overrides (book ∪ watchlist
     ],
     book: { rows: [{ id: 'bk-1', name: 'Zzz Unrelated Bank', type: 'org', role: 'counterparty', country: 'US', segment: 'Trade' }] },
     match: { threshold: 0.85 },
-    live: { extract: '/extract', watchlist: '/watchlist', disposition: '/disposition', persist: true, model: 'm', llm_url: 'u' },
+    live: { extract: '/extract', watchlist: '/watchlist', disposition: '/disposition', prune: '/watchlist/prune', persist: true, model: 'm', llm_url: 'u' },
   };
   const liveScript = SRC.slice(SRC.indexOf('<script>') + '<script>'.length, SRC.lastIndexOf('</script>'))
     .replace('__NEWS__', JSON.stringify(liveNEWS));
@@ -303,6 +310,21 @@ console.log('\n[live mode] companion-served client overrides (book ∪ watchlist
   ok(/Disposition — the human gate/.test(dh), 'live Disposition renders');
   ok(/data-e="E1"/.test(dh) && /(＋ WATCHLIST|ESCALATED)/.test(dh), 'Disposition shows a per-entity escalate control (data-e + watchlist label)');
   ok(/the screen surface compounds/.test(dh), 'Disposition explains the escalation → watchlist loop');
+
+  // 4) Phase 38 — the watchlist VIEW renders the escalated surface (name + provenance + a Prune control)
+  ok(typeof L.liveRenderWatchlistPanel === 'function' && typeof L.livePrune === 'function',
+     'companion page wires the watchlist view (liveRenderWatchlistPanel) + prune (livePrune)');
+  env.app._html = '<div id="watchpanel"></div>';
+  L.NEWS._watch = [{ name: 'Acme Holdings', type: 'org', kind: 'scanned', role: 'watchlist', country: 'escalated from Article A' }];
+  L.liveRenderWatchlistPanel();
+  const wp = env.document.getElementById('watchpanel');
+  ok(wp && /Acme Holdings/.test(wp.innerHTML) && /escalated from Article A/.test(wp.innerHTML) && /Prune/.test(wp.innerHTML),
+     'watchlist view renders the escalated entity with provenance + a Prune control');
+  // empty surface → an explicit empty state (not a blank panel)
+  L.NEWS._watch = [];
+  L.liveRenderWatchlistPanel();
+  ok(/No escalated entities yet/.test(env.document.getElementById('watchpanel').innerHTML),
+     'watchlist view shows an empty state when nothing is escalated');
 }
 
 console.log(`\n${pass} passed, ${fails.length} failed`);

@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-08
 updated: 2026-06-08
 source: plan
-status: active
+status: completed
 scope: [".dev-wiki/tmp/**", "data/indicator-typology-map.json", "scripts/build.py", "corpus.html", "data/typology-map.json", "dist/corpus/index.html", "tests/corpus-explorer.test.mjs", "docs/**", "tests/smoke-checklist.md", "CLAUDE.md", ".claude/rules/active-phase.md"]
 entry_criteria: "Phase 36 DELIVERED + accepted + committed (e96f31d + 71e0989, pushed to main). The corpus is the primary demo; its Typologies lens groups each DOC by one money-laundering typology (data/typology-map.json, 27-term closed vocab). All 10 derived FINTRAC sector-guidance pages render; 7 collapse into a catch-all typology fintrac-sector-baselines."
 exit_criteria: "The Typologies lens groups by INDICATOR typology; the 7 FINTRAC sector pages distribute across real typology clusters; fintrac-sector-baselines retired; per-indicator typology lives in a NEW overlay so all 56 derived records + derive_signals.py stay byte-frozen; combined coverage stays honest union arithmetic (no lift/dedup; badge intact); --check all 5/5 zero drift; node corpus + news harnesses + derive --selftest green; the agreement rate reported as consensus (not a new demo number); NO non-negotiable change."

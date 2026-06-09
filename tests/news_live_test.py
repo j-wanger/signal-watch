@@ -27,6 +27,25 @@ HAS_DUCKDB = news_store.duckdb is not None  # the watchlist/disposition store te
 
 ARTICLE_MD = (ROOT / "data" / "news" / "articles" / "ofac-tgr-group.md").read_text(encoding="utf-8")
 
+# Phase 38 — recorded-fixture replay. tests/fixtures/news-live/<id>.qwen.json is REAL captured Qwen output;
+# <id>.golden.json is its grounded+screened record. The meta supplied at capture is committed HERE (so the
+# offline replay is self-contained — no dependency on the .dev-wiki/tmp capture helper).
+FIXDIR = ROOT / "tests" / "fixtures" / "news-live"
+_BASIS = "Public domain · 17 U.S.C. §105"
+FIXTURE_META = {
+    # the 4 committed-corpus calibration articles (article .md lives in data/news/articles/)
+    "doj-mullings-romance-mule": {"source_org": "DOJ", "basis": _BASIS},
+    "doj-goltsev-export-control": {"source_org": "DOJ", "basis": _BASIS},
+    "doj-ravenell-attorney-ml": {"source_org": "DOJ", "basis": _BASIS},
+    "ofac-tgr-group": {"source_org": "OFAC", "basis": _BASIS},
+    # Phase 38 — the 3 promoted STRESS articles (harder: multi-defendant / mass-designation). NOT in the
+    # shipped corpus (that would change dist/news); their article .md lives beside the fixture in FIXDIR.
+    "doj-chinese-cmlo": {"source_org": "DOJ", "basis": _BASIS},
+    "doj-transnational-fraud": {"source_org": "DOJ", "basis": _BASIS},
+    "ofac-sinaloa-fentanyl": {"source_org": "OFAC", "basis": _BASIS},
+}
+LIVE_URL = "http://127.0.0.1:8080/v1/chat/completions"
+
 # Canned "model output": real grounded items (from the gate-passing committed record) + planted ungrounded.
 CANNED = {
     "title": "Treasury Targets Russian Illicit Finance Network",
@@ -62,6 +81,7 @@ def http_route_test() -> None:
     serve_news.call_llm = lambda text, **kw: json.dumps(CANNED)  # stub the only model-dependent step
     httpd = serve_news.ThreadingHTTPServer(("127.0.0.1", 0), serve_news.Handler)
     httpd.llm_url, httpd.model, httpd.page = "stub://", "stub", "<html></html>"
+    httpd.verify = False  # the deterministic route tests exercise plumbing; the neural verify is tested separately
     httpd.store, httpd.book = None, []  # Phase 36: this route runs persistence-OFF (scan_id None, /extract unchanged)
     port = httpd.server_address[1]
     t = threading.Thread(target=httpd.serve_forever, daemon=True)
@@ -108,6 +128,7 @@ def watchlist_disposition_route_test() -> None:
     store = news_store.NewsStore(":memory:")
     httpd = serve_news.ThreadingHTTPServer(("127.0.0.1", 0), serve_news.Handler)
     httpd.llm_url, httpd.model, httpd.page = "stub://", "stub", "<html></html>"
+    httpd.verify = False  # the deterministic route tests exercise plumbing; the neural verify is tested separately
     httpd.store, httpd.book = store, book
     port = httpd.server_address[1]
     base = f"http://127.0.0.1:{port}"
@@ -154,11 +175,24 @@ def watchlist_disposition_route_test() -> None:
         except urllib.error.HTTPError as he:
             code = he.code
         assert code == 404, f"unknown entity should 404, got {code}"
+
+        # Phase 38 — prune George Rossi from the watchlist BY NAME -> he leaves; the book is untouched
+        s, d = post("/watchlist/prune", {"name": "George Rossi"})
+        assert s == 200 and d["pruned"] == 1, d
+        _, wl2 = get("/watchlist")
+        assert [r for r in wl2["rows"] if r["kind"] == "scanned"] == [], "pruned entity must leave the watchlist"
+        assert any(r["name"] == "Globex Bank" and r["kind"] == "book" for r in wl2["rows"]), "prune must not touch the book"
+        code = 0
+        try:
+            post("/watchlist/prune", {"name": "Nobody On The List"})
+        except urllib.error.HTTPError as he:
+            code = he.code
+        assert code == 404, f"pruning an unknown name should 404, got {code}"
     finally:
         httpd.shutdown()
         serve_news.call_llm = orig
         store.close()
-    print("  watchlist/disposition route: /extract persists (scan_id) · /watchlist book→escalated · dismiss excluded · bad target 404")
+    print("  watchlist/disposition route: /extract persists (scan_id) · /watchlist book→escalated · dismiss excluded · bad target 404 · prune removes by name")
 
 
 def disposition_persist_off_test() -> None:
@@ -167,6 +201,7 @@ def disposition_persist_off_test() -> None:
     book = [{"id": "bk-1", "name": "Globex Bank", "type": "org", "role": "counterparty", "country": "US"}]
     httpd = serve_news.ThreadingHTTPServer(("127.0.0.1", 0), serve_news.Handler)
     httpd.llm_url, httpd.model, httpd.page = "stub://", "stub", "<html></html>"
+    httpd.verify = False  # the deterministic route tests exercise plumbing; the neural verify is tested separately
     httpd.store, httpd.book = None, book
     port = httpd.server_address[1]
     base = f"http://127.0.0.1:{port}"
@@ -184,9 +219,81 @@ def disposition_persist_off_test() -> None:
         except urllib.error.HTTPError as he:
             code = he.code
         assert code == 503, f"disposition with persistence off should 503, got {code}"
+        code = 0
+        try:
+            req = urllib.request.Request(base + "/watchlist/prune", data=b'{"name":"X"}',
+                                         headers={"Content-Type": "application/json"}, method="POST")
+            urllib.request.urlopen(req, timeout=10)
+        except urllib.error.HTTPError as he:
+            code = he.code
+        assert code == 503, f"prune with persistence off should 503, got {code}"
     finally:
         httpd.shutdown()
-    print("  persistence-off: /watchlist book-only (persist=false) · /disposition 503")
+    print("  persistence-off: /watchlist book-only (persist=false) · /disposition 503 · /watchlist/prune 503")
+
+
+def fixture_replay_test() -> None:
+    """OFFLINE replay (NO model): each committed RAW Qwen output (<id>.qwen.json) → parse_llm_json →
+    build_record → ground+screen MUST equal the committed <id>.golden.json. Pins the REAL model's output
+    contract — incl. the ungrounded-elision DROP and the Phase-38 entity-precision filter — deterministically."""
+    fixtures = sorted(FIXDIR.glob("*.qwen.json"))
+    assert fixtures, f"no captured fixtures under {FIXDIR}"
+    ids = {p.name[: -len(".qwen.json")] for p in fixtures}
+    committed = {p.stem for p in (ROOT / "data" / "news" / "articles").glob("*.md")}
+    assert committed <= ids, f"missing replay fixtures for committed articles: {committed - ids}"
+    total_drops = 0
+    for p in fixtures:
+        aid = p.name[: -len(".qwen.json")]
+        raw = p.read_text(encoding="utf-8")
+        # the article lives beside the fixture (promoted stress articles) or in the shipped corpus
+        local = FIXDIR / f"{aid}.article.md"
+        art = (local if local.exists() else ROOT / "data" / "news" / "articles" / f"{aid}.md").read_text(encoding="utf-8")
+        rec, dropped = serve_news.build_record(serve_news.parse_llm_json(raw), art, FIXTURE_META.get(aid))
+        golden = json.loads((FIXDIR / f"{aid}.golden.json").read_text(encoding="utf-8"))
+        assert rec == golden, f"replay mismatch for {aid} (re-capture if build_record changed intentionally)"
+        for i, e in enumerate(rec["entities"], 1):
+            assert e["id"] == f"E{i}" and e["name"] in rec["article_text"], f"{aid} entity {e}"
+        for i, f in enumerate(rec["red_flags"], 1):
+            assert f["id"] == f"R{i}" and f["flag"] in rec["article_text"], f"{aid} flag {f}"
+        total_drops += len(dropped)
+    # the captured corpus must carry the real-model messiness (ungrounded flags + over-extracted entities)
+    assert total_drops > 0, "expected ungrounded/noise drops across the captured fixtures"
+    print(f"  fixture replay: {len(fixtures)} real-Qwen outputs → parse→build→ground→screen == committed goldens "
+          f"({total_drops} ungrounded/noise drops reproduced, no model invoked)")
+
+
+def live_smoke_test() -> None:
+    """OPT-IN (`--live` only): hit the real local model at 127.0.0.1:8080 and assert the live backend still
+    extracts + grounds. OFF by default — never hit by the standard offline run (the model/.venv-gated pattern)."""
+    art = (ROOT / "data" / "news" / "articles" / "doj-mullings-romance-mule.md").read_text(encoding="utf-8")
+    rec, dropped = serve_news.extract(art, {"source_org": "DOJ"}, llm_url=LIVE_URL, model="qwen")
+    assert rec["entities"] and rec["red_flags"], "live model returned nothing groundable"
+    print(f"  --live smoke: real model @8080 → {len(rec['entities'])} entities, {len(rec['red_flags'])} flags grounded "
+          f"(incl. the keep-biased second-pass entity verify)")
+
+
+def verify_entities_test() -> None:
+    """Phase 38 — the keep-biased second pass. With verify_subject STUBBED (no model), verify_entities drops
+    the NON-subjects, keeps subjects, and re-ids E1.. contiguously. Also asserts the load-bearing fail-OPEN:
+    an unreachable verifier KEEPS (never drops a subject on error)."""
+    art = "# T\n\nAcme Holdings laundered funds. Judge Jane Doe presided. The U.S. District Court ruled."
+    rec = {"entities": [
+        {"id": "E1", "name": "Acme Holdings", "type": "org"},
+        {"id": "E2", "name": "U.S. District Court", "type": "org"},
+        {"id": "E3", "name": "Jane Doe", "type": "person"},
+    ], "red_flags": []}
+    orig = serve_news.verify_subject
+    serve_news.verify_subject = lambda name, etype, ctx, **kw: name == "Acme Holdings"  # only the subject is kept
+    try:
+        out, dropped = serve_news.verify_entities(rec, art, llm_url="stub://", model="stub")
+    finally:
+        serve_news.verify_subject = orig
+    assert [e["name"] for e in out["entities"]] == ["Acme Holdings"], out["entities"]
+    assert out["entities"][0]["id"] == "E1", "survivors must be re-id'd contiguously"
+    assert len(dropped) == 2 and all("second-pass" in d["reason"] for d in dropped), dropped
+    # fail-open — an unreachable verifier returns KEEP (the AML-safe default), never drops a subject
+    assert serve_news.verify_subject("Anyone", "person", "ctx", llm_url="http://127.0.0.1:9/x", model="stub") is True
+    print("  verify-entities (2nd pass): drops non-subjects · keeps subjects · re-ids · fail-open=KEEP")
 
 
 def main() -> int:
@@ -234,13 +341,19 @@ def main() -> int:
     assert serve_news.parse_llm_json('Sure! {"b": 2} done') == {"b": 2}
     assert serve_news.parse_llm_json('{"c": 3}') == {"c": 3}
 
+    fixture_replay_test()      # Phase 38 — offline replay of REAL captured Qwen output (no model)
+    verify_entities_test()     # Phase 38 — the keep-biased second pass (model stubbed)
     http_route_test()
     watchlist_disposition_route_test()
     disposition_persist_off_test()
 
+    if "--live" in sys.argv:   # opt-in only — the default run never touches 127.0.0.1:8080
+        live_smoke_test()
+
     print(f"news_live_test: PASS (kept {len(rec['entities'])} entities, {len(rec['red_flags'])} red flag; "
           f"dropped {len(dropped)} ungrounded; ids contiguous; idempotent; parse robust; "
-          f"watchlist loop {'exercised' if HAS_DUCKDB else 'SKIPPED (no duckdb)'})")
+          f"fixture-replay locked; watchlist loop {'exercised' if HAS_DUCKDB else 'SKIPPED (no duckdb)'}; "
+          f"live-smoke {'RAN' if '--live' in sys.argv else 'off (pass --live to hit 8080)'})")
     return 0
 
 

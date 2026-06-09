@@ -27,7 +27,7 @@
     "virtual-currency": "Illicit activity involving convertible virtual currency (broad CVC laundering and movement)",
     "unlawful-employment": "Laundering tied to unlawful employment of non-work-authorized labour and labour-broker payroll schemes",
     "casino-gaming": "Money laundering through casinos and the gaming sector",
-    "fintrac-sector-baselines": "FINTRAC per-regulated-sector ML/TF baseline indicator lists (multi-typology sector guidance)"
+    "cross-cutting-indicators": "Cross-cutting ML/TF indicators that span many typologies (FINTRAC per-sector baseline lists) — generic behaviour, not specific to one money-laundering typology"
   },
   "map": {
     "fin-2020-a008": "human-trafficking",
@@ -79,12 +79,12 @@
     "fintrac-guid-real-estate": "real-estate",
     "fintrac-guid-virtual-currency": "virtual-currency",
     "fintrac-guid-casinos": "casino-gaming",
-    "fintrac-guid-financial-entities": "fintrac-sector-baselines",
-    "fintrac-guid-msb": "fintrac-sector-baselines",
-    "fintrac-guid-securities": "fintrac-sector-baselines",
-    "fintrac-guid-life-insurance": "fintrac-sector-baselines",
-    "fintrac-guid-dpms": "fintrac-sector-baselines",
-    "fintrac-guid-accountants": "fintrac-sector-baselines",
-    "fintrac-guid-bc-notaries": "fintrac-sector-baselines"
+    "fintrac-guid-financial-entities": "cross-cutting-indicators",
+    "fintrac-guid-msb": "cross-cutting-indicators",
+    "fintrac-guid-securities": "cross-cutting-indicators",
+    "fintrac-guid-life-insurance": "cross-cutting-indicators",
+    "fintrac-guid-dpms": "cross-cutting-indicators",
+    "fintrac-guid-accountants": "cross-cutting-indicators",
+    "fintrac-guid-bc-notaries": "cross-cutting-indicators"
   }
 }

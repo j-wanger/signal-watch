@@ -360,19 +360,26 @@ function shortFlag(t,cap){cap=cap||150;t=stripLinks(String(t||'')).replace(/\s+/
 const TYPOLOGY_DESC=(CORPUS.typologies && typeof CORPUS.typologies==='object')?CORPUS.typologies:{};
 function typoLabel(t){return String(t||'').replace(/-/g,' ');}
 function sectLabel(s){s=String(s||'').replace(/-/g,' ').trim();return s?s.charAt(0).toUpperCase()+s.slice(1):'';}
-function clusterFor(t){return ADVISORIES.filter(a=>isLive(a) && a.typology===t);}
-// build the cluster list: one entry per typology over the LIVE docs, with jurisdictions/doc-types/
-// pooled indicator count. Sorted cross-jurisdiction first, then cross-agency, then size — the
-// multi-source clusters (the payoff) lead. jurisdiction comes from the source registry (build.py).
+// Phase 37: clusters group by INDICATOR typology, not doc typology — a multi-typology doc (e.g. a
+// FINTRAC sector page) contributes its corruption/TF indicators to those real clusters while its generic
+// indicators sit in the honest `cross-cutting-indicators` bucket. So a doc can appear in several clusters.
+function indsForTypology(t){const rows=[];ADVISORIES.forEach(a=>{if(!isLive(a))return;
+  a.indicators.forEach(i=>{if(i.typology===t)rows.push({i,a});});});return rows;}
+// docs that contribute ≥1 indicator of typology t (a doc can be in several clusters now).
+function clusterFor(t){return [...new Set(indsForTypology(t).map(r=>r.a))];}
+// build the cluster list: one entry per INDICATOR typology, with the contributing docs / jurisdictions /
+// doc-types and the count of indicators OF THAT TYPOLOGY (not the docs' full lists). Sorted
+// cross-jurisdiction first, then cross-agency, then size — the multi-source clusters (the payoff) lead.
 function clusters(){
   const m=new Map();
-  ADVISORIES.forEach(a=>{ if(!isLive(a)||!a.typology) return;
-    if(!m.has(a.typology)) m.set(a.typology,[]); m.get(a.typology).push(a); });
-  return [...m.entries()].map(([t,docs])=>{
+  ADVISORIES.forEach(a=>{ if(!isLive(a)) return;
+    a.indicators.forEach(i=>{ const t=i.typology; if(!t) return;
+      if(!m.has(t)) m.set(t,{docs:new Set(),inds:0}); const e=m.get(t); e.docs.add(a); e.inds++; }); });
+  return [...m.entries()].map(([t,e])=>{
+    const docs=[...e.docs];
     const juris=[...new Set(docs.map(a=>a.jurisdiction||'—'))].sort();
     const types=[...new Set(docs.map(a=>a.doc_type||'—'))];
-    const inds=docs.reduce((n,a)=>n+a.indicators.length,0);
-    return {t,docs,juris,types,inds,xj:juris.length>=2,xa:juris.length<2&&types.length>=2};
+    return {t,docs,juris,types,inds:e.inds,xj:juris.length>=2,xa:juris.length<2&&types.length>=2};
   }).sort((a,b)=> (a.xj?0:1)-(b.xj?0:1) || (a.xa?0:1)-(b.xa?0:1) || b.docs.length-a.docs.length || a.t.localeCompare(b.t));
 }
 function jchip(j){const cls=j==='Canada'?'ca':j==='US'?'us':'xx';return `<span class="chip jur ${cls}">${esc(j)}</span>`;}
@@ -408,7 +415,7 @@ function capAgg(){
     const gap=inds.filter(i=>i.status==='gap').length;
     return {c, rows, demand:inds.length, covered, partial, gap, cov:coverageIndex(inds),
       docs:new Set(rows.map(r=>r.a.id)).size,
-      typols:new Set(rows.map(r=>r.a.typology).filter(Boolean)).size,
+      typols:new Set(rows.map(r=>r.i.typology).filter(Boolean)).size,
       juris:[...new Set(rows.map(r=>r.a.jurisdiction||'—'))].sort()};
   }).filter(x=>x.demand>0)
     .sort((a,b)=>(POSTURE_RANK[a.c.posture]??3)-(POSTURE_RANK[b.c.posture]??3) || b.demand-a.demand || String(a.c.name).localeCompare(String(b.c.name)));
@@ -429,7 +436,7 @@ function dsAgg(){
     const gap=inds.filter(i=>i.status==='gap').length;
     return {d, rows, demand:inds.length, covered, partial, gap, cov:coverageIndex(inds),
       docs:new Set(rows.map(r=>r.a.id)).size,
-      typols:new Set(rows.map(r=>r.a.typology).filter(Boolean)).size,
+      typols:new Set(rows.map(r=>r.i.typology).filter(Boolean)).size,
       juris:[...new Set(rows.map(r=>r.a.jurisdiction||'—'))].sort()};
   }).filter(x=>x.demand>0)
     .sort((a,b)=>(POSTURE_RANK[a.d.posture]??3)-(POSTURE_RANK[b.d.posture]??3) || b.demand-a.demand || String(a.d.name).localeCompare(String(b.d.name)));
@@ -613,30 +620,34 @@ function typoCard(c){
 
 /* ---------- cross-corpus synthesis screen (one typology cluster) ---------- */
 function renderSynthesis(t){
-  const docs=clusterFor(t).slice().sort((x,y)=>
-    String(x.jurisdiction||'').localeCompare(String(y.jurisdiction||'')) || String(x.id).localeCompare(String(y.id)));
-  if(!docs.length){toSelect();return;}
-  const pool=docs.reduce((acc,a)=>acc.concat(a.indicators),[]);   // union of every regulator's enumerated flags
+  // Phase 37: pool the INDICATORS of this typology (not whole docs) — a multi-typology sector page
+  // contributes only its indicators OF THIS typology, grouped by their source document for the drill.
+  const allrows=indsForTypology(t); if(!allrows.length){toSelect();return;}
+  const pool=allrows.map(r=>r.i);   // the typology's enumerated flags across every regulator
   const cov=coverageIndex(pool);
-  const juris=[...new Set(docs.map(a=>a.jurisdiction||'—'))].sort();
+  const byDoc=new Map();
+  allrows.forEach(r=>{if(!byDoc.has(r.a.id))byDoc.set(r.a.id,{a:r.a,inds:[]});byDoc.get(r.a.id).inds.push(r.i);});
+  const groups=[...byDoc.values()].sort((x,y)=>
+    String(x.a.jurisdiction||'').localeCompare(String(y.a.jurisdiction||'')) || String(x.a.id).localeCompare(String(y.a.id)));
+  const juris=[...new Set(groups.map(g=>g.a.jurisdiction||'—'))].sort();
   const xj=juris.length>=2;
-  // per-jurisdiction contribution — honest counts of what each jurisdiction enumerates; NO overlap claimed.
-  const byJ={}; docs.forEach(a=>{const j=a.jurisdiction||'—';(byJ[j]=byJ[j]||{d:0,i:0});byJ[j].d++;byJ[j].i+=a.indicators.length;});
+  // per-jurisdiction contribution — honest counts of what each jurisdiction enumerates FOR THIS typology; NO overlap claimed.
+  const byJ={}; groups.forEach(g=>{const j=g.a.jurisdiction||'—';(byJ[j]=byJ[j]||{d:0,i:0});byJ[j].d++;byJ[j].i+=g.inds.length;});
   const contrib=Object.keys(byJ).sort().map(j=>`<b>${esc(j)}</b> ${byJ[j].i} indicators across ${byJ[j].d} doc${byJ[j].d===1?'':'s'}`).join(' · ');
-  const rows=docs.map(a=>{
-    const c=coverageIndex(a.indicators);
-    return `<div class="covrow synthrow" data-id="${esc(a.id)}" role="button">
-      <div class="clabel">${esc(a.title||a.id)}<div class="csub">${esc(a.advisory||a.id)} · ${a.indicators.length} indicators · coverage ${c}%</div></div>
-      <span class="acleft">${jchip(a.jurisdiction||'—')}<span class="chip doc">${esc(a.doc_type||'')}</span></span>
+  const rows=groups.map(g=>{
+    const c=coverageIndex(g.inds);
+    return `<div class="covrow synthrow" data-id="${esc(g.a.id)}" role="button">
+      <div class="clabel">${esc(g.a.title||g.a.id)}<div class="csub">${esc(g.a.advisory||g.a.id)} · ${g.inds.length} indicator${g.inds.length===1?'':'s'} for this typology · coverage ${c}%</div></div>
+      <span class="acleft">${jchip(g.a.jurisdiction||'—')}<span class="chip doc">${esc(g.a.doc_type||'')}</span></span>
     </div>`;
   }).join('');
   const head = xj ? `No single regulator enumerates all of <em>${esc(typoLabel(t))}</em>.`
-            : docs.length>1 ? `The corpus on <em>${esc(typoLabel(t))}</em>, combined.`
+            : byDoc.size>1 ? `The corpus on <em>${esc(typoLabel(t))}</em>, combined.`
             : `One corpus document covers <em>${esc(typoLabel(t))}</em>.`;
   const lead = xj
-    ? `<b>${docs.length}</b> documents across <b>${juris.map(esc).join(' + ')}</b> each enumerate red flags for this typology — a bank scoping one regulator sees only that regulator's list. The combined corpus surfaces all <b>${pool.length}</b> indicators. ${contrib}.`
-    : docs.length>1
-      ? `<b>${docs.length}</b> documents in the corpus enumerate <b>${pool.length}</b> indicators for this typology. ${contrib}.`
+    ? `<b>${byDoc.size}</b> documents across <b>${juris.map(esc).join(' + ')}</b> each enumerate red flags for this typology — a bank scoping one regulator sees only that regulator's list. The combined corpus surfaces all <b>${pool.length}</b> indicators. ${contrib}.`
+    : byDoc.size>1
+      ? `<b>${byDoc.size}</b> documents in the corpus enumerate <b>${pool.length}</b> indicators for this typology. ${contrib}.`
       : `<b>1</b> corpus document enumerates <b>${pool.length}</b> indicators for this typology. ${contrib}.`;
   stage.innerHTML=`<div class="scene">
     <div class="eyebrow">Cross-corpus synthesis · ${esc(typoLabel(t))}</div>
@@ -647,11 +658,11 @@ function renderSynthesis(t){
       <div class="gauge">
         <div class="gh">Combined coverage</div>
         <div class="gnum" id="gnum">${cov}%</div>
-        <div class="gd">of ${pool.length} indicators · ${docs.length} doc${docs.length===1?'':'s'}</div>
+        <div class="gd">of ${pool.length} indicators · ${byDoc.size} doc${byDoc.size===1?'':'s'}</div>
         <div class="gbar"><div class="gfill" id="gfill" style="width:0%"></div></div>
       </div>
     </div>
-    <div class="framenote">Combined coverage is the union of each regulator's enumerated red flags — counted as enumerated, NOT de-duplicated or matched across regulators (no similarity or overlap is computed or claimed). Coverage is illustrative; pick any document to walk its own loop.</div>
+    <div class="framenote">Documents are grouped by INDICATOR typology — a multi-typology sector page contributes only its indicators for this typology. Combined coverage is the union of each regulator's enumerated red flags — counted as enumerated, NOT de-duplicated or matched across regulators (no similarity or overlap is computed or claimed). Coverage is illustrative; pick any document to walk its own loop.</div>
   </div>`;
   stage.querySelectorAll('.synthrow').forEach(el=>el.onclick=()=>pick(el.dataset.id,t));
   T(()=>{const f=document.getElementById('gfill');if(f)f.style.width=cov+'%';animVal('gnum',0,cov,900,'%');},250);

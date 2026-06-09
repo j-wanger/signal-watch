@@ -66,8 +66,16 @@ that table.
   · 56 derived**. Pick **Financial entities** → it walks the full per-doc arc (a dense ~150-indicator doc) and
   the page **footer carries the FINTRAC Crown-copyright attribution** (never the US "public domain" line). On the
   **Typologies** toggle, confirm **Trade-based money laundering** appears as its own cluster (the re-segmented
-  `ofac-sham-transactions`) alongside the **FINTRAC sector baselines** cluster. No fabricated number; the new
-  source is verbatim FINTRAC under the non-commercial licence; the always-on badge stays.
+  `ofac-sham-transactions`). No fabricated number; the new source is verbatim FINTRAC under the
+  non-commercial licence; the always-on badge stays.
+- [ ] **Per-indicator typology (Phase 37):** on the **Typologies** toggle, confirm the clusters group by
+  INDICATOR typology — **no `fintrac-sector-baselines` cluster** remains; instead **`corruption`** and
+  **`terrorist-financing`** are now **cross-jurisdiction (US + Canada)** clusters that draw indicators from the
+  FINTRAC sector pages, and a **`cross-cutting-indicators`** bucket holds the generic sector-baseline indicators.
+  Open the **corruption** synthesis → its rows list multiple FINTRAC sector pages (each contributing only its
+  corruption indicators) plus any US doc; the framenote still says indicators are NOT de-duplicated/matched
+  across regulators (no lift/overlap). The 56 derived records are byte-frozen — the typology rides in
+  `data/indicator-typology-map.json` (350 deterministic corruption/TF assignments; the rest inherit the doc typology).
 
 ## Adverse-media / negative-news stream (`dist/news/`) — M8, Phase 31 + Phase 32
 - [ ] **Automated arc:** `node tests/news-stream.test.mjs` exits **0** — drives the committed

@@ -163,7 +163,7 @@ function makeEnv(reduced) {
 
 // Run the script in a fresh vm context; the epilogue hands the internals back via __capture.
 const EPILOGUE = `;__capture({coverageIndex,buildNows,isLive,curAdv,pick,gotoScreen,toSelect,back,render,renderClose,renderSignal,ADVISORIES,
-  clusters,clusterFor,enterSynthesis,renderSelect,
+  clusters,clusterFor,indsForTypology,enterSynthesis,renderSelect,
   capAgg,enterCapability,renderCapability,indsForCap,CAPS,CAP_BY,DS_BY,
   dsAgg,enterDataSource,renderDataSource,indsForDS,DSRC,
   get selected(){return selected}, set selected(v){selected=v},
@@ -489,10 +489,11 @@ eq(apiS.view, 'synthesis', 'enterSynthesis() enters the synthesis view');
 eq(apiS.currentTypology, cluster.t, 'currentTypology is the chosen cluster');
 const cdocs = apiS.clusterFor(cluster.t);
 const synthrows = (envS.__stage._html.match(/class="covrow synthrow"/g) || []).length;
-eq(synthrows, cdocs.length, 'synthesis lists one clickable row per cluster document');
-const pool = cdocs.reduce((a, d) => a.concat(d.indicators), []);
+eq(synthrows, cdocs.length, 'synthesis lists one clickable row per contributing document');
+// Phase 37: combined coverage is over the typology's INDICATORS (per-indicator pooling), not docs' full lists
+const pool = apiS.indsForTypology(cluster.t).map(r => r.i);
 eq(numText(envS, 'gnum'), apiS.coverageIndex(pool),
-  'combined coverage = coverageIndex over the UNION of every cluster doc’s indicators (honest set arithmetic)');
+  'combined coverage = coverageIndex over the typology’s pooled indicators (honest per-indicator set arithmetic)');
 ok(/chip jur us/.test(envS.__stage._html) && /chip jur ca/.test(envS.__stage._html),
   'a cross-jurisdiction cluster shows BOTH US and Canada jurisdiction chips');
 ok(/No single regulator enumerates all of/.test(envS.__stage._html), 'the cross-jurisdiction headline lands');
@@ -869,13 +870,24 @@ const api33t = env33t.__api;
 api33t.selMode = 'typology'; api33t.renderSelect();
 const typset33 = new Set(api33t.clusters().map(c => c.t));
 ok(typset33.has('trade-based-money-laundering'), 'TBML is now its own typology (ofac-sham-transactions re-segmented)');
-ok(typset33.has('fintrac-sector-baselines'), 'the FINTRAC sector baselines form their own cluster');
 ok(typset33.has('virtual-currency') && typset33.has('unlawful-employment') && typset33.has('casino-gaming'),
   'new crime typologies present: virtual-currency, unlawful-employment, casino-gaming');
 const tbml33 = api33t.clusterFor('trade-based-money-laundering');
 ok(tbml33.some(d => d.id === 'ofac-sham-transactions'),
   'TBML cluster contains the re-segmented ofac-sham-transactions doc');
 ok(env33t.__errors.length === 0, 'typology re-segmentation view rendered with no console errors');
+
+// (P37) per-indicator typology — the FINTRAC sector pages distribute across real typology clusters; the catch-all retires
+ok(!typset33.has('fintrac-sector-baselines'), 'the fintrac-sector-baselines catch-all is RETIRED (no such cluster)');
+ok(typset33.has('cross-cutting-indicators'), 'the honest cross-cutting-indicators bucket holds the generic sector indicators');
+ok(typset33.has('corruption') && typset33.has('terrorist-financing'),
+  'corruption + terrorist-financing clusters exist (the sector pages distribute into them)');
+const feTypos = new Set((api33t.ADVISORIES.find(a => a.id === 'fintrac-guid-financial-entities').indicators).map(i => i.typology));
+ok(feTypos.has('corruption') && feTypos.has('terrorist-financing') && feTypos.has('cross-cutting-indicators') && feTypos.size >= 3,
+  `a FINTRAC sector page distributes across ≥3 typologies incl. corruption + TF (${[...feTypos].sort().join(', ')})`);
+const corrDocs = new Set(api33t.clusterFor('corruption').map(d => d.id));
+ok(corrDocs.has('fintrac-guid-financial-entities') && corrDocs.has('fintrac-guid-msb'),
+  'the corruption cluster now draws indicators from multiple FINTRAC sector pages');
 
 /* ============================ report ============================ */
 console.log(`\n${pass} passed, ${fails.length} failed`);

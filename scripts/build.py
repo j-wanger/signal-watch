@@ -56,6 +56,15 @@ TYPOLOGY_MAP = ROOT / "data" / "typology-map.json"
 # DETECTION CAPABILITY. Kept separate from the 42 derived records (which stay byte-frozen); validated at
 # the build boundary (validate_capability_taxonomy — shape + closed vocab + referential integrity).
 CAPABILITY_TAXONOMY = ROOT / "data" / "capability-taxonomy.json"
+# Phase 37: the per-indicator typology overlay — a SEPARATE committed artifact mapping a LIVE indicator
+# global-id (<doc-id>/<ind-id>) to ONE closed-vocab typology (data/typology-map.json's vocabulary). SPARSE:
+# only indicators whose typology differs from their doc's typology-map value are listed (the deterministic
+# corruption/TF sections of the FINTRAC sector-guidance pages, which span many typologies); every other
+# indicator INHERITS its doc typology at build time. So a sector page's indicators distribute across the
+# real typology clusters instead of collapsing into the doc-level catch-all. Derived records stay byte-frozen
+# (the overlay carries the typology, not record edits); validated at the build boundary
+# (validate_indicator_typology — closed vocab + referential integrity against the live corpus).
+INDICATOR_TYPOLOGY_MAP = ROOT / "data" / "indicator-typology-map.json"
 # Multi-source corpus registry (Phase 20): each source is one FinCEN publication TYPE with its own
 # committed corpus-status.json + derived/*.json; render_corpus merges them by id into one __CORPUS__.
 # Decoupling source-id from storage dir means adding the Nth FinCEN source (or, later, OFAC — also
@@ -457,6 +466,52 @@ def validate_typology(advisories: list, vocab: dict, mapping: dict) -> list:
     return e
 
 
+def load_indicator_typology_map() -> dict:
+    """Load + shape-check the per-indicator typology overlay (data/indicator-typology-map.json).
+
+    Returns mapping: dict[str, str] keyed by indicator global-id "<doc-id>/<ind-id>". Fails loud on a
+    missing/invalid file or a malformed shape. SEPARATE committed artifact (the derived records stay
+    byte-frozen); referential integrity + closed-vocab are checked in validate_indicator_typology once
+    the merged corpus is known. The overlay is SPARSE (override-only) — coverage is NOT required, since
+    unlisted indicators inherit their doc typology.
+    """
+    rel = INDICATOR_TYPOLOGY_MAP.relative_to(ROOT)
+    if not INDICATOR_TYPOLOGY_MAP.exists():
+        die(f"indicator typology overlay not found: {rel}")
+    try:
+        doc = json.loads(INDICATOR_TYPOLOGY_MAP.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as ex:
+        die(f"invalid JSON in {rel}: {ex}")
+    mapping = doc.get("map")
+    if not isinstance(mapping, dict) or not mapping:
+        die(f"{rel}: 'map' must be a non-empty object {{'<doc-id>/<ind-id>': typology}}")
+    return mapping
+
+
+def validate_indicator_typology(advisories: list, vocab: dict, imap: dict) -> list:
+    """Boundary check on the per-indicator typology overlay against the merged corpus. Returns errors.
+
+    Two deterministic checks (mirrors validate_typology; the overlay is agent/section-proposed, this
+    disposes — the grounding gate derive_signals.py stays untouched):
+      1. closed vocab — every mapped typology is a declared typology-map vocabulary term;
+      2. referential  — every mapped key is a LIVE (derived) indicator global-id "<doc>/<ind>" (no dangling).
+    Coverage is NOT required: the overlay is an override; unlisted indicators inherit their doc typology.
+    """
+    e = []
+    live = set()
+    for a in advisories:
+        if not a.get("derived"):
+            continue
+        for i in a.get("indicators") or []:
+            live.add(f"{a.get('id', '?')}/{i.get('id', '?')}")
+    for key, typ in imap.items():
+        if typ not in vocab:
+            e.append(f"{key}: typology {typ!r} not in the declared vocabulary")
+        if key not in live:
+            e.append(f"{key}: mapped key is not a live (derived) corpus indicator")
+    return e
+
+
 def load_capability_taxonomy() -> tuple:
     """Load + shape-check the capability-lens overlay (data/capability-taxonomy.json).
 
@@ -647,6 +702,20 @@ def render_corpus(template: str) -> str:
     for entry in merged:
         if entry.get("derived") and entry["id"] in tmap:
             entry["typology"] = tmap[entry["id"]]
+
+    # Phase 37: resolve each LIVE indicator's typology = the per-indicator overlay value ELSE inherit the
+    # doc typology. So a FINTRAC sector page (multi-typology) contributes its corruption/TF indicators to
+    # those real clusters while its generic indicators stay under the doc's headline typology — the
+    # Typologies lens groups by indicator, not doc. Gated at the boundary; derived records stay frozen.
+    imap = load_indicator_typology_map()
+    ierrors = validate_indicator_typology(merged, vocab, imap)
+    if ierrors:
+        die("indicator typology overlay fails boundary validation:\n  - " + "\n  - ".join(ierrors))
+    for entry in merged:
+        if not entry.get("derived"):
+            continue
+        for i in entry.get("indicators") or []:
+            i["typology"] = imap.get(f"{entry['id']}/{i.get('id', '?')}", entry.get("typology"))
 
     # Phase 29: the capability-lens overlay — labels + group + interview posture per capability/data-source
     # code (the codes already ride in each derived indicator). Gated at the boundary; derived records frozen.

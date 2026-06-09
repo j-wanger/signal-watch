@@ -99,12 +99,22 @@ shape validated at the build boundary:
 - Non-derivable (no enumerated red-flag list, honestly skipped): the 2 FATF advisories, BEC
   fin-2019-a005, FINTRAC crown-agents.
 
-Two committed OVERLAYS, each validated at the build boundary (closed-vocab + referential integrity
+Three committed OVERLAYS, each validated at the build boundary (closed-vocab + referential integrity
 against the live corpus; the grounding core is untouched — agent proposes, the gate disposes, the
 human reviews):
 - `data/typology-map.json` — doc-id → ONE typology (27-term closed vocab); jurisdiction is DERIVED
-  from the source registry (FinCEN/OFAC = US, FINTRAC = Canada), not stored. Powers the Typologies
-  lens + cross-corpus synthesis (combined coverage across a cross-jurisdiction cluster).
+  from the source registry (FinCEN/OFAC = US, FINTRAC = Canada), not stored. It is the doc HEADLINE +
+  the per-indicator INHERIT-DEFAULT.
+- `data/indicator-typology-map.json` (Phase 37) — a SPARSE override mapping a LIVE indicator global-id
+  (`<doc-id>/<ind-id>`) → one closed-vocab typology. Build-time, each indicator's typology = overlay
+  value ELSE inherit its doc typology. This exists because a FINTRAC per-sector page is INHERENTLY
+  MULTI-TYPOLOGY (bribery/corruption, TF, structuring, wires…): a doc→one-typology overlay forced 7 of
+  the 10 sector pages into a catch-all. Now the deterministic corruption/TF section indicators (350,
+  assigned by source SECTION heading — no neural) distribute into those real clusters; the genuinely
+  cross-cutting remainder inherits the honest `cross-cutting-indicators` bucket. So the **Typologies
+  lens + cross-corpus synthesis group by INDICATOR typology** (a doc appears in every cluster its
+  indicators touch); `corruption` + `terrorist-financing` are now cross-jurisdiction US+Canada.
+  Combined coverage stays honest union arithmetic over per-indicator statuses — no lift/dedup.
 - `data/capability-taxonomy.json` — C1–C28 capabilities + D1–D20 data sources (code → {name, group,
   interview posture}). Powers the Capabilities + Data-sources lenses.
 
@@ -172,7 +182,7 @@ boundary (a LOCAL normalizer — build.py never imports the authoring layer).
 
 ## How to run
 - Build: `python3 scripts/build.py <id>` (or `corpus` / `news` / `all`) → the ship file.
-  - `corpus` merges every source in `CORPUS_SOURCES` (the 5 `data/*` dirs) + the two overlays.
+  - `corpus` merges every source in `CORPUS_SOURCES` (the 5 `data/*` dirs) + the three overlays.
   - `news` reads `data/news/{articles,derived,book}`. Both are grounded/validated at the build boundary.
 - Present: open `dist/<id>/index.html` (or `dist/corpus/index.html`, `dist/news/index.html`) — single
   self-contained file, offline, no server.

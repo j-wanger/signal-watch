@@ -35,6 +35,7 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import build  # scripts/ is on sys.path[0] when run as `python3 scripts/serve_news.py`; stdlib-only import
+import news_fetch  # Phase 39: URL acquisition (fetch ladder + standardizer + verifier; companion-only)
 import news_ground  # the shared grounding gate — drops ungrounded live extractions (live == build by construction)
 import news_store  # Phase 36: DuckDB persistence + the escalated-only watchlist (companion-only; build.py never imports it)
 
@@ -256,13 +257,17 @@ def verify_subject(name: str, etype: str, context: str, *, llm_url: str, model: 
         return True
 
 
-def verify_entities(record: dict, article: str, *, llm_url: str, model: str):
+def verify_entities(record: dict, article: str, *, llm_url: str, model: str, on_progress=None):
     """Second pass over a grounded record's entities — drop the ones the keep-biased verifier rejects as
     NON-subjects, then re-id the survivors E1.. contiguously. Returns (record, dropped). Pure aside from
-    the model calls; mutates a copy."""
+    the model calls; mutates a copy. `on_progress` (Phase 39) is notified per entity ("verifying", i, n,
+    name) — the N sequential verify calls are the wall-time majority, so this is where progress lives."""
+    notify = on_progress or (lambda stage, **kw: None)
     body = news_ground.article_body(article)
+    ents = record.get("entities") or []
     kept, dropped = [], []
-    for e in record.get("entities") or []:
+    for i, e in enumerate(ents, 1):
+        notify("verifying", i=i, n=len(ents), name=e.get("name", ""))
         if verify_subject(e.get("name", ""), e.get("type", ""), _entity_context(e.get("name", ""), body),
                           llm_url=llm_url, model=model):
             kept.append(e)
@@ -274,12 +279,18 @@ def verify_entities(record: dict, article: str, *, llm_url: str, model: str):
 
 
 def extract(text: str, meta: dict = None, *, llm_url: str = DEFAULT_LLM_URL, model: str = DEFAULT_MODEL,
-            verify: bool = True):
+            verify: bool = True, on_progress=None):
     """Full live pipeline: model -> parse -> assemble -> ground (deterministic core) -> optional keep-biased
-    second-pass entity verify (Phase 38, on by default). Returns (record, dropped)."""
-    record, dropped = build_record(parse_llm_json(call_llm(text, llm_url=llm_url, model=model)), text, meta)
+    second-pass entity verify (Phase 38, on by default). Returns (record, dropped). `on_progress` (Phase 39)
+    is an optional stage callback (`on_progress(stage, **detail)`) — default no-op, so every existing caller
+    (the replay fixtures, the --live smoke) is byte-for-byte unaffected."""
+    notify = on_progress or (lambda stage, **kw: None)
+    notify("extracting")
+    raw = call_llm(text, llm_url=llm_url, model=model)
+    notify("grounding")
+    record, dropped = build_record(parse_llm_json(raw), text, meta)
     if verify:
-        record, vdropped = verify_entities(record, text, llm_url=llm_url, model=model)
+        record, vdropped = verify_entities(record, text, llm_url=llm_url, model=model, on_progress=notify)
         dropped = list(dropped) + vdropped
     return record, dropped
 
@@ -369,35 +380,71 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, json.JSONDecodeError):
             return None, "invalid JSON body"
 
+    def _emit(self, obj: dict) -> None:
+        """One NDJSON progress/result line, flushed immediately (Phase 39). The handler speaks HTTP/1.0
+        (BaseHTTPRequestHandler default) — no Content-Length, the body ends when the connection closes —
+        so a plain write+flush per event reaches the browser's fetch ReadableStream as it happens."""
+        self.wfile.write((json.dumps(obj, ensure_ascii=False) + "\n").encode("utf-8"))
+        self.wfile.flush()
+
     def _extract(self) -> None:
         payload, err = self._read_json()
         if err:
             self._json(400, {"error": err}); return
         text = (payload.get("text") or "").strip()
-        if not text:
-            self._json(400, {"error": "missing 'text' (the article to process)"}); return
+        url = (payload.get("url") or "").strip()
+        if not text and not url:
+            self._json(400, {"error": "missing 'text' or 'url' (the article to process)"}); return
         meta = {k: payload[k] for k in ("title", "source_org", "source_url", "doc_type", "typology")
                 if payload.get(k)}
+        # Phase 39 — the response is an NDJSON STREAM of stage events ending in {"done": …} or {"error": …}.
+        # The 200 is committed before the pipeline runs, so every later failure travels IN-stream (the
+        # client reads events, not status codes). Request-shape errors above still fail fast as plain 400s.
+        self.send_response(200)
+        self.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
         try:
-            record, dropped = extract(text, meta, llm_url=self.server.llm_url, model=self.server.model,
-                                      verify=getattr(self.server, "verify", True))
-        except (urllib.error.URLError, OSError) as ex:
-            self._json(502, {"error": f"local model unreachable at {self.server.llm_url}: {ex}"}); return
-        except (ValueError, KeyError, json.JSONDecodeError) as ex:
-            self._json(502, {"error": f"model returned output that could not be parsed: {ex}"}); return
-        # Honest fallback: if NOTHING in the model output grounded, surface it rather than show an empty arc.
-        if not record["entities"] and not record["red_flags"]:
-            self._json(422, {"error": "nothing in the model output grounded in the submitted article",
-                             "dropped": dropped}); return
-        # Persist the grounded scan (best-effort — a store failure must NEVER fail the scan). The scan_id is
-        # echoed so the client's later /disposition can target a specific entity of THIS scan.
-        scan_id = None
-        if self.server.store is not None:
+            # Phase 39 — ONE-SHOT URL mode: acquire (fetch ladder) → standardize → verify, then run the
+            # same pipeline on the verified text. Pasted text WINS over a URL (the trim + re-run recovery
+            # path). The converted text streams back EARLY so the client can fill the textarea — the
+            # analyst sees exactly what the model saw, and can trim + re-run if the conversion was noisy.
+            if url and not text:
+                self._emit({"stage": "fetching", "url": url})
+                acq = news_fetch.acquire(url)
+                if not acq.get("ok"):
+                    self._emit({"error": acq.get("error") or "URL acquisition failed",
+                                "attempts": acq.get("attempts") or []}); return
+                text = acq["text"]
+                meta.setdefault("source_url", url)
+                if acq.get("title") and not meta.get("title"):
+                    meta["title"] = acq["title"]
+                self._emit({"stage": "converted", "text": text,
+                            "title": acq.get("title") or "", "method": acq.get("method") or ""})
             try:
-                scan_id = self.server.store.append_scan(record, dropped, ts=_now())
-            except Exception as ex:  # noqa: BLE001 — persistence is optional; degrade, don't drop the result
-                self.log_message("persist failed: %s", ex)
-        self._json(200, {"record": record, "dropped": dropped, "scan_id": scan_id})
+                record, dropped = extract(text, meta, llm_url=self.server.llm_url, model=self.server.model,
+                                          verify=getattr(self.server, "verify", True),
+                                          on_progress=lambda stage, **kw: self._emit({"stage": stage, **kw}))
+            except (urllib.error.URLError, OSError) as ex:
+                self._emit({"error": f"local model unreachable at {self.server.llm_url}: {ex}"}); return
+            except (ValueError, KeyError, json.JSONDecodeError) as ex:
+                self._emit({"error": f"model returned output that could not be parsed: {ex}"}); return
+            # Honest fallback: if NOTHING in the model output grounded, surface it rather than show an empty arc.
+            if not record["entities"] and not record["red_flags"]:
+                self._emit({"error": "nothing in the model output grounded in the submitted article",
+                            "dropped": dropped}); return
+            # Persist the grounded scan (best-effort — a store failure must NEVER fail the scan). The scan_id is
+            # echoed so the client's later /disposition can target a specific entity of THIS scan.
+            scan_id = None
+            if self.server.store is not None:
+                try:
+                    scan_id = self.server.store.append_scan(record, dropped, ts=_now())
+                except Exception as ex:  # noqa: BLE001 — persistence is optional; degrade, don't drop the result
+                    self.log_message("persist failed: %s", ex)
+            self._emit({"done": {"record": record, "dropped": dropped, "scan_id": scan_id}})
+        except (BrokenPipeError, ConnectionResetError):
+            # the client navigated away mid-stream — abandon this scan quietly (nothing to answer to)
+            self.log_message("client disconnected mid-extract stream")
 
     def _disposition(self) -> None:
         # The human Disposition gate posts back here; 'escalate' adds the entity to the watchlist.
@@ -449,6 +496,8 @@ def selftest() -> int:
     assert '"prune": "/watchlist/prune"' in page, "live config missing the Phase-38 watchlist prune endpoint"
     assert "const NEWS = {" in page, "NEWS object not inlined as expected"
     assert "liveInit" in page and "fetch(NEWS.live.extract" in page, "companion page missing the live branch"
+    assert "liveReadStream" in page and "liveStageLabel" in page, \
+        "companion page missing the Phase-39 progress-stream reader"
     assert page.rstrip().endswith("</html>"), "served page is not a complete HTML document"
     assert json.loads(json.dumps(payload)) == payload, "payload is not JSON round-trippable"
     assert payload["articles"] and payload["book"].get("rows"), "seed data empty"

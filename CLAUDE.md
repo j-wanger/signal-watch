@@ -69,9 +69,16 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    transaction signals — the compose payoff is the M8 north star, scoped OUT). Arc: Select → Read →
    Screen → Disposition (the human gate) → Exposure. Runtime fuzzy matcher (normalize → token-sort →
    Jaro-Winkler, REAL scores, 0.85 threshold) is pure client-side JS — the OFFLINE ship file makes no
-   LLM/fetch call. **Optional LIVE mode (Phase 35–38):** `scripts/serve_news.py` (a stdlib companion) serves
-   the page over http://localhost + proxies a local llama-cpp model so a pasted article is extracted in
-   REAL TIME → grounded server-side via `news_ground.py` (ungrounded dropped) → the same arc. The live
+   LLM/fetch call. **Optional LIVE mode (Phase 35–39):** `scripts/serve_news.py` (a stdlib companion) serves
+   the page over http://localhost + proxies a local llama-cpp model so a pasted article — or an article URL,
+   acquired ONE-SHOT server-side by `scripts/news_fetch.py` (a fetch LADDER urllib→curl→markitdown with
+   cookie-jar + one same-host interstitial-refresh follow, then a deterministic format STANDARDIZER + an
+   article-shape VERIFIER gate; a rung wins only by passing the verifier; markitdown is `.venv`-only,
+   lazy + graceful degrade; honest "paste instead" failure) — is extracted in REAL TIME → grounded
+   server-side via `news_ground.py` (ungrounded dropped) → the same arc. `/extract` streams NDJSON STAGE
+   PROGRESS (fetching → converted[text → fills the textarea; pasted text wins over URL on re-run] →
+   extracting → grounding → verifying i/N + elapsed; errors travel in-stream) read by the page via
+   fetch+ReadableStream. The live
    branch is build-time STRIPPED from the offline `dist/news` (zero network code there); the offline file
    stays the default + fallback. **Persistence + the feedback watchlist (Phase 36):** each live scan
    row-appends to a local DuckDB store (`scripts/news_store.py`, companion-only — build.py NEVER imports it;
@@ -195,13 +202,16 @@ boundary (a LOCAL normalizer — build.py never imports the authoring layer).
   - `news` reads `data/news/{articles,derived,book}`. Both are grounded/validated at the build boundary.
 - Present: open `dist/<id>/index.html` (or `dist/corpus/index.html`, `dist/news/index.html`) — single
   self-contained file, offline, no server.
-- News LIVE mode (Phase 35–38, optional, dev/authoring-time): start a local llama-cpp server, then
+- News LIVE mode (Phase 35–39, optional, dev/authoring-time): start a local llama-cpp server, then
   `.venv/bin/python scripts/serve_news.py --llm-url <chat-endpoint> --model <name>` and open
-  http://localhost:8000. Real-time extraction is grounded server-side (ungrounded dropped) + entity-verified
+  http://localhost:8000. Submit an article URL (one-shot: news_fetch ladder → standardize → verify →
+  extract; the converted text fills the textarea for trim + re-run) or paste text; stage progress streams
+  live (verify i/N + elapsed). Extraction is grounded server-side (ungrounded dropped) + entity-verified
   (subjects-only prompt + keep-biased second pass, on by default; `--no-verify-entities` off); each scan
-  persists to DuckDB and the Disposition-gate ESCALATE grows the screen watchlist (now viewable + prunable),
-  run under `.venv` for persistence (`--export-parquet <dir>` exports; `--no-persist` disables). The offline
-  `dist/news` is unaffected (the live/persistence/view code is stripped from it). Details: `docs/news-live.md`.
+  persists to DuckDB and the Disposition-gate ESCALATE grows the screen watchlist (viewable + prunable),
+  run under `.venv` for persistence (`--export-parquet <dir>` exports; `--no-persist` disables) AND for
+  URL mode (markitdown). The offline `dist/news` is unaffected (the live/persistence/view/progress/URL
+  code is stripped from it). Details: `docs/news-live.md`.
 - Drift guard before presenting: `python3 scripts/build.py --check all` (frozen dists byte-identical).
 - Test (dep-free, no install — except the DuckDB store selftests, which run under `.venv`):
   - `node tests/corpus-explorer.test.mjs` — the story landing + the 6-screen per-doc arc + the
@@ -213,10 +223,14 @@ boundary (a LOCAL normalizer — build.py never imports the authoring layer).
   - `python3 scripts/derive_signals.py --selftest` — the derivation GATE checks + anchor fixtures.
   - `python3 tests/news_live_test.py` — the live extraction pipeline (build_record + grounding, the
     recorded-fixture REPLAY [7 captured-Qwen outputs → goldens, no model], the keep-biased second-pass verify,
-    the `/extract`+`/watchlist/prune` routes, model stubbed; `--live` is an opt-in real-model smoke); under
-    `.venv` it also drives `/watchlist` + `/disposition` + `/watchlist/prune` over a temp DuckDB store
-    (the escalated-only loop) · `python3 scripts/news_ground.py --selftest` (the
-    shared gate) · `.venv/bin/python scripts/news_store.py --selftest` (DuckDB store: append → escalate →
+    the `/extract` NDJSON stage-stream + one-shot URL routes [model + acquisition stubbed; stages precede the
+    payload, errors in-stream, text wins over url] + `/watchlist/prune`; `--live` is an opt-in real-model
+    smoke); under `.venv` it also drives `/watchlist` + `/disposition` + `/watchlist/prune` over a temp DuckDB
+    store (the escalated-only loop) · `python3 scripts/news_ground.py --selftest` (the
+    shared gate) · `python3 scripts/news_fetch.py --selftest` (URL acquisition: the standardizer pinned to a
+    committed golden, the article-shape verifier, the interstitial detector, the ladder order incl.
+    verifier-advances-the-ladder; under `.venv` also a real markitdown fixture conversion) ·
+    `.venv/bin/python scripts/news_store.py --selftest` (DuckDB store: append → escalate →
     watchlist union → parquet roundtrip) · `python3 scripts/serve_news.py --selftest` (the companion page).
   - Pre-present sequence: `--check all` (drift) → `node tests/…` (arcs) → walk `tests/smoke-checklist.md`.
 - Authoring a new corpus source (build-time only; raw PDFs gitignored, the committed `<dir>/*.md` is

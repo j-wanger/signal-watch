@@ -106,22 +106,32 @@ that table.
   verbatim under 17 U.S.C. §105); the client/counterparty **book is synthetic** (no real customer data);
   scores are real computed similarity; nothing reads as a real detection/precision rate.
 
-### Live mode (Phase 35 extraction + 36 persistence + 38 entity-precision/watchlist-view, optional — needs a local llama-cpp server; see `docs/news-live.md`)
+### Live mode (Phase 35 extraction + 36 persistence + 38 entity-precision/watchlist-view + 39 progress/URL, optional — needs a local llama-cpp server; see `docs/news-live.md`)
 - [ ] **Automated (no model):** `python3 tests/news_live_test.py`, `python3 scripts/news_ground.py --selftest`,
-  and `python3 scripts/serve_news.py --selftest` all exit **0** (the grounding gate, the build_record
-  pipeline, the `/extract` route over HTTP with the model stubbed, and the served live page). Under the
-  **`.venv`** (`.venv/bin/python tests/news_live_test.py` + `.venv/bin/python scripts/news_store.py --selftest`)
-  the DuckDB store + the `/watchlist` + `/disposition` escalated-only loop + parquet roundtrip are exercised too.
+  `python3 scripts/news_fetch.py --selftest`, and `python3 scripts/serve_news.py --selftest` all exit **0**
+  (the grounding gate, the build_record pipeline, the `/extract` NDJSON stage stream + one-shot URL route
+  with the model/acquisition stubbed, the URL standardizer/verifier/ladder, and the served live page). Under
+  the **`.venv`** (`.venv/bin/python tests/news_live_test.py` + `.venv/bin/python scripts/news_store.py --selftest`
+  + `.venv/bin/python scripts/news_fetch.py --selftest`) the DuckDB store + the `/watchlist` + `/disposition`
+  escalated-only loop + parquet roundtrip + a real markitdown fixture conversion are exercised too.
 - [ ] **Offline artifact still pure:** `dist/news/index.html` contains **no** `fetch(` / `liveInit` /
-  `LIVE_START` / `/watchlist` / `/disposition` / `NEWS._watch` / `watchpanel` / `livePrune` (the live +
-  persistence + watchlist-view code is build-time stripped); it opens standalone as the scripted fallback,
-  screening the static book only.
+  `LIVE_START` / `/watchlist` / `/disposition` / `NEWS._watch` / `watchpanel` / `livePrune` / `liveReadStream` /
+  `live-url` (the live + persistence + watchlist-view + progress/URL code is build-time stripped); it opens
+  standalone as the scripted fallback, screening the static book only.
 - [ ] **Live (with a model):** start llama-cpp, then `python3 scripts/serve_news.py --llm-url <endpoint>
   --model <name>`; open **http://localhost:8000**, click **＋ Process a new article**, paste a public-domain
   enforcement article, **Run extraction** → entities + red flags appear in the streaming Read, each **grounded**
   in the pasted text (ungrounded items are dropped; the status line reports how many), then the normal
   Screen → Disposition → Exposure arc runs. Pasting gibberish returns an honest "nothing grounded" message,
   never a fabricated record.
+- [ ] **Extraction progress (Phase 39):** during a run the status line paints **live stages** — model
+  extraction → grounding → **"Verifying entity i of N — <name>"** per entity — with an **elapsed-seconds**
+  counter ticking; on completion it reports counts + total seconds. No silent multi-minute wait.
+- [ ] **One-shot URL (Phase 39):** put a public **article URL** (e.g. a justice.gov or treasury.gov press
+  release) in the URL field, **Run extraction** → "Fetching + converting" paints, the **converted text fills
+  the textarea** as the run proceeds, and the grounded record opens (source link = the URL). Trimming the
+  textarea and re-running uses the trimmed text (paste wins over URL). A walled/non-article URL fails
+  **honestly** with "…paste the article text instead" — never a loosened gate, never a fabricated record.
 - [ ] **Persistence + the feedback watchlist (Phase 36, run the companion under `.venv/bin/python`):** scan
   an article, then at **Disposition** click **＋ WATCHLIST** to **escalate** an entity that is *not* in the
   book (its label flips to **ESCALATED**). Process a **second** article that re-mentions that entity → at

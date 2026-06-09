@@ -573,12 +573,13 @@ function liveInjectSelect(){
   tiles.insertAdjacentHTML('afterend',
     '<div class="livebar" id="livebar">'
     + '<div class="livehead"><span class="livedot">●</span> Real-time extraction'
-    + '<span class="lsub"> — paste an article; a local model extracts entities + red flags, grounded against the source (ungrounded dropped).</span>'
+    + '<span class="lsub"> — give an article URL (fetched + converted server-side) or paste the text; a local model extracts entities + red flags, grounded against the source (ungrounded dropped).</span>'
     + '<button class="btn" id="live-toggle">＋ Process a new article</button></div>'
     + '<div class="liveform" id="liveform" hidden>'
+    + '<div class="liverow"><input class="livein" id="live-url" placeholder="Article URL — one shot: fetch, convert, extract (pasted text below wins if present)"></div>'
     + '<div class="liverow"><input class="livein" id="live-title" placeholder="Title (optional)">'
     + '<input class="livein" id="live-source" placeholder="Source / organisation (optional)"></div>'
-    + '<textarea class="livetext" id="live-text" placeholder="Paste the article text here…"></textarea>'
+    + '<textarea class="livetext" id="live-text" placeholder="…or paste the article text here (fills automatically on a URL run — trim + re-run if the conversion picked up noise)"></textarea>'
     + '<div class="liveact"><button class="btn primary" id="live-run">Run extraction</button>'
     + '<span class="lstatus" id="live-status"></span></div></div></div>');
   document.getElementById('live-toggle').addEventListener('click', () => {
@@ -589,28 +590,88 @@ function liveInjectSelect(){
   liveRenderWatchlistPanel();        // render from the cached surface immediately…
   liveRefreshWatchlist();            // …then refresh from the companion (re-renders the panel on return)
 }
+/* Phase 39 — /extract answers an NDJSON STREAM of stage events ending in {done} or {error}; read it
+   incrementally so the analyst sees WHERE the pipeline is (the per-entity verify loop is the wall-time
+   majority) instead of a silent multi-minute wait. Falls back to whole-body parsing if the browser
+   exposes no ReadableStream. */
+async function liveReadStream(r, onEvent){
+  let buf = '', last = null;
+  const feed = chunk => {
+    buf += chunk; let i;
+    while((i = buf.indexOf('\n')) >= 0){
+      const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
+      if(!line) continue;
+      let ev; try{ ev = JSON.parse(line); }catch(_){ continue; }
+      if(ev.done !== undefined) last = ev.done;
+      else if(ev.error !== undefined) last = ev;
+      else onEvent(ev);
+    }
+  };
+  if(r.body && r.body.getReader){
+    const reader = r.body.getReader(); const dec = new TextDecoder();
+    for(;;){
+      const {done, value} = await reader.read();
+      if(value) feed(dec.decode(value, {stream:true}));
+      if(done) break;
+    }
+  }else{
+    feed(await r.text()); feed('\n');
+  }
+  return last || { error: 'the extraction stream ended without a result' };
+}
+function liveStageLabel(ev){
+  if(ev.stage === 'fetching')   return 'Fetching + converting the URL (server-side ladder)…';
+  if(ev.stage === 'converted')  return 'Converted — ' + (ev.text ? ev.text.length : 0) + ' chars; extracting…';
+  if(ev.stage === 'extracting') return 'Model extracting entities + red flags…';
+  if(ev.stage === 'grounding')  return 'Grounding the extraction against the source…';
+  if(ev.stage === 'verifying')  return 'Verifying entity ' + ev.i + ' of ' + ev.n + (ev.name ? (' — ' + ev.name) : '') + '…';
+  return 'Processing…';
+}
+/* The 'converted' event is the one-shot URL mode's passive recovery: the server-acquired text fills
+   the textarea AS the run proceeds, so the analyst sees exactly what the model saw and can trim +
+   re-run (pasted text wins over the URL on the next run). */
+function liveApplyConverted(ev){
+  if(ev.stage !== 'converted') return;
+  const ta = document.getElementById('live-text');
+  if(ta) ta.value = ev.text || '';
+  const ti = document.getElementById('live-title');
+  if(ti && !ti.value.trim() && ev.title) ti.value = ev.title;
+}
 async function liveRun(){
   const status = document.getElementById('live-status');
   const text = (document.getElementById('live-text').value || '').trim();
-  if(!text){ status.textContent = 'Paste some article text first.'; return; }
-  status.textContent = 'Extracting via the local model…';
+  const url = ((document.getElementById('live-url') || {}).value || '').trim();
+  if(!text && !url){ status.textContent = 'Give an article URL or paste some article text first.'; return; }
+  const t0 = Date.now();
+  let stage = url && !text ? 'Contacting the companion (URL acquisition)…' : 'Contacting the local model…';
+  const paint = () => { status.textContent = stage + ' · ' + Math.round((Date.now() - t0) / 1000) + 's'; };
+  const tick = setInterval(paint, 1000);
+  paint();
   try{
     const r = await fetch(NEWS.live.extract, { method:'POST',
       headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ text,
+      body: JSON.stringify({ text, url,
         title: (document.getElementById('live-title').value || '').trim(),
         source_org: (document.getElementById('live-source').value || '').trim() }) });
-    const data = await r.json();
-    if(!r.ok){ status.textContent = 'Extraction failed: ' + (data.error || ('HTTP ' + r.status)); return; }
+    if(!r.ok){  // request-shape errors (400) are plain JSON, before any stream begins
+      const d = await r.json().catch(() => ({}));
+      clearInterval(tick);
+      status.textContent = 'Extraction failed: ' + (d.error || ('HTTP ' + r.status)); return;
+    }
+    const data = await liveReadStream(r, ev => { liveApplyConverted(ev); stage = liveStageLabel(ev); paint(); });
+    clearInterval(tick);
+    if(data.error){ status.textContent = 'Extraction failed: ' + data.error; return; }
     const rec = data.record, drop = (data.dropped || []).length;
     rec.scan_id = data.scan_id || null;            // Phase 36: lets the Disposition gate escalate THIS scan's entities
     const i = NEWS.articles.findIndex(a => a.id === rec.id);
     if(i >= 0) NEWS.articles[i] = rec; else NEWS.articles.unshift(rec);
     status.textContent = rec.entities.length + ' entities · ' + rec.red_flags.length + ' red flags grounded'
-      + (drop ? (' · ' + drop + ' ungrounded dropped') : '');
+      + (drop ? (' · ' + drop + ' ungrounded dropped') : '')
+      + ' · ' + Math.round((Date.now() - t0) / 1000) + 's';
     await liveRefreshWatchlist();                  // screen this scan against the current escalated watchlist
     go('read', rec.id);
   }catch(ex){
+    clearInterval(tick);
     status.textContent = 'Could not reach the local companion (' + NEWS.live.extract + ') — ' + ex.message;
   }
 }

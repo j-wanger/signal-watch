@@ -19,6 +19,7 @@ import urllib.request
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import news_fetch   # noqa: E402
 import news_ground  # noqa: E402
 import news_store   # noqa: E402
 import serve_news   # noqa: E402
@@ -74,9 +75,22 @@ CANNED = {
 }
 
 
+def read_extract_stream(resp) -> tuple:
+    """Phase 39: /extract answers an NDJSON stream of stage events ending in {"done": …} or {"error": …}.
+    Parse the whole body into (progress_events, final) — the final dict is the old single-JSON payload."""
+    lines = [json.loads(l) for l in resp.read().decode("utf-8").splitlines() if l.strip()]
+    assert lines, "extract stream was empty"
+    final = lines[-1]
+    assert "done" in final or "error" in final, f"stream did not end in a result/error event: {final}"
+    progress = lines[:-1]
+    assert all("stage" in ev for ev in progress), f"non-stage event before the final payload: {progress}"
+    return progress, (final.get("done") if "done" in final else final)
+
+
 def http_route_test() -> None:
     """Drive the real /extract route over HTTP with the model call STUBBED (no llama-cpp needed) — proves
-    the full live loop: request parse -> call_llm (stubbed) -> parse -> build_record -> ground -> JSON."""
+    the full live loop: request parse -> call_llm (stubbed) -> parse -> build_record -> ground -> the
+    Phase-39 NDJSON progress stream (stage events strictly precede the final payload)."""
     orig = serve_news.call_llm
     serve_news.call_llm = lambda text, **kw: json.dumps(CANNED)  # stub the only model-dependent step
     httpd = serve_news.ThreadingHTTPServer(("127.0.0.1", 0), serve_news.Handler)
@@ -93,7 +107,10 @@ def http_route_test() -> None:
             headers={"Content-Type": "application/json"}, method="POST")
         with urllib.request.urlopen(req, timeout=10) as r:
             assert r.status == 200, r.status
-            data = json.loads(r.read().decode("utf-8"))
+            assert r.headers.get("Content-Type", "").startswith("application/x-ndjson"), r.headers.get("Content-Type")
+            progress, data = read_extract_stream(r)
+        stages = [ev["stage"] for ev in progress]
+        assert stages == ["extracting", "grounding"], f"verify-off stages should be extracting→grounding: {stages}"
         names = [e["name"] for e in data["record"]["entities"]]
         assert names == ["George Rossi", "Siam Expert Trading Company Limited"], names
         assert len(data["record"]["red_flags"]) == 1, data["record"]["red_flags"]
@@ -108,10 +125,76 @@ def http_route_test() -> None:
         except urllib.error.HTTPError as he:
             code = he.code
         assert code == 400, f"empty text should return 400, got {code}"
+
+        # Phase 39: a pipeline failure AFTER the stream opens travels IN-stream — still HTTP 200, the
+        # final event is {"error": …} (the client reads events, not status codes).
+        def _unreachable(text, **kw):
+            raise urllib.error.URLError("connection refused (stub)")
+        serve_news.call_llm = _unreachable
+        with urllib.request.urlopen(req, timeout=10) as r:
+            assert r.status == 200, "in-stream errors keep the committed 200"
+            progress, final = read_extract_stream(r)
+        assert [ev["stage"] for ev in progress] == ["extracting"], progress
+        assert "error" in final and "unreachable" in final["error"], final
+        serve_news.call_llm = lambda text, **kw: json.dumps(CANNED)
     finally:
         httpd.shutdown()
         serve_news.call_llm = orig
-    print("  http route: /extract 200 grounded (stubbed model) · empty-text 400 · dropped reported")
+    print("  http route: /extract NDJSON stream (stages precede payload, stubbed model) · empty-text 400 "
+          "· dropped reported · mid-stream failure → in-stream error event")
+
+
+def url_route_test() -> None:
+    """Phase 39 — ONE-SHOT URL mode over the real /extract route (model + acquisition both stubbed):
+    {url} streams fetching → converted(text) BEFORE the pipeline stages, the converted text becomes the
+    grounding surface (source_url stamped), pasted text WINS over a url, and a verifier failure travels
+    in-stream as an honest error suggesting paste."""
+    orig_llm, orig_acq = serve_news.call_llm, news_fetch.acquire
+    serve_news.call_llm = lambda text, **kw: json.dumps(CANNED)
+    news_fetch.acquire = lambda url: {"ok": True, "text": ARTICLE_MD, "title": "Fetched Title",
+                                      "method": "urllib", "attempts": []}
+    httpd = serve_news.ThreadingHTTPServer(("127.0.0.1", 0), serve_news.Handler)
+    httpd.llm_url, httpd.model, httpd.page = "stub://", "stub", "<html></html>"
+    httpd.verify = False
+    httpd.store, httpd.book = None, []
+    port = httpd.server_address[1]
+    t = threading.Thread(target=httpd.serve_forever, daemon=True)
+    t.start()
+
+    def post_extract(obj):
+        req = urllib.request.Request(f"http://127.0.0.1:{port}/extract", data=json.dumps(obj).encode("utf-8"),
+                                     headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return read_extract_stream(r)
+
+    try:
+        # 1) url-only: fetching → converted (the EARLY text event) → extracting → grounding → done
+        progress, data = post_extract({"url": "https://example.test/case"})
+        stages = [ev["stage"] for ev in progress]
+        assert stages == ["fetching", "converted", "extracting", "grounding"], stages
+        conv = progress[1]
+        assert conv["text"] == ARTICLE_MD and conv["method"] == "urllib", "converted event must carry the acquired text"
+        assert data["record"]["source_url"] == "https://example.test/case", data["record"]["source_url"]
+        assert [e["name"] for e in data["record"]["entities"]] == ["George Rossi", "Siam Expert Trading Company Limited"]
+
+        # 2) pasted text WINS over a url (the trim + re-run recovery path) — no acquisition runs
+        news_fetch.acquire = lambda url: (_ for _ in ()).throw(AssertionError("acquire must not be called"))
+        progress, data = post_extract({"text": ARTICLE_MD, "url": "https://example.test/case"})
+        assert [ev["stage"] for ev in progress] == ["extracting", "grounding"], progress
+
+        # 3) verifier failure → in-stream honest error suggesting paste (still HTTP 200)
+        news_fetch.acquire = lambda url: {"ok": False, "attempts": [{"method": "urllib", "error": "403"}],
+                                          "error": "fetched, but the result failed the article verifier: "
+                                                   "bot-guard — paste the article text instead"}
+        progress, final = post_extract({"url": "https://example.test/walled"})
+        assert [ev["stage"] for ev in progress] == ["fetching"], progress
+        assert "error" in final and "paste the article text" in final["error"], final
+        assert final.get("attempts"), "the failed rungs must be reported"
+    finally:
+        httpd.shutdown()
+        serve_news.call_llm, news_fetch.acquire = orig_llm, orig_acq
+    print("  url route: {url} streams fetching→converted(text)→stages→done · source_url stamped · "
+          "text wins over url · verifier failure → in-stream paste suggestion")
 
 
 def watchlist_disposition_route_test() -> None:
@@ -146,7 +229,12 @@ def watchlist_disposition_route_test() -> None:
             return r.status, json.loads(r.read().decode("utf-8"))
 
     try:
-        _, data = post("/extract", {"text": ARTICLE_MD, "source_org": "OFAC"})
+        req = urllib.request.Request(base + "/extract",
+                                     data=json.dumps({"text": ARTICLE_MD, "source_org": "OFAC"}).encode("utf-8"),
+                                     headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=10) as r:
+            progress, data = read_extract_stream(r)   # Phase 39: the persisted path streams stages too
+        assert progress, "expected stage events before the persisted payload"
         scan_id = data.get("scan_id")
         assert scan_id and len(scan_id) == 32, f"persisted scan should echo a scan_id, got {scan_id!r}"
 
@@ -284,16 +372,19 @@ def verify_entities_test() -> None:
     ], "red_flags": []}
     orig = serve_news.verify_subject
     serve_news.verify_subject = lambda name, etype, ctx, **kw: name == "Acme Holdings"  # only the subject is kept
+    seen = []  # Phase 39: the per-entity verify loop is where progress lives — record the callback
     try:
-        out, dropped = serve_news.verify_entities(rec, art, llm_url="stub://", model="stub")
+        out, dropped = serve_news.verify_entities(rec, art, llm_url="stub://", model="stub",
+                                                  on_progress=lambda stage, **kw: seen.append((stage, kw.get("i"), kw.get("n"))))
     finally:
         serve_news.verify_subject = orig
     assert [e["name"] for e in out["entities"]] == ["Acme Holdings"], out["entities"]
     assert out["entities"][0]["id"] == "E1", "survivors must be re-id'd contiguously"
     assert len(dropped) == 2 and all("second-pass" in d["reason"] for d in dropped), dropped
+    assert seen == [("verifying", 1, 3), ("verifying", 2, 3), ("verifying", 3, 3)], seen
     # fail-open — an unreachable verifier returns KEEP (the AML-safe default), never drops a subject
     assert serve_news.verify_subject("Anyone", "person", "ctx", llm_url="http://127.0.0.1:9/x", model="stub") is True
-    print("  verify-entities (2nd pass): drops non-subjects · keeps subjects · re-ids · fail-open=KEEP")
+    print("  verify-entities (2nd pass): drops non-subjects · keeps subjects · re-ids · fail-open=KEEP · progress i/N")
 
 
 def main() -> int:
@@ -344,6 +435,7 @@ def main() -> int:
     fixture_replay_test()      # Phase 38 — offline replay of REAL captured Qwen output (no model)
     verify_entities_test()     # Phase 38 — the keep-biased second pass (model stubbed)
     http_route_test()
+    url_route_test()           # Phase 39 — one-shot URL mode (acquisition stubbed)
     watchlist_disposition_route_test()
     disposition_persist_off_test()
 

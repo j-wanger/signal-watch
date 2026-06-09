@@ -62,6 +62,16 @@ const SCRIPT = html.slice(open + '<script>'.length, close);
   // …and the SOURCE template DOES carry the companion-only watchlist view + prune
   ok(src.includes('liveRenderWatchlistPanel') && src.includes('livePrune') && src.includes('/watchlist/prune'),
      'news.html SOURCE carries the Phase-38 watchlist view + prune (companion-served)');
+  // Phase 39: the extraction-progress stream reader is companion-only — none survives the strip
+  ok(!html.includes('liveReadStream') && !html.includes('liveStageLabel') && !html.includes('getReader'),
+     'offline dist/news carries NO Phase-39 progress-stream code (stripped)');
+  ok(src.includes('liveReadStream') && src.includes('liveStageLabel') && src.includes('Verifying entity '),
+     'news.html SOURCE carries the Phase-39 NDJSON progress reader + stage labels (companion-served)');
+  // Phase 39: the one-shot URL input is companion-only — none survives the strip
+  ok(!html.includes('live-url') && !html.includes('liveApplyConverted'),
+     'offline dist/news carries NO Phase-39 URL-input code (stripped)');
+  ok(src.includes('live-url') && src.includes('liveApplyConverted'),
+     'news.html SOURCE carries the Phase-39 one-shot URL input (companion-served)');
 }
 
 ok(/class="badge"/.test(html) && /Illustrative data/.test(html), 'always-on illustrative badge present in the ship chrome');
@@ -131,7 +141,7 @@ function bootLive(scriptText, reduced) {
   const ctx = vm.createContext({ window: env.window, document: env.document, console,
     fetch: fetchStub, setTimeout: env.setTimeout, clearTimeout: env.clearTimeout });
   let threw = null;
-  try { vm.runInContext(scriptText + '\n;globalThis.__L={go,state,matchEntities,articleById,NEWS,RENDER,liveRenderWatchlistPanel,livePrune};', ctx); }
+  try { vm.runInContext(scriptText + '\n;globalThis.__L={go,state,matchEntities,articleById,NEWS,RENDER,liveRenderWatchlistPanel,livePrune,liveReadStream,liveStageLabel};', ctx); }
   catch (e) { threw = e; }
   return { env, ctx, threw };
 }
@@ -325,6 +335,24 @@ console.log('\n[live mode] companion-served client overrides (book ∪ watchlist
   L.liveRenderWatchlistPanel();
   ok(/No escalated entities yet/.test(env.document.getElementById('watchpanel').innerHTML),
      'watchlist view shows an empty state when nothing is escalated');
+
+  // 5) Phase 39 — the client side of the streamed /extract: NDJSON reader + stage labels
+  ok(typeof L.liveReadStream === 'function' && typeof L.liveStageLabel === 'function',
+     'companion page wires the Phase-39 progress reader + stage labels');
+  ok(L.liveStageLabel({ stage: 'verifying', i: 2, n: 9, name: 'Acme' }) === 'Verifying entity 2 of 9 — Acme…',
+     'stage label renders verify i/N with the entity name (the wall-time majority made visible)');
+  ok(/Fetching \+ converting/.test(L.liveStageLabel({ stage: 'fetching' })),
+     'stage label covers the one-shot URL fetching stage');
+  const events = [];
+  const okStream = { body: null, text: async () =>
+    '{"stage":"extracting"}\n{"stage":"grounding"}\n{"done":{"record":{"id":"r"},"dropped":[],"scan_id":null}}\n' };
+  const finalEv = await L.liveReadStream(okStream, ev => events.push(ev.stage));
+  ok(events.join(',') === 'extracting,grounding' && finalEv.record && finalEv.record.id === 'r',
+     'liveReadStream parses NDJSON stage events and returns the final done payload');
+  const errEv = await L.liveReadStream(
+    { body: null, text: async () => '{"stage":"fetching"}\n{"error":"walled — paste the article text instead"}\n' }, () => {});
+  ok(!!errEv.error && /paste the article text/.test(errEv.error),
+     'liveReadStream surfaces an in-stream error event (honest verifier/acquisition failure)');
 }
 
 console.log(`\n${pass} passed, ${fails.length} failed`);

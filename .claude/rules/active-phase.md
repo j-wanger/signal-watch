@@ -1,6 +1,6 @@
 # Active Phase Context
 
-Phase: 37 — Per-indicator typology (corpus Typologies lens). PLANNED → IN PROGRESS (0/5 tasks; direction approved 2026-06-08). Next: BEGIN T1 (the measure-first probe). Lite ceremony.
+Phase: 37 — Per-indicator typology (corpus Typologies lens). DELIVERED + accepted + committed 798fe28 + pushed to main (all 5 tasks [x]; --check all 5/5 zero drift; corpus 239/0; news 76 frozen; derive --selftest PASS; frozen set byte-clean). Lite ceremony. Next: /dev-plan for Phase 38.
 
 Objective: the corpus Typologies lens groups each DOC by ONE money-laundering typology (`data/typology-map.json`, 27-term vocab); that collapsed 7 of the 10 FINTRAC sector-guidance pages into a catch-all `fintrac-sector-baselines` (a sector page enumerates indicators across MANY typologies). Tag typology PER INDICATOR so a sector page distributes across the real typology clusters and the catch-all retires. Investigation (this session): all 10 derived pages RENDER (3 under casino-gaming/real-estate/VC; all 10 in the Documents lens); the FINTRAC SOURCE side is complete (11 pages, 10 derived, crown-agents skipped; STR + sanctions guidance enumerate nothing). The /intel/ special-bulletin frontier (OA001 + 3 SBs) was offered + DEFERRED.
 
@@ -24,4 +24,4 @@ Abort rule: if the T1 probe shows most indicators are genuinely cross-cutting �
 
 Gates:
 - [x] Direction confirmed by user (per-indicator typology, measure-first overlay approach; approved 2026-06-08)
-- [ ] Delivery accepted (post-implementation report)
+- [x] Delivery accepted (post-implementation report accepted; committed 798fe28 + pushed to main 2026-06-08)

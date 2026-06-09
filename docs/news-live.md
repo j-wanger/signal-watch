@@ -77,8 +77,10 @@ touched). Companion-only — stripped from the offline `dist/news` like the rest
 2. **Start the companion** (under the `.venv` so DuckDB persistence + the watchlist are active):
    ```
    .venv/bin/python scripts/serve_news.py --port 8000 \
-       --llm-url http://localhost:8080/v1/chat/completions --model qwen
+       --llm-url http://127.0.0.1:8080/v1/chat/completions --model qwen
    ```
+   (`--llm-url` defaults to `http://127.0.0.1:8080/v1/chat/completions`, so the bare
+   `.venv/bin/python scripts/serve_news.py` already points at a local llama-cpp on 8080.)
 3. Open **http://localhost:8000**, click **＋ Process a new article**, paste article text (a public-domain
    gov-enforcement record is the cleanest choice — see the compliance note), and **Run extraction**. The
    grounded record flows through the existing Read → Screen → Disposition → Exposure arc.

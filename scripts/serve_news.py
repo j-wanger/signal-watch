@@ -21,8 +21,8 @@ for the seed data — build.py never imports the authoring/LLM layer, and neithe
 (news_ground is stdlib grounding primitives).
 
 Usage:
-    python3 scripts/serve_news.py                  # serve on http://localhost:8000
-    python3 scripts/serve_news.py --port 8001 --llm-url http://localhost:8080/v1/chat/completions
+    python3 scripts/serve_news.py                  # serve on http://localhost:8000, proxy the model at http://127.0.0.1:8080
+    python3 scripts/serve_news.py --port 8001 --llm-url http://127.0.0.1:8080/v1/chat/completions
     python3 scripts/serve_news.py --selftest       # assemble the page offline, assert, exit
 """
 import argparse
@@ -44,7 +44,7 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 DEFAULT_PORT = 8000
-DEFAULT_LLM_URL = "http://localhost:8080/v1/chat/completions"
+DEFAULT_LLM_URL = "http://127.0.0.1:8080/v1/chat/completions"  # the local llama-cpp endpoint (literal IPv4 — llama-cpp binds 127.0.0.1, not IPv6 ::1)
 DEFAULT_MODEL = "qwen"  # any model swappable behind llama-cpp's OpenAI-compatible /v1
 DEFAULT_DB = "data/news/.live/store.duckdb"  # Phase 36: gitignored runtime store (never on the ship path)
 

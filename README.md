@@ -334,6 +334,20 @@ byte-frozen; `build.py` validates it at the build boundary (closed vocabulary + 
 total live-document coverage, fail-loud) — agent proposes the map, the deterministic gate disposes. No
 non-negotiable changed.
 
+**Per-indicator typology (Phase 37) — the lens groups by what the *indicators* are about.** A doc → one-typology
+map breaks on the FINTRAC per-sector guidance pages: a single sector page enumerates indicators across many
+typologies (bribery/corruption, TF, structuring, wires), so 7 of the 10 sector pages collapsed into a catch-all.
+Phase 37 added a **second, sparse overlay** (`data/indicator-typology-map.json`, `<doc-id>/<ind-id>` → one
+typology); at build time each indicator's typology = its overlay value **else** it inherits its doc's
+typology-map value. The deterministic corruption/TF section indicators (assigned by source *section heading*, no
+neural step) now distribute into their real clusters, and the genuinely cross-cutting remainder lands in an honest
+`cross-cutting-indicators` bucket — so the **Typologies lens groups by indicator typology** (a doc appears in
+every cluster its indicators touch), and `corruption` + `terrorist-financing` become cross-jurisdiction US +
+Canada. All 56 derived records and `derive_signals.py` stay byte-frozen (the overlay carries the typology, not
+record edits); combined coverage stays honest union arithmetic — no lift/dedup. *(The C/D codes those lenses lean
+on were separately verified + corrected as inter-rater agreement in Phase 34 — a quality pass, not a new demo
+number.)*
+
 **Capability & data-source lenses (Phase 29–30) — coverage by what you *have*.** The **Select** toggle now
 carries four modes: **Documents / Typologies / Capabilities / Data sources**. The Phase-28 interview tagged
 every indicator with both a detection-**capability** code (C1–C28) and a **data-source** code (D1–D20), each
@@ -351,7 +365,7 @@ The capability/data-source labels + postures live in one committed overlay (`dat
 validated at the build boundary); the 42 derived records already carry the codes, so they and `build.py` stay
 byte-frozen. No non-negotiable changed.
 
-## The adverse-media / negative-news stream (M8 — Phase 31 + Phase 32)
+## The adverse-media / negative-news stream (M8 — Phases 31–38)
 
 `dist/news/index.html` is a **third** single-file ship artifact, opening a **second atom stream**:
 adverse-media / negative-news screening. Where the corpus stream derives signals from *regulatory* text,
@@ -395,6 +409,42 @@ tests/news-stream.test.mjs` drives the whole arc + the matcher against the commi
 motion modes). The showcase, the entire corpus, and the grounding core stay byte-frozen; `build.py` is edited only
 additively. No non-negotiable changed (US-federal verbatim public domain is the corpus's existing basis).
 
+**Live mode (Phases 35–38) — a working instance of the loop, not just a dramatization.** Everything above
+is the **offline** ship artifact (scripted book, real client-side matcher, zero network). Phases 35–38 add an
+**optional, isolated** live companion for dev/authoring-time — the "live mode" the non-negotiables already
+sanction (off by default, scripted fallback always present, no keys in the frontend). A thin stdlib companion
+`scripts/serve_news.py` serves `news.html` over `http://localhost:8000` (same-origin — no CORS) and **proxies a
+local llama-cpp model** (a Qwen ~30B-A3B-class GGUF on `http://127.0.0.1:8080`, swappable). Paste an article and
+it is extracted in **real time**, then **grounded server-side** by the *same* `news_ground` gate the build uses —
+ungrounded entities/flags drop, "the model proposes, the deterministic gate disposes" moved to runtime — and
+flows through the same Read → Screen → Disposition → Exposure arc. The architecture keeps the ship target intact:
+the entire live branch lives inside a `/*LIVE_START*/…/*LIVE_END*/` region that `build.py render_news` **strips**,
+so the offline `dist/news` stays **byte-identical** with zero network code, and `build.py` **never** imports the
+live/store layer (`serve_news` / `news_store`).
+
+- **Persistence + the feedback watchlist (Phase 36):** each live scan row-appends to a local **DuckDB** store
+  (`scripts/news_store.py`, companion-only; gitignored, → parquet export). The **Disposition gate is the feedback
+  loop** — ESCALATE marks an entity, and the Screen step then scores each new article against `book ∪ escalated`,
+  a **curated** surface that *grows* (escalated-only, not every scanned name). DuckDB is a `.venv`-only dep, never
+  on the ship path.
+- **Watchlist view + prune (Phase 38):** the escalated surface is now **viewable and prunable** — a Select-screen
+  panel lists each escalated entity with its provenance and a ✕ Prune control (`POST /watchlist/prune`), making
+  the human gate bidirectional and inspectable.
+- **Entity precision (Phase 38):** the extraction prompt carries a **subjects-only** rule (extract
+  perpetrators / designated parties / their companies, *not* announcing officials, prosecutors, agencies, or courts
+  — context shaping, the primary lever; a stress test on new articles proved an enumerated denylist overfits),
+  backed by a keep-biased per-entity **second-pass verify** (on by default, fail-OPEN = keep, live-path only,
+  layered on top of the deterministic record the offline replay fixtures pin).
+- **Verified backend:** the live Qwen was exercised end-to-end and its raw outputs captured as committed fixtures
+  (`tests/fixtures/news-live/`, 7 real captured-Qwen outputs → goldens) that drive a **dep-free offline replay**
+  (parse → build → ground → screen, no model); `tests/news_live_test.py --live` is an opt-in real-model smoke off
+  the default run. The Qwen-vs-Claude comparison is reported as **inter-rater agreement** (a second rater, never
+  ground truth — no accuracy/precision/recall number; the always-on badge stays). A well-prompted local Qwen ≈
+  Opus on this task (the gap was instruction clarity, not capability) — so **no API backend is needed**.
+
+Run it: start a local `llama-server` on `:8080`, then `.venv/bin/python scripts/serve_news.py` and open
+`http://localhost:8000`. Full walkthrough + honesty/compliance notes: **`docs/news-live.md`**.
+
 ## Present it
 
 - Build the typology you want and open `dist/<id>/index.html` in the presentation browser,
@@ -434,19 +484,30 @@ additively. No non-negotiable changed (US-federal verbatim public domain is the 
 
 ## Status
 
-**M8 — the adverse-media / negative-news stream (in progress).** Phase 31 opened a **second atom stream** as
-a third single-file artifact (`dist/news/index.html`): synthetic news → grounded entity + red-flag extraction
-→ a client-side **fuzzy match** against a synthetic client/counterparty book → potential exposure → a human
-disposition gate. A walking skeleton — the "compose with the transaction signal" payoff is named and scoped for
-later M8 work. The showcase and the entire corpus stay byte-frozen; `build.py` gained only an additive `news`
-target.
+**M8 — the adverse-media / negative-news stream.** Phase 31 opened a **second atom stream** as a third
+single-file artifact (`dist/news/index.html`): real public-domain enforcement news → grounded entity + red-flag
+extraction → a client-side **fuzzy match** against a synthetic client/counterparty book → potential exposure → a
+human disposition gate. Phase 32 grounded the articles in real US-federal enforcement records. Phases 35–38 then
+made it **a working instance of the loop, not just a dramatization** — an optional, isolated **live companion**
+(`scripts/serve_news.py`) that serves the page over localhost and proxies a local llama-cpp model for real-time
+extraction (grounded server-side by the same gate), with **DuckDB persistence** and an **escalated-only feedback
+watchlist** (view + prune) that grows as the analyst escalates at the Disposition gate, plus a subjects-only
+extraction prompt + keep-biased verify for entity precision. The live branch is **stripped** from the offline
+artifact, so `dist/news` stays byte-identical and `build.py` never imports the live/store layer — the offline file
+remains the default + scripted fallback. See *The adverse-media / negative-news stream* above and
+`docs/news-live.md`. The showcase and the entire corpus stay byte-frozen; `build.py` gained only an additive
+`news` target.
 
 **M7 — corpus-backed demo.** Phase 12 built the derivation backend (the deterministic red-flag spine
 validated across all 14 advisories + an LLM-derived, deterministically-checked proof slice in
 `data/fincen/derived/`); Phase 13 added the **corpus explorer** (`dist/corpus/index.html`) — a second
 single-file artifact with an advisory-selection front-end and the per-indicator build-recommendation
 render, built from `corpus.html` + the committed corpus manifest + derived records, with the six-act
-showcase engine left byte-untouched. The earlier arc still stands:
+showcase engine left byte-untouched. Phases 20–37 then scaled and elevated it to its current shape —
+**5 sources** across two jurisdictions (FinCEN advisories + alerts, OFAC, FINTRAC operational alerts + per-sector
+guidance), **62 publications / 56 derived / 2,251 indicators**, **four Select lenses** (Documents / Typologies /
+Capabilities / Data sources) with cross-jurisdiction synthesis, per-indicator typology, and verified C/D coverage
+tags — all described under *The corpus explorer* above. The earlier arc still stands:
 
 **M6 — Signal Watch ingestion pipeline.** Config-driven engine (M1) + three typologies
 (**fentanyl**, **trade-based ML** — M2; **elder financial exploitation** — M6), switchable at build

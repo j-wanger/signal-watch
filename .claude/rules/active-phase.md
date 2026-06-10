@@ -14,4 +14,4 @@ Next: delivery gate → commit + push to main (commits-phases-to-main; TWO commi
 
 Gates:
 - [x] Direction confirmed by user (assumption gate closed 2026-06-10: A1/A3 accept, A2→A2' accept after evidence-refuted round 1, A4 accept-with-condition, A5 scope constraint)
-- [ ] Delivery accepted
+- [x] Delivery accepted (post-implementation report 2026-06-10; commits ecb2de7 + 0527fed verified)

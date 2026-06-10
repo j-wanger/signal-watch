@@ -106,7 +106,7 @@ that table.
   verbatim under 17 U.S.C. §105); the client/counterparty **book is synthetic** (no real customer data);
   scores are real computed similarity; nothing reads as a real detection/precision rate.
 
-### Live mode (Phase 35 extraction + 36 persistence + 38 entity-precision/watchlist-view + 39 progress/URL + 40 flag-quality + 41 entity-resolution + 42 network/dossier, optional — needs a local llama-cpp server; see `docs/news-live.md`)
+### Live mode (Phase 35 extraction + 36 persistence + 38 entity-precision/watchlist-view + 39 progress/URL + 40 flag-quality + 41 entity-resolution + 42 network/dossier + 43 size-robustness/staged-rendering, optional — needs a local llama-cpp server; see `docs/news-live.md`)
 - [ ] **Automated (no model):** `python3 tests/news_live_test.py`, `python3 scripts/news_ground.py --selftest`,
   `python3 scripts/news_fetch.py --selftest`, and `python3 scripts/serve_news.py --selftest` all exit **0**
   (the grounding gate, the build_record pipeline, the `/extract` NDJSON stage stream + one-shot URL route
@@ -129,6 +129,16 @@ that table.
 - [ ] **Extraction progress (Phase 39):** during a run the status line paints **live stages** — model
   extraction → grounding → **"Verifying entity i of N — <name>"** per entity — with an **elapsed-seconds**
   counter ticking; on completion it reports counts + total seconds. No silent multi-minute wait.
+- [ ] **Size robustness + staged rendering (Phase 43):** during the model call the status line ticks
+  **"… N tokens generated"** (the transport streams; a long generation does NOT die at a fixed deadline —
+  a 30K+-char document legitimately runs past 3 minutes and completes). The moment grounding completes,
+  the **preview panel** under the form reveals the **red flags as FINAL** (badge: *final* — the gate has
+  disposed) and the **entities as PROVISIONAL chips** that refine live through the verify pass (current
+  chip highlighted; dropped chips strike through; kept chips turn amber). A second concurrent **Run
+  extraction** (second tab) answers an honest **"another extraction is already running"** — never two
+  silent half-speed runs. An absurdly oversized paste refuses up front with a **named token overage +
+  the `--ctx-size` remedy** (when the model server is misconfigured small), never a silently truncated
+  "clean" record.
 - [ ] **Flag quality (Phase 40):** on a substantial enforcement article the extracted red flags read as
   **distinct mechanisms** (no same-quote duplicates — the gate collapses them; no per-anecdote flag storms),
   include **institutional/control-failure** flags where the article describes them (not only transactions),

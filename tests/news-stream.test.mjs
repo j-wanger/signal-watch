@@ -87,6 +87,13 @@ const SCRIPT = html.slice(open + '<script>'.length, close);
   ok(src.includes('liveGraphLayout') && src.includes('netsvg') && src.includes('gedge')
      && src.includes('liveOpenDossier') && src.includes('dosspanel'),
      'news.html SOURCE carries the Phase-42 SVG network visualizer + anchor dossier (companion-served)');
+  // Phase 43: the stage-completion preview + token counter are companion-only — none survives the strip
+  ok(!html.includes('livePreviewBody') && !html.includes('live-preview') && !html.includes('pvent')
+     && !html.includes('tokens generated'),
+     'offline dist/news carries NO Phase-43 progressive-preview/token-counter code (stripped)');
+  ok(src.includes('livePreviewBody') && src.includes('live-preview') && src.includes('tokens generated')
+     && src.includes("'grounded'") && src.includes("'verified'"),
+     'news.html SOURCE carries the Phase-43 staged preview + grounded/verified wiring (companion-served)');
 }
 
 ok(/class="badge"/.test(html) && /Illustrative data/.test(html), 'always-on illustrative badge present in the ship chrome');
@@ -156,7 +163,7 @@ function bootLive(scriptText, reduced) {
   const ctx = vm.createContext({ window: env.window, document: env.document, console,
     fetch: fetchStub, setTimeout: env.setTimeout, clearTimeout: env.clearTimeout });
   let threw = null;
-  try { vm.runInContext(scriptText + '\n;globalThis.__L={go,state,matchEntities,articleById,NEWS,RENDER,liveRenderWatchlistPanel,livePrune,liveReadStream,liveStageLabel,liveGraphLayout,liveOpenDossier,liveDossierBody};', ctx); }
+  try { vm.runInContext(scriptText + '\n;globalThis.__L={go,state,matchEntities,articleById,NEWS,RENDER,liveRenderWatchlistPanel,livePrune,liveReadStream,liveStageLabel,liveGraphLayout,liveOpenDossier,liveDossierBody,livePreviewBody};', ctx); }
   catch (e) { threw = e; }
   return { env, ctx, threw };
 }
@@ -510,6 +517,34 @@ console.log('\n[live mode] companion-served client overrides (book ∪ watchlist
     { body: null, text: async () => '{"stage":"fetching"}\n{"error":"walled — paste the article text instead"}\n' }, () => {});
   ok(!!errEv.error && /paste the article text/.test(errEv.error),
      'liveReadStream surfaces an in-stream error event (honest verifier/acquisition failure)');
+
+  // 6) Phase 43 — stage-completion progressive rendering (A2': staged reveal, never a token stream)
+  ok(typeof L.livePreviewBody === 'function', 'companion page exports livePreviewBody (pure record→HTML)');
+  ok(L.liveStageLabel({ stage: 'extracting', tokens: 1280 }).includes('1280 tokens generated'),
+     'extracting label carries the token counter when the transport reports progress');
+  ok(L.liveStageLabel({ stage: 'grounded', record: { red_flags: [{}, {}], entities: [{}, {}, {}] } })
+       === 'Grounded — 2 red flags final; verifying 3 entities…',
+     'grounded label names the staged counts (flags FINAL, entities pending verify)');
+  ok(L.liveStageLabel({ stage: 'verified', name: 'X', kept: true }) === '',
+     'verified events refine chips only — the i/N label keeps the cadence (no 0-of-0 style noise)');
+  // sane rendering at n=0 / n=1 / n=large (the spec's three counts) + honest staging labels + XSS escape
+  const pv0 = L.livePreviewBody({ red_flags: [], entities: [] });
+  ok(pv0.includes('grounded (0)') && (pv0.match(/none grounded/g) || []).length === 2 && !pv0.includes('undefined'),
+     'preview at n=0 renders honest empty states (no phantom counts, no 0-of-0)');
+  const pv1 = L.livePreviewBody({ red_flags: [{ red_flag: 'Structuring below threshold', category: 'Cash' }],
+                                  entities: [{ name: 'Acme Holdings' }] });
+  ok(pv1.includes('grounded (1)') && pv1.includes('Structuring below threshold')
+     && pv1.includes('final') && pv1.includes('provisional — verifying')
+     && pv1.includes('data-pvent="Acme Holdings"'),
+     'preview at n=1 renders the grounded flag as FINAL and the entity as PROVISIONAL');
+  const many = Array.from({ length: 35 }, (_, i) => ({ name: 'Ent ' + i }));
+  const pvN = L.livePreviewBody({ red_flags: [], entities: many });
+  ok(pvN.includes('Entities (35)') && (pvN.match(/class="pvent"/g) || []).length === 35,
+     'preview at n=35 renders every provisional entity chip (the verify-scale case)');
+  const pvX = L.livePreviewBody({ red_flags: [{ red_flag: '<script>x</script>', category: '<b>c</b>' }],
+                                  entities: [{ name: '<img onerror=1>' }] });
+  ok(!pvX.includes('<script>') && !pvX.includes('<img') && !pvX.includes('<b>c</b>'),
+     'preview escapes model-derived text everywhere (esc() is the sole escaper)');
 }
 
 console.log(`\n${pass} passed, ${fails.length} failed`);

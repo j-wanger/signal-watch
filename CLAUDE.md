@@ -70,7 +70,13 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    failure) is extracted in real time (subjects-only prompt + keep-biased second-pass verify),
    grounded server-side by the SHARED gate `news_ground.py` (everything grounded-or-stripped; live
    DROP / build CHECK — the ONE allowed build→companion import), and streamed as NDJSON stage
-   progress. The scan is a resolution-grade identity record — `aliases[]`, closed-vocab
+   progress. SIZE-ROBUST (Phase 43; ≈400–450 generated tokens/entity — dense docs are OUTPUT-bound):
+   `call_llm` STREAMS (idle-gap timeout, no fixed deadline; live token counter), budget 16384,
+   failures NAMED in-stream (output-budget · pre-flight over-context w/ the `--ctx-size` remedy —
+   silent truncation would PASS the gate), `/extract` SINGLE-FLIGHT (409 — ghost jobs split slot
+   throughput), disconnect-before-done persists NOTHING; the page reveals COMPLETED stages (grounded
+   flags FINAL, provisional chips refined through verify) — never a token stream. The scan is a
+   resolution-grade identity record — `aliases[]`, closed-vocab
    `properties[]` (incl. client_number/account_number: PRIVATE INVESTIGATION NOTES are a first-class
    input), `relationships[]` (labels vocab-checked, never correctness-checked), honest
    `main_subjects`, `red_flags` FIRST in EXTRACT_SCHEMA (strict-grammar generation order is
@@ -171,11 +177,10 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   both grounded/validated at the build boundary).
 - Present: open `dist/<id>/index.html` (or `dist/corpus/`, `dist/news/`) — single self-contained
   file, offline, no server.
-- News LIVE mode (optional, dev/authoring-time): start a local llama-cpp server, then
-  `.venv/bin/python scripts/serve_news.py --llm-url <chat-endpoint> --model <name>` → open
-  http://localhost:8000; submit a URL or paste text + pick a source type (run under `.venv` for
-  persistence + URL mode; `--export-parquet <dir>`; `--no-persist` disables). The offline
-  `dist/news` is unaffected. Demo walkthrough + details: `docs/news-live.md`.
+- News LIVE mode (optional, dev/authoring-time): start llama-cpp (set `--ctx-size` — see the doc),
+  then `.venv/bin/python scripts/serve_news.py` → http://localhost:8000 (URL or paste + source
+  type; `.venv` enables persistence/URL mode). Offline `dist/news` unaffected; full walkthrough +
+  flags: `docs/news-live.md`.
 - Drift guard before presenting: `python3 scripts/build.py --check all` (frozen dists byte-identical).
 - Test (dep-free, no install — except the DuckDB store selftests, which run under `.venv`):
   - `node tests/corpus-explorer.test.mjs` — the story landing + the 6-screen per-doc arc + the

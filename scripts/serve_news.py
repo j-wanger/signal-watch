@@ -29,6 +29,7 @@ import argparse
 import json
 import re
 import sys
+import threading
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -194,12 +195,95 @@ USER_PROMPT_TMPL = ("ARTICLE:\n\n{article}\n\nExtract the entities (with any ali
                     "flags as JSON.")
 
 
-def call_llm(text: str, *, llm_url: str, model: str, timeout: int = 180) -> str:
+class ExtractError(ValueError):
+    """A pipeline failure with a NAMED, analyst-actionable reason (Phase 43). _extract emits the
+    message verbatim in-stream — distinct from the generic 'could not be parsed' fallback."""
+
+
+# Phase 43 T1 measurement: the extraction JSON costs ~400-450 tokens PER ENTITY, so the old 4096
+# budget truncated at ~10+ subjects (finish_reason=length, silently discarded → an opaque parse
+# error minutes in). 16384 covers a 35-entity / 64K-char note (measured 12,373) with ample per-slot
+# context headroom (n_ctx/slots = 65,536 on the documented launch).
+MAX_GEN_TOKENS = 16384
+
+
+def _consume_sse(lines, on_tokens=None):
+    """Accumulate an OpenAI-style SSE chat stream (iterable of byte lines) into
+    (content, finish_reason, n_chunks). on_tokens(n) fires every 64 content chunks — chunk count
+    approximates generated tokens. Factored out of call_llm so the stream parse is testable with
+    no socket (Phase 43)."""
+    content, finish, n = [], None, 0
+    for raw in lines:
+        line = raw.decode("utf-8", "replace").strip()
+        if not line.startswith("data: "):
+            continue
+        data = line[6:]
+        if data == "[DONE]":
+            break
+        try:
+            d = json.loads(data)
+        except json.JSONDecodeError:
+            continue
+        for ch in d.get("choices") or []:
+            piece = (ch.get("delta") or {}).get("content")
+            if piece:
+                content.append(piece)
+                n += 1
+                if on_tokens and n % 64 == 0:
+                    on_tokens(n)
+            if ch.get("finish_reason"):
+                finish = ch["finish_reason"]
+    return "".join(content), finish, n
+
+
+def preflight_size(text: str, llm_url: str, timeout: int = 10) -> None:
+    """Honest pre-flight (Phase 43): measure the FULL assembled prompt (system + user template —
+    the raw paste alone undercounts) against the server's reported context, reserving the
+    MAX_GEN_TOKENS generation headroom. Raises ExtractError with a NAMED reason when the input
+    cannot fit — silent context truncation would otherwise pass the grounding gate looking normal
+    (the gate can't catch what the model never saw). FAIL-OPEN on any probe error: an unreachable
+    /props or /tokenize must never block a working pipeline (the transport surfaces real failures).
+    """
+    try:
+        base = llm_url.split("/v1/")[0]
+        with urllib.request.urlopen(base + "/props", timeout=timeout) as r:
+            props = json.loads(r.read().decode("utf-8"))
+        n_ctx = (props.get("default_generation_settings") or {}).get("n_ctx") or props.get("n_ctx")
+        if not n_ctx:
+            return
+        assembled = SYSTEM_PROMPT + "\n" + USER_PROMPT_TMPL.format(article=text)
+        req = urllib.request.Request(base + "/tokenize", data=json.dumps({"content": assembled}).encode("utf-8"),
+                                     headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            prompt_tokens = len(json.loads(r.read().decode("utf-8")).get("tokens") or [])
+        if not prompt_tokens:
+            return
+        prompt_tokens += 64  # chat-template wrapper overhead (approximate, deliberately generous)
+    except Exception:  # noqa: BLE001 — fail-open by design (see docstring; the raise sits BELOW the try)
+        return
+    if prompt_tokens + MAX_GEN_TOKENS > n_ctx:
+        raise ExtractError(
+            f"input too large for the model's context: ~{prompt_tokens} prompt tokens "
+            f"+ {MAX_GEN_TOKENS} generation headroom exceeds n_ctx={n_ctx} "
+            f"({prompt_tokens + MAX_GEN_TOKENS - n_ctx} tokens over) — trim the document, "
+            f"or relaunch llama-server with a larger --ctx-size")
+
+
+def call_llm(text: str, *, llm_url: str, model: str, timeout: int = 120, on_progress=None) -> str:
     """Call a local llama-cpp OpenAI-compatible /v1/chat/completions endpoint; return the assistant text.
 
     This is the ONLY part that needs a running model — kept separate from parse/assemble/ground so the
     pipeline is testable with NO model (the test stubs this or skips it). Requests JSON-schema-constrained
     output and disables Qwen thinking; <think> is also stripped defensively downstream.
+
+    Phase 43: the transport STREAMS (stream:true — probed to compose with the strict json_schema
+    grammar), so `timeout` is now the IDLE-GAP deadline between chunks (socket read timeout), not a
+    whole-response wall: a healthy long generation never dies at a fixed deadline (T1: a 35-entity
+    note legitimately generates for 320s+), while a hung server still fails in `timeout` seconds.
+    `on_progress(tokens=N)` (optional, ~every 64 tokens) feeds the stage stream; finish_reason is
+    READ — "length" raises ExtractError("output budget exhausted…") instead of letting truncated
+    JSON masquerade as a parse failure. Same name / kwargs-compatible signature / full-text return:
+    the replay-fixture stubs (`lambda text, **kw: …`) are untouched.
     """
     body = {
         "model": model,
@@ -208,7 +292,8 @@ def call_llm(text: str, *, llm_url: str, model: str, timeout: int = 180) -> str:
             {"role": "user", "content": USER_PROMPT_TMPL.format(article=text)},
         ],
         "temperature": 0,
-        "max_tokens": 4096,
+        "max_tokens": MAX_GEN_TOKENS,
+        "stream": True,
         "response_format": {
             "type": "json_schema",
             "json_schema": {"name": "extraction", "strict": True, "schema": EXTRACT_SCHEMA},
@@ -219,9 +304,19 @@ def call_llm(text: str, *, llm_url: str, model: str, timeout: int = 180) -> str:
         llm_url, data=json.dumps(body).encode("utf-8"),
         headers={"Content-Type": "application/json"}, method="POST",
     )
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        resp = json.loads(r.read().decode("utf-8"))
-    return resp["choices"][0]["message"]["content"]
+    on_tokens = (lambda n: on_progress(tokens=n)) if on_progress else None
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            content, finish, _n = _consume_sse(r, on_tokens)
+    except TimeoutError:
+        # a mid-stream stall is NOT "unreachable" — name it (the idle-gap deadline fired)
+        raise ExtractError(f"model stalled — no output for {timeout}s (idle-gap timeout); "
+                           f"check the llama-server console") from None
+    if finish == "length":
+        raise ExtractError(
+            f"output budget exhausted: the extraction needed more than {MAX_GEN_TOKENS} generated "
+            f"tokens (the model was cut mid-JSON) — split the document or raise MAX_GEN_TOKENS")
+    return content
 
 
 def parse_llm_json(content: str) -> dict:
@@ -377,8 +472,11 @@ def verify_entities(record: dict, article: str, *, llm_url: str, model: str, on_
     kept, dropped = [], []
     for i, e in enumerate(ents, 1):
         notify("verifying", i=i, n=len(ents), name=e.get("name", ""))
-        if verify_subject(e.get("name", ""), e.get("type", ""), _entity_context(e.get("name", ""), body),
-                          llm_url=llm_url, model=model):
+        ok = verify_subject(e.get("name", ""), e.get("type", ""), _entity_context(e.get("name", ""), body),
+                            llm_url=llm_url, model=model)
+        # Phase 43 — per-entity VERDICT event: the client's provisional entity chips refine live
+        notify("verified", name=e.get("name", ""), kept=ok)
+        if ok:
             kept.append(e)
         else:
             dropped.append({"kind": "entity", "value": e.get("name"), "reason": "second-pass: not a subject of the financial crime"})
@@ -396,10 +494,18 @@ def extract(text: str, meta: dict = None, *, llm_url: str = DEFAULT_LLM_URL, mod
     is an optional stage callback (`on_progress(stage, **detail)`) — default no-op, so every existing caller
     (the replay fixtures, the --live smoke) is byte-for-byte unaffected."""
     notify = on_progress or (lambda stage, **kw: None)
+    preflight_size(text, llm_url)  # Phase 43: refuse with a NAMED reason rather than truncate silently
     notify("extracting")
-    raw = call_llm(text, llm_url=llm_url, model=model)
+    # Phase 43: periodic token-count events during the (long) model call — counts only, never content
+    raw = call_llm(text, llm_url=llm_url, model=model,
+                   on_progress=lambda **kw: notify("extracting", **kw))
     notify("grounding")
     record, dropped = build_record(parse_llm_json(raw), text, meta)
+    # Phase 43 (A2' stage-completion rendering): the gate has DISPOSED — red flags are final, entities
+    # provisional until the verify pass. The client renders this slim record early (the verify loop is
+    # the wall-time majority). article_text is excluded: never re-echo the input (the converted event
+    # is the one designed echo); everything else IS the extraction, bound for the page by design.
+    notify("grounded", record={k: v for k, v in record.items() if k != "article_text"})
     if verify:
         record, vdropped = verify_entities(record, text, llm_url=llm_url, model=model, on_progress=notify)
         dropped = list(dropped) + vdropped
@@ -529,14 +635,23 @@ class Handler(BaseHTTPRequestHandler):
         source_type = (payload.get("source_type") or "").strip()
         if source_type not in news_store.SOURCE_TYPES:
             source_type = ""
+        # Phase 43 — SINGLE-FLIGHT: llama-cpp runs 4 parallel slots (probed), so a retry doesn't queue
+        # behind a ghost job — it runs BESIDE it, silently splitting throughput until both time out.
+        # A second concurrent /extract gets an honest busy answer instead (plain 409, pre-stream).
+        lock = self.server.__dict__.setdefault("extract_lock", threading.Lock())
+        if not lock.acquire(blocking=False):
+            self._json(409, {"error": "another extraction is already running — wait for it to finish "
+                                      "(the local model would split throughput between the two)"}); return
         # Phase 39 — the response is an NDJSON STREAM of stage events ending in {"done": …} or {"error": …}.
         # The 200 is committed before the pipeline runs, so every later failure travels IN-stream (the
         # client reads events, not status codes). Request-shape errors above still fail fast as plain 400s.
-        self.send_response(200)
-        self.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
-        self.send_header("Cache-Control", "no-store")
-        self.end_headers()
+        # The header writes sit INSIDE the try: wfile is unbuffered, so a client gone by now would raise
+        # BrokenPipeError — the finally must still release the single-flight lock (no false 409s after).
         try:
+            self.send_response(200)
+            self.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
             # Phase 39 — ONE-SHOT URL mode: acquire (fetch ladder) → standardize → verify, then run the
             # same pipeline on the verified text. Pasted text WINS over a URL (the trim + re-run recovery
             # path). The converted text streams back EARLY so the client can fill the textarea — the
@@ -557,6 +672,10 @@ class Handler(BaseHTTPRequestHandler):
                 record, dropped = extract(text, meta, llm_url=self.server.llm_url, model=self.server.model,
                                           verify=getattr(self.server, "verify", True),
                                           on_progress=lambda stage, **kw: self._emit({"stage": stage, **kw}))
+            except ExtractError as ex:
+                # Phase 43 — a NAMED failure (e.g. output budget exhausted) travels verbatim, never
+                # disguised as a parse error
+                self._emit({"error": str(ex)}); return
             except (urllib.error.URLError, OSError) as ex:
                 self._emit({"error": f"local model unreachable at {self.server.llm_url}: {ex}"}); return
             except (ValueError, KeyError, json.JSONDecodeError) as ex:
@@ -567,6 +686,10 @@ class Handler(BaseHTTPRequestHandler):
                             "dropped": dropped}); return
             # Persist the grounded scan (best-effort — a store failure must NEVER fail the scan). The scan_id is
             # echoed so the client's later /disposition can target a specific entity of THIS scan.
+            # Phase 43 — the "persisting" emit doubles as a CONNECTION PROBE: a disconnected client makes
+            # it raise BrokenPipe, so an abandoned scan NEVER reaches append_scan (the decided invariant:
+            # nothing is written to the store on a disconnect before done).
+            self._emit({"stage": "persisting"})
             scan_id = None
             if self.server.store is not None:
                 try:
@@ -575,8 +698,11 @@ class Handler(BaseHTTPRequestHandler):
                     self.log_message("persist failed: %s", ex)
             self._emit({"done": {"record": record, "dropped": dropped, "scan_id": scan_id}})
         except (BrokenPipeError, ConnectionResetError):
-            # the client navigated away mid-stream — abandon this scan quietly (nothing to answer to)
+            # the client navigated away mid-stream — abandon this scan quietly (nothing to answer to;
+            # the "persisting" probe emit sits ABOVE append_scan, so an abandoned scan writes NOTHING)
             self.log_message("client disconnected mid-extract stream")
+        finally:
+            lock.release()
 
     def _disposition(self) -> None:
         # The human Disposition gate posts back here; 'escalate' adds the entity to the watchlist.
@@ -666,6 +792,13 @@ def selftest() -> int:
     assert "aliases" not in rec_legacy["entities"][0] and "properties" not in rec_legacy["entities"][0]
     assert "main_subjects" not in rec_legacy and "relationships" not in rec_legacy, \
         "legacy captures must NOT gain new keys (golden compatibility)"
+    # Phase 43 — the streaming transport: SSE reassembly + the NAMED output-budget failure path
+    c43, f43, n43 = _consume_sse(iter([
+        b'data: {"choices":[{"delta":{"content":"hi"},"finish_reason":null}]}',
+        b'data: {"choices":[{"delta":{},"finish_reason":"length"}]}', b"data: [DONE]"]))
+    assert (c43, f43, n43) == ("hi", "length", 1), (c43, f43, n43)
+    assert MAX_GEN_TOKENS > 4096, "Phase 43: the T1-measured generation budget must stay raised"
+    assert "tokens generated" in page, "companion page missing the Phase-43 token counter label"
     print(f"serve_news --selftest: PASS "
           f"({len(payload['articles'])} articles, {len(payload['book']['rows'])} book rows, "
           f"{len(page):,} bytes served)")

@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-10
 updated: 2026-06-10
 source: plan
-status: active
+status: completed
 scope: ["scripts/serve_news.py", "news.html", "tests/news_live_test.py", "tests/news-stream.test.mjs", "docs/demo-investigation-note.md", "docs/news-live.md", "tests/smoke-checklist.md", "CLAUDE.md"]
 entry_criteria: "Phase 41 delivered + accepted + committed (1f74cb2 work + 62603be gate flip) + pushed to main; 0 open tasks; direction user-picked at the dev-plan gate 2026-06-10; assumption gate closed 2026-06-10 (A1/A3 accept, A2 don't-know→A2' accept, A4 accept-with-condition, A5 scope constraint)."
 exit_criteria: "Graph + dossier render in the LIVE region only; GET /anchor serves anchor_summary; conflicts surfaced presentation-only (both kept); synthetic-note demo flow documented + note committed; --check all 5/5 zero drift; node news-stream + corpus green; all selftests + news_live_test green; replay fixtures untouched; the always-on badge stays; NO non-negotiable change; CLAUDE.md ≤~220 lines with non-negotiables intact."
@@ -97,9 +97,10 @@ Files and modules affected:
 
 ## Notes
 
-- READY FOR COMPLETION (2026-06-10): all 6 tasks [x], full regate GREEN, reviewer 9/10 ACCEPT
-  zero HIGH+. NOT auto-completed — the delivery gate is pending (status flips at the delivery
-  flow, post-commit-verify). Journal: [[2026-06-10-phase-42-anchor-dossier-network-view]].
+- COMPLETED (2026-06-10): all 6 tasks [x], full regate GREEN, reviewer 9/10 ACCEPT zero HIGH+;
+  delivery accepted + committed ecb2de7 [work] + 0527fed [CLAUDE.md trim, own commit] + 2ec4075
+  [gate flip] + pushed to main (status flipped at the Phase-43 plan, post-commit-verify).
+  Journal: [[2026-06-10-phase-42-anchor-dossier-network-view]].
 - Gate result (assumption gate closed 2026-06-10): A1 accept (offline byte-frozen), A3 accept
   (one integrated view), A2 don't-know → A2' accept (the evidence check refuted the
   re-scan-different-articles script — zero cross-article entity overlap → synthetic-note seed),

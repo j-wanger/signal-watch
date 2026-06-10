@@ -115,7 +115,7 @@ def http_route_test() -> None:
             assert r.headers.get("Content-Type", "").startswith("application/x-ndjson"), r.headers.get("Content-Type")
             progress, data = read_extract_stream(r)
         stages = [ev["stage"] for ev in progress]
-        assert stages == ["extracting", "grounding"], f"verify-off stages should be extracting→grounding: {stages}"
+        assert stages == ["extracting", "grounding", "grounded", "persisting"], f"verify-off stages should be extracting→grounding→grounded→persisting: {stages}"
         names = [e["name"] for e in data["record"]["entities"]]
         assert names == ["George Rossi", "Siam Expert Trading Company Limited"], names
         assert len(data["record"]["red_flags"]) == 1, data["record"]["red_flags"]
@@ -176,7 +176,7 @@ def url_route_test() -> None:
         # 1) url-only: fetching → converted (the EARLY text event) → extracting → grounding → done
         progress, data = post_extract({"url": "https://example.test/case"})
         stages = [ev["stage"] for ev in progress]
-        assert stages == ["fetching", "converted", "extracting", "grounding"], stages
+        assert stages == ["fetching", "converted", "extracting", "grounding", "grounded", "persisting"], stages
         conv = progress[1]
         assert conv["text"] == ARTICLE_MD and conv["method"] == "urllib", "converted event must carry the acquired text"
         assert data["record"]["source_url"] == "https://example.test/case", data["record"]["source_url"]
@@ -185,7 +185,7 @@ def url_route_test() -> None:
         # 2) pasted text WINS over a url (the trim + re-run recovery path) — no acquisition runs
         news_fetch.acquire = lambda url: (_ for _ in ()).throw(AssertionError("acquire must not be called"))
         progress, data = post_extract({"text": ARTICLE_MD, "url": "https://example.test/case"})
-        assert [ev["stage"] for ev in progress] == ["extracting", "grounding"], progress
+        assert [ev["stage"] for ev in progress] == ["extracting", "grounding", "grounded", "persisting"], progress
 
         # 3) verifier failure → in-stream honest error suggesting paste (still HTTP 200)
         news_fetch.acquire = lambda url: {"ok": False, "attempts": [{"method": "urllib", "error": "403"}],
@@ -468,16 +468,278 @@ def verify_entities_test() -> None:
     seen = []  # Phase 39: the per-entity verify loop is where progress lives — record the callback
     try:
         out, dropped = serve_news.verify_entities(rec, art, llm_url="stub://", model="stub",
-                                                  on_progress=lambda stage, **kw: seen.append((stage, kw.get("i"), kw.get("n"))))
+                                                  on_progress=lambda stage, **kw: seen.append((stage, kw)))
     finally:
         serve_news.verify_subject = orig
     assert [e["name"] for e in out["entities"]] == ["Acme Holdings"], out["entities"]
     assert out["entities"][0]["id"] == "E1", "survivors must be re-id'd contiguously"
     assert len(dropped) == 2 and all("second-pass" in d["reason"] for d in dropped), dropped
-    assert seen == [("verifying", 1, 3), ("verifying", 2, 3), ("verifying", 3, 3)], seen
+    # Phase 43 — each "verifying i/N" is followed by a per-entity VERDICT event (chip refinement)
+    assert seen == [
+        ("verifying", {"i": 1, "n": 3, "name": "Acme Holdings"}),
+        ("verified", {"name": "Acme Holdings", "kept": True}),
+        ("verifying", {"i": 2, "n": 3, "name": "U.S. District Court"}),
+        ("verified", {"name": "U.S. District Court", "kept": False}),
+        ("verifying", {"i": 3, "n": 3, "name": "Jane Doe"}),
+        ("verified", {"name": "Jane Doe", "kept": False}),
+    ], seen
     # fail-open — an unreachable verifier returns KEEP (the AML-safe default), never drops a subject
     assert serve_news.verify_subject("Anyone", "person", "ctx", llm_url="http://127.0.0.1:9/x", model="stub") is True
     print("  verify-entities (2nd pass): drops non-subjects · keeps subjects · re-ids · fail-open=KEEP · progress i/N")
+
+
+def _sse_lines(pieces, finish="stop"):
+    """Synthetic llama-cpp SSE chat stream (byte lines), one content delta per piece."""
+    lines = [("data: " + json.dumps({"choices": [{"delta": {"content": p}, "finish_reason": None}]})).encode("utf-8")
+             for p in pieces]
+    lines += [b"", b": keep-alive comment",  # noise the parser must skip
+              ("data: " + json.dumps({"choices": [{"delta": {}, "finish_reason": finish}]})).encode("utf-8"),
+              b"data: [DONE]"]
+    return lines
+
+
+class _FakeStreamResp:
+    """Stands in for urlopen()'s response: context manager + line-iterable (what _consume_sse reads)."""
+    def __init__(self, lines):
+        self._lines = lines
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+    def __iter__(self):
+        return iter(self._lines)
+
+
+def streaming_transport_test() -> None:
+    """Phase 43 — the streaming transport. call_llm streams (idle-gap timeout, not a whole-response
+    deadline), reads finish_reason ("length" → a NAMED ExtractError, never a disguised parse error),
+    fires token-count progress, and keeps the fixture stub seam (same name / kwargs-compatible /
+    full-text return). Progress events carry COUNTS ONLY — never input content (the privacy rule)."""
+    # 1) _consume_sse: accumulation, finish_reason, token cadence (~every 64), noise tolerance
+    calls = []
+    content, finish, n = serve_news._consume_sse(_sse_lines(["a"] * 130), on_tokens=calls.append)
+    assert (content, finish, n) == ("a" * 130, "stop", 130), (len(content), finish, n)
+    assert calls == [64, 128], calls
+
+    # 2) call_llm over a FAKE streamed response: full-text return, stream:true + the raised
+    #    generation budget in the request body, idle-gap timeout passed to urlopen, token progress
+    sentinel = "PH43-PRIVATE-NOTE-SENTINEL-XYZZY"
+    pieces = [json.dumps(CANNED)[i:i + 7] for i in range(0, len(json.dumps(CANNED)), 7)]
+    captured = {}
+
+    def fake_urlopen(req, timeout=None):
+        captured["body"] = json.loads(req.data.decode("utf-8"))
+        captured["timeout"] = timeout
+        return _FakeStreamResp(_sse_lines(pieces))
+
+    orig = serve_news.urllib.request.urlopen
+    serve_news.urllib.request.urlopen = fake_urlopen
+    events = []
+    try:
+        out = serve_news.call_llm("body " + sentinel, llm_url="stub://", model="qwen",
+                                  on_progress=lambda **kw: events.append(kw))
+        assert json.loads(out) == CANNED, "streamed content must reassemble to the full text"
+        assert captured["body"]["stream"] is True, "transport must request a stream"
+        assert captured["body"]["max_tokens"] == serve_news.MAX_GEN_TOKENS, captured["body"]["max_tokens"]
+        assert captured["timeout"] is not None, "idle-gap socket timeout must be set"
+        assert events and all(set(e) == {"tokens"} and isinstance(e["tokens"], int) for e in events), events
+
+        # 3) finish_reason="length" → ExtractError NAMING the budget (distinct from a parse failure)
+        serve_news.urllib.request.urlopen = \
+            lambda req, timeout=None: _FakeStreamResp(_sse_lines(['{"trunca'], finish="length"))
+        try:
+            serve_news.call_llm("x", llm_url="stub://", model="qwen")
+            raise AssertionError("finish_reason=length must raise ExtractError")
+        except serve_news.ExtractError as ex:
+            assert "output budget exhausted" in str(ex) and str(serve_news.MAX_GEN_TOKENS) in str(ex), ex
+
+        # 3b) a mid-stream stall (the idle-gap deadline) is NAMED — never disguised as "unreachable"
+        class _Stall:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def __iter__(self):
+                raise TimeoutError("read timed out")
+
+        serve_news.urllib.request.urlopen = lambda req, timeout=None: _Stall()
+        try:
+            serve_news.call_llm("x", llm_url="stub://", model="qwen")
+            raise AssertionError("a stalled stream must raise ExtractError")
+        except serve_news.ExtractError as ex:
+            assert "model stalled" in str(ex) and "idle-gap" in str(ex), ex
+
+        # 4) privacy: the full pipeline's progress events never carry input content (counts only)
+        serve_news.urllib.request.urlopen = \
+            lambda req, timeout=None: _FakeStreamResp(_sse_lines(pieces))
+        stages = []
+        rec, _ = serve_news.extract(ARTICLE_MD + "\n" + sentinel, {"source_org": "OFAC"},
+                                    llm_url="stub://", model="qwen", verify=False,
+                                    on_progress=lambda stage, **kw: stages.append({"stage": stage, **kw}))
+        assert rec["entities"], "pipeline should still ground the canned record"
+        assert sentinel not in json.dumps(stages), f"progress events leaked input content: {stages}"
+        token_evs = [s for s in stages if "tokens" in s]
+        assert token_evs and all(s["stage"] == "extracting" for s in token_evs), stages
+    finally:
+        serve_news.urllib.request.urlopen = orig
+    print("  streaming transport: SSE reassembly · token cadence 64 · stream:true + "
+          f"max_tokens={serve_news.MAX_GEN_TOKENS} · ExtractError(length) named · events content-free")
+
+
+def size_and_concurrency_test() -> None:
+    """Phase 43 — the T1-earned size/complexity handling. (1) preflight_size: an over-context input
+    raises a NAMED ExtractError (silent truncation would pass the grounding gate — the gate can't
+    catch what the model never saw) and fails OPEN when the server can't answer. (2) the route emits
+    the refusal IN-stream WITHOUT ever invoking the model (stub-call-count 0). (3) /extract is
+    SINGLE-FLIGHT: a second concurrent request gets an honest 409 (slots=4 means a retry would run
+    BESIDE the ghost job, splitting throughput). (4, DuckDB-gated) a client disconnect before done
+    writes NOTHING to the store (the 'persisting' probe emit precedes append_scan)."""
+    import socket
+    import time
+
+    # (1a) over-context → ExtractError naming the overflow + the --ctx-size remedy
+    def fake_urlopen_small_ctx(req, timeout=None):
+        url = req if isinstance(req, str) else req.full_url
+        if url.endswith("/props"):
+            return _FakeBody(json.dumps({"default_generation_settings": {"n_ctx": 2048}}))
+        if url.endswith("/tokenize"):
+            return _FakeBody(json.dumps({"tokens": list(range(1500))}))
+        raise AssertionError(f"unexpected url {url}")
+
+    orig_open = serve_news.urllib.request.urlopen
+    serve_news.urllib.request.urlopen = fake_urlopen_small_ctx
+    try:
+        try:
+            serve_news.preflight_size("x" * 100, "http://stub/v1/chat/completions")
+            raise AssertionError("over-context input must raise ExtractError")
+        except serve_news.ExtractError as ex:
+            assert "input too large" in str(ex) and "--ctx-size" in str(ex) and "n_ctx=2048" in str(ex), ex
+    finally:
+        serve_news.urllib.request.urlopen = orig_open
+    # (1b) fail-open: an unreachable probe endpoint never blocks the pipeline
+    serve_news.preflight_size("x", "http://127.0.0.1:9/v1/chat/completions")
+
+    # (2) route-level: the refusal travels IN-stream, and the model is NEVER called
+    calls = []
+    orig_llm, orig_pf = serve_news.call_llm, serve_news.preflight_size
+    serve_news.call_llm = lambda text, **kw: calls.append(1) or json.dumps(CANNED)
+    serve_news.preflight_size = lambda text, llm_url, timeout=10: (_ for _ in ()).throw(
+        serve_news.ExtractError("input too large for the model's context: stubbed"))
+    httpd = serve_news.ThreadingHTTPServer(("127.0.0.1", 0), serve_news.Handler)
+    httpd.llm_url, httpd.model, httpd.page = "stub://", "stub", "<html></html>"
+    httpd.verify, httpd.store, httpd.book = False, None, []
+    port = httpd.server_address[1]
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    try:
+        req = urllib.request.Request(f"http://127.0.0.1:{port}/extract",
+                                     data=json.dumps({"text": ARTICLE_MD}).encode("utf-8"),
+                                     headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=10) as r:
+            _, final = read_extract_stream(r)
+        assert "input too large" in final.get("error", ""), final
+        assert calls == [], "the refusal must happen BEFORE any model call"
+    finally:
+        serve_news.preflight_size = orig_pf
+        serve_news.call_llm = orig_llm
+        httpd.shutdown()
+
+    # (3) single-flight: while one extraction runs, a second gets an honest 409 busy.
+    # Stubs restore in the trailing finally — a failed assertion must not leak slow_llm
+    # into the later route tests.
+    gate_open = threading.Event()
+    started = threading.Event()
+
+    def slow_llm(text, **kw):
+        started.set()
+        assert gate_open.wait(10), "test gate never opened"
+        calls.append(1)
+        return json.dumps(CANNED)
+
+    serve_news.call_llm = slow_llm
+    httpd2 = serve_news.ThreadingHTTPServer(("127.0.0.1", 0), serve_news.Handler)
+    httpd2.llm_url, httpd2.model, httpd2.page = "stub://", "stub", "<html></html>"
+    httpd2.verify, httpd2.store, httpd2.book = False, None, []
+    port2 = httpd2.server_address[1]
+    threading.Thread(target=httpd2.serve_forever, daemon=True).start()
+    results = {}
+
+    def first():
+        req = urllib.request.Request(f"http://127.0.0.1:{port2}/extract",
+                                     data=json.dumps({"text": ARTICLE_MD}).encode("utf-8"),
+                                     headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=30) as r:
+            results["first"] = read_extract_stream(r)[1]
+
+    try:
+        t1 = threading.Thread(target=first, daemon=True)
+        t1.start()
+        assert started.wait(10), "first extraction never reached the model stub"
+        code = 0
+        try:
+            req2 = urllib.request.Request(f"http://127.0.0.1:{port2}/extract",
+                                          data=json.dumps({"text": "short text"}).encode("utf-8"),
+                                          headers={"Content-Type": "application/json"}, method="POST")
+            urllib.request.urlopen(req2, timeout=10)
+        except urllib.error.HTTPError as he:
+            code = he.code
+            busy = json.loads(he.read().decode("utf-8"))
+            assert "another extraction" in busy.get("error", ""), busy
+        assert code == 409, f"concurrent /extract should answer 409 busy, got {code}"
+        gate_open.set()
+        t1.join(30)
+        assert results.get("first", {}).get("record"), "the first extraction must complete after the busy answer"
+        assert calls == [1], "exactly ONE model call across both requests (the second never ran)"
+    finally:
+        serve_news.call_llm = orig_llm
+        httpd2.shutdown()
+
+    # (4) disconnect before done → NOTHING in the store (DuckDB-gated)
+    disc = "store untouched on mid-stream disconnect: SKIP (duckdb not installed)"
+    if HAS_DUCKDB:
+        serve_news.call_llm = lambda text, **kw: time.sleep(0.8) or json.dumps(CANNED)
+        store = news_store.NewsStore(":memory:")
+        httpd3 = serve_news.ThreadingHTTPServer(("127.0.0.1", 0), serve_news.Handler)
+        httpd3.llm_url, httpd3.model, httpd3.page = "stub://", "stub", "<html></html>"
+        httpd3.verify, httpd3.store, httpd3.book = False, store, []
+        port3 = httpd3.server_address[1]
+        threading.Thread(target=httpd3.serve_forever, daemon=True).start()
+        try:
+            body = json.dumps({"text": ARTICLE_MD, "source_type": "investigation-note"}).encode("utf-8")
+            s = socket.create_connection(("127.0.0.1", port3), timeout=10)
+            s.sendall(b"POST /extract HTTP/1.1\r\nHost: t\r\nContent-Type: application/json\r\n"
+                      + f"Content-Length: {len(body)}\r\n\r\n".encode("ascii") + body)
+            s.recv(64)   # the response has started → the pipeline is running
+            s.close()    # …and the analyst walks away mid-extract
+            time.sleep(2.5)  # let the server hit the post-disconnect emits (grounding/grounded/persisting)
+            n_scans = store.con.execute("SELECT count(*) FROM scans").fetchone()[0]
+            assert n_scans == 0, f"a disconnected scan must never persist (found {n_scans} scans)"
+            disc = "store untouched on mid-stream disconnect (persisting probe precedes append_scan)"
+        finally:
+            serve_news.call_llm = orig_llm
+            httpd3.shutdown()
+    serve_news.call_llm = orig_llm
+    print(f"  size+concurrency: over-context → named in-stream refusal (0 model calls) · fail-open probe "
+          f"· concurrent /extract → 409 busy · {disc}")
+
+
+class _FakeBody:
+    """urlopen()-shaped stub: context manager + .read()."""
+    def __init__(self, text):
+        self._b = text.encode("utf-8")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+    def read(self):
+        return self._b
 
 
 def main() -> int:
@@ -529,6 +791,8 @@ def main() -> int:
 
     fixture_replay_test()      # Phase 38 — offline replay of REAL captured Qwen output (no model)
     verify_entities_test()     # Phase 38 — the keep-biased second pass (model stubbed)
+    streaming_transport_test() # Phase 43 — streaming call_llm (idle-gap, finish_reason, content-free events)
+    size_and_concurrency_test()  # Phase 43 — pre-flight refusal · single-flight 409 · disconnect≠persist
     http_route_test()
     url_route_test()           # Phase 39 — one-shot URL mode (acquisition stubbed)
     watchlist_disposition_route_test()

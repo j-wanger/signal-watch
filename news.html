@@ -587,7 +587,8 @@ function liveInjectSelect(){
     + '</select></div>'
     + '<textarea class="livetext" id="live-text" placeholder="…or paste the article text here (fills automatically on a URL run — trim + re-run if the conversion picked up noise)"></textarea>'
     + '<div class="liveact"><button class="btn primary" id="live-run">Run extraction</button>'
-    + '<span class="lstatus" id="live-status"></span></div></div></div>');
+    + '<span class="lstatus" id="live-status"></span></div>'
+    + '<div class="livepreview" id="live-preview"></div></div></div>');
   document.getElementById('live-toggle').addEventListener('click', () => {
     const f = document.getElementById('liveform'); f.hidden = !f.hidden;
   });
@@ -629,10 +630,45 @@ async function liveReadStream(r, onEvent){
 function liveStageLabel(ev){
   if(ev.stage === 'fetching')   return 'Fetching + converting the URL (server-side ladder)…';
   if(ev.stage === 'converted')  return 'Converted — ' + (ev.text ? ev.text.length : 0) + ' chars; extracting…';
-  if(ev.stage === 'extracting') return 'Model extracting entities + red flags…';
+  if(ev.stage === 'extracting') return 'Model extracting entities + red flags…' + (ev.tokens ? ' · ' + ev.tokens + ' tokens generated' : '');
   if(ev.stage === 'grounding')  return 'Grounding the extraction against the source…';
+  if(ev.stage === 'grounded')   return 'Grounded — ' + (((ev.record||{}).red_flags)||[]).length + ' red flags final; verifying ' + (((ev.record||{}).entities)||[]).length + ' entities…';
   if(ev.stage === 'verifying')  return 'Verifying entity ' + ev.i + ' of ' + ev.n + (ev.name ? (' — ' + ev.name) : '') + '…';
+  if(ev.stage === 'verified')   return '';   // chip-level refinement only — the i/N label keeps the cadence
+  if(ev.stage === 'persisting') return 'Saving the scan to the local store…';
   return 'Processing…';
+}
+/* Phase 43 — stage-completion progressive rendering (A2'): reveal COMPLETED pipeline stages,
+   corpus-demo-style — never a token stream. Red flags render the moment grounding completes (the
+   deterministic gate has already disposed — they are FINAL); entities render PROVISIONAL and refine
+   chip-by-chip through the verify pass (the wall-time majority). livePreviewBody is pure (record →
+   HTML, esc() everywhere) so the harness pins it without a DOM. */
+function livePreviewBody(rec){
+  if(!rec) return '';
+  const flags = rec.red_flags || [], ents = rec.entities || [];
+  return '<div class="pvsec">Red flags — grounded (' + flags.length + ') <span class="pvfinal">final</span></div>'
+    + (flags.length ? flags.map(f => '<div class="pvflag">⚑ ' + esc(f.red_flag || f.flag || '')
+        + (f.category ? ' <span class="pvcat">' + esc(f.category) + '</span>' : '') + '</div>').join('')
+      : '<div class="pvnone">none grounded</div>')
+    + '<div class="pvsec">Entities (' + ents.length + ') <span class="pvprov">provisional — verifying</span></div>'
+    + (ents.length ? '<div class="pvents">' + ents.map(e => '<span class="pvent" data-pvent="'
+        + esc(e.name || '') + '">' + esc(e.name || '') + '</span>').join('') + '</div>'
+      : '<div class="pvnone">none grounded</div>');
+}
+function livePreviewReset(){
+  const el = document.getElementById('live-preview');
+  if(el) el.innerHTML = '';
+}
+function livePreviewGrounded(rec){
+  const el = document.getElementById('live-preview');
+  if(el) el.innerHTML = livePreviewBody(rec);
+}
+function livePreviewEnt(name, cls){
+  const el = document.getElementById('live-preview');
+  if(!el || !el.querySelectorAll) return;   // no-op under the string-DOM harness
+  Array.prototype.forEach.call(el.querySelectorAll('[data-pvent]'), sp => {
+    if(sp.getAttribute('data-pvent') === name) sp.className = 'pvent ' + cls;
+  });
 }
 /* The 'converted' event is the one-shot URL mode's passive recovery: the server-acquired text fills
    the textarea AS the run proceeds, so the analyst sees exactly what the model saw and can trim +
@@ -666,9 +702,21 @@ async function liveRun(){
       clearInterval(tick);
       status.textContent = 'Extraction failed: ' + (d.error || ('HTTP ' + r.status)); return;
     }
-    const data = await liveReadStream(r, ev => { liveApplyConverted(ev); stage = liveStageLabel(ev); paint(); });
+    livePreviewReset();
+    let vStart = 0;   // Phase 43: verify-stage projection — measured pace, an estimate, never a promise
+    const data = await liveReadStream(r, ev => { liveApplyConverted(ev);
+      if(ev.stage === 'grounded') livePreviewGrounded(ev.record);
+      else if(ev.stage === 'verifying') livePreviewEnt(ev.name, 'checking');
+      else if(ev.stage === 'verified') livePreviewEnt(ev.name, ev.kept ? 'kept' : 'dropped');
+      let lbl = liveStageLabel(ev);
+      if(ev.stage === 'verifying'){
+        if(ev.i === 1) vStart = Date.now();
+        else if(vStart && ev.n > 4) lbl += ' · ~' + Math.ceil((ev.n - ev.i + 1) * ((Date.now() - vStart) / (ev.i - 1)) / 1000) + 's left (est.)';
+      }
+      if(lbl) stage = lbl; paint(); });
     clearInterval(tick);
-    if(data.error){ status.textContent = 'Extraction failed: ' + data.error; return; }
+    if(data.error){ status.textContent = 'Extraction failed: ' + data.error; return; }  // a grounded preview, if any, stays — honest partial truth
+    livePreviewReset();
     const rec = data.record, drop = (data.dropped || []).length;
     rec.scan_id = data.scan_id || null;            // Phase 36: lets the Disposition gate escalate THIS scan's entities
     const i = NEWS.articles.findIndex(a => a.id === rec.id);
@@ -1018,6 +1066,18 @@ function liveInit(){
     + '.livetext{min-height:170px;padding:11px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2);color:var(--ink);font:13px/1.5 var(--body);resize:vertical}'
     + '.liveact{display:flex;align-items:center;gap:12px;flex-wrap:wrap}'
     + '.lstatus{color:var(--muted);font:13px var(--mono)}'
+    + '.livepreview{display:flex;flex-direction:column;gap:4px}'
+    + '.pvsec{font:600 10px var(--mono);color:var(--signal);text-transform:uppercase;letter-spacing:.06em;margin:10px 0 2px}'
+    + '.pvfinal{border:1px solid var(--signal);color:var(--signal);border-radius:4px;padding:1px 6px;font:600 9px var(--mono);text-transform:none;letter-spacing:0}'
+    + '.pvprov{border:1px solid var(--line2);color:var(--muted);border-radius:4px;padding:1px 6px;font:600 9px var(--mono);text-transform:none;letter-spacing:0}'
+    + '.pvflag{font:13px/1.5 var(--body);color:var(--ink)}'
+    + '.pvcat{font:11px var(--mono);color:var(--muted)}'
+    + '.pvnone{font:12px var(--body);color:var(--muted);font-style:italic}'
+    + '.pvents{display:flex;flex-wrap:wrap;gap:4px}'
+    + '.pvent{border:1px solid var(--line2);border-radius:4px;padding:2px 7px;font:12px var(--body);color:var(--ink);opacity:.75}'
+    + '.pvent.checking{border-color:var(--signal);opacity:1}'
+    + '.pvent.kept{border-color:var(--signal);color:var(--signal);opacity:1}'
+    + '.pvent.dropped{opacity:.35;text-decoration:line-through}'
     + '.watchpanel{margin:14px 0}'
     + '.watchhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:600 14px/1.3 var(--head);color:var(--ink);margin-bottom:8px}'
     + '.watchempty{color:var(--muted);font:13px/1.5 var(--body);border:1px dashed var(--line2);border-radius:8px;padding:12px 14px}'

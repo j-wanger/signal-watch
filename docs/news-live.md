@@ -217,10 +217,18 @@ paste" message while paste mode keeps working — `build.py` never imports any o
 1. **Start a local llama-cpp server** with an OpenAI-compatible endpoint, serving your model (e.g. a
    Qwen ~30B-A3B-class GGUF):
    ```
-   llama-server -m /path/to/qwen.gguf --port 8080 --jinja
+   llama-server -m /path/to/qwen.gguf --port 8080 --jinja --ctx-size 65536
    ```
    (`--jinja` enables the chat template; the companion requests JSON-schema-constrained output and disables
    thinking. Any model behind `/v1/chat/completions` works — it's swappable.)
+
+   **Context size matters (Phase 43):** set `--ctx-size` explicitly — some llama-server builds default
+   to a small context (4096) and SILENTLY truncate the prompt tail, which the grounding gate cannot
+   catch (it grounds against the full source — it can't know what the model never saw). The
+   companion's pre-flight measures the FULL assembled prompt against the server's reported `n_ctx`
+   (`/props` + `/tokenize`) and **refuses with a named reason** instead of truncating; note
+   llama-server divides the context across parallel slots, so budget `n_ctx ≥ (prompt + 16384
+   generation headroom) × slots` for your largest documents.
 2. **Start the companion** (under the `.venv` so DuckDB persistence + the watchlist are active):
    ```
    .venv/bin/python scripts/serve_news.py --port 8000 \
@@ -236,6 +244,29 @@ paste" message while paste mode keeps working — `build.py` never imports any o
    flows through the existing Read → Screen → Disposition → Exposure arc.
 
 The offline demo still works with no companion: just open `dist/news/index.html`.
+
+## Size robustness + staged rendering (Phase 43)
+
+The pipeline works **regardless of document size/complexity — or fails fast with a named reason**
+(measured: the extraction JSON costs ~400–450 generated tokens *per entity*, so dense documents are
+output-bound, not input-bound; a 64K-char / 35-subject note legitimately generates for ~5 minutes):
+
+- **Streaming transport.** `call_llm` streams (`stream:true` composes with the strict JSON-schema
+  grammar); the old 180s whole-response deadline is replaced by an **idle-gap timeout** (120s with no
+  chunk = a hung server) — a healthy long generation never dies mid-run, and the page shows a live
+  `… N tokens generated` counter during the model call.
+- **Named failures, never opaque ones.** `finish_reason=length` → "output budget exhausted"
+  (generation budget 16384, raised from the 4096 that silently truncated at ~10+ entities);
+  an over-context input → a pre-flight refusal naming the token overage and the `--ctx-size` remedy.
+  Both travel in-stream where the analyst can act on them.
+- **Single-flight.** A second concurrent extraction gets an honest 409 — llama-cpp runs parallel
+  slots, so a "retry" would otherwise run BESIDE the abandoned job and silently split throughput
+  (the old failure cascade: timeout → retry → both slower → timeout again).
+- **Stage-completion rendering (never a token stream).** The page reveals each COMPLETED stage,
+  corpus-demo-style: the converted text, then — the moment grounding completes — the **red flags as
+  FINAL** (the deterministic gate has already disposed) beside the **entities as PROVISIONAL** chips
+  that refine kept/dropped live through the verify pass (the wall-time majority), then the full
+  record. A disconnect before `done` writes nothing to the store.
 
 ## Honesty / compliance
 - Real client-side fuzzy scores; the counterparty **book is synthetic** (no real customer data); the

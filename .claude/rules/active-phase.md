@@ -12,4 +12,4 @@ Carried to Phase 41: semantic instance-dup merge pass · denial-quote prompt mic
 
 Gates:
 - [x] Direction confirmed by user (assumption gate closed 2026-06-09; revisit filled at debrief: A1/A3/A4 held, A2 held-with-deviation)
-- [ ] Delivery accepted
+- [x] Delivery accepted (post-implementation report 2026-06-09; phase commit ea53adc verified on main)

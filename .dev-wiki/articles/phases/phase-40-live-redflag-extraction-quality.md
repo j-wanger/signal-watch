@@ -5,9 +5,9 @@ category: phases
 tags: [news, live-mode, extraction-quality, prompt, few-shot, measure-first, red-flags, agreement, gate]
 parents: [phase-39-live-news-qol]
 created: 2026-06-09
-updated: 2026-06-09
+updated: 2026-06-10
 source: plan
-status: ready-for-completion
+status: completed
 scope: ["scripts/serve_news.py", "scripts/news_ground.py", "scripts/build.py", "tests/news_live_test.py", "tests/fixtures/news-live/**", "docs/news-live.md", "tests/smoke-checklist.md", "CLAUDE.md", ".dev-wiki/tmp/**", "data/news/.live/**"]
 entry_criteria: "Phase 39 delivered + accepted + committed 3786042/3c35902 + pushed; the live companion has streamed progress + one-shot URL acquisition; flags pass the deterministic grounding gate but completeness/span-quality/translation/consistency are unguarded."
 exit_criteria: "Measured characterization (proxies + blind second-rater agreement, consensus-honest) user-adjudicated at the T2 checkpoint; SYSTEM_PROMPT context-shaped with holdout holding; measurement-earned checks in the shared news_ground gate with the 4 committed records passing; conditional batched per-flag verify only on measured residue; fixtures green without re-capture + new US-federal fixtures; --check all 5/5; badge stays; no non-negotiable change."

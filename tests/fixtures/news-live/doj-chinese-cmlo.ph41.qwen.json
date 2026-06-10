@@ -1,0 +1,98 @@
+{
+  "red_flags": [
+    {
+      "flag": "directed a group of couriers to pick up bulk cash proceeds",
+      "red_flag": "Bulk-cash placement via organized courier network",
+      "category": "bulk-cash placement & couriers"
+    },
+    {
+      "flag": "deposited these illicit funds, which generally exceeded $10,000, into shell company bank accounts",
+      "red_flag": "Structuring: deposits exceeding $10k threshold into shell accounts",
+      "category": "structuring/threshold-avoidance"
+    },
+    {
+      "flag": "shell company bank accounts controlled by the CMLO",
+      "red_flag": "Shell/front companies & nominee or opaque ownership",
+      "category": "shell/front companies & nominee or opaque ownership"
+    },
+    {
+      "flag": "used multiple cellphones, changing phone numbers regularly, and several encrypted messaging applications to communicate",
+      "red_flag": "Concealment & detection-evasion: encrypted comms and frequent number changes",
+      "category": "concealment & detection-evasion"
+    },
+    {
+      "flag": "deposited those illicit funds, using both real and fake identities",
+      "red_flag": "Use of fake identities for financial transactions",
+      "category": "concealment & detection-evasion"
+    },
+    {
+      "flag": "procured fake driver’s licenses for the CMLO’s couriers",
+      "red_flag": "Professional-gatekeeper misuse: procurement of forged IDs for illicit activity",
+      "category": "professional-gatekeeper misuse (attorneys, trust accounts, corporate service providers)"
+    },
+    {
+      "flag": "picked up and deposited — using both her real and fake identities — nearly $25 million of illicit bulk cash",
+      "red_flag": "Money mules & funnel accounts: use of real/fake identities for bulk deposits",
+      "category": "money mules & funnel accounts"
+    },
+    {
+      "flag": "laundered over $92 million in illicit funds, including proceeds from the importation and distribution of illegal drugs",
+      "red_flag": "Fraud- or scam-derived victim funds: laundering drug trafficking proceeds",
+      "category": "fraud- or scam-derived victim funds"
+    }
+  ],
+  "entities": [
+    {
+      "name": "Enhua Fang",
+      "type": "person",
+      "aliases": [],
+      "properties": []
+    },
+    {
+      "name": "Jianfei Lu",
+      "type": "person",
+      "aliases": [],
+      "properties": []
+    },
+    {
+      "name": "Shu Jun Zhen",
+      "type": "person",
+      "aliases": [],
+      "properties": []
+    },
+    {
+      "name": "Chinese money laundering organization",
+      "type": "org",
+      "aliases": [
+        "CMLO"
+      ],
+      "properties": []
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Enhua Fang",
+      "to": "Chinese money laundering organization",
+      "label": "owner-or-controller-of",
+      "evidence": "Fang was an organizer within the CMLO who directed a group of couriers"
+    },
+    {
+      "from": "Jianfei Lu",
+      "to": "Chinese money laundering organization",
+      "label": "employee-or-agent-of",
+      "evidence": "Lu also served as a manager for the CMLO"
+    },
+    {
+      "from": "Shu Jun Zhen",
+      "to": "Chinese money laundering organization",
+      "label": "employee-or-agent-of",
+      "evidence": "Zhen, at Fang’s and Lu’s direction, picked up and deposited"
+    }
+  ],
+  "main_subjects": [
+    "Enhua Fang",
+    "Jianfei Lu",
+    "Shu Jun Zhen",
+    "Chinese money laundering organization"
+  ]
+}

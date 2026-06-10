@@ -57,21 +57,10 @@ EXTRACT_SCHEMA = {
     "properties": {
         "title": {"type": "string"},
         "typology": {"type": "string"},
-        "entities": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "name": {"type": "string"},
-                    "type": {"type": "string", "enum": ["person", "org"]},
-                    "location": {"type": "string"},
-                    "age": {"type": "string"},
-                    "profession": {"type": "string"},
-                    "context": {"type": "string"},
-                },
-                "required": ["name", "type"],
-            },
-        },
+        # Phase 41 calibration r2 — red_flags come FIRST in schema order: the strict-grammar model
+        # generates properties in this order, so the measured Phase-40 flag surface is produced with
+        # full attention BEFORE the identity enrichment spends any output budget (measured: the
+        # enriched one-call prompt with flags last cost ~12.5% kept flags on the regression set).
         "red_flags": {
             "type": "array",
             "items": {
@@ -84,6 +73,49 @@ EXTRACT_SCHEMA = {
                 "required": ["flag", "red_flag"],
             },
         },
+        "entities": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "type": {"type": "string", "enum": ["person", "org"]},
+                    "location": {"type": "string"},
+                    "age": {"type": "string"},
+                    "profession": {"type": "string"},
+                    "context": {"type": "string"},
+                    # Phase 41 — resolution-grade identity fields (vocab authority: news_ground)
+                    "aliases": {"type": "array", "items": {"type": "string"}},
+                    "properties": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "kind": {"type": "string", "enum": list(news_ground.PROPERTY_KINDS)},
+                                "value": {"type": "string"},
+                            },
+                            "required": ["kind", "value"],
+                        },
+                    },
+                },
+                "required": ["name", "type"],
+            },
+        },
+        # Phase 41 — structured inter-entity relationships + the main-subject designation
+        "relationships": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "from": {"type": "string"},
+                    "to": {"type": "string"},
+                    "label": {"type": "string", "enum": list(news_ground.RELATION_LABELS)},
+                    "evidence": {"type": "string"},
+                },
+                "required": ["from", "to", "label", "evidence"],
+            },
+        },
+        "main_subjects": {"type": "array", "items": {"type": "string"}},
     },
     "required": ["entities", "red_flags"],
 }
@@ -101,7 +133,7 @@ SYSTEM_PROMPT = (
     "investigating agencies or their field offices, officials who announce or comment on the action, "
     "government programs, or prosecuting/court districts. If a person or org appears ONLY because they "
     "announced, investigated, or prosecuted the case, EXCLUDE it.\n"
-    "- red_flags: extract EVERY DISTINCT suspicious behaviour in the article — be exhaustive. Use the "
+    "- red_flags (you output these FIRST): extract EVERY DISTINCT suspicious behaviour in the article — be exhaustive. Use the "
     "CHECKLIST below as a coverage net: scan the whole article once per family so nothing is overlooked; a "
     "family yields AS MANY flags as the article has distinct behaviours in it (several distinct behaviours "
     "in one family = several flags). Suspicious behaviour includes INSTITUTIONAL failures — a bank or firm "
@@ -128,9 +160,37 @@ SYSTEM_PROMPT = (
     "| institutional control failure (willful blindness, monitoring gaps, paper-only compliance, "
     "profit-over-compliance) | misrepresentation to regulators, counterparties or customers | corruption & "
     "PEP-linked funds\n"
+    # Phase 41 — resolution-grade identity enrichment (aliases / properties / relationships / main
+    # subjects), AFTER the flag contract: complete the full checklist scan first; the enrichment must
+    # NEVER reduce flag coverage. Every value is verbatim-or-dropped downstream.
+    "AFTER the red_flags are complete (the identity fields below must NEVER reduce your red_flags "
+    "coverage — extract flags with the same exhaustiveness as if they were the only output):\n"
+    "- aliases (per entity, optional): OTHER names the ARTICLE ITSELF uses for the same party — a.k.a. "
+    "names, shortened forms, nicknames, online handles, transliterations, former or trading names. Each "
+    "alias MUST be copied VERBATIM from the article. Do NOT invent variants; most entities have none.\n"
+    "- properties (per entity, optional): identifying attributes, ONLY when literally printed in the "
+    "article. `kind` is one of " + " | ".join(news_ground.PROPERTY_KINDS) + " (id_registration covers "
+    "passport, company/tax registration, case and licence numbers; wallet is a cryptocurrency address; "
+    "domain is a website). `value` MUST be copied VERBATIM — exact characters, keeping punctuation, "
+    "spacing and line formatting as printed. MOST entities have ZERO properties — that is the normal "
+    "case. NEVER guess, derive, or reformat a value: an age like '45-year-old' is NOT a dob; record a "
+    "dob ONLY if a birth date is printed.\n"
+    "- relationships (optional): how the extracted subjects connect, ONLY where the article states the "
+    "connection. `from` and `to` MUST be `name` values from your entities list. `label` is one of "
+    + " | ".join(news_ground.RELATION_LABELS) + ". Direction: 'A owner-or-controller-of B' means A owns "
+    "or controls B. `evidence` MUST be a VERBATIM, CONTIGUOUS quote from the article stating the "
+    "connection. Only STATED connections — no inference chains, not every possible pair. Examples of "
+    "label use: a spouse who laundered the scheme's proceeds → family-or-associate-of + co-conspirator; "
+    "a Brooklyn company used to source and ship the goods → 'scheme leader owner-or-controller-of "
+    "company' (if ownership is stated) or 'company front-for scheme leader'.\n"
+    "- main_subjects (optional): the `name`(s) of the entity or entities the article is PRINCIPALLY "
+    "about — the target(s) of the enforcement action or investigation. May be one, several (a "
+    "multi-defendant case), or empty if genuinely unclear — never force a single pick.\n"
     "A downstream grounding check DISCARDS anything not literally present in the article, so quote exactly."
 )
-USER_PROMPT_TMPL = "ARTICLE:\n\n{article}\n\nExtract the entities and red flags as JSON."
+USER_PROMPT_TMPL = ("ARTICLE:\n\n{article}\n\nExtract the entities (with any aliases and printed "
+                    "identifying properties), their relationships, the main subject(s), and the red "
+                    "flags as JSON.")
 
 
 def call_llm(text: str, *, llm_url: str, model: str, timeout: int = 180) -> str:
@@ -205,6 +265,14 @@ def build_record(llm_json: dict, text: str, meta: dict = None):
                 "age": (str(e.get("age")).strip() if e.get("age") not in (None, "") else None),
                 "profession": (e.get("profession") or "").strip() or None,
                 "context": (e.get("context") or "").strip() or None,
+                # Phase 41 — present ONLY when the model emitted them (old captures replay unchanged)
+                "aliases": [a for a in (str(x).strip() for x in (e.get("aliases") or [])) if a] or None,
+                "properties": [
+                    {"kind": pk, "value": pv}
+                    for pk, pv in ((str(p.get("kind") or "").strip(), str(p.get("value") or "").strip())
+                                   for p in (e.get("properties") or []) if isinstance(p, dict))
+                    if pk and pv
+                ] or None,
             }.items() if v}
             for e in (llm_json.get("entities") or [])
         ],
@@ -217,12 +285,30 @@ def build_record(llm_json: dict, text: str, meta: dict = None):
             for f in (llm_json.get("red_flags") or [])
         ],
     }
+    # Phase 41 — record-level enrichment, added ONLY when non-empty (old captures replay unchanged).
+    main_subjects = [s for s in (str(x).strip() for x in (llm_json.get("main_subjects") or [])) if s]
+    if main_subjects:
+        pre["main_subjects"] = main_subjects
+    relationships = [
+        {"from": fr, "to": to, "label": lb, "evidence": ev}
+        for fr, to, lb, ev in (
+            (str(r.get("from") or "").strip(), str(r.get("to") or "").strip(),
+             str(r.get("label") or "").strip(), str(r.get("evidence") or "").strip())
+            for r in (llm_json.get("relationships") or []) if isinstance(r, dict))
+        if fr and to and lb and ev
+    ]
+    if relationships:
+        pre["relationships"] = relationships
     kept, dropped = news_ground.ground_record(pre, body)
     # Phase 38 — LIVE-mode entity-precision pass: drop institutional noise + surname-alias duplicates the
     # model over-extracts (faithful; never invents; preserves every grounded subject). LIVE PATH ONLY —
     # build.py does not call this, so the committed records + offline dist/news stay byte-frozen.
     kept["entities"], ent_dropped = news_ground.screen_entities(kept["entities"], text)
     dropped = list(dropped) + ent_dropped
+    # Phase 41 — the fold inversion renames subset/moniker entities into parent ALIASES; remap +
+    # re-filter relationships/main_subjects so referential integrity survives the fold.
+    rename = {d["value"]: d["folded_into"] for d in ent_dropped if d.get("folded_into")}
+    kept = news_ground.reconcile_refs(kept, rename)
     for i, e in enumerate(kept["entities"], 1):
         e["id"] = f"E{i}"
     for i, f in enumerate(kept["red_flags"], 1):
@@ -297,6 +383,8 @@ def verify_entities(record: dict, article: str, *, llm_url: str, model: str, on_
             dropped.append({"kind": "entity", "value": e.get("name"), "reason": "second-pass: not a subject of the financial crime"})
     out = dict(record)
     out["entities"] = [{**e, "id": f"E{i}"} for i, e in enumerate(kept, 1)]
+    # Phase 41 — a verify-dropped entity must not leave dangling relationship/main_subject references
+    out = news_ground.reconcile_refs(out)
     return out, dropped
 
 
@@ -419,6 +507,11 @@ class Handler(BaseHTTPRequestHandler):
             self._json(400, {"error": "missing 'text' or 'url' (the article to process)"}); return
         meta = {k: payload[k] for k in ("title", "source_org", "source_url", "doc_type", "typology")
                 if payload.get(k)}
+        # Phase 41 — what KIND of document this is (drives anchor provenance significance). Closed
+        # vocab; anything else degrades to "" (unknown) rather than erroring — the scan still runs.
+        source_type = (payload.get("source_type") or "").strip()
+        if source_type not in news_store.SOURCE_TYPES:
+            source_type = ""
         # Phase 39 — the response is an NDJSON STREAM of stage events ending in {"done": …} or {"error": …}.
         # The 200 is committed before the pipeline runs, so every later failure travels IN-stream (the
         # client reads events, not status codes). Request-shape errors above still fail fast as plain 400s.
@@ -460,7 +553,7 @@ class Handler(BaseHTTPRequestHandler):
             scan_id = None
             if self.server.store is not None:
                 try:
-                    scan_id = self.server.store.append_scan(record, dropped, ts=_now())
+                    scan_id = self.server.store.append_scan(record, dropped, ts=_now(), source_type=source_type)
                 except Exception as ex:  # noqa: BLE001 — persistence is optional; degrade, don't drop the result
                     self.log_message("persist failed: %s", ex)
             self._emit({"done": {"record": record, "dropped": dropped, "scan_id": scan_id}})
@@ -523,6 +616,38 @@ def selftest() -> int:
     assert page.rstrip().endswith("</html>"), "served page is not a complete HTML document"
     assert json.loads(json.dumps(payload)) == payload, "payload is not JSON round-trippable"
     assert payload["articles"] and payload["book"].get("rows"), "seed data empty"
+    # Phase 41 — the enriched extraction contract, vocab authority in news_ground (never redefined here)
+    ent_props = EXTRACT_SCHEMA["properties"]["entities"]["items"]["properties"]
+    assert "aliases" in ent_props and "properties" in ent_props, "entity schema missing aliases/properties"
+    assert ent_props["properties"]["items"]["properties"]["kind"]["enum"] == list(news_ground.PROPERTY_KINDS), \
+        "property-kind enum must mirror news_ground.PROPERTY_KINDS (single authority)"
+    rel = EXTRACT_SCHEMA["properties"]["relationships"]["items"]["properties"]
+    assert rel["label"]["enum"] == list(news_ground.RELATION_LABELS), \
+        "relation-label enum must mirror news_ground.RELATION_LABELS (single authority)"
+    assert "main_subjects" in EXTRACT_SCHEMA["properties"], "schema missing main_subjects"
+    for needle in ("aliases", "properties", "relationships", "main_subjects", "NOT a dob"):
+        assert needle in SYSTEM_PROMPT, f"SYSTEM_PROMPT missing the Phase-41 {needle!r} contract"
+    for kind in news_ground.PROPERTY_KINDS:
+        assert kind in SYSTEM_PROMPT, f"SYSTEM_PROMPT missing property kind {kind!r}"
+    # Phase 41 — build_record passes enrichment through ONLY when present (old captures replay unchanged)
+    bj = {"title": "T", "entities": [{"name": "Acme Corp", "type": "org",
+                                      "aliases": ["ACME"], "properties": [{"kind": "wallet", "value": "bc1qxy"}]},
+                                     {"name": "Bo Vance", "type": "person"}],
+          "red_flags": [], "main_subjects": ["Acme Corp"],
+          "relationships": [{"from": "Bo Vance", "to": "Acme Corp", "label": "owner-or-controller-of",
+                             "evidence": "Bo Vance, who controls Acme Corp"}]}
+    rec41, _ = build_record(bj, "# T\nAcme Corp (ACME) moved funds to wallet bc1qxy for Bo Vance, who controls Acme Corp.")
+    assert rec41["entities"] and rec41["entities"][0].get("aliases") == ["ACME"], rec41["entities"]
+    assert rec41["entities"][0].get("properties") == [{"kind": "wallet", "value": "bc1qxy"}], rec41["entities"]
+    assert rec41.get("main_subjects") == ["Acme Corp"], rec41
+    assert rec41.get("relationships") == [{"from": "Bo Vance", "to": "Acme Corp",
+                                           "label": "owner-or-controller-of",
+                                           "evidence": "Bo Vance, who controls Acme Corp"}], rec41
+    rec_legacy, _ = build_record({"title": "T", "entities": [{"name": "Acme Corp", "type": "org"}],
+                                  "red_flags": []}, "# T\nAcme Corp moved funds yesterday.")
+    assert "aliases" not in rec_legacy["entities"][0] and "properties" not in rec_legacy["entities"][0]
+    assert "main_subjects" not in rec_legacy and "relationships" not in rec_legacy, \
+        "legacy captures must NOT gain new keys (golden compatibility)"
     print(f"serve_news --selftest: PASS "
           f"({len(payload['articles'])} articles, {len(payload['book']['rows'])} book rows, "
           f"{len(page):,} bytes served)")

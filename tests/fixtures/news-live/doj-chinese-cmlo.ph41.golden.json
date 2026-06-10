@@ -1,0 +1,111 @@
+{
+ "id": "live-untitled-live-article",
+ "title": "Untitled live article",
+ "doc_type": "News",
+ "typology": "",
+ "source_org": "DOJ",
+ "source_url": "",
+ "basis": "Public domain \u00b7 17 U.S.C. \u00a7105",
+ "article_text": "Source: U.S. Department of Justice, Office of Public Affairs \u2014 justice.gov/opa. Public-domain U.S. federal government work (17 U.S.C. \u00a7105). Excerpted verbatim.\n\nTwo Chinese nationals and a New York woman, all members of a prolific Chinese money laundering organization (CMLO), pleaded guilty today to money laundering charges involving drug trafficking proceeds. They are the last of six total defendants charged in the indictment to plead guilty.\n\nAccording to court documents, Enhua Fang, 38, and Jianfei Lu, 30, both of China, and Shu Jun Zhen, 36, of Staten Island, New York, were members of the CMLO that laundered over $92 million in illicit funds, including proceeds from the importation and distribution of illegal drugs into the United States, primarily through Mexico.\n\nAccording to court documents, Fang was an organizer within the CMLO who directed a group of couriers to pick up bulk cash proceeds from unlawful activities, including narcotics trafficking, from individuals throughout the United States. The couriers then deposited these illicit funds, which generally exceeded $10,000, into shell company bank accounts controlled by the CMLO in order to conceal the nature of the illicit funds. Fang used multiple cellphones, changing phone numbers regularly, and several encrypted messaging applications to communicate with the CMLO\u2019s foreign-based operatives and U.S.-based drug traffickers. Pursuant to her plea agreement, Fang admitted that she was personally responsible for laundering at least $90 million of illicit funds in less than two years. Fang further admitted that she knew funds laundered in the conspiracy included drug trafficking proceeds or funds intended to promote drug trafficking.\n\nAccording to court documents, Lu collected drug trafficking proceeds from U.S.-based drug traffickers and deposited those illicit funds, using both real and fake identities, into shell company bank accounts registered by other members of the CMLO. Lu also served as a manager for the CMLO: he coordinated bulk cash pickups and deposits while Fang was in China and procured fake driver\u2019s licenses for the CMLO\u2019s couriers, which were used to deposit illicit funds at major U.S. banks. Pursuant to his plea agreement, Lu admitted that he had actual knowledge and involvement in the laundering of between $25 million and $65 million in illicit funds. Lu further admitted that he knew funds laundered in the conspiracy included drug trafficking proceeds.\n\nAccording to court documents, Zhen, at Fang\u2019s and Lu\u2019s direction, picked up and deposited \u2014 using both her real and fake identities \u2014 nearly $25 million of illicit bulk cash, including drug trafficking proceeds. Pursuant to her plea agreement, Zhen admitted that she knew funds laundered in the conspiracy included drug trafficking proceeds or funds intended to promote drug trafficking.\n\nFang and Zhen each pleaded guilty to one count of money laundering conspiracy, one count of money laundering to conceal the nature, location, source, ownership, and control of the illicit proceeds, and one count of monetary transaction involving criminally derived property greater than $10,000. Lu pleaded guilty to one count of money laundering conspiracy, two counts of money laundering to conceal the nature, location, source, ownership, and control of the illicit proceeds, and two counts of monetary transaction involving criminally derived property greater than $10,000.\n\nThe defendants face a maximum penalty of 20 years in prison on each of the conspiracy and money laundering counts and a maximum of 10 years in prison on each of the monetary transaction counts. A federal district court judge will determine their respective sentences after considering the U.S. Sentencing Guidelines and other statutory factors.\n\nAll members of the CMLO charged to date have pleaded guilty, including the three who pleaded guilty on April 30, 2025; as a result, this particularly prolific cell within the CMLO has been completely dismantled.\n\nMatthew R. Galeotti, Head of the Justice Department\u2019s Criminal Division, U.S. Attorney Russ Ferguson for the Western District of North Carolina, Acting Special Agent in Charge Jae W. Chung of the Drug Enforcement Administration (DEA) Atlanta Division, and Criminal Investigation Chief Guy Ficco of IRS Criminal Investigation (IRS-CI) made the announcement.\n\nThe DEA Charlotte District Office and the IRS-CI Charlotte Field Office are investigating the case.\n\nActing Assistant Deputy Chief Mingda Hang, Acting Deputy Chief Melanie Alsworth, and Trial Attorney Jayce Born of the Criminal Division\u2019s Narcotic and Dangerous Drug Section and Assistant U.S. Attorney Alfredo De La Rosa for the Western District of North Carolina are prosecuting the case.\n\nThis case is part of Operation Take Back America, a nationwide initiative that marshals the full resources of the Department of Justice to repel the invasion of illegal immigration, achieve the total elimination of cartels and transnational criminal organizations, and protect our communities from the perpetrators of violent crime. Operation Take Back America streamlines efforts and resources from the Department\u2019s Organized Crime Drug Enforcement Task Forces and Project Safe Neighborhoods.",
+ "entities": [
+  {
+   "name": "Enhua Fang",
+   "type": "person",
+   "id": "E1"
+  },
+  {
+   "name": "Jianfei Lu",
+   "type": "person",
+   "id": "E2"
+  },
+  {
+   "name": "Shu Jun Zhen",
+   "type": "person",
+   "id": "E3"
+  },
+  {
+   "name": "Chinese money laundering organization",
+   "type": "org",
+   "aliases": [
+    "CMLO"
+   ],
+   "id": "E4"
+  }
+ ],
+ "red_flags": [
+  {
+   "flag": "directed a group of couriers to pick up bulk cash proceeds",
+   "red_flag": "Bulk-cash placement via organized courier network",
+   "category": "bulk-cash placement & couriers",
+   "id": "R1"
+  },
+  {
+   "flag": "deposited these illicit funds, which generally exceeded $10,000, into shell company bank accounts",
+   "red_flag": "Structuring: deposits exceeding $10k threshold into shell accounts",
+   "category": "structuring/threshold-avoidance",
+   "id": "R2"
+  },
+  {
+   "flag": "shell company bank accounts controlled by the CMLO",
+   "red_flag": "Shell/front companies & nominee or opaque ownership",
+   "category": "shell/front companies & nominee or opaque ownership",
+   "id": "R3"
+  },
+  {
+   "flag": "used multiple cellphones, changing phone numbers regularly, and several encrypted messaging applications to communicate",
+   "red_flag": "Concealment & detection-evasion: encrypted comms and frequent number changes",
+   "category": "concealment & detection-evasion",
+   "id": "R4"
+  },
+  {
+   "flag": "deposited those illicit funds, using both real and fake identities",
+   "red_flag": "Use of fake identities for financial transactions",
+   "category": "concealment & detection-evasion",
+   "id": "R5"
+  },
+  {
+   "flag": "procured fake driver\u2019s licenses for the CMLO\u2019s couriers",
+   "red_flag": "Professional-gatekeeper misuse: procurement of forged IDs for illicit activity",
+   "category": "professional-gatekeeper misuse (attorneys, trust accounts, corporate service providers)",
+   "id": "R6"
+  },
+  {
+   "flag": "picked up and deposited \u2014 using both her real and fake identities \u2014 nearly $25 million of illicit bulk cash",
+   "red_flag": "Money mules & funnel accounts: use of real/fake identities for bulk deposits",
+   "category": "money mules & funnel accounts",
+   "id": "R7"
+  },
+  {
+   "flag": "laundered over $92 million in illicit funds, including proceeds from the importation and distribution of illegal drugs",
+   "red_flag": "Fraud- or scam-derived victim funds: laundering drug trafficking proceeds",
+   "category": "fraud- or scam-derived victim funds",
+   "id": "R8"
+  }
+ ],
+ "main_subjects": [
+  "Enhua Fang",
+  "Jianfei Lu",
+  "Shu Jun Zhen",
+  "Chinese money laundering organization"
+ ],
+ "relationships": [
+  {
+   "from": "Enhua Fang",
+   "to": "Chinese money laundering organization",
+   "label": "owner-or-controller-of",
+   "evidence": "Fang was an organizer within the CMLO who directed a group of couriers"
+  },
+  {
+   "from": "Jianfei Lu",
+   "to": "Chinese money laundering organization",
+   "label": "employee-or-agent-of",
+   "evidence": "Lu also served as a manager for the CMLO"
+  },
+  {
+   "from": "Shu Jun Zhen",
+   "to": "Chinese money laundering organization",
+   "label": "employee-or-agent-of",
+   "evidence": "Zhen, at Fang\u2019s and Lu\u2019s direction, picked up and deposited"
+  }
+ ]
+}

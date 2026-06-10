@@ -578,7 +578,13 @@ function liveInjectSelect(){
     + '<div class="liveform" id="liveform" hidden>'
     + '<div class="liverow"><input class="livein" id="live-url" placeholder="Article URL — one shot: fetch, convert, extract (pasted text below wins if present)"></div>'
     + '<div class="liverow"><input class="livein" id="live-title" placeholder="Title (optional)">'
-    + '<input class="livein" id="live-source" placeholder="Source / organisation (optional)"></div>'
+    + '<input class="livein" id="live-source" placeholder="Source / organisation (optional)">'
+    + '<select class="livein" id="live-stype">'
+    + '<option value="">Source type (optional — drives anchor provenance)</option>'
+    + '<option value="gov-enforcement">Government / enforcement release</option>'
+    + '<option value="commercial-news">Commercial news article</option>'
+    + '<option value="investigation-note">Investigation note (private — stays local)</option>'
+    + '</select></div>'
     + '<textarea class="livetext" id="live-text" placeholder="…or paste the article text here (fills automatically on a URL run — trim + re-run if the conversion picked up noise)"></textarea>'
     + '<div class="liveact"><button class="btn primary" id="live-run">Run extraction</button>'
     + '<span class="lstatus" id="live-status"></span></div></div></div>');
@@ -652,7 +658,8 @@ async function liveRun(){
       headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({ text, url,
         title: (document.getElementById('live-title').value || '').trim(),
-        source_org: (document.getElementById('live-source').value || '').trim() }) });
+        source_org: (document.getElementById('live-source').value || '').trim(),
+        source_type: ((document.getElementById('live-stype') || {}).value || '') }) });
     if(!r.ok){  // request-shape errors (400) are plain JSON, before any stream begins
       const d = await r.json().catch(() => ({}));
       clearInterval(tick);
@@ -688,7 +695,7 @@ async function liveRefreshWatchlist(){
     if(!r.ok) return;
     const d = await r.json();
     NEWS._watch = (d.rows || []).filter(x => x.kind === 'scanned').map(x => ({
-      id:x.id, name:x.name, type:x.type, kind:'scanned',
+      id:x.id, name:x.name, type:x.type, kind:'scanned', aliases:(x.aliases || []),
       role:'watchlist', country:(x.provenance || 'escalated from a prior scan') }));
     liveRenderWatchlistPanel();      // reflect the refreshed surface if the panel is on screen
   }catch(ex){ /* keep the prior watchlist on a transient failure */ }
@@ -726,20 +733,47 @@ async function livePrune(name){
   }catch(ex){ /* transient — leave the panel as-is */ }
 }
 /* Screen against book ∪ watchlist. A live-only REASSIGNMENT (the offline matchEntities, byte-frozen via the
-   strip, stays book-only); when the watchlist is empty it defers to the base, so this is inert until
-   something is escalated. The body mirrors the base deliberately — refactoring the base signature would
-   change dist/news, which must stay byte-identical. */
+   strip, stays book-only); the live screen is ALIAS-AWARE (Phase 41): an entity or watchlist row is
+   matchable by name ∪ aliases, taking the MAX pair score. CLASS-AWARE alias rules guard the 0.85 fuzzy
+   threshold against a false-positive flood: a single-token alias ("Smith") or an @-handle never enters
+   generic fuzzy matching — it matches EXACT-NORMALIZED only; multi-token aliases ("M. Lopez") fuzzy-score
+   like names. The body mirrors the base shape deliberately — refactoring the base signature would change
+   dist/news, which must stay byte-identical. */
 const _baseMatchEntities = matchEntities;
+function liveAliasFuzzyOk(s){
+  return !String(s).startsWith('@') && mnorm(s).split(' ').filter(Boolean).length >= 2;
+}
+function livePairScore(a, aIsAlias, b, bIsAlias){
+  if((aIsAlias && !liveAliasFuzzyOk(a)) || (bIsAlias && !liveAliasFuzzyOk(b))){
+    return mnorm(a) === mnorm(b) ? 1 : 0;          // restricted alias class: exact-normalized only
+  }
+  return simScore(a, b);
+}
+function liveBestPair(en, r){
+  const lefts  = [[en.name, false]].concat((en.aliases || []).map(x => [x, true]));
+  const rights = [[r.name,  false]].concat((r.aliases  || []).map(x => [x, true]));
+  let best = { score: 0, via: null };
+  for(const [a, ai] of lefts){ for(const [b, bi] of rights){
+    const sc = livePairScore(a, ai, b, bi);
+    if(sc > best.score) best = { score: sc, via: (ai || bi) ? { entity: a, row: b } : null };
+  } }
+  return best;
+}
 matchEntities = function(a){
   const extra = NEWS._watch || [];
-  if(!extra.length) return _baseMatchEntities(a);
+  const live = a && a.id && String(a.id).startsWith('live-');
+  if(!extra.length && !live) return _baseMatchEntities(a);   // static arc, nothing escalated → byte-frozen base path
   const th = threshold();
   const rows = ((NEWS.book && NEWS.book.rows) || []).concat(extra);
   return (a.entities || []).map(en => {
     let best = null;
-    for(const r of rows){ const sc = simScore(en.name, r.name); if(!best || sc > best.score) best = {row:r, score:sc}; }
+    for(const r of rows){
+      const p = liveBestPair(en, r);
+      if(!best || p.score > best.score) best = { row: r, score: p.score, via: p.via };
+    }
     const score = best ? best.score : 0, hit = score >= th, exact = hit && mnorm(en.name) === mnorm(best.row.name);
-    return { entity:en, row: best?best.row:null, score, hit, exact, kind: !hit?'none':(exact?'exact':'near') };
+    return { entity:en, row: best?best.row:null, score, hit, exact,
+             kind: !hit?'none':(exact?'exact':'near'), via: hit ? best.via : null };
   });
 };
 async function livePostDisposition(eid, decision){
@@ -767,15 +801,38 @@ function liveRenderDisposition(){
   h += '<p class="lead">The agent proposes; the analyst disposes. <b>Escalate</b> an entity to add it to the '
      + 'live watchlist — every article you screen next is matched against it too. Escalation is how the screen '
      + 'surface compounds; a high score is <em>not</em> a confirmation.</p>';
+  // Phase 41 — the SUBJECT MAP: who the article is principally about + how the others connect (every
+  // edge gate-passed: label vocab-checked, evidence verbatim-grounded). Honest none/multiple subjects.
+  const mains = a.main_subjects || [];
+  if(mains.length || (a.relationships || []).length){
+    h += '<div class="relpanel"><div class="relhead">Subject map — '
+       + (mains.length ? ('main subject' + (mains.length > 1 ? 's' : '') + ': ' + mains.map(esc).join(', '))
+                       : 'no clear main subject (none forced)') + '</div>';
+    (a.relationships || []).forEach(r => {
+      h += '<div class="reledge"><span class="relwho">'+esc(r.from)+'</span>'
+         + '<span class="rellabel">—'+esc(r.label)+'→</span>'
+         + '<span class="relwho">'+esc(r.to)+'</span>'
+         + '<div class="relev">“'+esc(r.evidence)+'”</div></div>';
+    });
+    h += '</div>';
+  }
   h += '<div class="rows">';
   (a.entities || []).forEach(en => {
     const x = byId[en.id] || { score:0, hit:false, kind:'none', row:null };
     const on = !!a._escal[en.id];
-    const sub = x.hit ? ('matches '+esc(x.row.name)+' · '+esc(x.row.role || '')+' · score '+x.score.toFixed(3))
+    const sub = x.hit ? ('matches '+esc(x.row.name)+' · '+esc(x.row.role || '')+' · score '+x.score.toFixed(3)
+                         + (x.via ? (' · via alias '+esc(x.via.entity)+' ≈ '+esc(x.via.row)) : ''))
                       : 'no current book or watchlist exposure';
+    // Phase 41 — the resolution-grade identity card: aliases + grounded identifying properties
+    const akas = (en.aliases || []).length
+      ? '<div class="lalias">a.k.a. ' + en.aliases.map(esc).join(' · ') + '</div>' : '';
+    const props = (en.properties || []).length
+      ? '<div class="lprops">' + en.properties.map(p =>
+          '<span class="lprop"><b>'+esc(p.kind)+'</b> '+esc(p.value)+'</span>').join('') + '</div>' : '';
+    const mainTag = mains.indexOf(en.name) >= 0 ? '<span class="tag main">main subject</span>' : '';
     h += '<button class="hitbtn'+(x.hit?'':' below')+'" data-e="'+esc(en.id)+'" aria-pressed="'+on+'">'
-       + '<div><div class="who">'+esc(en.name)+'<span class="tag '+x.kind+'">'+(x.hit?x.kind:'no match')+'</span></div>'
-       + '<div class="sub">'+sub+'</div></div>'
+       + '<div><div class="who">'+esc(en.name)+mainTag+'<span class="tag '+x.kind+'">'+(x.hit?x.kind:'no match')+'</span></div>'
+       + '<div class="sub">'+sub+'</div>'+akas+props+'</div>'
        + '<span class="disp '+(on?'on':'off')+'">'+(on?'ESCALATED':'＋ WATCHLIST')+'</span></button>';
   });
   h += '</div>';
@@ -813,7 +870,18 @@ function liveInit(){
     + '.wname{font:600 13px var(--body);color:var(--ink)}'
     + '.wprov{font:11px var(--mono);color:var(--muted)}'
     + '.wprune{flex:none;border:1px solid var(--line2);background:transparent;color:var(--muted);border-radius:6px;padding:5px 10px;font:600 12px var(--body);cursor:pointer}'
-    + '.wprune:hover{border-color:var(--signal);color:var(--signal)}';
+    + '.wprune:hover{border-color:var(--signal);color:var(--signal)}'
+    + '.relpanel{border:1px solid var(--line);border-left:3px solid var(--signal);border-radius:10px;padding:12px 14px;margin:0 0 16px;background:rgba(246,166,35,.04)}'
+    + '.relhead{font:600 13px var(--head);color:var(--ink);margin-bottom:6px}'
+    + '.reledge{padding:7px 0;border-top:1px dashed var(--line2)}'
+    + '.relwho{font:600 13px var(--body);color:var(--ink)}'
+    + '.rellabel{color:var(--signal);font:600 11px var(--mono);margin:0 8px}'
+    + '.relev{font:12px/1.5 var(--body);color:var(--muted);font-style:italic;margin-top:2px}'
+    + '.lalias{font:11px var(--mono);color:var(--signal);margin-top:3px}'
+    + '.lprops{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}'
+    + '.lprop{border:1px solid var(--line2);border-radius:4px;padding:1px 6px;font:11px var(--mono);color:var(--muted)}'
+    + '.lprop b{color:var(--ink);font-weight:600}'
+    + '.tag.main{color:var(--signal);border:1px solid var(--signal)}';
   const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s);
   const baseSelect = RENDER.select;
   RENDER.select = function(){ baseSelect(); liveInjectSelect(); };

@@ -844,6 +844,35 @@ def validate_news_data(articles: list, book: dict) -> list:
                 if key in seen_flag_keys:
                     e.append(f"news[{aid}]/{rf.get('id')}: duplicate flag (same quote + category)")
                 seen_flag_keys.add(key)
+        # Phase 41 — enriched identity fields (OPTIONAL; the 4 committed records carry none yet).
+        # CHECK mode mirrors news_ground.ground_record's live DROP rules: fail loud, never rewrite.
+        # Aliases RAW-ground like names; property values normalize-ground (the attribute precedent);
+        # relationship labels/kinds are vocab-checked against the news_ground single authority.
+        if isinstance(ents, list):
+            for ent in ents:
+                nm = ent.get("name", "")
+                for al in ent.get("aliases") or []:
+                    if al not in body:
+                        e.append(f"news[{aid}]: alias not raw-grounded in article: {al!r} ({nm})")
+                for p in ent.get("properties") or []:
+                    kind, val = (p or {}).get("kind"), (p or {}).get("value", "")
+                    if kind not in news_ground.PROPERTY_KINDS:
+                        e.append(f"news[{aid}]: unknown property kind {kind!r} ({nm})")
+                    elif not val or _news_normalize(str(val)) not in nbody:
+                        e.append(f"news[{aid}]: property value not grounded: {kind}={val!r} ({nm})")
+            ent_names = {ent.get("name") for ent in ents}
+            for r in a.get("relationships") or []:
+                if r.get("label") not in news_ground.RELATION_LABELS:
+                    e.append(f"news[{aid}]: unknown relation label {r.get('label')!r}")
+                if r.get("from") not in ent_names or r.get("to") not in ent_names or r.get("from") == r.get("to"):
+                    e.append(f"news[{aid}]: relationship references a non-extracted entity or itself "
+                             f"({r.get('from')!r}->{r.get('to')!r})")
+                ev = r.get("evidence", "")
+                if not ev or ev not in body:
+                    e.append(f"news[{aid}]: relationship evidence not raw-grounded: {ev!r}")
+            for s in a.get("main_subjects") or []:
+                if s not in ent_names:
+                    e.append(f"news[{aid}]: main_subject is not an extracted entity: {s!r}")
     rows = book.get("rows") if isinstance(book, dict) else None
     if not isinstance(rows, list) or not rows:
         e.append("news: book.rows must be a non-empty array")

@@ -1,15 +1,17 @@
 # Active Phase Context
 
-Phase: 40 — Live red-flag extraction quality (measure-first). Lite. ALL 6 tasks [x] (T5 SKIPPED-WITH-REASON — the sectioning trigger didn't fire); full regate green; READY FOR COMPLETION pending the delivery gate.
+Phase: 41 — Entity-resolution schema enrichment (live news). Lite. ALL 6 tasks T1–T6 [x] — READY FOR COMPLETION; delivery gate pending (present → commit+push to main → flip post-commit-verify). Spec: specs/phase-41-entity-resolution-schema.md (nana:approved 2026-06-09).
 
-Objective: DONE — measured (proxies + blind second-rater agreement, consensus never ground truth; residue = RECALL on commercial longreads, user-adjudicated at the T2 checkpoint) → SYSTEM_PROMPT context-shaped (20-family mechanism checklist + granularity contract + committed-record exemplars + [12,240] drift fix; r3 rolled back, r2 shipped) → shared-gate dup-collapse (news_ground.flag_dup_key: live DROP / build CHECK; 4 committed records clean) → HOLDOUT covR 0.40→0.55, mechCovR 0.46→0.63, positional decay eliminated; federal unregressed (0.73→0.74); 3 new .ph40 federal fixtures (10 total) + docs.
+Objective (DELIVERED): the LIVE entity scan enriched for proper ER — aliases[] verbatim-KEPT (DROP→FOLD inversion), properties[] {kind,value} closed vocab (incl. client_number/account_number — private investigation notes a first-class future input), relationships[] {from,to,label,evidence} + main_subject, all grounded-or-stripped by the SHARED gate (labels vocab-checked, never correctness-checked). DuckDB normalized to ANCHORS (anchors + source_type, ONE monolithic property table w/ confidence NULL-reserved, relationship edges); exact-name cross-scan accumulation; screen matches name ∪ aliases (max score). D5: red_flags FIRST in EXTRACT_SCHEMA order (strict-grammar generation order is load-bearing — flags-last cost −12.5%, r2 cleared it).
 
-Remaining: present the delivery gate → commit + push to main → flip `delivery=accepted` post-commit-verify (delivery-flow D3). Commit hygiene: `.claude/.memory-consulted` (untracked session marker) must NOT be committed; `.dev-wiki/tmp/ph40/` + `data/news/.live/` stay local-only; `specs/` + the .ph40 fixture pairs DO commit.
+Scope: scripts/{serve_news,news_ground,news_store}.py · scripts/build.py (shared-gate consequence) · news.html (LIVE region only) · tests/{news_live_test.py,news-stream.test.mjs,fixtures/news-live/**} · docs/news-live.md · tests/smoke-checklist.md · CLAUDE.md.
 
-Key constraints HELD: dists byte-identical 5/5 (NO client/news.html change); commercial captures never committed (fixture promotion US-federal-only); replay fixtures green without re-capture; agreement reported as consensus, no accuracy number as real; badge stays; NO non-negotiable change.
+Key constraints HELD: offline dist/news + 4 committed records + book.json BYTE-FROZEN (--check all 5/5 zero drift); replay goldens regenerated deterministically (old captures default-empty; pinned pre-41 captures byte-clean); PRIVACY boundary (gitignored DuckDB; 127.0.0.1 model; fixtures US-federal-only w/ FIXTURE_META allowlist assert); the always-on badge stays; NO non-negotiable change.
 
-Carried to Phase 41: semantic instance-dup merge pass · denial-quote prompt micro-rule · committed registry-scoring harness · CLAUDE.md trim (279 lines) · FINTRAC /intel/ depth · third jurisdiction (AUSTRAC/UK) · verify-latency batching.
+Exit criteria: MET — all selftests + news_live_test (+--live smoke) + node news-stream 103 + corpus 239 green; 3 NEW .ph41 fixtures; docs/smoke-checklist/CLAUDE.md updated. Reviewer 9/10 ACCEPT, zero HIGH+.
+
+Next: delivery gate → commit + push to main (commits-phases-to-main) → flip delivery=accepted → /dev-plan Phase 42 (candidates: anchor dossier view + conflict surfacing · fuzzy-merge adjudication · CLAUDE.md trim · FINTRAC /intel/ · AUSTRAC/UK · negative-news bulk scan).
 
 Gates:
-- [x] Direction confirmed by user (assumption gate closed 2026-06-09; revisit filled at debrief: A1/A3/A4 held, A2 held-with-deviation)
-- [x] Delivery accepted (post-implementation report 2026-06-09; phase commit ea53adc verified on main)
+- [x] Direction confirmed by user (assumption gate closed 2026-06-09: A1 reject→A1' accept-with-conditions, A3 reject→A3'a/A3'b accept, A2/A4/A5 accept)
+- [ ] Delivery accepted (post-implementation report)

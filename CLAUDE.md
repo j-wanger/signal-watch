@@ -78,7 +78,7 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    server-side via `news_ground.py` (ungrounded dropped) → the same arc. `/extract` streams NDJSON STAGE
    PROGRESS (fetching → converted[text → fills the textarea; pasted text wins over URL on re-run] →
    extracting → grounding → verifying i/N + elapsed; errors travel in-stream) read by the page via
-   fetch+ReadableStream. The live
+   fetch+ReadableStream. **Optional LIVE mode spans Phase 35–41.** The live
    branch is build-time STRIPPED from the offline `dist/news` (zero network code there); the offline file
    stays the default + fallback. **Persistence + the feedback watchlist (Phase 36):** each live scan
    row-appends to a local DuckDB store (`scripts/news_store.py`, companion-only — build.py NEVER imports it;
@@ -94,7 +94,8 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    `extract()` (`verify_entities`, on by default, `--no-verify-entities` off; fail-OPEN=KEEP, LIVE-only,
    layered ON TOP of the deterministic `build_record` the replay fixtures pin). The escalated watchlist is now
    VIEWABLE + prunable (`POST /watchlist/prune {name}` + a Select-screen panel). `news_ground.screen_entities`
-   keeps only the structural drops (alias-dedup/source-line/judicial/moniker). **Flag quality (Phase 40,
+   keeps the structural rules (source-line/judicial drops; since Phase 41 alias-dedup + adjacent-moniker
+   FOLD into the parent's aliases — audit-trailed `folded_into` — orphan handles still drop). **Flag quality (Phase 40,
    measure-first):** the red_flags prompt contract carries a 20-family mechanism CHECKLIST (a coverage net incl.
    institutional-control-failure + misrepresentation families) + a granularity contract (one flag per distinct
    behaviour, retellings merge) + the [12,240] bounds (prompt/gate drift fixed) — measured against a BLIND
@@ -102,9 +103,27 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    0.40→0.55, positional decay eliminated, federal layer unregressed; a per-flag precision verify was dropped
    (residue was recall) and sectioned extraction skipped (trigger didn't fire). The shared gate adds ONE
    measurement-earned rule: duplicate-flag collapse (same quote + same category, first survives) — DROP-mode in
-   `ground_record` (live), CHECK-mode in `validate_news_data` (build, fail loud). Recorded-fixture replay
-   (`tests/fixtures/news-live/`, 10 real captured-Qwen outputs: 7 original incl. 3 promoted stress articles + 3
-   `<id>.ph40.*` checklist-prompt re-captures) pins the deterministic core offline; `tests/news_live_test.py
+   `ground_record` (live), CHECK-mode in `validate_news_data` (build, fail loud). **Entity resolution (Phase
+   41):** the live scan is a resolution-grade identity record — entities carry `aliases[]` (verbatim) +
+   `properties[]` {kind, value} (closed vocab incl. client_number/account_number — PRIVATE INVESTIGATION
+   NOTES are a first-class future input); the record carries `relationships[]` {from,to,label,evidence}
+   (closed vocab, labels vocab-checked never correctness-checked) + `main_subjects` (honest none/multiple).
+   Vocab authority = `news_ground.PROPERTY_KINDS`/`RELATION_LABELS` (schema + prompt CONSTRUCT from them).
+   Gate: aliases RAW-ground, property values NORMALIZE-ground (wrap/punct-tolerant, rejects derived forms —
+   canonicalization post-gate only), relationship evidence RAW-grounds + referential integrity; everything
+   grounded-or-stripped, shared live-DROP/build-CHECK. `red_flags` sit FIRST in EXTRACT_SCHEMA (measured:
+   flags-last cost ~12.5% kept flags; flags-first restored 24→25 on the 3-article regression set). DuckDB
+   normalizes to the ANCHOR design: anchors (exact-normalized name = identity spine; cross-scan
+   ACCUMULATION; fuzzy merge deferred) + ONE monolithic property association table (per-row scan provenance,
+   conflicting values BOTH kept never auto-resolved, confidence RESERVED/NULL) + relationship edges;
+   `scans.source_type` (gov-enforcement/commercial-news/investigation-note). Screen matches name ∪ aliases
+   (max pair score; single-token/@-handle aliases EXACT-normalized only, never fuzzy). Disposition shows the
+   SUBJECT MAP (mains + evidence edges) + identity cards. PRIVACY boundary by CHECK: private data confined
+   to the gitignored local store + 127.0.0.1 model; fixture promotion blocked by the US-federal
+   `FIXTURE_META` allowlist assert. Recorded-fixture replay
+   (`tests/fixtures/news-live/`, 13 real captured-Qwen outputs: 7 original incl. 3 promoted stress articles + 3
+   `<id>.ph40.*` checklist-prompt re-captures + 3 `<id>.ph41.*` enriched-schema re-captures) pins the
+   deterministic core offline; `tests/news_live_test.py
    --live` is an opt-in real-model smoke. See `docs/news-live.md`.
 
 ### Build (`scripts/build.py`)
@@ -211,13 +230,17 @@ boundary (a LOCAL normalizer — build.py never imports the authoring layer).
   - `news` reads `data/news/{articles,derived,book}`. Both are grounded/validated at the build boundary.
 - Present: open `dist/<id>/index.html` (or `dist/corpus/index.html`, `dist/news/index.html`) — single
   self-contained file, offline, no server.
-- News LIVE mode (Phase 35–39, optional, dev/authoring-time): start a local llama-cpp server, then
+- News LIVE mode (Phase 35–41, optional, dev/authoring-time): start a local llama-cpp server, then
   `.venv/bin/python scripts/serve_news.py --llm-url <chat-endpoint> --model <name>` and open
   http://localhost:8000. Submit an article URL (one-shot: news_fetch ladder → standardize → verify →
-  extract; the converted text fills the textarea for trim + re-run) or paste text; stage progress streams
+  extract; the converted text fills the textarea for trim + re-run) or paste text + pick a source type
+  (gov-enforcement/commercial-news/investigation-note); stage progress streams
   live (verify i/N + elapsed). Extraction is grounded server-side (ungrounded dropped) + entity-verified
-  (subjects-only prompt + keep-biased second pass, on by default; `--no-verify-entities` off); each scan
-  persists to DuckDB and the Disposition-gate ESCALATE grows the screen watchlist (viewable + prunable),
+  (subjects-only prompt + keep-biased second pass, on by default; `--no-verify-entities` off) + ER-enriched
+  (aliases/properties/relationships/main subjects, all grounded-or-stripped; the Disposition subject map +
+  identity cards render it; aliases join the screen surface); each scan
+  persists to DuckDB (anchor accumulation by exact-normalized name) and the Disposition-gate ESCALATE grows
+  the screen watchlist (viewable + prunable),
   run under `.venv` for persistence (`--export-parquet <dir>` exports; `--no-persist` disables) AND for
   URL mode (markitdown). The offline `dist/news` is unaffected (the live/persistence/view/progress/URL
   code is stripped from it). Details: `docs/news-live.md`.
@@ -227,12 +250,14 @@ boundary (a LOCAL normalizer — build.py never imports the authoring layer).
     multi-source menu (doc_type chips, FINTRAC footer attribution) + the 4 lenses + cross-corpus synthesis.
   - `node tests/news-stream.test.mjs` — the adverse-media arc + the fuzzy matcher (seeded matches,
     near-matches, the common-name trap dismissable at the gate); both motion modes; + the companion-served
-    live overrides (book ∪ watchlist screen + the escalate gate + the Phase-38 watchlist VIEW/prune panel) +
+    live overrides (book ∪ watchlist screen + the escalate gate + the Phase-38 watchlist VIEW/prune panel +
+    the Phase-41 alias-aware matcher [exact-yes/fuzzy-no per alias class] + subject-map/identity-card render) +
     the offline-is-book-only strip assertion.
   - `python3 scripts/derive_signals.py --selftest` — the derivation GATE checks + anchor fixtures.
   - `python3 tests/news_live_test.py` — the live extraction pipeline (build_record + grounding incl. the
-    duplicate-flag collapse, the recorded-fixture REPLAY [10 captured-Qwen outputs → goldens, no model,
-    incl. 3 `.ph40` checklist-prompt re-captures], the keep-biased second-pass verify,
+    duplicate-flag collapse, the recorded-fixture REPLAY [13 captured-Qwen outputs → goldens, no model,
+    incl. 3 `.ph40` checklist-prompt + 3 `.ph41` enriched-schema re-captures, every base id asserted
+    against the US-federal FIXTURE_META allowlist], the keep-biased second-pass verify,
     the `/extract` NDJSON stage-stream + one-shot URL routes [model + acquisition stubbed; stages precede the
     payload, errors in-stream, text wins over url] + `/watchlist/prune`; `--live` is an opt-in real-model
     smoke); under `.venv` it also drives `/watchlist` + `/disposition` + `/watchlist/prune` over a temp DuckDB
@@ -241,7 +266,8 @@ boundary (a LOCAL normalizer — build.py never imports the authoring layer).
     committed golden, the article-shape verifier, the interstitial detector, the ladder order incl.
     verifier-advances-the-ladder; under `.venv` also a real markitdown fixture conversion) ·
     `.venv/bin/python scripts/news_store.py --selftest` (DuckDB store: append → escalate →
-    watchlist union → parquet roundtrip) · `python3 scripts/serve_news.py --selftest` (the companion page).
+    watchlist union → parquet roundtrip + anchor accumulation/conflict-keep/NULL-confidence/legacy
+    migration) · `python3 scripts/serve_news.py --selftest` (the companion page).
   - Pre-present sequence: `--check all` (drift) → `node tests/…` (arcs) → walk `tests/smoke-checklist.md`.
 - Authoring a new corpus source (build-time only; raw PDFs gitignored, the committed `<dir>/*.md` is
   the surface): `crawl_fincen.py [--alerts] --fetch`/`--write` → `acquire_fincen.py --source <dir>

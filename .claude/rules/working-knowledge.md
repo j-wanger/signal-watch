@@ -20,3 +20,7 @@
   source: ~/.claude/wikis.json negative-news | activated: 2026-06-09 | tier: 3
 - [uses: 1] `rf_region` does NOT transfer to news articles — a news story has no enumerated red-flag list, so flag COMPLETENESS has no deterministic anchor there (unlike advisories). The honest completeness measure is a blind second-rater reference extraction reported as inter-rater agreement (consensus, never ground truth) + human cluster adjudication. (Phase 40 D2.)
   source: scripts/news_ground.py vs derive_signals.py rf_region | activated: 2026-06-09 | tier: 3
+- [uses: 1] The replay-fixture SEAM: a SYSTEM_PROMPT/EXTRACT_SCHEMA change NEVER forces model re-capture — goldens regenerate DETERMINISTICALLY from the pinned `<id>.qwen.json` captures via build_record; any NEW extraction field must DEFAULT-EMPTY when absent from an old capture (old fixtures stay green). Re-capture only to ADD fixtures, US-federal-only. [[phase-41-entity-resolution-schema]]
+  source: tests/fixtures/news-live/ + tests/news_live_test.py (project) | activated: 2026-06-09 | tier: 3
+- [uses: 1] `news_ground.py` is the SHARED gate (build.py imports it BY DESIGN — the one allowed build→companion-layer import): any gate change regates the 4 committed news records (validate_news_data, fail-loud CHECK mode) AND the 10 replay goldens (live DROP mode) — run news_ground --selftest + build news + news_live_test before calling a gate edit done. [[phase-41-entity-resolution-schema]]
+  source: scripts/news_ground.py + scripts/build.py (project) | activated: 2026-06-09 | tier: 3

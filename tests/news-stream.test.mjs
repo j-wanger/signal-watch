@@ -72,6 +72,13 @@ const SCRIPT = html.slice(open + '<script>'.length, close);
      'offline dist/news carries NO Phase-39 URL-input code (stripped)');
   ok(src.includes('live-url') && src.includes('liveApplyConverted'),
      'news.html SOURCE carries the Phase-39 one-shot URL input (companion-served)');
+  // Phase 41: the entity-resolution enrichment UI + alias-aware matcher are companion-only — none survives the strip
+  ok(!html.includes('live-stype') && !html.includes('liveBestPair') && !html.includes('relpanel')
+     && !html.includes('Subject map') && !html.includes('main_subjects'),
+     'offline dist/news carries NO Phase-41 enrichment-UI/alias-matcher code (stripped)');
+  ok(src.includes('live-stype') && src.includes('liveBestPair') && src.includes('Subject map')
+     && src.includes('investigation-note'),
+     'news.html SOURCE carries the Phase-41 source-type selector + subject map + alias matcher (companion-served)');
 }
 
 ok(/class="badge"/.test(html) && /Illustrative data/.test(html), 'always-on illustrative badge present in the ship chrome');
@@ -290,6 +297,16 @@ console.log('\n[live mode] companion-served client overrides (book ∪ watchlist
       { id: 'live-b', scan_id: 'bbb', title: 'Article B', doc_type: 'News', typology: 'fraud', source_org: 'Live',
         article_text: 'Acme Holdings surfaced again in a later filing.',
         entities: [{ id: 'E1', name: 'Acme Holdings', type: 'org' }], red_flags: [] },
+      { id: 'live-e', scan_id: 'eee', title: 'Article E', doc_type: 'News', typology: 'fraud', source_org: 'Live',
+        article_text: 'Maria Lopez ran Lopez Imports LLC, which was a front for her.',
+        entities: [
+          { id: 'E1', name: 'Maria Lopez', type: 'person', aliases: ['M. Lopez'],
+            properties: [{ kind: 'phone', value: '(212) 555-1234' }, { kind: 'client_number', value: 'C-77812' }] },
+          { id: 'E2', name: 'Lopez Imports LLC', type: 'org' }],
+        red_flags: [],
+        main_subjects: ['Maria Lopez'],
+        relationships: [{ from: 'Lopez Imports LLC', to: 'Maria Lopez', label: 'front-for',
+                          evidence: 'was a front for her' }] },
     ],
     book: { rows: [{ id: 'bk-1', name: 'Zzz Unrelated Bank', type: 'org', role: 'counterparty', country: 'US', segment: 'Trade' }] },
     match: { threshold: 0.85 },
@@ -335,6 +352,48 @@ console.log('\n[live mode] companion-served client overrides (book ∪ watchlist
   L.liveRenderWatchlistPanel();
   ok(/No escalated entities yet/.test(env.document.getElementById('watchpanel').innerHTML),
      'watchlist view shows an empty state when nothing is escalated');
+
+  // 4c) Phase 41 — ALIAS-AWARE screening: name ∪ aliases, max pair score, CLASS-AWARE alias rules
+  // (multi-token aliases fuzzy like names; single-token aliases + @-handles exact-normalized ONLY).
+  L.NEWS._watch = [{ name: 'Zeta Container Line', type: 'org', kind: 'scanned', role: 'watchlist',
+                     country: 'escalated from Article A · investigation-note',
+                     aliases: ['Krasnov Trading House', 'Smith', '@zetaops'] }];
+  const aliasArt = { id: 'live-c', scan_id: 'ccc', title: 'C', article_text: 'x', red_flags: [],
+    entities: [
+      { id: 'E1', name: 'Krasnov Trading House', type: 'org' },  // exact via a multi-token alias
+      { id: 'E2', name: 'Krasnov Trading Huose', type: 'org' },  // near-misspelling, fuzzy via multi-token alias
+      { id: 'E3', name: 'Smithe Logistics', type: 'org' },       // must NOT hit via the single-token alias
+      { id: 'E4', name: 'Smith', type: 'person' },               // single-token alias DOES hit exact-normalized
+      { id: 'E5', name: '@zetaops', type: 'org' },               // handle: exact-normalized only
+    ] };
+  const am = Object.fromEntries(L.matchEntities(aliasArt).map(x => [x.entity.name, x]));
+  ok(am['Krasnov Trading House'].hit && am['Krasnov Trading House'].score === 1 && !!am['Krasnov Trading House'].via,
+     'a multi-token watchlist alias matches exactly (via reported for the analyst)');
+  ok(am['Krasnov Trading Huose'].hit && am['Krasnov Trading Huose'].kind === 'near',
+     'a near-misspelling of a multi-token alias still hits (fuzzy allowed for the open class)');
+  ok(!am['Smithe Logistics'].hit,
+     'a single-token alias NEVER fuzzy-matches (exact-normalized only — guards the false-positive flood)');
+  ok(am['Smith'].hit && am['Smith'].score === 1, 'a single-token alias still matches EXACT-normalized');
+  ok(am['@zetaops'].hit && am['@zetaops'].score === 1, 'an @-handle alias matches exact-normalized only');
+  L.NEWS._watch = [{ name: 'Acme Holdings', type: 'org', kind: 'scanned', role: 'watchlist',
+                     country: 'escalated from Article A', aliases: [] }];
+  const am2 = L.matchEntities({ id: 'live-d', red_flags: [], entities: [
+    { id: 'E1', name: 'Fresh Shell LLC', type: 'org', aliases: ['Acme Holdings'] }] })[0];
+  ok(am2.hit && am2.via && am2.via.entity === 'Acme Holdings',
+     'an extracted entity ALIAS matches the watchlist name (the entity-resolution payoff)');
+
+  // 4d) Phase 41 — the Disposition gate renders the SUBJECT MAP + resolution-grade identity cards
+  L.NEWS._watch = [];
+  L.go('disposition', 'live-e');
+  const eh = env.app._html;
+  ok(/Subject map/.test(eh) && /main subject: Maria Lopez/.test(eh),
+     'Disposition shows the subject map with the main subject named');
+  ok(/front-for/.test(eh) && /was a front for her/.test(eh),
+     'a relationship edge renders with its verbatim evidence quote');
+  ok(/a\.k\.a\. M\. Lopez/.test(eh), 'an entity card shows the kept aliases');
+  ok(/client_number/.test(eh) && /C-77812/.test(eh) && /\(212\) 555-1234/.test(eh),
+     'an entity card shows the grounded identifying properties (incl. client_number)');
+  ok(/tag main/.test(eh), 'the main-subject entity card carries the main-subject tag');
 
   // 5) Phase 39 — the client side of the streamed /extract: NDJSON reader + stage labels
   ok(typeof L.liveReadStream === 'function' && typeof L.liveStageLabel === 'function',

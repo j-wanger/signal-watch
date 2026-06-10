@@ -1,4 +1,4 @@
-# News stream — live local-model mode (Phase 35–39, M8)
+# News stream — live local-model mode (Phase 35–41, M8)
 
 Optional, dev/authoring-time **live mode** for the adverse-media news stream: give an article URL (or
 paste the text) and a local model extracts entities + red flags in **real time**, grounded against the
@@ -59,8 +59,11 @@ vocabulary (it overfit its calibration set). Two controls instead, in order of l
    The verify is LIVE-only; it layers on top of the deterministic `build_record` core, which the offline
    replay fixtures pin.
 
-Structurally, a small deterministic pass (`news_ground.screen_entities`) still removes surname-alias
-duplicates, source-attribution publishers, judicial officers, and `@handles` — the rules that *generalize*.
+Structurally, a small deterministic pass (`news_ground.screen_entities`) still removes source-attribution
+publishers and judicial officers. Since Phase 41 the surname-alias duplicates and *structurally adjacent*
+`@handles` (printed right after a parent's name) **FOLD into the parent entity's `aliases`** instead of
+dropping — the article's own name variations are entity-resolution signal, not noise (the fold is
+audit-trailed with a `folded_into` key; an orphan handle with no adjacent parent still drops).
 
 ## Watchlist view + prune (Phase 38)
 The escalated-only watchlist is now **visible and manageable** on the Select screen: a panel lists each
@@ -97,6 +100,43 @@ swinging 4–29. Measurement first (the Phase-38 playbook applied to flags):
   CHECKS the same key (fail loud, never rewrite). Same quote under a *different* category is kept — one
   sentence can ground two mechanisms. No span caps, no topic rules: semantic dedup of *reworded* retellings
   stays a known prompt-side residue, not a gate rule (the Phase-38 overfit lesson).
+
+## Entity resolution (Phase 41)
+The live scan now produces **resolution-grade identity records**, designed for the system's real input
+domain — including **private investigation notes** — not just public articles:
+
+- **Schema.** Entities carry `aliases[]` (verbatim) and `properties[]` `{kind, value}` from a closed
+  kind vocab (`address, phone, email, client_number, account_number, dob, id_registration, wallet,
+  domain` — authority: `news_ground.PROPERTY_KINDS`); the record carries `relationships[]
+  `{from, to, label, evidence}` (closed label vocab `news_ground.RELATION_LABELS`; the **label** is
+  vocab-checked, never correctness-checked — the C/D-code honest split) and `main_subjects` (honest
+  none/multiple — never a forced single pick). `red_flags` come **FIRST in schema order**: measured,
+  the enriched one-call prompt with flags last cost ~12.5% kept flags on a 3-article regression set;
+  flags-first restored it (24→25 kept vs the Phase-40 captures).
+- **Gate (shared, deterministic).** Aliases RAW-ground like names; property values NORMALIZE-ground
+  (tolerant of the article's line-wrap/punctuation variance around an identifier, still rejects
+  derived/canonicalized forms — canonicalization is post-gate work, never gated); relationship
+  `evidence` RAW-grounds like a flag quote + `from`/`to` referential integrity; everything
+  grounded-or-stripped.
+- **Store (the anchor design).** `anchors` is the identity spine (exact-normalized name → ONE anchor;
+  cross-scan properties ACCUMULATE; fuzzy merge adjudication deferred); ONE monolithic
+  `entity_properties` association table — per-row scan provenance, NON-destructive (two conflicting
+  DOBs are BOTH kept and surfaced, never auto-resolved), `confidence` RESERVED/NULL (no model-emitted
+  confidence — a fabricated-shaped number); `entity_relationships` edges; `scans.source_type`
+  (gov-enforcement / commercial-news / investigation-note — document types differ in significance).
+- **Screen (alias-aware).** Matches **name ∪ aliases**, max pair score, CLASS-AWARE: a single-token
+  alias ("Smith") or an `@handle` matches **exact-normalized only** — never fuzzy (guards the 0.85
+  threshold against a false-positive flood); multi-token aliases fuzzy-score like names. Alias hits
+  report the `via` pair for the analyst.
+- **UI.** A source-type selector at submit; the Disposition gate renders the **subject map** (main
+  subject(s) + evidence-quoted relationship edges) and identity cards (a.k.a. line + property chips).
+- **Privacy boundary — by CHECK, not convention.** Private/client data stays in the local live layer
+  (gitignored DuckDB; the 127.0.0.1 model means notes never leave the machine). Fixture promotion is
+  blocked by an allowlist assert: every replay fixture's base id must be in the committed US-federal
+  `FIXTURE_META` registry.
+- **Honest residual.** The kind↔value semantic fit is neural and unguarded (a grounded value can sit
+  under the wrong kind — observed once: `dob = "born in Russia"`); the gate guards vocabulary +
+  grounding only, like relation-label correctness.
 
 ## Extraction progress (Phase 39)
 `POST /extract` answers an **NDJSON stage stream** instead of a single blocking JSON (a full run is tens
@@ -174,24 +214,30 @@ The offline demo still works with no companion: just open `dist/news/index.html`
 
 ## Tests (dep-free, no model; the DuckDB store parts run under `.venv`)
 - `node tests/news-stream.test.mjs` — the offline arc + the fuzzy matcher + the companion-served live
-  overrides: the **book ∪ watchlist** screen, the **escalate** Disposition gate, and (Phase 38) the
-  **watchlist view + prune** panel (render + empty state) — plus the strip assertion that none of the
-  live/watchlist/view code survives in the offline `dist/news`.
+  overrides: the **book ∪ watchlist** screen, the **escalate** Disposition gate, (Phase 38) the
+  **watchlist view + prune** panel (render + empty state), and (Phase 41) the **alias-aware matcher**
+  (exact-yes/fuzzy-no per alias class, both directions) + the **subject map / identity cards** render —
+  plus the strip assertion that none of the live/watchlist/view/enrichment code survives in the offline
+  `dist/news`.
 - `python3 tests/news_live_test.py` — `build_record` + grounding (CANNED, incl. the Phase-40 planted
-  duplicate-flag collapse), the **recorded-fixture replay** (10 real captured-Qwen outputs under
-  `tests/fixtures/news-live/` — 7 original + 3 `<id>.ph40.*` re-captures under the Phase-40 checklist
-  prompt → parse→build→ground→screen == committed goldens, **no model**), the keep-biased **second-pass
-  verify** (model stubbed), the `/extract`
+  duplicate-flag collapse), the **recorded-fixture replay** (13 real captured-Qwen outputs under
+  `tests/fixtures/news-live/` — 7 original + 3 `<id>.ph40.*` checklist-prompt re-captures + 3
+  `<id>.ph41.*` enriched-schema re-captures → parse→build→ground→screen == committed goldens, **no
+  model**; every base id asserted against the US-federal `FIXTURE_META` allowlist — the privacy check),
+  the keep-biased **second-pass verify** (model stubbed), the `/extract`
   route as an **NDJSON stage stream** (stages precede the payload; mid-stream failures → in-stream error
   events), and the **one-shot URL route** (acquisition stubbed: fetching→converted(text)→stages, text
   wins over url, verifier failure → in-stream paste suggestion). Run under **`.venv/bin/python`** to also
-  drive `/watchlist` + `/disposition` + `/watchlist/prune` over a temp DuckDB store; under system python
+  drive `/watchlist` + `/disposition` + `/watchlist/prune` over a temp DuckDB store (Phase 41: the
+  escalated row carries the anchor's **aliases** + the scan's **source_type**); under system python
   those SKIP. Add **`--live`** to hit a running model at `127.0.0.1:8080` (an opt-in smoke; OFF by default).
 - `python3 scripts/news_fetch.py --selftest` — URL acquisition, dep-free + no network: the standardizer
   pinned byte-exact to a committed golden (`tests/fixtures/news-fetch/`), the verifier's pass/fail modes,
   the interstitial meta-refresh detector, and the ladder order incl. the verifier-advances-the-ladder rule.
   Under `.venv` it also converts the committed fixture HTML through real markitdown end-to-end.
 - `.venv/bin/python scripts/news_store.py --selftest` — the DuckDB store: append → escalate → watchlist
-  union → parquet roundtrip.
+  union → parquet roundtrip; Phase 41: anchor accumulation (4 scans → 1 anchor), the both-kept conflict
+  rule, alias/property/relationship edges, the NULL-confidence assert, and the legacy-store additive
+  migration.
 - `python3 scripts/news_ground.py --selftest` — the shared grounding gate.
 - `python3 scripts/serve_news.py --selftest` — the companion assembles the page with the live branch.

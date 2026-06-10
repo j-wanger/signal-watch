@@ -211,7 +211,13 @@ def watchlist_disposition_route_test() -> None:
     book = [{"id": "bk-1", "name": "Globex Bank", "type": "org", "role": "counterparty",
              "country": "United States", "segment": "Trade finance"}]  # deliberately NOT containing George Rossi
     orig = serve_news.call_llm
-    serve_news.call_llm = lambda text, **kw: json.dumps(CANNED)
+    # Phase 41 — the canned output gains a subset-name entity ("Rossi", raw-grounded) that the screen
+    # FOLDS into George Rossi as an alias, plus a main-subject pick: proves the alias rides the anchor
+    # onto the escalated watchlist row, with the scan's source_type in the provenance.
+    canned41 = {**CANNED,
+                "entities": CANNED["entities"] + [{"name": "Rossi", "type": "person"}],
+                "main_subjects": ["George Rossi"]}
+    serve_news.call_llm = lambda text, **kw: json.dumps(canned41)
     store = news_store.NewsStore(":memory:")
     httpd = serve_news.ThreadingHTTPServer(("127.0.0.1", 0), serve_news.Handler)
     httpd.llm_url, httpd.model, httpd.page = "stub://", "stub", "<html></html>"
@@ -234,13 +240,19 @@ def watchlist_disposition_route_test() -> None:
 
     try:
         req = urllib.request.Request(base + "/extract",
-                                     data=json.dumps({"text": ARTICLE_MD, "source_org": "OFAC"}).encode("utf-8"),
+                                     data=json.dumps({"text": ARTICLE_MD, "source_org": "OFAC",
+                                                      "source_type": "investigation-note"}).encode("utf-8"),
                                      headers={"Content-Type": "application/json"}, method="POST")
         with urllib.request.urlopen(req, timeout=10) as r:
             progress, data = read_extract_stream(r)   # Phase 39: the persisted path streams stages too
         assert progress, "expected stage events before the persisted payload"
         scan_id = data.get("scan_id")
         assert scan_id and len(scan_id) == 32, f"persisted scan should echo a scan_id, got {scan_id!r}"
+        # Phase 41 — the subset name folded into the parent as an alias (gate-side), audit-trailed
+        e1 = data["record"]["entities"][0]
+        assert e1["name"] == "George Rossi" and e1.get("aliases") == ["Rossi"], e1
+        assert data["record"].get("main_subjects") == ["George Rossi"], data["record"].get("main_subjects")
+        assert any(d.get("folded_into") == "George Rossi" for d in data["dropped"]), data["dropped"]
 
         _, wl0 = get("/watchlist")
         kinds0 = {r["kind"] for r in wl0["rows"]}
@@ -257,6 +269,9 @@ def watchlist_disposition_route_test() -> None:
         scanned = [r for r in wl1["rows"] if r["kind"] == "scanned"]
         assert len(scanned) == 1 and scanned[0]["name"] == "George Rossi", scanned
         assert "escalated from" in scanned[0]["provenance"], scanned[0]["provenance"]
+        # Phase 41 — the anchor's accumulated alias + the scan's source_type ride the watchlist row
+        assert scanned[0].get("aliases") == ["Rossi"], scanned[0]
+        assert "investigation-note" in scanned[0]["provenance"], scanned[0]["provenance"]
         assert all(r["name"] != "Siam Expert Trading Company Limited" or r["kind"] == "book"
                    for r in wl1["rows"]), "a dismissed entity must not appear as a scanned watchlist row"
 
@@ -340,6 +355,11 @@ def fixture_replay_test() -> None:
         # re-captured under the Phase-40 checklist prompt). The variant shares the BASE article + meta;
         # only the golden pairing uses the full tagged name.
         base = aid.rsplit(".", 1)[0] if "." in aid else aid
+        # Phase 41 — the PRIVACY allowlist CHECK (boundary by check, not convention): every fixture's
+        # base id must be in the committed US-federal FIXTURE_META registry. A private/commercial
+        # capture can NEVER be promoted by habit — promotion requires a deliberate registry edit.
+        assert base in FIXTURE_META, \
+            f"fixture {p.name}: base id {base!r} is NOT in the committed US-federal allowlist (FIXTURE_META)"
         raw = p.read_text(encoding="utf-8")
         # the article lives beside the fixture (promoted stress articles) or in the shipped corpus
         local = FIXDIR / f"{base}.article.md"

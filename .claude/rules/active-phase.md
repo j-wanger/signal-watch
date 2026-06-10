@@ -14,4 +14,4 @@ Next: delivery gate → commit + push to main (commits-phases-to-main) → flip 
 
 Gates:
 - [x] Direction confirmed by user (assumption gate closed 2026-06-09: A1 reject→A1' accept-with-conditions, A3 reject→A3'a/A3'b accept, A2/A4/A5 accept)
-- [ ] Delivery accepted (post-implementation report)
+- [x] Delivery accepted (post-implementation report 2026-06-10; commit 1f74cb2 verified)

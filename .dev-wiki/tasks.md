@@ -40,7 +40,7 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-44-live-extraction-quality -->
-<!-- gate-log:phase-44 direction=approved delivery=pending -->
+<!-- gate-log:phase-44 direction=approved delivery=accepted -->
 
 ## Phase 44 — Live extraction quality: targeted harness, classified fixes, processing page (live news) — M8
 

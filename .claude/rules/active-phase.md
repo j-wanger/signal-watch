@@ -16,4 +16,4 @@ Abort rule (stood down — phase complete): blocked >3 attempts → ask skip or 
 
 Gates:
 - [x] Direction confirmed by user (assumption gate closed 2026-06-10: A1 accept-w/-conditions, A2 accept, A3 don't-know→defended→accept, A4 accept)
-- [ ] Delivery accepted (post-implementation report)
+- [x] Delivery accepted (post-implementation report 2026-06-10; commit 0835bff verified)

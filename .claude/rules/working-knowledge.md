@@ -24,3 +24,9 @@
   source: tests/fixtures/news-live/ + tests/news_live_test.py (project) | activated: 2026-06-09 | tier: 3
 - [uses: 1] `news_ground.py` is the SHARED gate (build.py imports it BY DESIGN — the one allowed build→companion-layer import): any gate change regates the 4 committed news records (validate_news_data, fail-loud CHECK mode) AND the 10 replay goldens (live DROP mode) — run news_ground --selftest + build news + news_live_test before calling a gate edit done. [[phase-41-entity-resolution-schema]]
   source: scripts/news_ground.py + scripts/build.py (project) | activated: 2026-06-09 | tier: 3
+- [uses: 1] The 7 committed news fixture articles are case-DISJOINT — ZERO cross-article entity overlap (verified at the Phase-42 gate; the round-1 "re-scan the .ph41 articles, they share entities" seeding claim was REFUTED by evidence). Cross-scan anchor accumulation can only be demonstrated via same-article re-scan or a seeded synthetic investigation note. [[phase-42-anchor-dossier-network-view]]
+  source: tests/fixtures/news-live/*.golden.json (project) | activated: 2026-06-10 | tier: 3
+- [uses: 1] `news_store.anchor_summary()` — the Phase-41 "built but UNCONSUMED" seam — is CONSUMED as of Phase 42 via the companion `GET /anchor` route + the live dossier panel; treat prior "unconsumed seam" notes as stale. [[phase-42-anchor-dossier-network-view]]
+  source: scripts/news_store.py + scripts/serve_news.py (project) | activated: 2026-06-10 | tier: 3
+- [uses: 1] Sanctions-screening practice layers DOB/identifiers ON TOP of name similarity (transliteration variants are valid matches, not errors — the threshold-recall tension); the Phase-41 properties[] {kind,value} edges make identifier-layered matching possible here — load-bearing design input for the DEFERRED fuzzy-merge adjudication phase. [[wiki:sanctions-screening-operations]]
+  source: aml-wiki sanctions-screening-operations | activated: 2026-06-10 | tier: 3

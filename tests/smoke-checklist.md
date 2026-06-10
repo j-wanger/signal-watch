@@ -106,7 +106,7 @@ that table.
   verbatim under 17 U.S.C. §105); the client/counterparty **book is synthetic** (no real customer data);
   scores are real computed similarity; nothing reads as a real detection/precision rate.
 
-### Live mode (Phase 35 extraction + 36 persistence + 38 entity-precision/watchlist-view + 39 progress/URL + 40 flag-quality + 41 entity-resolution, optional — needs a local llama-cpp server; see `docs/news-live.md`)
+### Live mode (Phase 35 extraction + 36 persistence + 38 entity-precision/watchlist-view + 39 progress/URL + 40 flag-quality + 41 entity-resolution + 42 network/dossier, optional — needs a local llama-cpp server; see `docs/news-live.md`)
 - [ ] **Automated (no model):** `python3 tests/news_live_test.py`, `python3 scripts/news_ground.py --selftest`,
   `python3 scripts/news_fetch.py --selftest`, and `python3 scripts/serve_news.py --selftest` all exit **0**
   (the grounding gate, the build_record pipeline, the `/extract` NDJSON stage stream + one-shot URL route
@@ -116,8 +116,9 @@ that table.
   escalated-only loop + parquet roundtrip + a real markitdown fixture conversion are exercised too.
 - [ ] **Offline artifact still pure:** `dist/news/index.html` contains **no** `fetch(` / `liveInit` /
   `LIVE_START` / `/watchlist` / `/disposition` / `NEWS._watch` / `watchpanel` / `livePrune` / `liveReadStream` /
-  `live-url` / `live-stype` / `liveBestPair` / `Subject map` (the live + persistence + watchlist-view +
-  progress/URL + Phase-41 enrichment code is build-time stripped); it opens
+  `live-url` / `live-stype` / `liveBestPair` / `Subject map` / `liveGraphLayout` / `netsvg` / `dosspanel` /
+  `/anchor` (the live + persistence + watchlist-view + progress/URL + Phase-41 enrichment + Phase-42
+  network/dossier code is build-time stripped); it opens
   standalone as the scripted fallback, screening the static book only.
 - [ ] **Live (with a model):** start llama-cpp, then `python3 scripts/serve_news.py --llm-url <endpoint>
   --model <name>`; open **http://localhost:8000**, click **＋ Process a new article**, paste a public-domain
@@ -161,6 +162,17 @@ that table.
   Screen hits via the alias (`via` shown); a single-token alias or @-handle hits on **exact** name only,
   never fuzzily. Private investigation notes stay local: gitignored DuckDB, 127.0.0.1 model — and the
   replay-fixture allowlist (`FIXTURE_META`) blocks any non-US-federal capture from being promoted.
+- [ ] **Network view + anchor dossier (Phase 42, run under `.venv`):** scan an enforcement article → at
+  **Disposition** the Subject map renders as an **SVG network** (main subjects highlighted + central;
+  edges carry their vocab labels); clicking an **edge** (svg or list row) reveals its verbatim evidence
+  quote (closed by default); clicking a **node** — or a watchlist row name on Select — opens the **Anchor
+  dossier**: every scan that touched the entity with source-type provenance, properties grouped by kind
+  with per-scan provenance, accumulated aliases, relationship edges. Run the **canonical demo flow**
+  (`docs/news-live.md` "Demo: anchor accumulation"): article scan + `docs/demo-investigation-note.md` as
+  *Investigation note* → the shared entity's dossier shows **2 scans**, the note's `client_number`, and
+  the conflicting phone values flagged **"conflicting values — both kept"** (coexisting claims, never
+  auto-resolved). An unscanned entity's dossier reports "No anchor yet" honestly; with persistence off
+  the dossier reports the store unavailable (never a crash).
 
 ## Walk the six-act arc (Next / Back) — read values from the table
 - [ ] **Act 0 — Blind spot:** coverage map renders; gauge animates to the **table value**; red (not-covered) rows visible

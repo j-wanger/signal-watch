@@ -138,6 +138,46 @@ domain — including **private investigation notes** — not just public article
   under the wrong kind — observed once: `dob = "born in Russia"`); the gate guards vocabulary +
   grounding only, like relation-label correctness.
 
+## Network view + anchor dossier (Phase 42)
+Phase 42 CONSUMES the Phase-41 model (read-side only — no gate/schema/prompt/store-write change):
+
+- **Per-scan network visualizer.** The Disposition subject map renders as an **SVG network**: nodes =
+  the scan's entities (main subjects highlighted + central), edges = the gate-passed `relationships[]`
+  with their vocab labels. Layout is `liveGraphLayout` — a PURE deterministic data→positions function
+  (radial placement + a fixed number of relaxation iterations, no randomness, no vendored library;
+  SVG is the initial implementation, revisited if the live tool outgrows demo scale). Clicking an
+  edge (svg or list row) reveals its verbatim grounded **evidence quote** — closed by default.
+  Degenerate shapes tolerated: 0-relationship scans render isolated nodes; an edge endpoint missing
+  from the entity list is synthesized as a node; a from==to edge is skipped.
+- **Anchor dossier.** Clicking a graph node — or a watchlist row name — fetches the NEW companion
+  route `GET /anchor?name=<n>` (wraps `news_store.anchor_summary()`; read-only, name-keyed, honest
+  404 on unknown names, 503 with persistence off) and renders the ACCUMULATED identity: every scan
+  that touched the anchor (with `source_type` provenance), properties grouped by kind with per-scan
+  provenance, accumulated aliases, and relationship edges. **Same-kind different values render BOTH,
+  flagged "conflicting values — both kept"** — coexisting claims for the analyst, presentation-only,
+  never auto-resolved (the Phase-41 store rule, now visible).
+- Everything sits inside the `/*LIVE_START*/…/*LIVE_END*/` region; the offline `dist/news` is
+  byte-identical (zero graph/dossier/route code ships).
+
+## Demo: anchor accumulation (Phase 42)
+The committed fixture articles are case-disjoint (zero cross-article entity overlap), so the dossier's
+payoff — cross-scan accumulation + conflict surfacing — is demonstrated with a committed SYNTHETIC
+investigation note: `docs/demo-investigation-note.md` (clearly labeled; fictional client/phone data;
+subject names from a public OFAC release so it lands on the same demo anchor).
+
+**Canonical flow** (fresh store, companion under `.venv`):
+1. Paste a fixture article (e.g. `data/news/articles/ofac-tgr-group.md`) — source type
+   *Government / enforcement release* — and Run. The Disposition step shows the network.
+2. Paste the body of `docs/demo-investigation-note.md` — source type *Investigation note* — and Run.
+3. Open the shared entity's dossier (click the **George Rossi** node, or the watchlist row after an
+   escalate): TWO scans listed with their source types, the `client_number` from the note, the
+   note's conflicting phone values flagged **"conflicting values — both kept"**, and the location
+   claim sitting beside the article's nationality — coexisting claims, never resolved.
+
+**Optional no-note variant:** re-scan the SAME article twice — the anchor accumulates two scan rows
+(pure accumulation with provenance, no conflict). The DuckDB store stays local + gitignored either
+way; the note is synthetic and the only thing committed.
+
 ## Extraction progress (Phase 39)
 `POST /extract` answers an **NDJSON stage stream** instead of a single blocking JSON (a full run is tens
 of seconds — measured 42.7s end-to-end on a 16-entity OFAC article): one line per pipeline stage —

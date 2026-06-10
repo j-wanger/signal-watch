@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-09
 updated: 2026-06-10
 source: plan
-status: active
+status: completed
 scope: ["scripts/serve_news.py", "scripts/news_ground.py", "scripts/news_store.py", "scripts/build.py", "news.html", "tests/news_live_test.py", "tests/news-stream.test.mjs", "tests/fixtures/news-live/**", "docs/news-live.md", "tests/smoke-checklist.md", "CLAUDE.md"]
 entry_criteria: "Phase 40 delivered + accepted + committed (ea53adc work + 760de35 gate flip) + pushed; 0 open tasks; direction set by user REFRAME at the dev-plan gate; assumption gate closed 2026-06-09 (A1 reject→A1' accept-with-conditions, A3 reject→A3'a/A3'b accept, A2/A4/A5 accept)."
 exit_criteria: "Extraction schema + prompt enriched (aliases/properties/relationships/main_subject) and grounded-or-stripped by the shared gate; alias DROPs inverted to FOLDs; DuckDB anchor redesign with exact-name cross-scan accumulation; screen matches name ∪ aliases; live UI renders enrichment in the LIVE region only; offline dist/news + the 4 committed records + book.json byte-frozen; new .ph41 US-federal fixtures; full regate green; privacy boundary held."

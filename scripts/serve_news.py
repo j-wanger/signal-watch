@@ -30,6 +30,7 @@ import json
 import re
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -409,7 +410,8 @@ def live_config(args, persist: bool = False) -> dict:
     """The `NEWS.live` block the served page reads to enable the live branch (absent in the offline build).
     Phase 36 adds the watchlist/disposition endpoints + a `persist` flag the live UI reflects."""
     return {"extract": "/extract", "watchlist": "/watchlist", "disposition": "/disposition",
-            "prune": "/watchlist/prune", "persist": persist, "model": args.model, "llm_url": args.llm_url}
+            "prune": "/watchlist/prune", "anchor": "/anchor",
+            "persist": persist, "model": args.model, "llm_url": args.llm_url}
 
 
 def news_payload(live_cfg: dict) -> dict:
@@ -469,6 +471,21 @@ class Handler(BaseHTTPRequestHandler):
             rows = (store.watchlist_rows(self.server.book) if store
                     else news_store.reconcile_book(self.server.book))
             self._json(200, {"rows": rows, "persist": store is not None})
+        elif path == "/anchor":
+            # Phase 42 — the dossier read: the accumulated identity for one anchor, name-keyed (the
+            # store resolves name→anchor server-side — the merge-robust seam). READ-ONLY: conflicting
+            # property values arrive as separate provenance'd rows and are never resolved here.
+            name = (urllib.parse.parse_qs(self.path.partition("?")[2]).get("name") or [""])[0].strip()
+            if not name:
+                self._json(400, {"error": "missing 'name' (the anchor to look up)"}); return
+            store = self.server.store
+            if store is None:
+                self._json(503, {"error": "persistence off — no anchor store (run under .venv, without --no-persist)"})
+                return
+            a = store.anchor_summary(name)
+            if a is None:
+                self._json(404, {"error": f"no anchor for {name!r}"}); return
+            self._json(200, a)
         else:
             self._json(404, {"error": f"not found: {path}"})
 
@@ -609,6 +626,7 @@ def selftest() -> int:
     assert '"watchlist": "/watchlist"' in page and '"disposition": "/disposition"' in page, \
         "live config missing the Phase-36 watchlist/disposition endpoints"
     assert '"prune": "/watchlist/prune"' in page, "live config missing the Phase-38 watchlist prune endpoint"
+    assert '"anchor": "/anchor"' in page, "live config missing the Phase-42 anchor dossier endpoint"
     assert "const NEWS = {" in page, "NEWS object not inlined as expected"
     assert "liveInit" in page and "fetch(NEWS.live.extract" in page, "companion page missing the live branch"
     assert "liveReadStream" in page and "liveStageLabel" in page, \

@@ -14,6 +14,7 @@ import pathlib
 import sys
 import threading
 import urllib.error
+import urllib.parse
 import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -302,6 +303,64 @@ def watchlist_disposition_route_test() -> None:
     print("  watchlist/disposition route: /extract persists (scan_id) · /watchlist book→escalated · dismiss excluded · bad target 404 · prune removes by name")
 
 
+def anchor_route_test() -> None:
+    """Phase 42: GET /anchor?name= serves news_store.anchor_summary() — the accumulated identity the
+    dossier renders. Two scans of the same article prove cross-scan ACCUMULATION (2 scan rows; the
+    fold-alias lands one provenance'd row PER scan, non-destructive); unknown and empty-normalizing
+    names 404 honestly (never a 500); a missing name param is a 400."""
+    if not HAS_DUCKDB:
+        print("  anchor route: SKIP (duckdb not installed — run under .venv)")
+        return
+    orig = serve_news.call_llm
+    canned = {**CANNED, "entities": CANNED["entities"] + [{"name": "Rossi", "type": "person"}],
+              "main_subjects": ["George Rossi"]}
+    serve_news.call_llm = lambda text, **kw: json.dumps(canned)
+    store = news_store.NewsStore(":memory:")
+    httpd = serve_news.ThreadingHTTPServer(("127.0.0.1", 0), serve_news.Handler)
+    httpd.llm_url, httpd.model, httpd.page = "stub://", "stub", "<html></html>"
+    httpd.verify = False  # the deterministic route tests exercise plumbing; the neural verify is tested separately
+    httpd.store, httpd.book = store, []
+    port = httpd.server_address[1]
+    base = f"http://127.0.0.1:{port}"
+    t = threading.Thread(target=httpd.serve_forever, daemon=True)
+    t.start()
+    try:
+        for _ in range(2):  # two scans of the SAME article -> the same anchors accumulate
+            req = urllib.request.Request(base + "/extract",
+                                         data=json.dumps({"text": ARTICLE_MD, "source_org": "OFAC",
+                                                          "source_type": "gov-enforcement"}).encode("utf-8"),
+                                         headers={"Content-Type": "application/json"}, method="POST")
+            with urllib.request.urlopen(req, timeout=10) as r:
+                read_extract_stream(r)
+        quoted = urllib.parse.quote("George Rossi")
+        with urllib.request.urlopen(base + "/anchor?name=" + quoted, timeout=10) as r:
+            assert r.status == 200, r.status
+            a = json.loads(r.read().decode("utf-8"))
+        assert a["name"] == "George Rossi" and a["type"] == "person" and a["anchor_id"], a
+        assert a["first_source_type"] == "gov-enforcement", a
+        assert len(a["scans"]) == 2 and all(s["source_type"] == "gov-enforcement" for s in a["scans"]), \
+            f"two scans must accumulate on ONE anchor: {a['scans']}"
+        alias_rows = [p for p in a["properties"] if p["kind"] == "alias" and p["value"] == "Rossi"]
+        assert len(alias_rows) == 2 and all(p["provenance"]["source_type"] for p in alias_rows), \
+            "the fold-alias must land one provenance'd property row PER scan (non-destructive)"
+        assert isinstance(a["relationships"], list), a
+        # unknown name / empty-normalizing name -> honest 404 (never 500); missing name -> 400
+        for q, want in (("?name=" + urllib.parse.quote("Nobody Anywhere"), 404),
+                        ("?name=" + urllib.parse.quote("***"), 404),
+                        ("", 400)):
+            code = 0
+            try:
+                urllib.request.urlopen(base + "/anchor" + q, timeout=10)
+            except urllib.error.HTTPError as he:
+                code = he.code
+            assert code == want, f"/anchor{q}: expected {want}, got {code}"
+    finally:
+        httpd.shutdown()
+        serve_news.call_llm = orig
+        store.close()
+    print("  anchor route: 200 accumulated identity (2 scans · per-scan alias provenance) · 404 unknown/empty-norm · 400 missing name")
+
+
 def disposition_persist_off_test() -> None:
     """Persistence OFF (store None): /watchlist serves the static book reconciled; /disposition returns 503.
     Runs WITHOUT duckdb — proves the graceful-degradation path."""
@@ -334,9 +393,15 @@ def disposition_persist_off_test() -> None:
         except urllib.error.HTTPError as he:
             code = he.code
         assert code == 503, f"prune with persistence off should 503, got {code}"
+        code = 0
+        try:  # Phase 42 — the dossier route degrades honestly too (503, never a 500)
+            urllib.request.urlopen(base + "/anchor?name=Globex%20Bank", timeout=10)
+        except urllib.error.HTTPError as he:
+            code = he.code
+        assert code == 503, f"/anchor with persistence off should 503, got {code}"
     finally:
         httpd.shutdown()
-    print("  persistence-off: /watchlist book-only (persist=false) · /disposition 503 · /watchlist/prune 503")
+    print("  persistence-off: /watchlist book-only (persist=false) · /disposition 503 · /watchlist/prune 503 · /anchor 503")
 
 
 def fixture_replay_test() -> None:
@@ -467,6 +532,7 @@ def main() -> int:
     http_route_test()
     url_route_test()           # Phase 39 — one-shot URL mode (acquisition stubbed)
     watchlist_disposition_route_test()
+    anchor_route_test()        # Phase 42 — the dossier read route (accumulated identity)
     disposition_persist_off_test()
 
     if "--live" in sys.argv:   # opt-in only — the default run never touches 127.0.0.1:8080

@@ -86,12 +86,14 @@ keyboard nav (←/→/Space/Esc/↺) + `prefers-reduced-motion`. Theme in `:root
 | anthropic | GONE (Phase 17) | Was `derive_signals.py --draft` only (lazy). The `--draft`/`--scaffold` authoring stack was DELETED under the inverted loop (the model SESSION is the backend, no API key); derive_signals.py no longer imports it (now stdlib-only). Phase 19 confirmed the "stale pin" is DEAD — `requirements-authoring.txt` does not exist (Ph17's deletion already took it). The ship artifact never called an LLM. |
 | duckdb (1.5.3, MIT) | Phase 36, .venv-only | News-stream LIVE-mode persistence store (`scripts/news_store.py`). Confined to the gitignored uv `.venv` (where markitdown lives); NEVER imported by `build.py` and NEVER inlined into any dist (the self-contained, offline, no-fetch non-negotiable holds). The store file + parquet exports are gitignored (`data/news/.live/`, `*.duckdb`, `*.parquet`). |
 
-**News-stream LIVE backbone (Phase 35–39, companion/dev-time only — the offline `dist/news` is byte-identical).**
+**News-stream LIVE backbone (Phase 35–42, companion/dev-time only — the offline `dist/news` is byte-identical).**
 The M8 news stream gained an optional same-origin stdlib companion `scripts/serve_news.py` (ThreadingHTTPServer
 serves `news.html` + proxies a local llama-cpp `/v1`; routes `GET /health`, `POST /extract` (Phase 39: accepts
 {url} OR {text}, ALWAYS an NDJSON stage stream — received → [fetching → converting] → extracting → grounding →
 verifying i/N → done; `extract(on_progress=None)` keeps the replay-fixture seam), Phase-36
-`GET /watchlist` + `POST /disposition`, Phase-38 `POST /watchlist/prune`; CLI `--export-parquet`/`--no-persist`/`--db`/
+`GET /watchlist` + `POST /disposition`, Phase-38 `POST /watchlist/prune`, Phase-42 `GET /anchor?name=` (read-only,
+name-keyed — wraps `news_store.anchor_summary()` for the anchor dossier; 400 missing name · 503 store-off ·
+404 unknown · 200 JSON); CLI `--export-parquet`/`--no-persist`/`--db`/
 `--no-verify-entities`). Phase 39 added companion-only `scripts/news_fetch.py` (fetch ladder urllib→curl→markitdown,
 deterministic standardizer, article-shape verifier that advances the ladder; fixtures `tests/fixtures/news-fetch/`);
 Phase 38 added the recorded-fixture replay (`tests/fixtures/news-live/`) + the keep-biased `verify_entities`

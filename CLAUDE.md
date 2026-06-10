@@ -78,7 +78,7 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    server-side via `news_ground.py` (ungrounded dropped) → the same arc. `/extract` streams NDJSON STAGE
    PROGRESS (fetching → converted[text → fills the textarea; pasted text wins over URL on re-run] →
    extracting → grounding → verifying i/N + elapsed; errors travel in-stream) read by the page via
-   fetch+ReadableStream. **Optional LIVE mode spans Phase 35–41.** The live
+   fetch+ReadableStream. **Optional LIVE mode spans Phase 35–42.** The live
    branch is build-time STRIPPED from the offline `dist/news` (zero network code there); the offline file
    stays the default + fallback. **Persistence + the feedback watchlist (Phase 36):** each live scan
    row-appends to a local DuckDB store (`scripts/news_store.py`, companion-only — build.py NEVER imports it;
@@ -124,7 +124,19 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    (`tests/fixtures/news-live/`, 13 real captured-Qwen outputs: 7 original incl. 3 promoted stress articles + 3
    `<id>.ph40.*` checklist-prompt re-captures + 3 `<id>.ph41.*` enriched-schema re-captures) pins the
    deterministic core offline; `tests/news_live_test.py
-   --live` is an opt-in real-model smoke. See `docs/news-live.md`.
+   --live` is an opt-in real-model smoke. **Network view + anchor dossier (Phase 42, pure
+   consumption — no gate/schema/prompt/store-write change):** the Disposition subject map renders as a
+   deterministic vanilla-SVG NETWORK (`liveGraphLayout`, a pure data→positions function — radial +
+   fixed-iteration relaxation, no lib, no randomness; main subjects central; an EDGE click reveals its
+   verbatim evidence quote, closed by default) and a NODE click — or a watchlist-row name — opens the
+   ANCHOR DOSSIER via the new companion `GET /anchor?name=` (anchor_summary finally CONSUMED): every
+   scan touching the anchor w/ source-type provenance, properties grouped by kind w/ per-scan
+   provenance, same-kind different values BOTH rendered + flagged "conflicting values — both kept"
+   (presentation-only, never auto-resolved), accumulated aliases, relationship edges; honest 404/
+   store-off states. Demo seed: a committed SYNTHETIC `docs/demo-investigation-note.md` (fictional
+   client_number + deliberately conflicting phones; subject names from the public OFAC TGR release) —
+   the canonical flow is docs/news-live.md `## Demo: anchor accumulation`. All Phase-42 code is
+   LIVE-region-only; the offline dist/news stays byte-identical. See `docs/news-live.md`.
 
 ### Build (`scripts/build.py`)
 Validates a config against the schema (fail-loud), resolves `text_file`→inline, inlines everything →
@@ -230,7 +242,7 @@ boundary (a LOCAL normalizer — build.py never imports the authoring layer).
   - `news` reads `data/news/{articles,derived,book}`. Both are grounded/validated at the build boundary.
 - Present: open `dist/<id>/index.html` (or `dist/corpus/index.html`, `dist/news/index.html`) — single
   self-contained file, offline, no server.
-- News LIVE mode (Phase 35–41, optional, dev/authoring-time): start a local llama-cpp server, then
+- News LIVE mode (Phase 35–42, optional, dev/authoring-time): start a local llama-cpp server, then
   `.venv/bin/python scripts/serve_news.py --llm-url <chat-endpoint> --model <name>` and open
   http://localhost:8000. Submit an article URL (one-shot: news_fetch ladder → standardize → verify →
   extract; the converted text fills the textarea for trim + re-run) or paste text + pick a source type
@@ -251,7 +263,9 @@ boundary (a LOCAL normalizer — build.py never imports the authoring layer).
   - `node tests/news-stream.test.mjs` — the adverse-media arc + the fuzzy matcher (seeded matches,
     near-matches, the common-name trap dismissable at the gate); both motion modes; + the companion-served
     live overrides (book ∪ watchlist screen + the escalate gate + the Phase-38 watchlist VIEW/prune panel +
-    the Phase-41 alias-aware matcher [exact-yes/fuzzy-no per alias class] + subject-map/identity-card render) +
+    the Phase-41 alias-aware matcher [exact-yes/fuzzy-no per alias class] + subject-map/identity-card render +
+    the Phase-42 SVG network [pure deterministic liveGraphLayout: centrality/bounds/degenerate-shape/XSS-escape
+    asserts; edge click reveals evidence] + anchor dossier [conflict both-kept flag, honest 404/empty states]) +
     the offline-is-book-only strip assertion.
   - `python3 scripts/derive_signals.py --selftest` — the derivation GATE checks + anchor fixtures.
   - `python3 tests/news_live_test.py` — the live extraction pipeline (build_record + grounding incl. the

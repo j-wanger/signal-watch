@@ -592,7 +592,8 @@ function liveInjectSelect(){
     const f = document.getElementById('liveform'); f.hidden = !f.hidden;
   });
   document.getElementById('live-run').addEventListener('click', liveRun);
-  document.getElementById('livebar').insertAdjacentHTML('afterend', '<div class="watchpanel" id="watchpanel"></div>');
+  document.getElementById('livebar').insertAdjacentHTML('afterend',
+    '<div class="watchpanel" id="watchpanel"></div><div id="dossier"></div>');
   liveRenderWatchlistPanel();        // render from the cached surface immediately…
   liveRefreshWatchlist();            // …then refresh from the companion (re-renders the panel on return)
 }
@@ -712,7 +713,7 @@ function liveRenderWatchlistPanel(){
     h += '<div class="watchempty">No escalated entities yet — escalate one at the Disposition gate and the screening surface compounds.</div>';
   }else{
     h += '<div class="watchrows">';
-    rows.forEach(r => { h += '<div class="watchrow"><div class="wmeta"><span class="wname">'+esc(r.name)+'</span>'
+    rows.forEach(r => { h += '<div class="watchrow"><div class="wmeta"><button class="wname wdoss" data-n="'+esc(r.name)+'">'+esc(r.name)+'</button>'
       + '<span class="wprov">'+esc(r.country || 'escalated')+'</span></div>'
       + '<button class="wprune" data-n="'+esc(r.name)+'">✕ Prune</button></div>'; });
     h += '</div>';
@@ -720,7 +721,9 @@ function liveRenderWatchlistPanel(){
   el.innerHTML = h;
   el.onclick = (ev) => {                  // delegation — idempotent across re-renders, no per-row rewiring
     const b = ev.target && ev.target.closest && ev.target.closest('.wprune');
-    if(b) livePrune(b.getAttribute('data-n'));
+    if(b){ livePrune(b.getAttribute('data-n')); return; }
+    const d = ev.target && ev.target.closest && ev.target.closest('.wdoss');   // Phase 42 — name → dossier
+    if(d) liveOpenDossier(d.getAttribute('data-n'));
   };
 }
 async function livePrune(name){
@@ -787,6 +790,159 @@ async function livePostDisposition(eid, decision){
     return true;
   }catch(ex){ return false; }
 }
+/* Phase 42 — the subject-map NETWORK layout: a PURE deterministic data→positions function (no DOM, no
+   randomness — the dep-free harness asserts it directly). Main subjects sit central (one main → dead
+   center; several → an inner ring); everyone else on an outer ring, radially placed then relaxed a FIXED
+   number of iterations (each outer node drifts toward the mean angle of its neighbours, then a minimum
+   angular gap is re-enforced). Degenerate shapes tolerated: a from==to edge (a post-fold artifact) is
+   skipped; an edge endpoint that isn't an extracted entity is synthesized as a node (the edge is kept). */
+function liveGraphLayout(entities, relationships, mains, W, H){
+  W = W || 720; H = H || 380;
+  const names = (entities || []).map(e => e.name).filter(Boolean);
+  const seen = new Set(names);
+  const edges = [];
+  (relationships || []).forEach(r => {
+    if(!r || !r.from || !r.to || r.from === r.to) return;
+    [r.from, r.to].forEach(n => { if(!seen.has(n)){ seen.add(n); names.push(n); } });
+    edges.push({ from: r.from, to: r.to, label: r.label || '', evidence: r.evidence || '' });
+  });
+  const mainSet = new Set((mains || []).filter(n => seen.has(n)));
+  const inner = names.filter(n => mainSet.has(n));
+  const outer = names.filter(n => !mainSet.has(n));
+  const cx = W/2, cy = H/2, R2 = Math.min(W, H)/2 - 46;
+  const R1 = inner.length > 1 ? R2*0.38 : 0;
+  const pos = {};
+  inner.forEach((n, i) => { pos[n] = { a: -Math.PI/2 + 2*Math.PI*i/Math.max(inner.length, 1), r: R1 }; });
+  outer.forEach((n, i) => { pos[n] = { a: -Math.PI/2 + 2*Math.PI*i/Math.max(outer.length, 1), r: R2 }; });
+  const nbr = {};
+  edges.forEach(e => { (nbr[e.from] = nbr[e.from] || []).push(e.to); (nbr[e.to] = nbr[e.to] || []).push(e.from); });
+  const minGap = 2*Math.PI/Math.max(outer.length, 8) * 0.7;
+  for(let k = 0; k < 24; k++){
+    outer.forEach(n => {
+      const ns = (nbr[n] || []).filter(m => pos[m]); if(!ns.length) return;
+      let sx = 0, sy = 0;
+      ns.forEach(m => { sx += Math.cos(pos[m].a); sy += Math.sin(pos[m].a); });
+      let d = Math.atan2(sy, sx) - pos[n].a;
+      while(d > Math.PI) d -= 2*Math.PI; while(d < -Math.PI) d += 2*Math.PI;
+      pos[n].a += d*0.25;
+    });
+    const sorted = outer.slice().sort((x, y) => pos[x].a - pos[y].a);
+    for(let i = 1; i < sorted.length; i++){
+      if(pos[sorted[i]].a - pos[sorted[i-1]].a < minGap) pos[sorted[i]].a = pos[sorted[i-1]].a + minGap;
+    }
+  }
+  const nodes = names.map(n => ({ name: n, main: mainSet.has(n),
+    x: Math.round((cx + Math.cos(pos[n].a)*pos[n].r)*10)/10,
+    y: Math.round((cy + Math.sin(pos[n].a)*pos[n].r)*10)/10 }));
+  return { w: W, h: H, nodes, edges };
+}
+/* Phase 42 — the subject map rendered as an SVG network (string-built; esc() on EVERY store-derived
+   value — names, labels, evidence — the stored-XSS guard). The graph is the navigation surface: the
+   evidence quote stays CLOSED until its edge is clicked (svg edge or list row); node clicks open the
+   anchor dossier (Phase 42 T3). All inside the LIVE region — the offline build strips every byte. */
+function liveRenderSubjectGraph(a){
+  const mains = a.main_subjects || [], rels = a.relationships || [];
+  if(!(mains.length || rels.length)) return '';
+  const g = liveGraphLayout(a.entities || [], rels, mains);
+  const P = {}; g.nodes.forEach(n => P[n.name] = n);
+  let h = '<div class="relpanel" id="netpanel"><div class="relhead">Subject map — '
+        + (mains.length ? ('main subject' + (mains.length > 1 ? 's' : '') + ': ' + mains.map(esc).join(', '))
+                        : 'no clear main subject (none forced)') + '</div>';
+  h += '<svg class="netsvg" viewBox="0 0 ' + g.w + ' ' + g.h + '" role="img" aria-label="entity relationship network">';
+  g.edges.forEach((e, i) => {
+    const f = P[e.from], t = P[e.to];
+    h += '<g class="gedge" data-ei="' + i + '"><line x1="' + f.x + '" y1="' + f.y + '" x2="' + t.x + '" y2="' + t.y + '"></line>'
+       + '<text x="' + Math.round((f.x + t.x)/2) + '" y="' + (Math.round((f.y + t.y)/2) - 4) + '">' + esc(e.label) + '</text></g>';
+  });
+  g.nodes.forEach(n => {
+    const lbl = n.name.length > 20 ? n.name.slice(0, 19) + '…' : n.name;
+    h += '<g class="gnode' + (n.main ? ' gmain' : '') + '" data-n="' + esc(n.name) + '">'
+       + '<circle cx="' + n.x + '" cy="' + n.y + '" r="' + (n.main ? 9 : 6) + '"></circle>'
+       + '<text x="' + n.x + '" y="' + (n.y - (n.main ? 13 : 10)) + '">' + esc(lbl) + '</text></g>';
+  });
+  h += '</svg>';
+  g.edges.forEach((e, i) => {
+    const open = a._gsel === i;
+    h += '<div class="reledge gerow' + (open ? ' open' : '') + '" data-ei="' + i + '">'
+       + '<span class="relwho">' + esc(e.from) + '</span><span class="rellabel">—' + esc(e.label) + '→</span>'
+       + '<span class="relwho">' + esc(e.to) + '</span>'
+       + (open ? '<div class="relev">“' + esc(e.evidence) + '”</div>' : '')
+       + '</div>';
+  });
+  h += '</div>';
+  return h;
+}
+/* Phase 42 — the ANCHOR DOSSIER: the accumulated identity behind one entity (GET /anchor wraps the
+   store's anchor_summary). READ-ONLY by design: same-kind conflicting values arrive as separate
+   provenance'd rows and render BOTH with a conflict flag — coexisting claims for the analyst, never a
+   resolved value (the store keeps everything; this view resolves nothing). esc() on every value. */
+function liveDossierBody(a){
+  const scans = a.scans || [];
+  let h = '<div class="dossmeta">' + esc(a.type || 'entity')
+        + (a.first_source_type ? ' · first seen via ' + esc(a.first_source_type) : '')
+        + ' · ' + scans.length + ' scan' + (scans.length === 1 ? '' : 's') + '</div>';
+  h += '<div class="dosssec">Scans touching this anchor</div>';
+  scans.forEach(s => {
+    h += '<div class="dossrow"><span class="dossval">' + esc(s.title || s.scan_id) + '</span>'
+       + '<span class="dossprov">' + esc((s.ts || '').slice(0, 10))
+       + (s.source_type ? ' · ' + esc(s.source_type) : '') + '</span></div>';
+  });
+  const groups = {};
+  (a.properties || []).forEach(p => { (groups[p.kind] = groups[p.kind] || []).push(p); });
+  const aliasRows = groups.alias || []; delete groups.alias;
+  const aliases = aliasRows.map(p => p.value).filter((v, i, arr) => arr.indexOf(v) === i);
+  if(aliases.length) h += '<div class="lalias">a.k.a. ' + aliases.map(esc).join(' · ') + '</div>';
+  const kinds = Object.keys(groups).sort();
+  if(kinds.length){
+    h += '<div class="dosssec">Claimed properties — per-scan provenance</div>';
+    kinds.forEach(k => {
+      const rows = groups[k];
+      const distinct = rows.map(p => p.value).filter((v, i, arr) => arr.indexOf(v) === i);
+      h += '<div class="dosskind"><b>' + esc(k) + '</b>'
+         + (distinct.length > 1 ? '<span class="conflict">conflicting values — both kept</span>' : '') + '</div>';
+      rows.forEach(p => {
+        const pr = p.provenance || {};
+        h += '<div class="dossrow"><span class="dossval">' + esc(p.value) + '</span>'
+           + '<span class="dossprov">' + esc(pr.title || '') + ' · ' + esc((pr.ts || '').slice(0, 10))
+           + (pr.source_type ? ' · ' + esc(pr.source_type) : '') + '</span></div>';
+      });
+    });
+  }
+  if((a.relationships || []).length){
+    h += '<div class="dosssec">Relationships</div>';
+    a.relationships.forEach(r => {
+      h += '<div class="reledge"><span class="relwho">' + esc(r.from) + '</span>'
+         + '<span class="rellabel">—' + esc(r.label) + '→</span>'
+         + '<span class="relwho">' + esc(r.to) + '</span>'
+         + '<div class="relev">“' + esc(r.evidence) + '”</div></div>';
+    });
+  }
+  if(!kinds.length && !aliases.length && !(a.relationships || []).length){
+    h += '<div class="watchempty">Nothing accumulated beyond the name yet — only the name has been seen. '
+       + 'Properties, aliases and relationships join the dossier as further scans (or investigation notes) land.</div>';
+  }
+  return h;
+}
+async function liveOpenDossier(name){
+  const el = document.getElementById('dossier');
+  if(!el || !name || !NEWS.live.anchor) return;
+  const head = '<div class="dosspanel"><div class="dosshead">Anchor dossier — ' + esc(name) + '</div>';
+  el.innerHTML = head + '<div class="dossmeta">Loading…</div></div>';
+  let body;
+  try{
+    const r = await fetch(NEWS.live.anchor + '?name=' + encodeURIComponent(name));
+    if(r.status === 404){
+      body = '<div class="watchempty">No anchor yet for ' + esc(name)
+           + ' — it joins the local store when a persisted scan extracts it.</div>';
+    }else if(!r.ok){
+      body = '<div class="watchempty">Anchor store unavailable (HTTP ' + r.status
+           + ') — run the companion under .venv with persistence on.</div>';
+    }else{
+      body = liveDossierBody(await r.json());
+    }
+  }catch(ex){ body = '<div class="watchempty">Anchor store unreachable.</div>'; }
+  el.innerHTML = head + body + '</div>';
+}
 /* Disposition (live): escalate ANY extracted entity to the watchlist. Escalating a book/watchlist HIT also
    confirms it as an exposure (state.dispo) so the Exposure view shows it. Committed (non-persisted) articles
    have no scan_id → fall back to the base gate. */
@@ -801,21 +957,12 @@ function liveRenderDisposition(){
   h += '<p class="lead">The agent proposes; the analyst disposes. <b>Escalate</b> an entity to add it to the '
      + 'live watchlist — every article you screen next is matched against it too. Escalation is how the screen '
      + 'surface compounds; a high score is <em>not</em> a confirmation.</p>';
-  // Phase 41 — the SUBJECT MAP: who the article is principally about + how the others connect (every
-  // edge gate-passed: label vocab-checked, evidence verbatim-grounded). Honest none/multiple subjects.
+  // Phase 41/42 — the SUBJECT MAP: who the article is principally about + how the others connect (every
+  // edge gate-passed: label vocab-checked, evidence verbatim-grounded; honest none/multiple subjects).
+  // Phase 42 renders it as an SVG NETWORK — evidence opens on edge click.
   const mains = a.main_subjects || [];
-  if(mains.length || (a.relationships || []).length){
-    h += '<div class="relpanel"><div class="relhead">Subject map — '
-       + (mains.length ? ('main subject' + (mains.length > 1 ? 's' : '') + ': ' + mains.map(esc).join(', '))
-                       : 'no clear main subject (none forced)') + '</div>';
-    (a.relationships || []).forEach(r => {
-      h += '<div class="reledge"><span class="relwho">'+esc(r.from)+'</span>'
-         + '<span class="rellabel">—'+esc(r.label)+'→</span>'
-         + '<span class="relwho">'+esc(r.to)+'</span>'
-         + '<div class="relev">“'+esc(r.evidence)+'”</div></div>';
-    });
-    h += '</div>';
-  }
+  h += liveRenderSubjectGraph(a);
+  h += '<div id="dossier"></div>';   // Phase 42 — a node click renders the anchor dossier here
   h += '<div class="rows">';
   (a.entities || []).forEach(en => {
     const x = byId[en.id] || { score:0, hit:false, kind:'none', row:null };
@@ -845,6 +992,16 @@ function liveRenderDisposition(){
     const ok = await livePostDisposition(eid, next ? 'escalate' : 'dismiss');
     if(!ok){ a._escal[eid] = !next; if(x && x.hit) state.dispo[dispoKey(a.id, eid)] = !next; }
     render();
+  }));
+  // Phase 42 — edge click (svg edge or list row) toggles the grounded evidence quote open
+  ['.gedge', '.gerow'].forEach(sel => app.querySelectorAll(sel).forEach(el => el.addEventListener('click', () => {
+    const i = parseInt(el.getAttribute('data-ei'), 10);
+    a._gsel = (a._gsel === i ? null : i);
+    render();
+  })));
+  // Phase 42 — node click opens the entity's anchor dossier (the accumulated cross-scan identity)
+  app.querySelectorAll('.gnode').forEach(el => el.addEventListener('click', () => {
+    liveOpenDossier(el.getAttribute('data-n'));
   }));
   wireNav();
 }
@@ -877,6 +1034,26 @@ function liveInit(){
     + '.relwho{font:600 13px var(--body);color:var(--ink)}'
     + '.rellabel{color:var(--signal);font:600 11px var(--mono);margin:0 8px}'
     + '.relev{font:12px/1.5 var(--body);color:var(--muted);font-style:italic;margin-top:2px}'
+    + '.netsvg{width:100%;height:auto;display:block;margin:8px 0 4px}'
+    + '.netsvg line{stroke:var(--line2);stroke-width:1.2}'
+    + '.gedge{cursor:pointer}'
+    + '.gedge:hover line{stroke:var(--signal)}'
+    + '.gedge text{fill:var(--signal);font:600 10px var(--mono);text-anchor:middle}'
+    + '.gnode circle{fill:var(--panel2);stroke:var(--muted);stroke-width:1.4;cursor:pointer}'
+    + '.gnode.gmain circle{stroke:var(--signal);fill:rgba(246,166,35,.18)}'
+    + '.gnode text{fill:var(--ink);font:600 11px var(--body);text-anchor:middle;cursor:pointer}'
+    + '.gerow{cursor:pointer}'
+    + '.gerow.open{border-left:2px solid var(--signal);padding-left:8px}'
+    + '.dosspanel{border:1px solid var(--line);border-left:3px solid var(--signal);border-radius:10px;padding:12px 14px;margin:12px 0;background:var(--panel2)}'
+    + '.dosshead{font:600 14px var(--head);color:var(--ink)}'
+    + '.dossmeta{font:11px var(--mono);color:var(--muted);margin:3px 0 6px}'
+    + '.dosssec{font:600 10px var(--mono);color:var(--signal);text-transform:uppercase;letter-spacing:.06em;margin:10px 0 4px}'
+    + '.dossrow{display:flex;justify-content:space-between;gap:12px;padding:4px 0;border-top:1px dashed var(--line2)}'
+    + '.dossval{font:13px var(--body);color:var(--ink)}'
+    + '.dossprov{font:11px var(--mono);color:var(--muted);text-align:right;flex:none}'
+    + '.dosskind{margin-top:6px;font:12px var(--body);color:var(--ink)}'
+    + '.dosskind .conflict{margin-left:8px;border:1px solid var(--signal);color:var(--signal);border-radius:4px;padding:1px 6px;font:600 10px var(--mono)}'
+    + '.wdoss{background:transparent;border:0;padding:0;cursor:pointer;text-align:left}'
     + '.lalias{font:11px var(--mono);color:var(--signal);margin-top:3px}'
     + '.lprops{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}'
     + '.lprop{border:1px solid var(--line2);border-radius:4px;padding:1px 6px;font:11px var(--mono);color:var(--muted)}'

@@ -79,6 +79,14 @@ const SCRIPT = html.slice(open + '<script>'.length, close);
   ok(src.includes('live-stype') && src.includes('liveBestPair') && src.includes('Subject map')
      && src.includes('investigation-note'),
      'news.html SOURCE carries the Phase-41 source-type selector + subject map + alias matcher (companion-served)');
+  // Phase 42: the SVG network visualizer + anchor dossier are companion-only — none survives the strip
+  ok(!html.includes('liveGraphLayout') && !html.includes('netsvg') && !html.includes('gedge')
+     && !html.includes('netpanel') && !html.includes('liveOpenDossier') && !html.includes('dosspanel')
+     && !html.includes('/anchor'),
+     'offline dist/news carries NO Phase-42 network-visualizer/dossier code (stripped)');
+  ok(src.includes('liveGraphLayout') && src.includes('netsvg') && src.includes('gedge')
+     && src.includes('liveOpenDossier') && src.includes('dosspanel'),
+     'news.html SOURCE carries the Phase-42 SVG network visualizer + anchor dossier (companion-served)');
 }
 
 ok(/class="badge"/.test(html) && /Illustrative data/.test(html), 'always-on illustrative badge present in the ship chrome');
@@ -148,7 +156,7 @@ function bootLive(scriptText, reduced) {
   const ctx = vm.createContext({ window: env.window, document: env.document, console,
     fetch: fetchStub, setTimeout: env.setTimeout, clearTimeout: env.clearTimeout });
   let threw = null;
-  try { vm.runInContext(scriptText + '\n;globalThis.__L={go,state,matchEntities,articleById,NEWS,RENDER,liveRenderWatchlistPanel,livePrune,liveReadStream,liveStageLabel};', ctx); }
+  try { vm.runInContext(scriptText + '\n;globalThis.__L={go,state,matchEntities,articleById,NEWS,RENDER,liveRenderWatchlistPanel,livePrune,liveReadStream,liveStageLabel,liveGraphLayout,liveOpenDossier,liveDossierBody};', ctx); }
   catch (e) { threw = e; }
   return { env, ctx, threw };
 }
@@ -302,7 +310,9 @@ console.log('\n[live mode] companion-served client overrides (book ∪ watchlist
         entities: [
           { id: 'E1', name: 'Maria Lopez', type: 'person', aliases: ['M. Lopez'],
             properties: [{ kind: 'phone', value: '(212) 555-1234' }, { kind: 'client_number', value: 'C-77812' }] },
-          { id: 'E2', name: 'Lopez Imports LLC', type: 'org' }],
+          { id: 'E2', name: 'Lopez Imports LLC', type: 'org' },
+          // Phase 42 — a hostile store-derived name: the graph + cards must render it ESCAPED (stored-XSS guard)
+          { id: 'E3', name: '<img src=x onerror=alert(1)>', type: 'org' }],
         red_flags: [],
         main_subjects: ['Maria Lopez'],
         relationships: [{ from: 'Lopez Imports LLC', to: 'Maria Lopez', label: 'front-for',
@@ -310,7 +320,7 @@ console.log('\n[live mode] companion-served client overrides (book ∪ watchlist
     ],
     book: { rows: [{ id: 'bk-1', name: 'Zzz Unrelated Bank', type: 'org', role: 'counterparty', country: 'US', segment: 'Trade' }] },
     match: { threshold: 0.85 },
-    live: { extract: '/extract', watchlist: '/watchlist', disposition: '/disposition', prune: '/watchlist/prune', persist: true, model: 'm', llm_url: 'u' },
+    live: { extract: '/extract', watchlist: '/watchlist', disposition: '/disposition', prune: '/watchlist/prune', anchor: '/anchor', persist: true, model: 'm', llm_url: 'u' },
   };
   const liveScript = SRC.slice(SRC.indexOf('<script>') + '<script>'.length, SRC.lastIndexOf('</script>'))
     .replace('__NEWS__', JSON.stringify(liveNEWS));
@@ -382,18 +392,106 @@ console.log('\n[live mode] companion-served client overrides (book ∪ watchlist
   ok(am2.hit && am2.via && am2.via.entity === 'Acme Holdings',
      'an extracted entity ALIAS matches the watchlist name (the entity-resolution payoff)');
 
-  // 4d) Phase 41 — the Disposition gate renders the SUBJECT MAP + resolution-grade identity cards
+  // 4d) Phase 41/42 — the Disposition gate renders the SUBJECT MAP (now an SVG network) + identity cards
   L.NEWS._watch = [];
   L.go('disposition', 'live-e');
   const eh = env.app._html;
   ok(/Subject map/.test(eh) && /main subject: Maria Lopez/.test(eh),
      'Disposition shows the subject map with the main subject named');
-  ok(/front-for/.test(eh) && /was a front for her/.test(eh),
-     'a relationship edge renders with its verbatim evidence quote');
+  ok(/<svg[^>]*class="netsvg"/.test(eh) && /class="gnode gmain"/.test(eh) && /class="gedge"/.test(eh),
+     'the subject map renders as an SVG network (nodes + edges, main subject highlighted)');
+  ok(/front-for/.test(eh), 'a relationship edge renders its vocab label');
+  ok(!/was a front for her/.test(eh),
+     'the evidence quote is CLOSED until its edge is clicked (graph as navigation, evidence on demand)');
   ok(/a\.k\.a\. M\. Lopez/.test(eh), 'an entity card shows the kept aliases');
   ok(/client_number/.test(eh) && /C-77812/.test(eh) && /\(212\) 555-1234/.test(eh),
      'an entity card shows the grounded identifying properties (incl. client_number)');
   ok(/tag main/.test(eh), 'the main-subject entity card carries the main-subject tag');
+  ok(!/<img src=x/.test(eh) && /&lt;img src=x/.test(eh),
+     'a hostile store-derived entity name renders ESCAPED everywhere (graph label + card — stored-XSS guard)');
+  // clicking the edge (svg or row) reveals the grounded evidence quote
+  const edgeEls = env.document.querySelectorAll('.gedge');
+  ok(edgeEls.length >= 1, 'the rendered network exposes a clickable edge');
+  edgeEls[0]._click();
+  ok(/was a front for her/.test(env.app._html),
+     'clicking an edge reveals its verbatim grounded evidence quote');
+
+  // 4e) Phase 42 — the layout is a PURE deterministic function (asserted directly, no DOM)
+  ok(typeof L.liveGraphLayout === 'function', 'companion page exports liveGraphLayout (pure data→positions)');
+  const ents42 = [{ name: 'A Corp' }, { name: 'B Person' }, { name: 'C LLC' }];
+  const rels42 = [
+    { from: 'B Person', to: 'A Corp', label: 'owner-or-controller-of', evidence: 'B controls A' },
+    { from: 'GhostCo', to: 'A Corp', label: 'counterparty', evidence: 'paid GhostCo' },  // endpoint not extracted
+    { from: 'A Corp', to: 'A Corp', label: 'counterparty', evidence: 'self' }];          // post-fold artifact
+  const lay1 = L.liveGraphLayout(ents42, rels42, ['A Corp']);
+  const lay2 = L.liveGraphLayout(ents42, rels42, ['A Corp']);
+  ok(JSON.stringify(lay1) === JSON.stringify(lay2), 'layout is deterministic (same input → identical positions)');
+  ok(lay1.nodes.length === 4 && lay1.nodes.some(n => n.name === 'GhostCo'),
+     'an edge endpoint missing from the entity list is synthesized as a node (the edge is kept)');
+  ok(lay1.edges.length === 2 && !lay1.edges.some(e => e.from === e.to), 'a from==to self-edge is skipped defensively');
+  const c42 = { x: lay1.w / 2, y: lay1.h / 2 };
+  const d42 = n => Math.hypot(n.x - c42.x, n.y - c42.y);
+  const main42 = lay1.nodes.find(n => n.name === 'A Corp');
+  ok(main42 && main42.main && lay1.nodes.filter(n => n.name !== 'A Corp').every(o => d42(main42) < d42(o)),
+     'the main subject sits more central than every other node');
+  ok(lay1.nodes.every(n => n.x >= 0 && n.x <= lay1.w && n.y >= 0 && n.y <= lay1.h),
+     'every node lands inside the viewBox');
+  const lay0 = L.liveGraphLayout([{ name: 'Solo Corp' }], [], []);
+  ok(lay0.nodes.length === 1 && lay0.edges.length === 0,
+     'a 0-relationship scan lays out as isolated nodes (no edges, no crash)');
+
+  // 4f) Phase 42 — the ANCHOR DOSSIER: node/watchlist click → GET /anchor → the accumulated identity
+  ok(typeof L.liveOpenDossier === 'function' && typeof L.liveDossierBody === 'function',
+     'companion page wires the anchor dossier (liveOpenDossier + liveDossierBody)');
+  const anchorPayload = {
+    anchor_id: 'a1', name: 'Maria Lopez', type: 'person', first_source_type: 'gov-enforcement',
+    first_ts: '2026-06-10T00:00:00Z',
+    scans: [{ scan_id: 's1', title: 'Article E', ts: '2026-06-10T00:00:00Z', source_type: 'gov-enforcement' },
+            { scan_id: 's2', title: 'Case note 7', ts: '2026-06-11T00:00:00Z', source_type: 'investigation-note' }],
+    properties: [
+      { kind: 'alias', value: 'M. Lopez', scan_id: 's1', provenance: { title: 'Article E', ts: '2026-06-10', source_type: 'gov-enforcement' } },
+      { kind: 'alias', value: 'M. Lopez', scan_id: 's2', provenance: { title: 'Case note 7', ts: '2026-06-11', source_type: 'investigation-note' } },
+      { kind: 'phone', value: '(212) 555-1234', scan_id: 's1', provenance: { title: 'Article E', ts: '2026-06-10', source_type: 'gov-enforcement' } },
+      { kind: 'phone', value: '(305) 555-9876', scan_id: 's2', provenance: { title: 'Case note 7', ts: '2026-06-11', source_type: 'investigation-note' } }],
+    relationships: [{ from: 'Lopez Imports LLC', to: 'Maria Lopez', label: 'front-for', evidence: 'was a front for her' }],
+  };
+  const db = L.liveDossierBody(anchorPayload);
+  ok(/2 scans/.test(db) && /Article E/.test(db) && /Case note 7/.test(db),
+     'dossier lists every scan that touched the anchor');
+  ok(/conflicting values — both kept/.test(db) && /\(212\) 555-1234/.test(db) && /\(305\) 555-9876/.test(db),
+     'same-kind different values BOTH render with the conflict flag (presentation-only, never resolved)');
+  ok(/a\.k\.a\./.test(db) && /M\. Lopez/.test(db), 'accumulated aliases render');
+  ok(/investigation-note/.test(db), 'per-row provenance carries the scan source type');
+  ok(/front-for/.test(db) && /was a front for her/.test(db), 'the dossier lists relationship edges with evidence');
+  const emptyDb = L.liveDossierBody({ anchor_id: 'a2', name: 'Solo', type: 'org', first_source_type: '', first_ts: '',
+                                      scans: [{ scan_id: 's1', title: 'One', ts: '', source_type: '' }],
+                                      properties: [], relationships: [] });
+  ok(/only the name has been seen/.test(emptyDb), 'an anchor with nothing accumulated renders an honest empty state');
+  // integration: a graph-node click fetches /anchor and renders the dossier into #dossier
+  const fetched = [];
+  ctx.fetch = async (url) => { fetched.push(String(url)); return { ok: true, status: 200, json: async () => anchorPayload }; };
+  L.go('disposition', 'live-e');
+  const nodes42 = env.document.querySelectorAll('.gnode');
+  ok(nodes42.length >= 2, 'the rendered network exposes clickable nodes');
+  const mlNode = nodes42.filter(n => n.getAttribute('data-n') === 'Maria Lopez')[0];
+  ok(!!mlNode, 'the main-subject node is addressable by name');
+  mlNode._click();
+  await new Promise(r => setImmediate(r));
+  ok(fetched.some(u => u.includes('/anchor?name=Maria%20Lopez')), 'a node click fetches GET /anchor?name=<url-encoded>');
+  const dEl = env.document.getElementById('dossier');
+  ok(dEl && /Anchor dossier — Maria Lopez/.test(dEl.innerHTML) && /conflicting values — both kept/.test(dEl.innerHTML),
+     'the dossier panel renders the accumulated identity below the graph');
+  // 404 → an honest no-anchor state (never a crash)
+  ctx.fetch = async () => ({ ok: false, status: 404, json: async () => ({ error: 'no anchor' }) });
+  await L.liveOpenDossier('Ghost Name');
+  ok(/No anchor yet for Ghost Name/.test(env.document.getElementById('dossier').innerHTML),
+     'an unknown anchor renders an honest 404 state');
+  // watchlist rows carry the dossier affordance
+  env.app._html = '<div id="watchpanel"></div><div id="dossier"></div>';
+  L.NEWS._watch = [{ name: 'Acme Holdings', type: 'org', kind: 'scanned', role: 'watchlist', country: 'escalated from Article A' }];
+  L.liveRenderWatchlistPanel();
+  ok(/class="wname wdoss"/.test(env.document.getElementById('watchpanel').innerHTML),
+     'watchlist rows expose the dossier affordance (name click opens the anchor dossier)');
 
   // 5) Phase 39 — the client side of the streamed /extract: NDJSON reader + stage labels
   ok(typeof L.liveReadStream === 'function' && typeof L.liveStageLabel === 'function',

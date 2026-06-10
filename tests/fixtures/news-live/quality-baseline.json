@@ -1,0 +1,121 @@
+{
+ "committed:doj-goltsev-export-control": {
+  "alias_suspects": 0,
+  "entity_count": 5,
+  "kept_flags": 7,
+  "mech_families": 5,
+  "type_blind_folds": 0
+ },
+ "committed:doj-mullings-romance-mule": {
+  "alias_suspects": 0,
+  "entity_count": 2,
+  "kept_flags": 7,
+  "mech_families": 5,
+  "type_blind_folds": 0
+ },
+ "committed:doj-ravenell-attorney-ml": {
+  "alias_suspects": 0,
+  "entity_count": 1,
+  "kept_flags": 7,
+  "mech_families": 4,
+  "type_blind_folds": 0
+ },
+ "committed:ofac-tgr-group": {
+  "alias_suspects": 0,
+  "entity_count": 6,
+  "kept_flags": 8,
+  "mech_families": 5,
+  "type_blind_folds": 0
+ },
+ "doj-chinese-cmlo": {
+  "alias_suspects": 0,
+  "entity_count": 5,
+  "kept_flags": 4,
+  "mech_families": 3,
+  "type_blind_folds": 0
+ },
+ "doj-chinese-cmlo.ph40": {
+  "alias_suspects": 0,
+  "entity_count": 5,
+  "kept_flags": 5,
+  "mech_families": 4,
+  "type_blind_folds": 0
+ },
+ "doj-chinese-cmlo.ph41": {
+  "alias_suspects": 0,
+  "entity_count": 4,
+  "kept_flags": 8,
+  "mech_families": 7,
+  "type_blind_folds": 0
+ },
+ "doj-goltsev-export-control": {
+  "alias_suspects": 0,
+  "entity_count": 6,
+  "kept_flags": 7,
+  "mech_families": 4,
+  "type_blind_folds": 0
+ },
+ "doj-mullings-romance-mule": {
+  "alias_suspects": 0,
+  "entity_count": 2,
+  "kept_flags": 4,
+  "mech_families": 3,
+  "type_blind_folds": 0
+ },
+ "doj-ravenell-attorney-ml": {
+  "alias_suspects": 0,
+  "entity_count": 4,
+  "kept_flags": 12,
+  "mech_families": 5,
+  "type_blind_folds": 0
+ },
+ "doj-ravenell-attorney-ml.ph40": {
+  "alias_suspects": 0,
+  "entity_count": 2,
+  "kept_flags": 9,
+  "mech_families": 6,
+  "type_blind_folds": 0
+ },
+ "doj-ravenell-attorney-ml.ph41": {
+  "alias_suspects": 0,
+  "entity_count": 2,
+  "kept_flags": 7,
+  "mech_families": 6,
+  "type_blind_folds": 0
+ },
+ "doj-transnational-fraud": {
+  "alias_suspects": 0,
+  "entity_count": 4,
+  "kept_flags": 5,
+  "mech_families": 4,
+  "type_blind_folds": 0
+ },
+ "ofac-sinaloa-fentanyl": {
+  "alias_suspects": 0,
+  "entity_count": 25,
+  "kept_flags": 2,
+  "mech_families": 2,
+  "type_blind_folds": 0
+ },
+ "ofac-tgr-group": {
+  "alias_suspects": 0,
+  "entity_count": 14,
+  "kept_flags": 9,
+  "mech_families": 6,
+  "type_blind_folds": 0
+ },
+ "ofac-tgr-group.ph40": {
+  "alias_suspects": 0,
+  "entity_count": 14,
+  "kept_flags": 10,
+  "mech_families": 8,
+  "type_blind_folds": 0
+ },
+ "ofac-tgr-group.ph41": {
+  "alias_suspects": 0,
+  "entity_count": 14,
+  "kept_flags": 10,
+  "mech_families": 7,
+  "type_blind_folds": 0
+ }
+}

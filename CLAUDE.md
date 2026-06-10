@@ -74,8 +74,18 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    `call_llm` STREAMS (idle-gap timeout, no fixed deadline; live token counter), budget 16384,
    failures NAMED in-stream (output-budget · pre-flight over-context w/ the `--ctx-size` remedy —
    silent truncation would PASS the gate), `/extract` SINGLE-FLIGHT (409 — ghost jobs split slot
-   throughput), disconnect-before-done persists NOTHING; the page reveals COMPLETED stages (grounded
-   flags FINAL, provisional chips refined through verify) — never a token stream. The scan is a
+   throughput), disconnect-before-done persists NOTHING; Run extraction opens a DEDICATED PROCESSING
+   PAGE (Phase 44: an IN-PAGE viewport takeover — real navigation would abort the stream; presenter
+   keys guarded, Esc arms → Esc abandons honestly) revealing COMPLETED stages (grounded flags FINAL,
+   provisional chips refined through verify) — never a token stream. GROUNDING is wrap-tolerant
+   (Phase 44 — the dominant "missed flag" class was a GATE-drop, not model recall): a quote crossing
+   a hard line-wrap / keeping a stripped `*` is `locate_span`-REQUOTED to the body's exact bytes
+   (raw substring by construction; title-line quotes still drop). Alias FOLDS refuse ambiguity +
+   type-mismatch (2+ compatible parents → no fold, order never picks the owner; person ≠ org alias;
+   type disambiguates); alias OWNERSHIP stays measured-not-gated (`tests/news_quality_harness.py
+   --check`, the committed extraction-quality regression gate vs `quality-baseline.json`; `--freeze`
+   = conscious re-baseline). SPEED measured: generation = 92–98% of wall on notes — that IS the
+   extraction; future levers = slot-parallel verify / smaller-model eval vs the harness. The scan is a
    resolution-grade identity record — `aliases[]`, closed-vocab
    `properties[]` (incl. client_number/account_number: PRIVATE INVESTIGATION NOTES are a first-class
    input), `relationships[]` (labels vocab-checked, never correctness-checked), honest
@@ -189,7 +199,10 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
     the companion-served live overrides (watchlist screen/escalate/view/prune + the alias-aware
     matcher [exact-yes/fuzzy-no per class] + the SVG network [deterministic liveGraphLayout:
     centrality/bounds/degenerate-shape/XSS-escape; edge click reveals evidence] + the anchor
-    dossier [conflict both-kept flag, honest 404/empty states]) + the offline strip assertion.
+    dossier [conflict both-kept flag, honest 404/empty states] + the Phase-44 processing page
+    [pure liveProcBody/liveProcKeyAction: key guard, Esc arm/abandon]) + the offline strip assertion.
+  - `python3 tests/news_quality_harness.py --check` — the extraction-quality REGRESSION GATE
+    (deterministic replay of all pinned captures + committed records vs the committed baseline).
   - `python3 scripts/derive_signals.py --selftest` — the derivation GATE checks + anchor fixtures.
   - `python3 tests/news_live_test.py` — the live pipeline: build_record + grounding, the 13-fixture
     REPLAY (goldens, no model; US-federal FIXTURE_META allowlist asserted), the second-pass verify,

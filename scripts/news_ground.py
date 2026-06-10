@@ -54,6 +54,26 @@ def article_body(md: str) -> str:
     return "\n".join(lines).strip().replace("*", "")
 
 
+def locate_span(quote, body):
+    """Phase 44 — wrap-tolerant span locator (the T1-classified GATE-DROP fix).
+
+    The model is prompted with RAW text but grounded against article_body(text); a verbatim quote
+    that crosses a hard line-wrap (newline read back as a space) or keeps a stripped `*` emphasis
+    marker fails the raw-substring check even though news_normalize matches — T1 measured this as
+    the PRIMARY "missed flag" class (4/5 planted wire facts on wrapped prose; the maintainer's
+    seeded STR sample 3/5). Find `quote` in `body` treating any whitespace run as equivalent and
+    `*` as whitespace, and return the body's EXACT span text — a raw substring BY CONSTRUCTION, so
+    the highlighter and every downstream raw-substring invariant hold unchanged. Leftmost match
+    wins (deterministic). Returns None when the quote genuinely isn't in the body (e.g. a `# Title`
+    line quote — the title is not part of the grounding/display body and still drops honestly).
+    """
+    toks = str(quote).replace("*", " ").split()
+    if not toks:
+        return None
+    m = re.search(r"[ \t\r\n]+".join(re.escape(t) for t in toks), body)
+    return m.group(0) if m else None
+
+
 def flag_dup_key(rf):
     """Phase 40: the duplicate-collapse key for a red-flag row — (normalized quote, normalized category).
 
@@ -73,7 +93,9 @@ def ground_record(record, article_text=None, min_chars=MIN_RED_FLAG_CHARS, max_c
         highlightable) and has a `type`; ungrounded location/age/profession attributes are STRIPPED
         (the entity is kept, the ungrounded attribute removed — nothing shown that isn't in the source).
       - red_flag: kept iff `flag` is a RAW substring of the body AND `red_flag` is present, distinct
-        (normalize) from `flag`, and within [min_chars, max_chars].
+        (normalize) from `flag`, and within [min_chars, max_chars]. Phase 44: a quote failing the
+        raw check is wrap-tolerantly LOCATED (locate_span) and REQUOTED to the body's exact span —
+        raw-substring holds by construction; only unlocatable quotes drop.
       - duplicate collapse (Phase 40, measurement-earned): two flags quoting the SAME span under the
         SAME category are one behaviour twice — the FIRST survives (spans identical ⟹ input order is
         the total survivor rule; deterministic for golden regeneration). Same quote under a DIFFERENT
@@ -140,7 +162,14 @@ def ground_record(record, article_text=None, min_chars=MIN_RED_FLAG_CHARS, max_c
         if not flag:
             dropped.append({"kind": "red_flag", "value": rf, "reason": "missing flag"}); continue
         if flag not in body:
-            dropped.append({"kind": "red_flag", "value": flag, "reason": "flag not raw-grounded in article"}); continue
+            # Phase 44 — wrap/`*` tolerance: REQUOTE to the body's exact span when the quote matches
+            # modulo whitespace runs; the kept flag is a raw substring by construction. A quote that
+            # still doesn't locate (e.g. title-line) drops with the same honest reason.
+            located = locate_span(flag, body)
+            if located is None:
+                dropped.append({"kind": "red_flag", "value": flag, "reason": "flag not raw-grounded in article"}); continue
+            rf = dict(rf, flag=located)
+            flag = located
         if not tr or news_normalize(tr) == news_normalize(flag):
             dropped.append({"kind": "red_flag", "value": flag, "reason": "red_flag missing or not distinct from flag"}); continue
         if not (min_chars <= len(tr) <= max_chars):
@@ -173,7 +202,10 @@ def ground_record(record, article_text=None, min_chars=MIN_RED_FLAG_CHARS, max_c
         if fr == to:
             dropped.append({"kind": "relationship", "value": rid, "reason": "self-relationship"}); continue
         if not ev or ev not in body:
-            dropped.append({"kind": "relationship", "value": rid, "reason": "relationship evidence not raw-grounded"}); continue
+            located = locate_span(ev, body) if ev else None  # Phase 44 — same wrap tolerance as flags
+            if located is None:
+                dropped.append({"kind": "relationship", "value": rid, "reason": "relationship evidence not raw-grounded"}); continue
+            ev = located
         rels.append({"from": fr, "to": to, "label": lb, "evidence": ev})
     if rels:
         kept["relationships"] = rels
@@ -279,6 +311,11 @@ def screen_entities(entities, text=""):
     up); the fold is reported in `dropped` with a `folded_into` key (the audit trail — callers remap
     relationship/main_subject references via reconcile_refs). A moniker with NO structurally adjacent
     parent still drops, as do judicial officers and source-attribution publishers.
+
+    Phase 44: a subset-name fold happens ONLY when exactly one type-compatible parent exists — an
+    ambiguous subset (2+ compatible parents, e.g. a bare shared surname) drops with an honest reason
+    instead of folding into whichever parent extraction order yields, and a type-mismatched subset
+    (person vs org) is not a fold candidate at all.
     """
     ents = list(entities or [])
     toksets = [_toks(e.get("name", "")) for e in ents]
@@ -290,10 +327,25 @@ def screen_entities(entities, text=""):
         name = (e.get("name") or "").strip()
         nn = news_normalize(name)
         tx, typ = toksets[i], (e.get("type") or "").strip().lower()
-        # (a) alias-dedup — a strict token-subset of ANOTHER extracted entity → FOLD into the fuller name
+        # (a) alias-dedup — a strict token-subset of ANOTHER extracted entity → FOLD into the fuller name.
+        # Phase 44 (T1-classified misparent fix): the fold must be UNAMBIGUOUS and TYPE-COMPATIBLE —
+        #   · type-match first: a person is never folded as an org's alias (and type DISAMBIGUATES:
+        #     bare 'Lopez' [person] with parents 'Maria Lopez' [person] + 'Lopez Imports' [org] folds
+        #     to the person); an untyped side is treated as compatible;
+        #   · 2+ compatible parents (the shared-surname case) → REFUSE the fold and drop honestly —
+        #     extraction ORDER must never pick the owner (proven order-dependent pre-fix), and a wrong
+        #     attachment poisons the anchor store downstream;
+        #   · type-mismatch only → not an alias-fold candidate; falls through to the other rules.
         if tx and any(j != i and tx < toksets[j] for j in range(len(ents))):
-            parent = next(j for j in range(len(ents)) if j != i and tx < toksets[j])
-            decisions.append(("fold", parent)); continue
+            parents = [j for j in range(len(ents)) if j != i and tx < toksets[j]]
+            compat = [j for j in parents
+                      if not typ or not (ents[j].get("type") or "").strip().lower()
+                      or (ents[j].get("type") or "").strip().lower() == typ]
+            if len(compat) == 1:
+                decisions.append(("fold", compat[0])); continue
+            if compat:
+                decisions.append(("drop", f"ambiguous alias of {len(compat)} entities — not folded")); continue
+            # type-mismatch only: fall through (kept unless another rule applies; the verify pass judges)
         # (b) moniker / handle — @… or a lone all-lowercase token for a person → FOLD if structurally
         # adjacent to a parent name in the text, else DROP (no parent to attach the alias to)
         if name.startswith("@") or (typ == "person" and len(tx) == 1 and name == name.lower()):
@@ -439,6 +491,41 @@ def _selftest() -> int:
     k41b, d41b = ground_record(k41)
     assert d41b == [] and k41b == k41, f"Phase-41 grounding not idempotent: {d41b}"
 
+    # ── Phase 44 — wrap-tolerant locate_span + requote (the T1-classified GATE-DROP fix) ──
+    wrap_body = ("This STR reports six international incoming wire transactions received in favor\n"
+                 "of the customer from multiple individuals based in a high-risk jurisdiction which\n"
+                 "were then depleted by term-deposit purchase. Amounts sat just below the reporting\n"
+                 "threshold.")
+    wrapped_quote = ("six international incoming wire transactions received in favor of the customer "
+                     "from multiple individuals based in a high-risk jurisdiction")
+    rec44 = {"id": "t44", "title": "T44", "article_text": wrap_body, "entities": [],
+             "red_flags": [
+                 {"id": "W1", "flag": wrapped_quote, "category": "high-risk-jurisdiction",
+                  "red_flag": "Inbound third-party wires from a high-risk jurisdiction"},
+                 {"id": "W2", "flag": "a phrase the article never printed at all", "category": "x",
+                  "red_flag": "Should still drop as not grounded"}]}
+    k44, d44 = ground_record(rec44)
+    assert [f["id"] for f in k44["red_flags"]] == ["W1"], k44["red_flags"]
+    rq = k44["red_flags"][0]["flag"]
+    assert rq in wrap_body and "\n" in rq, rq  # REQUOTED to exact body bytes — raw substring by construction
+    assert news_normalize(rq) == news_normalize(wrapped_quote)
+    assert any(d["reason"] == "flag not raw-grounded in article" for d in d44), d44
+    k44i, d44i = ground_record(k44)
+    assert d44i == [] and k44i["red_flags"] == k44["red_flags"], "requoted record must re-ground idempotently"
+    # `*` asymmetry: a quote keeping a stripped emphasis marker still locates (returns the body's form)
+    star_body = article_body("# T\nThe payments were marked *urgent* and split across branches.")
+    assert locate_span("marked *urgent* and split", star_body) == "marked urgent and split"
+    # a title-line quote is NOT in the grounding body → honest None (the drop path is preserved)
+    assert locate_span("T44 Headline Words", star_body) is None
+    # relationship evidence gets the same wrap tolerance
+    rel_body = "Acme Corp was controlled by\nBo Vance, filings show."
+    rec44b = {"article_text": rel_body, "red_flags": [],
+              "entities": [{"name": "Acme Corp", "type": "org"}, {"name": "Bo Vance", "type": "person"}],
+              "relationships": [{"from": "Acme Corp", "to": "Bo Vance", "label": "owner-or-controller-of",
+                                 "evidence": "Acme Corp was controlled by Bo Vance"}]}
+    k44b, _d44b = ground_record(rec44b)
+    assert k44b.get("relationships") and "\n" in k44b["relationships"][0]["evidence"], k44b.get("relationships")
+
     # reconcile_refs — fold remap + dangling-ref filtering (the post-screen/post-verify pass)
     rr = reconcile_refs(
         {"entities": [{"name": "George Rossi"}, {"name": "TGR Group"}],
@@ -484,6 +571,34 @@ def _selftest() -> int:
     folds = {d["value"]: d.get("folded_into") for d in sdrop if d.get("folded_into")}
     assert folds == {"Rossi": "George Rossi", "@monalisa7": "Elena Chirkinyan"}, folds
     assert reasons["Rossi"] == "folded as alias into 'George Rossi'"
+
+    # ── Phase 44 — fold misparent fixes (ambiguity refusal + type-match) ──
+    amb_text = ("Maria Lopez wired funds through shell accounts. Her brother Jose Lopez ran the courier "
+                "side. Investigators said Lopez controlled the Dubai consignee.")
+    amb_in = [{"name": "Maria Lopez", "type": "person"},
+              {"name": "Jose Lopez", "type": "person"},
+              {"name": "Lopez", "type": "person"}]
+    ak, ad = screen_entities(amb_in, amb_text)
+    assert [e["name"] for e in ak] == ["Maria Lopez", "Jose Lopez"], ak
+    assert not any(d.get("folded_into") for d in ad), ad  # NO fold — ambiguity refused
+    assert any(d["reason"] == "ambiguous alias of 2 entities — not folded" for d in ad), ad
+    # order-independence: swapped input order → SAME refusal (pre-fix this folded into the first parent)
+    ak2, ad2 = screen_entities([amb_in[1], amb_in[0], amb_in[2]], amb_text)
+    assert not any(d.get("folded_into") for d in ad2) \
+        and any(d["reason"].startswith("ambiguous alias") for d in ad2), ad2
+    # type-mismatch: person 'Smith' is NOT folded into org 'Smith Holdings LLC' — kept as an entity
+    tm_in = [{"name": "Smith Holdings LLC", "type": "org"}, {"name": "Smith", "type": "person"}]
+    tk, td = screen_entities(tm_in, "Smith Holdings LLC moved $2.1M. Smith denied wrongdoing.")
+    assert [e["name"] for e in tk] == ["Smith Holdings LLC", "Smith"], tk
+    assert not tk[0].get("aliases") and td == [], (tk, td)
+    # type DISAMBIGUATES: bare person 'Lopez' with a person parent AND an org parent → folds to the person
+    dis_in = [{"name": "Maria Lopez", "type": "person"},
+              {"name": "Lopez Imports LLC", "type": "org"},
+              {"name": "Lopez", "type": "person"}]
+    dk, dd = screen_entities(dis_in, "Maria Lopez ran Lopez Imports LLC. Lopez signed the wires.")
+    dfolds = {d["value"]: d.get("folded_into") for d in dd if d.get("folded_into")}
+    assert dfolds == {"Lopez": "Maria Lopez"}, dfolds
+    assert dk[0].get("aliases") == ["Lopez"], dk[0]
     assert reasons["acescom"].startswith("moniker"), "orphan handle (no adjacent parent) must still DROP"
     assert reasons["Jane Doe"].startswith("judicial")
     assert reasons["U.S. Department of Justice"].startswith("source-attribution")

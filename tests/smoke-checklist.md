@@ -139,6 +139,16 @@ that table.
   silent half-speed runs. An absurdly oversized paste refuses up front with a **named token overage +
   the `--ctx-size` remedy** (when the model server is misconfigured small), never a silently truncated
   "clean" record.
+- [ ] **Processing page + requote grounding (Phase 44):** clicking **Run extraction** takes over the
+  viewport with the **dedicated processing page** (source line · live stage banner with elapsed/token
+  counter · the staged grounded-flags/provisional-chips reveal); on completion it closes onto the Read
+  screen. Mid-run, **←/→/Space do nothing** (presenter keys guarded) and **Esc warns first, Esc again
+  abandons** ("nothing was saved"). Paste a HARD-WRAPPED note (or the committed synthetic
+  `docs/demo-investigation-note.md` reflowed) containing a high-risk-country wire sentence spanning
+  lines — the wire flag surfaces GROUNDED (pre-44 it silently dropped "not raw-grounded"); the
+  highlighted quote in Read matches the article bytes exactly. A bare shared surname beside two full
+  names is NOT folded as anyone's alias (an honest "ambiguous alias … not folded" drop in the
+  companion log), and `python3 tests/news_quality_harness.py --check` reports CHECK OK.
 - [ ] **Flag quality (Phase 40):** on a substantial enforcement article the extracted red flags read as
   **distinct mechanisms** (no same-quote duplicates — the gate collapses them; no per-anecdote flag storms),
   include **institutional/control-failure** flags where the article describes them (not only transactions),

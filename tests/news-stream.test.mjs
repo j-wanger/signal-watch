@@ -94,6 +94,13 @@ const SCRIPT = html.slice(open + '<script>'.length, close);
   ok(src.includes('livePreviewBody') && src.includes('live-preview') && src.includes('tokens generated')
      && src.includes("'grounded'") && src.includes("'verified'"),
      'news.html SOURCE carries the Phase-43 staged preview + grounded/verified wiring (companion-served)');
+  // Phase 44: the dedicated processing page (in-page swap + presenter-key guard) is companion-only
+  ok(!html.includes('liveproc') && !html.includes('liveProcBody') && !html.includes('liveProcKeyAction')
+     && !html.includes('Live extraction in progress') && !html.includes('AbortController'),
+     'offline dist/news carries NO Phase-44 processing-page code (stripped)');
+  ok(src.includes('liveProcBody') && src.includes('liveProcKeyAction') && src.includes('liveShowProcessing')
+     && src.includes('Live extraction in progress') && src.includes('AbortController'),
+     'news.html SOURCE carries the Phase-44 dedicated processing page (companion-served)');
 }
 
 ok(/class="badge"/.test(html) && /Illustrative data/.test(html), 'always-on illustrative badge present in the ship chrome');
@@ -163,7 +170,7 @@ function bootLive(scriptText, reduced) {
   const ctx = vm.createContext({ window: env.window, document: env.document, console,
     fetch: fetchStub, setTimeout: env.setTimeout, clearTimeout: env.clearTimeout });
   let threw = null;
-  try { vm.runInContext(scriptText + '\n;globalThis.__L={go,state,matchEntities,articleById,NEWS,RENDER,liveRenderWatchlistPanel,livePrune,liveReadStream,liveStageLabel,liveGraphLayout,liveOpenDossier,liveDossierBody,livePreviewBody};', ctx); }
+  try { vm.runInContext(scriptText + '\n;globalThis.__L={go,state,matchEntities,articleById,NEWS,RENDER,liveRenderWatchlistPanel,livePrune,liveReadStream,liveStageLabel,liveGraphLayout,liveOpenDossier,liveDossierBody,livePreviewBody,liveProcBody,liveProcKeyAction};', ctx); }
   catch (e) { threw = e; }
   return { env, ctx, threw };
 }
@@ -545,6 +552,31 @@ console.log('\n[live mode] companion-served client overrides (book ∪ watchlist
                                   entities: [{ name: '<img onerror=1>' }] });
   ok(!pvX.includes('<script>') && !pvX.includes('<img') && !pvX.includes('<b>c</b>'),
      'preview escapes model-derived text everywhere (esc() is the sole escaper)');
+
+  // ── Phase 44: the dedicated processing page — pure body builder + presenter-key guard ──
+  ok(typeof L.liveProcBody === 'function' && typeof L.liveProcKeyAction === 'function',
+     'companion page exports liveProcBody + liveProcKeyAction (pure — pinnable without a DOM)');
+  const lp = L.liveProcBody({ title: 'STR narrative', source: 'Branch intel' });
+  ok(lp.includes('Live extraction in progress') && lp.includes('liveproc-status')
+     && lp.includes('liveproc-preview') && lp.includes('STR narrative') && lp.includes('Branch intel'),
+     'processing page carries the header, status line, staged-preview container, and source line');
+  const lpX = L.liveProcBody({ title: '<script>x</script>', source: '<img onerror=1>' });
+  ok(!lpX.includes('<script>') && !lpX.includes('<img'),
+     'processing page escapes caller-supplied title/source (esc() is the sole escaper)');
+  ok(L.liveProcKeyAction('ArrowRight', { open: false }) === 'pass'
+     && L.liveProcKeyAction('Escape', null) === 'pass',
+     'presenter keys behave normally when the processing page is closed');
+  ok(L.liveProcKeyAction('ArrowRight', { open: true, running: true }) === 'block'
+     && L.liveProcKeyAction(' ', { open: true, running: true }) === 'block'
+     && L.liveProcKeyAction('r', { open: true, running: true }) === 'block',
+     'presenter-nav keys (←/→/Space/↺) are blocked while an extraction is running');
+  ok(L.liveProcKeyAction('Escape', { open: true, running: true, armed: false }) === 'arm'
+     && L.liveProcKeyAction('Escape', { open: true, running: true, armed: true }) === 'abort',
+     'Esc arms first (honest warning — nothing saved), Esc again abandons the run');
+  ok(L.liveProcKeyAction('Escape', { open: true, running: false }) === 'close',
+     'Esc simply closes the page once the run has finished or failed');
+  ok(L.liveProcKeyAction('x', { open: true, running: true }) === 'pass',
+     'non-presenter keys pass through even while the page is open');
 }
 
 console.log(`\n${pass} passed, ${fails.length} failed`);

@@ -268,6 +268,56 @@ output-bound, not input-bound; a 64K-char / 35-subject note legitimately generat
   that refine kept/dropped live through the verify pass (the wall-time majority), then the full
   record. A disconnect before `done` writes nothing to the store.
 
+## Extraction quality: requote grounding, fold rules, the quality harness (Phase 44)
+
+Phase 44 classified the two real-use quality failures before fixing them (the committed harness +
+local seeded material did the classification — the user's "missed wire flags" turned out to be
+GATE-drops, not model recall):
+
+- **Wrap-tolerant requote grounding.** The model reads the RAW pasted text; the gate grounds against
+  the display body. A verbatim quote crossing a hard line-wrap (or keeping a stripped `*` marker)
+  used to fail the raw-substring check and silently DROP — the dominant "missed flag" class on
+  wrapped prose and note-register input (measured: 4/5 planted wire facts on wrapped prose; 3/5 on a
+  seeded STR sample). `news_ground.locate_span` now finds the quote whitespace-tolerantly and
+  REQUOTES it to the body's exact bytes — a raw substring by construction, so highlighting and every
+  downstream invariant hold. Title-line quotes still drop honestly (the title is not body).
+- **Alias folds: ambiguity refusal + type-match.** A bare subset name (e.g. a shared surname) folds
+  into a parent entity ONLY when exactly one type-compatible parent exists. Two candidate parents →
+  the fold is REFUSED with an honest drop reason (pre-fix it folded into whichever entity came first
+  in extraction order — proven order-dependent); a person is never folded as an org's alias (and
+  type disambiguates between a person + an org candidate). The gate's alias check remains
+  presence-only (it never verifies WHOSE alias it is) — that residual is now *measured* by the
+  harness's alias-ownership dimension.
+- **The committed quality harness.** `python3 tests/news_quality_harness.py` replays every pinned
+  capture + the 4 committed records deterministically (no model) and scores kept-flags /
+  mechanism-family coverage / entity count / **alias-ownership suspicion** / type-blind folds;
+  `--check` exits non-zero if any dimension regresses against the committed baseline
+  (`tests/fixtures/news-live/quality-baseline.json`); `--freeze` re-baselines (a conscious act after
+  an accepted quality change). This is the regression gate for any future prompt/gate/model change.
+- **Speed (measured, honestly skipped).** On note-register input the model generation call is
+  92–98% of wall time — that IS the extraction (~400–450 tokens/entity); no quality-preserving lever
+  exists at a fixed model. The named future levers: slot-parallel per-entity verify (pays only on
+  entity-rich articles) and a smaller-model eval gated by the harness.
+
+## The dedicated processing page (Phase 44)
+
+Clicking **Run extraction** now takes over the viewport with a fresh processing page (an in-page
+swap — real navigation would abort the NDJSON stream and discard the run): the source line, a live
+stage/status banner (elapsed + token counter), and the Phase-43 staged reveal (grounded flags FINAL,
+provisional entity chips refining through verify). Presenter keys are guarded while it is open;
+**Esc arms, Esc again abandons** (honest: nothing is saved until the scan completes — disconnect
+persists nothing). A 409 (another extraction already running) and stream errors render as named
+failures on the page, with any grounded partial truth left visible.
+
+## Local store hygiene (anchor rows from old scans)
+
+Scans made BEFORE the Phase-44 fold fixes may have persisted wrong-owner aliases into the local
+anchor store, and Screen matches on name ∪ aliases — a bad alias keeps generating false matches
+after the extraction fix. The store is local and gitignored: the reset path is simply deleting the
+DuckDB file (default `data/news/.live/store.duckdb`; override with `serve_news.py --db`) and
+re-scanning; escalated watchlist rows can be pruned individually from the watchlist panel. There is deliberately NO automated anchor rewrite — history stays inspectable,
+conflicts stay both-kept.
+
 ## Honesty / compliance
 - Real client-side fuzzy scores; the counterparty **book is synthetic** (no real customer data); the
   always-on "Illustrative data & outputs" badge stays.

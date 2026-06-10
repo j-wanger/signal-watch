@@ -655,16 +655,92 @@ function livePreviewBody(rec){
         + esc(e.name || '') + '">' + esc(e.name || '') + '</span>').join('') + '</div>'
       : '<div class="pvnone">none grounded</div>');
 }
+/* Phase 44 — DEDICATED PROCESSING PAGE: clicking Run extraction takes over the viewport with a
+   fresh processing view (an IN-PAGE swap — real navigation would abort the NDJSON stream, discard
+   the run, and leave a ghost job holding the single-flight slot). The staged Phase-43 rendering
+   moves onto it; presenter keys are guarded while it is open (Esc arms, Esc again abandons —
+   disconnect-before-done persists NOTHING, so abandoning is honest); liveProcBody and
+   liveProcKeyAction are PURE so the harness pins them without a DOM. */
+const _liveProc = { open: false, armed: false, running: false, ctrl: null, disarmT: 0 };
+function liveProcBody(meta){
+  meta = meta || {};
+  return '<div class="lpwrap">'
+    + '<div class="lphead"><span class="livedot">●</span> Live extraction in progress</div>'
+    + '<div class="lpsrc">' + esc(meta.title || meta.url || 'Pasted text')
+    + (meta.source ? ' <span class="lporg">· ' + esc(meta.source) + '</span>' : '') + '</div>'
+    + '<div class="lpstatus" id="liveproc-status">Contacting the local model…</div>'
+    + '<div class="livepreview" id="liveproc-preview"></div>'
+    + '<div class="lpact"><button class="btn" id="liveproc-back">← Back</button>'
+    + '<span class="lpnote">Esc twice abandons the run — nothing is saved until the scan completes.</span></div>'
+    + '</div>';
+}
+function liveProcKeyAction(key, st){
+  if(!st || !st.open) return 'pass';                       // page closed — presenter keys behave normally
+  if(key === 'Escape') return st.running ? (st.armed ? 'abort' : 'arm') : 'close';
+  return (key === 'ArrowLeft' || key === 'ArrowRight' || key === ' ' || key === 'r' || key === 'R')
+    ? 'block' : 'pass';                                    // block ONLY the presenter-nav set mid-run
+}
+function liveProcKeydown(e){
+  const act = liveProcKeyAction(e.key, _liveProc);
+  if(act === 'pass') return;
+  e.stopPropagation(); e.preventDefault();
+  if(act === 'arm'){
+    _liveProc.armed = true;
+    liveProcStatus('Extraction still running — Esc again to abandon (nothing will be saved)');
+    clearTimeout(_liveProc.disarmT);
+    _liveProc.disarmT = setTimeout(() => { _liveProc.armed = false; }, 3000);
+  } else if(act === 'abort'){
+    if(_liveProc.ctrl) _liveProc.ctrl.abort();
+  } else if(act === 'close'){
+    liveCloseProcessing();
+  }
+}
+function liveShowProcessing(meta){
+  let el = document.getElementById('liveproc');
+  if(!el && document.createElement){
+    el = document.createElement('div'); el.id = 'liveproc'; el.className = 'liveproc';
+    document.body.appendChild(el);
+  }
+  if(!el) return;
+  el.innerHTML = liveProcBody(meta);
+  el.hidden = false;
+  _liveProc.open = true; _liveProc.armed = false; _liveProc.running = true;
+  _liveProc.ctrl = (meta && meta.ctrl) || null;
+  const b = document.getElementById('liveproc-back');
+  if(b && b.addEventListener) b.addEventListener('click', () => {
+    if(_liveProc.running){ if(_liveProc.ctrl) _liveProc.ctrl.abort(); }
+    else liveCloseProcessing();
+  });
+  document.addEventListener('keydown', liveProcKeydown, true);
+}
+function liveCloseProcessing(){
+  const el = document.getElementById('liveproc');
+  if(el) el.hidden = true;
+  _liveProc.open = false; _liveProc.armed = false; _liveProc.running = false; _liveProc.ctrl = null;
+  document.removeEventListener('keydown', liveProcKeydown, true);
+}
+function liveProcStatus(msg){
+  const el = document.getElementById('liveproc-status');
+  if(el) el.textContent = msg;
+}
+function liveProcFail(msg){
+  _liveProc.running = false;   // the page stays open — the analyst reads the named error (+ any
+  liveProcStatus(msg);         // grounded partial truth) and leaves via Back/Esc
+}
+function livePreviewEl(){
+  return (_liveProc.open && document.getElementById('liveproc-preview'))
+    || document.getElementById('live-preview');
+}
 function livePreviewReset(){
-  const el = document.getElementById('live-preview');
+  const el = livePreviewEl();
   if(el) el.innerHTML = '';
 }
 function livePreviewGrounded(rec){
-  const el = document.getElementById('live-preview');
+  const el = livePreviewEl();
   if(el) el.innerHTML = livePreviewBody(rec);
 }
 function livePreviewEnt(name, cls){
-  const el = document.getElementById('live-preview');
+  const el = livePreviewEl();
   if(!el || !el.querySelectorAll) return;   // no-op under the string-DOM harness
   Array.prototype.forEach.call(el.querySelectorAll('[data-pvent]'), sp => {
     if(sp.getAttribute('data-pvent') === name) sp.className = 'pvent ' + cls;
@@ -687,20 +763,28 @@ async function liveRun(){
   if(!text && !url){ status.textContent = 'Give an article URL or paste some article text first.'; return; }
   const t0 = Date.now();
   let stage = url && !text ? 'Contacting the companion (URL acquisition)…' : 'Contacting the local model…';
-  const paint = () => { status.textContent = stage + ' · ' + Math.round((Date.now() - t0) / 1000) + 's'; };
+  const paint = () => { const s = stage + ' · ' + Math.round((Date.now() - t0) / 1000) + 's';
+    status.textContent = s; liveProcStatus(s); };
   const tick = setInterval(paint, 1000);
+  const title = (document.getElementById('live-title').value || '').trim();
+  const ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+  // Phase 44 — the dedicated processing page opens for the whole run (in-page swap, stream kept alive)
+  liveShowProcessing({ title, url, source: (document.getElementById('live-source').value || '').trim(), ctrl });
   paint();
   try{
     const r = await fetch(NEWS.live.extract, { method:'POST',
       headers:{ 'Content-Type':'application/json' },
+      signal: ctrl ? ctrl.signal : undefined,
       body: JSON.stringify({ text, url,
-        title: (document.getElementById('live-title').value || '').trim(),
+        title,
         source_org: (document.getElementById('live-source').value || '').trim(),
         source_type: ((document.getElementById('live-stype') || {}).value || '') }) });
-    if(!r.ok){  // request-shape errors (400) are plain JSON, before any stream begins
+    if(!r.ok){  // request-shape errors (400/409) are plain JSON, before any stream begins
       const d = await r.json().catch(() => ({}));
       clearInterval(tick);
-      status.textContent = 'Extraction failed: ' + (d.error || ('HTTP ' + r.status)); return;
+      const msg = 'Extraction failed: ' + (d.error || ('HTTP ' + r.status))
+        + (r.status === 409 ? ' — the model runs one job at a time; wait for the running scan to finish.' : '');
+      status.textContent = msg; liveProcFail(msg); return;
     }
     livePreviewReset();
     let vStart = 0;   // Phase 43: verify-stage projection — measured pace, an estimate, never a promise
@@ -715,7 +799,8 @@ async function liveRun(){
       }
       if(lbl) stage = lbl; paint(); });
     clearInterval(tick);
-    if(data.error){ status.textContent = 'Extraction failed: ' + data.error; return; }  // a grounded preview, if any, stays — honest partial truth
+    if(data.error){ const m = 'Extraction failed: ' + data.error;        // the grounded preview, if any,
+      status.textContent = m; liveProcFail(m); return; }                 // stays on the page — honest partial truth
     livePreviewReset();
     const rec = data.record, drop = (data.dropped || []).length;
     rec.scan_id = data.scan_id || null;            // Phase 36: lets the Disposition gate escalate THIS scan's entities
@@ -725,10 +810,16 @@ async function liveRun(){
       + (drop ? (' · ' + drop + ' ungrounded dropped') : '')
       + ' · ' + Math.round((Date.now() - t0) / 1000) + 's';
     await liveRefreshWatchlist();                  // screen this scan against the current escalated watchlist
+    liveCloseProcessing();
     go('read', rec.id);
   }catch(ex){
     clearInterval(tick);
-    status.textContent = 'Could not reach the local companion (' + NEWS.live.extract + ') — ' + ex.message;
+    if(ctrl && ctrl.signal && ctrl.signal.aborted){      // Esc-twice / Back mid-run: honest abandon
+      liveCloseProcessing();
+      status.textContent = 'Extraction abandoned — nothing was saved.'; return;
+    }
+    const m = 'Could not reach the local companion (' + NEWS.live.extract + ') — ' + ex.message;
+    status.textContent = m; liveProcFail(m);
   }
 }
 /* ── Phase 36 — escalated-only feedback watchlist (companion-served ONLY; render_news STRIPS this whole
@@ -1118,7 +1209,16 @@ function liveInit(){
     + '.lprops{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}'
     + '.lprop{border:1px solid var(--line2);border-radius:4px;padding:1px 6px;font:11px var(--mono);color:var(--muted)}'
     + '.lprop b{color:var(--ink);font-weight:600}'
-    + '.tag.main{color:var(--signal);border:1px solid var(--signal)}';
+    + '.tag.main{color:var(--signal);border:1px solid var(--signal)}'
+    + '.liveproc{position:fixed;inset:0;z-index:80;background:var(--bg);overflow:auto;padding:46px 22px}'
+    + '.liveproc[hidden]{display:none}'
+    + '.lpwrap{max-width:860px;margin:0 auto}'
+    + '.lphead{font:600 22px var(--head);color:var(--ink);display:flex;gap:10px;align-items:center}'
+    + '.lpsrc{font:13px var(--mono);color:var(--muted);margin:8px 0 14px}'
+    + '.lporg{color:var(--muted)}'
+    + '.lpstatus{font:13px var(--mono);color:var(--signal);border:1px solid var(--line);border-left:3px solid var(--signal);border-radius:8px;padding:10px 12px;margin-bottom:14px;background:rgba(246,166,35,.05)}'
+    + '.lpact{display:flex;align-items:center;gap:12px;margin-top:18px}'
+    + '.lpnote{font:11px var(--mono);color:var(--muted)}';
   const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s);
   const baseSelect = RENDER.select;
   RENDER.select = function(){ baseSelect(); liveInjectSelect(); };

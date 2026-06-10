@@ -1,0 +1,69 @@
+{
+  "entities": [
+    {
+      "name": "Enhua Fang",
+      "type": "person",
+      "age": "38",
+      "context": "organizer within the CMLO"
+    },
+    {
+      "name": "Jianfei Lu",
+      "type": "person",
+      "age": "30",
+      "context": "manager for the CMLO"
+    },
+    {
+      "name": "Shu Jun Zhen",
+      "type": "person",
+      "age": "36",
+      "context": "courier/depositor"
+    },
+    {
+      "name": "Chinese money laundering organization",
+      "type": "org",
+      "context": "prolific Chinese money laundering organization (CMLO)"
+    },
+    {
+      "name": "CMLO",
+      "type": "org",
+      "context": "money laundering organization"
+    }
+  ],
+  "red_flags": [
+    {
+      "flag": "pick up bulk cash proceeds from unlawful activities, including narcotics trafficking",
+      "red_flag": "Bulk-cash placement via couriers collecting drug proceeds",
+      "category": "bulk-cash placement & couriers"
+    },
+    {
+      "flag": "deposited these illicit funds, which generally exceeded $10,000, into shell company bank accounts",
+      "red_flag": "Structuring: deposits exceeding $10k threshold into shell accounts",
+      "category": "structuring/threshold-avoidance"
+    },
+    {
+      "flag": "shell company bank accounts controlled by the CMLO",
+      "red_flag": "Shell/front companies used to hold illicit funds",
+      "category": "shell/front companies & nominee or opaque ownership"
+    },
+    {
+      "flag": "using multiple cellphones, changing phone numbers regularly, and several encrypted messaging applications",
+      "red_flag": "Concealment: encrypted comms and rotating phone numbers to evade detection",
+      "category": "concealment & detection-evasion"
+    },
+    {
+      "flag": "deposited those illicit funds, using both real and fake identities",
+      "red_flag": "Use of fake identities for financial transactions",
+      "category": "concealment & detection-evasion"
+    },
+    {
+      "flag": "procured fake driver’s licenses for the CMLO’s couriers",
+      "red_flag": "Procurement of fraudulent identification documents for money mules",
+      "category": "concealment & detection-evasion"
+    },
+    {
+      "flag": "money laundering organization (CMLO) that laundered over $92 million in illicit funds, including proceeds from the importation and distribution of illegal drugs",
+      "red_flag": "Laundering drug trafficking proceeds through organized criminal network",
+      "category": "fraud- or scam-derived victim funds"
+    }
+  ]
+}

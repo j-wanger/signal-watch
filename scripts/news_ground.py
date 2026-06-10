@@ -40,6 +40,16 @@ def article_body(md: str) -> str:
     return "\n".join(lines).strip().replace("*", "")
 
 
+def flag_dup_key(rf):
+    """Phase 40: the duplicate-collapse key for a red-flag row — (normalized quote, normalized category).
+
+    Shared by ground_record (live DROP mode) and build.validate_news_data (build-path CHECK mode) so
+    live collapse == build check by construction. Category-aware on purpose: the same quote under a
+    different category is two mechanisms, not a duplicate.
+    """
+    return (news_normalize(rf.get("flag") or ""), news_normalize(rf.get("category") or ""))
+
+
 def ground_record(record, article_text=None, min_chars=MIN_RED_FLAG_CHARS, max_chars=MAX_RED_FLAG_CHARS):
     """Filter a news record to only entities / red-flags that quote-ground in the article (DROP mode).
 
@@ -50,6 +60,10 @@ def ground_record(record, article_text=None, min_chars=MIN_RED_FLAG_CHARS, max_c
         (the entity is kept, the ungrounded attribute removed — nothing shown that isn't in the source).
       - red_flag: kept iff `flag` is a RAW substring of the body AND `red_flag` is present, distinct
         (normalize) from `flag`, and within [min_chars, max_chars].
+      - duplicate collapse (Phase 40, measurement-earned): two flags quoting the SAME span under the
+        SAME category are one behaviour twice — the FIRST survives (spans identical ⟹ input order is
+        the total survivor rule; deterministic for golden regeneration). Same quote under a DIFFERENT
+        category is NOT collapsed — one sentence can legitimately ground two mechanisms.
     Does not mutate the input record.
     """
     body = article_text if article_text is not None else record.get("article_text", "")
@@ -72,6 +86,7 @@ def ground_record(record, article_text=None, min_chars=MIN_RED_FLAG_CHARS, max_c
         kept_ents.append(e)
 
     kept_flags = []
+    seen_flag_keys = set()
     for rf in record.get("red_flags") or []:
         flag = (rf.get("flag") or "").strip()
         tr = (rf.get("red_flag") or "").strip()
@@ -83,6 +98,10 @@ def ground_record(record, article_text=None, min_chars=MIN_RED_FLAG_CHARS, max_c
             dropped.append({"kind": "red_flag", "value": flag, "reason": "red_flag missing or not distinct from flag"}); continue
         if not (min_chars <= len(tr) <= max_chars):
             dropped.append({"kind": "red_flag", "value": flag, "reason": f"red_flag length {len(tr)} outside [{min_chars},{max_chars}]"}); continue
+        key = flag_dup_key(rf)
+        if key in seen_flag_keys:
+            dropped.append({"kind": "red_flag", "value": flag, "reason": "duplicate flag (same quote + category)"}); continue
+        seen_flag_keys.add(key)
         kept_flags.append(rf)
 
     kept = dict(record)
@@ -171,20 +190,30 @@ def _selftest() -> int:
             {"id": "E3", "name": "Ghost LLC", "type": "org"},                              # name NOT grounded -> dropped
         ],
         "red_flags": [
-            {"id": "R1", "flag": "used shell companies to layer cash", "red_flag": "Layering via shell companies"},  # kept
+            {"id": "R1", "flag": "used shell companies to layer cash", "red_flag": "Layering via shell companies",
+             "category": "shell"},                                                                                   # kept
             {"id": "R2", "flag": "phrase absent from the article", "red_flag": "Some translation here"},             # not grounded
             {"id": "R3", "flag": "wired funds to Bob Smith", "red_flag": "wired funds to Bob Smith"},                # not distinct
             {"id": "R4", "flag": "wired funds", "red_flag": "ok"},                                                   # red_flag too short
+            # Phase 40 dup-collapse: same quote + same category as R1 (translation wording differs) → DUP drop;
+            # the FIRST (R1) survives — input order is the total survivor rule (spans identical).
+            {"id": "R5", "flag": "used shell companies to layer cash", "red_flag": "Shells used for cash layering",
+             "category": "shell"},
+            # same quote, DIFFERENT category → kept (one sentence can ground two mechanisms)
+            {"id": "R6", "flag": "used shell companies to layer cash", "red_flag": "Rapid cash layering chain",
+             "category": "rapid-movement"},
         ],
     }
     kept, dropped = ground_record(record)
     assert [e["name"] for e in kept["entities"]] == ["Acme Corp", "Bob Smith"], kept["entities"]
     assert kept["entities"][0].get("location") == "Miami", "grounded attribute should survive"
     assert "profession" not in kept["entities"][1], "ungrounded attribute should be stripped"
-    assert [f["id"] for f in kept["red_flags"]] == ["R1"], kept["red_flags"]
+    assert [f["id"] for f in kept["red_flags"]] == ["R1", "R6"], kept["red_flags"]
     assert any(d["reason"].startswith("name not raw-grounded") for d in dropped)
     assert any(d["reason"] == "attribute not grounded" for d in dropped)
-    assert sum(1 for d in dropped if d["kind"] == "red_flag") == 3
+    assert sum(1 for d in dropped if d["kind"] == "red_flag") == 4
+    dup_drops = [d for d in dropped if d["reason"] == "duplicate flag (same quote + category)"]
+    assert len(dup_drops) == 1 and dup_drops[0]["value"] == "used shell companies to layer cash", dup_drops
 
     # idempotence: re-grounding the kept record drops nothing
     kept2, dropped2 = ground_record(kept)

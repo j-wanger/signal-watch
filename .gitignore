@@ -74,3 +74,4 @@ config/typologies/*.draft.json
 
 # dev-wiki scratch / intermediate workflow artifacts
 .dev-wiki/tmp/
+.claude/.memory-consulted

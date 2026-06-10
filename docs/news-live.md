@@ -68,6 +68,36 @@ escalated entity with its provenance (*"escalated from &lt;article&gt;"*) and a 
 `POST`s `/watchlist/prune {name}` to un-escalate it (the audit row is retained; the book is never
 touched). Companion-only — stripped from the offline `dist/news` like the rest of the live region.
 
+## Red-flag quality (Phase 40, measure-first)
+Flags always passed the deterministic faithfulness gate, but completeness / span quality / translation
+register / granularity were unguarded — and on long **commercial** articles the model extracted only ~40%
+of what a blind second rater found (vs 67% on federal enforcement summaries), with per-article flag counts
+swinging 4–29. Measurement first (the Phase-38 playbook applied to flags):
+- **Method.** A 12-article commercial stress corpus (selected deterministically from a local negative-news
+  store; calibration/holdout split; **local-only, never committed**) + the 7 federal fixture articles, each
+  extracted live and compared against a **blind second-rater reference extraction**. Reported as
+  **inter-rater agreement / coverage-of-the-other-rater — consensus, never ground truth**; divergence
+  clusters human-adjudicated. No accuracy number is real here.
+- **Findings.** The misses concentrated in (1) early-stop with positional decay on narrative longreads,
+  (2) an **institutional/control-failure blind spot** (the old prompt's examples were transactional-only),
+  (3) per-anecdote over-extraction on enumerated content, (4) a latent prompt/gate bounds drift
+  (12–200 stated vs [12,240] enforced).
+- **The fix is the prompt (context shaping, again the lever).** The red_flags contract now carries a
+  **20-family mechanism CHECKLIST** (a coverage net: scan the whole article once per family — includes
+  *institutional control failure* and *misrepresentation to regulators*), a **granularity contract** (one
+  flag per distinct behaviour; retellings merge; narrow merge rule), tightest-span guidance, register
+  exemplars, and the [12,240] bounds. Three calibration rounds; the accepted round measured on the
+  **untouched holdout**: coverage-of-reference 0.40→0.55, agreement 0.54→0.62, mechanism-family coverage
+  0.46→0.63, **positional decay eliminated** — with the federal layer unregressed (0.73→0.74 agreement).
+  A planned per-flag precision verify was **dropped** (measurement showed the residue was recall, not
+  precision); a sectioned-extraction fallback was **skipped-with-reason** (its trigger — persisting decay —
+  did not fire).
+- **One measurement-earned gate rule.** `news_ground.ground_record` now collapses **duplicate flags**
+  (same quote + same category; the first survives — deterministic), and build.py's `validate_news_data`
+  CHECKS the same key (fail loud, never rewrite). Same quote under a *different* category is kept — one
+  sentence can ground two mechanisms. No span caps, no topic rules: semantic dedup of *reworded* retellings
+  stays a known prompt-side residue, not a gate rule (the Phase-38 overfit lesson).
+
 ## Extraction progress (Phase 39)
 `POST /extract` answers an **NDJSON stage stream** instead of a single blocking JSON (a full run is tens
 of seconds — measured 42.7s end-to-end on a 16-entity OFAC article): one line per pipeline stage —
@@ -147,9 +177,11 @@ The offline demo still works with no companion: just open `dist/news/index.html`
   overrides: the **book ∪ watchlist** screen, the **escalate** Disposition gate, and (Phase 38) the
   **watchlist view + prune** panel (render + empty state) — plus the strip assertion that none of the
   live/watchlist/view code survives in the offline `dist/news`.
-- `python3 tests/news_live_test.py` — `build_record` + grounding (CANNED), the **recorded-fixture replay**
-  (7 real captured-Qwen outputs under `tests/fixtures/news-live/` → parse→build→ground→screen == committed
-  goldens, **no model**), the keep-biased **second-pass verify** (model stubbed), the `/extract`
+- `python3 tests/news_live_test.py` — `build_record` + grounding (CANNED, incl. the Phase-40 planted
+  duplicate-flag collapse), the **recorded-fixture replay** (10 real captured-Qwen outputs under
+  `tests/fixtures/news-live/` — 7 original + 3 `<id>.ph40.*` re-captures under the Phase-40 checklist
+  prompt → parse→build→ground→screen == committed goldens, **no model**), the keep-biased **second-pass
+  verify** (model stubbed), the `/extract`
   route as an **NDJSON stage stream** (stages precede the payload; mid-stream failures → in-stream error
   events), and the **one-shot URL route** (acquisition stubbed: fetching→converted(text)→stages, text
   wins over url, verifier failure → in-stream paste suggestion). Run under **`.venv/bin/python`** to also

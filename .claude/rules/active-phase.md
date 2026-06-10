@@ -1,17 +1,15 @@
 # Active Phase Context
 
-Phase: 39 — Live news QOL: streamed extraction progress + one-shot URL acquisition. DELIVERED 2026-06-09 — all 5 lite tasks T1–T5 [x]; exit criteria MET; awaiting the delivery gate (present report → accept → commit + push to main → flip gate post-commit). Direction was approved via the assumption gate 2026-06-09 (A1 reject→revised→accept-with-condition; revisit: A1 BIT — the verifier/standardizer condition proved load-bearing on the justice.gov Akamai interstitial; A2–A4 held). Lite ceremony.
+Phase: 40 — Live red-flag extraction quality (measure-first). Lite. ALL 6 tasks [x] (T5 SKIPPED-WITH-REASON — the sectioning trigger didn't fire); full regate green; READY FOR COMPLETION pending the delivery gate.
 
-Objective: make the LIVE news companion legible + one-shot. DELIVERED: (1) `/extract` is ALWAYS an NDJSON stage stream (received → [fetching → converting] → extracting → grounding → verifying i/N → done; HTTP/1.0 body-until-close per-line flush — NO chunked framing, polling fallback unused; `extract(on_progress=None)` kept the Phase-38 replay fixtures green WITHOUT re-capture); (2) NEW companion-only `scripts/news_fetch.py` — fetch ladder urllib→curl→markitdown + deterministic standardizer + article-shape VERIFIER (D5: a rung wins ONLY by passing the verifier; D6: cookie + one same-host meta-refresh beats the Akamai interstitial); `/extract` accepts {url} OR {text} (text wins, D8); news.html live-region URL input + progress UI.
+Objective: DONE — measured (proxies + blind second-rater agreement, consensus never ground truth; residue = RECALL on commercial longreads, user-adjudicated at the T2 checkpoint) → SYSTEM_PROMPT context-shaped (20-family mechanism checklist + granularity contract + committed-record exemplars + [12,240] drift fix; r3 rolled back, r2 shipped) → shared-gate dup-collapse (news_ground.flag_dup_key: live DROP / build CHECK; 4 committed records clean) → HOLDOUT covR 0.40→0.55, mechCovR 0.46→0.63, positional decay eliminated; federal unregressed (0.73→0.74); 3 new .ph40 federal fixtures (10 total) + docs.
 
-Scope (UNFREEZE was): scripts/serve_news.py · scripts/news_fetch.py (NEW) · news.html (live region only) · dist/news/index.html (BYTE-IDENTICAL via the strip) · tests/news_live_test.py · tests/news-stream.test.mjs · tests/fixtures/news-fetch/** (NEW) · docs/news-live.md · tests/smoke-checklist.md · CLAUDE.md (in-place) · this file.
+Remaining: present the delivery gate → commit + push to main → flip `delivery=accepted` post-commit-verify (delivery-flow D3). Commit hygiene: `.claude/.memory-consulted` (untracked session marker) must NOT be committed; `.dev-wiki/tmp/ph40/` + `data/news/.live/` stay local-only; `specs/` + the .ph40 fixture pairs DO commit.
 
-Key constraints (held): offline `dist/news` byte-identical (all client code inside /*LIVE_START*/…/*LIVE_END*/); build.py NEVER imports the live layer (news_fetch companion-only; markitdown lazy/.venv-only); replay fixtures green without re-capture; a fetch that can't pass the verifier is an HONEST failure → paste fallback (never loosen the verifier); the always-on badge stays; NO non-negotiable change.
+Key constraints HELD: dists byte-identical 5/5 (NO client/news.html change); commercial captures never committed (fixture promotion US-federal-only); replay fixtures green without re-capture; agreement reported as consensus, no accuracy number as real; badge stays; NO non-negotiable change.
 
-Exit criteria: MET — news-stream 81→90 + corpus green; `--check all` 5/5 ZERO DRIFT; news_live_test PASS (system + .venv + --live real-Qwen smoke); news_fetch/news_ground/serve_news/news_store/derive_signals --selftest PASS; measured live 42.7s end-to-end, 16 entities + 8 flags grounded, 0 dropped (treasury.gov jy2735).
-
-Abort rule: (closed) blocked >3 attempts → mark [blocked: …] + ask the user: skip or abort.
+Carried to Phase 41: semantic instance-dup merge pass · denial-quote prompt micro-rule · committed registry-scoring harness · CLAUDE.md trim (279 lines) · FINTRAC /intel/ depth · third jurisdiction (AUSTRAC/UK) · verify-latency batching.
 
 Gates:
-- [x] Direction confirmed by user (assumption-approval gate 2026-06-09: A1 accept-with-condition, A2–A4 accept)
-- [x] Delivery accepted (post-implementation report 2026-06-09; commit 3786042 verified)
+- [x] Direction confirmed by user (assumption gate closed 2026-06-09; revisit filled at debrief: A1/A3/A4 held, A2 held-with-deviation)
+- [ ] Delivery accepted

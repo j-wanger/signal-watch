@@ -7,7 +7,7 @@ parents: [phase-38-consolidate-live-news]
 created: 2026-06-09
 updated: 2026-06-09
 source: plan
-status: active
+status: completed
 scope: ["news.html", "scripts/serve_news.py", "scripts/news_fetch.py", "tests/news_live_test.py", "tests/news-stream.test.mjs", "tests/fixtures/news-fetch/**", "docs/news-live.md", "dist/news/index.html", "tests/smoke-checklist.md", "CLAUDE.md"]
 entry_criteria: "Phase 38 delivered + accepted + committed 7df3ce4/f27f99b + pushed; the live companion (serve_news.py) + the strip invariant + the recorded-fixture replay harness exist."
 exit_criteria: "Streamed stage-level progress live in the companion (or documented job-id+polling fallback); one-shot URL acquisition through the news_fetch ladder + standardizer + verifier with honest failure → paste fallback; offline dist/news byte-identical; --check all zero drift; all harnesses + selftests green (incl. the new news_fetch --selftest); replay fixtures green without re-capture; build.py never imports the live layer; NO non-negotiable change."

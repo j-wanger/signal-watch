@@ -94,9 +94,18 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    `extract()` (`verify_entities`, on by default, `--no-verify-entities` off; fail-OPEN=KEEP, LIVE-only,
    layered ON TOP of the deterministic `build_record` the replay fixtures pin). The escalated watchlist is now
    VIEWABLE + prunable (`POST /watchlist/prune {name}` + a Select-screen panel). `news_ground.screen_entities`
-   keeps only the structural drops (alias-dedup/source-line/judicial/moniker). Recorded-fixture replay
-   (`tests/fixtures/news-live/`, 7 real captured-Qwen outputs incl. 3 promoted stress articles) pins the
-   deterministic core offline; `tests/news_live_test.py --live` is an opt-in real-model smoke. See `docs/news-live.md`.
+   keeps only the structural drops (alias-dedup/source-line/judicial/moniker). **Flag quality (Phase 40,
+   measure-first):** the red_flags prompt contract carries a 20-family mechanism CHECKLIST (a coverage net incl.
+   institutional-control-failure + misrepresentation families) + a granularity contract (one flag per distinct
+   behaviour, retellings merge) + the [12,240] bounds (prompt/gate drift fixed) — measured against a BLIND
+   second-rater reference as inter-rater agreement (consensus, never accuracy): holdout coverage-of-reference
+   0.40→0.55, positional decay eliminated, federal layer unregressed; a per-flag precision verify was dropped
+   (residue was recall) and sectioned extraction skipped (trigger didn't fire). The shared gate adds ONE
+   measurement-earned rule: duplicate-flag collapse (same quote + same category, first survives) — DROP-mode in
+   `ground_record` (live), CHECK-mode in `validate_news_data` (build, fail loud). Recorded-fixture replay
+   (`tests/fixtures/news-live/`, 10 real captured-Qwen outputs: 7 original incl. 3 promoted stress articles + 3
+   `<id>.ph40.*` checklist-prompt re-captures) pins the deterministic core offline; `tests/news_live_test.py
+   --live` is an opt-in real-model smoke. See `docs/news-live.md`.
 
 ### Build (`scripts/build.py`)
 Validates a config against the schema (fail-loud), resolves `text_file`→inline, inlines everything →
@@ -221,8 +230,9 @@ boundary (a LOCAL normalizer — build.py never imports the authoring layer).
     live overrides (book ∪ watchlist screen + the escalate gate + the Phase-38 watchlist VIEW/prune panel) +
     the offline-is-book-only strip assertion.
   - `python3 scripts/derive_signals.py --selftest` — the derivation GATE checks + anchor fixtures.
-  - `python3 tests/news_live_test.py` — the live extraction pipeline (build_record + grounding, the
-    recorded-fixture REPLAY [7 captured-Qwen outputs → goldens, no model], the keep-biased second-pass verify,
+  - `python3 tests/news_live_test.py` — the live extraction pipeline (build_record + grounding incl. the
+    duplicate-flag collapse, the recorded-fixture REPLAY [10 captured-Qwen outputs → goldens, no model,
+    incl. 3 `.ph40` checklist-prompt re-captures], the keep-biased second-pass verify,
     the `/extract` NDJSON stage-stream + one-shot URL routes [model + acquisition stubbed; stages precede the
     payload, errors in-stream, text wins over url] + `/watchlist/prune`; `--live` is an opt-in real-model
     smoke); under `.venv` it also drives `/watchlist` + `/disposition` + `/watchlist/prune` over a temp DuckDB

@@ -1,0 +1,153 @@
+{
+ "id": "live-untitled-live-article",
+ "title": "Untitled live article",
+ "doc_type": "News",
+ "typology": "",
+ "source_org": "OFAC",
+ "source_url": "",
+ "basis": "Public domain \u00b7 17 U.S.C. \u00a7105",
+ "article_text": "Source: U.S. Department of the Treasury, Office of Foreign Assets Control \u2014 home.treasury.gov/news/press-releases/jy2735 (archived 2026-05-29). Public-domain U.S. federal government work (17 U.S.C. \u00a7105). Excerpted verbatim.\n\nWASHINGTON \u2014 Today, the Department of the Treasury\u2019s Office of Foreign Assets Control (OFAC) is sanctioning five individuals and four entities that are associated with or leverage the TGR Group, a sprawling international network of businesses and employees that have facilitated significant sanctions circumvention on behalf of Russian elites. This action also identifies a Wyoming-based entity that is owned 50 percent or more by a sanctioned individual. Today\u2019s action continues the G7 commitment to hold accountable parties that evade or offset the impact of international sanctions, including by using digital assets, and to impose costs on illicit actors that use digital assets to enhance and transfer their wealth. These designations are the result of a collaborative effort with the United Kingdom\u2019s (UK) National Crime Agency, the United Arab Emirates (UAE) government, the Drug Enforcement Administration, and the Financial Crimes Enforcement Network.\n\nWith touchpoints around the world, the TGR Group is an extensive sanctions evasion and money laundering network that works to obfuscate the illicit activities of its clients, including through the use digital assets, such as stablecoins like Tether (USDT). Controlled by Ukrainian national George Rossi, the networkprovides a range of services to place, layer, and integrate illicit financial schemes into the global financial system. These include: the laundering of funds associated with sanctioned entities; providing an unregistered service to exchange cash and cryptocurrency; the receipt of cash and making the value available to clients in the form of cryptocurrency; providing a pre-paid credit card service; and, obfuscating the source of funds to allow high-net worth Russian nationals to purchase property in the United Kingdom.\n\nTo support their illicit activities, the TGR Group has leveraged other illicit actors, such as the Smart Group, led by Russian money launderer Ekaterina Zhdanova (Zhdanova). On November 3, 2023, OFAC designated Zhdanova, a Russian national, pursuant to Executive Order (E.O.) 14024, for operating or having operated in the financial services sector of the Russian Federation economy by laundering and moving funds using digital assets on behalf of Russian elites.\n\nGeorge Rossi (Rossi), a Ukrainian national who was born in Russia, is believed to be in overall control of the TGR Group. Rossi is the founder of TGR Partners and is the non-executive director at TGR Corporate Concierge LTD, both entities that are also being designated pursuant to E.O. 14024. Rossi also controls a TGR Group-related company that leveraged OFAC-sanctioned Russian cryptocurrency exchange, Garantex OU, to process USDT transactions after its date of designation.\n\nElena Chirkinyan (Chirkinyan), a Russian national, is a direct subordinate to Rossi and is considered a decision maker within the TGR Group. Chirkinyan is also a partner at TGR Partners and the Chief Executive Officer of TGR Corporate Concierge LTD. Additionally, Chirkinyan is the manager of TGR DWC-LLC, an entity designated pursuant to E.O. 14024.\n\nSeparately, Chirkinyan coordinated with Zhdanova (via her moniker @monalisa7) to obfuscate the source of Russian client funds to purchase real estate property in the United Kingdom. Chirkinyan and other TGR Group members also arranged cash handovers in which USDT was sent to a cryptocurrency address controlled by Zhdanova, and in return cash was received by the TGR Group.\n\nAndrejs Bradens (Bradens), a Latvian national, is associated with multiple TGR Group companies, including Pullman Global Solutions LLC (Pullman Global) and TGR Corporate Concierge LTD. Pullman Global is a Wyoming-based entity that is owned by Bradens.\n\nTGR Partners is a Moscow, Russia-based entity that provides financial services such as asset management, cryptocurrency trading, foreign exchange market payments, and concierge services. TGR Partners maintains locations in Russia, the UK, and other parts of Europe and Asia. Rossi is the founder of TGR Partners and Chirkinyan is a partner at TGR Partners.\n\nSiam Expert Trading Company Limited (Siam Expert) is a Thailand-based entity. Siam Expert has facilitated the export of electronic components to Russia. Siam Expert is also associated with Bradens.\n\nPullman Global Solutions LLC (Pullman Global) is a Wyoming-based entity that is owned by Bradens.\n\nKhadzi-Murat Dalgatovich Magomedov (Magomedov), a Russian national, and Zhdanova regularly coordinated to facilitate bulk cash and cryptocurrency money laundering transactions internationally. Magomedov and Zhdanova also coordinated a bulk cash hand-over in the United Kingdom.\n\nNikita Vladimirovich Krasnov, a Russian national, worked closely with Zhdanova as a key money laundering partner. As part of their scheme, Krasnov would arrange for intermediaries to deliver and convert bulk cash into cryptocurrency which would be deposited into cryptocurrency wallets in Zhdanova\u2019s name. Among other laundering methods, Krasnov and Zhdanova used a luxury watch company to facilitate trade-based money laundering. Krasnov is associated with the alias \u201cacescom.\u201d",
+ "entities": [
+  {
+   "name": "TGR Group",
+   "type": "org",
+   "id": "E1"
+  },
+  {
+   "name": "George Rossi",
+   "type": "person",
+   "context": "Ukrainian national, founder of TGR Partners, non-executive director at TGR Corporate Concierge LTD, controlled by the network",
+   "id": "E2"
+  },
+  {
+   "name": "TGR Partners",
+   "type": "org",
+   "id": "E3"
+  },
+  {
+   "name": "TGR Corporate Concierge LTD",
+   "type": "org",
+   "id": "E4"
+  },
+  {
+   "name": "Garantex OU",
+   "type": "org",
+   "context": "OFAC-sanctioned Russian cryptocurrency exchange",
+   "id": "E5"
+  },
+  {
+   "name": "Smart Group",
+   "type": "org",
+   "id": "E6"
+  },
+  {
+   "name": "Ekaterina Zhdanova",
+   "type": "person",
+   "context": "Russian national, money launderer, led Smart Group",
+   "id": "E7"
+  },
+  {
+   "name": "Elena Chirkinyan",
+   "type": "person",
+   "context": "Russian national, direct subordinate to Rossi, decision maker within the TGR Group, partner at TGR Partners, CEO of TGR Corporate Concierge LTD, manager of TGR DWC-LLC",
+   "id": "E8"
+  },
+  {
+   "name": "TGR DWC-LLC",
+   "type": "org",
+   "id": "E9"
+  },
+  {
+   "name": "Andrejs Bradens",
+   "type": "person",
+   "context": "Latvian national, associated with multiple TGR Group companies, owner of Pullman Global Solutions LLC",
+   "id": "E10"
+  },
+  {
+   "name": "Pullman Global Solutions LLC",
+   "type": "org",
+   "context": "Wyoming-based entity owned by Bradens",
+   "id": "E11"
+  },
+  {
+   "name": "Siam Expert Trading Company Limited",
+   "type": "org",
+   "context": "Thailand-based entity associated with Bradens",
+   "id": "E12"
+  },
+  {
+   "name": "Khadzi-Murat Dalgatovich Magomedov",
+   "type": "person",
+   "context": "Russian national, coordinated with Zhdanova to facilitate bulk cash and cryptocurrency money laundering transactions internationally",
+   "id": "E13"
+  },
+  {
+   "name": "Nikita Vladimirovich Krasnov",
+   "type": "person",
+   "context": "Russian national, key money laundering partner of Zhdanova, associated with alias 'acescom'",
+   "id": "E14"
+  }
+ ],
+ "red_flags": [
+  {
+   "flag": "facilitated significant sanctions circumvention on behalf of Russian elites",
+   "red_flag": "Sanctions evasion: facilitating circumvention for sanctioned Russian elites",
+   "category": "sanctions evasion & designated-party dealings",
+   "id": "R1"
+  },
+  {
+   "flag": "obfuscate the illicit activities of its clients, including through the use digital assets, such as stablecoins like Tether (USDT)",
+   "red_flag": "Virtual-asset obfuscation: using stablecoins (USDT) to hide illicit activity",
+   "category": "virtual-asset obfuscation (mixers, chain-hopping, stablecoins, unregistered exchange)",
+   "id": "R2"
+  },
+  {
+   "flag": "providing an unregistered service to exchange cash and cryptocurrency",
+   "red_flag": "Unregistered financial services: operating unregistered cash-crypto exchange",
+   "category": "unregistered/unlicensed financial services",
+   "id": "R3"
+  },
+  {
+   "flag": "receipt of cash and making the value available to clients in the form of cryptocurrency",
+   "red_flag": "Cash-for-crypto handovers to break the trail",
+   "category": "bulk-cash placement & couriers",
+   "id": "R4"
+  },
+  {
+   "flag": "obfuscating the source of funds to allow high-net worth Russian nationals to purchase property in the United Kingdom",
+   "red_flag": "Real-estate laundering: obfuscating funds for UK property purchases by sanctioned nationals",
+   "category": "casino, real-estate & luxury-asset laundering",
+   "id": "R5"
+  },
+  {
+   "flag": "USDT was sent to a cryptocurrency address controlled by Zhdanova, and in return cash was received by the TGR Group",
+   "red_flag": "Cash-for-crypto handovers to break the trail",
+   "category": "bulk-cash placement & couriers",
+   "id": "R6"
+  },
+  {
+   "flag": "facilitate bulk cash and cryptocurrency money laundering transactions internationally",
+   "red_flag": "Bulk cash and crypto layering: international money laundering transactions",
+   "category": "rapid movement with no economic purpose (layering, circular or flow-through transfers)",
+   "id": "R7"
+  },
+  {
+   "flag": "bulk cash hand-over in the United Kingdom",
+   "red_flag": "Bulk cash placement: physical handovers in high-risk jurisdictions",
+   "category": "bulk-cash placement & couriers",
+   "id": "R8"
+  },
+  {
+   "flag": "arrange for intermediaries to deliver and convert bulk cash into cryptocurrency which would be deposited into cryptocurrency wallets in Zhdanova\u2019s name",
+   "red_flag": "Money mules & funnel accounts: using intermediaries to convert cash to crypto in target's wallet",
+   "category": "money mules & funnel accounts",
+   "id": "R9"
+  },
+  {
+   "flag": "used a luxury watch company to facilitate trade-based money laundering",
+   "red_flag": "Trade-based laundering: using luxury goods (watches) for invoice fraud/over-invoicing",
+   "category": "trade-based laundering & invoice fraud",
+   "id": "R10"
+  }
+ ]
+}

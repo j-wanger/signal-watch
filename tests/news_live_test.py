@@ -71,6 +71,10 @@ CANNED = {
         # REAL verbatim flag but red_flag == flag (not distinct) -> dropped
         {"flag": "arrange for intermediaries to deliver and convert bulk cash into cryptocurrency",
          "red_flag": "arrange for intermediaries to deliver and convert bulk cash into cryptocurrency"},
+        # Phase 40 — PLANTED exact duplicate of the first flag (same quote + same category, reworded
+        # translation) -> dropped by the gate's dup-collapse; the FIRST survives
+        {"flag": "providing an unregistered service to exchange cash and cryptocurrency",
+         "red_flag": "Cash-crypto swaps without MSB registration", "category": "Virtual assets"},
     ],
 }
 
@@ -332,11 +336,15 @@ def fixture_replay_test() -> None:
     total_drops = 0
     for p in fixtures:
         aid = p.name[: -len(".qwen.json")]
+        # Phase 40: a fixture may carry a prompt-variant tag (e.g. <id>.ph40.qwen.json = the same article
+        # re-captured under the Phase-40 checklist prompt). The variant shares the BASE article + meta;
+        # only the golden pairing uses the full tagged name.
+        base = aid.rsplit(".", 1)[0] if "." in aid else aid
         raw = p.read_text(encoding="utf-8")
         # the article lives beside the fixture (promoted stress articles) or in the shipped corpus
-        local = FIXDIR / f"{aid}.article.md"
-        art = (local if local.exists() else ROOT / "data" / "news" / "articles" / f"{aid}.md").read_text(encoding="utf-8")
-        rec, dropped = serve_news.build_record(serve_news.parse_llm_json(raw), art, FIXTURE_META.get(aid))
+        local = FIXDIR / f"{base}.article.md"
+        art = (local if local.exists() else ROOT / "data" / "news" / "articles" / f"{base}.md").read_text(encoding="utf-8")
+        rec, dropped = serve_news.build_record(serve_news.parse_llm_json(raw), art, FIXTURE_META.get(base))
         golden = json.loads((FIXDIR / f"{aid}.golden.json").read_text(encoding="utf-8"))
         assert rec == golden, f"replay mismatch for {aid} (re-capture if build_record changed intentionally)"
         for i, e in enumerate(rec["entities"], 1):
@@ -421,7 +429,9 @@ def main() -> int:
     # something was actually dropped (the gate did work)
     assert any(d["reason"].startswith("name not raw-grounded") for d in dropped)
     assert any(d["reason"] == "attribute not grounded" for d in dropped)
-    assert sum(1 for d in dropped if d["kind"] == "red_flag") == 2
+    assert sum(1 for d in dropped if d["kind"] == "red_flag") == 3
+    # Phase 40: the planted same-quote+category duplicate is collapsed (first survives)
+    assert any(d["reason"] == "duplicate flag (same quote + category)" for d in dropped), dropped
 
     # idempotent: re-grounding the assembled record drops nothing more
     _, again = news_ground.ground_record(rec, rec["article_text"])

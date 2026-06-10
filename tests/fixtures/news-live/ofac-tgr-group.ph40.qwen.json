@@ -1,0 +1,136 @@
+{
+  "entities": [
+    {
+      "name": "TGR Group",
+      "type": "org"
+    },
+    {
+      "name": "George Rossi",
+      "type": "person",
+      "context": "Ukrainian national, founder of TGR Partners, non-executive director at TGR Corporate Concierge LTD, controlled by the network"
+    },
+    {
+      "name": "TGR Partners",
+      "type": "org"
+    },
+    {
+      "name": "TGR Corporate Concierge LTD",
+      "type": "org"
+    },
+    {
+      "name": "Garantex OU",
+      "type": "org",
+      "context": "OFAC-sanctioned Russian cryptocurrency exchange"
+    },
+    {
+      "name": "Smart Group",
+      "type": "org"
+    },
+    {
+      "name": "Ekaterina Zhdanova",
+      "type": "person",
+      "context": "Russian national, money launderer, led Smart Group"
+    },
+    {
+      "name": "Elena Chirkinyan",
+      "type": "person",
+      "context": "Russian national, direct subordinate to Rossi, decision maker within the TGR Group, partner at TGR Partners, CEO of TGR Corporate Concierge LTD, manager of TGR DWC-LLC"
+    },
+    {
+      "name": "TGR DWC-LLC",
+      "type": "org"
+    },
+    {
+      "name": "@monalisa7",
+      "type": "person",
+      "context": "moniker used by Zhdanova"
+    },
+    {
+      "name": "Andrejs Bradens",
+      "type": "person",
+      "context": "Latvian national, associated with multiple TGR Group companies, owner of Pullman Global Solutions LLC"
+    },
+    {
+      "name": "Pullman Global Solutions LLC",
+      "type": "org",
+      "context": "Wyoming-based entity owned by Bradens"
+    },
+    {
+      "name": "Siam Expert Trading Company Limited",
+      "type": "org",
+      "context": "Thailand-based entity associated with Bradens"
+    },
+    {
+      "name": "Khadzi-Murat Dalgatovich Magomedov",
+      "type": "person",
+      "context": "Russian national, coordinated with Zhdanova to facilitate bulk cash and cryptocurrency money laundering transactions internationally"
+    },
+    {
+      "name": "Nikita Vladimirovich Krasnov",
+      "type": "person",
+      "context": "Russian national, key money laundering partner of Zhdanova, associated with alias 'acescom'"
+    },
+    {
+      "name": "acescom",
+      "type": "person",
+      "context": "alias of Nikita Vladimirovich Krasnov"
+    }
+  ],
+  "red_flags": [
+    {
+      "flag": "facilitated significant sanctions circumvention on behalf of Russian elites",
+      "red_flag": "Sanctions evasion: facilitating circumvention for sanctioned Russian elites",
+      "category": "sanctions evasion & designated-party dealings"
+    },
+    {
+      "flag": "obfuscate the illicit activities of its clients, including through the use digital assets, such as stablecoins like Tether (USDT)",
+      "red_flag": "Virtual-asset obfuscation: using stablecoins (USDT) to hide illicit activity",
+      "category": "virtual-asset obfuscation (mixers, chain-hopping, stablecoins, unregistered exchange)"
+    },
+    {
+      "flag": "providing an unregistered service to exchange cash and cryptocurrency",
+      "red_flag": "Unregistered financial services: operating unregistered cash-crypto exchange",
+      "category": "unregistered/unlicensed financial services"
+    },
+    {
+      "flag": "receipt of cash and making the value available to clients in the form of cryptocurrency",
+      "red_flag": "Cash-for-crypto handovers to break the trail",
+      "category": "bulk-cash placement & couriers"
+    },
+    {
+      "flag": "obfuscating the source of funds to allow high-net worth Russian nationals to purchase property in the United Kingdom",
+      "red_flag": "Real-estate laundering: obfuscating funds for UK property purchases by sanctioned nationals",
+      "category": "casino, real-estate & luxury-asset laundering"
+    },
+    {
+      "flag": "leverage OFAC-sanctioned Russian cryptocurrency exchange, Garantex OU, to process USDT transactions after its date of designation",
+      "red_flag": "Sanctions evasion: using designated exchange (Garantex) for post-designation transactions",
+      "category": "sanctions evasion & designated-party dealings"
+    },
+    {
+      "flag": "USDT was sent to a cryptocurrency address controlled by Zhdanova, and in return cash was received by the TGR Group",
+      "red_flag": "Cash-for-crypto handovers to break the trail",
+      "category": "bulk-cash placement & couriers"
+    },
+    {
+      "flag": "facilitate bulk cash and cryptocurrency money laundering transactions internationally",
+      "red_flag": "Bulk cash and crypto layering: international money laundering transactions",
+      "category": "rapid movement with no economic purpose (layering, circular or flow-through transfers)"
+    },
+    {
+      "flag": "bulk cash hand-over in the United Kingdom",
+      "red_flag": "Bulk cash placement: physical handovers in high-risk jurisdictions",
+      "category": "bulk-cash placement & couriers"
+    },
+    {
+      "flag": "arrange for intermediaries to deliver and convert bulk cash into cryptocurrency which would be deposited into cryptocurrency wallets in Zhdanova’s name",
+      "red_flag": "Money mules & funnel accounts: using intermediaries to convert cash to crypto in target's wallet",
+      "category": "money mules & funnel accounts"
+    },
+    {
+      "flag": "used a luxury watch company to facilitate trade-based money laundering",
+      "red_flag": "Trade-based laundering: using luxury goods (watches) for invoice fraud/over-invoicing",
+      "category": "trade-based laundering & invoice fraud"
+    }
+  ]
+}

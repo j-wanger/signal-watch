@@ -827,6 +827,7 @@ def validate_news_data(articles: list, book: dict) -> list:
         if not isinstance(rfs, list) or not rfs:
             e.append(f"news[{aid}]: red_flags must be a non-empty array")
         else:
+            seen_flag_keys = set()  # Phase 40: duplicate-flag CHECK (same quote + category) — fail loud, never rewrite
             for rf in rfs:
                 flag = rf.get("flag", ""); tr = rf.get("red_flag", "")
                 if not flag or not rf.get("id"):
@@ -839,6 +840,10 @@ def validate_news_data(articles: list, book: dict) -> list:
                     e.append(f"news[{aid}]/{rf.get('id')}: red_flag missing or not distinct from the verbatim flag")
                 elif not (MIN_RED_FLAG_CHARS <= len(tr) <= MAX_RED_FLAG_CHARS):
                     e.append(f"news[{aid}]/{rf.get('id')}: red_flag length {len(tr)} outside [{MIN_RED_FLAG_CHARS},{MAX_RED_FLAG_CHARS}]")
+                key = news_ground.flag_dup_key(rf)
+                if key in seen_flag_keys:
+                    e.append(f"news[{aid}]/{rf.get('id')}: duplicate flag (same quote + category)")
+                seen_flag_keys.add(key)
     rows = book.get("rows") if isinstance(book, dict) else None
     if not isinstance(rows, list) or not rows:
         e.append("news: book.rows must be a non-empty array")

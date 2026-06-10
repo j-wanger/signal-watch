@@ -106,7 +106,7 @@ that table.
   verbatim under 17 U.S.C. §105); the client/counterparty **book is synthetic** (no real customer data);
   scores are real computed similarity; nothing reads as a real detection/precision rate.
 
-### Live mode (Phase 35 extraction + 36 persistence + 38 entity-precision/watchlist-view + 39 progress/URL, optional — needs a local llama-cpp server; see `docs/news-live.md`)
+### Live mode (Phase 35 extraction + 36 persistence + 38 entity-precision/watchlist-view + 39 progress/URL + 40 flag-quality, optional — needs a local llama-cpp server; see `docs/news-live.md`)
 - [ ] **Automated (no model):** `python3 tests/news_live_test.py`, `python3 scripts/news_ground.py --selftest`,
   `python3 scripts/news_fetch.py --selftest`, and `python3 scripts/serve_news.py --selftest` all exit **0**
   (the grounding gate, the build_record pipeline, the `/extract` NDJSON stage stream + one-shot URL route
@@ -127,6 +127,10 @@ that table.
 - [ ] **Extraction progress (Phase 39):** during a run the status line paints **live stages** — model
   extraction → grounding → **"Verifying entity i of N — <name>"** per entity — with an **elapsed-seconds**
   counter ticking; on completion it reports counts + total seconds. No silent multi-minute wait.
+- [ ] **Flag quality (Phase 40):** on a substantial enforcement article the extracted red flags read as
+  **distinct mechanisms** (no same-quote duplicates — the gate collapses them; no per-anecdote flag storms),
+  include **institutional/control-failure** flags where the article describes them (not only transactions),
+  and each `red_flag` is a terse mechanism-named translation distinct from its verbatim quote.
 - [ ] **One-shot URL (Phase 39):** put a public **article URL** (e.g. a justice.gov or treasury.gov press
   release) in the URL field, **Run extraction** → "Fetching + converting" paints, the **converted text fills
   the textarea** as the run proceeds, and the grounded record opens (source link = the URL). Trimming the

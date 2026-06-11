@@ -41,7 +41,7 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-45-corpus-presentation-polish -->
-<!-- gate-log:phase-45 direction=approved delivery=pending -->
+<!-- gate-log:phase-45 direction=approved delivery=accepted -->
 
 ## Phase 45 — Corpus demo presentation polish (pre-presentation day) — M7
 

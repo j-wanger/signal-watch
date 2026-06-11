@@ -27,6 +27,11 @@
 html,body{height:100%;overflow:hidden;background:var(--bg);cursor:none}
 body{font-family:var(--sans);color:var(--ink)}
 
+/* fixed 1920×1080 design canvas, uniformly scaled to the screen — content never reflows,
+   so the layout holds at any resolution/aspect (atmosphere + ticker + finale stay full-bleed) */
+#fit{position:fixed;left:50%;top:50%;width:1920px;height:1080px;z-index:5;
+  transform:translate(-50%,-50%)}
+
 /* ======== atmosphere ======== */
 .vignette{position:fixed;inset:0;pointer-events:none;z-index:3;
   background:radial-gradient(ellipse 120% 90% at 50% 42%,transparent 55%,rgba(0,0,0,.55) 100%)}
@@ -76,12 +81,12 @@ header{position:fixed;top:0;left:0;right:0;z-index:10;display:flex;align-items:c
 .acttitle.on{opacity:1;transform:none}
 .acttitle .no{font-family:var(--mono);font-size:13px;color:var(--signal);letter-spacing:.3em}
 .acttitle .tt{font-family:var(--display);font-style:italic;font-weight:600;font-size:52px;
-  line-height:1.04;color:var(--ink);margin-top:6px;max-width:430px}
+  line-height:1.04;color:var(--ink);margin-top:6px;max-width:400px}
 .acttitle .tt em{font-style:italic;color:var(--signal)}
 .acttitle .ds{font-family:var(--sans);font-size:15px;color:var(--muted);margin-top:12px;max-width:400px;line-height:1.5}
 
 /* ======== ACT 1 — the document ======== */
-.docwrap{display:flex;gap:48px;align-items:center;transform:translateX(2%)}
+.docwrap{display:flex;gap:48px;align-items:center;transform:translateX(64px)}
 .doc{width:620px;background:var(--panel);border:1px solid var(--line);border-radius:14px;
   padding:38px 42px;box-shadow:0 30px 80px rgba(0,0,0,.6);position:relative}
 .doc::before{content:"FINTRAC OPERATIONAL ALERT · INDICATORS PARAPHRASED · ATTRIBUTED";position:absolute;top:-11px;left:26px;
@@ -116,7 +121,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:10;display:flex;align-items:c
 .chip .cf{display:block;font-size:10px;color:var(--faint);letter-spacing:.16em;margin-top:6px;text-transform:uppercase}
 
 /* ======== ACT 2/3 — shared constellation stage ======== */
-.cosmos{width:min(1480px,94vw);height:min(780px,78vh);position:relative}
+.cosmos{width:1480px;height:780px;position:relative}
 svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .edge{stroke:var(--signal);stroke-width:1.6;fill:none;opacity:0;
   stroke-dasharray:var(--len) var(--len);stroke-dashoffset:var(--len)}
@@ -175,7 +180,7 @@ svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
   opacity:0;visibility:hidden;transition:opacity 1.2s;backdrop-filter:blur(3px)}
 .finale.on{opacity:1;visibility:visible}
 .finale .fin{text-align:center;max-width:1100px;padding:0 40px}
-.finale .big{font-family:var(--display);font-style:italic;font-weight:600;font-size:88px;
+.finale .big{font-family:var(--display);font-style:italic;font-weight:600;font-size:clamp(44px,4.6vw,88px);
   line-height:1.06;color:var(--ink);letter-spacing:-.01em}
 .finale .big em{color:var(--signal);font-style:italic}
 .finale .small{font-family:var(--mono);font-size:14px;letter-spacing:.3em;text-transform:uppercase;
@@ -199,6 +204,8 @@ svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 <div class="scan"></div>
 <div class="vignette"></div>
 <div class="grain"></div>
+
+<div id="fit">
 
 <header>
   <div class="brand">
@@ -279,6 +286,8 @@ svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
   </section>
 
 </div>
+
+</div><!-- /#fit -->
 
 <div class="finale" id="finale">
   <div class="fin">
@@ -381,7 +390,15 @@ function buildEdges(){
   });
 }
 buildEdges();
-addEventListener('resize', buildEdges);
+
+/* scale the fixed 1920×1080 canvas to the screen (cosmos is fixed-size, so edges never rebuild) */
+const fit = document.getElementById('fit');
+function fitScale(){
+  const s = Math.min(innerWidth/1920, innerHeight/1080);
+  fit.style.transform = `translate(-50%,-50%) scale(${s.toFixed(4)})`;
+}
+fitScale();
+addEventListener('resize', fitScale);
 
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);

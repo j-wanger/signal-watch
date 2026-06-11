@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signal Watch — booth loop</title>
+<!--
+  BOOTH LOOP — a standalone, self-contained draw-in animation for a booth monitor.
+  Open by double-clicking (file://, offline — fonts degrade gracefully to system stacks).
+  NOT part of the build system; NOT one of the three ship artifacts. All on-screen content
+  is SYNTHETIC / illustrative (no real advisory text, no real data) — the "Illustrative ·
+  vision prototype" chip stays on screen at all times.
+  Loop: 38s master timeline — ACT 1 read/extract → ACT 2 atoms form → ACT 3 compose coverage.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,600&family=Archivo:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08090c; --bg2:#0d0f14; --panel:#11141b; --line:#1d212b; --line2:#272c39;
+  --ink:#e8e4da; --muted:#8b8fa0; --faint:#5a5f70;
+  --signal:#f6a623; --signal-dim:#a4711a; --green:#5dbd7e; --rose:#ef6079; --blue:#6aa5e8;
+  --display:'Newsreader',Georgia,'Times New Roman',serif;
+  --sans:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg);cursor:none}
+body{font-family:var(--sans);color:var(--ink)}
+
+/* ======== atmosphere ======== */
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:3;
+  background:radial-gradient(ellipse 120% 90% at 50% 42%,transparent 55%,rgba(0,0,0,.55) 100%)}
+.grid{position:fixed;inset:0;pointer-events:none;opacity:.05;z-index:0;
+  background-image:linear-gradient(var(--line2) 1px,transparent 1px),linear-gradient(90deg,var(--line2) 1px,transparent 1px);
+  background-size:64px 64px}
+.grain{position:fixed;inset:-100px;pointer-events:none;z-index:4;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+  animation:grain 1.1s steps(4) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-40px,30px)}50%{transform:translate(30px,-50px)}75%{transform:translate(-30px,-20px)}100%{transform:translate(0,0)}}
+.scan{position:fixed;left:0;right:0;height:120px;z-index:2;pointer-events:none;opacity:.5;
+  background:linear-gradient(180deg,transparent,rgba(246,166,35,.035),transparent);
+  animation:scan 9s linear infinite}
+@keyframes scan{from{top:-140px}to{top:110%}}
+
+/* ======== persistent chrome ======== */
+header{position:fixed;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;
+  justify-content:space-between;padding:30px 44px}
+.brand{display:flex;align-items:baseline;gap:16px}
+.brand .bx{width:13px;height:13px;background:var(--signal);transform:rotate(45deg) translateY(-2px);
+  box-shadow:0 0 18px rgba(246,166,35,.8);animation:bxpulse 3.2s ease-in-out infinite}
+@keyframes bxpulse{0%,100%{box-shadow:0 0 10px rgba(246,166,35,.5)}50%{box-shadow:0 0 26px rgba(246,166,35,.95)}}
+.brand h1{font-family:var(--sans);font-weight:700;font-size:21px;letter-spacing:.34em;text-transform:uppercase}
+.brand h1 em{font-style:normal;color:var(--signal)}
+.brand .sub{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.18em;text-transform:uppercase}
+.badge{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--signal);border:1px solid var(--signal-dim);border-radius:999px;padding:7px 16px;
+  background:rgba(246,166,35,.06)}
+
+/* act marker — top center */
+.actbar{position:fixed;top:34px;left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:34px}
+.actstep{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11.5px;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--faint);transition:color .6s}
+.actstep .dot{width:7px;height:7px;border-radius:50%;background:var(--line2);transition:.6s}
+.actstep.on{color:var(--ink)}
+.actstep.on .dot{background:var(--signal);box-shadow:0 0 12px rgba(246,166,35,.9)}
+
+/* ======== stage ======== */
+.stage{position:fixed;inset:0;display:grid;place-items:center;z-index:5}
+.act{position:absolute;inset:0;display:grid;place-items:center;opacity:0;visibility:hidden;
+  transition:opacity .85s ease}
+.act.on{opacity:1;visibility:visible}
+
+/* big act title, lower-left */
+.acttitle{position:fixed;left:46px;bottom:96px;z-index:9;opacity:0;transform:translateY(14px);
+  transition:opacity .9s ease,transform .9s ease}
+.acttitle.on{opacity:1;transform:none}
+.acttitle .no{font-family:var(--mono);font-size:13px;color:var(--signal);letter-spacing:.3em}
+.acttitle .tt{font-family:var(--display);font-style:italic;font-weight:600;font-size:52px;
+  line-height:1.04;color:var(--ink);margin-top:6px;max-width:430px}
+.acttitle .tt em{font-style:italic;color:var(--signal)}
+.acttitle .ds{font-family:var(--sans);font-size:15px;color:var(--muted);margin-top:12px;max-width:400px;line-height:1.5}
+
+/* ======== ACT 1 — the document ======== */
+.docwrap{display:flex;gap:48px;align-items:center;transform:translateX(2%)}
+.doc{width:620px;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:38px 42px;box-shadow:0 30px 80px rgba(0,0,0,.6);position:relative}
+.doc::before{content:"FINTRAC OPERATIONAL ALERT · INDICATORS PARAPHRASED · ATTRIBUTED";position:absolute;top:-11px;left:26px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--faint);
+  background:var(--bg);padding:2px 10px;border:1px solid var(--line);border-radius:999px}
+.doc h3{font-family:var(--display);font-weight:600;font-size:19px;line-height:1.3;color:var(--ink);margin-bottom:6px}
+.doc .dmeta{font-family:var(--mono);font-size:11px;color:var(--faint);margin-bottom:20px;letter-spacing:.08em}
+.doc .dcredit{font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.06em;
+  margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
+.dline{font-family:var(--display);font-size:16px;line-height:1.7;color:var(--muted);margin-bottom:9px;
+  opacity:0;transform:translateY(6px);transition:opacity .55s,transform .55s}
+.dline.bullet{padding-left:18px;position:relative}
+.dline.bullet::before{content:"▸";position:absolute;left:0;color:var(--signal-dim);font-size:13px;top:2px}
+.dline.on{opacity:1;transform:none}
+.rf{position:relative;color:var(--ink);padding:1px 3px;border-radius:4px;transition:background .5s}
+.rf::after{content:"";position:absolute;inset:0;background:rgba(246,166,35,.22);border-radius:4px;
+  transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.25,.8,.3,1)}
+.rf.hl::after{transform:scaleX(1)}
+.rf.hl{color:#ffe9c4}
+.caret{display:inline-block;width:9px;height:20px;background:var(--signal);vertical-align:-3px;
+  animation:blink .85s steps(1) infinite;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+/* extracted phrase chips */
+.rail{display:flex;flex-direction:column;gap:14px;width:380px}
+.rail .rh{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--faint);
+  text-transform:uppercase;margin-bottom:4px}
+.chip{font-family:var(--mono);font-size:13px;line-height:1.5;color:#ffd896;
+  border:1px solid var(--signal-dim);border-left:3px solid var(--signal);border-radius:9px;
+  padding:11px 15px;background:rgba(246,166,35,.05);opacity:0;transform:translateX(-26px);
+  transition:opacity .45s,transform .45s cubic-bezier(.2,.9,.3,1.2)}
+.chip.on{opacity:1;transform:none}
+.chip .cf{display:block;font-size:10px;color:var(--faint);letter-spacing:.16em;margin-top:6px;text-transform:uppercase}
+
+/* ======== ACT 2/3 — shared constellation stage ======== */
+.cosmos{width:min(1480px,94vw);height:min(780px,78vh);position:relative}
+svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.edge{stroke:var(--signal);stroke-width:1.6;fill:none;opacity:0;
+  stroke-dasharray:var(--len) var(--len);stroke-dashoffset:var(--len)}
+.edge.on{opacity:.85;animation:draw .7s cubic-bezier(.4,0,.2,1) forwards}
+.edge.fade{opacity:0;transition:opacity .7s}
+@keyframes draw{to{stroke-dashoffset:0}}
+.halo{fill:none;stroke:rgba(246,166,35,.18);stroke-width:1;stroke-dasharray:5 14;
+  opacity:0;transition:opacity 1.2s}
+.halo.on{opacity:1;animation:halodrift 30s linear infinite}
+@keyframes halodrift{to{stroke-dashoffset:-760}}
+
+.atom{position:absolute;width:114px;height:100px;margin:-50px 0 0 -57px;display:grid;place-items:center;
+  opacity:0;transform:scale(.2);transition:opacity .6s,transform .7s cubic-bezier(.2,.85,.3,1.25)}
+.atom.on{opacity:1;transform:scale(1)}
+.atom .hex{position:absolute;width:86px;height:86px;
+  clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+  background:linear-gradient(160deg,#181c26,#0e1118);border:none}
+.atom .hexline{position:absolute;width:90px;height:90px;
+  clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+  background:var(--line2);transition:background .5s}
+.atom .core{position:relative;z-index:2;text-align:center}
+.atom .glyph{width:8px;height:8px;border-radius:50%;background:var(--signal-dim);margin:0 auto 6px;
+  transition:.5s}
+.atom .lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;color:var(--muted);
+  text-transform:uppercase;line-height:1.35;transition:color .5s;white-space:pre-line}
+.atom.lit .hexline{background:var(--signal)}
+.atom.lit .glyph{background:var(--signal);box-shadow:0 0 16px rgba(246,166,35,1)}
+.atom.lit .lbl{color:#ffe9c4}
+.atom.lit{filter:drop-shadow(0 0 22px rgba(246,166,35,.35))}
+.atom .ring{position:absolute;width:106px;height:106px;border-radius:50%;
+  border:1px solid rgba(246,166,35,.55);opacity:0;transform:scale(.6)}
+.atom.lit .ring{animation:ripple 1.6s ease-out infinite}
+@keyframes ripple{0%{opacity:.7;transform:scale(.62)}100%{opacity:0;transform:scale(1.25)}}
+
+/* coverage gauge */
+.gauge{position:absolute;right:1.5%;top:50%;transform:translateY(-50%);width:330px;text-align:center;
+  opacity:0;transition:opacity 1s}
+.gauge.on{opacity:1}
+.gring{position:relative;width:280px;height:280px;margin:0 auto}
+.gring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.gtrack{fill:none;stroke:var(--line);stroke-width:10}
+.gfill{fill:none;stroke:var(--signal);stroke-width:10;stroke-linecap:round;
+  stroke-dasharray:754 754;stroke-dashoffset:754;transition:stroke-dashoffset 1.4s cubic-bezier(.3,0,.2,1);
+  filter:drop-shadow(0 0 10px rgba(246,166,35,.55))}
+.gnum{position:absolute;inset:0;display:grid;place-items:center}
+.gnum .v{font-family:var(--mono);font-weight:700;font-size:64px;color:var(--ink)}
+.gnum .v small{font-size:30px;color:var(--signal)}
+.glabel{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--faint);
+  text-transform:uppercase;margin-top:18px;line-height:2}
+.glabel b{color:var(--signal);font-weight:400}
+.combolabel{font-family:var(--display);font-style:italic;font-size:21px;color:var(--muted);
+  margin-top:10px;min-height:30px;transition:opacity .5s}
+
+/* ======== finale ======== */
+.finale{position:fixed;inset:0;z-index:12;display:grid;place-items:center;background:rgba(5,6,8,.88);
+  opacity:0;visibility:hidden;transition:opacity 1.2s;backdrop-filter:blur(3px)}
+.finale.on{opacity:1;visibility:visible}
+.finale .fin{text-align:center;max-width:1100px;padding:0 40px}
+.finale .big{font-family:var(--display);font-style:italic;font-weight:600;font-size:88px;
+  line-height:1.06;color:var(--ink);letter-spacing:-.01em}
+.finale .big em{color:var(--signal);font-style:italic}
+.finale .small{font-family:var(--mono);font-size:14px;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--muted);margin-top:34px}
+.finale .small b{color:var(--signal);font-weight:400}
+
+/* ======== ticker ======== */
+.ticker{position:fixed;left:0;right:0;bottom:0;z-index:11;border-top:1px solid var(--line);
+  background:rgba(10,11,15,.85);overflow:hidden;height:46px;display:flex;align-items:center}
+.tk{display:flex;gap:0;white-space:nowrap;animation:tick 52s linear infinite;font-family:var(--mono);
+  font-size:12.5px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.tk span{padding:0 34px;position:relative}
+.tk span::after{content:"◆";position:absolute;right:-7px;color:var(--signal-dim);font-size:9px;top:3px}
+.tk b{color:var(--signal);font-weight:400}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+
+<div class="grid"></div>
+<div class="scan"></div>
+<div class="vignette"></div>
+<div class="grain"></div>
+
+<header>
+  <div class="brand">
+    <div class="bx"></div>
+    <h1>SIGNAL<em>WATCH</em></h1>
+    <span class="sub">AML detection · vision prototype</span>
+  </div>
+  <div class="badge">Illustrative · vision prototype</div>
+</header>
+
+<div class="actbar">
+  <div class="actstep" id="as0"><span class="dot"></span>01 Read</div>
+  <div class="actstep" id="as1"><span class="dot"></span>02 Derive</div>
+  <div class="actstep" id="as2"><span class="dot"></span>03 Compose</div>
+</div>
+
+<div class="acttitle" id="t0">
+  <div class="no">ACT 01 — READ THE PLAYBOOK</div>
+  <div class="tt">The regulators publish the red flags. <em>In public.</em></div>
+  <div class="ds">One signal loop reads every advisory and lifts each red flag out — verbatim, traceable to its line.</div>
+</div>
+<div class="acttitle" id="t1">
+  <div class="no">ACT 02 — DERIVE THE ATOMS</div>
+  <div class="tt">Every red flag becomes a detection <em>atom.</em></div>
+  <div class="ds">68 indicators derived from one operational alert — small, composable signals, each traceable to its source line.</div>
+</div>
+<div class="acttitle" id="t2">
+  <div class="no">ACT 03 — COMPOSE COVERAGE</div>
+  <div class="tt">Atoms recombine. Coverage <em>compounds.</em></div>
+  <div class="ds">The engine searches pairings an analyst can't enumerate — what survives faces the promotion gate.</div>
+</div>
+
+<div class="stage">
+
+  <!-- ============ ACT 1 ============ -->
+  <section class="act" id="act1">
+    <div class="docwrap">
+      <div class="doc">
+        <h3>Laundering the proceeds of illicit synthetic opioids</h3>
+        <div class="dmeta">FINTRAC · Operational Alert · January 2025 · selected indicators — paraphrased</div>
+        <p class="dline">Selected ML/TF indicators (paraphrased):</p>
+        <p class="dline bullet">Client receives payroll or deposits <span class="rf" data-k="0">inconsistent with their declared occupation and stated income</span>.</p>
+        <p class="dline bullet">Business structures arranged so the <span class="rf" data-k="1">ultimate beneficial owner cannot be determined</span>.</p>
+        <p class="dline bullet">Wire or virtual-currency payments to <span class="rf" data-k="2">chemical exporters in high-risk source jurisdictions</span>, several sharing the same contact identifiers.</p>
+        <p class="dline bullet">Purchases of <span class="rf" data-k="3">pill presses or laboratory equipment</span> with no apparent business need.</p>
+        <p class="dline bullet">Shipping and courier payments <span class="rf" data-k="4">paired with chemical-company purchases</span>, out of profile for the client.</p>
+        <p class="dline bullet">Repeated shipments of <span class="rf" data-k="5">small parcels under one kilogram</span>, consistent with small-package trafficking.<span class="caret" id="caret"></span></p>
+        <div class="dcredit">Paraphrased from FINTRAC, &ldquo;Operational Alert: Laundering the proceeds of illicit synthetic opioids&rdquo; (January 2025) · fintrac-canafe.gc.ca/intel/operation/iso-osi-eng.pdf · indicator text not reproduced verbatim</div>
+      </div>
+      <div class="rail">
+        <div class="rh">Extracted indicators · 68 derived from this alert</div>
+        <div class="chip" data-c="0">Payroll/deposits inconsistent with declared occupation &amp; income<span class="cf">grounded · md L442</span></div>
+        <div class="chip" data-c="1">Opaque ultimate beneficial ownership<span class="cf">grounded · md L481</span></div>
+        <div class="chip" data-c="2">VC/wire to China-based chemical exporters sharing contact identifiers<span class="cf">grounded · md L557</span></div>
+        <div class="chip" data-c="3">Pill-press / lab-equipment purchase with no business need<span class="cf">grounded · md L575</span></div>
+        <div class="chip" data-c="4">Paired shipping + chemical-company payments out of profile<span class="cf">grounded · md L567</span></div>
+        <div class="chip" data-c="5">Sub-1kg parcel shipments (small-package trafficking)<span class="cf">grounded · md L666</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ACT 2 + 3 ============ -->
+  <section class="act" id="act23">
+    <div class="cosmos" id="cosmos">
+      <svg id="net" preserveAspectRatio="none"></svg>
+      <div class="gauge" id="gauge">
+        <div class="gring">
+          <svg viewBox="0 0 280 280">
+            <circle class="gtrack" cx="140" cy="140" r="120"/>
+            <circle class="gfill" id="gfill" cx="140" cy="140" r="120"/>
+          </svg>
+          <div class="gnum"><div class="v"><span id="gv">0</span><small>%</small></div></div>
+        </div>
+        <div class="glabel">coverage index · <b>illustrative</b><br>composition discovered by search</div>
+        <div class="combolabel" id="combolabel"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="finale" id="finale">
+  <div class="fin">
+    <div class="big">Alone it's noise.<br><em>Together it's a case.</em></div>
+    <div class="small">SIGNAL WATCH — <b>effective</b> · <b>regulatorily defensible</b> · built from the public corpus</div>
+  </div>
+</div>
+
+<div class="ticker"><div class="tk" id="tk"></div></div>
+
+<script>
+/* =====================================================================
+   Master loop — one deterministic 38s timeline, state rebuilt each cycle.
+   ===================================================================== */
+const LOOP = 32800;   // ~1.3× the original pacing, PLUS a deliberate ~3s hold at the end of ACT 1
+
+/* ---------- ticker (independent infinite marquee) ---------- */
+const TKMSG = [
+  'The agent proposes — <b>you dispose</b>',
+  'Every signal traceable to <b>the regulator’s own line</b>',
+  'Small composable <b>atoms</b> — not monolithic scenarios',
+  'Read the public corpus — <b>FinCEN · OFAC · FINTRAC</b>',
+  'Nothing alerts until it passes <b>the promotion gate</b>',
+  'On screen: <b>FINTRAC Operational Alert — illicit synthetic opioids</b> (Jan 2025), indicators paraphrased &amp; attributed',
+  'Coverage figures <b>illustrative</b> — a vision prototype',
+];
+document.getElementById('tk').innerHTML = (TKMSG.map(m=>`<span>${m}</span>`).join('')).repeat(2);
+
+/* ---------- constellation geometry (shared by ACT 2 + 3) ---------- */
+/* atoms derived from the FINTRAC synthetic-opioids OA's grounded indicators (real committed signal
+   names where they exist in the derived record: S-INCOME-ACTIVITY-INCONSISTENCY, S-SHELL-NOMINEE-
+   NETWORK, S-REVENUE-OPERATIONS-MISMATCH, S-MCC-SPEND-PATTERN, S-VASP-EXPOSURE-SCREEN,
+   S-LIFESTYLE-UTILITY-MISMATCH, S-SHIPPING-PARCEL-ANOMALY); the last two are LIBRARY atoms —
+   signals already committed from prior corpus documents. */
+const ATOMS = [
+  {l:'S-INCOME\nACTIVITY',      x:.205, y:.225},
+  {l:'S-EMT\nVELOCITY',         x:.365, y:.145},
+  {l:'S-SHELL\nNOMINEE',        x:.535, y:.190},
+  {l:'S-REVENUE-OPS\nMISMATCH', x:.680, y:.275},
+  {l:'S-VASP\nEXPOSURE',        x:.150, y:.450},
+  {l:'S-FUNNEL\nDEPOSIT',       x:.330, y:.385},
+  {l:'S-LIFESTYLE\nUTILITY',    x:.510, y:.420},
+  {l:'S-SHIPPING\nPARCEL',      x:.665, y:.520},
+  {l:'S-MCC-SPEND\nPATTERN',    x:.225, y:.660},
+  {l:'S-CORRIDOR\nSPEND',       x:.420, y:.730},
+  {l:'S-CASH\nSTRUCTURING',     x:.585, y:.690},   // library atom (prior documents)
+  {l:'S-KYC\nINTEGRITY',        x:.395, y:.560},   // library atom (prior documents)
+];
+const DOC_ATOMS = 10;                              // first N pop from THIS alert; the rest join from the library
+/* combinations cycled in ACT 3: members + the coverage they "reach" (illustrative) */
+const COMBOS = [
+  {m:[0,11,5],     cov:24, label:'income-activity × KYC integrity × funnel deposits'},
+  {m:[2,3,10],     cov:41, label:'shell nominee × revenue-ops mismatch × cash structuring'},
+  {m:[4,1,6,9],    cov:63, label:'VASP exposure × EMT velocity × lifestyle-utility × corridor spend'},
+  {m:[7,8,2,5,9],  cov:86, label:'five-atom composition — case-grade'},
+];
+
+const cosmos = document.getElementById('cosmos');
+const net = document.getElementById('net');
+const atomEls = [];
+ATOMS.forEach((a,i)=>{
+  const el = document.createElement('div');
+  el.className = 'atom'; el.id = 'atom'+i;
+  el.style.left = (a.x*100)+'%'; el.style.top = (a.y*100)+'%';
+  el.innerHTML = `<div class="hexline"></div><div class="hex"></div><div class="ring"></div>
+    <div class="core"><div class="glyph"></div><div class="lbl">${a.l}</div></div>`;
+  cosmos.appendChild(el); atomEls.push(el);
+});
+
+/* edges — build one <line> per combo pair, sized after layout */
+let edgeEls = [];
+function buildEdges(){
+  net.innerHTML = '';
+  edgeEls = [];
+  const W = cosmos.clientWidth, H = cosmos.clientHeight;
+  net.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  /* slow ambient halo — an ellipse FITTED to the atom field's bounding box, so it always
+     lines up with the constellation regardless of how the atom layout changes */
+  const xs = ATOMS.map(a=>a.x), ys = ATOMS.map(a=>a.y);
+  const cx = (Math.min(...xs)+Math.max(...xs))/2 * W;
+  const cy = (Math.min(...ys)+Math.max(...ys))/2 * H;
+  const rx = (Math.max(...xs)-Math.min(...xs))/2 * W + 96;
+  const ry = (Math.max(...ys)-Math.min(...ys))/2 * H + 84;
+  const halo = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+  halo.setAttribute('cx', cx); halo.setAttribute('cy', cy);
+  halo.setAttribute('rx', rx); halo.setAttribute('ry', ry);
+  halo.setAttribute('class','halo'); halo.id='halo';
+  net.appendChild(halo);
+  COMBOS.forEach((c,ci)=>{
+    for(let i=0;i<c.m.length;i++) for(let j=i+1;j<c.m.length;j++){
+      const A=ATOMS[c.m[i]], B=ATOMS[c.m[j]];
+      const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+      ln.setAttribute('x1',A.x*W); ln.setAttribute('y1',A.y*H);
+      ln.setAttribute('x2',B.x*W); ln.setAttribute('y2',B.y*H);
+      const len = Math.hypot((A.x-B.x)*W,(A.y-B.y)*H);
+      ln.style.setProperty('--len', len.toFixed(0));
+      ln.setAttribute('class','edge'); ln.dataset.combo = ci;
+      net.appendChild(ln); edgeEls.push(ln);
+    }
+  });
+}
+buildEdges();
+addEventListener('resize', buildEdges);
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const gfill = $('gfill'), gv = $('gv'), combolabel = $('combolabel');
+const GCIRC = 754; // 2πr, r=120
+let gvAnim = null;
+function setCoverage(pct){
+  gfill.style.strokeDashoffset = (GCIRC*(1-pct/100)).toFixed(1);
+  const from = parseInt(gv.textContent)||0, t0 = performance.now();
+  cancelAnimationFrame(gvAnim);
+  (function step(now){
+    const p = Math.min(1,(now-t0)/1200);
+    gv.textContent = Math.round(from+(pct-from)*(1-Math.pow(1-p,3)));
+    if(p<1) gvAnim = requestAnimationFrame(step);
+  })(t0);
+}
+function combo(ci){
+  edgeEls.forEach(e=>{ e.classList.remove('on'); e.classList.add('fade'); });
+  atomEls.forEach(a=>a.classList.remove('lit'));
+  if(ci<0) return;
+  edgeEls.filter(e=>+e.dataset.combo===ci).forEach(e=>{e.classList.remove('fade');void e.getBoundingClientRect();e.classList.add('on');});
+  COMBOS[ci].m.forEach(i=>atomEls[i].classList.add('lit'));
+  combolabel.style.opacity = 0;
+  setTimeout(()=>{ combolabel.textContent = COMBOS[ci].label; combolabel.style.opacity = 1; }, 320);
+  setCoverage(COMBOS[ci].cov);
+}
+
+/* ---------- the timeline ---------- */
+const EVENTS = [
+  /* ===== ACT 1 : 0 – 12s (1.3× pace, then a DELIBERATE ~3s hold once extraction completes) ===== */
+  {t:    0, fn(){ $('act1').classList.add('on'); $('t0').classList.add('on'); $('as0').classList.add('on'); }},
+  /* document lines stream in (intro + 6 paraphrased bullets) */
+  ...[0,1,2,3,4,5,6].map(i=>({t: 400+i*560, fn(){ document.querySelectorAll('.dline')[i].classList.add('on'); }})),
+  /* highlights sweep + chips extract */
+  ...[0,1,2,3,4,5].map(i=>({t: 4300+i*880, fn(){
+      document.querySelector(`.rf[data-k="${i}"]`).classList.add('hl');
+      setTimeout(()=>document.querySelector(`.chip[data-c="${i}"]`).classList.add('on'), 320);
+  }})),
+  /* extraction complete ~9.0s → HOLD on the finished page until 12.0s (the requested pause) */
+  /* ===== ACT 2 : 12 – 18.9s ===== */
+  {t:12000, fn(){ $('act1').classList.remove('on'); $('t0').classList.remove('on'); }},
+  {t:12600, fn(){ $('act23').classList.add('on'); $('t1').classList.add('on'); $('as1').classList.add('on'); $('halo').classList.add('on'); }},
+  /* the 10 alert atoms pop in, then the 2 library atoms join */
+  ...Array.from({length:DOC_ATOMS},(_,k)=>({t:13000+k*360, fn(){ atomEls[k].classList.add('on'); }})),
+  {t:16700, fn(){ for(let i=DOC_ATOMS;i<ATOMS.length;i++) atomEls[i].classList.add('on'); }},
+  /* a teaser pulse: every atom flickers lit once */
+  {t:17500, fn(){ atomEls.forEach((a,i)=>setTimeout(()=>{a.classList.add('lit');setTimeout(()=>a.classList.remove('lit'),380);}, i*110)); }},
+  /* ===== ACT 3 : 19.4 – 30.5s ===== */
+  {t:18900, fn(){ $('t1').classList.remove('on'); }},
+  {t:19400, fn(){ $('t2').classList.add('on'); $('as2').classList.add('on'); $('gauge').classList.add('on'); }},
+  {t:20000, fn(){ combo(0); }},
+  {t:22600, fn(){ combo(1); }},
+  {t:25200, fn(){ combo(2); }},
+  {t:27900, fn(){ combo(3); }},
+  /* ===== finale + reset : 30.5 – 32.8s ===== */
+  {t:30500, fn(){ $('finale').classList.add('on'); }},
+  {t:32400, fn(){ resetAll(); }},
+];
+
+function resetAll(){
+  ['act1','act23','t0','t1','t2','as0','as1','as2','gauge'].forEach(id=>$(id).classList.remove('on'));
+  document.querySelectorAll('.dline.on').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.rf.hl').forEach(e=>e.classList.remove('hl'));
+  document.querySelectorAll('.chip.on').forEach(e=>e.classList.remove('on'));
+  atomEls.forEach(a=>{a.classList.remove('on','lit');});
+  edgeEls.forEach(e=>e.classList.remove('on','fade'));
+  const h=$('halo'); if(h) h.classList.remove('on');
+  combolabel.textContent=''; gv.textContent='0';
+  gfill.style.transition='none'; gfill.style.strokeDashoffset=GCIRC;
+  void gfill.getBoundingClientRect(); gfill.style.transition='';
+  setTimeout(()=>$('finale').classList.remove('on'), 250);
+}
+
+/* driver — fire events in order; wrap resets the pointer (and the DOM via the 37.6s event) */
+let t0 = performance.now(), ptr = 0;
+(function tick(now){
+  let p = now - t0;
+  if(p >= LOOP){ t0 += LOOP*Math.floor(p/LOOP); p = now - t0; ptr = 0; }
+  while(ptr < EVENTS.length && EVENTS[ptr].t <= p){ EVENTS[ptr].fn(); ptr++; }
+  requestAnimationFrame(tick);
+})(t0);
+</script>
+</body>
+</html>

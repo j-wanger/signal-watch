@@ -60,7 +60,7 @@ that table.
   **Back** returns to the data source (not the picker). No fabricated number — only honest counts + the
   always-on badge. (Sanity: the lens is genuinely distinct — at least one feed reads **"not yet"**.)
 - [ ] **Corpus completeness + typology re-segmentation (Phase 33):** on Select, confirm the menu now shows
-  **five** source groups — the new **"FINTRAC sector guidance (ML/TF indicators)"** group with **10 derived**
+  **five** source groups — the new **"FINTRAC Sector Guidance (ML/TF indicators)"** group with **10 derived**
   pages (Financial entities, MSB, Real estate, Securities, Life insurance, DPMS, Casinos, Accountants, BC
   notaries, Virtual currency; Agents of the Crown shows non-derivable). The header stat reads **62 publications
   · 56 derived**. Pick **Financial entities** → it walks the full per-doc arc (a dense ~150-indicator doc) and
@@ -76,6 +76,31 @@ that table.
   corruption indicators) plus any US doc; the framenote still says indicators are NOT de-duplicated/matched
   across regulators (no lift/overlap). The 56 derived records are byte-frozen — the typology rides in
   `data/indicator-typology-map.json` (350 deterministic corruption/TF assignments; the rest inherit the doc typology).
+
+### Presenter notes + demo path (Phase 45 — the stakeholder walk)
+- [ ] **Recommended route:** open on the landing (atoms are now seeded in the lead — say the word once here,
+  it pays off on the lift screen) → Documents lens → walk **fin-2024-a002** (FinCEN 2024 fentanyl advisory:
+  5 build-nows, and its lift beat shows **28 covered partners across FinCEN + FINTRAC** — the
+  cross-jurisdiction payoff for a Canadian room) → back → **Typologies** lens for the synthesis beat →
+  **Capabilities** lens briefly (the FINTRAC Crown-copyright attribution now renders in the footer here —
+  point to it if compliance is in the room). For Canadian depth, a FINTRAC sector page (Financial entities /
+  Securities) now renders its build recs in ≤2s (the stagger is capped) — safe to open live.
+- [ ] **The gate is YOURS — perform it:** on Build recs the copy now says the agent has *proposed all N,
+  pre-selected*. **Visibly deselect 1–2 rows** before advancing — that's the human-gate beat, and it also
+  keeps the Signal screen at a presentable 2–3 spec cards instead of 30.
+- [ ] **The second gate is narrated, not clicked:** on Signal, name the build-log's last step aloud —
+  "and nothing deploys from here: it queues a backtest and routes to **Model Validation under E-23**" —
+  that's gate two, off-screen by design.
+- [ ] **The lift beat carries REAL numbers now:** the counts are the corpus's own covered-indicator
+  inventory (the same honesty class as the lens counts). If asked "is that number real?" the answer is
+  **yes** — what's NOT claimed is any lift/precision figure; that's the promotion gate's job. (The old
+  illustrative 18→64→83 bars and their "pending calibration" disclaimer are gone from the corpus demo;
+  the six-act showcase still has its own illustrative Act-5 — don't cross-reference them.)
+- [ ] **Avoid as walk targets:** `fin-2021-a004` and `fin-2023-alert003` (zero build-now → an honest but
+  anticlimactic back half; their picker chips lack the "· N build-now" suffix — that's the tell).
+- [ ] **On the presentation machine:** open `dist/corpus/index.html` once over network BEFORE the room
+  (warms the Google-Fonts cache; offline it falls back to system fonts — acceptable but flatter), then
+  confirm offline reload still walks clean. Use **Back** (not the stepper's step 1) to return into a lens.
 
 ## Adverse-media / negative-news stream (`dist/news/`) — M8, Phase 31 + Phase 32
 - [ ] **Automated arc:** `node tests/news-stream.test.mjs` exits **0** — drives the committed

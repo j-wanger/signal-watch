@@ -53,10 +53,15 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    elder-financial-exploitation) against `config/schema.md`; the elder typology renders the FULL
    verbatim EFE advisory (FinCEN FIN-2022-A002, public domain) in Act 1 via `advisory_full`.
 2. **Corpus explorer** — `corpus.html` → `dist/corpus/index.html`. A SEPARATE artifact (own copy of
-   the dossier theme; `index.html` byte-untouched). 6-screen per-doc arc: Select → Read advisory →
-   Coverage → Build recs (**the human GATE**) → Signal → Combination lift → Close; FOUR Select lenses
-   (Documents / Typologies / Capabilities / Data sources). Scale: **2,251 indicators / 56 derived /
-   62 publications / 5 sources**.
+   the dossier theme; `index.html` byte-untouched). 6-screen per-doc arc: Select → Read the source →
+   Coverage → Build recs (**the human GATE** — all BUILD_NOWs PROPOSED pre-selected, the presenter
+   deselects to dispose) → Signal → Combination lift (honest R2 inventory counts — see Honesty
+   constraints) → Close; FOUR Select lenses (Documents / Typologies / Capabilities / Data sources);
+   FINTRAC Crown-copyright footer attribution on detail AND the quoting capability/data-source drills
+   (per contributing doc). Scale: **2,251 indicators / 56 derived / 62 publications / 5 sources**.
+   Load-time DISPLAY-ONLY encoding repair (mojibake in some derived records' authored coverage fields
+   + PDF-bullet tofu in article md → repaired at render; committed records/md byte-frozen) —
+   harness-swept across every doc/screen/drill.
 3. **News stream** (M8) — `news.html` → `dist/news/index.html`. The adverse-media / negative-news
    stream (a SECOND atom stream — the compose payoff is the M8 north star, scoped OUT). Arc: Select →
    Read → Screen → Disposition (the human gate) → Exposure. Runtime fuzzy matcher (normalize →
@@ -154,10 +159,12 @@ per-capability spec templates; honest SOURCE_DATA where the bank can't observe.
 - Cross-corpus / lens coverage is honest UNION arithmetic / honest COUNTS over the existing
   per-indicator status. NO similarity / overlap / lift number is computed or claimed; indicators are
   NOT de-duplicated across regulators. The always-on "Illustrative data & outputs" badge stays.
-- The ONE approved fabrication-shaped reversal: the corpus combination-lift figures are a GENERIC
-  illustrative template (18→64→83), identical across docs, behind a LOUD "Illustrative · pending
-  calibration — NOT measured" tag (distinct from the always-on badge). The derived records carry no
-  lift numbers.
+- The corpus combination-lift beat carries NO lift/precision figure (Phase 45 deleted the Phase-18-era
+  generic illustrative template AND its "pending calibration" tag): the screen shows honest INVENTORY
+  counts only — covered indicators in the committed signal's typology × contributing regulators,
+  computed client-side at render, the same honesty class as the lens counts — framed as candidate
+  composition partners feeding the promotion gate. The derived records carry no lift numbers. The
+  SHOWCASE Act-5 keeps its illustrative lift template (a deliberate, gate-accepted divergence).
 
 ### News data (`data/news/{articles/*.md, derived/*.json, book.json}`)
 `articles` are REAL US-federal gov-enforcement docs (DOJ + OFAC, verbatim-excerpted under 17 U.S.C.

@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-10
 updated: 2026-06-10
 source: plan
-status: active
+status: completed
 scope: [tests/news_quality_harness.py, scripts/serve_news.py, scripts/news_ground.py, news.html, tests/news_live_test.py, tests/news-stream.test.mjs, tests/fixtures/news-live/**, .dev-wiki/tmp/ph44*, .dev-wiki/tasks.md, .dev-wiki/_CURRENT_STATE.md, .dev-wiki/_ARCHITECTURE.md, docs/news-live.md, tests/smoke-checklist.md, CLAUDE.md, specs/]
 entry_criteria: "Phase 43 delivered + accepted + committed (fba2bb0/58a9ed6) + pushed; 0 open tasks; assumption gate closed 2026-06-10."
 exit_criteria: "Both reported failure classes reproduced + classified + fixed-or-honestly-reported; the targeted quality harness committed (deterministic on fixture material, alias-ownership scoring); quality-gated speed optimization at the T1-proven hotspot or an honest skip-with-reason; the fresh processing page in the LIVE region only; the hygiene trim lossless; 13/13 replay fixtures green NO re-capture; the 4 committed records pass the gate; offline dist/news byte-identical (--check all 5/5); node news-stream + corpus green; all selftests + news_live_test (system + .venv + --live incl. a wire-note probe) green; docs/smoke/CLAUDE.md updated in place."

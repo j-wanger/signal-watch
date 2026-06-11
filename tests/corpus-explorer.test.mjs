@@ -31,7 +31,7 @@
 // letting us drive the arc AND read/write the gate's real `selected` Set (REDUCED is read once at eval,
 // so motion modes are tested in two fresh contexts).
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import vm from 'node:vm';
@@ -682,8 +682,8 @@ const s26 = env26.__stage._html;
 // (P26-1) Select grouped by SOURCE, newest-first within each group
 eq((s26.match(/class="srcgroup"/g) || []).length, 5,
   'Select groups documents into 5 source sections (Advisories / Alerts / OFAC / FINTRAC OAs / FINTRAC guidance)');
-['FinCEN Advisories', 'FinCEN Alerts', 'OFAC advisories', 'FINTRAC operational alerts', 'FINTRAC sector guidance'].forEach(l =>
-  ok(s26.includes(l), `source-group header present: "${l}"`));
+['FinCEN Advisories', 'FinCEN Alerts', 'OFAC Advisories', 'FINTRAC Operational Alerts &amp; Briefs', 'FINTRAC Sector Guidance'].forEach(l =>
+  ok(s26.includes(l), `source-group header present: "${l}"`));   // labels render through esc() — & is &amp;
 const advBlock = s26.slice(s26.indexOf('FinCEN Advisories'), s26.indexOf('FinCEN Alerts'));
 const renderedAdvIds = [...advBlock.matchAll(/class="advcard [^"]*" data-id="([^"]+)"/g)].map(m => m[1]);
 const expectedAdvIds = api26.ADVISORIES.filter(a => (a.doc_type || 'Advisory') === 'Advisory').slice()
@@ -720,19 +720,54 @@ ok(/class="buildlog"/.test(env26.__stage._html) && /Agent build log/.test(env26.
 eq((env26.__stage._html.match(/class="blstep/g) || []).length, 6, 'build-log has 6 structural steps');
 ok(/PROPOSED ·/.test(env26.__stage._html), 'Signal still drafts the spec card(s) below the build-log');
 
-// (P26-5) combination-lift screen (Act-5 port) — GENERIC illustrative template + the LOUD honesty gate
+// (P45-T2) combination-lift — the R2 REAL composition search space (Phase 45 replaced the Phase-26
+// generic illustrative template). The expected counts are recomputed INDEPENDENTLY from the COMMITTED
+// DATA FILES (data/*/derived/*.json + the two typology overlays) — never from __CORPUS__ or the DOM —
+// so a wrong on-screen count (NaN→0, double-count) can never pin itself as truth.
+const DATA45 = resolve(HERE, '..', 'data');
+const SRCS45 = [['fincen','Advisory'],['fincen-alerts','Alert'],['ofac','OFAC'],['fintrac','FINTRAC'],['fintrac-guidance','FINTRAC Guidance']];
+const REG45 = {'Advisory':'FinCEN','Alert':'FinCEN','OFAC':'OFAC','FINTRAC':'FINTRAC','FINTRAC Guidance':'FINTRAC'};
+const tv45 = v => (typeof v === 'string') ? v : (v && v.typology) || null;
+const dmap45r = JSON.parse(readFileSync(resolve(DATA45, 'typology-map.json'), 'utf8'));
+const dmap45 = dmap45r.map || dmap45r;
+const imap45r = JSON.parse(readFileSync(resolve(DATA45, 'indicator-typology-map.json'), 'utf8'));
+const imap45 = imap45r.map || imap45r;
+const recs45 = [];
+for (const [dir, dt] of SRCS45)
+  for (const f of readdirSync(resolve(DATA45, dir, 'derived')).filter(f => f.endsWith('.json')))
+    recs45.push({ rec: JSON.parse(readFileSync(resolve(DATA45, dir, 'derived', f), 'utf8')), dt, fid: f.replace(/\.json$/, '') });
+const covByTyp45 = new Map(); let covAll45 = 0; const regsAll45 = new Set();
+for (const { rec, dt, fid } of recs45) {
+  const did = rec.id || fid;
+  for (const i of rec.indicators || []) {
+    if (i.status !== 'covered') continue;
+    const typ = tv45(imap45[`${did}/${i.id}`]) || tv45(dmap45[did]);   // overlay keys are doc-qualified
+    if (!covByTyp45.has(typ)) covByTyp45.set(typ, { n: 0, regs: new Set() });
+    const e = covByTyp45.get(typ); e.n++; e.regs.add(REG45[dt]);
+    covAll45++; regsAll45.add(REG45[dt]);
+  }
+}
+function expected45(docId) {                 // mirrors renderLift's derivation RULE, from data files only
+  const r = recs45.find(x => (x.rec.id || x.fid) === docId);
+  const first = (r.rec.indicators || []).filter(i => i.build_rec === 'BUILD_NOW')
+    .find(i => i.build_logic && typeof i.build_logic === 'object');
+  const typ = first ? (tv45(imap45[`${docId}/${first.id}`]) || tv45(dmap45[docId])) : null;
+  const e = typ && covByTyp45.get(typ);
+  return (e && e.n) ? { n: e.n, regs: e.regs.size } : { n: covAll45, regs: regsAll45.size };
+}
 api26.gotoScreen(4);
-const lift26 = env26.__stage._html;
-ok(/· Combination lift/.test(lift26), 'screen 4 is the new Combination-lift beat');
-eq((lift26.match(/class="liftbar"/g) || []).length, 3, 'combination-lift renders 3 composition bars');
-ok(/fill weak/.test(lift26) && /fill mid/.test(lift26) && /fill strong/.test(lift26), 'lift bars: weak → mid → strong');
-// THE HONEST-ILLUSTRATIVE GATE: the loud tag is present and the figures are openly NOT real / NOT per-doc.
-ok(/class="illus"/.test(lift26) && /Illustrative · pending calibration/.test(lift26),
-  'combination-lift carries the LOUD "illustrative · pending calibration" tag');
-ok(/NOT measured on this document/.test(lift26) && /identical across the corpus/.test(lift26),
-  'honesty gate: lift figures are openly declared a generic template, not measured per-document');
-eq(numText(env26, 'lv0'), 18, 'reduced: lift count-up jumps to the template value (signal alone = 18%)');
-eq(numText(env26, 'lv2'), 83, 'reduced: lift count-up jumps to the template value (full combination = 83%)');
+const lift45 = env26.__stage._html;
+const exp45 = expected45(adv26.id);
+ok(/· Combination lift/.test(lift45), 'screen 4 is the Combination-lift beat');
+ok(/candidate composition partner/.test(lift45), 'R2: the real composition search space renders (stable marker)');
+eq(numText(env26, 'lfn'), exp45.n, `R2 partner count equals the INDEPENDENTLY recomputed covered inventory (${exp45.n})`);
+ok(new RegExp(`<span class="lfn">${exp45.regs}</span>`).test(lift45),
+  `R2 regulator count equals the independent recomputation (${exp45.regs})`);
+ok(!/\d+\s*%/.test(lift45), 'NO percentage anywhere on the lift screen — inventory facts only, no performance claim');
+ok(!/liftbar|pending calibration|class="illus"/.test(lift45),
+  'the fake 18→64→83 bars and the "pending calibration" disclaimer are GONE (nothing left to disclaim)');
+ok(/promotion gate/.test(lift45), 'the promotion gate closes the beat');
+ok(/NOT de-duplicated or matched across regulators/.test(lift45), 'the honest-union disclosure stays on the framenote');
 ok(env26.__errors.length === 0, 'grouping + build-log + lift rendered with no console errors');
 
 // (P26-6) combination-lift honest empty state when nothing is committed at the gate
@@ -740,7 +775,7 @@ api26.selected = new Set(); api26.gotoScreen(4);
 ok(/class="empty"/.test(env26.__stage._html) && /No signal committed/.test(env26.__stage._html),
   'combination-lift shows an honest empty state when nothing is committed');
 
-// (P26-7) animated (non-reduced) lift bars count up after a flush
+// (P45-T2b) animated (non-reduced) — the partner count counts up to the REAL inventory value
 const env26b = boot(false);
 const api26b = env26b.__api;
 const adv26b = api26b.ADVISORIES.find(a => a.id === adv26.id);
@@ -748,7 +783,7 @@ api26b.pick(adv26b.id);
 api26b.selected = new Set(api26b.buildNows(adv26b).map(i => i.id));
 api26b.gotoScreen(4);
 env26b.__flush();                                            // run the deferred T() → animVal → rAF chain
-eq(numText(env26b, 'lv2'), 83, 'animated: lift count-up reaches the template value after the timer flush');
+eq(numText(env26b, 'lfn'), exp45.n, 'animated: the partner count-up reaches the real inventory value after the timer flush');
 ok(env26b.__errors.length === 0, 'animated combination-lift produced no console errors');
 
 /* ===================== Phase 27 — presentation fixes (T2 cleaner / T3 highlight / T4 build-beat) ===================== */
@@ -888,6 +923,141 @@ ok(feTypos.has('corruption') && feTypos.has('terrorist-financing') && feTypos.ha
 const corrDocs = new Set(api33t.clusterFor('corruption').map(d => d.id));
 ok(corrDocs.has('fintrac-guid-financial-entities') && corrDocs.has('fintrac-guid-msb'),
   'the corruption cluster now draws indicators from multiple FINTRAC sector pages');
+
+/* ===================== Phase 45 — presentation polish (pre-presentation day) ===================== */
+// (P45-T1a) build-rec row stagger is CAPPED — the 119–173-row FINTRAC guidance docs must not blank-wait ~15s.
+const env45 = boot(false);                                   // full motion: the delays are real
+const api45 = env45.__api;
+const big45 = api45.ADVISORIES.filter(api45.isLive).slice().sort((x, y) => y.indicators.length - x.indicators.length)[0];
+ok(big45.indicators.length > 30, `largest doc is big enough for the cap to bind (${big45.id}: ${big45.indicators.length} rows)`);
+api45.pick(big45.id); api45.gotoScreen(2);
+const delays45 = [...env45.__stage._html.matchAll(/animation-delay:(\d+)ms/g)].map(m => +m[1]);
+ok(delays45.length >= big45.indicators.length, `every build-rec row carries a stagger delay (${delays45.length})`);
+ok(Math.max(...delays45) <= 1500, `stagger capped at 1500ms (max ${Math.max(...delays45)}ms) — last row visible ≤2s, reduced-motion instant`);
+// (P45-T1b) the human gate reads PROPOSED, not pre-decided — the agent proposes, the presenter disposes.
+ok(/proposed all/.test(env45.__stage._html) && /Deselect any to dispose/.test(env45.__stage._html),
+  'human gate copy: agent has PROPOSED all N, deselect to dispose (not pre-decided)');
+// (P45-T1c) a zero-build-now doc never dead-ends with impossible advice on the lift screen.
+const env45z = boot(true);
+const api45z = env45z.__api;
+const zero45 = api45z.ADVISORIES.find(a => api45z.isLive(a) &&
+  api45z.buildNows(a).filter(i => i.build_logic && typeof i.build_logic === 'object').length === 0);
+ok(zero45, `found a zero-build-now doc for the dead-end check (${zero45 && zero45.id})`);
+api45z.pick(zero45.id); api45z.gotoScreen(4);
+ok(/No immediately-buildable signal/.test(env45z.__stage._html) && !/pick at least one build-now gap/.test(env45z.__stage._html),
+  'zero-build-now doc: lift empty state never advises the impossible (no "go back and pick")');
+// (P45-T1d) the build-log QUEUES the backtest — no ✓ for a backtest that never ran.
+const advQ45 = api45.ADVISORIES.filter(api45.isLive).find(a => api45.buildNows(a).some(i => i.build_logic && typeof i.build_logic === 'object'));
+api45.pick(advQ45.id); api45.gotoScreen(3);
+ok(/Queue backtest on population/.test(env45.__stage._html),
+  'build-log step 4 reads "Queue backtest on population" — a handoff, not a false claim');
+ok(env45.__errors.length === 0 && env45z.__errors.length === 0, 'Phase-45 T1 screens rendered with no console errors');
+
+// (P45-T3) FINTRAC licence attribution on the QUOTING lens views — the capability/data-source drills
+// reproduce each indicator's verbatim flag text, so the footer must attribute EVERY contributing
+// FINTRAC doc (© clause + complete title + source URL — per reproduced work), and stay EMPTY where
+// nothing Crown-copyrighted is quoted. The synthesis (Typologies) drill shows titles/counts only
+// (no reproduced text) and stays footer-silent.
+const env45a = boot(true);
+const api45a = env45a.__api;
+const capCodes45 = Object.keys(api45a.CAP_BY);
+const capWith45 = capCodes45.find(c => api45a.indsForCap(c).some(r => r.a.attribution));
+ok(capWith45, `found a FINTRAC-bearing capability for the attribution check (${capWith45})`);
+api45a.enterCapability(capWith45);
+const attC45 = env45a.document.getElementById('attribution').innerHTML;
+const nFC45 = new Set(api45a.indsForCap(capWith45).filter(r => r.a.attribution).map(r => r.a.id)).size;
+ok(/His Majesty the King in Right of Canada/.test(attC45), 'capability drill: footer carries the Crown-copyright clause');
+eq((attC45.match(/a copy of the version available at/g) || []).length, nFC45,
+  `capability drill: attribution lists EVERY contributing FINTRAC doc with its source URL (${nFC45})`);
+ok((attC45.match(/“/g) || []).length >= nFC45, 'capability drill: each listed attribution carries the complete document title');
+const dsCodes45 = Object.keys(api45a.DS_BY);
+const dsWith45 = dsCodes45.find(c => api45a.indsForDS(c).some(r => r.a.attribution));
+ok(dsWith45, `found a FINTRAC-bearing data source for the attribution check (${dsWith45})`);
+api45a.enterDataSource(dsWith45);
+ok(/His Majesty the King in Right of Canada/.test(env45a.document.getElementById('attribution').innerHTML),
+  'data-source drill: footer carries the Crown-copyright attribution');
+// the EMPTY side: a US-only lens slice (no FINTRAC quote on screen) shows NO attribution — over-attribution
+// would misstate the US docs' public-domain basis. Fall back across cap → DS for whichever US-only slice exists.
+const usCap45 = capCodes45.find(c => { const rs = api45a.indsForCap(c); return rs.length && rs.every(r => !r.a.attribution); });
+const usDS45 = usCap45 ? null : dsCodes45.find(c => { const rs = api45a.indsForDS(c); return rs.length && rs.every(r => !r.a.attribution); });
+if (usCap45) {
+  api45a.enterCapability(usCap45);
+  eq(env45a.document.getElementById('attribution').innerHTML, '', `US-only capability drill (${usCap45}): footer attribution EMPTY`);
+} else if (usDS45) {
+  api45a.enterDataSource(usDS45);
+  eq(env45a.document.getElementById('attribution').innerHTML, '', `US-only data-source drill (${usDS45}): footer attribution EMPTY`);
+} else {
+  ok(true, 'no US-only lens slice exists in the current corpus (every capability/data source draws ≥1 FINTRAC doc) — empty side covered by synthesis below');
+}
+// synthesis (titles only, no reproduced text) stays footer-silent
+const typ45 = api45a.clusters()[0];
+api45a.enterSynthesis(typ45.t);
+eq(env45a.document.getElementById('attribution').innerHTML, '', 'synthesis drill (titles/counts only): footer attribution stays EMPTY');
+ok(env45a.__errors.length === 0, 'Phase-45 T3 attribution views rendered with no console errors');
+
+// (P45-T4) copy coherence — the story reads as ONE story from landing to close.
+const envL45 = boot(true, true);                              // raw=true stays on the landing cover
+const landing45 = envL45.__stage._html;
+ok(/per-sector ML\/TF indicator guidance/.test(landing45), 'landing names ALL 5 source families (incl. FINTRAC sector guidance)');
+ok(/detection <b>atoms<\/b>/.test(landing45), 'landing SEEDS the atom vocabulary — the lift beat lands as a callback, not jargon');
+ok(/source families · 3 regulators/.test(landing45), 'landing tile: honest "5 source families · 3 regulators" split');
+// FINTRAC invented reference slugs are humanized at display (FinCEN/OFAC real refs pass through)
+const envR45 = boot(true);
+const apiR45 = envR45.__api;
+const ftDoc45 = apiR45.ADVISORIES.find(a => apiR45.isLive(a) && /^FINTRAC-/.test(a.advisory || '') && !/\d/.test(a.advisory || ''));
+ok(ftDoc45, `found a FINTRAC doc with an invented ref slug (${ftDoc45 && ftDoc45.advisory})`);
+apiR45.pick(ftDoc45.id);
+ok(!new RegExp(ftDoc45.advisory).test(envR45.__stage._html) && /FINTRAC( Guidance)? · /.test(envR45.__stage._html),
+  'FINTRAC eyebrow wears a humanized source label, never the invented ALL-CAPS slug');
+const efeR45 = apiR45.ADVISORIES.find(a => a.id === 'fin-2022-a002');
+apiR45.pick(efeR45.id);
+ok(/FIN-2022-A002/.test(envR45.__stage._html), 'FinCEN real reference numbers still pass through untouched');
+// the close-screen pill speaks the UI vocabulary, not the internal token
+apiR45.pick(advQ45.id); apiR45.gotoScreen(5);
+ok(/not covered → covered/.test(envR45.__stage._html) && !/>gap → covered</.test(envR45.__stage._html),
+  'close-screen pill reads "not covered → covered" (the internal token stays internal)');
+// typology cluster labels are human-readable
+const envT45 = boot(true);
+const apiT45 = envT45.__api;
+apiT45.selMode = 'typology'; apiT45.renderSelect();
+ok(/Cross-cutting indicators/.test(envT45.__stage._html), 'the cross-cutting cluster label is title-cased + hyphenated');
+ok(!/cross cutting indicators/.test(envT45.__stage._html), 'no de-hyphenated lowercase slug remains on the Typologies lens');
+ok(envL45.__errors.length === 0 && envR45.__errors.length === 0 && envT45.__errors.length === 0,
+  'Phase-45 T4 copy surfaces rendered with no console errors');
+
+// (P45-T5) walkthrough feedback — (a) the landing hooks on an effective, regulatorily defensible
+// financial-crime program; (b) NO mojibake / PDF-symbol tofu reaches any rendered surface (the load-time
+// display repair fixes the authored coverage fields' broken encoding + the article bullets; committed
+// records/md stay byte-frozen).
+ok(/regulatorily defensible/.test(boot(true, true).__stage._html),
+  'landing hooks on the effective + regulatorily defensible financial-crime program');
+const MOJI45 = /\u00e2[\u0080-\u009f\u0086]|\u00c2[\u00b7\u00a7\u00a0\u00ae]|[\uf000-\uf0ff]|\ufeff/;
+const envM45 = boot(true);
+const apiM45 = envM45.__api;
+// FULL-CONTENT sweep: EVERY live doc × all six screens renders mojibake/tofu-free (the fincen-alerts
+// records carried Â·/â-mojibake in their authored coverage fields — repaired at load, records byte-frozen).
+let clean45 = true; const dirty45 = [];
+const live45 = apiM45.ADVISORIES.filter(apiM45.isLive);
+for (const d of live45) {
+  apiM45.pick(d.id);
+  for (let sN = 0; sN <= 5; sN++) {
+    apiM45.gotoScreen(sN);
+    if (MOJI45.test(envM45.__stage._html)) { clean45 = false; dirty45.push(`${d.id}#${sN}`); }
+  }
+}
+ok(clean45, `ALL ${live45.length} live docs × 6 screens render mojibake/tofu-free${dirty45.length ? ' — DIRTY: ' + dirty45.slice(0, 5).join(', ') : ''}`);
+// and every lens drill surface
+let cleanLens45 = true;
+for (const c of Object.keys(apiM45.CAP_BY)) { if (apiM45.indsForCap(c).length) { apiM45.enterCapability(c); if (MOJI45.test(envM45.__stage._html)) cleanLens45 = false; } }
+for (const c of Object.keys(apiM45.DS_BY)) { if (apiM45.indsForDS(c).length) { apiM45.enterDataSource(c); if (MOJI45.test(envM45.__stage._html)) cleanLens45 = false; } }
+for (const cl of apiM45.clusters()) { apiM45.enterSynthesis(cl.t); if (MOJI45.test(envM45.__stage._html)) cleanLens45 = false; }
+ok(cleanLens45, 'ALL capability / data-source / typology drill surfaces render mojibake/tofu-free');
+const puaDoc45 = apiM45.ADVISORIES.find(a => a.id === 'fintrac-cannabis');     // article md carries PDF symbol-font bullets
+ok(puaDoc45 && apiM45.isLive(puaDoc45), 'the PDF-bullet FINTRAC doc is live for the cleanliness walk');
+apiM45.pick(puaDoc45.id);
+ok(!/[\uf000-\uf0ff]/.test(envM45.__stage._html) && /\u2022/.test(envM45.__stage._html),
+  'fintrac-cannabis: PDF symbol-font bullets render as • (no tofu boxes in the article)');
+ok(envM45.__errors.length === 0, 'Phase-45 T5 cleanliness walks rendered with no console errors');
 
 /* ============================ report ============================ */
 console.log(`\n${pass} passed, ${fails.length} failed`);

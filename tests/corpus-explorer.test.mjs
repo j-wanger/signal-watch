@@ -1059,6 +1059,143 @@ ok(!/[\uf000-\uf0ff]/.test(envM45.__stage._html) && /\u2022/.test(envM45.__stage
   'fintrac-cannabis: PDF symbol-font bullets render as • (no tofu boxes in the article)');
 ok(envM45.__errors.length === 0, 'Phase-45 T5 cleanliness walks rendered with no console errors');
 
+/* ============================ Phase 46 — LIVE derivation mode ============================ */
+console.log('\n[Phase 46] live derivation mode — the strip + the companion-served live branch');
+
+// ---- (46a) the STRIP class: the offline dist carries ZERO live code; the template carries the branch ----
+const TEMPLATE46 = readFileSync(resolve(HERE, '..', 'corpus.html'), 'utf8');
+ok(!html.includes('LIVE_START') && !html.includes('LIVE_END'),
+  'dist/corpus carries NO live-region markers (the build strip fired)');
+ok(!html.includes('fetch(') && !/\bliveRun\b/.test(html) && !/\bLIVE_DOCS\b/.test(html),
+  'dist/corpus carries ZERO network/live code (fetch/liveRun/LIVE_DOCS all absent offline)');
+ok(TEMPLATE46.includes('/*LIVE_START*/') && TEMPLATE46.includes('/*LIVE_END*/')
+  && TEMPLATE46.includes('if(CORPUS.live){liveInit();}'),
+  'corpus.html (the template) DOES carry the live region + its CORPUS.live activation guard');
+
+// ---- (46b) a LIVE context: the template script + a synthetic corpus + the live config ----
+const tOpen = TEMPLATE46.indexOf('<script>'), tClose = TEMPLATE46.lastIndexOf('</script>');
+const T_SCRIPT_RAW = TEMPLATE46.slice(tOpen + '<script>'.length, tClose);
+const SYN_DOC = {
+  id: 'syn-adv', advisory: 'SYN-2024-A001', title: 'Synthetic committed advisory', date: '2024-01',
+  url: '', source: 'Synthetic', doc_type: 'Advisory', derived: true,
+  article_text: '# Synthetic committed advisory\n\nBody text. Flag one verbatim text.\n',
+  indicators: [{ id: 'IND-01', section: 'financial', flag: 'Flag one verbatim text.',
+    red_flag: 'Synthetic mechanism translation phrase', src_line: 3, status: 'covered',
+    data: 'available', capability: 'C3', data_source: 'D3', build_rec: 'COVERED',
+    rationale: 'covered.' }],
+};
+const SYN_CORPUS = {
+  brand: { title: 'Signal Watch', subtitle: 'test' }, badge: 'Illustrative data & outputs',
+  advisories: [SYN_DOC], typologies: {},
+  taxonomy: { capabilities: [{ id: 'C3', name: 'Funnel detection', desc: '', group: 'Txn', posture: 'y' }],
+              data_sources: [{ id: 'D3', name: 'EMT rails', desc: '', posture: 'y' }] },
+  live: { derive: '/derive', model: 'stub', llm_url: 'http://stub' },
+};
+const T_SCRIPT = T_SCRIPT_RAW.replace('__CORPUS__', JSON.stringify(SYN_CORPUS));
+const LIVE_EPILOGUE = `;__capture({isLive,curAdv,toSelect,render,ADVISORIES,renderSelect,
+  liveProcBody,liveProcKeyAction,liveStageLabel,liveReadStream,liveRun,livePick,
+  LIVE_DOCS,_liveForm,_liveProc,liveShowProcessing,liveCloseProcessing,
+  get view(){return view}, get selMode(){return selMode}, set selMode(v){selMode=v}});`;
+function bootLive() {
+  const env = makeEnv(true);
+  env.document.removeEventListener = () => {};
+  env.setInterval = () => 0; env.clearInterval = () => {};
+  // the live bar injects into the Select scene; give the shim a scene hook that appends to the stage
+  const stage = env.__stage;
+  const baseQS = stage.querySelector.bind(stage);
+  stage.querySelector = sel => sel === '.scene' && /class="scene/.test(stage._html)
+    ? { querySelector: () => null, insertAdjacentHTML: (_p, h) => { stage._html += h; } }
+    : baseQS(sel);
+  vm.createContext(env);
+  vm.runInContext(T_SCRIPT + LIVE_EPILOGUE, env, { filename: 'corpus-live-inline.js' });
+  env.__api.toSelect();
+  return env;
+}
+const envLV = bootLive(); const apiLV = envLV.__api;
+ok(/id="livebar"/.test(envLV.__stage._html) && /Run derivation/.test(envLV.__stage._html),
+  'live context: the Select screen gains the live-derivation control (livebar injected)');
+ok(/never persisted/i.test(envLV.__stage._html),
+  'the live control states the propose-only honesty contract (never persisted)');
+apiLV.selMode = 'typology'; apiLV.render();
+ok(!/id="livebar"/.test(envLV.__stage._html), 'the live control is Documents-lens-only (absent on Typologies)');
+apiLV.selMode = 'doc'; apiLV.render();
+
+// ---- (46c) the PURE processing-page contract (the news Phase-44 pattern, corpus-flavored) ----
+const ka = apiLV.liveProcKeyAction;
+eq(ka('ArrowRight', { open: false }), 'pass', 'keyAction: page closed → presenter keys pass');
+eq(ka('ArrowRight', { open: true, running: true }), 'block', 'keyAction: nav blocked while the page is open');
+eq(ka('PageDown', { open: true, running: true }), 'block', 'keyAction: PageDown blocked (corpus nav set)');
+eq(ka('Escape', { open: true, running: true, armed: false }), 'arm', 'keyAction: first Esc arms');
+eq(ka('Escape', { open: true, running: true, armed: true }), 'abort', 'keyAction: second Esc aborts');
+eq(ka('Escape', { open: true, running: false }), 'close', 'keyAction: Esc closes a finished/failed page');
+ok(apiLV.liveProcBody({ title: '<script>x</script>' }).includes('&lt;script&gt;'),
+  'liveProcBody escapes the document title (XSS-safe)');
+ok(/tokens generated/.test(apiLV.liveStageLabel({ stage: 'extracting', tokens: 128 }))
+  && !/Flag one/.test(apiLV.liveStageLabel({ stage: 'extracting', tokens: 128 })),
+  'extracting label shows a token COUNT only — never content (stage-completion rendering)');
+ok(/3 passed · 2 rejected/.test(apiLV.liveStageLabel({ stage: 'gated', passed: 3, failed: 2 }))
+  && /retrying/i.test(apiLV.liveStageLabel({ stage: 'gated', passed: 3, failed: 2 })),
+  'gated label carries honest pass/reject counts + the retry note');
+ok(/2 gate-green/.test(apiLV.liveStageLabel({ stage: 'derived', entry: { indicators: [{}, {}] } })),
+  'derived label counts gate-green indicators');
+
+// ---- (46d) the done path: stubbed /derive stream → the entry routes the EXISTING arc ----
+const LIVE_ENTRY = {
+  id: 'live-stub-oa', advisory: 'LIVE-STUB-OA', title: 'Stubbed live operational alert',
+  date: '2024-08', url: '', source: 'Live document — UNREVIEWED live derivation',
+  derived: true, live: true,
+  article_text: '# Stubbed live operational alert\n\nClient deposits cash just under the reporting threshold.\nFunds wired to a high-risk jurisdiction.\n',
+  indicators: [
+    { id: 'IND-01', section: 'transactions', flag: 'Client deposits cash just under the reporting threshold.',
+      red_flag: 'Structuring below the reporting threshold', src_line: 3, status: 'gap', data: 'available',
+      capability: 'C3', data_source: 'D3', build_rec: 'BUILD_NOW',
+      build_logic: { signal_name: 'Structuring below the reporting threshold', class: 'Txn',
+        features: ['sub_threshold_cash'], logic: 'Detect: structuring', window: '30d rolling',
+        source: 'EMT rails', route: 'AML case review queue' } },
+    { id: 'IND-02', section: 'transactions', flag: 'Funds wired to a high-risk jurisdiction.',
+      red_flag: 'High-risk-jurisdiction wire corridor exposure', src_line: 4, status: 'covered',
+      data: 'available', capability: 'C3', data_source: 'D3', build_rec: 'COVERED', rationale: 'covered.' },
+  ],
+};
+const ndjson = evs => ({ ok: true, status: 200, text: async () => evs.map(e => JSON.stringify(e)).join('\n') + '\n' });
+envLV.fetch = async () => ndjson([
+  { stage: 'extracting' }, { stage: 'extracting', tokens: 256 }, { stage: 'gating' },
+  { stage: 'gated', passed: 2, failed: 0 },
+  { stage: 'derived', entry: { ...LIVE_ENTRY, article_text: undefined } },
+  { done: { entry: LIVE_ENTRY, dropped: [], counts: { kept: 2, dropped: 0 } } },
+]);
+apiLV._liveForm.text = '# Stubbed live operational alert\n…';
+await apiLV.liveRun();
+eq(apiLV.LIVE_DOCS.length, 1, 'done path: the live entry lands in the session-only LIVE_DOCS');
+ok(apiLV.LIVE_DOCS[0].doc_type === 'Live derivation', 'the live entry is typed "Live derivation" (never a committed doc_type)');
+eq(apiLV.ADVISORIES.length, 1, 'the committed ADVISORIES list is UNTOUCHED (honest counts hold)');
+eq(apiLV.view, 'detail', 'done path: the existing 6-screen arc opens on the live entry');
+eq(apiLV.curAdv().id, 'live-stub-oa', 'curAdv resolves the live doc (the wrapped resolver)');
+ok(envLV.__stage._html.includes('Stubbed live operational alert'),
+  'the arc renders the live document (Read-the-source screen)');
+ok(apiLV._liveProc.open === false, 'the processing page closed on success');
+apiLV.toSelect();
+ok(/Live derivations \(this session — UNREVIEWED\)/.test(envLV.__stage._html)
+  && /Stubbed live operational alert/.test(envLV.__stage._html),
+  'Select shows the session-only "Live derivations — UNREVIEWED" group with the entry card');
+ok(/gate-green indicators only/.test(envLV.__stage._html),
+  'the live group states the gate-green-only honesty contract');
+
+// ---- (46e) the NAMED error path + the single-flight 409 (honest failure, state intact) ----
+envLV.fetch = async () => ndjson([{ stage: 'extracting' },
+  { error: 'output budget exhausted: the derivation needed more than 16384 generated tokens — split the document' }]);
+await apiLV.liveRun();
+eq(apiLV.LIVE_DOCS.length, 1, 'error path: no entry added (the named in-stream error is honest)');
+ok(apiLV._liveProc.running === false && apiLV._liveProc.open === true,
+  'error path: the processing page STAYS OPEN, not running (the analyst reads the named error)');
+apiLV.liveCloseProcessing();
+envLV.fetch = async () => ({ ok: false, status: 409, json: async () => ({ error: 'another derivation is already running' }) });
+await apiLV.liveRun();
+eq(apiLV.LIVE_DOCS.length, 1, '409 path: no entry added (single-flight respected client-side)');
+ok(apiLV._liveProc.running === false, '409 path: the processing page reports the failure (not running)');
+apiLV.liveCloseProcessing();
+ok(envLV.__errors.length === 0, 'live-mode paths rendered with no console errors');
+
 /* ============================ report ============================ */
 console.log(`\n${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.log('FAILURES:\n  - ' + fails.join('\n  - ')); process.exit(1); }

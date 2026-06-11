@@ -685,7 +685,12 @@ def render_corpus(template: str) -> str:
     loud), and injects the result. Pure: no disk write, no stdout — the single source of truth for
     what dist/corpus/index.html should contain (shared by build_corpus + check_corpus). build.py
     stays decoupled from derive_signals.py: it consumes committed data, never imports the tool.
+
+    Phase 46: STRIP the companion-only live-mode region first (the news Phase-35 mechanism), so the
+    offline ship file keeps zero network code (the self-contained guard below then holds). The live
+    branch is served only by serve_corpus.py.
     """
+    template = LIVE_REGION_RE.sub("", template)
     merged = []
     for source in CORPUS_SOURCES:
         merged.extend(_load_source(source))

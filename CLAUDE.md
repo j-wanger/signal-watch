@@ -62,6 +62,15 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    Load-time DISPLAY-ONLY encoding repair (mojibake in some derived records' authored coverage fields
    + PDF-bullet tofu in article md → repaired at render; committed records/md byte-frozen) —
    harness-swept across every doc/screen/drill.
+   **Optional LIVE derivation mode (Phase 46 — companion-served, dev/authoring-time only; full
+   architecture + walkthrough in `docs/corpus-live.md`):** `scripts/serve_corpus.py` (stdlib) serves
+   the page + proxies llama-cpp; pasted advisory md DERIVES in real time through the FROZEN gate —
+   the model proposes ONLY {section, verbatim flag, red_flag, C, D}; the deterministic downstream +
+   `check_record` DISPOSE; gate-rejected indicators get ONE violation-guided re-prompt then drop
+   honestly (the T1 probe decision over an opencode agent loop — ph46_probe.md). NDJSON staged
+   /derive, Phase-44-pattern processing takeover (token COUNTS, never content), a session-only
+   "Live derivations — UNREVIEWED" Select group; NOTHING persisted — committing a record stays a
+   human-reviewed act. Live client code in `/*LIVE_*/`, build-stripped (dist/corpus byte-identical).
 3. **News stream** (M8) — `news.html` → `dist/news/index.html`. The adverse-media / negative-news
    stream (a SECOND atom stream — the compose payoff is the M8 north star, scoped OUT). Arc: Select →
    Read → Screen → Disposition (the human gate) → Exposure. Runtime fuzzy matcher (normalize →
@@ -198,10 +207,19 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   then `.venv/bin/python scripts/serve_news.py` → http://localhost:8000 (URL or paste + source
   type; `.venv` enables persistence/URL mode). Offline `dist/news` unaffected; full walkthrough +
   flags: `docs/news-live.md`.
+- Corpus LIVE derivation mode (optional, dev/authoring-time, stdlib-only — no venv): llama-server up,
+  then `python3 scripts/serve_corpus.py` → http://localhost:8010 (paste a converted advisory md;
+  derives through the frozen gate, propose-only). Offline `dist/corpus` unaffected; doc:
+  `docs/corpus-live.md`.
 - Drift guard before presenting: `python3 scripts/build.py --check all` (frozen dists byte-identical).
 - Test (dep-free, no install — except the DuckDB store selftests, which run under `.venv`):
   - `node tests/corpus-explorer.test.mjs` — the story landing + the 6-screen per-doc arc + the
-    multi-source menu (FINTRAC footer attribution) + the 4 lenses + cross-corpus synthesis.
+    multi-source menu (FINTRAC footer attribution) + the 4 lenses + cross-corpus synthesis + the
+    Phase-46 live mode (the offline strip assertion + the companion-served live branch: injection,
+    pure processing-page contract, done/error/409 paths) ·
+    `python3 scripts/serve_corpus.py --selftest` — the corpus live companion (offline, no model:
+    schema↔taxonomy mirror, deterministic-downstream exactness on a committed record, the stubbed
+    full derive loop incl. the violation-guided retry, page render + payload parity with the build).
   - `node tests/news-stream.test.mjs` — the adverse-media arc + fuzzy matcher; both motion modes;
     the companion-served live overrides (watchlist screen/escalate/view/prune + the alias-aware
     matcher [exact-yes/fuzzy-no per class] + the SVG network [deterministic liveGraphLayout:

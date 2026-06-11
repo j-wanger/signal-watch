@@ -1,6 +1,6 @@
 # Architecture: Signal Watch — AML Vision Demo
 
-> Last updated 2026-06-10 (Phase 44). Per-phase architecture narrative archived to [articles/state-archive-architecture-header.md](articles/state-archive-architecture-header.md) + the journals; this file is the durable structure snapshot only.
+> Last updated 2026-06-11 (Phase 46). Per-phase architecture narrative archived to [articles/state-archive-architecture-header.md](articles/state-archive-architecture-header.md) + the journals; this file is the durable structure snapshot only.
 >
 > [Phase 24 carry] CROSS-CORPUS SYNTHESIS — `data/typology-map.json` overlay (22-term closed vocab + 42-entry doc-id→typology map; jurisdiction from the source registry) + `build.py` `load_typology_map`/`validate_typology` (build-boundary gate) + the `corpus.html` Documents/Typologies toggle + synthesis view (honest union coverage, NO similarity/overlap/lift). [Phases 25–27 carry] the two-layer red-flag model (grounded verbatim `flag` + register `red_flag`), the per-doc Read-advisory screen, the Act-4 build-log + Act-5 illustrative-badged combination-lift, the story landing, `cleanArticle` + normalize-both-sides highlighting, the faithfulness-guarded flag tightening — all corpus.html + derived-record VALUE changes; the grounding core stayed byte-frozen throughout.)
 
@@ -9,7 +9,8 @@
     index.html / corpus.html / news.html      # the 3 ship templates (single injection point each)
     config/{schema.md, typologies/*.json}     # showcase content model + per-typology content
     scripts/                                  # build.py · news_{ground,store,fetch}.py · serve_news.py ·
-                                              #   derive_signals.py · crawl/acquire/pdf_to_md (authoring)
+                                              #   serve_corpus.py (Phase 46) · derive_signals.py ·
+                                              #   crawl/acquire/pdf_to_md (authoring)
     tests/                                    # corpus-explorer + news-stream node harnesses ·
                                               #   news_live_test.py · news_quality_harness.py (Phase 44) ·
                                               #   fixtures/news-live/ (replay captures + quality-baseline.json)
@@ -68,6 +69,19 @@ wrap-tolerant (`news_ground.locate_span` REQUOTES flags/evidence to body bytes) 
 moved processing to an in-page LIVE takeover (`#liveproc`), and committed `tests/news_quality_harness.py` +
 `quality-baseline.json` (17-fixture deterministic quality regression gate, 5 dimensions incl. alias-ownership).
 
+**Corpus LIVE derivation backbone (Phase 46, companion/dev-time only — the offline `dist/corpus` is byte-identical).**
+The SECOND live companion `scripts/serve_corpus.py` (stdlib, port 8010) brings the news-live pattern to the corpus:
+a local model derives a PASTED advisory md (spec built deterministically from `data/capability-taxonomy.json` + 3
+committed FINTRAC few-shot exemplars; streaming strict-schema `call_llm`, failures NAMED in-stream) through the
+imported FROZEN `derive_signals.check_record` gate — ONE violation-guided retry, then grounded-or-dropped with
+honest counts; staged NDJSON `/derive` (single-flight 409, disconnect-abandons, NOTHING persisted — no store).
+T1 probe verdict (2026-06-11, user checkpoint): direct pipeline + retry CHOSEN over opencode (identical 17/17
+indicators, 3.1× wall, the iterate loop never engaged). corpus.html's live client code sits in its own
+`/*LIVE_START*/…/*LIVE_END*/` region, stripped by `render_corpus` (mirroring `render_news`); live-derived docs are
+session-only, labeled UNREVIEWED, DISPLAY/PROPOSE-only. `serve_corpus.corpus_payload()` duplicates
+`render_corpus`'s load/validate/merge (selftest parity-guarded; future `build.corpus_payload()` factoring named).
+Doc: `docs/corpus-live.md` (news-live.md sibling); `build.py` does NOT import serve_corpus.
+
 ## Authoring Pipeline (compact — full narrative in the archive article + CLAUDE.md)
 
 crawl_fincen.py (manifest) → acquire_fincen.py (PDF/HTML, gitignored raw) → pdf_to_md.py (committed
@@ -90,7 +104,7 @@ news_fetch.py (URL ladder). No authoring tool is imported by the engine or build
 |----------|------|-------------|--------|
 | Build System | scripts/build.py (stdlib; validates config + inlines → dist/<id>/index.html; `--check` zero-drift guard) | scripts/build.py | detected |
 | Authoring/companion deps | markitdown[pdf] (MIT, convert only) + duckdb (1.5.3, MIT — Phase 36 news-store, companion-only) in a uv-managed py3.12 .venv (gitignored); `anthropic` GONE since Phase 17 (derive_signals.py stdlib-only); no `requirements-authoring.txt` on disk (Ph17's deletion took it — confirmed Phase 19) | gitignored uv `.venv` | detected (authoring/companion-only) |
-| Test harness | node (system) — `tests/corpus-explorer.test.mjs` (239) + `tests/news-stream.test.mjs` (150) zero-dep DOM-shim arc tests; `tests/news_quality_harness.py --check` (Phase 44 quality-regression gate vs the committed baseline); `derive_signals.py --selftest`; `scripts/{news_ground,serve_news,news_store,news_fetch}.py --selftest` (news_store under `.venv`, DuckDB-gated; news_fetch dep-free, + real markitdown under `.venv`); `tests/news_live_test.py` (recorded-fixture replay over `tests/fixtures/news-live/`, NDJSON `/extract` stream-shape + url-route + `/watchlist`/`/disposition`/`/watchlist/prune` routes, model stubbed; `--live` opt-in real-Qwen smoke); `build.py --check all` 5-target drift guard | tests/*.test.mjs, tests/news_live_test.py | detected |
+| Test harness | node (system) — `tests/corpus-explorer.test.mjs` (303; Phase 46 +30 live-strip/injection/processing-page) + `tests/news-stream.test.mjs` (150) zero-dep DOM-shim arc tests; `tests/news_quality_harness.py --check` (Phase 44 quality-regression gate vs the committed baseline); `derive_signals.py --selftest`; `scripts/{news_ground,serve_news,serve_corpus,news_store,news_fetch}.py --selftest` (news_store under `.venv`, DuckDB-gated; news_fetch dep-free, + real markitdown under `.venv`); `tests/news_live_test.py` (recorded-fixture replay over `tests/fixtures/news-live/`, NDJSON `/extract` stream-shape + url-route + `/watchlist`/`/disposition`/`/watchlist/prune` routes, model stubbed; `--live` opt-in real-Qwen smoke); `build.py --check all` 5-target drift guard | tests/*.test.mjs, tests/news_live_test.py | detected |
 | Dev Server | python3 -m http.server (optional, iteration only) | — | optional (never required) |
 | Version Control | git | .git/ | detected |
 

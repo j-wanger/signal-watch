@@ -1387,6 +1387,265 @@ document.addEventListener('keydown',e=>{
   }
 });
 
+/*LIVE_START*/
+/* Phase 46 LIVE MODE — companion-served ONLY. build.py render_corpus STRIPS this whole region for the
+   offline dist/corpus (which therefore keeps ZERO network code; the self-contained guard holds). When
+   CORPUS.live is set (the page is being served by scripts/serve_corpus.py), a "derive a new document"
+   control is injected into Select; submit -> POST /derive (NDJSON stage stream) -> the model PROPOSES,
+   the FROZEN derive_signals gate DISPOSES server-side -> ONLY gate-green indicators return -> the entry
+   joins a session-only "Live derivations" group and the existing 6-screen arc runs on it unchanged.
+   DISPLAY/PROPOSE-ONLY: nothing is persisted anywhere; committing a derived record to data/ remains a
+   separate human-reviewed act under the licence rules. */
+const LIVE_DOCS=[];                                       // session-only — never mixed into ADVISORIES
+const _liveForm={text:'',title:'',source:'',date:''};     // survives Select re-renders
+const _liveProc={open:false,armed:false,running:false,ctrl:null,disarmT:0};
+function liveInjectCss(){
+  if(!document.createElement||!document.head)return;        // string-DOM harness: styles are untestable chrome
+  if(document.getElementById('livecss'))return;
+  const st=document.createElement('style');st.id='livecss';
+  st.textContent='.livebar{margin:26px 0 6px;padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:rgba(246,166,35,.04)}'
+    +'.livehead{display:flex;align-items:center;gap:10px;font-family:Archivo,sans-serif;font-size:.95rem}'
+    +'.livedot{color:var(--signal);animation:lpulse 2s infinite}'
+    +'@keyframes lpulse{0%,100%{opacity:1}50%{opacity:.35}}'
+    +'.lsub{color:var(--muted);font-size:.82rem;flex:1}'
+    +'.liveform{margin-top:12px}.liveform[hidden]{display:none}'
+    +'.liverow{display:flex;gap:8px;margin-bottom:8px}'
+    +'.livein{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:6px;color:var(--ink);padding:8px 10px;font-size:.85rem}'
+    +'.livetext{width:100%;min-height:130px;background:var(--panel);border:1px solid var(--line);border-radius:6px;color:var(--ink);padding:10px;font-size:.8rem;font-family:"JetBrains Mono",monospace}'
+    +'.liveact{display:flex;align-items:center;gap:12px;margin-top:8px}'
+    +'.lstatus{color:var(--muted);font-size:.82rem}'
+    +'.liveproc{position:fixed;inset:0;z-index:80;background:var(--bg);overflow:auto;padding:46px 22px}'
+    +'.liveproc[hidden]{display:none}'
+    +'.lpwrap{max-width:880px;margin:0 auto}'
+    +'.lphead{font-family:Archivo,sans-serif;font-size:1.05rem;display:flex;gap:10px;align-items:center}'
+    +'.lpsrc{color:var(--muted);margin:8px 0 18px;font-size:.9rem}.lporg{color:var(--muted)}'
+    +'.lpstatus{font-family:"JetBrains Mono",monospace;font-size:.85rem;color:var(--signal);min-height:1.4em}'
+    +'.lppreview{margin-top:18px}'
+    +'.lpact{margin-top:26px;display:flex;align-items:center;gap:14px}'
+    +'.lpnote{color:var(--muted);font-size:.78rem}'
+    +'.pvflag{display:inline-block;margin:3px 4px 0 0;padding:3px 9px;border:1px solid var(--line);border-radius:999px;font-size:.74rem;color:var(--ink);background:var(--panel)}'
+    +'.pvhead{margin-top:14px;color:var(--muted);font-size:.8rem}'
+    +'.pvnone{color:var(--muted);font-size:.8rem;margin-top:6px}';
+  document.head.appendChild(st);
+}
+/* the session-only Select group + the derive control — re-injected on every Select render (the base
+   renderSelect rewrites stage.innerHTML; form values survive via _liveForm). Documents lens only. */
+function liveInjectSelect(){
+  const scene=stage.querySelector('.scene');
+  if(!scene)return;
+  if(String(stage.innerHTML).indexOf('id="livebar"')>=0)return;   // already injected this paint
+  if(selMode!=='doc')return;
+  const groups=LIVE_DOCS.length
+    ? '<div class="srcgroup" id="livegroup"><div class="srchead"><span class="srcname">Live derivations (this session — UNREVIEWED)</span>'
+      +'<span class="srcsub">'+LIVE_DOCS.length+' document'+(LIVE_DOCS.length===1?'':'s')+' · gate-green indicators only · not part of the committed corpus</span></div>'
+      +'<div class="advgrid">'+LIVE_DOCS.map(a=>advCard(a)).join('')+'</div></div>'
+    : '';
+  const bar='<div class="livebar" id="livebar">'
+    +'<div class="livehead"><span class="livedot">●</span> Live derivation'
+    +'<span class="lsub"> — paste an advisory (markdown); the local model proposes indicators, the SAME deterministic gate that grounds the committed corpus disposes server-side. Only gate-green indicators render. Session-only, unreviewed, never persisted.</span>'
+    +'<button class="btn" id="live-toggle">＋ Derive a new document</button></div>'
+    +'<div class="liveform" id="liveform" '+(_liveForm.text?'':'hidden')+'>'
+    +'<div class="liverow"><input class="livein" id="live-title" placeholder="Title (optional — defaults to the document’s first heading)">'
+    +'<input class="livein" id="live-source" placeholder="Source / regulator (optional)">'
+    +'<input class="livein" id="live-date" placeholder="Date (optional, YYYY-MM)"></div>'
+    +'<textarea class="livetext" id="live-text" placeholder="Paste the advisory markdown here (the converted .md body — the derivation surface)"></textarea>'
+    +'<div class="liveact"><button class="btn primary" id="live-run">Run derivation</button>'
+    +'<span class="lstatus" id="live-status"></span></div></div></div>';
+  const selhead=scene.querySelector('.selhead');
+  if(selhead)selhead.insertAdjacentHTML('afterend',groups+bar);
+  else scene.insertAdjacentHTML('beforeend',groups+bar);
+  const f=document.getElementById('liveform');
+  const t=document.getElementById('live-text'),ti=document.getElementById('live-title'),
+        so=document.getElementById('live-source'),da=document.getElementById('live-date');
+  t.value=_liveForm.text;ti.value=_liveForm.title;so.value=_liveForm.source;da.value=_liveForm.date;
+  t.oninput=()=>{_liveForm.text=t.value;};ti.oninput=()=>{_liveForm.title=ti.value;};
+  so.oninput=()=>{_liveForm.source=so.value;};da.oninput=()=>{_liveForm.date=da.value;};
+  document.getElementById('live-toggle').onclick=()=>{f.hidden=!f.hidden;};
+  document.getElementById('live-run').onclick=liveRun;
+  const lg=document.getElementById('livegroup');
+  if(lg&&lg.querySelectorAll)lg.querySelectorAll('.advcard.live').forEach(el=>el.onclick=()=>livePick(el.dataset.id));
+}
+/* live docs route through the EXISTING arc: curAdv resolves LIVE_DOCS first, then the base */
+const _baseCurAdv=curAdv;
+curAdv=function(){return LIVE_DOCS.find(a=>a.id===current)||_baseCurAdv();};
+function livePick(id){
+  const a=LIVE_DOCS.find(x=>x.id===id);if(!a)return;
+  fromTypology=null;fromCapability=null;fromDataSource=null;current=id;view='detail';screen=0;maxScreen=0;
+  selected=new Set(buildNows(a).map(i=>i.id));
+  render();
+}
+/* ---- the dedicated processing page (the news Phase-44 pattern: in-page takeover — real navigation
+   would abort the NDJSON stream; presenter keys guarded; Esc arms, Esc again abandons honestly —
+   nothing is persisted on ANY path here, so abandoning loses nothing). liveProcBody and
+   liveProcKeyAction are PURE so the harness pins them without a DOM. ---- */
+function liveProcBody(meta){
+  meta=meta||{};
+  return '<div class="lpwrap">'
+    +'<div class="lphead"><span class="livedot">●</span> Live derivation in progress</div>'
+    +'<div class="lpsrc">'+esc(meta.title||'Pasted document')
+    +(meta.source?' <span class="lporg">· '+esc(meta.source)+'</span>':'')+'</div>'
+    +'<div class="lpstatus" id="liveproc-status">Contacting the local model…</div>'
+    +'<div class="lppreview" id="liveproc-preview"></div>'
+    +'<div class="lpact"><button class="btn" id="liveproc-back">← Back</button>'
+    +'<span class="lpnote">Esc twice abandons the run — nothing is ever saved by live mode.</span></div>'
+    +'</div>';
+}
+function liveProcKeyAction(key,st){
+  if(!st||!st.open)return 'pass';
+  if(key==='Escape')return st.running?(st.armed?'abort':'arm'):'close';
+  return (key==='ArrowLeft'||key==='ArrowRight'||key==='PageUp'||key==='PageDown'||key===' ')
+    ?'block':'pass';                                  // block ONLY the presenter-nav set mid-run
+}
+function liveProcKeydown(e){
+  const act=liveProcKeyAction(e.key,_liveProc);
+  if(act==='pass')return;
+  e.stopPropagation();e.preventDefault();
+  if(act==='arm'){
+    _liveProc.armed=true;
+    liveProcStatus('Derivation still running — Esc again to abandon (nothing will be saved)');
+    clearTimeout(_liveProc.disarmT);
+    _liveProc.disarmT=setTimeout(()=>{_liveProc.armed=false;},3000);
+  }else if(act==='abort'){
+    if(_liveProc.ctrl)_liveProc.ctrl.abort();
+  }else if(act==='close'){
+    liveCloseProcessing();
+  }
+}
+function liveShowProcessing(meta){
+  let el=document.getElementById('liveproc');
+  if(!el&&document.createElement){
+    el=document.createElement('div');el.id='liveproc';el.className='liveproc';
+    document.body.appendChild(el);
+  }
+  if(!el)return;
+  el.innerHTML=liveProcBody(meta);
+  el.hidden=false;
+  _liveProc.open=true;_liveProc.armed=false;_liveProc.running=true;
+  _liveProc.ctrl=(meta&&meta.ctrl)||null;
+  const b=document.getElementById('liveproc-back');
+  if(b&&b.addEventListener)b.addEventListener('click',()=>{
+    if(_liveProc.running){if(_liveProc.ctrl)_liveProc.ctrl.abort();}
+    else liveCloseProcessing();
+  });
+  document.addEventListener('keydown',liveProcKeydown,true);
+}
+function liveCloseProcessing(){
+  const el=document.getElementById('liveproc');
+  if(el)el.hidden=true;
+  _liveProc.open=false;_liveProc.armed=false;_liveProc.running=false;_liveProc.ctrl=null;
+  document.removeEventListener('keydown',liveProcKeydown,true);
+}
+function liveProcStatus(msg){
+  const el=document.getElementById('liveproc-status');
+  if(el)el.textContent=msg;
+}
+function liveProcFail(msg){
+  _liveProc.running=false;       // the page stays open — the analyst reads the named error and leaves
+  liveProcStatus(msg);
+}
+/* stage-completion labels — completed stages only, NEVER a token stream (the decided rendering rule) */
+function liveStageLabel(ev){
+  if(ev.stage==='extracting')return 'Model proposing indicators…'+(ev.tokens?' · '+ev.tokens+' tokens generated':'');
+  if(ev.stage==='gating')   return 'Deterministic gate disposing (grounding · matrix · shape)…';
+  if(ev.stage==='gated')    return 'Gate: '+ev.passed+' passed · '+ev.failed+' rejected'+(ev.failed?' — retrying the rejected with the gate’s violations…':'');
+  if(ev.stage==='retrying') return 'Re-prompting '+(ev.count?ev.count+' rejected indicator'+(ev.count===1?'':'s'):'')+(ev.tokens?' · '+ev.tokens+' tokens generated':'')+'…';
+  if(ev.stage==='regating') return 'Re-gating the corrected indicators…';
+  if(ev.stage==='derived')  return 'Derived — '+(((ev.entry||{}).indicators)||[]).length+' gate-green indicators; rendering…';
+  return 'Processing…';
+}
+function livePreviewDerived(entry){
+  const el=document.getElementById('liveproc-preview');
+  if(!el)return;
+  const inds=(entry&&entry.indicators)||[];
+  el.innerHTML='<div class="pvhead">Gate-green indicators (grounded verbatim + translation):</div>'
+    +(inds.length?inds.map(i=>'<span class="pvflag">'+esc(i.red_flag||'')+'</span>').join(''):'<div class="pvnone">none</div>');
+}
+/* the NDJSON stage-stream reader (the news Phase-39 pattern) */
+async function liveReadStream(r,onEvent){
+  let buf='',last=null;
+  const feed=chunk=>{
+    buf+=chunk;let i;
+    while((i=buf.indexOf('\n'))>=0){
+      const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
+      if(!line)continue;
+      let ev;try{ev=JSON.parse(line);}catch(_){continue;}
+      if(ev.done!==undefined)last=ev.done;
+      else if(ev.error!==undefined)last=ev;
+      else onEvent(ev);
+    }
+  };
+  if(r.body&&r.body.getReader){
+    const reader=r.body.getReader();const dec=new TextDecoder();
+    for(;;){
+      const {done,value}=await reader.read();
+      if(value)feed(dec.decode(value,{stream:true}));
+      if(done)break;
+    }
+  }else{
+    feed(await r.text());feed('\n');
+  }
+  return last||{error:'the derivation stream ended without a result'};
+}
+async function liveRun(){
+  const status=document.getElementById('live-status');
+  const text=_liveForm.text.trim();
+  if(!text){if(status)status.textContent='Paste the advisory markdown first.';return;}
+  const t0=Date.now();
+  let stageLbl='Contacting the local model…';
+  const paint=()=>{const s=stageLbl+' · '+Math.round((Date.now()-t0)/1000)+'s';
+    if(status)status.textContent=s;liveProcStatus(s);};
+  const tick=setInterval(paint,1000);
+  const ctrl=(typeof AbortController==='function')?new AbortController():null;
+  liveShowProcessing({title:_liveForm.title,source:_liveForm.source,ctrl});
+  paint();
+  try{
+    const r=await fetch(CORPUS.live.derive,{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      signal:ctrl?ctrl.signal:undefined,
+      body:JSON.stringify({text,title:_liveForm.title.trim(),source_org:_liveForm.source.trim(),date:_liveForm.date.trim()})});
+    if(!r.ok){                       // request-shape errors (400/409) are plain JSON, pre-stream
+      const d=await r.json().catch(()=>({}));
+      clearInterval(tick);
+      const msg='Derivation failed: '+(d.error||('HTTP '+r.status))
+        +(r.status===409?' — the model runs one job at a time; wait for the running derivation.':'');
+      if(status)status.textContent=msg;liveProcFail(msg);return;
+    }
+    const data=await liveReadStream(r,ev=>{
+      if(ev.stage==='derived')livePreviewDerived(ev.entry);
+      const lbl=liveStageLabel(ev);
+      if(lbl)stageLbl=lbl;paint();
+    });
+    clearInterval(tick);
+    if(data.error){const m='Derivation failed: '+data.error;
+      if(status)status.textContent=m;liveProcFail(m);return;}
+    const entry=data.entry,drop=(data.dropped||[]).length;
+    entry.doc_type='Live derivation';
+    const i=LIVE_DOCS.findIndex(a=>a.id===entry.id);
+    if(i>=0)LIVE_DOCS[i]=entry;else LIVE_DOCS.unshift(entry);
+    if(status)status.textContent=entry.indicators.length+' gate-green indicators'
+      +(drop?' · '+drop+' rejected by the gate (dropped honestly)':'')
+      +' · '+Math.round((Date.now()-t0)/1000)+'s';
+    liveCloseProcessing();
+    livePick(entry.id);              // the existing 6-screen arc runs on the live entry unchanged
+  }catch(ex){
+    clearInterval(tick);
+    if(ex&&ex.name==='AbortError'){
+      _liveProc.running=false;
+      liveProcStatus('Derivation abandoned — nothing was saved.');
+      if(status)status.textContent='Abandoned.';
+      return;
+    }
+    const m='Could not reach the local companion ('+CORPUS.live.derive+') — '+ex.message;
+    if(status)status.textContent=m;liveProcFail(m);
+  }
+}
+function liveInit(){
+  liveInjectCss();
+  const _baseRenderSelect=renderSelect;
+  renderSelect=function(){_baseRenderSelect();liveInjectSelect();};
+}
+if(CORPUS.live){liveInit();}
+/*LIVE_END*/
 function setChromeText(id,txt){const el=document.getElementById(id);if(el!=null&&txt!=null)el.textContent=txt;}
 function applyChrome(){
   if(BRAND.title)setChromeText('brandTitle',BRAND.title);

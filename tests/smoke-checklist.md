@@ -102,6 +102,18 @@ that table.
   (warms the Google-Fonts cache; offline it falls back to system fonts — acceptable but flatter), then
   confirm offline reload still walks clean. Use **Back** (not the stepper's step 1) to return into a lens.
 
+### Corpus LIVE derivation mode (Phase 46 — companion-served, dev/authoring-time ONLY)
+- [ ] **The offline artifact is untouched:** `dist/corpus/index.html` contains NO `LIVE_START` marker and
+  no `fetch(` (the harness asserts both; `--check all` stays 5/5). The live branch exists ONLY when the
+  page is served by `python3 scripts/serve_corpus.py` (port 8010; full doc: `docs/corpus-live.md`).
+- [ ] **If demoing live derivation** (off the presentation path by default): llama-server up → companion
+  up → Select shows "＋ Derive a new document" → paste a converted advisory md → the processing page
+  shows staged progress (token counts, never content) → gate-green indicators only → the entry lands in
+  the "Live derivations (this session — UNREVIEWED)" group and walks the normal 6-screen arc. ~80–90 s
+  for a 22K-char OA on the measured setup. Esc twice abandons honestly; nothing is ever persisted.
+- [ ] **Never claim live output is reviewed/committed** — it is a proposal surface; committing a record
+  to `data/` stays a separate human-reviewed act under the licence rules.
+
 ## Adverse-media / negative-news stream (`dist/news/`) — M8, Phase 31 + Phase 32
 - [ ] **Automated arc:** `node tests/news-stream.test.mjs` exits **0** — drives the committed
   `dist/news/index.html` through the screening arc (Select → Read → Screen → Disposition → Exposure) +

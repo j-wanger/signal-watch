@@ -16,4 +16,4 @@ Abort rule (stood down — phase complete): blocked >3 attempts → ask skip or 
 
 Gates:
 - [x] Direction confirmed by user (assumption gate closed 2026-06-10: all_accept TRUE, A1–A4; T1 harness checkpoint taken 2026-06-11)
-- [ ] Delivery accepted
+- [x] Delivery accepted (post-implementation report 2026-06-11; commit verified)

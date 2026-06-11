@@ -42,7 +42,7 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-46-corpus-live-derivation -->
-<!-- gate-log:phase-46 direction=approved delivery=pending -->
+<!-- gate-log:phase-46 direction=approved delivery=accepted -->
 
 ## Phase 46 — Corpus live derivation mode: local-model agentic derivation through the frozen gate (M7×M8 convergence)
 

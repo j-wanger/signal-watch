@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-12
 updated: 2026-06-12
 source: plan
-status: active
+status: completed
 scope: ["docs/program-blueprint.md", "specs/phase-47-agentic-aml-program-design.md", "console.html", "dist/console/**", "data/console/**", "scripts/curate_console_cases.py", "scripts/build.py", "tests/gate-console.test.mjs", "tests/smoke-checklist.md", "CLAUDE.md", "HANDOFF.md", "wiki/articles/concepts/*.md", ".dev-wiki/*"]
 entry_criteria: "Phase 46 closed (committed 5981b41 + 4cf6cbb, pushed); presentation 2026-06-11 delivered, user verdict: huge success; direction = the user's 6th gate reframe; assumption gate closed 2026-06-12 (A1 reject-by-reframe → A1′; A2–A5 accept)."
 exit_criteria: "E-23 article w/ per-stage SR 11-7 mapping table; docs/program-blueprint.md complete w/ named sections; gate console MVP OR recorded descope to 47b at T5-CHECKPOINT; full regate green, existing 3 ship artifacts byte-identical."

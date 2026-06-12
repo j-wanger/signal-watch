@@ -43,7 +43,7 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-47-agentic-aml-program-design -->
-<!-- gate-log:phase-47 direction=approved delivery=pending -->
+<!-- gate-log:phase-47 direction=approved delivery=accepted -->
 
 ## Phase 47 — Demo-to-program design: the regulatorily defensible agentic AML program
 

@@ -275,3 +275,14 @@ Deterministic gate run against both shipped `dist/<id>/index.html`. **Result: PA
 - ✅ Advisories paraphrased + public-source, attributed in both (fentanyl: FINTRAC Jan-2025 · trade-based: FinCEN Apr-2025 / FATF TBML 2024).
 - ✅ No secrets/keys; no real-data/PII (no emails, no ≥9-digit runs, no card/SSN patterns). All figures are config-sourced illustrative numbers.
 - ↪ Runtime render (Act 0, no console errors) was verified on real Chrome 149 × both motion modes at **M3**; these dist bytes are unchanged since (zero drift), so that pass carries. Re-run the live walk above before any presentation.
+
+---
+
+## Gate console (Phase 47 — `dist/console/index.html`)
+
+- [ ] Open `dist/console/index.html` offline from `file://` — Queue renders 213 cases grouped by changed axis (C / D / both); the "Illustrative data & outputs" badge is visible on every screen
+- [ ] Walk one FINTRAC case end-to-end: Evidence shows the verbatim flag beside the red-flag translation, Assessment A/B presented NEUTRALLY (nothing hints which is the correction); the page footer carries the © His Majesty FINTRAC attribution for the on-screen doc
+- [ ] Disposition with an EMPTY rationale is blocked with an honest message; a graded disposition + rationale records, and ONLY THEN does the adjudicated record reveal ("precedent, not a score" framing — no right/wrong language)
+- [ ] The one US case (fin-2019-a006): footer renders exactly empty (public domain — no attribution required)
+- [ ] Ledger accumulates the session's dispositions; Export produces valid JSON containing the typed rationale; reload loses everything ("persists nothing" stated on screen)
+- [ ] Keys ←/→/Esc/↺ navigate; typing in the rationale textarea does NOT trigger key nav; reduced-motion mode lands each screen in one paint

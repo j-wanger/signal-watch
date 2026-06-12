@@ -45,7 +45,7 @@ detection system; a scripted dramatization of the signal/atom loop. See HANDOFF.
 > - Target ≤ ~200 lines. If it's growing, a phase log is leaking in — move it out.
 This section is the DURABLE, currently-true architecture — not a changelog.
 
-### Three ship artifacts (each a single self-contained offline file)
+### Four ship artifacts (each a single self-contained offline file)
 1. **Showcase** — `index.html` → `dist/<id>/index.html`. The generic six-act engine (vanilla
    HTML/CSS/JS, single `__CONFIG__` injection point, typology-agnostic — adding a typology is one
    JSON file, no engine edits); presenter controls (keyboard nav ←/→/Space/Esc/↺, reset,
@@ -118,10 +118,27 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    promotion blocked by the US-federal `FIXTURE_META` allowlist (the 13-fixture replay pins the
    deterministic core offline).
 
+4. **Gate console** (Phase 47, M9) — `console.html` → `dist/console/index.html`. The program
+   blueprint's Class-J human-judgment gate dramatized (design source: `docs/program-blueprint.md`
+   §4–§5 — the M9 blueprint: universal grounding / per-workload substrate+verifier / 4-class gate
+   taxonomy / human-work charter): 213 REAL C/D-tag adjudication cases — the Phase-34 correction
+   divergences, deterministically curated from git history (`scripts/curate_console_cases.py`,
+   regeneration-only) into committed `data/console/cases.json`, build-boundary validated
+   (referential integrity + flag grounding vs CURRENT records + closed C/D vocab + the
+   FINTRAC-attribution rule). Arc: Queue (grouped by changed axis; honest consensus-not-ground-truth
+   framing) → Evidence (verbatim `flag` beside the `red_flag` translation; NEUTRAL Assessment A/B,
+   differing axis highlighted) → Disposition (graded NON-BINARY: uphold-A / uphold-B /
+   both-defensible / neither-escalate; rationale REQUIRED — empty records nothing) → Record reveal
+   (the adjudicated outcome DERIVED per case against the current committed codes — dataset drift
+   fails the build loudly; "precedent, not a score") → session-only Ledger (JSON copy-out export;
+   persists nothing). Badge always-on; FINTRAC footer attribution per on-screen doc (the one US
+   case renders an empty footer); NO LLM/fetch.
+
 ### Build (`scripts/build.py`)
 Validates a config against the schema (fail-loud), resolves `text_file`→inline, inlines everything →
-the single ship file. Targets: `<id>`, `corpus`, `news`, `all`; `--check <target>` is the drift guard
-(frozen dists byte-identical). **build.py NEVER imports the authoring layer.** Baseline in `archive/`.
+the single ship file. Targets: `<id>`, `corpus`, `news`, `console`, `all`; `--check <target>` is the
+drift guard (frozen dists byte-identical). **build.py NEVER imports the authoring layer.** Baseline
+in `archive/`.
 
 ### Corpus sources & overlays (committed; merged at build time)
 5 sources via the `CORPUS_SOURCES` registry in build.py (source-id → {status dir, derived dir,
@@ -198,11 +215,12 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   genuine flag, the gate grounds each).
 
 ## How to run
-- Build: `python3 scripts/build.py <id>` (or `corpus` / `news` / `all`) → the ship file (`corpus`
-  merges `CORPUS_SOURCES` + the three overlays; `news` reads `data/news/{articles,derived,book}` —
-  both grounded/validated at the build boundary).
-- Present: open `dist/<id>/index.html` (or `dist/corpus/`, `dist/news/`) — single self-contained
-  file, offline, no server.
+- Build: `python3 scripts/build.py <id>` (or `corpus` / `news` / `console` / `all`) → the ship file
+  (`corpus` merges `CORPUS_SOURCES` + the three overlays; `news` reads
+  `data/news/{articles,derived,book}`; `console` reads `data/console/cases.json` — all
+  grounded/validated at the build boundary).
+- Present: open `dist/<id>/index.html` (or `dist/corpus/`, `dist/news/`, `dist/console/`) — single
+  self-contained file, offline, no server.
 - News LIVE mode (optional, dev/authoring-time): start llama-cpp (set `--ctx-size` — see the doc),
   then `.venv/bin/python scripts/serve_news.py` → http://localhost:8000 (URL or paste + source
   type; `.venv` enables persistence/URL mode). Offline `dist/news` unaffected; full walkthrough +
@@ -220,6 +238,10 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
     `python3 scripts/serve_corpus.py --selftest` — the corpus live companion (offline, no model:
     schema↔taxonomy mirror, deterministic-downstream exactness on a committed record, the stubbed
     full derive loop incl. the violation-guided retry, page render + payload parity with the build).
+  - `node tests/gate-console.test.mjs` — the gate-console adjudication arc (queue/evidence, the
+    rationale-REQUIRED graded disposition gate, record reveal only post-disposition, ledger +
+    JSON export, badge + per-doc FINTRAC footer [US case empty], XSS-escape, keyboard guards,
+    both motion modes).
   - `node tests/news-stream.test.mjs` — the adverse-media arc + fuzzy matcher; both motion modes;
     the companion-served live overrides (watchlist screen/escalate/view/prune + the alias-aware
     matcher [exact-yes/fuzzy-no per class] + the SVG network [deterministic liveGraphLayout:
@@ -256,7 +278,8 @@ Mono; theme in `:root` CSS variables. Refined, not flashy.
 M0 bootstrap · M1 config-driven refactor · M2 multi-typology · M3 presenter polish · M4 (skipped) ·
 M5 ship · M6 ingestion pipeline (FinCEN verbatim) · M7 corpus-backed demo (`dist/corpus/`: inverted
 derivation loop, 5 sources, 4 lenses, cross-corpus synthesis, grounded coverage) · M8 adverse-media
-stream (`dist/news/`). Per-phase detail: git log + `.dev-wiki/` journal + HANDOFF.md §8.
+stream (`dist/news/`) · M9 program design (`docs/program-blueprint.md` + the `dist/console/` gate
+console). Per-phase detail: git log + `.dev-wiki/` journal + HANDOFF.md §8.
 
 ## Definition of done
 Reliable offline · multi-typology from config · presenter controls · compliance-clean · README

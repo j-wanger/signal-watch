@@ -7,7 +7,7 @@ parents: []
 created: 2026-06-10
 updated: 2026-06-11
 source: plan
-status: active # READY FOR COMPLETION 2026-06-11 — all 4 tasks [x], exit criteria met; delivery gate pending (delivery flow flips to completed after commit)
+status: completed # DELIVERED + accepted + committed 5981b41 (work) + 4cf6cbb (gate flip) + pushed to main 2026-06-11; all 4 tasks [x], exit criteria met, A1–A4 held
 scope: [".dev-wiki/tmp/**", "scripts/serve_corpus.py", "corpus.html", "scripts/build.py", "tests/corpus-explorer.test.mjs", "docs/corpus-live.md", "tests/smoke-checklist.md", "CLAUDE.md"]
 entry_criteria: "Phase 45 DELIVERED + accepted + committed (324734e/7e9fa23) + pushed; assumption gate closed 2026-06-10 all_accept: TRUE"
 exit_criteria: "T1 probe report w/ measured numbers BOTH harnesses + user checkpoint; serve_corpus.py --selftest + end-to-end gate-green staged NDJSON derivation; corpus suite green incl. live-strip assertion; dist/corpus BYTE-IDENTICAL (--check all 5/5); docs/corpus-live.md + smoke + CLAUDE.md in place; full regate green; nothing presentation-touching before 2026-06-11"

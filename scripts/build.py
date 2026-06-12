@@ -9,8 +9,9 @@ placeholder; the engine and styles already live in index.html.
 Usage:
     python3 scripts/build.py [typology_id]   # default: fentanyl
     python3 scripts/build.py corpus          # build the FinCEN corpus explorer (dist/corpus/)
-    python3 scripts/build.py all             # build every typology + the corpus explorer
-    python3 scripts/build.py --check [all|corpus|<id>]  # drift guard: committed dist == fresh build?
+    python3 scripts/build.py console         # build the gate console (dist/console/) — Phase 47
+    python3 scripts/build.py all             # every typology + corpus + news + console
+    python3 scripts/build.py --check [all|corpus|news|console|<id>]  # drift guard: committed dist == fresh build?
 
 The corpus explorer (Phase 13) is a separate single-file artifact built from corpus.html + the
 committed per-source data artifacts. Phase 20 made it MULTI-SOURCE: CORPUS_SOURCES registers each
@@ -118,6 +119,14 @@ MAX_RED_FLAG_CHARS = 240
 # normalizer so build.py stays decoupled from the authoring layer (never imports derive_signals.py).
 NEWS_TEMPLATE = ROOT / "news.html"
 NEWS_PLACEHOLDER = "__NEWS__"
+# Phase 47: the GATE CONSOLE — the FOURTH standalone single-file ship artifact (its own template +
+# the committed divergence dataset data/console/cases.json). Dramatizes the blueprint's Class-J
+# human-judgment gate over the REAL Phase-34 C/D-tag divergences. Mirrors the corpus pattern: build.py
+# validates the cases at the boundary (load_console_cases + validate_console_cases — referential
+# integrity + flag grounding against the CURRENT committed derived records) and inlines at __CONSOLE__.
+# Offline, no LLM/fetch; dispositions are session-only in the artifact itself.
+CONSOLE_TEMPLATE = ROOT / "console.html"
+CONSOLE_PLACEHOLDER = "__CONSOLE__"
 NEWS_DERIVED = ROOT / "data" / "news" / "derived"
 NEWS_BOOK = ROOT / "data" / "news" / "book.json"
 NEWS_MATCH_THRESHOLD = 0.85  # fuzzy-match surface threshold (shared by the ship artifact + the harness)
@@ -579,6 +588,100 @@ def validate_capability_taxonomy(advisories: list, caps: list, srcs: list) -> li
     return e
 
 
+# Phase 47: the gate-console adjudication dataset — REAL rater-A/rater-B C/D-tag divergence cases
+# curated deterministically from the Phase-34 correction (scripts/curate_console_cases.py regenerates;
+# the committed artifact is the authority — validation NEVER depends on git history). A SEPARATE
+# committed artifact (the derived records stay byte-frozen); validated at the build boundary
+# (validate_console_cases — referential integrity + flag grounding against the CURRENT committed
+# derived records + closed C/D vocab + the FINTRAC attribution rule).
+CONSOLE_CASES = ROOT / "data" / "console" / "cases.json"
+
+
+def load_console_cases() -> list:
+    """Load + shape-check the gate-console adjudication dataset (data/console/cases.json).
+
+    Returns cases: list[dict]. Fails loud on a missing/invalid file or a malformed shape (mirrors
+    load_typology_map). Referential integrity against the live corpus + the taxonomy is checked in
+    validate_console_cases once the merged corpus is known.
+    """
+    rel = CONSOLE_CASES.relative_to(ROOT)
+    if not CONSOLE_CASES.exists():
+        die(f"console cases dataset not found: {rel} (regenerate: `python3 scripts/curate_console_cases.py`)")
+    try:
+        doc = json.loads(CONSOLE_CASES.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as ex:
+        die(f"invalid JSON in {rel}: {ex}")
+    cases = doc.get("cases")
+    if not isinstance(cases, list) or not cases:
+        die(f"{rel}: 'cases' must be a non-empty array of adjudication cases")
+    return cases
+
+
+def validate_console_cases(cases: list, advisories: list, caps: list, srcs: list) -> list:
+    """Boundary check on the gate-console adjudication dataset against the merged corpus. Returns errors.
+
+    The build-boundary GATE for the console dataset (curated from history, this disposes against the
+    PRESENT — validation never consults git; mirrors validate_capability_taxonomy):
+      1. referential   — every case's doc_id is a LIVE (derived) corpus doc and its indicator_id exists
+                         in that doc (no dangling case); case ids unique;
+      2. flag grounding — the case's quoted flag is byte-equal to (or an exact substring of) that
+                         indicator's CURRENT committed flag (no paraphrase, no drift);
+      3. closed vocab  — rater_a/rater_b capability + data_source codes are declared taxonomy ids;
+      4. attribution   — a Canada-jurisdiction (FINTRAC) case carries non-empty {title, url} matching
+                         the doc's manifest entry; a US public-domain case carries NO attribution
+                         (mirrors the corpus footer rule);
+      5. provenance    — no case references an uncommitted path (.dev-wiki / tmp scratch).
+    """
+    e = []
+    cap_ids = {x.get("id") for x in caps}
+    src_ids = {x.get("id") for x in srcs}
+    docs = {a["id"]: a for a in advisories if a.get("derived") and a.get("id")}
+    seen = set()
+    for c in cases:
+        cid = c.get("id", "?")
+        if not c.get("id"):
+            e.append("a case is missing id")
+        elif cid in seen:
+            e.append(f"{cid}: case id repeated")
+        seen.add(cid)
+        if c.get("changed") not in {"C", "D", "both"}:
+            e.append(f"{cid}: changed axis {c.get('changed')!r} not in ['C', 'D', 'both']")
+        doc = docs.get(c.get("doc_id"))
+        if doc is None:
+            e.append(f"{cid}: doc_id {c.get('doc_id')!r} is not a live (derived) corpus document")
+            continue
+        ind = next((i for i in doc.get("indicators") or [] if i.get("id") == c.get("indicator_id")), None)
+        if ind is None:
+            e.append(f"{cid}: indicator {c.get('indicator_id')!r} not in {c.get('doc_id')}")
+            continue
+        flag = c.get("flag")
+        if not (isinstance(flag, str) and flag and isinstance(ind.get("flag"), str) and flag in ind["flag"]):
+            e.append(f"{cid}: flag is not grounded in the indicator's CURRENT committed flag")
+        for rater in ("rater_a", "rater_b"):
+            r = c.get(rater)
+            if not isinstance(r, dict):
+                e.append(f"{cid}: missing {rater}")
+                continue
+            if r.get("capability") not in cap_ids:
+                e.append(f"{cid}: {rater} capability {r.get('capability')!r} not in the taxonomy")
+            if r.get("data_source") not in src_ids:
+                e.append(f"{cid}: {rater} data_source {r.get('data_source')!r} not in the taxonomy")
+        attr = c.get("attribution")
+        if doc.get("jurisdiction") == "Canada":
+            if not (isinstance(attr, dict) and (attr.get("title") or "").strip() and (attr.get("url") or "").strip()):
+                e.append(f"{cid}: FINTRAC-sourced case missing non-empty attribution {{title, url}}")
+            else:
+                if attr["title"] != doc.get("title"):
+                    e.append(f"{cid}: attribution title differs from the doc's manifest title")
+                if attr["url"] != doc.get("url"):
+                    e.append(f"{cid}: attribution url differs from the doc's manifest url")
+        elif attr is not None:
+            e.append(f"{cid}: US public-domain case must carry no attribution (footer rule)")
+        if ".dev-wiki" in json.dumps(c):
+            e.append(f"{cid}: case references an uncommitted path (.dev-wiki)")
+    return e
+
+
 def _strip_provenance(md: str) -> str:
     """Strip a corpus md's leading provenance HTML-comment header + blank lines → the body only.
 
@@ -970,6 +1073,87 @@ def check_news(template: str) -> bool:
     return True
 
 
+def render_console(template: str) -> str:
+    """Validate + assemble the gate-console adjudication dataset and inline it into console.html.
+
+    Phase 47: loads the committed divergence cases (load_console_cases), gates them at the build
+    boundary against the CURRENT merged corpus + capability taxonomy (validate_console_cases — fail
+    loud), then DERIVES the adjudicated rater from the data: rater_b must equal the CURRENT committed
+    indicator's C/D codes for every case (the dataset's contract that B is the post-adjudication
+    state is verified, never assumed — the console's reveal copy depends on it). Pure: no disk
+    write — the single source of truth for dist/console/index.html (shared by build/check).
+    """
+    merged = []
+    for source in CORPUS_SOURCES:
+        merged.extend(_load_source(source))
+    caps, srcs = load_capability_taxonomy()
+    cases = load_console_cases()
+    errors = validate_console_cases(cases, merged, caps, srcs)
+    if errors:
+        die("console cases fail boundary validation:\n  - " + "\n  - ".join(errors))
+
+    # Derive (verify) the adjudicated rater: every case's rater_b == the CURRENT committed codes.
+    docs = {a["id"]: a for a in merged if a.get("derived")}
+    for c in cases:
+        ind = next(i for i in docs[c["doc_id"]]["indicators"] if i.get("id") == c["indicator_id"])
+        rb = c["rater_b"]
+        if rb.get("capability") != ind.get("capability") or rb.get("data_source") != ind.get("data_source"):
+            die(f"console case {c['id']}: rater_b does not match the CURRENT committed C/D codes "
+                f"— cannot derive the adjudicated record (the reveal would misattribute history)")
+
+    # Only the docs the cases reference ride along (title for the queue/evidence, jurisdiction for
+    # the footer-attribution rule) — sorted for a deterministic payload.
+    case_doc_ids = sorted({c["doc_id"] for c in cases})
+    doc_meta = {d: {"title": docs[d].get("title"), "doc_type": docs[d].get("doc_type"),
+                    "jurisdiction": docs[d].get("jurisdiction")} for d in case_doc_ids}
+
+    payload = {
+        "brand": {"title": "Signal Watch", "subtitle": "Gate Console · Vision Prototype"},
+        "badge": "Illustrative data & outputs",
+        "adjudicated": "b",   # verified against the committed corpus above, per case
+        "cases": cases,
+        "taxonomy": {"capabilities": caps, "data_sources": srcs},
+        "docs": doc_meta,
+    }
+    n = template.count(CONSOLE_PLACEHOLDER)
+    if n != 1:
+        die(f"expected exactly one {CONSOLE_PLACEHOLDER} placeholder in console.html, found {n}")
+    out = template.replace(CONSOLE_PLACEHOLDER, json.dumps(payload, ensure_ascii=False, indent=2))
+    if CONSOLE_PLACEHOLDER in out:
+        die("console placeholder survived substitution")
+    if "fetch(" in out or "<script src" in out or 'type="module"' in out:
+        die("console ship file is not self-contained (fetch / external script / ES module present)")
+    return out
+
+
+def build_console(template: str) -> None:
+    out = render_console(template)
+    out_dir = ROOT / "dist" / "console"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "index.html"
+    out_path.write_text(out, encoding="utf-8")
+    print(f"build: console -> {out_path.relative_to(ROOT)}  ({len(out):,} bytes)")
+
+
+def check_console(template: str) -> bool:
+    """Drift guard for the gate-console artifact: committed dist/console == a fresh render?"""
+    out_path = ROOT / "dist" / "console" / "index.html"
+    rel = out_path.relative_to(ROOT)
+    try:
+        fresh = render_console(template)
+    except SystemExit:
+        print(f"check: console -> FAIL (console data no longer renders; cannot reproduce {rel})", file=sys.stderr)
+        return False
+    if not out_path.exists():
+        print(f"check: console -> DRIFT (missing built artifact {rel}; run `build.py console`)", file=sys.stderr)
+        return False
+    if out_path.read_text(encoding="utf-8") != fresh:
+        print(f"check: console -> DRIFT ({rel} differs from a fresh build; run `build.py console` and commit)", file=sys.stderr)
+        return False
+    print(f"check: console -> ok ({rel} matches a fresh build)")
+    return True
+
+
 def resolve_targets(target: str) -> list:
     """A single id, or every config/typologies/*.json for 'all' (sorted, stable)."""
     if target == "all":
@@ -990,11 +1174,12 @@ def main() -> None:
     positional = [a for a in args if not a.startswith("-")]
     target = positional[0] if positional else DEFAULT_TYPOLOGY
 
-    # 'corpus' = only the corpus explorer; 'news' = only the adverse-media stream;
-    # 'all' = every typology + the corpus + the news stream; else a typology.
+    # 'corpus' = only the corpus explorer; 'news' = only the adverse-media stream; 'console' = only
+    # the gate console; 'all' = every typology + the corpus + the news stream + the console; else a typology.
     want_corpus = target in ("corpus", "all")
     want_news = target in ("news", "all")
-    want_typologies = target not in ("corpus", "news")
+    want_console = target in ("console", "all")
+    want_typologies = target not in ("corpus", "news", "console")
     corpus_template = None
     if want_corpus:
         if not CORPUS_TEMPLATE.exists():
@@ -1005,6 +1190,11 @@ def main() -> None:
         if not NEWS_TEMPLATE.exists():
             die(f"news template not found: {NEWS_TEMPLATE}")
         news_template = NEWS_TEMPLATE.read_text(encoding="utf-8")
+    console_template = None
+    if want_console:
+        if not CONSOLE_TEMPLATE.exists():
+            die(f"console template not found: {CONSOLE_TEMPLATE}")
+        console_template = CONSOLE_TEMPLATE.read_text(encoding="utf-8")
 
     if check:
         # Non-mutating drift guard: committed dist == fresh build? Touches nothing on disk.
@@ -1015,6 +1205,8 @@ def main() -> None:
             results.append(check_corpus(corpus_template))
         if want_news:
             results.append(check_news(news_template))
+        if want_console:
+            results.append(check_console(console_template))
         drifted = results.count(False)
         if drifted:
             die(f"build-drift check FAILED: {drifted}/{len(results)} artifact(s) drifted "
@@ -1030,6 +1222,8 @@ def main() -> None:
         build_corpus(corpus_template)
     if want_news:
         build_news(news_template)
+    if want_console:
+        build_console(console_template)
 
     # one-time migration: remove the old single-file M1 layout if present
     stale = ROOT / "dist" / "index.html"

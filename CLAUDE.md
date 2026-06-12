@@ -278,8 +278,13 @@ Mono; theme in `:root` CSS variables. Refined, not flashy.
 M0 bootstrap · M1 config-driven refactor · M2 multi-typology · M3 presenter polish · M4 (skipped) ·
 M5 ship · M6 ingestion pipeline (FinCEN verbatim) · M7 corpus-backed demo (`dist/corpus/`: inverted
 derivation loop, 5 sources, 4 lenses, cross-corpus synthesis, grounded coverage) · M8 adverse-media
-stream (`dist/news/`) · M9 program design (`docs/program-blueprint.md` + the `dist/console/` gate
-console). Per-phase detail: git log + `.dev-wiki/` journal + HANDOFF.md §8.
+stream (`dist/news/`) · M9 program design (`docs/program-blueprint.md` §1–§15 — Phase 48 added
+§12 brownfield history utilization ["history is evidence, never ground truth"], §13 LFCM target
+architecture [library-not-monolith; dossier-now/score-deferred], §14 the continuous adjudication
+loop — + the `dist/console/` gate console + the SYNTHETIC history-decomposition probe
+`data/probe-history/` w/ `scripts/probe_history_stats.py` [outside every build path; writeup
+`docs/probe-history.md`] + the NON-ship offline report `docs/blueprint-report.html`).
+Per-phase detail: git log + `.dev-wiki/` journal + HANDOFF.md §8.
 
 ## Definition of done
 Reliable offline · multi-typology from config · presenter controls · compliance-clean · README

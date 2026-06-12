@@ -1,0 +1,367 @@
+{
+ "meta": {
+  "synthetic": true,
+  "note": "SYNTHETIC alert/disposition history for the Phase-48 history-decomposition probe. Every entity, alert, analyst, and date is invented; patterns (re-review, disposition inconsistency, data requests) are deliberately seeded. No real data.",
+  "rulebook": "legacy-rulebook.md",
+  "dispositions": [
+   "dismissed",
+   "escalated",
+   "sar_filed",
+   "data_requested"
+  ]
+ },
+ "alerts": [
+  {
+   "alert_id": "A-0001",
+   "rule_id": "TM-101",
+   "entity_id": "E-014",
+   "date": "2023-01-12",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0002",
+   "rule_id": "TM-101",
+   "entity_id": "E-014",
+   "date": "2023-02-09",
+   "disposition": "dismissed",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0003",
+   "rule_id": "TM-101",
+   "entity_id": "E-014",
+   "date": "2023-03-14",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0004",
+   "rule_id": "TM-101",
+   "entity_id": "E-014",
+   "date": "2023-04-11",
+   "disposition": "dismissed",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0005",
+   "rule_id": "TM-101",
+   "entity_id": "E-014",
+   "date": "2023-05-16",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0006",
+   "rule_id": "TM-101",
+   "entity_id": "E-014",
+   "date": "2023-06-13",
+   "disposition": "dismissed",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0007",
+   "rule_id": "TM-101",
+   "entity_id": "E-014",
+   "date": "2023-07-18",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0008",
+   "rule_id": "TM-101",
+   "entity_id": "E-014",
+   "date": "2023-08-15",
+   "disposition": "dismissed",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0009",
+   "rule_id": "TM-101",
+   "entity_id": "E-014",
+   "date": "2023-09-12",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0010",
+   "rule_id": "TM-101",
+   "entity_id": "E-014",
+   "date": "2023-10-17",
+   "disposition": "dismissed",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0011",
+   "rule_id": "TM-104",
+   "entity_id": "E-002",
+   "date": "2023-02-02",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0012",
+   "rule_id": "TM-104",
+   "entity_id": "E-003",
+   "date": "2023-03-07",
+   "disposition": "escalated",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0013",
+   "rule_id": "TM-104",
+   "entity_id": "E-004",
+   "date": "2023-04-04",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0014",
+   "rule_id": "TM-104",
+   "entity_id": "E-005",
+   "date": "2023-05-09",
+   "disposition": "escalated",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0015",
+   "rule_id": "TM-104",
+   "entity_id": "E-006",
+   "date": "2023-06-06",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0016",
+   "rule_id": "TM-104",
+   "entity_id": "E-007",
+   "date": "2023-07-11",
+   "disposition": "escalated",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0017",
+   "rule_id": "TM-104",
+   "entity_id": "E-008",
+   "date": "2023-08-08",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0018",
+   "rule_id": "TM-104",
+   "entity_id": "E-009",
+   "date": "2023-09-05",
+   "disposition": "escalated",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0019",
+   "rule_id": "TM-109",
+   "entity_id": "E-021",
+   "date": "2023-03-21",
+   "disposition": "escalated",
+   "analyst": "a3"
+  },
+  {
+   "alert_id": "A-0020",
+   "rule_id": "TM-109",
+   "entity_id": "E-021",
+   "date": "2023-04-18",
+   "disposition": "sar_filed",
+   "analyst": "a3"
+  },
+  {
+   "alert_id": "A-0021",
+   "rule_id": "TM-109",
+   "entity_id": "E-022",
+   "date": "2023-08-22",
+   "disposition": "escalated",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0022",
+   "rule_id": "TM-102",
+   "entity_id": "E-030",
+   "date": "2023-01-25",
+   "disposition": "dismissed",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0023",
+   "rule_id": "TM-102",
+   "entity_id": "E-030",
+   "date": "2023-03-29",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0024",
+   "rule_id": "TM-102",
+   "entity_id": "E-030",
+   "date": "2023-06-27",
+   "disposition": "dismissed",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0025",
+   "rule_id": "TM-102",
+   "entity_id": "E-031",
+   "date": "2023-05-02",
+   "disposition": "dismissed",
+   "analyst": "a3"
+  },
+  {
+   "alert_id": "A-0026",
+   "rule_id": "TM-102",
+   "entity_id": "E-032",
+   "date": "2023-07-05",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0027",
+   "rule_id": "TM-102",
+   "entity_id": "E-033",
+   "date": "2023-09-19",
+   "disposition": "escalated",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0028",
+   "rule_id": "TM-108",
+   "entity_id": "E-040",
+   "date": "2023-02-14",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0029",
+   "rule_id": "TM-108",
+   "entity_id": "E-041",
+   "date": "2023-03-14",
+   "disposition": "dismissed",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0030",
+   "rule_id": "TM-108",
+   "entity_id": "E-042",
+   "date": "2023-04-12",
+   "disposition": "dismissed",
+   "analyst": "a3"
+  },
+  {
+   "alert_id": "A-0031",
+   "rule_id": "TM-108",
+   "entity_id": "E-043",
+   "date": "2023-05-10",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0032",
+   "rule_id": "TM-108",
+   "entity_id": "E-040",
+   "date": "2023-06-14",
+   "disposition": "dismissed",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0033",
+   "rule_id": "TM-108",
+   "entity_id": "E-044",
+   "date": "2023-07-12",
+   "disposition": "dismissed",
+   "analyst": "a3"
+  },
+  {
+   "alert_id": "A-0034",
+   "rule_id": "TM-108",
+   "entity_id": "E-045",
+   "date": "2023-08-09",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0035",
+   "rule_id": "TM-108",
+   "entity_id": "E-046",
+   "date": "2023-09-13",
+   "disposition": "data_requested",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0036",
+   "rule_id": "TM-110",
+   "entity_id": "E-050",
+   "date": "2023-04-25",
+   "disposition": "data_requested",
+   "analyst": "a3"
+  },
+  {
+   "alert_id": "A-0037",
+   "rule_id": "TM-110",
+   "entity_id": "E-051",
+   "date": "2023-06-20",
+   "disposition": "data_requested",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0038",
+   "rule_id": "TM-110",
+   "entity_id": "E-052",
+   "date": "2023-08-29",
+   "disposition": "escalated",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0039",
+   "rule_id": "TM-110",
+   "entity_id": "E-052",
+   "date": "2023-10-03",
+   "disposition": "sar_filed",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0040",
+   "rule_id": "TM-103",
+   "entity_id": "E-060",
+   "date": "2023-05-23",
+   "disposition": "escalated",
+   "analyst": "a3"
+  },
+  {
+   "alert_id": "A-0041",
+   "rule_id": "TM-105",
+   "entity_id": "E-061",
+   "date": "2023-06-08",
+   "disposition": "dismissed",
+   "analyst": "a1"
+  },
+  {
+   "alert_id": "A-0042",
+   "rule_id": "TM-106",
+   "entity_id": "E-062",
+   "date": "2023-07-26",
+   "disposition": "data_requested",
+   "analyst": "a2"
+  },
+  {
+   "alert_id": "A-0043",
+   "rule_id": "TM-107",
+   "entity_id": "E-063",
+   "date": "2023-08-02",
+   "disposition": "dismissed",
+   "analyst": "a3"
+  },
+  {
+   "alert_id": "A-0044",
+   "rule_id": "TM-112",
+   "entity_id": "E-064",
+   "date": "2023-09-27",
+   "disposition": "escalated",
+   "analyst": "a1"
+  }
+ ]
+}

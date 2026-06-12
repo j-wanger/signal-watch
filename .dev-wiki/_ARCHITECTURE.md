@@ -1,6 +1,6 @@
 # Architecture: Signal Watch — AML Vision Demo
 
-> Last updated 2026-06-12 (Phase 47). Per-phase architecture narrative archived to [articles/state-archive-architecture-header.md](articles/state-archive-architecture-header.md) + the journals; this file is the durable structure snapshot only.
+> Last updated 2026-06-12 (Phase 48 debrief). Per-phase architecture narrative archived to [articles/state-archive-architecture-header.md](articles/state-archive-architecture-header.md) + the journals; this file is the durable structure snapshot only.
 >
 > [Phases 24–27 carry] Cross-corpus synthesis (`data/typology-map.json` overlay + build-boundary gate + the Documents/Typologies toggle, honest union coverage, NO similarity/overlap/lift) · the two-layer red-flag model (grounded verbatim `flag` + register `red_flag`) · per-doc Read-advisory screen · `cleanArticle` + normalize-both-sides highlighting — corpus.html + derived-record VALUE changes; the grounding core byte-frozen throughout.
 
@@ -20,8 +20,8 @@
     data/news/{articles,derived,book.json}    # M8 news data (US-federal verbatim; synthetic book)
     data/console/cases.json                   # Phase 47: 213 C/D adjudication cases (Phase-34 pairs)
     dist/{<id>,corpus,news,console}/          # committed byte-frozen ship artifacts (6 --check targets)
-    docs/ archive/ specs/ .dev-wiki/          # live-mode docs + program-blueprint.md (M9 design
-                                              #   source-of-truth) · baseline · specs · lifecycle wiki
+    data/probe-history/ + scripts/probe_history_stats.py    # Phase 48 SYNTHETIC probe (outside build.py)
+    docs/ archive/ specs/ .dev-wiki/          # live-mode docs · program-blueprint.md §1–§15 (M9 design source-of-truth) · blueprint-report.html (non-ship) + probe-history.md · baseline · specs · wiki
 
 ## Module Responsibilities
 

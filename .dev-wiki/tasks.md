@@ -44,7 +44,7 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-48-history-utilization-lfcm -->
-<!-- gate-log:phase-48 direction=approved delivery=pending -->
+<!-- gate-log:phase-48 direction=approved delivery=accepted -->
 
 ## Phase 48 — Brownfield history + LFCM: blueprint extension, triage-elicitation loop, synthetic-history probe
 

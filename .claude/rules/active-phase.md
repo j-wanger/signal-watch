@@ -16,4 +16,4 @@ Abort rule: existing dists drift → STOP and surface (never re-baseline).
 
 Gates:
 - [x] Direction confirmed by user (assumption gate closed 2026-06-12: A1 accept-with-condition [history-sourced scenarios; decisions-not-correctness; process-inconsistency + policy-gap discovery], A2–A4 accept; ledger revisit filled at debrief — all held)
-- [ ] Delivery accepted
+- [x] Delivery accepted (post-implementation report 2026-06-12; work commit 83e4218 verified)

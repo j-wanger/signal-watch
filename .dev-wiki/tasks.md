@@ -44,6 +44,18 @@
 > - Phase 8: Doc true-up + provenance fix (M6 debt) — COMPLETED + accepted
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
+<!-- phase:phase-50-aml-program-build -->
+<!-- gate-log:phase-50 direction=approved delivery=accepted -->
+
+## Phase 50 — AML program build: the demo became the program (data-substrate pillar spun out)
+
+Direction = a major user REFRAME at the dev-plan gate (2026-06-12): build the blueprint's §3 design-stage workloads as REAL systems, spun out **one real-system-class repo per pillar**. signal-watch is now the program-ARCHITECTURE home (blueprint + this lifecycle record); the build lives in sibling repos. Pillar 1 = the **data substrate** → `/Users/jwang/aml-substrate` (Python; its phases tracked in that repo's DESIGN.md + docs/phase-*.md — the dev-* skills don't operate cross-repo). Interview (institutional knowledge) + 3 parallel research agents (synthetic-AML generators · real field-level schemas · distributions/topology) grounded the design (AMLworld emergent method + transitive labeling; ISO 20022 / Interac EMT / Payments Canada Std 005–007 / FINTRAC schemas; log-normal+Pareto / Hawkes distributions; cited in aml-substrate/DESIGN.md). Assumption gate closed 2026-06-12, all_accept: false — A1 [HIGH, T0] foundation-first / emergence-ready ACCEPT · A2 [HIGH] build-on-research (user OVERRODE the offered review-first) · A3 [HIGH] 1M-scale REJECT → parameterized small-first · A4 [MED] hybrid eyes-open → DEFERRED to phase-2's flow engine; ledger Phase-50 block, revisit-status filled at Phase-1 delivery.
+
+- [x] aml-substrate **Phase 1 (Foundation)** DELIVERED 2026-06-13 (commits 44ad9b1→9256dc5, 54 tests) — canonical data model w/ inert emergence hooks · deterministic population + KYC graph (15 Canadian archetypes; PEP 0.5% / HR 2% / active 60%) · 6-channel background transaction engine (Hawkes seasonality, Canadian channel medians, round-number snapping) · net-new EMT channel detail · parquet + realism report. Scale ~161s/1M (linear), byte-identical regen, Benford-clean 0.001.
+- [x] aml-substrate **Phase 2 (Emergence)** DELIVERED 2026-06-13 (commits 42b0c17→5632816, 83 tests total) — criminal/mule/shell designation (hidden ground-truth only, NO KYC leak) · fresh-Python laundering behavior engine (structuring → funnel → layering → shell, margin skim) · transitive taint labeling (bounded; ground-truth cases) · coverage checklist (6/7; cycle honestly uncovered) · the A1 permutation-null SEPARABILITY GATE (passes clean, fires on injected artifact) · emergence realism. Class imbalance calibrated to 1:21,657 @100k; structuring breaks Benford 0.18>0.01. PROCESS: user flagged the first Phase-2 "assumptions" as mislabeled DIRECTION choices → re-ran a proper falsifiable-assumption gate (A1 don't-know → defended + down-scoped to the separability gate, which then caught its own naive fixed-threshold at scale).
+
+> signal-watch SHIP ARTIFACTS FROZEN (program-architecture home; no further demo-track work unless re-opened). Next: aml-substrate **Phase 3** — FINTRAC reporting + alert/case monitoring layer (signals fire over the labelled substrate → grounded alerts; the §3 monitoring workload).
+
 <!-- phase:phase-49-triage-loop-embryo -->
 <!-- gate-log:phase-49 direction=approved delivery=accepted -->
 

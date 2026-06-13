@@ -1,17 +1,20 @@
 # Active Phase Context
 
-Phase: 49 — Triage-loop embryo made demo-able: blueprint §14's continuous adjudication loop as the 5th ship artifact (triage console). STANDARD ceremony. 5 tasks, planned 2026-06-12, next: T1.
+Phase: 50 — AML program build: the demo became the program. A major user REFRAME at the dev-plan gate (2026-06-12): build the blueprint's §3 design-stage workloads as REAL systems, **one real-system-class repo per pillar**. signal-watch is now the program-ARCHITECTURE home (blueprint + this lifecycle record only); the build lives in sibling repos.
 
-Objective: triage.html → dist/triage/index.html (single self-contained offline; gate console BYTE-FROZEN). Committed SYNTHETIC data/triage/scenarios.json deterministically curated (curate script reads data/probe-history at AUTHORING time only; rule text embedded; build.py never reads probe-history) — ~16 scenarios × 4 §14 strata + ~4 controls, panels shared BY REFERENCE across divergent-disposition pairs, fired-rule state universal, labeled second-rater seeds. Arc: Queue → Evidence → Disposition (§14 grammar incl. need-more-info→C/D picker + the policy-gap escape; rationale REQUIRED) → Reveal (decisions-not-correctness; second-rater replay; process-inconsistency surfacing) → Discovery ledger (JSON export, persists nothing).
+Pillar 1 = the **data substrate** → **`/Users/jwang/aml-substrate`** (Python; ultra-realistic synthetic Canadian retail-banking data where ML typologies EMERGE from modeled behavior). Its DESIGN.md holds the architecture, schema + distribution spec, gate, and cited sources. **aml-substrate Phases 1 (Foundation) + 2 (Emergence) DELIVERED 2026-06-13** — commits 44ad9b1→5632816, 83 tests green: population/KYC graph + 6-channel background engine + net-new EMT detail (P1); criminal/mule/shell designation + fresh-Python laundering engine + transitive labeling + coverage checklist + the A1 permutation-null separability gate + emergence realism (P2). ~161s/1M scale; 1:21,657 imbalance calibration; structuring breaks Benford. **Active: aml-substrate Phase 3** — FINTRAC reporting + alert/case monitoring layer (signals fire over the labelled substrate → grounded alerts, the §3 monitoring workload).
 
-Scope: scripts/curate_triage_scenarios.py · data/triage/** · scripts/build.py · triage.html · tests/triage-console.test.mjs · dist/triage/** · specs/phase-49-*.md · CLAUDE.md · HANDOFF.md §8 · tests/smoke-checklist.md · .dev-wiki/*
+Doctrine (aml-substrate): data-first/emergent (typologies emerge, NEVER injected/stamped); deterministically SCRIPTED generation, no runtime LLM (small statistical models OK; LLM only authors scripts); grounded in researched REAL schemas + distributions; everything SYNTHETIC, no real customer data, ever.
 
-Key constraints: 4 existing dists byte-identical; derive_signals.py + news pipeline + overlays + blueprint FROZEN (no docs/program-blueprint.md edit); everything synthetic, badge always-on, NO LLM/fetch; no fake instrumentation — render-computed numbers w/ measurement definitions only, params "chosen, not measured"; US-federal-only novel stratum.
+Note: the `/dev-*` skills anchor to this session's root (signal-watch) and don't operate cross-repo. aml-substrate tracks its own phases in DESIGN.md + docs/; lifecycle bookkeeping for it is hand-authored (or run the dev-* skills from a session rooted there).
 
-Exit criteria: (1) scenarios.json committed — ≤20 scenarios, 4 strata populated, ≥3 controls, deterministic regen byte-identical, panel-sharing by reference, ≥4 labeled second-rater seeds, synthetic meta flag; (2) build.py triage target in all/--check, 4-class tamper validation fails loud, no probe-history in build.py; (3) dist/triage single-file offline full arc; (4) tests/triage-console.test.mjs fully green ~50+; (5) honesty greps + FULL REGATE — --check all zero drift (7 targets), derive_signals.py + program-blueprint.md untouched, all existing suites green.
+FROZEN (signal-watch — no further demo work this track unless re-opened): the 5 ship artifacts + dists byte-identical (index.html + config + 3 typology dists; corpus.html + dist/corpus; news.html + dist/news; console.html + dist/console; triage.html + dist/triage); derive_signals.py; news pipeline; all committed derived data + the 3 overlays; docs/program-blueprint.md + blueprint-report.html.
 
-Abort rule: existing dists drift → STOP and surface (never re-baseline); >3 attempts on a task → mark [blocked] + ask.
+Abort rule: existing signal-watch dists drift → STOP and surface (never re-baseline).
 
-Gates:
-- [x] Direction confirmed by user (assumption gate closed 2026-06-12: A1 demo-first accept · A2 don't-know→defended→accept · A3 accept · A4 5th-ship-artifact accept; all_accept: false)
-- [x] Delivery accepted (post-implementation report 2026-06-12)
+Gates (Phase 50, program-kickoff direction gate — closed 2026-06-12, all_accept: false):
+- [x] Direction confirmed by user (A1 foundation-first/emergence-ready accept · A2 build-on-research [user override of review-first] · A3 1M-scale reject→small-first · A4 hybrid eyes-open→deferred to phase 2; ledger Phase-50 block, revisit-status recorded at Phase-1 delivery)
+- [x] aml-substrate Phase 1 (Foundation) delivered 2026-06-13 (54 tests; A1 proven, A3 validated, A2 held, A4 deferred)
+- [x] aml-substrate Phase 2 (Emergence) delivered 2026-06-13 (83 tests; A1 measured-not-assumed via the separability gate, A2 bounded, A3 fresh works, A4 1:21k validated at scale, A5 no migration)
+
+Per-pillar/per-phase gates for aml-substrate are tracked in that repo (DESIGN.md §8 + docs/).

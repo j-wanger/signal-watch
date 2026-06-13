@@ -10,8 +10,9 @@ Usage:
     python3 scripts/build.py [typology_id]   # default: fentanyl
     python3 scripts/build.py corpus          # build the FinCEN corpus explorer (dist/corpus/)
     python3 scripts/build.py console         # build the gate console (dist/console/) — Phase 47
-    python3 scripts/build.py all             # every typology + corpus + news + console
-    python3 scripts/build.py --check [all|corpus|news|console|<id>]  # drift guard: committed dist == fresh build?
+    python3 scripts/build.py triage          # build the triage console (dist/triage/) — Phase 49
+    python3 scripts/build.py all             # every typology + corpus + news + console + triage
+    python3 scripts/build.py --check [all|corpus|news|console|triage|<id>]  # drift guard: committed dist == fresh build?
 
 The corpus explorer (Phase 13) is a separate single-file artifact built from corpus.html + the
 committed per-source data artifacts. Phase 20 made it MULTI-SOURCE: CORPUS_SOURCES registers each
@@ -127,6 +128,22 @@ NEWS_PLACEHOLDER = "__NEWS__"
 # Offline, no LLM/fetch; dispositions are session-only in the artifact itself.
 CONSOLE_TEMPLATE = ROOT / "console.html"
 CONSOLE_PLACEHOLDER = "__CONSOLE__"
+# Phase 49: the TRIAGE CONSOLE — the FIFTH standalone single-file ship artifact (its own template +
+# the committed SYNTHETIC scenario dataset data/triage/scenarios.json). Dramatizes blueprint §14's
+# continuous adjudication loop: history-sourced mini-triage scenarios, graded dispositions, the
+# decisions-not-correctness reveal. The dataset is SELF-CONTAINED (rule text + signals + novel
+# indicator text embedded at curation by scripts/curate_triage_scenarios.py) — build.py NEVER reads
+# data/probe-history. Boundary validation here: closed vocabs, referential integrity (panels/rules),
+# the US-federal-only novel stratum verified against the merged corpus + source registry, novel
+# indicator text drift-checked against the CURRENT committed derived records. Inlines at __TRIAGE__.
+TRIAGE_TEMPLATE = ROOT / "triage.html"
+TRIAGE_PLACEHOLDER = "__TRIAGE__"
+TRIAGE_SCENARIOS = ROOT / "data" / "triage" / "scenarios.json"
+TRIAGE_STRATA = ["history-signal-fired", "history-below-the-line", "synthetic-novel",
+                 "random-population"]
+TRIAGE_GRAMMAR = ["confirm-risk", "confirm-no-risk", "both-defensible", "escalate",
+                  "need-more-info", "no-defensible-option"]
+TRIAGE_HISTORY_DISPOSITIONS = ["dismissed", "escalated", "sar_filed", "data_requested"]
 NEWS_DERIVED = ROOT / "data" / "news" / "derived"
 NEWS_BOOK = ROOT / "data" / "news" / "book.json"
 NEWS_MATCH_THRESHOLD = 0.85  # fuzzy-match surface threshold (shared by the ship artifact + the harness)
@@ -1154,6 +1171,190 @@ def check_console(template: str) -> bool:
     return True
 
 
+def load_triage_scenarios() -> dict:
+    """Load + shape-check the triage-console scenario dataset (data/triage/scenarios.json).
+
+    Phase 49: the dataset is curated deterministically from the SYNTHETIC probe history by
+    scripts/curate_triage_scenarios.py (authoring-time only) and is SELF-CONTAINED — rules,
+    panels, and novel indicator text are embedded, so this loader never touches
+    data/probe-history. Deep validation happens in validate_triage_scenarios once the merged
+    corpus is known (the novel stratum is verified against the CURRENT committed records).
+    """
+    rel = TRIAGE_SCENARIOS.relative_to(ROOT)
+    if not TRIAGE_SCENARIOS.exists():
+        die(f"triage scenario dataset not found: {rel} "
+            f"(regenerate: `python3 scripts/curate_triage_scenarios.py`)")
+    try:
+        data = json.loads(TRIAGE_SCENARIOS.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as ex:
+        die(f"invalid JSON in {rel}: {ex}")
+    for key in ("meta", "rules", "panels", "scenarios"):
+        if key not in data:
+            die(f"{rel}: missing top-level '{key}'")
+    if not isinstance(data["scenarios"], list) or not data["scenarios"]:
+        die(f"{rel}: 'scenarios' must be a non-empty array")
+    return data
+
+
+def validate_triage_scenarios(data: dict, advisories: list, caps: list, srcs: list) -> list:
+    """Boundary check on the triage scenario dataset. Returns errors (render dies on any).
+
+    Checks: synthetic meta flag; closed vocabs (strata, disposition grammar, history
+    dispositions); referential integrity (panel + rule refs, unique ids, fired_rule field
+    universal); seeded-instrumentation floor (≥1 divergent shared-panel pair, ≥3 controls,
+    ≥4 labeled second-rater seeds, all strata populated, ≤20 scenarios); the synthetic-novel
+    stratum quotes US-FEDERAL committed docs only (jurisdiction from the source registry via
+    the merged corpus) with flag/red_flag/C/D byte-equal to the CURRENT committed indicator
+    (dataset drift fails the build loudly — the console precedent).
+    """
+    errors = []
+    cap_ids = {c["id"] for c in caps}
+    src_ids = {d["id"] for d in srcs}
+    if data["meta"].get("synthetic") is not True:
+        errors.append("meta.synthetic must be true (everything in this artifact is synthetic)")
+    rules = data["rules"]
+    panels = data["panels"]
+    scenarios = data["scenarios"]
+    if len(scenarios) > 20:
+        errors.append(f"{len(scenarios)} scenarios exceed the 20-scenario ceiling")
+    for rid, rule in rules.items():
+        sig = rule.get("signal", {})
+        if sig.get("capability") not in cap_ids:
+            errors.append(f"rule {rid}: signal capability {sig.get('capability')!r} not in taxonomy")
+        if sig.get("data_source") not in src_ids:
+            errors.append(f"rule {rid}: signal data_source {sig.get('data_source')!r} not in taxonomy")
+        for key in ("title", "logic", "indicator"):
+            if not rule.get(key):
+                errors.append(f"rule {rid}: missing {key}")
+    docs = {a["id"]: a for a in advisories if a.get("derived")}
+    seen = set()
+    panel_disp = {}
+    for sc in scenarios:
+        sid = sc.get("id", "<missing>")
+        if sid in seen:
+            errors.append(f"duplicate scenario id {sid}")
+        seen.add(sid)
+        if sc.get("stratum") not in TRIAGE_STRATA:
+            errors.append(f"{sid}: stratum {sc.get('stratum')!r} not in the closed vocab")
+        if sc.get("panel") not in panels:
+            errors.append(f"{sid}: dangling panel ref {sc.get('panel')!r}")
+        if "fired_rule" not in sc:
+            errors.append(f"{sid}: fired_rule field missing (must be present, possibly null)")
+        for key in ("fired_rule", "below_rule"):
+            if sc.get(key) is not None and sc[key] not in rules:
+                errors.append(f"{sid}: {key} {sc[key]!r} not in the embedded rules block")
+        h = sc.get("history")
+        if h is not None:
+            if h.get("disposition") not in TRIAGE_HISTORY_DISPOSITIONS:
+                errors.append(f"{sid}: history disposition {h.get('disposition')!r} off-vocab")
+            else:
+                panel_disp.setdefault(sc.get("panel"), set()).add(h["disposition"])
+        sr = sc.get("second_rater")
+        if sr is not None:
+            if "synthetic" not in sr.get("label", "").lower():
+                errors.append(f"{sid}: second_rater label must declare itself synthetic")
+            if sr.get("disposition") not in TRIAGE_GRAMMAR:
+                errors.append(f"{sid}: second_rater disposition {sr.get('disposition')!r} off-grammar")
+            info = sr.get("info_needed")
+            if info and info.get("data_source") not in src_ids:
+                errors.append(f"{sid}: info_needed data_source {info.get('data_source')!r} not in taxonomy")
+        ctl = sc.get("control")
+        if ctl is not None and ctl.get("known_disposition") not in TRIAGE_GRAMMAR:
+            errors.append(f"{sid}: control known_disposition {ctl.get('known_disposition')!r} off-grammar")
+        nv = sc.get("novel_source")
+        if nv is not None:
+            doc = docs.get(nv.get("doc_id"))
+            if doc is None:
+                errors.append(f"{sid}: novel_source doc {nv.get('doc_id')!r} not in the merged corpus")
+            elif doc.get("jurisdiction") != "US":
+                errors.append(f"{sid}: novel_source doc {nv['doc_id']} is not US-federal "
+                              f"(jurisdiction {doc.get('jurisdiction')!r}) — the novel stratum is US-only")
+            else:
+                ind = next((i for i in doc["indicators"] if i.get("id") == nv.get("indicator_id")), None)
+                if ind is None:
+                    errors.append(f"{sid}: novel_source indicator {nv.get('indicator_id')!r} "
+                                  f"not in {nv['doc_id']}'s CURRENT committed record")
+                else:
+                    for key in ("flag", "red_flag", "capability", "data_source"):
+                        if nv.get(key) != ind.get(key):
+                            errors.append(f"{sid}: novel_source {key} drifted from the CURRENT "
+                                          f"committed indicator {nv['doc_id']}/{nv['indicator_id']} "
+                                          f"— regenerate the dataset")
+    if not any(len(v) > 1 for v in panel_disp.values()):
+        errors.append("no divergent-disposition pair shares a panel "
+                      "(the seeded process inconsistency is required)")
+    if sum(1 for sc in scenarios if sc.get("control")) < 3:
+        errors.append("fewer than 3 known-disposition control scenarios")
+    if sum(1 for sc in scenarios if sc.get("second_rater")) < 4:
+        errors.append("fewer than 4 labeled second-rater seeds")
+    missing_strata = set(TRIAGE_STRATA) - {sc.get("stratum") for sc in scenarios}
+    if missing_strata:
+        errors.append(f"strata not all populated: missing {sorted(missing_strata)}")
+    return errors
+
+
+def render_triage(template: str) -> str:
+    """Validate + assemble the triage scenario dataset and inline it into triage.html.
+
+    Pure: no disk write — the single source of truth for dist/triage/index.html (shared by
+    build/check). The merged corpus is loaded only to verify the novel stratum against the
+    CURRENT committed records; nothing from the corpus beyond the validated dataset rides
+    into the payload.
+    """
+    merged = []
+    for source in CORPUS_SOURCES:
+        merged.extend(_load_source(source))
+    caps, srcs = load_capability_taxonomy()
+    data = load_triage_scenarios()
+    errors = validate_triage_scenarios(data, merged, caps, srcs)
+    if errors:
+        die("triage scenarios fail boundary validation:\n  - " + "\n  - ".join(errors))
+
+    payload = {
+        "brand": {"title": "Signal Watch", "subtitle": "Triage Console · Vision Prototype"},
+        "badge": "Illustrative data & outputs",
+        "taxonomy": {"capabilities": caps, "data_sources": srcs},
+        "triage": data,
+    }
+    n = template.count(TRIAGE_PLACEHOLDER)
+    if n != 1:
+        die(f"expected exactly one {TRIAGE_PLACEHOLDER} placeholder in triage.html, found {n}")
+    out = template.replace(TRIAGE_PLACEHOLDER, json.dumps(payload, ensure_ascii=False, indent=2))
+    if TRIAGE_PLACEHOLDER in out:
+        die("triage placeholder survived substitution")
+    if "fetch(" in out or "<script src" in out or 'type="module"' in out:
+        die("triage ship file is not self-contained (fetch / external script / ES module present)")
+    return out
+
+
+def build_triage(template: str) -> None:
+    out = render_triage(template)
+    out_dir = ROOT / "dist" / "triage"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "index.html"
+    out_path.write_text(out, encoding="utf-8")
+    print(f"build: triage -> {out_path.relative_to(ROOT)}  ({len(out):,} bytes)")
+
+
+def check_triage(template: str) -> bool:
+    """Drift guard for the triage-console artifact: committed dist/triage == a fresh render?"""
+    out_path = ROOT / "dist" / "triage" / "index.html"
+    rel = out_path.relative_to(ROOT)
+    try:
+        fresh = render_triage(template)
+    except SystemExit:
+        print(f"check: triage -> FAIL (triage data no longer renders; cannot reproduce {rel})", file=sys.stderr)
+        return False
+    if not out_path.exists():
+        print(f"check: triage -> DRIFT (missing built artifact {rel}; run `build.py triage`)", file=sys.stderr)
+        return False
+    if out_path.read_text(encoding="utf-8") != fresh:
+        print(f"check: triage -> DRIFT ({rel} differs from a fresh build; run `build.py triage` and commit)", file=sys.stderr)
+        return False
+    print(f"check: triage -> ok ({rel} matches a fresh build)")
+    return True
+
+
 def resolve_targets(target: str) -> list:
     """A single id, or every config/typologies/*.json for 'all' (sorted, stable)."""
     if target == "all":
@@ -1175,11 +1376,13 @@ def main() -> None:
     target = positional[0] if positional else DEFAULT_TYPOLOGY
 
     # 'corpus' = only the corpus explorer; 'news' = only the adverse-media stream; 'console' = only
-    # the gate console; 'all' = every typology + the corpus + the news stream + the console; else a typology.
+    # the gate console; 'triage' = only the triage console; 'all' = every typology + corpus + news +
+    # console + triage; else a typology.
     want_corpus = target in ("corpus", "all")
     want_news = target in ("news", "all")
     want_console = target in ("console", "all")
-    want_typologies = target not in ("corpus", "news", "console")
+    want_triage = target in ("triage", "all")
+    want_typologies = target not in ("corpus", "news", "console", "triage")
     corpus_template = None
     if want_corpus:
         if not CORPUS_TEMPLATE.exists():
@@ -1195,6 +1398,11 @@ def main() -> None:
         if not CONSOLE_TEMPLATE.exists():
             die(f"console template not found: {CONSOLE_TEMPLATE}")
         console_template = CONSOLE_TEMPLATE.read_text(encoding="utf-8")
+    triage_template = None
+    if want_triage:
+        if not TRIAGE_TEMPLATE.exists():
+            die(f"triage template not found: {TRIAGE_TEMPLATE}")
+        triage_template = TRIAGE_TEMPLATE.read_text(encoding="utf-8")
 
     if check:
         # Non-mutating drift guard: committed dist == fresh build? Touches nothing on disk.
@@ -1207,6 +1415,8 @@ def main() -> None:
             results.append(check_news(news_template))
         if want_console:
             results.append(check_console(console_template))
+        if want_triage:
+            results.append(check_triage(triage_template))
         drifted = results.count(False)
         if drifted:
             die(f"build-drift check FAILED: {drifted}/{len(results)} artifact(s) drifted "
@@ -1224,6 +1434,8 @@ def main() -> None:
         build_news(news_template)
     if want_console:
         build_console(console_template)
+    if want_triage:
+        build_triage(triage_template)
 
     # one-time migration: remove the old single-file M1 layout if present
     stale = ROOT / "dist" / "index.html"

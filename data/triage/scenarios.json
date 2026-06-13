@@ -1,0 +1,689 @@
+{
+ "meta": {
+  "design_params": {
+   "controls": 4,
+   "double_assigned": 6,
+   "note": "chosen, not measured — every parameter below is a design choice, not a measured quantity (§14)",
+   "scenario_count": 20
+  },
+  "disposition_grammar": [
+   "confirm-risk",
+   "confirm-no-risk",
+   "both-defensible",
+   "escalate",
+   "need-more-info",
+   "no-defensible-option"
+  ],
+  "history_dispositions": [
+   "dismissed",
+   "escalated",
+   "sar_filed",
+   "data_requested"
+  ],
+  "note": "SYNTHETIC triage-scenario dataset for the Phase-49 triage console (blueprint §14 embryo). Curated deterministically from the SYNTHETIC Phase-48 probe history (data/probe-history) — every institution, customer, figure, and panel is invented; no real customer or transaction data. The synthetic-novel stratum quotes committed corpus indicators from US FEDERAL sources only (public domain, 17 U.S.C. §105). Historical dispositions are facts about DECISIONS, never labels of correctness. Regenerate: python3 scripts/curate_triage_scenarios.py",
+  "source": {
+   "alert_history": "data/probe-history/alert-history.json (SYNTHETIC)",
+   "derived_signals": "data/probe-history/derived/legacy-rulebook.json",
+   "rulebook": "data/probe-history/legacy-rulebook.md (SYNTHETIC)"
+  },
+  "strata": [
+   "history-signal-fired",
+   "history-below-the-line",
+   "synthetic-novel",
+   "random-population"
+  ],
+  "synthetic": true,
+  "us_federal_allowlist": [
+   "fin-2022-a002",
+   "fin-2023-alert004",
+   "ofac-virtual-currency"
+  ]
+ },
+ "panels": {
+  "P-BT-101": {
+   "activity": [
+    "Cash deposits $7,400 / $7,900 / $7,650 across six days — each BELOW the rule's $8,000 floor.",
+    "Same weekly rhythm as classic structuring, shifted down one band.",
+    "No alert fired; the pattern is invisible to TM-101 as tuned."
+   ],
+   "customer": "Personal account, 5-year tenure. SYNTHETIC.",
+   "kyc_note": "Declared occupation: café owner; expected cash volume declared LOW at onboarding.",
+   "skeleton": "below TM-101 thresholds"
+  },
+  "P-BT-102": {
+   "activity": [
+    "Incoming wire $26,000; $22,100 (85%) transferred out 60 hours later.",
+    "Misses TM-102 on both arms: under the 90% ratio and outside the 48-hour window.",
+    "One earlier near-identical cycle 5 weeks ago. No alert fired."
+   ],
+   "customer": "Personal account, 18-month tenure. SYNTHETIC.",
+   "kyc_note": "No declared source-of-funds note for either incoming wire.",
+   "skeleton": "below TM-102 thresholds"
+  },
+  "P-BT-112": {
+   "activity": [
+    "Remittances through two different MSB counterparties to the same beneficiary country: $2,950 + $2,900 + $2,700 in 30 days.",
+    "Aggregate $8,550 — UNDER the rule's $9,000 aggregate trigger.",
+    "Beneficiary name identical across all three; no alert fired."
+   ],
+   "customer": "Personal account, 4-year tenure. SYNTHETIC.",
+   "kyc_note": "Profile records family in the destination country (a documented connection).",
+   "skeleton": "below TM-112 thresholds"
+  },
+  "P-CT-01": {
+   "activity": [
+    "Nine cash deposits in 21 days, every one between $9,300 and $9,900, at three branches.",
+    "Each deposit followed within a day by an outbound transfer to the same external account.",
+    "Customer asked at the counter about 'the reporting limit' on two occasions (teller notes on file)."
+   ],
+   "customer": "Personal account, 14-month tenure. SYNTHETIC.",
+   "kyc_note": "Declared occupation: unemployed. No declared source of funds.",
+   "skeleton": "control: textbook TM-101"
+  },
+  "P-CT-02": {
+   "activity": [
+    "Transaction count 8× the trailing weekly average in the last 7 days.",
+    "The spike is the bureau's quarter-end payroll run; identical spikes every quarter-end in history.",
+    "Every outbound credit matches a named employee of a documented client company."
+   ],
+   "customer": "Business account — payroll services bureau, 9-year tenure. SYNTHETIC.",
+   "kyc_note": "Client roster and service agreement on file; the velocity rule has no calendar awareness.",
+   "skeleton": "control: textbook TM-108 false positive"
+  },
+  "P-CT-03": {
+   "activity": [
+    "Monthly pension credits, utility debits, one annual travel booking.",
+    "No cash activity in 5 years."
+   ],
+   "customer": "Personal account, 31-year tenure, customer age 74. SYNTHETIC.",
+   "kyc_note": "KYC current; nothing out of pattern.",
+   "skeleton": "control: benign retiree"
+  },
+  "P-CT-04": {
+   "activity": [
+    "Cash deposits at branches in five cities within 10 days, $4,000–7,000 each.",
+    "Aggregate $28,500 wired out in one transfer to a money services business in another region.",
+    "Branch slips name three different depositors, none the account holder."
+   ],
+   "customer": "Personal account opened 4 months ago. SYNTHETIC.",
+   "kyc_note": "Declared occupation: retail clerk; declared income inconsistent with deposit volume.",
+   "skeleton": "control: textbook TM-109"
+  },
+  "P-HF-101": {
+   "activity": [
+    "Cash deposits $8,400 / $9,100 / $8,950 on three days within one week — each inside the $8,000–9,999 band.",
+    "Pattern recurs monthly; this is the NINTH alert on this account for the same behaviour.",
+    "All eight prior alerts dismissed (rationale on file each time: 'known cash-intensive side business').",
+    "No CTR has ever been triggered; declared occupation: rideshare driver."
+   ],
+   "customer": "Personal account, 9-year tenure. SYNTHETIC.",
+   "kyc_note": "Profile lists a part-time cash side business (unregistered); expected cash volume field BLANK at onboarding.",
+   "skeleton": "TM-101 logic"
+  },
+  "P-HF-102": {
+   "activity": [
+    "Incoming e-transfer $21,500, then $19,800 wired out 36 hours later (92% pass-through).",
+    "Second cycle three weeks later: $24,000 in, $22,300 out within 40 hours.",
+    "Residual balance after each cycle under $2,000. THIRD alert on this account this year; both priors dismissed ('expected property-deal flows')."
+   ],
+   "customer": "Personal account, 2-year tenure. SYNTHETIC.",
+   "kyc_note": "Customer note from a prior review mentions 'acting for a relative buying property'; no documentation on file.",
+   "skeleton": "TM-102 logic"
+  },
+  "P-HF-104": {
+   "activity": [
+    "Outbound wire $14,200 to a jurisdiction on the institution's high-risk country list.",
+    "Customer profile records no business, family, or travel connection to the destination.",
+    "Wire memo field: 'family support'. No prior wires to this corridor in account history.",
+    "Account otherwise in pattern: salary credits, rent, card spend."
+   ],
+   "customer": "Personal account, 6-year tenure, salaried profile. SYNTHETIC.",
+   "kyc_note": "KYC current (refreshed 14 months ago); occupation: logistics coordinator; no documented overseas ties.",
+   "skeleton": "TM-104 logic"
+  },
+  "P-HF-106": {
+   "activity": [
+    "Monthly cash deposits at 240% and 265% of the onboarding-declared expected volume, two consecutive months.",
+    "No change filed to the declared nature of business.",
+    "Card-settlement credits flat over the same period (sales mix unchanged on the acquiring side)."
+   ],
+   "customer": "Business account — convenience store, 7-year tenure. SYNTHETIC.",
+   "kyc_note": "Onboarding profile dated; last KYC refresh 4 years ago. A refresh request is the obvious next step — history shows the review PAUSED for exactly that.",
+   "skeleton": "TM-106 logic"
+  },
+  "P-HF-109": {
+   "activity": [
+    "Cash deposits at branches in four cities across two provinces within 12 days ($3,000–6,500 each).",
+    "Aggregate $23,800 consolidated, then a single wire out from a fifth city two days later.",
+    "Depositor descriptions on branch slips do not consistently match the account holder."
+   ],
+   "customer": "Personal account opened 11 months ago. SYNTHETIC.",
+   "kyc_note": "Declared occupation: student. No employment income credits in account history.",
+   "skeleton": "TM-109 logic"
+  },
+  "P-HF-110": {
+   "activity": [
+    "Three incoming wires in 60 days with originator name fields truncated or filled with 'XXX'.",
+    "Originating institutions in two different correspondent corridors.",
+    "Funds applied to supplier payments consistent with the declared business line."
+   ],
+   "customer": "Small-business account (import/export), 3-year tenure. SYNTHETIC.",
+   "kyc_note": "Beneficial ownership on file; counterparty list NOT on file — the institution does not collect expected-counterparty data for this segment.",
+   "skeleton": "TM-110 logic"
+  },
+  "P-NV-ec": {
+   "activity": [
+    "Incoming payments from a freight forwarder; outgoing wires to component brokers in two transshipment hubs.",
+    "Trade documents reference HS codes matching export-controlled microelectronics.",
+    "The company has NO trade history before incorporation; director previously at a deregistered trading firm."
+   ],
+   "customer": "Business account — electronics wholesaler incorporated 8 months ago. SYNTHETIC.",
+   "kyc_note": "Trade-document screening is out of scope for every legacy TM rule; the institution holds the docs in a separate trade-finance system.",
+   "skeleton": "novel: fin-2023-alert004/IND-01"
+  },
+  "P-NV-efe": {
+   "activity": [
+    "Sudden daily debit-card cash withdrawals at the branch ATM ($400–800), prior pattern was one monthly visit.",
+    "New e-transfer payees added in a two-week burst; amounts drain the savings sweep.",
+    "Branch note: customer accompanied by an unfamiliar 'helper' on two visits; a power-of-attorney change is in progress."
+   ],
+   "customer": "Personal account, 23-year tenure, customer age 81. SYNTHETIC.",
+   "kyc_note": "File notes a documented cognitive-impairment accommodation from 2024. No legacy TM rule covers elder financial exploitation.",
+   "skeleton": "novel: fin-2022-a002/IND-02"
+  },
+  "P-NV-vc": {
+   "activity": [
+    "Online-banking logins routed through VPN exit nodes; two sessions geolocate to a comprehensively sanctioned jurisdiction.",
+    "Card purchases at a virtual-asset platform within hours of those sessions.",
+    "Fiat withdrawals from the same platform land back in the account days later."
+   ],
+   "customer": "Personal account, 3-year tenure, crypto-exchange on/off-ramps in profile. SYNTHETIC.",
+   "kyc_note": "Login telemetry sits in the fraud stack, not the AML stack — the legacy rulebook has no access-geography rule.",
+   "skeleton": "novel: ofac-virtual-currency/IND-02"
+  },
+  "P-RP-01": {
+   "activity": [
+    "Cash deposits spike every February and May (holiday trade), 160% of monthly average.",
+    "Supplier payments to two wholesale nurseries; payroll for three staff.",
+    "Pattern repeats across all 12 years of history."
+   ],
+   "customer": "Business account — florist, 12-year tenure. SYNTHETIC.",
+   "kyc_note": "Declared seasonal cash business at onboarding; expected-volume field anticipates the seasonal peaks.",
+   "skeleton": "authored benign"
+  },
+  "P-RP-02": {
+   "activity": [
+    "Biweekly salary credit, monthly mortgage debit, automatic savings sweep.",
+    "One out-of-pattern event: a $30,000 incoming transfer with memo 'estate distribution', matched by a probate-note on file."
+   ],
+   "customer": "Personal account, 15-year tenure. SYNTHETIC.",
+   "kyc_note": "KYC current; the estate transfer is documented in a branch note from the same week.",
+   "skeleton": "authored benign"
+  },
+  "P-RP-03": {
+   "activity": [
+    "Lumpy invoice income: $4,000–11,000 credits at irregular intervals from 5 repeat counterparties.",
+    "Three round-amount transfers of $2,000 to the same family member in 60 days (below TM-105's five-transfer trigger).",
+    "Periodic cash withdrawals for materials purchases (declared trade: renovation contractor)."
+   ],
+   "customer": "Personal account — independent contractor, 6-year tenure. SYNTHETIC.",
+   "kyc_note": "Occupation documented; counterparties consistent with the declared trade.",
+   "skeleton": "authored benign-ambiguous"
+  }
+ },
+ "rules": {
+  "TM-101": {
+   "indicator": "A customer makes multiple cash deposits just below the currency transaction reporting threshold within a short period, in a pattern consistent with structuring to avoid the filing requirement.",
+   "logic": "three or more cash deposits each between $8,000 and $9,999 into one account within any rolling 7-day window.",
+   "signal": {
+    "build_rec": "COVERED",
+    "capability": "C4",
+    "data_source": "D2",
+    "red_flag": "Structuring — repeated sub-threshold cash deposits to evade CTR filing",
+    "status": "covered"
+   },
+   "title": "Structuring below the reporting threshold"
+  },
+  "TM-102": {
+   "indicator": "Funds are deposited and then promptly withdrawn or transferred out within one to two business days, leaving a minimal balance and showing no apparent business or personal purpose for the pass-through activity.",
+   "logic": "incoming credits ≥ $20,000 followed by outgoing debits of 90% or more of the credited amount within 48 hours, twice in 30 days.",
+   "signal": {
+    "build_rec": "COVERED",
+    "capability": "C2",
+    "data_source": "D1",
+    "red_flag": "Rapid in-and-out movement with no economic purpose (pass-through account)",
+    "status": "covered"
+   },
+   "title": "Rapid movement of funds"
+  },
+  "TM-104": {
+   "indicator": "A customer sends or receives international wire transfers involving high-risk jurisdictions with no documented economic purpose or relationship to the destination country.",
+   "logic": "any wire ≥ $10,000 to or from a jurisdiction on the institution's high-risk country list where the customer profile records no business or family connection to that jurisdiction.",
+   "signal": {
+    "build_rec": "COVERED",
+    "capability": "C20",
+    "data_source": "D3",
+    "red_flag": "Unexplained wires to/from high-risk jurisdictions with no customer nexus",
+    "status": "covered"
+   },
+   "title": "Unexplained high-risk geography wires"
+  },
+  "TM-106": {
+   "indicator": "A business customer's cash deposit volume substantially and persistently exceeds the expected activity stated in its onboarding profile, without a corresponding change in the declared nature of the business.",
+   "logic": "monthly cash deposits exceeding 200% of the declared expected cash volume recorded at onboarding, for two consecutive months.",
+   "signal": {
+    "build_rec": "ENHANCE",
+    "capability": "C5",
+    "data_source": "D8",
+    "red_flag": "Cash deposits far exceeding the declared business cash profile",
+    "status": "partial"
+   },
+   "title": "Cash activity inconsistent with business profile"
+  },
+  "TM-108": {
+   "indicator": "An account exhibits a sudden spike in transaction frequency relative to its own historical baseline that is not explained by seasonality or a documented life event.",
+   "logic": "transaction count in any 7-day window exceeding six times the trailing 90-day weekly average, minimum 25 transactions.",
+   "signal": {
+    "build_rec": "COVERED",
+    "capability": "C6",
+    "data_source": "D1",
+    "red_flag": "Sudden transaction-velocity spike vs the account's own baseline",
+    "status": "covered"
+   },
+   "title": "Transaction velocity spike"
+  },
+  "TM-109": {
+   "indicator": "An account receives cash deposits in multiple geographically dispersed locations followed by prompt consolidated withdrawal or onward transfer elsewhere, consistent with funnel account activity used to move illicit proceeds across regions.",
+   "logic": "cash deposits into one account at branches in three or more distinct cities within 14 days, followed by consolidation and withdrawal or transfer in a different region.",
+   "signal": {
+    "build_rec": "COVERED",
+    "capability": "C3",
+    "data_source": "D2",
+    "red_flag": "Funnel account — dispersed multi-city cash-in, consolidated withdrawal elsewhere",
+    "status": "covered"
+   },
+   "title": "Funnel account pattern"
+  },
+  "TM-110": {
+   "indicator": "Incoming wire transfers repeatedly arrive with missing or incomplete originator information, suggesting deliberate stripping of payment details to obscure the source of funds.",
+   "logic": "two or more incoming wires within 90 days where originator name, address, or account fields are missing, truncated, or populated with filler characters.",
+   "signal": {
+    "build_rec": "BUILD_NOW",
+    "capability": "C10",
+    "data_source": "D3",
+    "red_flag": "Incoming wires with stripped or incomplete originator information",
+    "status": "gap"
+   },
+   "title": "Incomplete originator information on incoming wires"
+  },
+  "TM-112": {
+   "indicator": "A customer splits international remittances into multiple below-threshold transactions routed through different money services businesses to the same destination, consistent with deliberate fragmentation to avoid scrutiny.",
+   "logic": "outgoing remittances from one customer through two or more money services business counterparties to the same beneficiary country, each below $3,000, aggregate ≥ $9,000 in 30 days.",
+   "signal": {
+    "build_rec": "COVERED",
+    "capability": "C4",
+    "data_source": "D3",
+    "red_flag": "Remittances fragmented across MSBs below thresholds to one destination",
+    "status": "covered"
+   },
+   "title": "Split international remittances across MSBs"
+  }
+ },
+ "scenarios": [
+  {
+   "below_rule": null,
+   "control": null,
+   "fired_rule": "TM-104",
+   "history": {
+    "alert_id": "A-0011",
+    "analyst": "a1",
+    "date": "2023-02-02",
+    "disposition": "dismissed",
+    "entity_id": "E-002"
+   },
+   "id": "S-01",
+   "novel_source": null,
+   "panel": "P-HF-104",
+   "prior_alerts": 0,
+   "second_rater": {
+    "disposition": "escalate",
+    "label": "synthetic second rater (seeded)",
+    "rater": "r2",
+    "rationale": "No documented connection to the corridor; unexplained purpose outweighs the in-pattern remainder."
+   },
+   "stratum": "history-signal-fired"
+  },
+  {
+   "below_rule": null,
+   "control": null,
+   "fired_rule": "TM-104",
+   "history": {
+    "alert_id": "A-0012",
+    "analyst": "a2",
+    "date": "2023-03-07",
+    "disposition": "escalated",
+    "entity_id": "E-003"
+   },
+   "id": "S-02",
+   "novel_source": null,
+   "panel": "P-HF-104",
+   "prior_alerts": 0,
+   "second_rater": {
+    "disposition": "escalate",
+    "label": "synthetic second rater (seeded)",
+    "rater": "r2",
+    "rationale": "Same fact pattern as the dismissed sibling alert; consistency requires the same call."
+   },
+   "stratum": "history-signal-fired"
+  },
+  {
+   "below_rule": null,
+   "control": null,
+   "fired_rule": "TM-101",
+   "history": {
+    "alert_id": "A-0009",
+    "analyst": "a1",
+    "date": "2023-09-12",
+    "disposition": "dismissed",
+    "entity_id": "E-014"
+   },
+   "id": "S-03",
+   "novel_source": null,
+   "panel": "P-HF-101",
+   "prior_alerts": 8,
+   "second_rater": {
+    "disposition": "need-more-info",
+    "info_needed": {
+     "data_source": "D8",
+     "what": "KYC refresh — registration and expected cash volume of the declared side business"
+    },
+    "label": "synthetic second rater (seeded)",
+    "rater": "r2",
+    "rationale": "Nine alerts on one undocumented cash business: the file needs the business documentation before another dismissal."
+   },
+   "stratum": "history-signal-fired"
+  },
+  {
+   "below_rule": null,
+   "control": null,
+   "fired_rule": "TM-109",
+   "history": {
+    "alert_id": "A-0019",
+    "analyst": "a3",
+    "date": "2023-03-21",
+    "disposition": "escalated",
+    "entity_id": "E-021"
+   },
+   "id": "S-04",
+   "novel_source": null,
+   "panel": "P-HF-109",
+   "prior_alerts": 0,
+   "second_rater": null,
+   "stratum": "history-signal-fired"
+  },
+  {
+   "below_rule": null,
+   "control": null,
+   "fired_rule": "TM-110",
+   "history": {
+    "alert_id": "A-0036",
+    "analyst": "a3",
+    "date": "2023-04-25",
+    "disposition": "data_requested",
+    "entity_id": "E-050"
+   },
+   "id": "S-05",
+   "novel_source": null,
+   "panel": "P-HF-110",
+   "prior_alerts": 0,
+   "second_rater": null,
+   "stratum": "history-signal-fired"
+  },
+  {
+   "below_rule": null,
+   "control": null,
+   "fired_rule": "TM-106",
+   "history": {
+    "alert_id": "A-0042",
+    "analyst": "a2",
+    "date": "2023-07-26",
+    "disposition": "data_requested",
+    "entity_id": "E-062"
+   },
+   "id": "S-06",
+   "novel_source": null,
+   "panel": "P-HF-106",
+   "prior_alerts": 0,
+   "second_rater": null,
+   "stratum": "history-signal-fired"
+  },
+  {
+   "below_rule": null,
+   "control": null,
+   "fired_rule": "TM-102",
+   "history": {
+    "alert_id": "A-0024",
+    "analyst": "a2",
+    "date": "2023-06-27",
+    "disposition": "dismissed",
+    "entity_id": "E-030"
+   },
+   "id": "S-07",
+   "novel_source": null,
+   "panel": "P-HF-102",
+   "prior_alerts": 2,
+   "second_rater": null,
+   "stratum": "history-signal-fired"
+  },
+  {
+   "below_rule": "TM-101",
+   "control": null,
+   "fired_rule": null,
+   "history": null,
+   "id": "S-08",
+   "novel_source": null,
+   "panel": "P-BT-101",
+   "prior_alerts": 0,
+   "second_rater": {
+    "disposition": "confirm-risk",
+    "label": "synthetic second rater (seeded)",
+    "rater": "r2",
+    "rationale": "Band-shifted structuring; the rhythm is the signal, not the band."
+   },
+   "stratum": "history-below-the-line"
+  },
+  {
+   "below_rule": "TM-112",
+   "control": null,
+   "fired_rule": null,
+   "history": null,
+   "id": "S-09",
+   "novel_source": null,
+   "panel": "P-BT-112",
+   "prior_alerts": 0,
+   "second_rater": null,
+   "stratum": "history-below-the-line"
+  },
+  {
+   "below_rule": "TM-102",
+   "control": null,
+   "fired_rule": null,
+   "history": null,
+   "id": "S-10",
+   "novel_source": null,
+   "panel": "P-BT-102",
+   "prior_alerts": 0,
+   "second_rater": null,
+   "stratum": "history-below-the-line"
+  },
+  {
+   "below_rule": null,
+   "control": null,
+   "fired_rule": null,
+   "history": null,
+   "id": "S-11",
+   "novel_source": {
+    "capability": "C1",
+    "data_source": "D1",
+    "doc_id": "fin-2022-a002",
+    "flag": "An older customer with known physical, emotional, and cognitive impairment has unexplainable or unusual account activity.",
+    "indicator_id": "IND-02",
+    "licence": "US federal — public domain (17 U.S.C. §105)",
+    "red_flag": "Out-of-pattern activity on a known-impaired elderly account",
+    "source_dir": "data/fincen"
+   },
+   "panel": "P-NV-efe",
+   "prior_alerts": 0,
+   "second_rater": null,
+   "stratum": "synthetic-novel"
+  },
+  {
+   "below_rule": null,
+   "control": null,
+   "fired_rule": null,
+   "history": null,
+   "id": "S-12",
+   "novel_source": {
+    "capability": "C18",
+    "data_source": "D9",
+    "doc_id": "ofac-virtual-currency",
+    "flag": "Attempt to access a virtual currency exchange from an IP address or VPN connected to a sanctioned jurisdiction",
+    "indicator_id": "IND-02",
+    "licence": "US federal — public domain (17 U.S.C. §105)",
+    "red_flag": "Login from sanctioned-jurisdiction IP / VPN (geo-anonymizer access)",
+    "source_dir": "data/ofac"
+   },
+   "panel": "P-NV-vc",
+   "prior_alerts": 0,
+   "second_rater": null,
+   "stratum": "synthetic-novel"
+  },
+  {
+   "below_rule": null,
+   "control": null,
+   "fired_rule": null,
+   "history": null,
+   "id": "S-13",
+   "novel_source": {
+    "capability": "C24",
+    "data_source": "D15",
+    "doc_id": "fin-2023-alert004",
+    "flag": "The company never received exports prior to February 24, 2022;",
+    "indicator_id": "IND-01",
+    "licence": "US federal — public domain (17 U.S.C. §105)",
+    "red_flag": "Non-GECC importer with no pre-Feb-2022 export history newly receiving controlled goods",
+    "source_dir": "data/fincen-alerts"
+   },
+   "panel": "P-NV-ec",
+   "prior_alerts": 0,
+   "second_rater": {
+    "disposition": "escalate",
+    "label": "synthetic second rater (seeded)",
+    "rater": "r2",
+    "rationale": "Controlled-goods HS codes + no trade history + successor-director pattern: escalate to investigations."
+   },
+   "stratum": "synthetic-novel"
+  },
+  {
+   "below_rule": null,
+   "control": null,
+   "fired_rule": null,
+   "history": null,
+   "id": "S-14",
+   "novel_source": null,
+   "panel": "P-RP-01",
+   "prior_alerts": 0,
+   "second_rater": null,
+   "stratum": "random-population"
+  },
+  {
+   "below_rule": null,
+   "control": null,
+   "fired_rule": null,
+   "history": null,
+   "id": "S-15",
+   "novel_source": null,
+   "panel": "P-RP-02",
+   "prior_alerts": 0,
+   "second_rater": null,
+   "stratum": "random-population"
+  },
+  {
+   "below_rule": null,
+   "control": null,
+   "fired_rule": null,
+   "history": null,
+   "id": "S-16",
+   "novel_source": null,
+   "panel": "P-RP-03",
+   "prior_alerts": 0,
+   "second_rater": null,
+   "stratum": "random-population"
+  },
+  {
+   "below_rule": null,
+   "control": {
+    "basis": "Textbook structuring with teller-note intent evidence — seeded clear-risk control.",
+    "known_disposition": "confirm-risk"
+   },
+   "fired_rule": "TM-101",
+   "history": null,
+   "id": "C-17",
+   "novel_source": null,
+   "panel": "P-CT-01",
+   "prior_alerts": 0,
+   "second_rater": null,
+   "stratum": "history-signal-fired"
+  },
+  {
+   "below_rule": null,
+   "control": {
+    "basis": "Documented quarter-end payroll run — seeded clear-benign control behind a firing rule.",
+    "known_disposition": "confirm-no-risk"
+   },
+   "fired_rule": "TM-108",
+   "history": null,
+   "id": "C-18",
+   "novel_source": null,
+   "panel": "P-CT-02",
+   "prior_alerts": 0,
+   "second_rater": null,
+   "stratum": "history-signal-fired"
+  },
+  {
+   "below_rule": null,
+   "control": {
+    "basis": "Long-tenure retiree, fully in pattern — seeded clear-benign control.",
+    "known_disposition": "confirm-no-risk"
+   },
+   "fired_rule": null,
+   "history": null,
+   "id": "C-19",
+   "novel_source": null,
+   "panel": "P-CT-03",
+   "prior_alerts": 0,
+   "second_rater": {
+    "disposition": "confirm-no-risk",
+    "label": "synthetic second rater (seeded)",
+    "rater": "r2",
+    "rationale": "Nothing out of pattern; control agreement check."
+   },
+   "stratum": "random-population"
+  },
+  {
+   "below_rule": null,
+   "control": {
+    "basis": "Textbook funnel-account pattern with third-party depositors — seeded clear-risk control.",
+    "known_disposition": "confirm-risk"
+   },
+   "fired_rule": "TM-109",
+   "history": null,
+   "id": "C-20",
+   "novel_source": null,
+   "panel": "P-CT-04",
+   "prior_alerts": 0,
+   "second_rater": null,
+   "stratum": "history-signal-fired"
+  }
+ ]
+}

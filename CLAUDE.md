@@ -45,7 +45,7 @@ detection system; a scripted dramatization of the signal/atom loop. See HANDOFF.
 > - Target ≤ ~200 lines. If it's growing, a phase log is leaking in — move it out.
 This section is the DURABLE, currently-true architecture — not a changelog.
 
-### Four ship artifacts (each a single self-contained offline file)
+### Five ship artifacts (each a single self-contained offline file)
 1. **Showcase** — `index.html` → `dist/<id>/index.html`. The generic six-act engine (vanilla
    HTML/CSS/JS, single `__CONFIG__` injection point, typology-agnostic — adding a typology is one
    JSON file, no engine edits); presenter controls (keyboard nav ←/→/Space/Esc/↺, reset,
@@ -134,10 +134,29 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    persists nothing). Badge always-on; FINTRAC footer attribution per on-screen doc (the one US
    case renders an empty footer); NO LLM/fetch.
 
+5. **Triage console** (Phase 49, M9) — `triage.html` → `dist/triage/index.html`. Blueprint §14's
+   continuous adjudication loop made demo-able (the gate console's sibling, console byte-frozen):
+   20 fully SYNTHETIC mini-triage scenarios across the 4 §14 strata (history-signal-fired /
+   below-the-line / synthetic-novel / random-population; 16 + 4 known-disposition controls),
+   deterministically curated by `scripts/curate_triage_scenarios.py` (reads `data/probe-history`
+   at AUTHORING time only; rule text EMBEDDED — build.py never reads probe-history) into committed
+   `data/triage/scenarios.json`, build-boundary validated (closed vocabs + referential integrity
+   + the US-federal-ONLY novel stratum drift-checked vs CURRENT committed records). Evidence
+   panels are shared BY REFERENCE across divergent-disposition pairs (the seeded process
+   inconsistency is structural). Arc: Queue (stratum-grouped; controls hidden) → Evidence →
+   Disposition (the §14 grammar: confirm-risk / confirm-no-risk / both-defensible / escalate /
+   need-more-info naming a C/D code via taxonomy picker / the policy-gap escape; rationale
+   REQUIRED) → Reveal (the historical disposition framed "decisions, not correctness"; LABELED
+   synthetic second-rater replay; process-inconsistency surfacing) → Discovery ledger (signal
+   gaps DERIVED from fired-rule state · data gaps per D-code · process inconsistencies · policy
+   gaps · agreement arithmetic computed at render, every number with its definition; params
+   "chosen, not measured"; JSON export; persists nothing). Badge always-on; NO LLM/fetch; no
+   FINTRAC content (novel stratum is US-federal public domain only — no footer machinery).
+
 ### Build (`scripts/build.py`)
 Validates a config against the schema (fail-loud), resolves `text_file`→inline, inlines everything →
-the single ship file. Targets: `<id>`, `corpus`, `news`, `console`, `all`; `--check <target>` is the
-drift guard (frozen dists byte-identical). **build.py NEVER imports the authoring layer.** Baseline
+the single ship file. Targets: `<id>`, `corpus`, `news`, `console`, `triage`, `all`; `--check <target>`
+is the drift guard (frozen dists byte-identical). **build.py NEVER imports the authoring layer.** Baseline
 in `archive/`.
 
 ### Corpus sources & overlays (committed; merged at build time)
@@ -215,12 +234,12 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   genuine flag, the gate grounds each).
 
 ## How to run
-- Build: `python3 scripts/build.py <id>` (or `corpus` / `news` / `console` / `all`) → the ship file
-  (`corpus` merges `CORPUS_SOURCES` + the three overlays; `news` reads
-  `data/news/{articles,derived,book}`; `console` reads `data/console/cases.json` — all
-  grounded/validated at the build boundary).
-- Present: open `dist/<id>/index.html` (or `dist/corpus/`, `dist/news/`, `dist/console/`) — single
-  self-contained file, offline, no server.
+- Build: `python3 scripts/build.py <id>` (or `corpus` / `news` / `console` / `triage` / `all`) → the
+  ship file (`corpus` merges `CORPUS_SOURCES` + the three overlays; `news` reads
+  `data/news/{articles,derived,book}`; `console` reads `data/console/cases.json`; `triage` reads
+  `data/triage/scenarios.json` — all grounded/validated at the build boundary).
+- Present: open `dist/<id>/index.html` (or `dist/corpus/`, `dist/news/`, `dist/console/`,
+  `dist/triage/`) — single self-contained file, offline, no server.
 - News LIVE mode (optional, dev/authoring-time): start llama-cpp (set `--ctx-size` — see the doc),
   then `.venv/bin/python scripts/serve_news.py` → http://localhost:8000 (URL or paste + source
   type; `.venv` enables persistence/URL mode). Offline `dist/news` unaffected; full walkthrough +
@@ -242,6 +261,13 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
     rationale-REQUIRED graded disposition gate, record reveal only post-disposition, ledger +
     JSON export, badge + per-doc FINTRAC footer [US case empty], XSS-escape, keyboard guards,
     both motion modes).
+  - `node tests/triage-console.test.mjs` — the triage-console §14 arc (stratified queue [controls
+    hidden], the 6-option graded gate [rationale required; need-more-info requires a C/D pick;
+    policy-gap escape], reveal locked pre-disposition [decisions-not-correctness; labeled
+    second-rater replay; process-inconsistency surfacing], the DERIVED discovery ledger
+    [hand-computed agreement fixture + definition strings], XSS, keyboard guards, both motion
+    modes) · `python3 scripts/curate_triage_scenarios.py --selftest` — the curate validators
+    (broken fixtures rejected; deterministic regen; 12 rules parsed).
   - `node tests/news-stream.test.mjs` — the adverse-media arc + fuzzy matcher; both motion modes;
     the companion-served live overrides (watchlist screen/escalate/view/prune + the alias-aware
     matcher [exact-yes/fuzzy-no per class] + the SVG network [deterministic liveGraphLayout:
@@ -283,7 +309,8 @@ stream (`dist/news/`) · M9 program design (`docs/program-blueprint.md` §1–§
 architecture [library-not-monolith; dossier-now/score-deferred], §14 the continuous adjudication
 loop — + the `dist/console/` gate console + the SYNTHETIC history-decomposition probe
 `data/probe-history/` w/ `scripts/probe_history_stats.py` [outside every build path; writeup
-`docs/probe-history.md`] + the NON-ship offline report `docs/blueprint-report.html`).
+`docs/probe-history.md`] + the NON-ship offline report `docs/blueprint-report.html` + the
+`dist/triage/` triage console [Phase 49 — §14's loop embryo made demo-able]).
 Per-phase detail: git log + `.dev-wiki/` journal + HANDOFF.md §8.
 
 ## Definition of done

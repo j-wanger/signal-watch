@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signal Watch — Triage Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* Theme is shared with the gate console / corpus explorer by deliberate copy: this is the FIFTH
+     SEPARATE single-file ship artifact (dist/triage/) — the existing artifacts stay byte-frozen,
+     so triage.html owns its own copy of the dossier theme rather than a build-time include. */
+  :root{
+    --bg:#0c0e12;--bg2:#10131a;--panel:#151922;--panel2:#1a1f29;
+    --line:#262c39;--line2:#333b4c;--ink:#e9ebf0;--muted:#98a2b5;--faint:#6a7388;
+    --signal:#f6a623;--teal:#4fd1c5;--blue:#5aa9ff;--rose:#ef6079;--green:#54c98a;--violet:#b08cff;
+    --accent:var(--signal);
+    --mono:'JetBrains Mono',ui-monospace,monospace;--body:'Archivo',system-ui,sans-serif;--display:'Newsreader',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1100px 560px at 84% -10%,rgba(246,166,35,.08),transparent 60%),
+      radial-gradient(820px 460px at -6% 8%,rgba(90,169,255,.06),transparent 55%),
+      var(--bg);
+    color:var(--ink);font-family:var(--body);line-height:1.5;-webkit-font-smoothing:antialiased;
+    min-height:100vh;display:flex;flex-direction:column}
+  .shell{max-width:1080px;margin:0 auto;width:100%;padding:0 22px;flex:1;display:flex;flex-direction:column}
+
+  /* header (shared chrome) */
+  header{padding:26px 0 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:13px}
+  .brand .mark{width:34px;height:34px;border-radius:9px;border:1px solid var(--signal);display:grid;place-items:center;color:var(--signal);font-family:var(--mono);font-size:15px;box-shadow:0 0 18px -4px var(--signal) inset}
+  .brand .bt{font-family:var(--display);font-size:20px;line-height:1}
+  .brand .bs{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);margin-top:3px}
+  .badge{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--signal);border:1px solid var(--signal);border-radius:999px;padding:6px 12px;background:rgba(246,166,35,.06)}
+
+  /* stepper (shared) */
+  .stepper{display:flex;gap:4px;padding:16px 0;overflow-x:auto}
+  .step{flex:1;min-width:84px;cursor:pointer;opacity:.5;transition:.25s}
+  .step.done,.step.active{opacity:1}
+  .step .sbar{height:3px;border-radius:2px;background:var(--line2);overflow:hidden}
+  .step.done .sbar,.step.active .sbar{background:var(--signal)}
+  .step .sl{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:7px;white-space:nowrap}
+  .step.active .sl{color:var(--ink)}
+
+  /* stage (shared) */
+  .stage{flex:1;padding:24px 0 8px;min-height:430px;position:relative}
+  .scene{animation:fade .5s cubic-bezier(.2,.7,.2,1)}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--signal);margin-bottom:10px}
+  h2{font-family:var(--display);font-weight:500;font-size:clamp(24px,4vw,36px);line-height:1.08;letter-spacing:-.01em;margin-bottom:12px}
+  h2 em{font-style:italic;color:var(--muted)}
+  .lead{color:var(--muted);max-width:720px;font-size:15.5px;margin-bottom:22px}
+  .lead b{color:var(--ink)}
+  .framenote{margin-top:20px;font-size:12px;color:var(--faint);border-left:2px solid var(--line2);padding-left:12px;font-style:italic;font-family:var(--display)}
+  .empty{border:1px dashed var(--line2);border-radius:10px;padding:20px;color:var(--muted);font-family:var(--mono);font-size:12px;background:var(--panel);line-height:1.6}
+
+  /* queue — stat tiles + stratum groups + scenario rows */
+  .qstats{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 22px}
+  .qstat{border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:14px 18px;min-width:118px;flex:1}
+  .qstat .qsn{font-family:var(--display);font-size:30px;color:var(--signal);line-height:1}
+  .qstat .qsl{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-top:6px}
+  .axhead{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--signal);margin:18px 0 8px;display:flex;gap:8px;align-items:baseline;padding-bottom:6px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .axhead:first-of-type{margin-top:0}
+  .axhead .axn{color:var(--faint)}
+  .axhead .axd{color:var(--faint);text-transform:none;letter-spacing:0;font-size:10.5px;flex-basis:100%;font-family:var(--body)}
+  .qgrid{display:flex;flex-direction:column;gap:6px}
+  .scnrow{display:flex;align-items:center;gap:12px;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:10px 13px;cursor:pointer;transition:.18s;opacity:0;transform:translateX(8px);animation:rin .4s forwards}
+  @keyframes rin{to{opacity:1;transform:none}}
+  .scnrow:hover{border-color:var(--line2);background:var(--panel2);transform:translateY(-1px)}
+  .scnrow .crmain{flex:1;min-width:0}
+  .scnrow .crflag{font-size:13px;line-height:1.4;color:var(--ink)}
+  .scnrow .crmeta{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:3px}
+  .chip{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:6px;white-space:nowrap;border:1px solid currentColor}
+  .chip.ax{color:var(--blue)}
+  .chip.rec{color:var(--green)}
+  .chip.da{color:var(--violet)}
+  .chip.nf{color:var(--faint)}
+  .qfoot{margin-top:18px;display:flex;justify-content:flex-end}
+
+  /* evidence — the fact-pattern panel + the per-stratum source card */
+  .evgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  @media(max-width:820px){.evgrid{grid-template-columns:1fr}}
+  .doclabel{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:7px}
+  .evflag{border:1px solid var(--line);border-left:3px solid var(--teal);background:var(--bg2);border-radius:0 11px 11px 0;padding:14px 16px;font-family:var(--mono);font-size:12px;line-height:1.75;color:var(--ink);white-space:pre-wrap;word-break:break-word;margin-bottom:16px}
+  .evred{border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:12px 15px;font-size:14px;color:var(--ink);line-height:1.45;margin-bottom:16px}
+  .card{border:1px solid var(--line);background:var(--panel);border-radius:12px;overflow:hidden;margin-bottom:12px}
+  .card .ah{background:var(--panel2);border-bottom:1px solid var(--line);padding:10px 15px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--signal)}
+  .card .ab{padding:13px 15px;font-size:13px;color:var(--ink);line-height:1.6}
+  .card .ab .sub{color:var(--muted)}
+  .card.teal .ah{color:var(--teal)}
+  .card.faintc .ah{color:var(--faint)}
+  .actlist{list-style:none;display:flex;flex-direction:column;gap:7px;margin:8px 0}
+  .actlist li{border-left:2px solid var(--line2);padding-left:11px;font-size:13px;line-height:1.55}
+  .kyc{border-top:1px dashed var(--line);margin-top:10px;padding-top:9px;font-size:12.5px;color:var(--muted);line-height:1.55}
+  .codepair{font-family:var(--mono);font-size:11.5px;color:var(--teal);background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-right:6px}
+  .licline{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:8px}
+
+  /* disposition — the §14 graded gate */
+  .grades{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  @media(max-width:680px){.grades{grid-template-columns:1fr}}
+  .gradebtn{text-align:left;border:1px solid var(--line2);background:var(--panel);color:var(--ink);border-radius:10px;padding:12px 14px;cursor:pointer;transition:.18s;font-family:var(--body);display:flex;flex-direction:column;gap:5px}
+  .gradebtn:hover{background:var(--panel2);border-color:var(--line2)}
+  .gradebtn b{font-size:14px;font-weight:600}
+  .gradebtn span{font-size:12px;color:var(--muted);line-height:1.45}
+  .gradebtn.on{border-color:var(--signal);box-shadow:0 0 0 1px var(--signal);background:rgba(246,166,35,.06)}
+  .gradebtn.on b{color:var(--signal)}
+  .ratwrap{margin-bottom:14px}
+  #rationale{width:100%;min-height:92px;resize:vertical;background:var(--bg2);border:1px solid var(--line2);border-radius:10px;color:var(--ink);font-family:var(--body);font-size:13.5px;line-height:1.55;padding:12px 14px}
+  #rationale:focus{outline:none;border-color:var(--signal)}
+  .infowrap{margin-bottom:14px}
+  #infopick{width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:10px;color:var(--ink);font-family:var(--mono);font-size:12px;padding:10px 12px}
+  #infopick:focus{outline:none;border-color:var(--signal)}
+  .blockmsg{border:1px solid var(--rose);border-radius:9px;background:rgba(239,96,121,.07);color:var(--rose);font-family:var(--mono);font-size:11.5px;line-height:1.6;padding:10px 13px;margin-bottom:14px}
+  .recact{display:flex;align-items:center;gap:14px}
+  .recnote{font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+  .recdone{border:1px solid var(--line);border-left:3px solid var(--green);background:var(--panel);border-radius:0 11px 11px 0;padding:14px 16px;margin-bottom:16px}
+  .recdone .rg{font-family:var(--mono);font-size:12px;color:var(--green);letter-spacing:.04em;margin-bottom:6px}
+  .recdone .rr{font-size:13px;color:var(--muted);line-height:1.55}
+
+  /* the reveal */
+  .revgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch;margin-bottom:6px}
+  @media(max-width:820px){.revgrid{grid-template-columns:1fr}}
+  .revcard{border:1px solid var(--line);background:var(--panel);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+  .revcard.you{border-color:var(--line2);border-left:3px solid var(--signal)}
+  .revcard .ah{background:var(--panel2);border-bottom:1px solid var(--line);padding:10px 15px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--signal)}
+  .revbody{padding:13px 15px;display:flex;flex-direction:column;gap:9px;flex:1}
+  .revgrade{font-family:var(--mono);font-size:13px;color:var(--ink);letter-spacing:.03em}
+  .revrat{font-size:13px;color:var(--muted);line-height:1.55;border-top:1px dashed var(--line);padding-top:9px}
+  .revtag{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--teal);margin-top:auto}
+  .inccard{border:1px solid var(--violet);border-radius:11px;background:rgba(176,140,255,.06);padding:13px 15px;margin:12px 0;font-size:13px;line-height:1.6}
+  .inccard .ih{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--violet);margin-bottom:6px}
+  .seedcard{border:1px solid var(--line);border-left:3px solid var(--violet);background:var(--panel);border-radius:0 11px 11px 0;padding:13px 15px;margin:12px 0}
+  .seedcard .sh{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--violet);margin-bottom:6px}
+  .seedcard .sg{font-family:var(--mono);font-size:12.5px;color:var(--ink);margin-bottom:5px}
+  .seedcard .sr{font-size:12.5px;color:var(--muted);line-height:1.55}
+  .seedcard .sa{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--teal);margin-top:7px}
+
+  /* discovery ledger */
+  .ledgrid{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+  .ledrow{display:flex;align-items:baseline;gap:12px;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:10px 13px}
+  .ledrow .lo{font-family:var(--mono);font-size:11px;color:var(--signal);flex:none}
+  .ledrow .lmain{flex:1;min-width:0}
+  .ledrow .lcase{font-family:var(--mono);font-size:11px;color:var(--ink)}
+  .ledrow .lrat{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:3px}
+  .disco{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+  @media(max-width:820px){.disco{grid-template-columns:1fr}}
+  .defn{font-family:var(--mono);font-size:10px;color:var(--faint);line-height:1.6;border-top:1px dashed var(--line);margin-top:9px;padding-top:8px}
+  #export{width:100%;min-height:180px;resize:vertical;background:var(--bg2);border:1px solid var(--line2);border-radius:10px;color:var(--muted);font-family:var(--mono);font-size:11px;line-height:1.6;padding:12px 14px}
+  .expact{display:flex;align-items:center;gap:14px;margin-top:10px}
+
+  /* controls (shared) */
+  .controls{border-top:1px solid var(--line);padding:16px 0 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;position:sticky;bottom:0;background:linear-gradient(0deg,var(--bg) 60%,transparent)}
+  .btn{font-family:var(--body);font-weight:600;font-size:14px;border-radius:10px;padding:12px 22px;cursor:pointer;border:1px solid var(--line2);background:var(--panel);color:var(--ink);transition:.18s}
+  .btn:hover{background:var(--panel2)}
+  .btn.primary{background:var(--signal);color:#0c0e12;border-color:var(--signal)}
+  .btn.primary:hover{filter:brightness(1.08)}
+  .btn.ghost{background:none;border-color:transparent;color:var(--muted)}
+  .btn.ghost:hover{color:var(--ink)}
+  .lgroup{display:flex;align-items:center;gap:6px}
+  .keys{color:var(--faint)}
+  .ctrlhint{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  footer{font-family:var(--mono);font-size:10px;color:var(--faint);text-align:center;padding:0 0 18px;line-height:1.7}
+
+  /* Reduced motion: collapse CSS animation/transition to one instant frame. duration:0s (NOT
+     animation:none) so forwards-fill keyframes (.scnrow) settle to their visible end state. */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:.001ms!important;
+      animation-iteration-count:1!important;
+      transition-duration:.001ms!important;
+      scroll-behavior:auto!important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <div class="mark">◈</div>
+      <div><div class="bt" id="brandTitle">Signal Watch</div><div class="bs" id="brandSub">Triage Console · Vision Prototype</div></div>
+    </div>
+    <div class="badge" id="badge">Illustrative data &amp; outputs</div>
+  </header>
+
+  <div class="stage" id="stage"></div>
+
+  <div class="controls">
+    <div class="lgroup">
+      <button class="btn ghost" id="back">‹ Back</button>
+      <button class="btn ghost" id="reset" title="Back to the queue (Esc)">↺ Queue</button>
+    </div>
+    <div class="ctrlhint" id="hint"></div>
+    <button class="btn primary" id="next">Next ›</button>
+  </div>
+
+  <footer>
+    Triage console — blueprint §14's continuous adjudication loop, the embryo made demo-able · everything on screen is SYNTHETIC: every institution, customer, account, and figure is invented · the historical record is a fact about <b>decisions, not correctness</b> — historical decisioning is never ground truth · novel-stratum indicator text is verbatim from US federal sources (public domain, 17 U.S.C. §105) · loop design parameters are <b>chosen, not measured</b> · dispositions are the presenter's, session-only<br>
+    <span class="keys">←/→ navigate · Space advance · Esc back to the queue</span>
+  </footer>
+</div>
+
+<script>
+// The scenario dataset is injected here at build time (scripts/build.py triage fills the placeholder
+// from data/triage/scenarios.json + data/capability-taxonomy.json). The engine is generic — no
+// scenario copy lives in code. Records are RAW text; esc() below is the SOLE escaper (the project
+// convention — never pre-escape a record).
+const DATA = {
+  "brand": {
+    "title": "Signal Watch",
+    "subtitle": "Triage Console · Vision Prototype"
+  },
+  "badge": "Illustrative data & outputs",
+  "taxonomy": {
+    "capabilities": [
+      {
+        "id": "C1",
+        "name": "Customer-profile / out-of-pattern transaction monitoring",
+        "desc": "Baseline each customer's expected activity (volume, value, instrument mix, counterparties) and alert on out-of-profile deviation, sudden onset on a previously-unrelated account, dormant-account reactivation, and post-closure migration of payment identifiers to unrelated parties.",
+        "group": "Transaction patterns",
+        "posture": "partial"
+      },
+      {
+        "id": "C2",
+        "name": "Rapid pass-through / flow-through (receive-and-forward) detection",
+        "desc": "Detect funds-in then rapid funds-out with low residual balance — deposit→drain, reimbursement→pass-through, EMT/wire/CVC in-and-out velocity, conduit accounts that are not an economic endpoint; the core mule/layering signature.",
+        "group": "Transaction patterns",
+        "posture": "y"
+      },
+      {
+        "id": "C3",
+        "name": "Multi-originator funnel-in / fan-out network detection",
+        "desc": "Identify many-to-one aggregation (multiple unrelated originators, addresses or jurisdictions converging on one beneficiary off the holder's geography/profile) and the inverse one-to-many disbursement to unrelated payees.",
+        "group": "Transaction patterns",
+        "posture": "y"
+      },
+      {
+        "id": "C4",
+        "name": "Structuring / sub-threshold & reporting-trigger evasion",
+        "desc": "Detect deposits/transactions kept below CTR/CMIR/aggregation thresholds, same-day multi-location structured cash, small-to-large denomination exchange, transactions cancelled when a report is triggered, and DD-avoidance account closures.",
+        "group": "Transaction patterns",
+        "posture": "y"
+      },
+      {
+        "id": "C5",
+        "name": "Cash-intensity / cash-placement anomaly detection",
+        "desc": "Profile expected cash behaviour and flag oversized, off-hours or peer-divergent cash activity — cash inconsistent with the business line, cash-funded cashier's cheques/drafts and OTC bills, bulk-cash vault/armored-car deposits, and large card cash advances.",
+        "group": "Transaction patterns",
+        "posture": "partial"
+      },
+      {
+        "id": "C6",
+        "name": "Transaction-velocity & dormancy / baseline-deviation monitoring",
+        "desc": "Behavioural baselining that fires on high-velocity throughput unrelated to expected activity, volume far above the account's own history or its profession peers, multiple no-rationale accounts, and dormant accounts reactivating into outflows.",
+        "group": "Transaction patterns",
+        "posture": "y"
+      },
+      {
+        "id": "C7",
+        "name": "Peer / business-activity anomaly (revenue-vs-operations) detection",
+        "desc": "Reconcile inflows against stated size, headcount and line of business and against same-segment peers, and against expected operating outflows (payroll, opex, copayments); fires when reimbursements/benefits/ERC exceed peer baseline or have no matching opex.",
+        "group": "Transaction patterns",
+        "posture": "n"
+      },
+      {
+        "id": "C8",
+        "name": "Income / occupation-vs-activity profile-inconsistency detection",
+        "desc": "Compare inflows, spend and asset acquisition against KYC-declared occupation, income and expected scale — unexplained wealth, low-income-vs-wealth, business income not commensurate, and declared-industry-vs-procurement mismatch (e.g. non-chemical buyer purchasing precursors).",
+        "group": "Transaction patterns",
+        "posture": "n"
+      },
+      {
+        "id": "C9",
+        "name": "Merchant-category (MCC) / spend-pattern screening",
+        "desc": "Score card/POS spend by merchant category for typology-indicative baskets — bulk gift-card/prepaid retail, escort-advertising, lodging clustering, lab/pill-press/heavy-machinery, capture-gear, hydroponics/grow-supply, wildlife/traditional-medicine merchants, luxury/auto/real-estate with no business nexus.",
+        "group": "Transaction patterns",
+        "posture": "n"
+      },
+      {
+        "id": "C10",
+        "name": "Transaction-narrative / memo-line keyword screening",
+        "desc": "Keyword and pattern screening over payment memos, EMT/P2P notes and reference fields — drug street-names, escort names, wildlife species, CSE/sextortion phrases, micro-value advertising memos, terrorism/charity language, and no-purpose / round-dollar narratives.",
+        "group": "Transaction patterns",
+        "posture": "n"
+      },
+      {
+        "id": "C11",
+        "name": "Counterfeit / altered negotiable-instrument & check-fraud screening",
+        "desc": "Examine deposited or cashed checks/drafts for altered amounts, inconsistent stock, counterfeit Treasury/government checks, mail-theft markers and unverifiable items — supports check-fraud, ERC-check and check-cashing indicators.",
+        "group": "Entity, KYC & screening",
+        "posture": "n"
+      },
+      {
+        "id": "C12",
+        "name": "Identity-verification, synthetic-identity & deepfake detection",
+        "desc": "At onboarding/re-verification detect document tampering, cross-document mismatch, GenAI/deepfake photos and text, MFA refusal, channel-switching, and geo/device-vs-document mismatch — the impersonation and synthetic-identity surface.",
+        "group": "Entity, KYC & screening",
+        "posture": "n"
+      },
+      {
+        "id": "C13",
+        "name": "Account-opening / KYC risk profiling",
+        "desc": "Risk-score new and thin-history accounts at opening — non-resident or inexperienced owners, single-purpose accounts (ERC-only, benefit-only, deposit-only), and beneficial owners with prior fraud convictions.",
+        "group": "Entity, KYC & screening",
+        "posture": "y"
+      },
+      {
+        "id": "C14",
+        "name": "KYC integrity & customer-cooperation screening",
+        "desc": "Treat onboarding-data quality and responsiveness as a signal — incomplete/inaccurate KYC, refusal to disclose UBO, evasive answers about a blocked person, and non-response to KYC-refresh/RFI requests.",
+        "group": "Entity, KYC & screening",
+        "posture": "n"
+      },
+      {
+        "id": "C15",
+        "name": "Beneficial-ownership, shell / front-company & nominee network analysis",
+        "desc": "Resolve UBO and link customers by shared owners, addresses, devices/IPs, TINs or counterparties — front/shell companies at residential/co-located addresses, shared-owner rings, beneficiary-swap-with-unchanged-name, slight-name-variant clusters, and nominee/proxy control hiding a blocked party.",
+        "group": "Entity, KYC & screening",
+        "posture": "n"
+      },
+      {
+        "id": "C16",
+        "name": "Third-party / nominee funding & legal-professional channel detection",
+        "desc": "Detect funds moving through nominee channels — lawyer/notary trust-account closings, third-party-funded deposits, mirror settlement of unrelated parties' cards, and drafts/EMTs from low-footprint legal professionals.",
+        "group": "Entity, KYC & screening",
+        "posture": "partial"
+      },
+      {
+        "id": "C17",
+        "name": "PEP & sanctioned-elite proxy screening",
+        "desc": "Identify PEPs, close associates and proxies and link asset/transaction activity to them — including ownership dilution or transfers that drop a sanctioned/PEP party below disclosure thresholds.",
+        "group": "Cross-border & sanctions",
+        "posture": "y"
+      },
+      {
+        "id": "C18",
+        "name": "Sanctions / watchlist screening",
+        "desc": "Screen all parties and identifiers (name, address, email, phone, passport, IMO, crypto address) against OFAC/SDN, BIS Entity/debarred, Section 311 and FinCEN-registration/imposter references with fuzzy/near-match to catch identifier-nexus and name-variant hits.",
+        "group": "Cross-border & sanctions",
+        "posture": "y"
+      },
+      {
+        "id": "C19",
+        "name": "Adverse-media / OSINT & web-presence verification",
+        "desc": "Enrich entities with negative news, prior convictions, extremist affiliation, and web-presence checks — minimal/PHE-timed online presence, residential/CMRA addresses, government-lookalike domains, and thin/absent footprint of shells and facilitators.",
+        "group": "Cross-border & sanctions",
+        "posture": "partial"
+      },
+      {
+        "id": "C20",
+        "name": "Cross-border / high-risk-jurisdiction & corridor anomaly detection",
+        "desc": "Score wires/EFT against expected geography — no-nexus inbound foreign wires, bidirectional/round-trip CN-HK-UAE-LatAm corridors, conflict-zone/ISIS-prevalent/precursor-source jurisdictions, capital-control routing, and domestic-purpose funds routed cross-border.",
+        "group": "Cross-border & sanctions",
+        "posture": "y"
+      },
+      {
+        "id": "C21",
+        "name": "Virtual-currency / blockchain exposure & VASP screening",
+        "desc": "Screen CVC/stablecoin addresses and VASP counterparties against illicit-cluster attribution (darknet, CSAM, ransomware, mixer/tumbler, sanctions), trace chain-hopping into AECs, and flag first-time/off-profile/cash-funded conversions and kiosk transfers.",
+        "group": "Cross-border & sanctions",
+        "posture": "n"
+      },
+      {
+        "id": "C22",
+        "name": "Trade-based money-laundering & documentary anomaly detection",
+        "desc": "Analyze trade documents, HS codes, consignee/end-user, routing and pricing — over/under-invoicing, transshipment-corridor routing, dual-use/EAR99 goods, freight-forwarder-as-end-customer, round-dollar goods payments, and deposits with no offsetting inventory purchasing.",
+        "group": "Sector / specialized",
+        "posture": "partial"
+      },
+      {
+        "id": "C23",
+        "name": "Vessel & maritime screening (AIS / IMO)",
+        "desc": "Reconcile shipping/payment parties against vessel and maritime databases to flag AIS gaps/manipulation, IMO spoofing, name/flag churn, false-flag use, ship-to-ship transfers, and shadow-fleet/sanctioned-vessel nexus.",
+        "group": "Sector / specialized",
+        "posture": "n"
+      },
+      {
+        "id": "C24",
+        "name": "Trade / shipping & parcel-movement anomaly detection",
+        "desc": "Detect physical-movement anomalies in the financial trail — sub-1kg/mislabeled parcels, bulk mailing-material buys, hazmat/waste-oil purchases without EPA registration, drop-shipping/PO-box/storage-locker use, and freight/postal/cargo payment frequency.",
+        "group": "Sector / specialized",
+        "posture": "n"
+      },
+      {
+        "id": "C25",
+        "name": "Government-payment & reimbursement-integrity screening",
+        "desc": "Validate that government disbursements (EIP, ERC, Medicare/Medicaid/relief reimbursement, enrollee payments) reach a legitimate, enrolled, operating recipient — reconciling enrollment/eligibility, prior-year existence and concurrent-claim conflicts.",
+        "group": "Sector / specialized",
+        "posture": "n"
+      },
+      {
+        "id": "C26",
+        "name": "Scam-typology / vulnerable-customer behavioral screening",
+        "desc": "Combine scam-marker memos (tech-support, winnings, taxes, fees, FinCEN-imposter), never-met/unknown counterparties, urgency/distress and vulnerable-customer attributes (senior, widowed, divorced) to flag elder-exploitation, romance and imposter scams from human-context signals.",
+        "group": "Sector / specialized",
+        "posture": "n"
+      },
+      {
+        "id": "C27",
+        "name": "High-value-asset value, flipping & loan-structure anomaly detection",
+        "desc": "Flag under-recorded purchase price with off-book balance, loans/mortgages above market value, successive flipping/buy-backs, over-market rushed bids, penalty-disregarding early payoffs, and unjustified collateral-light loan structures.",
+        "group": "Sector / specialized",
+        "posture": "n"
+      },
+      {
+        "id": "C28",
+        "name": "Lifestyle / utility & sector-specific spend-anomaly detection",
+        "desc": "Detect spend signatures inconsistent with the stated business — excess packaging/shipping spend, utility/hydro anomalies (multiple/shared accounts, above-consumption, cross-province mismatch), and heavy electronics/luxury card spend.",
+        "group": "Sector / specialized",
+        "posture": "n"
+      }
+    ],
+    "data_sources": [
+      {
+        "id": "D1",
+        "name": "Core transaction monitoring (deposit/account ledger)",
+        "desc": "Booked deposits, withdrawals, ATM/cash, debit-card, P2P, NSF, cheques/drafts and internal transfers with balances and timestamps — the baseline feed for profiling, pass-through, structuring, velocity/dormancy and peer-anomaly logic.",
+        "posture": "y"
+      },
+      {
+        "id": "D2",
+        "name": "Cash & instrument channel data (ATM/ABM, teller, money orders, prepaid)",
+        "desc": "Teller and ATM/ABM (incl. white-label) cash detail, denominations, money-order and cashier's-cheque issuance, and reloadable-prepaid load/spend — feeds cash-intensity, structuring, bulk-cash and prepaid fan-out logic.",
+        "posture": "y"
+      },
+      {
+        "id": "D3",
+        "name": "Wire / ACH / EFT & cross-border payment data (incl. EMT, P2P, remittance)",
+        "desc": "Inbound/outbound wires, ACH, EMT/e-transfer, P2P and remittance/MSB flows with originator/beneficiary, amount, memo and jurisdiction — drives funnel-in, fan-out, corridor, no-purpose-payment and escalating-transfer logic.",
+        "posture": "y"
+      },
+      {
+        "id": "D4",
+        "name": "Card & merchant-category (MCC) transaction data",
+        "desc": "Debit/credit-card and POS streams with MCC codes, merchant names and acquirer/PSP identifiers — drives MCC/spend-pattern and escort/equipment/wildlife/luxury-merchant screening.",
+        "posture": "y"
+      },
+      {
+        "id": "D5",
+        "name": "Transaction narrative / free-text fields",
+        "desc": "Payment memos, EMT/P2P notes, email/reference and invoice-description fields — the surface for keyword/pattern screening of street-names, escort names, wildlife species, CSE/sextortion markers and round-dollar/no-purpose narratives.",
+        "posture": "partial"
+      },
+      {
+        "id": "D6",
+        "name": "Check / negotiable-instrument image & metadata",
+        "desc": "Check images, MICR, stock, payee/issuer data plus reported mail-theft / never-received items — required for counterfeit, altered-instrument and Treasury/ERC-check screening.",
+        "posture": "n"
+      },
+      {
+        "id": "D7",
+        "name": "Virtual-currency / blockchain analytics",
+        "desc": "On-chain transaction graphs, address attribution/clustering (darknet, CSAM, ransomware, mixer/tumbler, OFAC-linked), VASP/kiosk identifiers and stablecoin mint/redemption — required for all CVC/VASP exposure screening and crypto pass-through tracing.",
+        "posture": "n"
+      },
+      {
+        "id": "D8",
+        "name": "KYC / CDD & beneficial-ownership data",
+        "desc": "Onboarding records — declared occupation/income/line-of-business and scale, account-open date, single-purpose flags, owner residency/experience, identity documents, registration status, UBO/TIN graph and KYC-refresh/RFI responses.",
+        "posture": "y"
+      },
+      {
+        "id": "D9",
+        "name": "Identity-verification, document & device/session telemetry",
+        "desc": "ID-document images and cross-document checks, biometric/deepfake and GenAI-gallery results, MFA outcome, channel/webcam signals, and device/IP/geolocation/VPN telemetry — the impersonation, synthetic-identity and multi-country-access feed.",
+        "posture": "n"
+      },
+      {
+        "id": "D10",
+        "name": "Customer & account reference / entity-resolution data",
+        "desc": "Static customer/account attributes and linkage keys — phone numbers, addresses, shared identifiers, common-ownership graph and account-relationship maps — powering shared-identifier ring, common-owner and counterparty-network analytics.",
+        "posture": "partial"
+      },
+      {
+        "id": "D11",
+        "name": "Sanctions / watchlist & regulator-action data",
+        "desc": "OFAC/SDN, BIS Entity/debarred, Section 311 designations, FinCEN registration/imposter references and state-regulator fraud flags, keyed by name and identifier (email/phone/passport/IMO/crypto-address) — the authority for party screening and near-match resolution.",
+        "posture": "y"
+      },
+      {
+        "id": "D12",
+        "name": "PEP & beneficial-ownership intelligence",
+        "desc": "PEP lists, close-associate and proxy linkage data, and corporate-ownership graphs — feeds PEP/sanctioned-elite proxy screening and entity-cluster resolution.",
+        "posture": "y"
+      },
+      {
+        "id": "D13",
+        "name": "Adverse-media / OSINT & web-presence intelligence",
+        "desc": "Negative-news, conviction/litigation records, business-registration, web/social-presence, address-type (residential/CMRA) and domain-reputation data — for entity enrichment, government-impersonation and thin-footprint/shell detection.",
+        "posture": "y"
+      },
+      {
+        "id": "D14",
+        "name": "Government-program enrollment & eligibility data",
+        "desc": "Provider/enrollee enrollment and eligibility status, program identifiers, expected reimbursement profiles and prior-year-existence checks (Medicare/Medicaid, EIP, ERC, benefit programs) for reimbursement-integrity screening.",
+        "posture": "n"
+      },
+      {
+        "id": "D15",
+        "name": "Trade-finance / customs / shipping & logistics data",
+        "desc": "Trade documents (invoices, bills of lading, LCs), HS codes, consignee/end-user and end-use detail, pricing references, freight-forwarder/parcel-weight/EPA-registration and routing/transshipment records — feeds documentary, transshipment and parcel-anomaly detection.",
+        "posture": "partial"
+      },
+      {
+        "id": "D16",
+        "name": "Maritime / vessel data (AIS & registries)",
+        "desc": "AIS transponder tracks, IMO numbers, vessel name/flag/ownership-and-management registries and port-call history — feeds vessel/maritime screening for AIS gaps, spoofing, flag-hopping and shadow-fleet nexus.",
+        "posture": "n"
+      },
+      {
+        "id": "D17",
+        "name": "Geographic / jurisdiction risk reference",
+        "desc": "Jurisdiction and corridor risk ratings, high-risk-country lists (terror, CSE, wildlife-crime, precursor-source), border/migrant-corridor and tax-haven reference data — the lookup layer for corridor screening and travel-spend geo-coincidence.",
+        "posture": "y"
+      },
+      {
+        "id": "D18",
+        "name": "Real-estate / property & valuation data",
+        "desc": "Property registries, recorded purchase prices, market-valuation references, mortgage/loan terms and conveyancing/closing records — required for value, flipping, loan-above-value and rushed-close anomaly detection.",
+        "posture": "n"
+      },
+      {
+        "id": "D19",
+        "name": "Legal/notary trust-account & third-party-funding data",
+        "desc": "Visibility into solicitor/notary trust-account flows, deposit-cheque payer identity and third-party funding sources — for nominee-channel, anonymous-closing, deposit-cleansing round-trip and mirror-settlement detection.",
+        "posture": "n"
+      },
+      {
+        "id": "D20",
+        "name": "External / lifestyle reference data (utilities, registries, merchant classification)",
+        "desc": "Third-party feeds — utility/hydro consumption and billing, registered-vs-operating address, falsified-document/licence checks, and MCC/counterparty classification (luxury, auto, real estate, brokerage, betting, dating-platform processors) — for sector-specific spend and no-nexus-outflow flags.",
+        "posture": "partial"
+      }
+    ]
+  },
+  "triage": {
+    "meta": {
+      "design_params": {
+        "controls": 4,
+        "double_assigned": 6,
+        "note": "chosen, not measured — every parameter below is a design choice, not a measured quantity (§14)",
+        "scenario_count": 20
+      },
+      "disposition_grammar": [
+        "confirm-risk",
+        "confirm-no-risk",
+        "both-defensible",
+        "escalate",
+        "need-more-info",
+        "no-defensible-option"
+      ],
+      "history_dispositions": [
+        "dismissed",
+        "escalated",
+        "sar_filed",
+        "data_requested"
+      ],
+      "note": "SYNTHETIC triage-scenario dataset for the Phase-49 triage console (blueprint §14 embryo). Curated deterministically from the SYNTHETIC Phase-48 probe history (data/probe-history) — every institution, customer, figure, and panel is invented; no real customer or transaction data. The synthetic-novel stratum quotes committed corpus indicators from US FEDERAL sources only (public domain, 17 U.S.C. §105). Historical dispositions are facts about DECISIONS, never labels of correctness. Regenerate: python3 scripts/curate_triage_scenarios.py",
+      "source": {
+        "alert_history": "data/probe-history/alert-history.json (SYNTHETIC)",
+        "derived_signals": "data/probe-history/derived/legacy-rulebook.json",
+        "rulebook": "data/probe-history/legacy-rulebook.md (SYNTHETIC)"
+      },
+      "strata": [
+        "history-signal-fired",
+        "history-below-the-line",
+        "synthetic-novel",
+        "random-population"
+      ],
+      "synthetic": true,
+      "us_federal_allowlist": [
+        "fin-2022-a002",
+        "fin-2023-alert004",
+        "ofac-virtual-currency"
+      ]
+    },
+    "panels": {
+      "P-BT-101": {
+        "activity": [
+          "Cash deposits $7,400 / $7,900 / $7,650 across six days — each BELOW the rule's $8,000 floor.",
+          "Same weekly rhythm as classic structuring, shifted down one band.",
+          "No alert fired; the pattern is invisible to TM-101 as tuned."
+        ],
+        "customer": "Personal account, 5-year tenure. SYNTHETIC.",
+        "kyc_note": "Declared occupation: café owner; expected cash volume declared LOW at onboarding.",
+        "skeleton": "below TM-101 thresholds"
+      },
+      "P-BT-102": {
+        "activity": [
+          "Incoming wire $26,000; $22,100 (85%) transferred out 60 hours later.",
+          "Misses TM-102 on both arms: under the 90% ratio and outside the 48-hour window.",
+          "One earlier near-identical cycle 5 weeks ago. No alert fired."
+        ],
+        "customer": "Personal account, 18-month tenure. SYNTHETIC.",
+        "kyc_note": "No declared source-of-funds note for either incoming wire.",
+        "skeleton": "below TM-102 thresholds"
+      },
+      "P-BT-112": {
+        "activity": [
+          "Remittances through two different MSB counterparties to the same beneficiary country: $2,950 + $2,900 + $2,700 in 30 days.",
+          "Aggregate $8,550 — UNDER the rule's $9,000 aggregate trigger.",
+          "Beneficiary name identical across all three; no alert fired."
+        ],
+        "customer": "Personal account, 4-year tenure. SYNTHETIC.",
+        "kyc_note": "Profile records family in the destination country (a documented connection).",
+        "skeleton": "below TM-112 thresholds"
+      },
+      "P-CT-01": {
+        "activity": [
+          "Nine cash deposits in 21 days, every one between $9,300 and $9,900, at three branches.",
+          "Each deposit followed within a day by an outbound transfer to the same external account.",
+          "Customer asked at the counter about 'the reporting limit' on two occasions (teller notes on file)."
+        ],
+        "customer": "Personal account, 14-month tenure. SYNTHETIC.",
+        "kyc_note": "Declared occupation: unemployed. No declared source of funds.",
+        "skeleton": "control: textbook TM-101"
+      },
+      "P-CT-02": {
+        "activity": [
+          "Transaction count 8× the trailing weekly average in the last 7 days.",
+          "The spike is the bureau's quarter-end payroll run; identical spikes every quarter-end in history.",
+          "Every outbound credit matches a named employee of a documented client company."
+        ],
+        "customer": "Business account — payroll services bureau, 9-year tenure. SYNTHETIC.",
+        "kyc_note": "Client roster and service agreement on file; the velocity rule has no calendar awareness.",
+        "skeleton": "control: textbook TM-108 false positive"
+      },
+      "P-CT-03": {
+        "activity": [
+          "Monthly pension credits, utility debits, one annual travel booking.",
+          "No cash activity in 5 years."
+        ],
+        "customer": "Personal account, 31-year tenure, customer age 74. SYNTHETIC.",
+        "kyc_note": "KYC current; nothing out of pattern.",
+        "skeleton": "control: benign retiree"
+      },
+      "P-CT-04": {
+        "activity": [
+          "Cash deposits at branches in five cities within 10 days, $4,000–7,000 each.",
+          "Aggregate $28,500 wired out in one transfer to a money services business in another region.",
+          "Branch slips name three different depositors, none the account holder."
+        ],
+        "customer": "Personal account opened 4 months ago. SYNTHETIC.",
+        "kyc_note": "Declared occupation: retail clerk; declared income inconsistent with deposit volume.",
+        "skeleton": "control: textbook TM-109"
+      },
+      "P-HF-101": {
+        "activity": [
+          "Cash deposits $8,400 / $9,100 / $8,950 on three days within one week — each inside the $8,000–9,999 band.",
+          "Pattern recurs monthly; this is the NINTH alert on this account for the same behaviour.",
+          "All eight prior alerts dismissed (rationale on file each time: 'known cash-intensive side business').",
+          "No CTR has ever been triggered; declared occupation: rideshare driver."
+        ],
+        "customer": "Personal account, 9-year tenure. SYNTHETIC.",
+        "kyc_note": "Profile lists a part-time cash side business (unregistered); expected cash volume field BLANK at onboarding.",
+        "skeleton": "TM-101 logic"
+      },
+      "P-HF-102": {
+        "activity": [
+          "Incoming e-transfer $21,500, then $19,800 wired out 36 hours later (92% pass-through).",
+          "Second cycle three weeks later: $24,000 in, $22,300 out within 40 hours.",
+          "Residual balance after each cycle under $2,000. THIRD alert on this account this year; both priors dismissed ('expected property-deal flows')."
+        ],
+        "customer": "Personal account, 2-year tenure. SYNTHETIC.",
+        "kyc_note": "Customer note from a prior review mentions 'acting for a relative buying property'; no documentation on file.",
+        "skeleton": "TM-102 logic"
+      },
+      "P-HF-104": {
+        "activity": [
+          "Outbound wire $14,200 to a jurisdiction on the institution's high-risk country list.",
+          "Customer profile records no business, family, or travel connection to the destination.",
+          "Wire memo field: 'family support'. No prior wires to this corridor in account history.",
+          "Account otherwise in pattern: salary credits, rent, card spend."
+        ],
+        "customer": "Personal account, 6-year tenure, salaried profile. SYNTHETIC.",
+        "kyc_note": "KYC current (refreshed 14 months ago); occupation: logistics coordinator; no documented overseas ties.",
+        "skeleton": "TM-104 logic"
+      },
+      "P-HF-106": {
+        "activity": [
+          "Monthly cash deposits at 240% and 265% of the onboarding-declared expected volume, two consecutive months.",
+          "No change filed to the declared nature of business.",
+          "Card-settlement credits flat over the same period (sales mix unchanged on the acquiring side)."
+        ],
+        "customer": "Business account — convenience store, 7-year tenure. SYNTHETIC.",
+        "kyc_note": "Onboarding profile dated; last KYC refresh 4 years ago. A refresh request is the obvious next step — history shows the review PAUSED for exactly that.",
+        "skeleton": "TM-106 logic"
+      },
+      "P-HF-109": {
+        "activity": [
+          "Cash deposits at branches in four cities across two provinces within 12 days ($3,000–6,500 each).",
+          "Aggregate $23,800 consolidated, then a single wire out from a fifth city two days later.",
+          "Depositor descriptions on branch slips do not consistently match the account holder."
+        ],
+        "customer": "Personal account opened 11 months ago. SYNTHETIC.",
+        "kyc_note": "Declared occupation: student. No employment income credits in account history.",
+        "skeleton": "TM-109 logic"
+      },
+      "P-HF-110": {
+        "activity": [
+          "Three incoming wires in 60 days with originator name fields truncated or filled with 'XXX'.",
+          "Originating institutions in two different correspondent corridors.",
+          "Funds applied to supplier payments consistent with the declared business line."
+        ],
+        "customer": "Small-business account (import/export), 3-year tenure. SYNTHETIC.",
+        "kyc_note": "Beneficial ownership on file; counterparty list NOT on file — the institution does not collect expected-counterparty data for this segment.",
+        "skeleton": "TM-110 logic"
+      },
+      "P-NV-ec": {
+        "activity": [
+          "Incoming payments from a freight forwarder; outgoing wires to component brokers in two transshipment hubs.",
+          "Trade documents reference HS codes matching export-controlled microelectronics.",
+          "The company has NO trade history before incorporation; director previously at a deregistered trading firm."
+        ],
+        "customer": "Business account — electronics wholesaler incorporated 8 months ago. SYNTHETIC.",
+        "kyc_note": "Trade-document screening is out of scope for every legacy TM rule; the institution holds the docs in a separate trade-finance system.",
+        "skeleton": "novel: fin-2023-alert004/IND-01"
+      },
+      "P-NV-efe": {
+        "activity": [
+          "Sudden daily debit-card cash withdrawals at the branch ATM ($400–800), prior pattern was one monthly visit.",
+          "New e-transfer payees added in a two-week burst; amounts drain the savings sweep.",
+          "Branch note: customer accompanied by an unfamiliar 'helper' on two visits; a power-of-attorney change is in progress."
+        ],
+        "customer": "Personal account, 23-year tenure, customer age 81. SYNTHETIC.",
+        "kyc_note": "File notes a documented cognitive-impairment accommodation from 2024. No legacy TM rule covers elder financial exploitation.",
+        "skeleton": "novel: fin-2022-a002/IND-02"
+      },
+      "P-NV-vc": {
+        "activity": [
+          "Online-banking logins routed through VPN exit nodes; two sessions geolocate to a comprehensively sanctioned jurisdiction.",
+          "Card purchases at a virtual-asset platform within hours of those sessions.",
+          "Fiat withdrawals from the same platform land back in the account days later."
+        ],
+        "customer": "Personal account, 3-year tenure, crypto-exchange on/off-ramps in profile. SYNTHETIC.",
+        "kyc_note": "Login telemetry sits in the fraud stack, not the AML stack — the legacy rulebook has no access-geography rule.",
+        "skeleton": "novel: ofac-virtual-currency/IND-02"
+      },
+      "P-RP-01": {
+        "activity": [
+          "Cash deposits spike every February and May (holiday trade), 160% of monthly average.",
+          "Supplier payments to two wholesale nurseries; payroll for three staff.",
+          "Pattern repeats across all 12 years of history."
+        ],
+        "customer": "Business account — florist, 12-year tenure. SYNTHETIC.",
+        "kyc_note": "Declared seasonal cash business at onboarding; expected-volume field anticipates the seasonal peaks.",
+        "skeleton": "authored benign"
+      },
+      "P-RP-02": {
+        "activity": [
+          "Biweekly salary credit, monthly mortgage debit, automatic savings sweep.",
+          "One out-of-pattern event: a $30,000 incoming transfer with memo 'estate distribution', matched by a probate-note on file."
+        ],
+        "customer": "Personal account, 15-year tenure. SYNTHETIC.",
+        "kyc_note": "KYC current; the estate transfer is documented in a branch note from the same week.",
+        "skeleton": "authored benign"
+      },
+      "P-RP-03": {
+        "activity": [
+          "Lumpy invoice income: $4,000–11,000 credits at irregular intervals from 5 repeat counterparties.",
+          "Three round-amount transfers of $2,000 to the same family member in 60 days (below TM-105's five-transfer trigger).",
+          "Periodic cash withdrawals for materials purchases (declared trade: renovation contractor)."
+        ],
+        "customer": "Personal account — independent contractor, 6-year tenure. SYNTHETIC.",
+        "kyc_note": "Occupation documented; counterparties consistent with the declared trade.",
+        "skeleton": "authored benign-ambiguous"
+      }
+    },
+    "rules": {
+      "TM-101": {
+        "indicator": "A customer makes multiple cash deposits just below the currency transaction reporting threshold within a short period, in a pattern consistent with structuring to avoid the filing requirement.",
+        "logic": "three or more cash deposits each between $8,000 and $9,999 into one account within any rolling 7-day window.",
+        "signal": {
+          "build_rec": "COVERED",
+          "capability": "C4",
+          "data_source": "D2",
+          "red_flag": "Structuring — repeated sub-threshold cash deposits to evade CTR filing",
+          "status": "covered"
+        },
+        "title": "Structuring below the reporting threshold"
+      },
+      "TM-102": {
+        "indicator": "Funds are deposited and then promptly withdrawn or transferred out within one to two business days, leaving a minimal balance and showing no apparent business or personal purpose for the pass-through activity.",
+        "logic": "incoming credits ≥ $20,000 followed by outgoing debits of 90% or more of the credited amount within 48 hours, twice in 30 days.",
+        "signal": {
+          "build_rec": "COVERED",
+          "capability": "C2",
+          "data_source": "D1",
+          "red_flag": "Rapid in-and-out movement with no economic purpose (pass-through account)",
+          "status": "covered"
+        },
+        "title": "Rapid movement of funds"
+      },
+      "TM-104": {
+        "indicator": "A customer sends or receives international wire transfers involving high-risk jurisdictions with no documented economic purpose or relationship to the destination country.",
+        "logic": "any wire ≥ $10,000 to or from a jurisdiction on the institution's high-risk country list where the customer profile records no business or family connection to that jurisdiction.",
+        "signal": {
+          "build_rec": "COVERED",
+          "capability": "C20",
+          "data_source": "D3",
+          "red_flag": "Unexplained wires to/from high-risk jurisdictions with no customer nexus",
+          "status": "covered"
+        },
+        "title": "Unexplained high-risk geography wires"
+      },
+      "TM-106": {
+        "indicator": "A business customer's cash deposit volume substantially and persistently exceeds the expected activity stated in its onboarding profile, without a corresponding change in the declared nature of the business.",
+        "logic": "monthly cash deposits exceeding 200% of the declared expected cash volume recorded at onboarding, for two consecutive months.",
+        "signal": {
+          "build_rec": "ENHANCE",
+          "capability": "C5",
+          "data_source": "D8",
+          "red_flag": "Cash deposits far exceeding the declared business cash profile",
+          "status": "partial"
+        },
+        "title": "Cash activity inconsistent with business profile"
+      },
+      "TM-108": {
+        "indicator": "An account exhibits a sudden spike in transaction frequency relative to its own historical baseline that is not explained by seasonality or a documented life event.",
+        "logic": "transaction count in any 7-day window exceeding six times the trailing 90-day weekly average, minimum 25 transactions.",
+        "signal": {
+          "build_rec": "COVERED",
+          "capability": "C6",
+          "data_source": "D1",
+          "red_flag": "Sudden transaction-velocity spike vs the account's own baseline",
+          "status": "covered"
+        },
+        "title": "Transaction velocity spike"
+      },
+      "TM-109": {
+        "indicator": "An account receives cash deposits in multiple geographically dispersed locations followed by prompt consolidated withdrawal or onward transfer elsewhere, consistent with funnel account activity used to move illicit proceeds across regions.",
+        "logic": "cash deposits into one account at branches in three or more distinct cities within 14 days, followed by consolidation and withdrawal or transfer in a different region.",
+        "signal": {
+          "build_rec": "COVERED",
+          "capability": "C3",
+          "data_source": "D2",
+          "red_flag": "Funnel account — dispersed multi-city cash-in, consolidated withdrawal elsewhere",
+          "status": "covered"
+        },
+        "title": "Funnel account pattern"
+      },
+      "TM-110": {
+        "indicator": "Incoming wire transfers repeatedly arrive with missing or incomplete originator information, suggesting deliberate stripping of payment details to obscure the source of funds.",
+        "logic": "two or more incoming wires within 90 days where originator name, address, or account fields are missing, truncated, or populated with filler characters.",
+        "signal": {
+          "build_rec": "BUILD_NOW",
+          "capability": "C10",
+          "data_source": "D3",
+          "red_flag": "Incoming wires with stripped or incomplete originator information",
+          "status": "gap"
+        },
+        "title": "Incomplete originator information on incoming wires"
+      },
+      "TM-112": {
+        "indicator": "A customer splits international remittances into multiple below-threshold transactions routed through different money services businesses to the same destination, consistent with deliberate fragmentation to avoid scrutiny.",
+        "logic": "outgoing remittances from one customer through two or more money services business counterparties to the same beneficiary country, each below $3,000, aggregate ≥ $9,000 in 30 days.",
+        "signal": {
+          "build_rec": "COVERED",
+          "capability": "C4",
+          "data_source": "D3",
+          "red_flag": "Remittances fragmented across MSBs below thresholds to one destination",
+          "status": "covered"
+        },
+        "title": "Split international remittances across MSBs"
+      }
+    },
+    "scenarios": [
+      {
+        "below_rule": null,
+        "control": null,
+        "fired_rule": "TM-104",
+        "history": {
+          "alert_id": "A-0011",
+          "analyst": "a1",
+          "date": "2023-02-02",
+          "disposition": "dismissed",
+          "entity_id": "E-002"
+        },
+        "id": "S-01",
+        "novel_source": null,
+        "panel": "P-HF-104",
+        "prior_alerts": 0,
+        "second_rater": {
+          "disposition": "escalate",
+          "label": "synthetic second rater (seeded)",
+          "rater": "r2",
+          "rationale": "No documented connection to the corridor; unexplained purpose outweighs the in-pattern remainder."
+        },
+        "stratum": "history-signal-fired"
+      },
+      {
+        "below_rule": null,
+        "control": null,
+        "fired_rule": "TM-104",
+        "history": {
+          "alert_id": "A-0012",
+          "analyst": "a2",
+          "date": "2023-03-07",
+          "disposition": "escalated",
+          "entity_id": "E-003"
+        },
+        "id": "S-02",
+        "novel_source": null,
+        "panel": "P-HF-104",
+        "prior_alerts": 0,
+        "second_rater": {
+          "disposition": "escalate",
+          "label": "synthetic second rater (seeded)",
+          "rater": "r2",
+          "rationale": "Same fact pattern as the dismissed sibling alert; consistency requires the same call."
+        },
+        "stratum": "history-signal-fired"
+      },
+      {
+        "below_rule": null,
+        "control": null,
+        "fired_rule": "TM-101",
+        "history": {
+          "alert_id": "A-0009",
+          "analyst": "a1",
+          "date": "2023-09-12",
+          "disposition": "dismissed",
+          "entity_id": "E-014"
+        },
+        "id": "S-03",
+        "novel_source": null,
+        "panel": "P-HF-101",
+        "prior_alerts": 8,
+        "second_rater": {
+          "disposition": "need-more-info",
+          "info_needed": {
+            "data_source": "D8",
+            "what": "KYC refresh — registration and expected cash volume of the declared side business"
+          },
+          "label": "synthetic second rater (seeded)",
+          "rater": "r2",
+          "rationale": "Nine alerts on one undocumented cash business: the file needs the business documentation before another dismissal."
+        },
+        "stratum": "history-signal-fired"
+      },
+      {
+        "below_rule": null,
+        "control": null,
+        "fired_rule": "TM-109",
+        "history": {
+          "alert_id": "A-0019",
+          "analyst": "a3",
+          "date": "2023-03-21",
+          "disposition": "escalated",
+          "entity_id": "E-021"
+        },
+        "id": "S-04",
+        "novel_source": null,
+        "panel": "P-HF-109",
+        "prior_alerts": 0,
+        "second_rater": null,
+        "stratum": "history-signal-fired"
+      },
+      {
+        "below_rule": null,
+        "control": null,
+        "fired_rule": "TM-110",
+        "history": {
+          "alert_id": "A-0036",
+          "analyst": "a3",
+          "date": "2023-04-25",
+          "disposition": "data_requested",
+          "entity_id": "E-050"
+        },
+        "id": "S-05",
+        "novel_source": null,
+        "panel": "P-HF-110",
+        "prior_alerts": 0,
+        "second_rater": null,
+        "stratum": "history-signal-fired"
+      },
+      {
+        "below_rule": null,
+        "control": null,
+        "fired_rule": "TM-106",
+        "history": {
+          "alert_id": "A-0042",
+          "analyst": "a2",
+          "date": "2023-07-26",
+          "disposition": "data_requested",
+          "entity_id": "E-062"
+        },
+        "id": "S-06",
+        "novel_source": null,
+        "panel": "P-HF-106",
+        "prior_alerts": 0,
+        "second_rater": null,
+        "stratum": "history-signal-fired"
+      },
+      {
+        "below_rule": null,
+        "control": null,
+        "fired_rule": "TM-102",
+        "history": {
+          "alert_id": "A-0024",
+          "analyst": "a2",
+          "date": "2023-06-27",
+          "disposition": "dismissed",
+          "entity_id": "E-030"
+        },
+        "id": "S-07",
+        "novel_source": null,
+        "panel": "P-HF-102",
+        "prior_alerts": 2,
+        "second_rater": null,
+        "stratum": "history-signal-fired"
+      },
+      {
+        "below_rule": "TM-101",
+        "control": null,
+        "fired_rule": null,
+        "history": null,
+        "id": "S-08",
+        "novel_source": null,
+        "panel": "P-BT-101",
+        "prior_alerts": 0,
+        "second_rater": {
+          "disposition": "confirm-risk",
+          "label": "synthetic second rater (seeded)",
+          "rater": "r2",
+          "rationale": "Band-shifted structuring; the rhythm is the signal, not the band."
+        },
+        "stratum": "history-below-the-line"
+      },
+      {
+        "below_rule": "TM-112",
+        "control": null,
+        "fired_rule": null,
+        "history": null,
+        "id": "S-09",
+        "novel_source": null,
+        "panel": "P-BT-112",
+        "prior_alerts": 0,
+        "second_rater": null,
+        "stratum": "history-below-the-line"
+      },
+      {
+        "below_rule": "TM-102",
+        "control": null,
+        "fired_rule": null,
+        "history": null,
+        "id": "S-10",
+        "novel_source": null,
+        "panel": "P-BT-102",
+        "prior_alerts": 0,
+        "second_rater": null,
+        "stratum": "history-below-the-line"
+      },
+      {
+        "below_rule": null,
+        "control": null,
+        "fired_rule": null,
+        "history": null,
+        "id": "S-11",
+        "novel_source": {
+          "capability": "C1",
+          "data_source": "D1",
+          "doc_id": "fin-2022-a002",
+          "flag": "An older customer with known physical, emotional, and cognitive impairment has unexplainable or unusual account activity.",
+          "indicator_id": "IND-02",
+          "licence": "US federal — public domain (17 U.S.C. §105)",
+          "red_flag": "Out-of-pattern activity on a known-impaired elderly account",
+          "source_dir": "data/fincen"
+        },
+        "panel": "P-NV-efe",
+        "prior_alerts": 0,
+        "second_rater": null,
+        "stratum": "synthetic-novel"
+      },
+      {
+        "below_rule": null,
+        "control": null,
+        "fired_rule": null,
+        "history": null,
+        "id": "S-12",
+        "novel_source": {
+          "capability": "C18",
+          "data_source": "D9",
+          "doc_id": "ofac-virtual-currency",
+          "flag": "Attempt to access a virtual currency exchange from an IP address or VPN connected to a sanctioned jurisdiction",
+          "indicator_id": "IND-02",
+          "licence": "US federal — public domain (17 U.S.C. §105)",
+          "red_flag": "Login from sanctioned-jurisdiction IP / VPN (geo-anonymizer access)",
+          "source_dir": "data/ofac"
+        },
+        "panel": "P-NV-vc",
+        "prior_alerts": 0,
+        "second_rater": null,
+        "stratum": "synthetic-novel"
+      },
+      {
+        "below_rule": null,
+        "control": null,
+        "fired_rule": null,
+        "history": null,
+        "id": "S-13",
+        "novel_source": {
+          "capability": "C24",
+          "data_source": "D15",
+          "doc_id": "fin-2023-alert004",
+          "flag": "The company never received exports prior to February 24, 2022;",
+          "indicator_id": "IND-01",
+          "licence": "US federal — public domain (17 U.S.C. §105)",
+          "red_flag": "Non-GECC importer with no pre-Feb-2022 export history newly receiving controlled goods",
+          "source_dir": "data/fincen-alerts"
+        },
+        "panel": "P-NV-ec",
+        "prior_alerts": 0,
+        "second_rater": {
+          "disposition": "escalate",
+          "label": "synthetic second rater (seeded)",
+          "rater": "r2",
+          "rationale": "Controlled-goods HS codes + no trade history + successor-director pattern: escalate to investigations."
+        },
+        "stratum": "synthetic-novel"
+      },
+      {
+        "below_rule": null,
+        "control": null,
+        "fired_rule": null,
+        "history": null,
+        "id": "S-14",
+        "novel_source": null,
+        "panel": "P-RP-01",
+        "prior_alerts": 0,
+        "second_rater": null,
+        "stratum": "random-population"
+      },
+      {
+        "below_rule": null,
+        "control": null,
+        "fired_rule": null,
+        "history": null,
+        "id": "S-15",
+        "novel_source": null,
+        "panel": "P-RP-02",
+        "prior_alerts": 0,
+        "second_rater": null,
+        "stratum": "random-population"
+      },
+      {
+        "below_rule": null,
+        "control": null,
+        "fired_rule": null,
+        "history": null,
+        "id": "S-16",
+        "novel_source": null,
+        "panel": "P-RP-03",
+        "prior_alerts": 0,
+        "second_rater": null,
+        "stratum": "random-population"
+      },
+      {
+        "below_rule": null,
+        "control": {
+          "basis": "Textbook structuring with teller-note intent evidence — seeded clear-risk control.",
+          "known_disposition": "confirm-risk"
+        },
+        "fired_rule": "TM-101",
+        "history": null,
+        "id": "C-17",
+        "novel_source": null,
+        "panel": "P-CT-01",
+        "prior_alerts": 0,
+        "second_rater": null,
+        "stratum": "history-signal-fired"
+      },
+      {
+        "below_rule": null,
+        "control": {
+          "basis": "Documented quarter-end payroll run — seeded clear-benign control behind a firing rule.",
+          "known_disposition": "confirm-no-risk"
+        },
+        "fired_rule": "TM-108",
+        "history": null,
+        "id": "C-18",
+        "novel_source": null,
+        "panel": "P-CT-02",
+        "prior_alerts": 0,
+        "second_rater": null,
+        "stratum": "history-signal-fired"
+      },
+      {
+        "below_rule": null,
+        "control": {
+          "basis": "Long-tenure retiree, fully in pattern — seeded clear-benign control.",
+          "known_disposition": "confirm-no-risk"
+        },
+        "fired_rule": null,
+        "history": null,
+        "id": "C-19",
+        "novel_source": null,
+        "panel": "P-CT-03",
+        "prior_alerts": 0,
+        "second_rater": {
+          "disposition": "confirm-no-risk",
+          "label": "synthetic second rater (seeded)",
+          "rater": "r2",
+          "rationale": "Nothing out of pattern; control agreement check."
+        },
+        "stratum": "random-population"
+      },
+      {
+        "below_rule": null,
+        "control": {
+          "basis": "Textbook funnel-account pattern with third-party depositors — seeded clear-risk control.",
+          "known_disposition": "confirm-risk"
+        },
+        "fired_rule": "TM-109",
+        "history": null,
+        "id": "C-20",
+        "novel_source": null,
+        "panel": "P-CT-04",
+        "prior_alerts": 0,
+        "second_rater": null,
+        "stratum": "history-signal-fired"
+      }
+    ]
+  }
+};
+
+const BRAND=(DATA&&typeof DATA.brand==='object'&&DATA.brand)||{};
+const TRIAGE=(DATA&&typeof DATA.triage==='object'&&DATA.triage)||{};
+const META=(TRIAGE&&typeof TRIAGE.meta==='object'&&TRIAGE.meta)||{};
+const RULES=(TRIAGE&&typeof TRIAGE.rules==='object'&&TRIAGE.rules)||{};
+const PANELS=(TRIAGE&&typeof TRIAGE.panels==='object'&&TRIAGE.panels)||{};
+const SCN=(TRIAGE&&Array.isArray(TRIAGE.scenarios))?TRIAGE.scenarios.filter(s=>s&&typeof s==='object'&&s.id):[];
+const TAX=(DATA&&typeof DATA.taxonomy==='object'&&DATA.taxonomy)||{};
+const CAPS=Array.isArray(TAX.capabilities)?TAX.capabilities:[];
+const SRCS=Array.isArray(TAX.data_sources)?TAX.data_sources:[];
+const TAX_BY={};CAPS.concat(SRCS).forEach(t=>{if(t&&t.id)TAX_BY[t.id]=t;});
+
+// escapes text AND attribute positions (quotes included) — triage.html interpolates into both.
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+// The §14 disposition grammar — graded, never approve/reject; need-more-info is the load-bearing
+// option (it wires the loop into the coverage model); no-defensible-option is the policy-gap escape.
+const GRADES=[
+  {id:'confirm-risk',label:'Confirm risk',short:'Confirm risk',desc:'The fact pattern supports a risk finding — record the reasoning that would carry an escalation.'},
+  {id:'confirm-no-risk',label:'Confirm no risk',short:'No risk',desc:'The activity is explained on this evidence — record the clearance with its reasoning.'},
+  {id:'both-defensible',label:'Both defensible',short:'Both defensible',desc:'Risk and no-risk readings are both defensible — record the ambiguity instead of forcing a side.'},
+  {id:'escalate',label:'Escalate',short:'Escalate',desc:'Beyond triage — route the scenario to investigations.'},
+  {id:'need-more-info',label:'I need more information — naming which',short:'Need more info',desc:'The call cannot be made on this evidence. Name the capability or data source that would decide it — recorded as a measured data-gap observation.'},
+  {id:'no-defensible-option',label:'No defensible option — flag for policy review',short:'Policy gap',desc:'The disposition grammar itself fails this scenario — recorded as a policy gap.'},
+];
+const GRADE_BY={};GRADES.forEach(g=>{GRADE_BY[g.id]=g;});
+
+const STRATA_INFO={
+  'history-signal-fired':{label:'History-sourced — signal fired',desc:'Replayed alerts a legacy rule fired. The institution\'s decision exists and is revealed after yours — a fact about decisions, not correctness.'},
+  'history-below-the-line':{label:'History-sourced — below the line',desc:'Activity sitting under the legacy thresholds. Nothing fired; no historical decision exists.'},
+  'synthetic-novel':{label:'Synthetic-novel — the ingestion frontier',desc:'Typologies no legacy rule covers, drawn from committed advisory indicators (US federal, public domain).'},
+  'random-population':{label:'Random population',desc:'Baseline draws — sampling only what already fires would calibrate the known and never measure the unknown.'},
+};
+const STRATA=Array.isArray(META.strata)?META.strata:Object.keys(STRATA_INFO);
+const STEPS=['Queue','Evidence','Disposition','Reveal','Discovery ledger'];
+
+/* ---------- state (session-only — nothing persists) ---------- */
+let view='queue', current=null, screen=0, maxScreen=0;
+let records=[];                                   // the session record
+let draft={grade:null,rationale:'',info:null};    // the in-progress disposition
+let blocked='';                                   // honest gate-refusal message ('' = not blocked)
+
+const stage=document.getElementById('stage');
+const nextBtn=document.getElementById('next'), backBtn=document.getElementById('back');
+const resetBtn=document.getElementById('reset'), hint=document.getElementById('hint');
+const REDUCED=!!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+function curScn(){return SCN.find(s=>s.id===current)||null;}
+function recordedFor(id){return records.find(r=>r.scenario_id===id)||null;}
+function ruleOf(id){return (id&&RULES[id])||null;}
+function panelOf(s){return PANELS[s.panel]||{customer:'',activity:[],kyc_note:''};}
+// the shared-panel divergent-disposition siblings (the seeded process inconsistency)
+function inconsistencySiblings(s){
+  if(!s||!s.history)return [];
+  return SCN.filter(x=>x.id!==s.id&&x.panel===s.panel&&x.history&&x.history.disposition!==s.history.disposition);
+}
+function rowLabel(s){
+  const r=ruleOf(s.fired_rule);
+  if(r)return r.title;
+  if(s.below_rule&&ruleOf(s.below_rule))return 'Below the line — under '+s.below_rule+'’s thresholds';
+  if(s.novel_source)return s.novel_source.red_flag;
+  return 'Baseline-population draw';
+}
+
+/* ---------- stepper (rendered INSIDE the stage, at the top of every scene) ---------- */
+function stepIndex(){return view==='queue'?0:view==='ledger'?4:screen+1;}
+function stepsHtml(){
+  const at=stepIndex();
+  return `<div class="stepper">${STEPS.map((s,i)=>
+    `<div class="step ${i<at?'done':''} ${i===at?'active':''}" data-i="${i}"><div class="sbar"></div><div class="sl">${i+1}· ${s}</div></div>`
+  ).join('')}</div>`;
+}
+function wireSteps(){
+  stage.querySelectorAll('.step').forEach(el=>el.onclick=()=>{
+    const i=+el.dataset.i;
+    if(i===0){toQueue();return;}
+    if(i===4){toLedger();return;}
+    if(view==='case'&&i-1<=maxScreen)gotoScreen(i-1);   // gotoScreen refuses an unrecorded reveal
+  });
+}
+
+/* ---------- screen: the mini-triage queue ---------- */
+function renderQueue(){
+  const total=SCN.length, done=records.length;
+  const da=SCN.filter(s=>s.second_rater).length;
+  let k=0;
+  const groups=STRATA.map(st=>{
+    const info=STRATA_INFO[st]||{label:st,desc:''};
+    const rows=SCN.filter(s=>s.stratum===st);
+    if(!rows.length)return '';
+    return `<div class="axhead">${esc(info.label)} <span class="axn">${rows.length} scenario${rows.length===1?'':'s'}</span><span class="axd">${esc(info.desc)}</span></div>
+      <div class="qgrid">${rows.map(s=>{
+        const rec=recordedFor(s.id);
+        const delay=REDUCED?0:Math.min(k++*60,1200);
+        return `<div class="scnrow" data-id="${esc(s.id)}" style="animation-delay:${delay}ms">
+          <div class="crmain">
+            <div class="crflag">${esc(rowLabel(s))}</div>
+            <div class="crmeta">${esc(s.id)} · ${esc(panelOf(s).customer)}</div>
+          </div>
+          ${rec?`<span class="chip rec">Recorded · ${esc(GRADE_BY[rec.grade]?GRADE_BY[rec.grade].short:rec.grade)}</span>`:''}
+          ${s.second_rater?`<span class="chip da">double-assigned</span>`:''}
+          ${s.fired_rule?`<span class="chip ax">${esc(s.fired_rule)}</span>`:`<span class="chip nf">no rule fired</span>`}
+        </div>`;}).join('')}</div>`;
+  }).join('');
+  stage.innerHTML=stepsHtml()+`<div class="scene">
+    <div class="eyebrow">Triage console · the continuous adjudication loop</div>
+    <h2>Today’s mini-triage queue — <em>judgment at a designed cadence</em></h2>
+    <p class="lead">A short daily queue of <b>history-sourced mini-triage scenarios</b>, stratified so the loop measures the unknown, not just the known: replayed alerts, below-the-line activity, ingestion-frontier typologies, and baseline draws. Each scenario takes a graded disposition with a written rationale. Some are <b>double-assigned</b> at a sampled rate — agreement is a first-class measured dimension. Everything is synthetic.</p>
+    <div class="qstats">
+      <div class="qstat"><div class="qsn">${total}</div><div class="qsl">scenarios today</div></div>
+      <div class="qstat"><div class="qsn">${STRATA.length}</div><div class="qsl">sampling strata</div></div>
+      <div class="qstat"><div class="qsn">${da}</div><div class="qsl">double-assigned</div></div>
+      <div class="qstat"><div class="qsn">${done}</div><div class="qsl">disposed this session</div></div>
+    </div>
+    ${groups}
+    <div class="qfoot"><button class="btn ghost" id="goledger">Discovery ledger (${done}) ›</button></div>
+  </div>`;
+  stage.querySelectorAll('.scnrow').forEach(el=>{el.onclick=()=>pickScenario(el.dataset.id);});
+  const gl=document.getElementById('goledger'); if(gl)gl.onclick=toLedger;
+}
+
+/* ---------- screen: evidence (the fact pattern + the per-stratum source card) ---------- */
+function sourceCard(s){
+  const r=ruleOf(s.fired_rule);
+  if(r){
+    return `<div class="card">
+      <div class="ah">Rule fired — ${esc(s.fired_rule)} · ${esc(r.title)}</div>
+      <div class="ab">
+        <div class="sub" style="font-family:var(--mono);font-size:11.5px;line-height:1.7">Logic: ${esc(r.logic)}</div>
+        <div style="margin-top:9px">${esc(r.indicator)}</div>
+        <div class="kyc"><span class="codepair">${esc(r.signal.capability)}·${esc(r.signal.data_source)}</span>Derived signal: ${esc(r.signal.red_flag)}</div>
+      </div>
+    </div>`;
+  }
+  const b=ruleOf(s.below_rule);
+  if(b){
+    return `<div class="card faintc">
+      <div class="ah">No rule fired — below ${esc(s.below_rule)}’s thresholds</div>
+      <div class="ab">
+        <div class="sub" style="font-family:var(--mono);font-size:11.5px;line-height:1.7">${esc(s.below_rule)} logic: ${esc(b.logic)}</div>
+        <div style="margin-top:9px">This activity sits under the tuned thresholds — the legacy book is blind to it. The stratum exists exactly to measure what the rules never surface.</div>
+      </div>
+    </div>`;
+  }
+  if(s.novel_source){
+    const nv=s.novel_source;
+    return `<div class="card teal">
+      <div class="ah">Ingestion frontier — no legacy rule covers this typology</div>
+      <div class="ab">
+        <div class="doclabel">Verbatim indicator — ${esc(nv.doc_id)} · ${esc(nv.indicator_id)}</div>
+        <div class="evflag">“${esc(nv.flag)}”</div>
+        <div class="doclabel">Red-flag translation</div>
+        <div class="evred"><span class="codepair">${esc(nv.capability)}·${esc(nv.data_source)}</span>${esc(nv.red_flag)}</div>
+        <div class="licline">${esc(nv.licence)}</div>
+      </div>
+    </div>`;
+  }
+  return `<div class="card faintc">
+    <div class="ah">Baseline population — nothing fired</div>
+    <div class="ab">A random-population draw. Most of these should be unremarkable — the stratum anchors the loop’s judgment distribution against selection bias.</div>
+  </div>`;
+}
+function renderEvidence(s){
+  const p=panelOf(s);
+  stage.innerHTML=stepsHtml()+`<div class="scene">
+    <div class="eyebrow">Scenario ${esc(s.id)} · ${esc((STRATA_INFO[s.stratum]||{}).label||s.stratum)}</div>
+    <h2>The evidence — <em>read it like the analyst</em></h2>
+    <p class="lead">The fact pattern, the customer context, and what the legacy book did (or could not do) with it. Judge on this evidence alone — the history comes after your call.</p>
+    <div class="evgrid">
+      <div class="card">
+        <div class="ah">Fact pattern</div>
+        <div class="ab">
+          <div class="sub">${esc(p.customer)}</div>
+          <ul class="actlist">${(Array.isArray(p.activity)?p.activity:[]).map(a=>`<li>${esc(a)}</li>`).join('')}</ul>
+          <div class="kyc">KYC: ${esc(p.kyc_note)}</div>
+        </div>
+      </div>
+      <div>${sourceCard(s)}</div>
+    </div>
+    <div class="framenote">The panel is the fact-pattern unit — scenarios sharing a panel are materially identical by construction, not by coincidence. What differs between them is what the institution did.</div>
+  </div>`;
+}
+
+/* ---------- screen: disposition (the §14 graded gate) ---------- */
+function infoPicker(){
+  const grp=(label,items)=>`<optgroup label="${esc(label)}">${items.map(t=>
+    `<option value="${esc(t.id)}"${draft.info===t.id?' selected':''}>${esc(t.id)} — ${esc(t.name)}</option>`).join('')}</optgroup>`;
+  return `<div class="infowrap">
+    <div class="doclabel">Name which — the capability or data source that would decide this call (required for need-more-info)</div>
+    <select id="infopick"><option value=""${draft.info?'':' selected'}>— pick the C or D code —</option>${grp('Capabilities (C1–C28)',CAPS)}${grp('Data sources (D1–D20)',SRCS)}</select>
+  </div>`;
+}
+function renderDisposition(s){
+  const rec=recordedFor(s.id);
+  if(rec){
+    stage.innerHTML=stepsHtml()+`<div class="scene">
+      <div class="eyebrow">Scenario ${esc(s.id)} · disposition</div>
+      <h2>Disposition recorded — <em>this session</em></h2>
+      <p class="lead">This scenario already carries a session disposition. Advance to the reveal.</p>
+      <div class="recdone">
+        <div class="rg">${esc(GRADE_BY[rec.grade]?GRADE_BY[rec.grade].label:rec.grade)}${rec.info_code?` · ${esc(rec.info_code)}`:''}</div>
+        <div class="rr">${esc(rec.rationale)}</div>
+      </div>
+    </div>`;
+    return;
+  }
+  stage.innerHTML=stepsHtml()+`<div class="scene">
+    <div class="eyebrow">Scenario ${esc(s.id)} · disposition</div>
+    <h2>Your disposition — <em>graded, with rationale</em></h2>
+    <p class="lead">The §14 grammar: graded options, never approve/reject. The grade carries the nuance; the <b>rationale carries the audit</b> — a disposition with an empty rationale does not record. Need-more-info additionally names the C or D code that would decide the call — that naming IS the measured data-gap observation.</p>
+    <div class="grades">${GRADES.map(g=>
+      `<button class="gradebtn${draft.grade===g.id?' on':''}" data-grade="${g.id}"><b>${esc(g.label)}</b><span>${esc(g.desc)}</span></button>`).join('')}</div>
+    ${draft.grade==='need-more-info'?infoPicker():''}
+    <div class="ratwrap">
+      <div class="doclabel">Rationale — recorded with the disposition (required)</div>
+      <textarea id="rationale" rows="4" placeholder="Why this call — the reasoning an examiner would read…">${esc(draft.rationale)}</textarea>
+    </div>
+    ${blocked?`<div id="blockmsg" class="blockmsg">${esc(blocked)}</div>`:''}
+    <div class="recact">
+      <button class="btn primary" id="record">Record disposition</button>
+      <span class="recnote">grade + rationale required · session-only</span>
+    </div>
+  </div>`;
+  stage.querySelectorAll('.gradebtn').forEach(el=>{el.onclick=()=>pickGrade(el.dataset.grade);});
+  const r=document.getElementById('rationale'); if(r)r.oninput=()=>setRationale(r.value);
+  const ip=document.getElementById('infopick'); if(ip)ip.onchange=()=>setInfo(ip.value);
+  const rb=document.getElementById('record'); if(rb)rb.onclick=recordDisposition;
+}
+
+/* ---------- screen: the reveal (decisions, not correctness) ---------- */
+function historyCard(s){
+  if(s.history){
+    const h=s.history;
+    const prior=s.prior_alerts>0?`<div class="revrat">This is alert ${s.prior_alerts+1} on this fact pattern — all ${s.prior_alerts} prior alerts carried the same disposition. The re-review treadmill is itself a discovery output.</div>`:'';
+    return `<div class="revcard">
+      <div class="ah">What the institution decided</div>
+      <div class="revbody">
+        <div class="revgrade">${esc(h.disposition)}</div>
+        <div class="revrat">${esc(h.analyst)} · ${esc(h.date)} · ${esc(h.alert_id)} · entity ${esc(h.entity_id)}</div>
+        ${prior}
+        <div class="revtag">a recorded decision — not a label of correctness</div>
+      </div>
+    </div>`;
+  }
+  const why=s.stratum==='history-below-the-line'
+    ?'Nothing fired, so no historical decision exists — that absence is the stratum’s finding: the legacy book never put this in front of an analyst.'
+    :s.stratum==='synthetic-novel'
+    ?'No legacy rule covers this typology, so no historical decision exists — your judgment is the first the loop has on it. Confirmed risk here is a candidate signal gap.'
+    :'A baseline draw — no alert, no historical decision. The stratum anchors the judgment distribution.';
+  return `<div class="revcard">
+    <div class="ah">No historical decision exists</div>
+    <div class="revbody"><div class="revrat" style="border-top:0;padding-top:0">${esc(why)}</div></div>
+  </div>`;
+}
+function renderReveal(s){
+  const rec=recordedFor(s.id);
+  if(!rec){gotoScreen(1);return;}
+  const sibs=inconsistencySiblings(s);
+  const inc=sibs.length?`<div class="inccard">
+      <div class="ih">Process inconsistency — surfaced for adjudication, never auto-resolved</div>
+      The same fact pattern (shared panel ${esc(s.panel)}) carried a divergent historical disposition: ${sibs.map(x=>
+        `<b>${esc(x.history.disposition)}</b> (${esc(x.history.analyst)}, ${esc(x.history.date)}, ${esc(x.history.alert_id)})`).join(' · ')} — against this scenario’s <b>${esc(s.history?s.history.disposition:'')}</b>. The loop’s job is to surface the divergence, not to pick the winner.
+    </div>`:'';
+  const sr=s.second_rater?`<div class="seedcard">
+      <div class="sh">Double-assigned · ${esc(s.second_rater.label)}</div>
+      <div class="sg">${esc(GRADE_BY[s.second_rater.disposition]?GRADE_BY[s.second_rater.disposition].label:s.second_rater.disposition)}</div>
+      <div class="sr">${esc(s.second_rater.rationale)}</div>
+      <div class="sa">${rec.grade===s.second_rater.disposition?'matches your disposition — agreement is consensus, never a correctness score':'diverges from your disposition — divergence routes to cluster adjudication'}</div>
+    </div>`:'';
+  const ctl=s.control?`<div class="seedcard">
+      <div class="sh">Seeded control scenario</div>
+      <div class="sg">known disposition: ${esc(GRADE_BY[s.control.known_disposition]?GRADE_BY[s.control.known_disposition].label:s.control.known_disposition)}</div>
+      <div class="sr">${esc(s.control.basis)} Interleaved controls watch click-through fatigue — a quality control, not a performance score.</div>
+    </div>`:'';
+  stage.innerHTML=stepsHtml()+`<div class="scene">
+    <div class="eyebrow">Scenario ${esc(s.id)} · the reveal</div>
+    <h2>The history — <em>your judgment beside it</em></h2>
+    <p class="lead">Now the record. The historical disposition is a replayable fact about <b>decisions, not correctness</b> — it tells you what the institution did, never whether that was right.</p>
+    <div class="revgrid">
+      ${historyCard(s)}
+      <div class="revcard you">
+        <div class="ah">Your disposition · this session</div>
+        <div class="revbody">
+          <div class="revgrade">${esc(GRADE_BY[rec.grade]?GRADE_BY[rec.grade].label:rec.grade)}${rec.info_code?` · ${esc(rec.info_code)}`:''}</div>
+          <div class="revrat">${esc(rec.rationale)}</div>
+        </div>
+      </div>
+    </div>
+    ${inc}${sr}${ctl}
+    <div class="framenote">Historical decisioning is never ground truth — it encodes the legacy program’s blind spots. What accumulates here is precedent and discovery, not a score.</div>
+  </div>`;
+}
+
+/* ---------- screen: the discovery ledger ---------- */
+function renderLedger(){
+  const rows=records.map(r=>`<div class="ledrow">
+      <span class="lo">#${r.order}</span>
+      <div class="lmain">
+        <div class="lcase">${esc(r.scenario_id)} · ${esc(r.stratum)}</div>
+        <div class="lrat">${esc(r.rationale)}</div>
+      </div>
+      <span class="chip ax">${esc(GRADE_BY[r.grade]?GRADE_BY[r.grade].short:r.grade)}${r.info_code?` · ${esc(r.info_code)}`:''}</span>
+    </div>`).join('');
+
+  // Discovery outputs — DERIVED from the session records + the dataset, never typed-in figures.
+  const sigGaps=records.filter(r=>(r.grade==='confirm-risk'||r.grade==='escalate')&&!r.fired_rule);
+  const dataGaps={};
+  records.filter(r=>r.grade==='need-more-info'&&r.info_code).forEach(r=>{
+    (dataGaps[r.info_code]=dataGaps[r.info_code]||[]).push(r.scenario_id);
+  });
+  const policyGaps=records.filter(r=>r.grade==='no-defensible-option');
+  const incPairs=[];
+  const seenPanels={};
+  records.forEach(r=>{
+    const s=SCN.find(x=>x.id===r.scenario_id);
+    if(!s||!s.history||seenPanels[s.panel])return;
+    const sibs=inconsistencySiblings(s).filter(x=>recordedFor(x.id));
+    if(sibs.length){seenPanels[s.panel]=true;incPairs.push({panel:s.panel,ids:[s.id].concat(sibs.map(x=>x.id))});}
+  });
+  const daWorked=records.filter(r=>{const s=SCN.find(x=>x.id===r.scenario_id);return s&&s.second_rater;});
+  const daMatched=daWorked.filter(r=>{const s=SCN.find(x=>x.id===r.scenario_id);return s&&r.grade===s.second_rater.disposition;});
+
+  const dp=META.design_params||{};
+  const exp={
+    artifact:'Signal Watch — Triage Console (vision prototype)',
+    note:'Session-only discovery ledger over a fully SYNTHETIC scenario stream. Dispositions and rationales are the presenter’s; illustrative outputs.',
+    records:records,
+    derived:{
+      signal_gaps:sigGaps.map(r=>r.scenario_id),
+      data_gaps:dataGaps,
+      policy_gaps:policyGaps.map(r=>r.scenario_id),
+      process_inconsistencies:incPairs,
+      agreement:{matched:daMatched.length,double_assigned_worked:daWorked.length,
+        definition:'exact disposition match vs the seeded synthetic second rater on double-assigned scenarios worked this session; consensus-class, never a correctness measure'},
+    },
+  };
+  stage.innerHTML=stepsHtml()+`<div class="scene">
+    <div class="eyebrow">Triage console · discovery ledger</div>
+    <h2>The discovery ledger — <em>what the loop learned today</em></h2>
+    <p class="lead"><b>Session-only:</b> this offline file persists nothing — close the tab and the ledger is gone. The §14 discovery outputs below accrue even if consensus never converges: every number is computed from this session’s records and carries its definition.</p>
+    ${records.length?`<div class="disco">
+      <div class="card">
+        <div class="ah">Signal gaps · ${sigGaps.length}</div>
+        <div class="ab">${sigGaps.length?sigGaps.map(r=>`<span class="codepair">${esc(r.scenario_id)}</span>`).join(' '):'<span class="sub">none this session</span>'}
+          <div class="defn">definition: scenarios disposed confirm-risk or escalate this session where NO rule fired — candidate signal gaps for the ingestion loop.</div></div>
+      </div>
+      <div class="card">
+        <div class="ah">Data gaps · ${Object.keys(dataGaps).length}</div>
+        <div class="ab">${Object.keys(dataGaps).length?Object.keys(dataGaps).sort().map(k=>
+          `<div><span class="codepair">${esc(k)}</span>${esc((TAX_BY[k]||{}).name||'')} <span class="sub">(${dataGaps[k].map(esc).join(', ')})</span></div>`).join(''):'<span class="sub">none this session</span>'}
+          <div class="defn">definition: need-more-info dispositions, aggregated by the named C/D code — the coverage interview made continuous.</div></div>
+      </div>
+      <div class="card">
+        <div class="ah">Process inconsistencies · ${incPairs.length}</div>
+        <div class="ab">${incPairs.length?incPairs.map(p=>`<div><span class="codepair">${esc(p.panel)}</span><span class="sub">${p.ids.map(esc).join(' · ')}</span></div>`).join(''):'<span class="sub">none surfaced this session</span>'}
+          <div class="defn">definition: shared-panel scenario pairs with divergent HISTORICAL dispositions, both worked this session — surfaced for adjudication, never auto-resolved.</div></div>
+      </div>
+      <div class="card">
+        <div class="ah">Policy gaps · ${policyGaps.length}</div>
+        <div class="ab">${policyGaps.length?policyGaps.map(r=>`<span class="codepair">${esc(r.scenario_id)}</span>`).join(' '):'<span class="sub">none this session</span>'}
+          <div class="defn">definition: no-defensible-option dispositions — scenarios where the grammar itself had no defensible option.</div></div>
+      </div>
+      <div class="card">
+        <div class="ah">Agreement · ${daMatched.length}/${daWorked.length}</div>
+        <div class="ab"><span class="sub">${daWorked.length?'exact-match vs the seeded synthetic second rater on double-assigned scenarios worked this session':'no double-assigned scenario worked yet'}</span>
+          <div class="defn">definition: ${esc(exp.derived.agreement.definition)}.</div></div>
+      </div>
+      <div class="card">
+        <div class="ah">Design parameters — chosen, not measured</div>
+        <div class="ab"><span class="sub">${esc(dp.note||'chosen, not measured')}</span>
+          <div class="defn">queue size ${esc(String(dp.scenario_count||SCN.length))} · controls ${esc(String(dp.controls||''))} · double-assigned ${esc(String(dp.double_assigned||''))} — each becomes a measured quantity only when the loop runs and the measurement is defined and owned.</div></div>
+      </div>
+    </div>
+    <div class="doclabel">Session records</div>
+    <div class="ledgrid">${rows}</div>
+    <div class="doclabel">Export — the session JSON (copy out to keep)</div>
+    <textarea id="export" readonly>${esc(JSON.stringify(exp,null,2))}</textarea>
+    <div class="expact"><button class="btn" id="copyexp">Copy JSON</button><button class="btn ghost" id="clearses">Clear session</button><span class="recnote" id="copynote"></span></div>`
+    :`<div class="empty">No dispositions recorded this session yet. Pick a scenario from the queue, grade it with a rationale, and the discovery outputs derive here.</div>`}
+  </div>`;
+  const cp=document.getElementById('copyexp');
+  if(cp)cp.onclick=()=>{const t=document.getElementById('export');if(!t)return;t.select();
+    try{document.execCommand('copy');const n=document.getElementById('copynote');if(n)n.textContent='copied';}catch(e){}};
+  const cl=document.getElementById('clearses');
+  if(cl)cl.onclick=()=>{records=[];render();};
+}
+
+/* ---------- render dispatch ---------- */
+const CASE_SCREENS=[renderEvidence,renderDisposition,renderReveal];
+function render(){
+  try{
+    if(view==='queue')renderQueue();
+    else if(view==='ledger')renderLedger();
+    else{
+      const s=curScn();
+      if(!s){view='queue';renderQueue();}
+      else CASE_SCREENS[screen](s);
+    }
+  }catch(e){
+    console.error('triage render',view,screen,e);
+    stage.innerHTML=stepsHtml()+'<div class="scene"><div class="eyebrow">Triage console</div><h2>This view can\'t render</h2><div class="empty">The data for this screen is missing or malformed — return to the queue.</div></div>';
+  }
+  wireSteps();
+  updateControls();
+  window.scrollTo({top:0,behavior:REDUCED?'auto':'smooth'});
+}
+
+/* ---------- navigation + the gate actions ---------- */
+function pickScenario(id){
+  const s=SCN.find(x=>x.id===id); if(!s)return;
+  current=id; view='case'; screen=0; maxScreen=0; blocked='';
+  const rec=recordedFor(id);
+  draft=rec?{grade:rec.grade,rationale:rec.rationale,info:rec.info_code||null}:{grade:null,rationale:'',info:null};
+  if(rec)maxScreen=2;                       // an already-disposed scenario may revisit its reveal
+  render();
+}
+function pickGrade(g){
+  if(!GRADE_BY[g])return;
+  draft.grade=g; blocked='';
+  if(view==='case'&&screen===1)render();
+}
+function setRationale(v){draft.rationale=String(v==null?'':v);}
+function setInfo(v){draft.info=v?String(v):null;}
+function recordDisposition(){
+  if(view!=='case')return;
+  const s=curScn(); if(!s)return;
+  if(recordedFor(s.id)){gotoScreen(2);return;}
+  const g=GRADE_BY[draft.grade], rat=draft.rationale.trim();
+  if(!g||!rat){
+    blocked='Not recorded — a disposition needs BOTH a grade and a written rationale. The rationale is the audit evidence; an empty one records nothing.';
+    screen=1; render(); return;
+  }
+  if(g.id==='need-more-info'&&!draft.info){
+    blocked='Not recorded — need-more-info must NAME which capability or data source would decide the call. The naming is the measured data-gap observation.';
+    screen=1; render(); return;
+  }
+  records.push({
+    order:records.length+1,
+    scenario_id:s.id, stratum:s.stratum, panel:s.panel,
+    fired_rule:s.fired_rule||null,
+    grade:g.id, grade_label:g.label,
+    rationale:draft.rationale,
+    info_code:g.id==='need-more-info'?draft.info:null,
+  });
+  blocked=''; screen=2; maxScreen=2; render();
+}
+function gotoScreen(n){
+  if(view!=='case')return;
+  n=Math.max(0,Math.min(CASE_SCREENS.length-1,n));
+  if(n===2&&!recordedFor(current))return;   // the reveal is unreachable pre-disposition
+  screen=n; maxScreen=Math.max(maxScreen,screen); render();
+}
+function toQueue(){view='queue';current=null;screen=0;maxScreen=0;blocked='';render();}
+function toLedger(){view='ledger';current=null;screen=0;maxScreen=0;blocked='';render();}
+function advance(){
+  if(view==='queue')return;                 // scenarios are picked, not paged
+  if(view==='ledger')return;
+  if(screen===0){gotoScreen(1);return;}
+  if(screen===1){ if(recordedFor(current))gotoScreen(2); else recordDisposition(); return; }
+  toLedger();                               // from the reveal → the discovery ledger
+}
+function back(){
+  if(view==='queue')return;
+  if(view==='ledger'){toQueue();return;}
+  if(screen<=0){toQueue();return;}
+  screen--; render();
+}
+function updateControls(){
+  if(view==='queue'){
+    backBtn.style.visibility='hidden';
+    resetBtn.style.visibility='hidden';
+    nextBtn.style.visibility='hidden';
+    hint.textContent='Pick a scenario to triage →';
+    return;
+  }
+  if(view==='ledger'){
+    backBtn.style.visibility='visible'; backBtn.textContent='‹ Queue';
+    resetBtn.style.visibility='hidden';
+    nextBtn.style.visibility='hidden';
+    hint.textContent='Copy the session JSON out to keep the record';
+    return;
+  }
+  backBtn.style.visibility='visible';
+  resetBtn.style.visibility='visible';
+  nextBtn.style.visibility='visible';
+  backBtn.textContent=['‹ Queue','‹ Evidence','‹ Disposition'][screen]||'‹ Back';
+  nextBtn.textContent=screen===0?'Disposition ›':screen===1?(recordedFor(current)?'The reveal ›':'Record disposition ›'):'Discovery ledger ›';
+  hint.textContent=['Judge on the evidence alone — the history comes after','Grade + rationale — need-more-info names the missing C/D code','The history is a decision record, never a correctness label'][screen]||'';
+}
+
+nextBtn.onclick=advance;
+backBtn.onclick=back;
+resetBtn.onclick=toQueue;
+// keyboard: ←/→ navigate, Space advances, Esc → back to the queue. Mirrors the gate console;
+// guarded inside INPUT/TEXTAREA/SELECT so typing a rationale or picking a code never navigates.
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target&&e.target.tagName))return;
+  const onBtn=e.target&&e.target.tagName==='BUTTON';
+  switch(e.key){
+    case 'ArrowRight':case 'PageDown':e.preventDefault();advance();break;
+    case 'ArrowLeft':case 'PageUp':e.preventDefault();back();break;
+    case ' ':case 'Spacebar':if(onBtn)break;e.preventDefault();advance();break;
+    case 'Escape':e.preventDefault();if(view!=='queue')toQueue();break;
+  }
+});
+
+render();
+</script>
+</body>
+</html>

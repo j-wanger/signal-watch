@@ -286,3 +286,14 @@ Deterministic gate run against both shipped `dist/<id>/index.html`. **Result: PA
 - [ ] The one US case (fin-2019-a006): footer renders exactly empty (public domain — no attribution required)
 - [ ] Ledger accumulates the session's dispositions; Export produces valid JSON containing the typed rationale; reload loses everything ("persists nothing" stated on screen)
 - [ ] Keys ←/→/Esc/↺ navigate; typing in the rationale textarea does NOT trigger key nav; reduced-motion mode lands each screen in one paint
+
+---
+
+## Triage console (Phase 49 — `dist/triage/index.html`)
+
+- [ ] Open `dist/triage/index.html` offline from `file://` — Queue renders 20 scenarios grouped by the 4 §14 strata with honest stratum descriptions; the "Illustrative data & outputs" badge is visible on every screen; nothing on the queue reveals which scenarios are controls
+- [ ] BELIEVABILITY READ (the A3 gate check): read 4 evidence panels, one per stratum (e.g. S-01 signal-fired · S-08 below-the-line · S-11 novel · S-15 random-population) — each should read like a real triage moment, not template filler; the divergent pair S-01/S-02 shows the IDENTICAL fact pattern (shared panel)
+- [ ] Disposition gate: empty rationale blocks with an honest message; need-more-info without a C/D pick blocks; need-more-info + rationale + a D-code records and lands in the ledger's data-gap stream under that code
+- [ ] The reveal appears ONLY post-disposition: history framed "decisions, not correctness"; S-01 or S-02 surfaces the process inconsistency (shared panel, divergent historical dispositions — "surfaced for adjudication, never auto-resolved"); a double-assigned scenario replays the SEEDED synthetic second rater with its label visible
+- [ ] Discovery ledger: every number derived at render with a "definition:" line (signal gaps from fired-rule state; agreement X/Y vs the seeded raters — consensus-class wording); design parameters boxed "chosen, not measured"; Export produces valid JSON; reload loses everything ("persists nothing" stated on screen)
+- [ ] Keys ←/→/Space/Esc navigate; typing in the rationale textarea or the C/D picker does NOT trigger key nav; reduced-motion mode lands each screen in one paint

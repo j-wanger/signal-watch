@@ -45,7 +45,7 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-49-triage-loop-embryo -->
-<!-- gate-log:phase-49 direction=approved delivery=pending -->
+<!-- gate-log:phase-49 direction=approved delivery=accepted -->
 
 ## Phase 49 — Triage-loop embryo made demo-able: §14's continuous adjudication loop as the 5th ship artifact (triage console)
 

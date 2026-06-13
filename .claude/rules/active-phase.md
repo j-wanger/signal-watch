@@ -14,4 +14,4 @@ Abort rule: existing dists drift → STOP and surface (never re-baseline); >3 at
 
 Gates:
 - [x] Direction confirmed by user (assumption gate closed 2026-06-12: A1 demo-first accept · A2 don't-know→defended→accept · A3 accept · A4 5th-ship-artifact accept; all_accept: false)
-- [ ] Delivery accepted (post-implementation report)
+- [x] Delivery accepted (post-implementation report 2026-06-12)

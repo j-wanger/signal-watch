@@ -65,20 +65,38 @@ Plus the resolution/network overlays (illustrative, adjudicable — NOT ground t
 `CustomerEntityDossier(customer_id, account_dossiers[], resolved_cluster_id, cluster_members[],
 merge_basis_labels[])`; the P7/P8 network `account_id → component_id` map.
 
-## 3. The composition fix — a grounded NETWORK-STRUCTURE signal (enabling increment §5b)
+## 3. Composition — evidence-assembly, NOT detection-lift (UPDATED 2026-06-16, post-triple-null)
 
-**Finding that shaped this contract:** all 6 current detectors fire on the transaction-flow axis
-only (KYC/PEP, sanctions, network exist as data/structure, not as fired grounded signals). Composing
-them = composing CORRELATED signals (all magnitude-driven under the P11 single-feature-dominance
-finding) — the §13 correlated-double-counting failure. Composition would be hollow.
+**What changed:** the original §3 premised a network-structure signal as a "non-redundant second
+DETECTION axis" that would let composition demonstrate detection lift. aml-substrate **measured that
+premise false** through Phase 13 — a code-verified **triple-null**: composition is *never required*
+to detect laundering on amount-ROC (multivariate adds −0.34 over `total_amount`'s 0.95), network-ROC
+(composed 0.916 vs best single detector 0.886, below the sealed 0.05 margin), or network-precision
+(AP 0.043 vs 0.033, below the sealed 0.083 floor). Root cause is structural: one ring ≈ one mule
+doing every typology, so typologies co-occur REDUNDANTLY — any single detector already catches the
+case. The generator levers meant to fix it (Hawkes/dormancy, legit-overlap cohort) were
+measured/predicted null AND counterproductive. **Detection-lift is therefore measured-not-required
+on emergent synthetic data and is RETIRED as a contract claim** (deferred-with-owner; the triple-null
+is a published honesty result, not a gap to fix).
 
-**Resolution (chosen 2026-06-16):** Pillar 1 authors ONE grounded **network-structure** signal
-over the existing P7/P8 reconstructed mule network, grounded to a network-typology advisory. It is
-dual-purpose: a NON-redundant composition ground for Pillar 2 AND a genuine second DETECTION axis
-(structure, not magnitude) that serves P12's multivariate-subtlety goal — the one place the two
-tracks converge. (KYC/sanctions signals are composition-only — the no-KYC-leak doctrine forbids
-them being strong laundering detectors; deferred.) After this lands, a Pillar-2 dossier composes
-≥2 non-redundant grounded axes (flow + structure).
+**What composition IS, in this contract:** redundancy-aware **evidence assembly** — a Pillar-2
+dossier gathers the grounded indicators that fire on a case into one examinable bundle a human judges
+(dossier-now/score-deferred, blueprint §13), plus the **volume-inversion** workload claim (N raw
+alerts → 1 reviewed dossier) which the triple-null leaves untouched. Neither requires the composite
+to OUT-DETECT any single signal. The **redundancy-management** frontier (§13 fm-1) is demonstrated on
+the **committed corpus** (the un-deduplicated 2,251 indicators across 5 regulators), not on the
+substrate.
+
+**The one un-refuted nuance (deferred-with-owner):** the triple-null was measured over the 6
+account-LOCAL flow detectors with a typology-COUNT composed signal — NOT a purpose-built
+network-STRUCTURE detector over the P7/P8 graph, which does not yet exist. Before retirement is final,
+aml-substrate runs ONE cheap **measure-only structure-detector reachability probe** (no gen-unfreeze;
+pre-registered two-baseline, held-out). NULL → retirement is unconditional and the network-structure
+signal (§5b) is formally shelved. CLEAR → the claim was reachable via that one unbuilt detector,
+which is then built (still NOT the P14 case-construction redesign — that is DEFERRED INDEFINITELY as a
+self-engineering tautology that violates the "typologies emerge, never injected" doctrine). Pillar 2
+builds its chain on the single flow axis meanwhile; the "≥2 non-redundant detection axes" premise is
+replaced by "≥1 grounded axis assembled into a complete, examinable dossier."
 
 ## 4. Honesty caveats carried on every consumed record
 

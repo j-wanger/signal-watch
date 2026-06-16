@@ -158,10 +158,15 @@ Stating these is the point — each is a deferred-with-owner item with a defined
   re-validation rate on a built library.
 - **C/D-tag correctness** — currently measured by inter-rater consensus (reproducibility), not
   correctness. Closed by an adjudication-against-authority sampling control with a measured error rate.
-- **Composition lift** — the composition layer is the design's hardest open problem; on synthetic data
-  it isn't yet needed (the substrate's laundering is single-feature-separable). Closed by the substrate
-  generator redesign (multivariate-subtle laundering) + a measured case where the composed library
-  beats both the single best signal and a legacy-rule baseline.
+- **Composition detection-lift** — RETIRED as a claim (2026-06-16). aml-substrate MEASURED a
+  triple-null (composition never required to detect laundering — amount-ROC, network-ROC, and
+  network-precision; the generator levers meant to fix it were null AND counterproductive), *published
+  as a result, not hidden as a gap* — it is part of the "we publish our nulls" inventory above.
+  Composition's value is **evidence-assembly** (the dossier a human judges) + **redundancy-management**
+  (demonstrated on the committed corpus's un-deduplicated cross-regulator indicators) + **volume-
+  inversion** (N alerts → 1 dossier) — none of which needs the composite to out-detect a single signal.
+  One un-refuted nuance (a purpose-built network-structure detector) is settled by a single cheap
+  measure-only probe; null → retirement is unconditional.
 
 ## The close
 

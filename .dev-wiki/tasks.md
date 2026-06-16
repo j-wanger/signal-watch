@@ -44,6 +44,17 @@
 > - Phase 8: Doc true-up + provenance fix (M6 debt) — COMPLETED + accepted
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
+<!-- phase:phase-51-corpus-redundancy-measurement -->
+
+## Phase 51 — Corpus redundancy measurement (the §13 fm-1 frontier, measured honestly) [ACTIVE BUILD]
+
+The measurement workstream's first deliverable: a NON-SHIP analysis (blueprint-report.html / probe-history class) quantifying the committed corpus's cross-regulator redundancy EXPOSURE — composition-as-redundancy-management on real data — without touching the frozen ship corpus or the no-similarity/no-dedup non-negotiable. HYBRID approach (user gate 2026-06-16): deterministic label co-occurrence UPPER BOUND + a sampled consensus-class semantic-equivalence estimate. Plan: articles/phases/phase-51-corpus-redundancy-measurement.md. Assumption ledger: Phase-51 block.
+
+- [ ] T1 Deterministic co-occurrence engine | scope: scripts/corpus_redundancy.py (NEW, stdlib, read-only over data/*/derived + the overlay maps) | success: RED a selftest asserting a known (typology×capability)×regulator cross-tab cell count on a fixed slice → GREEN `python3 scripts/corpus_redundancy.py --selftest` passes + emits the cross-regulator co-occurrence UPPER-BOUND fraction (% indicators sharing a (typology,capability) cell with another regulator), reproducible byte-identical; typology resolved per-indicator-override-else-doc-inherit; framed as candidate co-occurrence, NEVER dedup | size: M
+- [ ] T2 Sampled consensus-class semantic-equivalence harness | scope: scripts/corpus_redundancy.py (--sample / --equiv) + a committed blind-sample fixture | success: a deterministic blind sampler over cross-regulator co-occurring pairs + an equivalence-rate recorder that reports the rate WITH its measurement definition, LABELED consensus-not-ground-truth + illustrative; selftest on a hand-scored fixture; the redundancy ESTIMATE = upper-bound × equivalence-rate, both numbers definition-carrying | size: M
+- [ ] T3 Non-ship report artifact | scope: docs/corpus-redundancy-report.{md or html} (NON-ship, always-on illustrative badge) | success: renders the upper-bound + the sampled estimate with definitions, framed "candidate redundancy ≤ X%, est ~Z% (consensus)"; NO dedup, NO similarity number presented as validated; cites §13 fm-1; the §10 "every number carries its definition" honesty greps clean | size: S
+- [ ] T4 Honesty regate + verify | scope: tests + the build drift guard | success: `python3 scripts/build.py --check all` byte-identical (ship corpus + all dists UNTOUCHED); the report carries the badge; no similarity/lift figure on any ship artifact; corpus_redundancy --selftest green; claim-shaped honesty greps (no "deduplicated"/"X% redundant"-as-fact) | size: S
+
 <!-- phase:phase-50-aml-program-build -->
 <!-- gate-log:phase-50 direction=approved delivery=accepted -->
 

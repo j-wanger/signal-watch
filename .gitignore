@@ -75,3 +75,6 @@ config/typologies/*.draft.json
 # dev-wiki scratch / intermediate workflow artifacts
 .dev-wiki/tmp/
 .claude/.memory-consulted
+
+# nana memory MCP per-project store (binary DB; never commit)
+.memory/*.db*

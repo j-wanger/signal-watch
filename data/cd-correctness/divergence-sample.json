@@ -1,0 +1,153 @@
+{
+  "n": 24,
+  "seed": 0,
+  "rater": "claude-opus-4-8 (blind subagent, single-rater)",
+  "label": "single-(model-)rater illustrative; the random number is a SAME-MODEL blind re-rate (self-consistency, NOT validated correctness); consensus (>=2 independent raters / a different model family / human) + a larger sample deferred-with-owner",
+  "definition": "a blind rater picks the better of two neutrally-presented codes (rater-B = the committed correction); never told which is which",
+  "judgments": [
+    {
+      "id": "fintrac-guid-financial-entities/IND-123",
+      "pick": "1",
+      "option_1": "b",
+      "option_2": "a"
+    },
+    {
+      "id": "fintrac-guid-securities/IND-19",
+      "pick": "1",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-financial-entities/IND-39",
+      "pick": "1",
+      "option_1": "b",
+      "option_2": "a"
+    },
+    {
+      "id": "fintrac-guid-accountants/IND-14",
+      "pick": "2",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-casinos/IND-51",
+      "pick": "1",
+      "option_1": "b",
+      "option_2": "a"
+    },
+    {
+      "id": "fintrac-guid-life-insurance/IND-42",
+      "pick": "2",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-life-insurance/IND-23",
+      "pick": "1",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-financial-entities/IND-143",
+      "pick": "2",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-securities/IND-50",
+      "pick": "2",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-casinos/IND-92",
+      "pick": "both",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-life-insurance/IND-147",
+      "pick": "1",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-financial-entities/IND-01",
+      "pick": "2",
+      "option_1": "b",
+      "option_2": "a"
+    },
+    {
+      "id": "fintrac-guid-msb/IND-23",
+      "pick": "2",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-casinos/IND-103",
+      "pick": "2",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-life-insurance/IND-41",
+      "pick": "2",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-bc-notaries/IND-44",
+      "pick": "2",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-casinos/IND-81",
+      "pick": "2",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-securities/IND-25",
+      "pick": "1",
+      "option_1": "b",
+      "option_2": "a"
+    },
+    {
+      "id": "fintrac-guid-securities/IND-164",
+      "pick": "2",
+      "option_1": "b",
+      "option_2": "a"
+    },
+    {
+      "id": "fintrac-guid-bc-notaries/IND-08",
+      "pick": "1",
+      "option_1": "b",
+      "option_2": "a"
+    },
+    {
+      "id": "fintrac-guid-real-estate/IND-01",
+      "pick": "2",
+      "option_1": "b",
+      "option_2": "a"
+    },
+    {
+      "id": "fintrac-guid-casinos/IND-44",
+      "pick": "2",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-life-insurance/IND-71",
+      "pick": "2",
+      "option_1": "a",
+      "option_2": "b"
+    },
+    {
+      "id": "fintrac-guid-securities/IND-116",
+      "pick": "1",
+      "option_1": "b",
+      "option_2": "a"
+    }
+  ]
+}

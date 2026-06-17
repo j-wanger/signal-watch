@@ -1,0 +1,177 @@
+{
+  "n": 24,
+  "seed": 0,
+  "rater": "claude-opus-4-8 (blind subagent, single-rater)",
+  "label": "single-(model-)rater illustrative; the random number is a SAME-MODEL blind re-rate (self-consistency, NOT validated correctness); consensus (>=2 independent raters / a different model family / human) + a larger sample deferred-with-owner",
+  "definition": "a blind rater assigns one C + one D from the flag + red_flag + the closed vocab, never seeing the committed code; agreement = blind == committed per axis",
+  "judgments": [
+    {
+      "gid": "fintrac-guid-real-estate/IND-78",
+      "blind_capability": "C17",
+      "blind_data_source": "D12",
+      "committed_capability": "C17",
+      "committed_data_source": "D12"
+    },
+    {
+      "gid": "fintrac-guid-securities/IND-50",
+      "blind_capability": "C15",
+      "blind_data_source": "D8",
+      "committed_capability": "C15",
+      "committed_data_source": "D10"
+    },
+    {
+      "gid": "fin-2022-a002/IND-15",
+      "blind_capability": "C26",
+      "blind_data_source": "D7",
+      "committed_capability": "C21",
+      "committed_data_source": "D7"
+    },
+    {
+      "gid": "fintrac-guid-financial-entities/IND-115",
+      "blind_capability": "C17",
+      "blind_data_source": "D12",
+      "committed_capability": "C17",
+      "committed_data_source": "D12"
+    },
+    {
+      "gid": "fintrac-synthetic-opioids/IND-46",
+      "blind_capability": "C27",
+      "blind_data_source": "D18",
+      "committed_capability": "C28",
+      "committed_data_source": "D18"
+    },
+    {
+      "gid": "fintrac-real-estate/IND-09",
+      "blind_capability": "C19",
+      "blind_data_source": "D13",
+      "committed_capability": "C19",
+      "committed_data_source": "D13"
+    },
+    {
+      "gid": "fintrac-guid-securities/IND-145",
+      "blind_capability": "C20",
+      "blind_data_source": "D17",
+      "committed_capability": "C20",
+      "committed_data_source": "D17"
+    },
+    {
+      "gid": "fintrac-guid-life-insurance/IND-141",
+      "blind_capability": "C14",
+      "blind_data_source": "D8",
+      "committed_capability": "C14",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-online-child-exploitation/IND-42",
+      "blind_capability": "C9",
+      "blind_data_source": "D4",
+      "committed_capability": "C1",
+      "committed_data_source": "D4"
+    },
+    {
+      "gid": "fintrac-guid-msb/IND-90",
+      "blind_capability": "C17",
+      "blind_data_source": "D12",
+      "committed_capability": "C17",
+      "committed_data_source": "D12"
+    },
+    {
+      "gid": "fintrac-guid-casinos/IND-79",
+      "blind_capability": "C20",
+      "blind_data_source": "D17",
+      "committed_capability": "C20",
+      "committed_data_source": "D3"
+    },
+    {
+      "gid": "fintrac-synthetic-opioids/IND-19",
+      "blind_capability": "C22",
+      "blind_data_source": "D15",
+      "committed_capability": "C19",
+      "committed_data_source": "D13"
+    },
+    {
+      "gid": "fintrac-guid-accountants/IND-141",
+      "blind_capability": "C14",
+      "blind_data_source": "D8",
+      "committed_capability": "C14",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-guid-financial-entities/IND-67",
+      "blind_capability": "C2",
+      "blind_data_source": "D3",
+      "committed_capability": "C2",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fintrac-guid-accountants/IND-143",
+      "blind_capability": "C7",
+      "blind_data_source": "D8",
+      "committed_capability": "C7",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fin-2025-a003/IND-05",
+      "blind_capability": "C27",
+      "blind_data_source": "D18",
+      "committed_capability": "C27",
+      "committed_data_source": "D18"
+    },
+    {
+      "gid": "fintrac-guid-dpms/IND-92",
+      "blind_capability": "C7",
+      "blind_data_source": "D20",
+      "committed_capability": "C10",
+      "committed_data_source": "D5"
+    },
+    {
+      "gid": "fintrac-underground-banking/IND-12",
+      "blind_capability": "C20",
+      "blind_data_source": "D3",
+      "committed_capability": "C14",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-guid-accountants/IND-36",
+      "blind_capability": "C1",
+      "blind_data_source": "D1",
+      "committed_capability": "C7",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fintrac-guid-life-insurance/IND-34",
+      "blind_capability": "C13",
+      "blind_data_source": "D10",
+      "committed_capability": "C13",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fin-2025-alert001/IND-03",
+      "blind_capability": "C16",
+      "blind_data_source": "D3",
+      "committed_capability": "C16",
+      "committed_data_source": "D2"
+    },
+    {
+      "gid": "fin-2024-a002/IND-05",
+      "blind_capability": "C19",
+      "blind_data_source": "D13",
+      "committed_capability": "C24",
+      "committed_data_source": "D13"
+    },
+    {
+      "gid": "fintrac-guid-msb/IND-106",
+      "blind_capability": "C17",
+      "blind_data_source": "D12",
+      "committed_capability": "C17",
+      "committed_data_source": "D12"
+    },
+    {
+      "gid": "fintrac-online-child-exploitation/IND-23",
+      "blind_capability": "C10",
+      "blind_data_source": "D5",
+      "committed_capability": "C3",
+      "committed_data_source": "D3"
+    }
+  ]
+}

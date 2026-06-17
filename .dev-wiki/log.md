@@ -125,3 +125,5 @@
 [2026-06-15T04:28:19Z] DEBRIEF-QUICK -- cross-pillar review of aml-substrate P1-P6 (18-agent workflow + verification; no signal-watch code change); P7 direction set (Observable network linkage) handed to an aml-substrate-rooted session (brief in aml-substrate/docs/); stale active-phase.md + _CURRENT_STATE Phase-3 facts synced to P1-P6-delivered / P7-planning; quick journal 2026-06-15-program-review-pillar1-p7-direction; breadcrumbs clean.
 
 [2026-06-16T15:17:09Z] REVIEW -- Phase 50 cross-pillar review #2: aml-substrate P7-P11 delivered (360 tests, HEAD 0daa3cc), record was 5 phases stale + re-synced; P12 direction set (the §6 realism lever, measure-first cohort-vs-Hawkes sub-fork); brief pre-staged in aml-substrate/docs/.
+
+[2026-06-17T00:07:29Z] DEBRIEF -- Full session debrief. Two-workflow substream review (aml-substrate P13 triple-null + aml-casework P2) → composition detection-lift RETIRED + measure-first → Phase 51 corpus redundancy measurement DELIVERED (co-occurrence ≤0.325, genuine equiv ~1.4%; corpus no-dedup vindicated). 8 commits; ship artifacts + blueprint untouched.

@@ -45,8 +45,9 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-51-corpus-redundancy-measurement -->
+<!-- gate-log:phase-51 direction=approved delivery=accepted -->
 
-## Phase 51 — Corpus redundancy measurement (the §13 fm-1 frontier, measured honestly) [ACTIVE BUILD]
+## Phase 51 — Corpus redundancy measurement (the §13 fm-1 frontier, measured honestly) [COMPLETE]
 
 The measurement workstream's first deliverable: a NON-SHIP analysis (blueprint-report.html / probe-history class) quantifying the committed corpus's cross-regulator redundancy EXPOSURE — composition-as-redundancy-management on real data — without touching the frozen ship corpus or the no-similarity/no-dedup non-negotiable. HYBRID approach (user gate 2026-06-16): deterministic label co-occurrence UPPER BOUND + a sampled consensus-class semantic-equivalence estimate. Plan: articles/phases/phase-51-corpus-redundancy-measurement.md. Assumption ledger: Phase-51 block.
 

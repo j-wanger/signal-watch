@@ -33,14 +33,19 @@ read-only; ship corpus byte-frozen throughout.
 
 ## The finding
 
-The unguarded C/D dimension is genuinely **soft** (a same-model rater reproduces a free assignment
-only ~62.5%/axis) but **adjudicable** (forced pairwise, the committed correction wins ~71%). The gap
-between 62.5% free-agreement and 70.8% pairwise-uphold is the signal: **much C/D disagreement is
-adjacent-code / defensible-alternative, not error** (e.g. C8 income-inconsistency vs C14
-KYC-cooperation for "unexplained source of funds"; C15 shell vs C17 PEP-proxy for a PEP-owned shell),
-and where Phase-34 changed a code the change is the better one ~3:1. Honest bound on the unguarded
-dimension: not "X% correct," but reproducible-enough + adjudicable + corrections-defensible; ~⅓ of
-free assignments land on a different-but-often-defensible code (the residual risk the gate leaves).
+The unguarded C/D dimension is **soft** (a same-model rater reproduces a free assignment only
+~62.5%/axis — self-consistency) but **adjudicable on the hard cases** (forced pairwise, the blind
+rater upholds the committed correction 17/24). **These are two separate measurements, NOT
+subtractable** — different samples (random corpus vs the pre-selected hard divergences), different
+tasks (open free assignment vs forced pairwise), not even the same metric; and a forced choice scores
+mechanically higher than free assignment regardless of quality. The vocab demonstrably HAS overlapping
+neighbours (C8 income-inconsistency vs C14 KYC-cooperation for "unexplained source of funds"; C15
+shell vs C17 PEP-proxy for a PEP-owned shell), so defensible adjacent-code scatter is **plausibly** one
+driver of the random mismatch — but **its share is unmeasured**. Honest bound: not "X% correct," but
+reproducible-enough + adjudicable on the hard subset; ~⅓ of free assignments land on a **different**
+code whose error-vs-defensible composition was not adjudicated. (At n=24 the two rates are
+statistically indistinguishable — Wilson intervals overlap.) [Tightened post-delivery after the
+wiki-capture adversarial review flagged the original "gap = scatter, not error" as an overclaim.]
 
 ## Gate / honesty
 
@@ -61,7 +66,7 @@ the divergence stratum (a real two-pass disagreement).
 - **Deterministic heading→capability residual (the Phase-37 thread):** replace the neural rater with a
   deterministic section-heading→C map on the subset where the heading determines the capability — more
   build than measure, subset-only; carried, not built.
-- **Adjacent-code-scatter → taxonomy signal:** the 62.5%/70.8% gap suggests the C/D vocab has
+- **Adjacent-code-scatter → taxonomy signal:** the demonstrated overlapping neighbours suggest the C/D vocab has
   defensible-neighbour clusters; a "defensible-neighbour" set in `capability-taxonomy.json` (or a
   vocab consolidation) could make the dimension more determinate. Measurement input, not a fix yet.
 - **The measure-first workstream's remaining named candidates:** the casework audit-walk-to-source

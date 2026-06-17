@@ -50,8 +50,9 @@ extractor's systematic biases, so agreement is *necessary-not-sufficient* for co
 is merely self-consistent). The modest figure is expected and informative: the C/D vocabulary has many
 **adjacent / overlapping** codes — e.g. C8 (income-vs-activity inconsistency) vs C14 (KYC-cooperation)
 for "unexplained source of funds"; C15 (shell/nominee network) vs C17 (PEP-proxy) for a PEP-owned
-no-purpose offshore entity — so a *free re-assignment* scatters across defensible neighbours. Whether
-that scatter is *error* or *defensible-alternative* is exactly what the divergence stratum isolates.
+no-purpose offshore entity — so a *free re-assignment* can land on a defensible neighbour. Whether a
+given mismatch is *error* or *defensible-alternative* is **not measured here**: the divergence stratum
+adjudicates a *different*, pre-selected hard set, so it cannot isolate this scatter (see The finding).
 
 ## DIVERGENCE stratum — closer-to-independent adjudication
 
@@ -68,35 +69,58 @@ so a third blind pick is a genuine adjudication, not a same-model echo.
 | both defensible | 1 |
 | neither / escalate | 0 |
 
-The Phase-34 corrections are upheld **~3:1** by a blind rater; the cases are **adjudicable** (only 1
-both-defensible) and **in-vocabulary** (`neither` never fired — the committed C/D taxonomy covers the
-divergent cases).
+On this sample the Phase-34 corrections are upheld **17 vs 6** by a blind rater; the cases are
+**adjudicable** (only 1 both-defensible) and **in-vocabulary** (`neither` never fired — the committed C/D
+taxonomy covers the divergent cases). At n=24, single seed, this is a point estimate with no confidence
+interval (see the honesty boundary) — a lean toward the correction on this hard subset, not a corpus-wide
+validation of the corrections. A forced binary choice also scores mechanically higher than a free
+assignment over a 28/20-way vocab (random guessing alone ≈ 50% uphold), so the *level* here is inflated by
+the task format.
 
 ## The finding
 
-**The unguarded C/D dimension is genuinely *soft* but *adjudicable*, and the committed/corrected codes
-are empirically supported.** A same-model rater reproduces a free C/D assignment only ~62.5% per axis
-(41.7% on both) — so the dimension is **not** highly self-consistent and must never be presented as
-validated-correct. But when forced to choose pairwise, a blind rater upholds the committed **correction
-70.8%** of the time. The gap between **62.5% free-agreement and 70.8% pairwise-uphold** is the signal:
-much C/D disagreement is **adjacent-code / defensible-alternative, not error**, and where Phase-34 did
-change a code, the change is the better one ~3:1. This **bounds what the unguarded dimension can claim**:
-not "X% correct," but *reproducible-enough + adjudicable, with the corrections defensible* — and it
-quantifies the residual risk the grounding gate leaves open (roughly a third of free C/D assignments
-land on a different-but-often-defensible code).
+**The unguarded C/D dimension is *soft* but *adjudicable on the hard cases*.** A same-model rater
+reproduces a free C/D assignment only ~62.5% per axis (10/24 on both axes) — so the dimension is **not**
+highly self-consistent and must never be presented as validated-correct. *Separately*, on the 213 hard
+Phase-34 disagreement cases, a blind rater shown the two codes neutrally upholds the committed
+**correction 17/24** (1/24 both-defensible, 0 neither) — those cases are adjudicable and lean toward the
+correction.
+
+**These are two separate measurements, not a subtraction.** The random and divergence numbers are
+*different samples* (a random corpus sample vs the pre-selected hard divergences), *different tasks*
+(open free assignment vs forced pairwise choice), and *not even the same metric* (per-axis
+agreement-with-committed vs whole-case uphold-a-pole) — so they **cannot be subtracted to decompose
+disagreement into error vs defensible-alternative**, and a forced choice scores mechanically higher than
+free assignment regardless of quality. What the data *does* license: the vocabulary demonstrably **has**
+overlapping neighbours (C8/C14, C15/C17), so defensible adjacent-code scatter is **plausibly** one driver
+of the random-stratum mismatch — but **its share is unmeasured**. The honest bound on the unguarded
+dimension is therefore *not* "X% correct," but **reproducible-enough + adjudicable on the hard subset**,
+with a residual ~⅓ of free assignments landing on a **different** code whose error-vs-defensible
+composition was **not adjudicated**. A clean decomposition would require running the forced-pairwise
+adjudication on the **same** random-stratum mismatches (blind code vs committed, neutral order); an
+independent rater (different model family / human) would convert self-consistency into reliability. Both
+are the named follow-ups, deferred-with-owner.
 
 For the program design this is the honest posture for any **judgmental tag with no ground truth**: gate
 what is groundable (the verbatim `flag`), and **measure** what is judgmental (the C/D code) as blind
-consensus — never conflate the two.
+agreement (consensus only with ≥2 independent raters) — never conflate the two.
 
 ## Honesty boundary (what this is NOT)
 
-- **Not validated correctness and not ground truth.** Both numbers are consensus / self-consistency.
+- **Not validated correctness and not ground truth.** Both numbers are blind single-rater agreement /
+  self-consistency (consensus only with ≥2 independent raters — see below).
 - The RANDOM number is a **same-model** re-rate (shared biases) — it can only lower-bound reliability.
   **Genuine independence (a different model family / a human rater) and a larger sample are
   deferred-with-owner.**
 - The DIVERGENCE number measures **adjudicability + which pole is upheld** on a pre-selected *hard*
   subset (the cases Phase-34 changed) — it is **not** a corpus-wide correctness rate.
+- **Single rater, not a panel.** Both strata use one same-model-family blind rater against the committed
+  code — there is no inter-rater reliability statistic (no kappa, no CI). Genuine *consensus* needs ≥2
+  independent raters.
+- **No uncertainty / not chance-corrected.** Every figure is a point estimate from 24 draws at one seed;
+  raw percent agreement is **not** chance-corrected (kappa/alpha are the proper statistics). The Wilson
+  95% intervals on 15/24, 10/24 and 17/24 **overlap**, so 62.5% and 70.8% are **statistically
+  indistinguishable at this n** — read the two as illustrative first instances, not a measured difference.
 - Sample parameters (n=24, seed=0) are **chosen, not derived**. The deliverable is the reproducible
   machinery + an honest first instance, not a final number.
 - **NON-SHIP:** the ship corpus stays byte-frozen; `build.py` never reads `data/cd-correctness/`; no

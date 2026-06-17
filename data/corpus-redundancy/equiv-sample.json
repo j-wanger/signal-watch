@@ -1,0 +1,33 @@
+{
+  "_doc": "Phase 51 T2 — blind semantic-equivalence judgments over a deterministic sample of cross-regulator co-occurring indicator pairs. SINGLE-RATER, ILLUSTRATIVE. Consensus (>=2 independent raters) is deferred-with-owner. Regenerate the exact pairs with: python3 scripts/corpus_redundancy.py --sample 24 --seed 0. NON-SHIP measurement data; build.py never reads data/corpus-redundancy/. NO de-dup or similarity claim is made on any ship artifact.",
+  "seed": 0,
+  "n": 24,
+  "rater": "claude-opus-4.8-single-rater",
+  "label": "single-rater illustrative; verdict = does the same underlying behaviour a monitoring rule would target get described (equivalent / partial = related-but-a-rule-for-one-misses-the-other / distinct); consensus-class never ground truth",
+  "judgments": [
+    {"a": "fin-2025-a002/IND-03", "b": "ofac-maritime-shipping/IND-29", "verdict": "partial", "note": "both maritime sanctions-evasion; IMO-number falsification vs STS-carrier — overlapping domain, different mechanism"},
+    {"a": "fin-2019-a006/IND-02", "b": "fintrac-synthetic-opioids/IND-40", "verdict": "equivalent", "note": "both = payments to opioid precursor-chemical suppliers"},
+    {"a": "fin-2018-a003/IND-02", "b": "fintrac-guid-accountants/IND-117", "verdict": "partial", "note": "PEP-concealment family; nominee fronting vs business-connection-to-PEP-network"},
+    {"a": "fin-2022-a001/IND-06", "b": "fintrac-guid-bc-notaries/IND-99", "verdict": "distinct", "note": "nominee shielding PEP ownership vs PEP multiple unjustified accounts"},
+    {"a": "fin-2024-alert003/IND-03", "b": "fintrac-guid-msb/IND-123", "verdict": "distinct", "note": "opaque-MSB/CVC channel risk vs travel-spend to terror jurisdiction"},
+    {"a": "fin-2024-a001/IND-05", "b": "fintrac-guid-securities/IND-147", "verdict": "partial", "note": "charity-TF; sham-NPO-soliciting side vs donor-to-flagged-cause side"},
+    {"a": "fin-2022-alert002/IND-17", "b": "ofac-maritime-shipping/IND-06", "verdict": "partial", "note": "both disguise movement; proxy luxury-goods transport vs indirect routing/transshipment"},
+    {"a": "fin-2022-a001/IND-02", "b": "fintrac-guid-msb/IND-99", "verdict": "partial", "note": "jurisdiction-risk; vendor incorporated high-risk vs routing through no-nexus countries"},
+    {"a": "fin-2023-alert006/IND-05", "b": "fintrac-guid-securities/IND-146", "verdict": "partial", "note": "sham-NPO + extremist web presence vs online-presence-supports-extremism (B narrower)"},
+    {"a": "fin-2022-alert002/IND-14", "b": "ofac-maritime-shipping/IND-13", "verdict": "distinct", "note": "shell impersonation vs ownership/ISM-management churn"},
+    {"a": "fin-2022-a001/IND-04", "b": "fintrac-guid-msb/IND-111", "verdict": "partial", "note": "PEP asset concealment; lifestyle-vs-source-of-wealth mismatch vs assets-held-via-intermediaries"},
+    {"a": "fin-2024-a001/IND-03", "b": "fintrac-guid-dpms/IND-90", "verdict": "partial", "note": "TF-corridor flows; intermediary-risk (MSB/VASP lax CDD) vs destination-risk (conflict zone)"},
+    {"a": "fin-2018-a003/IND-08", "b": "fintrac-guid-msb/IND-88", "verdict": "partial", "note": "PEP abuse of office; control of state assets vs control of licensing"},
+    {"a": "fin-2018-a003/IND-07", "b": "fintrac-guid-bc-notaries/IND-80", "verdict": "partial", "note": "high-risk-jurisdiction movement; funds to no-nexus jurisdictions vs services to SOEs via high-risk company"},
+    {"a": "fin-2018-a003/IND-08", "b": "fintrac-guid-msb/IND-90", "verdict": "distinct", "note": "PEP-controls-state-assets vs high-value-transacting-with-PEP"},
+    {"a": "fin-2018-a003/IND-06", "b": "fintrac-guid-accountants/IND-122", "verdict": "partial", "note": "PEP concealment; routed through inappropriate FI/DNFBP vs PEP-controlled offshore no-purpose entity"},
+    {"a": "fin-2022-a001/IND-05", "b": "fintrac-guid-securities/IND-128", "verdict": "distinct", "note": "PEP cross-jurisdiction flows vs travel/lodging-paid-for-PEP (bribery in kind)"},
+    {"a": "fin-2025-a001/IND-06", "b": "fintrac-terrorist-financing/IND-33", "verdict": "distinct", "note": "credit bust-out fraud vs liquidation of personal possessions"},
+    {"a": "fin-2018-a003/IND-14", "b": "fintrac-guid-accountants/IND-117", "verdict": "distinct", "note": "regime-expropriated-property transactions vs business-connections-to-PEP-network"},
+    {"a": "fin-2018-a003/IND-12", "b": "fintrac-guid-real-estate/IND-72", "verdict": "partial", "note": "vague/incomplete transaction detail; over-priced gov-contract invoices vs generic vague payment details"},
+    {"a": "fin-2018-a003/IND-06", "b": "fintrac-guid-bc-notaries/IND-97", "verdict": "partial", "note": "PEP concealment; routed through inappropriate FI/DNFBP vs PEP-controlled offshore no-purpose entity"},
+    {"a": "fin-2018-a003/IND-03", "b": "fintrac-guid-casinos/IND-87", "verdict": "distinct", "note": "nominee legal ownership vs PEP unexplained net-worth growth"},
+    {"a": "fin-2020-a008/IND-01", "b": "fintrac-human-trafficking/IND-61", "verdict": "partial", "note": "HT travel-pattern; domestic-movement + conduit-jurisdiction travel vs multi-passenger long-haul ticketing"},
+    {"a": "fin-2023-alert006/IND-05", "b": "fintrac-guid-bc-notaries/IND-112", "verdict": "partial", "note": "charity-TF; sham-NPO-soliciting vs donor-to-flagged-cause"}
+  ]
+}

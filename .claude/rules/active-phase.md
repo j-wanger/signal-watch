@@ -31,7 +31,7 @@ Direction gate (2026-06-16, two-workflow review through the new lenses — compo
 - [x] Re-grounded the refuted artifacts (contract §3 + pitch composition claim) + added the re-ground-before-commit process rule [done this session, architecture home]
 - [ ] casework audit-walk-to-source verifier (wire citation verifier to the frozen corpus) → an aml-casework-rooted session
 - [x] corpus redundancy measurement PLANNED as **Phase 51** (2026-06-16) — direction gated to the HYBRID non-ship artifact (honesty-axis decision: in-constraint deterministic upper bound + sampled consensus-class semantic estimate; ship corpus untouched); tasks T1–T4 + the ledger Phase-51 block written; the measurement workstream's other number (C/D-correctness over the 213 console divergences) stays a parallel measure-first candidate
-- [ ] Phase 51 implementation (T1 deterministic co-occurrence engine → T4 honesty regate) — in this signal-watch session or handed off
+- [x] Phase 51 DELIVERED 2026-06-16 (T1–T4): cross-regulator co-occurrence ≤ 0.325 (deterministic) · genuine equivalence est ~1.4% strict / ~11.5% band (single-rater illustrative, consensus deferred) — the §13 fm-1 frontier measured honestly; the corpus's no-dedup stance empirically vindicated; ship corpus byte-frozen (--check all 7/7 zero drift). Artifacts: scripts/corpus_redundancy.py · data/corpus-redundancy/equiv-sample.json · docs/corpus-redundancy-report.md
 - [ ] the structure-detector reachability probe (measure-only) → an aml-substrate-rooted session
 
 Per-pillar/per-phase gates for the sibling repos are tracked there (their `.dev-wiki` + DESIGN.md §8 + docs/).

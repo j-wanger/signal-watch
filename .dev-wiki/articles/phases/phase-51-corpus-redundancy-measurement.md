@@ -1,10 +1,12 @@
 ---
 title: Phase 51 — Corpus redundancy measurement (the §13 fm-1 frontier, measured honestly)
 phase: 51
-status: active
+status: complete
 ceremony: standard
 created: 2026-06-16
 updated: 2026-06-16
+delivered: 2026-06-16
+result: "cross-regulator co-occurrence ≤ 0.325 (deterministic upper bound); genuine equivalence est ~1.4% strict / ~11.5% band (single-rater illustrative, consensus deferred). §13 fm-1 measured; the corpus's no-dedup stance empirically vindicated. Ship corpus byte-frozen throughout."
 tags: [measurement-workstream, corpus, redundancy, composition, lfcm, fm-1, measure-first, non-ship]
 ---
 

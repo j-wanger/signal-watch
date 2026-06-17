@@ -1,0 +1,443 @@
+{
+  "n": 62,
+  "seed": 0,
+  "rater": "claude-opus-4-8 (blind subagent, single-rater, Phase 53 decomposition adjudication; same-family => a BOUND)",
+  "label": "Phase 53 — DECOMPOSITION: blind forced-pairwise adjudication of the random-sample-large mismatches (blind code vs committed, neutral order).",
+  "definition": "For each random-stratum mismatch the blind rater picked the better of the two codes (neutral seed-fixed order, never told which is committed). committed-better=ERROR (lower bound, same-family), both=DEFENSIBLE-neighbour (upper bound), blind-better=COMMITTED-QUESTIONABLE, neither=ESCALATE.",
+  "judgments": [
+    {
+      "id": "fin-2018-a003/IND-05#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fin-2018-a003/IND-05#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fin-2021-a004/IND-07#C",
+      "axis": "C",
+      "pick": "2",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fin-2022-a002/IND-08#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fin-2022-a002/IND-15#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fin-2023-alert005/IND-02#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fin-2024-a002/IND-05#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fin-2025-a001/IND-11#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fin-2025-a002/IND-08#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fin-2025-a002/IND-08#D",
+      "axis": "D",
+      "pick": "1",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fin-2025-a002/IND-15#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fin-2025-a003/IND-05#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fin-2025-a003/IND-05#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fin-2025-alert001/IND-03#D",
+      "axis": "D",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fin-2026-a001/IND-21#C",
+      "axis": "C",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-cannabis/IND-17#C",
+      "axis": "C",
+      "pick": "2",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-cannabis/IND-17#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-guid-accountants/IND-108#D",
+      "axis": "D",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-guid-accountants/IND-18#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-guid-accountants/IND-36#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-guid-accountants/IND-47#C",
+      "axis": "C",
+      "pick": "both",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-guid-bc-notaries/IND-81#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-guid-casinos/IND-17#C",
+      "axis": "C",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-guid-casinos/IND-79#D",
+      "axis": "D",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-guid-dpms/IND-43#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-guid-dpms/IND-92#C",
+      "axis": "C",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-guid-dpms/IND-92#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-guid-financial-entities/IND-120#D",
+      "axis": "D",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-guid-financial-entities/IND-40#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-guid-financial-entities/IND-41#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-guid-financial-entities/IND-67#D",
+      "axis": "D",
+      "pick": "1",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-guid-life-insurance/IND-03#C",
+      "axis": "C",
+      "pick": "2",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-guid-msb/IND-87#C",
+      "axis": "C",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-guid-msb/IND-87#D",
+      "axis": "D",
+      "pick": "1",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-guid-securities/IND-122#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-guid-securities/IND-145#D",
+      "axis": "D",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-guid-securities/IND-50#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-guid-virtual-currency/IND-07#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-guid-virtual-currency/IND-07#D",
+      "axis": "D",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-human-trafficking/IND-25#C",
+      "axis": "C",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-human-trafficking/IND-37#C",
+      "axis": "C",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-human-trafficking/IND-37#D",
+      "axis": "D",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-human-trafficking/IND-48#D",
+      "axis": "D",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-online-child-exploitation/IND-23#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-online-child-exploitation/IND-23#D",
+      "axis": "D",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-online-child-exploitation/IND-41#C",
+      "axis": "C",
+      "pick": "2",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-online-child-exploitation/IND-42#C",
+      "axis": "C",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-online-child-exploitation/IND-43#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-real-estate/IND-23#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-romance-fraud/IND-01#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-synthetic-opioids/IND-19#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "fintrac-terrorist-financing/IND-21#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-terrorist-financing/IND-32#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-terrorist-financing/IND-32#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-underground-banking/IND-12#C",
+      "axis": "C",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "fintrac-underground-banking/IND-12#D",
+      "axis": "D",
+      "pick": "1",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "ofac-maritime-shipping/IND-15#C",
+      "axis": "C",
+      "pick": "2",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "ofac-maritime-shipping/IND-15#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "ofac-maritime-shipping/IND-25#C",
+      "axis": "C",
+      "pick": "1",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "ofac-maritime-shipping/IND-25#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "committed",
+      "option_2": "blind"
+    },
+    {
+      "id": "ofac-sham-transactions/IND-03#D",
+      "axis": "D",
+      "pick": "2",
+      "option_1": "blind",
+      "option_2": "committed"
+    },
+    {
+      "id": "ofac-virtual-currency/IND-02#C",
+      "axis": "C",
+      "pick": "2",
+      "option_1": "blind",
+      "option_2": "committed"
+    }
+  ]
+}

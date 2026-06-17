@@ -98,12 +98,83 @@ dimension is therefore *not* "X% correct," but **reproducible-enough + adjudicab
 with a residual ~⅓ of free assignments landing on a **different** code whose error-vs-defensible
 composition was **not adjudicated**. A clean decomposition would require running the forced-pairwise
 adjudication on the **same** random-stratum mismatches (blind code vs committed, neutral order); an
-independent rater (different model family / human) would convert self-consistency into reliability. Both
-are the named follow-ups, deferred-with-owner.
+independent rater (different model family / human) would convert self-consistency into reliability.
+**Phase 53 ran the first of these (see the section below): it REFUTES the "plausibly scatter" guess —
+the disagreements are sharp, not co-defensible — and surfaces a context-asymmetry confound.** A
+genuinely independent *and context-matched* rater remains the named follow-up, deferred-with-owner.
 
 For the program design this is the honest posture for any **judgmental tag with no ground truth**: gate
 what is groundable (the verbatim `flag`), and **measure** what is judgmental (the C/D code) as blind
 agreement (consensus only with ≥2 independent raters) — never conflate the two.
+
+## Phase 53 — Decomposing the disagreement (the named follow-up, delivered)
+
+Phase 52 left one measurement open: whether the ~⅓ random-stratum disagreement is **genuine error** or
+**defensible adjacent-code scatter** — "unmeasured," resolvable only by "the forced-pairwise adjudication
+on the **same** random-stratum mismatches." Phase 53 runs exactly that, over an enlarged sample. (2026-06-16.)
+
+### Enlarged random stratum (n=96) + chance-correction
+
+| Measure | Value | Wilson 95% | Cohen's κ |
+|---|---|---|---|
+| C agreement | **0.677** (65/96) | [0.578, 0.762] | **0.658** |
+| D agreement | **0.677** (65/96) | [0.578, 0.762] | **0.646** |
+| both axes | **0.490** (47/96) | [0.392, 0.588] | — |
+
+The enlarged self-consistency **reproduces** the Phase-52 n=24 figure (0.625; the Wilson intervals
+overlap). Critically, **Cohen's κ ≈ 0.65 ≈ the raw agreement**: because the vocab is 28/20-way, chance
+agreement is small, so the modest self-consistency is **genuine, not chance-inflated**. This closes the
+report's earlier "not chance-corrected" caveat for the random stratum — the ~⅔ self-consistency is real.
+
+### Decomposition of the 62 mismatches (31 C + 31 D)
+
+A third blind rater re-adjudicated every per-axis mismatch forced-pairwise — the blind re-rate code vs the
+committed code, neutral seed-fixed order, **never told which is which**:
+
+| Verdict | Count (of 62) | Reading |
+|---|---|---|
+| committed code better | **23** (0.371) [0.262, 0.495] | genuine ERROR in the re-rate / committed upheld |
+| both defensible | **1** (0.016) | adjacent-code scatter |
+| blind re-rate better | **38** (0.613) | committed-questionable (**confounded — see below**) |
+| neither / escalate | **0** | un-adjudicable |
+
+**The "scatter" hypothesis is REFUTED.** Phase 52 guessed the disagreement was "plausibly defensible
+adjacent-code scatter." It is not: only **1/62 (1.6%)** was rated both-defensible and **0** neither. The
+disagreements are **sharp** — a third rater almost always has a definite preference. The unguarded C/D
+dimension is *not* a fog of equally-good neighbours; the codes are adjudicable.
+
+**But the direction is confounded — read it as a BOUND, not a committed-error rate.** The adjudicator
+preferred the blind re-rate 61% and the committed code 37%. This is **not** "the committed corpus is 61%
+wrong," for a load-bearing reason: the committed codes were assigned with the **full document context**
+(the inverted extraction loop + the capability-interview posture), while **both** blind raters (the re-rate
+*and* this adjudicator) saw only the `flag` + `red_flag`. A flag-only adjudicator naturally sides with the
+flag-only re-rate — the two share both the impoverished context and the same model family. So:
+- **committed-better 23/62 (37%) is a clean LOWER bound on "committed code defensibly upheld":** even a
+  context-disadvantaged sibling rater, with the deck stacked toward the blind re-rate, still preferred the
+  committed code in 37% of disagreements.
+- **blind-better 38/62 (61%) is an UPPER bound on "committed code questionable":** it mixes genuine
+  committed error with the context-asymmetry confound (flag-only re-rate vs full-document committed) +
+  same-family agreement, in an **unmeasured** proportion — so it is **not** a committed-corpus error rate.
+  (The confound is real and the context asymmetry is large, but how much of the 61% it accounts for is
+  *itself* not measured here — the same "share unmeasured" caution the Phase-52 finding carried, one level
+  down.)
+
+Per-axis the split is near-identical (C: error 12 / both 1 / blind-better 18; D: error 11 / both 0 /
+blind-better 20), so neither axis is the sole driver.
+
+**A0 correction — the predicted bound was in the wrong place.** The Phase-53 gate predicted the same-family
+adjudicator would inflate *both-defensible* (rating its own scatter generously); error would be a lower
+bound *because* scatter was over-counted. That mechanism **did not fire** (both-defensible ≈ 0). The actual
+confound is **context asymmetry**: the two blind raters share a flag-only frame and side with each other
+against the full-context committed code. The bound still holds (error = lower bound, committed-questionable
+= upper bound), but for a *different* reason than planned — recorded honestly rather than retrofitted.
+
+### What this changes for the follow-up
+
+The deferred "independent rater (different model family / human)" must also be **context-matched** — given
+the same document context the committed code had, or run flag-only-vs-flag-only on *both* poles — otherwise
+it re-measures the context gap, not reliability. A context-matched or genuinely-independent rater remains
+the path from "bounded + confounded" to a clean reliability number.
 
 ## Honesty boundary (what this is NOT)
 
@@ -114,14 +185,19 @@ agreement (consensus only with ≥2 independent raters) — never conflate the t
   deferred-with-owner.**
 - The DIVERGENCE number measures **adjudicability + which pole is upheld** on a pre-selected *hard*
   subset (the cases Phase-34 changed) — it is **not** a corpus-wide correctness rate.
-- **Single rater, not a panel.** Both strata use one same-model-family blind rater against the committed
-  code — there is no inter-rater reliability statistic (no kappa, no CI). Genuine *consensus* needs ≥2
-  independent raters.
-- **No uncertainty / not chance-corrected.** Every figure is a point estimate from 24 draws at one seed;
-  raw percent agreement is **not** chance-corrected (kappa/alpha are the proper statistics). The Wilson
-  95% intervals on 15/24, 10/24 and 17/24 **overlap**, so 62.5% and 70.8% are **statistically
-  indistinguishable at this n** — read the two as illustrative first instances, not a measured difference.
-- Sample parameters (n=24, seed=0) are **chosen, not derived**. The deliverable is the reproducible
+- **Same model family throughout, not an independent panel.** Every rater (the n=24 + n=96 re-rates, the
+  divergence + decomposition adjudicators) is a `claude-opus-4-8` blind subagent. The Phase-53 enlarged
+  stratum now carries **Cohen's κ** (κ ≈ raw ≈ 0.65 → agreement is genuine, not chance) and **Wilson CIs**,
+  so the "no kappa / no CI" gap is closed for that stratum; but genuine *consensus* / reliability still
+  needs ≥2 **independent** (and **context-matched**) raters — deferred-with-owner.
+- The **decomposition** of the random mismatches is a **BOUND, not a clean split** (Phase 53): the
+  same-family adjudicator shares the flag-only context of the re-rate, so committed-error is a **lower**
+  bound (≥37%) and committed-questionable an **upper** bound (≤61%, confounded by context asymmetry — it is
+  **not** a committed-corpus error rate).
+- The original n=24 RANDOM / DIVERGENCE figures are point estimates at one seed; their Wilson intervals on
+  15/24, 10/24, 17/24 **overlap**, so 62.5% and 70.8% are **statistically indistinguishable at that n** —
+  illustrative first instances, not a measured difference.
+- Sample parameters (n=24/96, seed=0) are **chosen, not derived**. The deliverable is the reproducible
   machinery + an honest first instance, not a final number.
 - **NON-SHIP:** the ship corpus stays byte-frozen; `build.py` never reads `data/cd-correctness/`; no
   C/D number lands on any ship artifact.
@@ -129,9 +205,11 @@ agreement (consensus only with ≥2 independent raters) — never conflate the t
 ## Reproduce
 
 ```
-python3 scripts/cd_correctness.py --report                       # this report's numbers
-python3 scripts/cd_correctness.py --sample-random 24 --seed 0    # the exact blind random items
-python3 scripts/cd_correctness.py --sample-divergence 24 --seed 0  # the exact blind divergence cases
-python3 scripts/cd_correctness.py --verify-fixtures              # integrity: judgments match the seeded samples
-python3 scripts/cd_correctness.py --selftest                     # the agreement + sampling logic, on fixtures
+python3 scripts/cd_correctness.py --report                          # this report's numbers (all strata)
+python3 scripts/cd_correctness.py --sample-random 24 --seed 0       # the Phase-52 blind random items
+python3 scripts/cd_correctness.py --sample-random 96 --seed 0       # the Phase-53 enlarged blind random items
+python3 scripts/cd_correctness.py --sample-divergence 24 --seed 0   # the blind divergence cases
+python3 scripts/cd_correctness.py --sample-decomposition --seed 0   # the Phase-53 mismatches to adjudicate
+python3 scripts/cd_correctness.py --verify-fixtures                 # integrity: judgments match the seeded samples
+python3 scripts/cd_correctness.py --selftest                        # the agreement + sampling + kappa logic, on fixtures
 ```

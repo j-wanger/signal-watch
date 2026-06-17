@@ -63,7 +63,7 @@ def mint_dossier_id(account_id: str, alert_ids) -> str:
 # --- corpus grounding (the FROZEN signal-watch corpus — signal-watch's OWN data) ------------------
 def _find_indicator_flag(advisory_id: str, indicator_id: str):
     """Return the verbatim flag of <advisory_id>:<indicator_id> from the committed corpus, or None."""
-    matches = glob.glob(os.path.join(_ROOT, "data", "*", "derived", f"{advisory_id}.json"))
+    matches = sorted(glob.glob(os.path.join(_ROOT, "data", "*", "derived", f"{advisory_id}.json")))
     if not matches:
         return None
     record = json.load(open(matches[0], encoding="utf-8"))
@@ -159,6 +159,8 @@ def check_chain(bundle: dict, signed: dict) -> list:
                 v.append(f"dossier: references unknown alert_id '{aid}'")
 
     # === B. casework side — the SAR is verified + signed ===
+    if signed.get("illustrative") is not True:
+        v.append("signed: 'illustrative' must be true (synthetic/illustrative output discipline)")
     s = signed.get("str_record", {})
     if not s:
         v.append("signed: missing 'str_record' (the casework SAR)")
@@ -190,7 +192,9 @@ def check_chain(bundle: dict, signed: dict) -> list:
                     v.append(f"{cw}: dangling cite '{c}' (resolves to no grounded signal_id / txn_id)")
 
     so = signed.get("signoff")
-    if so is not None:
+    if so is None:
+        v.append("signed: missing 'signoff' (the SAR is not signed — the chain's terminal Class-A artifact)")
+    else:
         if so.get("signed") is not True:
             v.append("signed.signoff: signed != true (the SAR is not signed)")
         if so.get("blocking_violations"):
@@ -385,6 +389,17 @@ def selftest() -> int:
 
 
 def real(substrate_path: str, casework_path: str) -> int:
+    # Guard: --real is for REAL sibling outputs, NEVER the committed synthetic --selftest fixtures.
+    # Running the harness on data/e2e/* would flip the committed pillar-status to a false "connected"
+    # and drift the launcher (the synthetic fixtures are labeled illustrative, but a green bridge state
+    # reads as a real connectivity claim). Use --selftest to exercise the fixtures.
+    e2e_abs = os.path.abspath(E2E_DIR) + os.sep
+    for p in (substrate_path, casework_path):
+        if p and os.path.abspath(p).startswith(e2e_abs):
+            print(f"REFUSED: {p} is a synthetic --selftest fixture (data/e2e/). --real verifies REAL "
+                  f"sibling outputs (evidence/<run_id>/...); run --selftest to exercise the fixtures.",
+                  file=sys.stderr)  # noqa: T201
+            return 2
     missing = [p for p in (substrate_path, casework_path) if not (p and os.path.exists(p))]
     if missing:
         # honest gate: the sibling outputs do not exist yet (bridges #1/#2 not landed)

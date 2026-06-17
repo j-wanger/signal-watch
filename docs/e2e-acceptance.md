@@ -55,8 +55,9 @@ chain order:
 7. **Citations resolve:** every `str_record.narrative_claims[].cites` entry resolves to either a
    `signal_id` grounded by some alert OR a `txn_id` in `transactions` (dangling-reference check); each
    claim has non-empty `text`.
-8. **Signed:** when a `signoff` block is present, `signoff.signed === true` and
-   `signoff.blocking_violations === []`. (The signed SAR is the chain's terminal Class-A artifact.)
+8. **Signed:** the SAR carries a `signoff` block with `signoff.signed === true` and
+   `signoff.blocking_violations === []` (REQUIRED — the chain's terminal Class-A artifact; an unsigned
+   SAR is not a connected chain).
 
 ### C. Cross-pillar identity
 9. **Same case:** the substrate bundle and the casework signed SAR share `case_id`, and the SAR's
@@ -81,5 +82,8 @@ whose every statement walks back through the evidence to the frozen regulator co
 ## Honesty boundary
 
 The synthetic fixtures are LABELED synthetic (`illustrative: true`) and are NEVER presented as real
-substrate output. The harness proves *the chain connects*, not that any number is real — every output
-carries the always-on Illustrative posture. No sibling code is imported; the seam is files only.
+substrate output. `--real` **refuses any path under `data/e2e/`** (the synthetic fixtures) — so a
+verification run cannot flip the committed `pillar-status.json` to a false "connected" / green launcher;
+only genuine sibling outputs (`evidence/<run_id>/…`) update the bridge state. The harness proves *the
+chain connects*, not that any number is real — every output carries the always-on Illustrative posture.
+No sibling code is imported; the seam is files only.

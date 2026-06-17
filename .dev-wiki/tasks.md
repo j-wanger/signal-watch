@@ -44,6 +44,30 @@
 > - Phase 8: Doc true-up + provenance fix (M6 debt) — COMPLETED + accepted
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
+<!-- phase:phase-56-chain-workbench -->
+<!-- gate-log:phase-56 direction=approved delivery=pending -->
+
+## Phase 56 — Chain workbench: the HTML analyst UI (companion-served live consume + verify over a pre-baked case library)
+
+An HTML frontend for the substrate→casework→verify chain, living in signal-watch. Reframed (the user's
+"detection doesn't need runtime gen") to an ANALYST CASE-WORKBENCH: detection pre-baked/upstream (evidence
+bundles vendored like the corpus pin); the casework consume (6 verifiers + a LIVE neural SAR draft) + the
+cross-pillar verify run LIVE per case, stage-streamed. Dev-time companion (serve_chain.py + chain.html),
+NEVER a ship artifact (offline dists byte-frozen; chain.html is not a build target). Subprocess + file
+handoff only — no sibling import. Plan: articles/phases/phase-56-chain-workbench.md. Ledger: Phase-56
+(all_accept:false; A4 casework-consume-CLI the T0 weakest; A3 defer-neural REJECTED→live-in-v1). Grounded
+against aml-substrate@df23bba + aml-casework@85602c1. Gate 2026-06-17.
+
+- [ ] T1 Vendor the case library + build-time validator | scope: data/chain-cases/**, scripts/(validator) | success: ≥1 substrate evidence bundle committed under data/chain-cases/ (start CASE-P-0010361, synthetic, illustrative:true) with a provenance note (aml-substrate@df23bba); a validator confirms each vendored bundle passes e2e_chain_check's substrate-side checks (schema + §2 id-mint + corpus grounding); `python3 scripts/build.py --check all` 8/8 (data/chain-cases is NOT a build target) | size: S
+- [ ] T2 Sibling brief: the casework consume CLI | scope: aml-casework/docs/consume-cli-PLAN-BRIEF.md (NEW, sibling) | success: brief specs `python -m aml_casework.ingest <bundle> --out <signed.json> [--drafter stub|claude]` as a thin wrapper over load_real_bundle/generate_narrative/(ClaudeDrafter|FixedDraftStub)/record_signoff/emit_signed_sar; server-side ANTHROPIC_API_KEY for claude, stub default+fallback; code-verified current-HEAD facts (aml-casework@85602c1); acceptance = serve_chain.py drives it → e2e_chain_check --real CONNECTED (authored here, executed in a casework session) | size: S
+- [ ] T3 serve_chain.py companion (stdlib, dev-time, no sibling import) | scope: scripts/serve_chain.py (NEW), tests/ | success: GET /cases lists the vendored library; POST /run {case} → subprocess the casework consume CLI (--drafter stub default; claude iff ANTHROPIC_API_KEY) → subprocess e2e_chain_check --real → stage-stream NDJSON (evidence → consume/verifiers+draft → cross-pillar verify → CONNECTED) → final payload (bundle + signed SAR + audit walk); `python3 scripts/serve_chain.py --selftest` green OFFLINE with the casework subprocess STUBBED (cases listed; a run streams stages → CONNECTED on a fixture; key→stub fallback; honest gated/error paths); `! grep -nE "import aml_substrate|import aml_casework" scripts/serve_chain.py`; build.py never imports it | size: M
+- [ ] T4 The HTML workbench (chain.html, dossier theme) | scope: chain.html (NEW), tests/chain.test.mjs (NEW) | success: chain.html renders the analyst workbench (case list → Run → staged reveal: evidence bundle → the 6 verifiers + the live SAR draft → cross-pillar verify → CONNECTED + signed SAR + flag→corpus walk); always-on "Illustrative data & outputs" badge; esc() the sole escaper; served by serve_chain.py (NOT a build target, NOT in dist/); `node tests/chain.test.mjs` green (stage-rendering contract + badge + XSS-escape + NDJSON stage consumption under the DOM shim); dossier aesthetic via frontend-design | size: L
+- [ ] T5 Walkthrough + isolation guard | scope: docs/chain-workbench.md (NEW), tests/smoke-checklist.md | success: docs/chain-workbench.md gives the run recipe (start serve_chain.py; the casework consume-CLI prerequisite; optional ANTHROPIC_API_KEY for the neural draft; the keyless stub-fallback path) + the two-beat framing (signal-watch spine selftest-proven now; the live run gated on the casework CLI); `! grep -nE "chain\.html|serve_chain" scripts/build.py` (chain.html NOT a build target); `python3 scripts/build.py --check all` 8/8 (offline dists byte-identical) | size: S
+
+> Phase 56 SPINE = T1–T5 (signal-watch-local, deliverable this/next session; T2 is a brief). The LIVE run (real neural SAR drafted in the browser → CONNECTED end-to-end) is the DELIVERY GATE (beat 2), GATED on the casework consume CLI landing in a casework-rooted session. Two-beat, like Phase 55.
+> Exit (phase-56): (1) vendored library + validator; (2) serve_chain.py --selftest green (casework subprocess STUBBED, offline); (3) node tests/chain.test.mjs green; (4) the casework consume-CLI brief written; (5) docs/chain-workbench.md + chain.html NOT a build target + --check all 8/8.
+> Abort: chain.html becomes a build target OR any of the 8 offline dists drift → STOP and surface. The companion importing sibling code → out of bounds (subprocess + file-contract only). The key reaching the browser → out of bounds (non-negotiable). A validator looks like it needs loosening → fix the data/design, never the validator.
+
 <!-- phase:phase-55-cross-pillar-e2e-bridge -->
 <!-- gate-log:phase-55 direction=approved delivery=accepted -->
 

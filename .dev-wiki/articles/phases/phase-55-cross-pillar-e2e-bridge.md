@@ -1,7 +1,7 @@
 ---
 title: "Phase 55 — Cross-pillar end-to-end bridge: aggregation + verification (the 3-pillar full demo connected)"
 type: phase
-status: active
+status: completed
 ceremony: lite
 milestone: M9
 created: 2026-06-17

@@ -1,0 +1,24 @@
+{
+  "frozen": "2026-06-16",
+  "definition": "C/D-tag reliability control baseline \u2014 the floors are each stratum's Wilson-95 LOWER bound at validation; --control-check breaches when a committed-code re-tag breaks fixture integrity or a re-sampled rate falls below a floor. Consensus, never validated correctness.",
+  "strata": {
+    "self_consistency": {
+      "c_rate": 0.6770833333333334,
+      "d_rate": 0.6770833333333334,
+      "n": 96,
+      "c_lower": 0.5782964352989827,
+      "d_lower": 0.5782964352989827
+    },
+    "independent_reliability": {
+      "c_rate": 0.6041666666666666,
+      "d_rate": 0.6458333333333334,
+      "n": 96,
+      "c_lower": 0.5041492795838095,
+      "d_lower": 0.546241158747365
+    },
+    "divergence_uphold": {
+      "rate": 0.7083333333333334,
+      "n": 24
+    }
+  }
+}

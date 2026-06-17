@@ -49,6 +49,8 @@ RANDOM_FIXTURE = ROOT / "data" / "cd-correctness" / "random-sample.json"       #
 DIVERGENCE_FIXTURE = ROOT / "data" / "cd-correctness" / "divergence-sample.json"  # NON-corpus; build.py never reads it
 RANDOM_LARGE_FIXTURE = ROOT / "data" / "cd-correctness" / "random-sample-large.json"  # Phase 53: enlarged random re-rate (decomposition source)
 DECOMP_FIXTURE = ROOT / "data" / "cd-correctness" / "decomposition-sample.json"       # Phase 53: forced-pairwise adjudication of the random mismatches
+INDEPENDENT_FIXTURE = ROOT / "data" / "cd-correctness" / "independent-sample.json"     # Phase 54: context-matched CROSS-FAMILY independent rater (same gids as random-large)
+CONTROL_BASELINE = ROOT / "data" / "cd-correctness" / "cd-control-baseline.json"       # Phase 54: the frozen control baseline (--control-freeze writes it; --control-check reads it)
 CASES = ROOT / "data" / "console" / "cases.json"          # read-only measurement input (the 213 Phase-34 divergences)
 TAXONOMY = ROOT / "data" / "capability-taxonomy.json"     # read-only — the closed C1-C28 / D1-D20 vocab
 
@@ -218,6 +220,69 @@ def wilson_ci(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
     center = (p + z * z / (2 * n)) / denom
     half = (z * ((p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5)) / denom
     return (max(0.0, center - half), min(1.0, center + half))
+
+
+def krippendorff_alpha(units: list[list[str]]) -> float | None:
+    """Krippendorff's alpha (NOMINAL) over units — the chance-corrected inter-rater consensus stat the
+    Phase-52/53 reports named as missing (it generalises Cohen's kappa to >2 raters + incomplete data).
+
+    units = [[code_by_rater1, code_by_rater2, ...], ...]; only units with >=2 ratings are pairable.
+    alpha = 1 - Do/De over the coincidence matrix (nominal distance: 0 if equal, 1 else). Returns None
+    when nothing is pairable; 1.0 when all ratings coincide. Reported WITH the caveat that the raters
+    here are NOT all independent (committed + Opus-blind share a family) — alpha is a consensus
+    statistic, never validated correctness."""
+    o: Counter = Counter()
+    valid = [u for u in units if len(u) >= 2]
+    if not valid:
+        return None
+    for u in valid:
+        m = len(u)
+        cnt = Counter(u)
+        for c in cnt:
+            for k in cnt:
+                pairs = cnt[c] * (cnt[c] - 1) if c == k else cnt[c] * cnt[k]
+                o[(c, k)] += pairs / (m - 1)
+    cats = {c for pair in o for c in pair}
+    n_c = {c: sum(o.get((c, k), 0.0) for k in cats) for c in cats}
+    n = sum(n_c.values())
+    if n <= 1:
+        return None
+    do = sum(v for (c, k), v in o.items() if c != k) / n
+    de = (n * n - sum(v * v for v in n_c.values())) / (n * (n - 1))
+    if de == 0:
+        return 1.0
+    return 1 - do / de
+
+
+def join_raters(*fixtures: dict) -> dict[str, dict]:
+    """Index the SAME-gid fixtures by gid, keeping each fixture's blind C/D + the (shared) committed
+    C/D. Used to put the committed code, the Opus-blind re-rate, and the Qwen context-matched rate on
+    one row per gid for the cross-rater agreement + Krippendorff's alpha."""
+    by_gid: dict[str, dict] = {}
+    for fx in fixtures:
+        rater = fx.get("rater", "?")
+        for j in fx["judgments"]:
+            row = by_gid.setdefault(j["gid"], {"gid": j["gid"],
+                                               "committed_capability": j["committed_capability"],
+                                               "committed_data_source": j["committed_data_source"]})
+            row[f"{rater}__C"] = j["blind_capability"]
+            row[f"{rater}__D"] = j["blind_data_source"]
+    return by_gid
+
+
+def pairwise_agreement(fx_a: dict, fx_b: dict) -> dict:
+    """Per-axis agreement between two blind raters over their shared gids (their blind picks, NOT vs
+    committed) — e.g. Opus-blind-flag-only vs Qwen-context-matched (a genuine cross-family number)."""
+    a = {j["gid"]: j for j in fx_a["judgments"]}
+    b = {j["gid"]: j for j in fx_b["judgments"]}
+    shared = sorted(set(a) & set(b))
+    n = len(shared)
+    c = sum(1 for g in shared if a[g]["blind_capability"] == b[g]["blind_capability"])
+    d = sum(1 for g in shared if a[g]["blind_data_source"] == b[g]["blind_data_source"])
+    return {"n": n, "c_agree": c, "d_agree": d,
+            "c_rate": c / n if n else 0.0, "d_rate": d / n if n else 0.0,
+            "c_ci": wilson_ci(c, n), "d_ci": wilson_ci(d, n),
+            "rater_a": fx_a.get("rater", "?"), "rater_b": fx_b.get("rater", "?")}
 
 
 # ---------------------------------------------------------------------------
@@ -460,18 +525,148 @@ def measure(report: bool = False) -> None:
         print("    READ AS A BOUND (A0): the adjudicator is SAME-Claude-family, so it shares the biases that")
         print("    produced the neighbour — error is a LOWER bound, defensible-scatter an UPPER bound.")
 
+    if INDEPENDENT_FIXTURE.exists():
+        ifx = json.loads(INDEPENDENT_FIXTURE.read_text(encoding="utf-8"))
+        ir = random_agreement(ifx)
+        ok, msg = verify_random(ifx)
+        print()
+        print("  INDEPENDENT stratum (Phase 54) — DEFINITION: a CONTEXT-MATCHED, genuinely CROSS-FAMILY rater")
+        print(f"  ({ir['rater']}) re-assigns C + D from the SAME inputs the committed assignment had (the")
+        print("  source-document region + the 28+20 interview posture + the closed vocab — NOT flag-only);")
+        print("  agreement = independent == committed, per axis. The Phase-52/53 deferred follow-up, executed.")
+        print(f"  rater={ir['rater']}, seed={ir['seed']}, n={ir['n']}; integrity: {'VERIFIED' if ok else '!! ' + msg + ' !!'}.")
+        print(f"    C agreement: {ir['c_rate']:.3f}  ({ir['c_agree']}/{ir['n']})  Wilson95 [{ir['c_ci'][0]:.3f},{ir['c_ci'][1]:.3f}]  kappa={ir['c_kappa']:.3f}")
+        print(f"    D agreement: {ir['d_rate']:.3f}  ({ir['d_agree']}/{ir['n']})  Wilson95 [{ir['d_ci'][0]:.3f},{ir['d_ci'][1]:.3f}]  kappa={ir['d_kappa']:.3f}")
+        print(f"    both axes:   {ir['both_rate']:.3f}  ({ir['both_agree']}/{ir['n']})  Wilson95 [{ir['both_ci'][0]:.3f},{ir['both_ci'][1]:.3f}]")
+        print("    READ AS: a RELIABILITY number (context-matched + cross-family removes the Phase-53 context")
+        print("    confound AND the same-family bias) — but still CONSENSUS, never validated correctness.")
+        if RANDOM_LARGE_FIXTURE.exists():
+            rlfx = json.loads(RANDOM_LARGE_FIXTURE.read_text(encoding="utf-8"))
+            xr = pairwise_agreement(rlfx, ifx)  # Opus-blind-flag-only vs Qwen-context-matched (genuine cross-family)
+            rows = join_raters(rlfx, ifx)
+            ra, rb = rlfx.get("rater", "opus-blind"), ifx.get("rater", "qwen")
+            shared = [r for r in rows.values() if f"{ra}__C" in r and f"{rb}__C" in r]
+            ac = krippendorff_alpha([[r["committed_capability"], r[f"{ra}__C"], r[f"{rb}__C"]] for r in shared])
+            ad = krippendorff_alpha([[r["committed_data_source"], r[f"{ra}__D"], r[f"{rb}__D"]] for r in shared])
+            print(f"    cross-rater (Opus-blind-flag-only vs Qwen-context-matched), n={xr['n']}:"
+                  f" C {xr['c_rate']:.3f} ({xr['c_agree']}/{xr['n']}) · D {xr['d_rate']:.3f} ({xr['d_agree']}/{xr['n']})")
+            ac_s = f"{ac:.3f}" if ac is not None else "n/a"
+            ad_s = f"{ad:.3f}" if ad is not None else "n/a"
+            print(f"    Krippendorff's alpha over {{committed, Opus-blind, Qwen-context-matched}} (chance-corrected"
+                  f" 3-rater consensus): C alpha={ac_s} · D alpha={ad_s}")
+            print("      (NOT all 3 raters are independent — committed + Opus-blind share a family; alpha is a")
+            print("       consensus statistic over the panel, never validated correctness.)")
+
     if report:
         print()
         print("  HONESTY BOUNDARY:")
         print("    - Consensus / self-consistency, NEVER ground truth or validated correctness. The random")
-        print("      number is a SAME-MODEL re-rate (shared biases) — independence (a different model family")
-        print("      / human) + a chance-corrected inter-rater panel (Krippendorff's alpha) are deferred-with-owner.")
+        print("      number is a SAME-MODEL re-rate (shared biases) — it can only lower-bound reliability.")
+        print("    - Phase 54 DELIVERED the deferred cross-family + chance-corrected pieces: the INDEPENDENT")
+        print("      stratum is a CONTEXT-MATCHED, different-model-family (local Qwen) rater, and Krippendorff's")
+        print("      alpha now chance-corrects the rater panel. STILL deferred-with-owner: a HUMAN domain-expert")
+        print("      rater (the panel is two model families + the committed code, not yet a human).")
         print("    - The DECOMPOSITION is a BOUND, not a clean split: the same-family adjudicator rates its own")
         print("      scatter generously, so ERROR is a LOWER bound and DEFENSIBLE-neighbour an UPPER bound.")
         print("    - Sample size (n) + seed are CHOSEN, not derived; raw % carries its Wilson95 CI + Cohen's")
         print("      kappa; the deliverable is the reproducible machinery + an honest first instance.")
         print("    - NON-SHIP: the ship corpus (corpus.html / dist/corpus / all derived / the overlays) is")
         print("      byte-frozen; build.py never reads data/cd-correctness/.")
+
+
+# ---------------------------------------------------------------------------
+# The CONTROL (Phase 54) — the blueprint §4-§5 measured-not-gated control, EXECUTABLE.
+# The instrument above is the measurement; this turns it into ongoing monitoring with a frozen
+# baseline + trip-wires. --control-freeze records the validation baseline; --control-check re-evaluates
+# the committed fixtures vs the CURRENT corpus and FLAGS a breach (drifted committed code / a rate
+# below the frozen Wilson floor). Deterministic, stdlib, read-only — NO model in this path.
+# ---------------------------------------------------------------------------
+
+def control_metrics_from_current() -> dict:
+    """The control's monitored metrics, computed from the committed fixtures vs the CURRENT corpus.
+    Self-consistency (Opus-blind re-rate), independent reliability (Qwen context-matched cross-family),
+    divergence uphold — each WITH its Wilson lower bound (the trip-wire floor at freeze)."""
+    out: dict = {}
+    if RANDOM_LARGE_FIXTURE.exists():
+        r = random_agreement(json.loads(RANDOM_LARGE_FIXTURE.read_text(encoding="utf-8")))
+        out["self_consistency"] = {"c_rate": r["c_rate"], "d_rate": r["d_rate"], "n": r["n"],
+                                   "c_lower": r["c_ci"][0], "d_lower": r["d_ci"][0]}
+    if INDEPENDENT_FIXTURE.exists():
+        r = random_agreement(json.loads(INDEPENDENT_FIXTURE.read_text(encoding="utf-8")))
+        out["independent_reliability"] = {"c_rate": r["c_rate"], "d_rate": r["d_rate"], "n": r["n"],
+                                          "c_lower": r["c_ci"][0], "d_lower": r["d_ci"][0]}
+    if DIVERGENCE_FIXTURE.exists():
+        d = divergence_agreement(json.loads(DIVERGENCE_FIXTURE.read_text(encoding="utf-8")))
+        out["divergence_uphold"] = {"rate": d["uphold_correction_rate"], "n": d["n"]}
+    return out
+
+
+def evaluate_trip_wires(baseline: dict, current: dict, integrity: list[tuple[str, bool, str]]) -> tuple[list, list]:
+    """PURE trip-wire evaluation → (passes, breaches). Two classes: (1) INTEGRITY — every fixture's
+    committed-code snapshot still matches the current corpus (a re-tag of the unguarded dimension trips
+    this); (2) RATE FLOOR — each monitored axis stays at/above its frozen Wilson lower bound (a future
+    re-sample that degrades trips this). Both are first-class; a breach is never silently swallowed."""
+    passes, breaches = [], []
+    for label, ok, msg in integrity:
+        (passes if ok else breaches).append(f"integrity[{label}]: {msg}")
+    for stratum in ("self_consistency", "independent_reliability"):
+        b, c = baseline.get("strata", {}).get(stratum), current.get(stratum)
+        if not b or not c:
+            continue
+        for ax in ("c", "d"):
+            floor, rate = b.get(f"{ax}_lower"), c.get(f"{ax}_rate")
+            if floor is None or rate is None:
+                continue
+            line = f"{stratum}.{ax}: current {rate:.3f} vs frozen floor {floor:.3f}"
+            (passes if rate >= floor - 1e-9 else breaches).append(line)
+    return passes, breaches
+
+
+def control_freeze() -> int:
+    """Record the current measured metrics as the conscious validation baseline (the news_quality
+    --freeze idiom). A re-baseline is a DELIBERATE act — it is how you adopt a corrected corpus."""
+    metrics = control_metrics_from_current()
+    if not metrics:
+        print("  no fixtures present — nothing to freeze (run the measurement strata first).")
+        return 1
+    baseline = {
+        "frozen": "2026-06-16",
+        "definition": "C/D-tag reliability control baseline — the floors are each stratum's Wilson-95 LOWER bound "
+                      "at validation; --control-check breaches when a committed-code re-tag breaks fixture integrity "
+                      "or a re-sampled rate falls below a floor. Consensus, never validated correctness.",
+        "strata": metrics,
+    }
+    CONTROL_BASELINE.write_text(json.dumps(baseline, indent=2) + "\n", encoding="utf-8")
+    print(f"  froze the control baseline -> {CONTROL_BASELINE.relative_to(ROOT)}")
+    for s, m in metrics.items():
+        print(f"    {s}: {m}")
+    return 0
+
+
+def control_check() -> int:
+    """Re-evaluate the committed fixtures vs the CURRENT corpus against the frozen baseline → PASS/BREACH."""
+    if not CONTROL_BASELINE.exists():
+        print(f"  no baseline yet — run `--control-freeze` first ({CONTROL_BASELINE.relative_to(ROOT)} missing).")
+        return 1
+    baseline = json.loads(CONTROL_BASELINE.read_text(encoding="utf-8"))
+    integrity = []
+    for label, path, verify in (("random-large", RANDOM_LARGE_FIXTURE, verify_random),
+                                ("independent", INDEPENDENT_FIXTURE, verify_random),
+                                ("divergence", DIVERGENCE_FIXTURE, verify_divergence)):
+        if path.exists():
+            ok, msg = verify(json.loads(path.read_text(encoding="utf-8")))
+            integrity.append((label, ok, msg))
+    passes, breaches = evaluate_trip_wires(baseline, control_metrics_from_current(), integrity)
+    print("C/D-TAG CONTROL — --control-check (ongoing monitoring of the unguarded dimension vs the frozen baseline)")
+    print(f"  [NON-SHIP · committed corpus read-only · consensus, NOT validated correctness · the measured-not-gated control]")
+    print(f"  baseline frozen: {baseline.get('frozen', '?')}")
+    for p in passes:
+        print(f"  PASS    {p}")
+    for b in breaches:
+        print(f"  BREACH  {b}")
+    verdict = "PASS" if not breaches else "BREACH"
+    print(f"  => {verdict} ({len(passes)} pass, {len(breaches)} breach)")
+    return 0 if not breaches else 1
 
 
 # ---------------------------------------------------------------------------
@@ -570,10 +765,50 @@ def selftest() -> int:
     assert dec["defensible"] == 1 and dec["neither"] == 1, dec
     assert dec["by_axis"]["C"]["error"] == 1 and dec["by_axis"]["D"]["defensible"] == 1, dec["by_axis"]
 
+    # Phase 54 — Krippendorff's alpha (nominal): perfect=1, systematic disagreement<0, mixed in (0,1), degenerate None.
+    assert krippendorff_alpha([["C1", "C1"], ["C2", "C2"]]) == 1.0, "alpha perfect"
+    assert krippendorff_alpha([["C1", "C2"], ["C2", "C1"]]) == -0.5, "alpha systematic-disagreement"  # hand-computed
+    # mostly-agree over 3 categories (1 of 4 units disagrees) -> above chance, in (0,1). Hand-computed 0.667.
+    a_mixed = krippendorff_alpha([["C1", "C1"], ["C2", "C2"], ["C3", "C3"], ["C1", "C2"]])
+    assert a_mixed is not None and abs(a_mixed - 2 / 3) < 1e-9, a_mixed
+    assert krippendorff_alpha([]) is None and krippendorff_alpha([["C1"]]) is None, "alpha unpairable -> None"
+    a3 = krippendorff_alpha([["C1", "C1", "C1"], ["C2", "C2", "C2"]])  # 3 raters, perfect within units
+    assert a3 == 1.0, a3
+
+    # Phase 54 — join_raters + pairwise_agreement over same-gid fixtures (the cross-rater number).
+    fx_o = {"rater": "opus", "judgments": [
+        {"gid": "g/1", "blind_capability": "C1", "blind_data_source": "D1", "committed_capability": "C1", "committed_data_source": "D1"},
+        {"gid": "g/2", "blind_capability": "C2", "blind_data_source": "D2", "committed_capability": "C3", "committed_data_source": "D2"}]}
+    fx_q = {"rater": "qwen", "judgments": [
+        {"gid": "g/1", "blind_capability": "C1", "blind_data_source": "D9", "committed_capability": "C1", "committed_data_source": "D1"},
+        {"gid": "g/2", "blind_capability": "C5", "blind_data_source": "D2", "committed_capability": "C3", "committed_data_source": "D2"}]}
+    xr = pairwise_agreement(fx_o, fx_q)
+    assert xr["n"] == 2 and xr["c_agree"] == 1 and xr["d_agree"] == 1, xr  # C: g/1 agree, g/2 differ; D: g/2 agree, g/1 differ
+    rows = join_raters(fx_o, fx_q)
+    assert rows["g/1"]["opus__C"] == "C1" and rows["g/1"]["qwen__D"] == "D9", rows["g/1"]
+    assert rows["g/2"]["committed_capability"] == "C3", rows["g/2"]
+
+    # Phase 54 — the CONTROL trip-wires: clean corpus PASSES; injected drift (broken integrity AND a
+    # below-floor rate) BREACHES (the separability-gate "fires on an injected artifact" pattern).
+    base = {"strata": {"self_consistency": {"c_lower": 0.5, "d_lower": 0.5},
+                       "independent_reliability": {"c_lower": 0.3, "d_lower": 0.3}}}
+    cur_ok = {"self_consistency": {"c_rate": 0.68, "d_rate": 0.68},
+              "independent_reliability": {"c_rate": 0.50, "d_rate": 0.40}}
+    p, b = evaluate_trip_wires(base, cur_ok, [("random-large", True, "ok"), ("independent", True, "ok")])
+    assert not b and len(p) >= 6, (p, b)  # 2 integrity + 4 rate-floor, all pass
+    cur_drift = {"self_consistency": {"c_rate": 0.40, "d_rate": 0.68},   # c below the 0.5 floor
+                 "independent_reliability": {"c_rate": 0.50, "d_rate": 0.40}}
+    p2, b2 = evaluate_trip_wires(base, cur_drift, [("random-large", False, "committed C/D drift for x/1")])
+    assert any("integrity" in x for x in b2), b2
+    assert any("self_consistency.c" in x for x in b2), b2
+    assert not any("self_consistency.d" in x for x in b2), b2  # d still above floor -> passes
+
     print(f"selftest OK — random agreement math (2/3 C, 3/3 D), divergence options determinism + neutrality + "
           f"scoring, corpus loads {len(inds)} indicators (all C+D in a 28/20 vocab), {len(cases)} cases, "
           f"both samplers deterministic; Phase 53: Cohen's kappa (0/1/empty), Wilson CI, decomposition units "
-          f"(exact per-axis mismatches) + neutral options + error/defensible/questionable/neither scoring.")
+          f"(exact per-axis mismatches) + neutral options + error/defensible/questionable/neither scoring; "
+          f"Phase 54: Krippendorff's alpha (perfect/disagreement/mixed/degenerate/3-rater), join_raters + "
+          f"pairwise cross-rater agreement, control trip-wires (clean PASS / injected-drift BREACH).")
     return 0
 
 
@@ -594,12 +829,17 @@ def main(argv: list[str]) -> int:
         seed = int(argv[argv.index("--seed") + 1]) if "--seed" in argv else 0
         dump_decomposition(seed)
         return 0
+    if "--control-freeze" in argv:
+        return control_freeze()
+    if "--control-check" in argv:
+        return control_check()
     if "--verify-fixtures" in argv:
         rc = 0
         for label, path, verify in (("random", RANDOM_FIXTURE, verify_random),
                                     ("divergence", DIVERGENCE_FIXTURE, verify_divergence),
                                     ("random-large", RANDOM_LARGE_FIXTURE, verify_random),
-                                    ("decomposition", DECOMP_FIXTURE, verify_decomposition)):
+                                    ("decomposition", DECOMP_FIXTURE, verify_decomposition),
+                                    ("independent", INDEPENDENT_FIXTURE, verify_random)):
             if not path.exists():
                 print(f"  {label}: no fixture yet ({path.relative_to(ROOT)})")
                 continue

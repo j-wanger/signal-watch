@@ -1,0 +1,682 @@
+{
+  "rater": "qwen@local",
+  "model": "qwen",
+  "context_matched": true,
+  "n": 96,
+  "seed": 0,
+  "label": "Phase-54 context-matched cross-family independent rater (local llama-cpp)",
+  "judgments": [
+    {
+      "gid": "fintrac-guid-real-estate/IND-78",
+      "blind_capability": "C1",
+      "blind_data_source": "D8",
+      "committed_capability": "C17",
+      "committed_data_source": "D12"
+    },
+    {
+      "gid": "fintrac-guid-securities/IND-50",
+      "blind_capability": "C15",
+      "blind_data_source": "D8",
+      "committed_capability": "C15",
+      "committed_data_source": "D10"
+    },
+    {
+      "gid": "fin-2022-a002/IND-15",
+      "blind_capability": "C6",
+      "blind_data_source": "D1",
+      "committed_capability": "C21",
+      "committed_data_source": "D7"
+    },
+    {
+      "gid": "fintrac-guid-financial-entities/IND-115",
+      "blind_capability": "C17",
+      "blind_data_source": "D12",
+      "committed_capability": "C17",
+      "committed_data_source": "D12"
+    },
+    {
+      "gid": "fintrac-synthetic-opioids/IND-46",
+      "blind_capability": "C1",
+      "blind_data_source": "D1",
+      "committed_capability": "C28",
+      "committed_data_source": "D18"
+    },
+    {
+      "gid": "fintrac-real-estate/IND-09",
+      "blind_capability": "C19",
+      "blind_data_source": "D13",
+      "committed_capability": "C19",
+      "committed_data_source": "D13"
+    },
+    {
+      "gid": "fintrac-guid-securities/IND-145",
+      "blind_capability": "C20",
+      "blind_data_source": "D4",
+      "committed_capability": "C20",
+      "committed_data_source": "D17"
+    },
+    {
+      "gid": "fintrac-guid-life-insurance/IND-141",
+      "blind_capability": "C8",
+      "blind_data_source": "D8",
+      "committed_capability": "C14",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-online-child-exploitation/IND-42",
+      "blind_capability": "C9",
+      "blind_data_source": "D4",
+      "committed_capability": "C1",
+      "committed_data_source": "D4"
+    },
+    {
+      "gid": "fintrac-guid-msb/IND-90",
+      "blind_capability": "C17",
+      "blind_data_source": "D12",
+      "committed_capability": "C17",
+      "committed_data_source": "D12"
+    },
+    {
+      "gid": "fintrac-guid-casinos/IND-79",
+      "blind_capability": "C20",
+      "blind_data_source": "D3",
+      "committed_capability": "C20",
+      "committed_data_source": "D3"
+    },
+    {
+      "gid": "fintrac-synthetic-opioids/IND-19",
+      "blind_capability": "C7",
+      "blind_data_source": "D20",
+      "committed_capability": "C19",
+      "committed_data_source": "D13"
+    },
+    {
+      "gid": "fintrac-guid-accountants/IND-141",
+      "blind_capability": "C14",
+      "blind_data_source": "D8",
+      "committed_capability": "C14",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-guid-financial-entities/IND-67",
+      "blind_capability": "C2",
+      "blind_data_source": "D3",
+      "committed_capability": "C2",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fintrac-guid-accountants/IND-143",
+      "blind_capability": "C7",
+      "blind_data_source": "D8",
+      "committed_capability": "C7",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fin-2025-a003/IND-05",
+      "blind_capability": "C8",
+      "blind_data_source": "D3",
+      "committed_capability": "C27",
+      "committed_data_source": "D18"
+    },
+    {
+      "gid": "fintrac-guid-dpms/IND-92",
+      "blind_capability": "C1",
+      "blind_data_source": "D1",
+      "committed_capability": "C10",
+      "committed_data_source": "D5"
+    },
+    {
+      "gid": "fintrac-underground-banking/IND-12",
+      "blind_capability": "C20",
+      "blind_data_source": "D3",
+      "committed_capability": "C14",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-guid-accountants/IND-36",
+      "blind_capability": "C1",
+      "blind_data_source": "D8",
+      "committed_capability": "C7",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fintrac-guid-life-insurance/IND-34",
+      "blind_capability": "C13",
+      "blind_data_source": "D8",
+      "committed_capability": "C13",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fin-2025-alert001/IND-03",
+      "blind_capability": "C16",
+      "blind_data_source": "D2",
+      "committed_capability": "C16",
+      "committed_data_source": "D2"
+    },
+    {
+      "gid": "fin-2024-a002/IND-05",
+      "blind_capability": "C19",
+      "blind_data_source": "D13",
+      "committed_capability": "C24",
+      "committed_data_source": "D13"
+    },
+    {
+      "gid": "fintrac-guid-msb/IND-106",
+      "blind_capability": "C17",
+      "blind_data_source": "D12",
+      "committed_capability": "C17",
+      "committed_data_source": "D12"
+    },
+    {
+      "gid": "fintrac-online-child-exploitation/IND-23",
+      "blind_capability": "C3",
+      "blind_data_source": "D3",
+      "committed_capability": "C3",
+      "committed_data_source": "D3"
+    },
+    {
+      "gid": "fin-2025-alert002/IND-01",
+      "blind_capability": "C7",
+      "blind_data_source": "D1",
+      "committed_capability": "C7",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fintrac-guid-msb/IND-73",
+      "blind_capability": "C3",
+      "blind_data_source": "D3",
+      "committed_capability": "C3",
+      "committed_data_source": "D3"
+    },
+    {
+      "gid": "fintrac-guid-virtual-currency/IND-07",
+      "blind_capability": "C1",
+      "blind_data_source": "D1",
+      "committed_capability": "C19",
+      "committed_data_source": "D13"
+    },
+    {
+      "gid": "fintrac-guid-life-insurance/IND-59",
+      "blind_capability": "C4",
+      "blind_data_source": "D1",
+      "committed_capability": "C4",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fintrac-guid-casinos/IND-22",
+      "blind_capability": "C8",
+      "blind_data_source": "D8",
+      "committed_capability": "C14",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-online-child-exploitation/IND-43",
+      "blind_capability": "C28",
+      "blind_data_source": "D4",
+      "committed_capability": "C24",
+      "committed_data_source": "D4"
+    },
+    {
+      "gid": "fintrac-human-trafficking/IND-16",
+      "blind_capability": "C3",
+      "blind_data_source": "D3",
+      "committed_capability": "C3",
+      "committed_data_source": "D3"
+    },
+    {
+      "gid": "fintrac-terrorist-financing/IND-19",
+      "blind_capability": "C20",
+      "blind_data_source": "D3",
+      "committed_capability": "C20",
+      "committed_data_source": "D17"
+    },
+    {
+      "gid": "fintrac-guid-financial-entities/IND-120",
+      "blind_capability": "C16",
+      "blind_data_source": "D8",
+      "committed_capability": "C16",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fin-2023-alert004/IND-15",
+      "blind_capability": "C18",
+      "blind_data_source": "D11",
+      "committed_capability": "C18",
+      "committed_data_source": "D11"
+    },
+    {
+      "gid": "ofac-virtual-currency/IND-02",
+      "blind_capability": "C20",
+      "blind_data_source": "D17",
+      "committed_capability": "C18",
+      "committed_data_source": "D9"
+    },
+    {
+      "gid": "fin-2019-a006/IND-14",
+      "blind_capability": "C4",
+      "blind_data_source": "D2",
+      "committed_capability": "C4",
+      "committed_data_source": "D2"
+    },
+    {
+      "gid": "fin-2025-a002/IND-15",
+      "blind_capability": "C15",
+      "blind_data_source": "D8",
+      "committed_capability": "C15",
+      "committed_data_source": "D10"
+    },
+    {
+      "gid": "fintrac-guid-securities/IND-122",
+      "blind_capability": "C22",
+      "blind_data_source": "D3",
+      "committed_capability": "C22",
+      "committed_data_source": "D15"
+    },
+    {
+      "gid": "fin-2018-a003/IND-05",
+      "blind_capability": "C8",
+      "blind_data_source": "D12",
+      "committed_capability": "C19",
+      "committed_data_source": "D13"
+    },
+    {
+      "gid": "fintrac-romance-fraud/IND-01",
+      "blind_capability": "C26",
+      "blind_data_source": "D13",
+      "committed_capability": "C26",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-guid-msb/IND-117",
+      "blind_capability": "C18",
+      "blind_data_source": "D11",
+      "committed_capability": "C18",
+      "committed_data_source": "D11"
+    },
+    {
+      "gid": "fintrac-guid-dpms/IND-65",
+      "blind_capability": "C17",
+      "blind_data_source": "D12",
+      "committed_capability": "C17",
+      "committed_data_source": "D12"
+    },
+    {
+      "gid": "fintrac-guid-life-insurance/IND-96",
+      "blind_capability": "C27",
+      "blind_data_source": "D8",
+      "committed_capability": "C17",
+      "committed_data_source": "D12"
+    },
+    {
+      "gid": "fin-2023-alert005/IND-02",
+      "blind_capability": "C26",
+      "blind_data_source": "D5",
+      "committed_capability": "C26",
+      "committed_data_source": "D5"
+    },
+    {
+      "gid": "fintrac-guid-bc-notaries/IND-81",
+      "blind_capability": "C1",
+      "blind_data_source": "D3",
+      "committed_capability": "C7",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fintrac-guid-casinos/IND-93",
+      "blind_capability": "C17",
+      "blind_data_source": "D12",
+      "committed_capability": "C17",
+      "committed_data_source": "D12"
+    },
+    {
+      "gid": "fintrac-guid-dpms/IND-43",
+      "blind_capability": "C4",
+      "blind_data_source": "D1",
+      "committed_capability": "C4",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fintrac-guid-accountants/IND-18",
+      "blind_capability": "C14",
+      "blind_data_source": "D8",
+      "committed_capability": "C26",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "ofac-maritime-shipping/IND-25",
+      "blind_capability": "C20",
+      "blind_data_source": "D15",
+      "committed_capability": "C20",
+      "committed_data_source": "D17"
+    },
+    {
+      "gid": "fintrac-human-trafficking/IND-37",
+      "blind_capability": "C9",
+      "blind_data_source": "D20",
+      "committed_capability": "C7",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fin-2025-a002/IND-06",
+      "blind_capability": "C22",
+      "blind_data_source": "D15",
+      "committed_capability": "C22",
+      "committed_data_source": "D15"
+    },
+    {
+      "gid": "fin-2024-alert004/IND-10",
+      "blind_capability": "C12",
+      "blind_data_source": "D9",
+      "committed_capability": "C12",
+      "committed_data_source": "D9"
+    },
+    {
+      "gid": "fintrac-guid-life-insurance/IND-74",
+      "blind_capability": "C20",
+      "blind_data_source": "D17",
+      "committed_capability": "C20",
+      "committed_data_source": "D17"
+    },
+    {
+      "gid": "fintrac-synthetic-opioids/IND-32",
+      "blind_capability": "C20",
+      "blind_data_source": "D3",
+      "committed_capability": "C20",
+      "committed_data_source": "D3"
+    },
+    {
+      "gid": "fintrac-real-estate/IND-23",
+      "blind_capability": "C7",
+      "blind_data_source": "D8",
+      "committed_capability": "C7",
+      "committed_data_source": "D18"
+    },
+    {
+      "gid": "fin-2026-a001/IND-21",
+      "blind_capability": "C5",
+      "blind_data_source": "D2",
+      "committed_capability": "C11",
+      "committed_data_source": "D6"
+    },
+    {
+      "gid": "fintrac-guid-life-insurance/IND-134",
+      "blind_capability": "C6",
+      "blind_data_source": "D1",
+      "committed_capability": "C27",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fintrac-guid-life-insurance/IND-06",
+      "blind_capability": "C12",
+      "blind_data_source": "D9",
+      "committed_capability": "C12",
+      "committed_data_source": "D9"
+    },
+    {
+      "gid": "fintrac-cannabis/IND-17",
+      "blind_capability": "C5",
+      "blind_data_source": "D2",
+      "committed_capability": "C4",
+      "committed_data_source": "D2"
+    },
+    {
+      "gid": "ofac-sham-transactions/IND-04",
+      "blind_capability": "C15",
+      "blind_data_source": "D8",
+      "committed_capability": "C15",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-guid-msb/IND-115",
+      "blind_capability": "C1",
+      "blind_data_source": "D3",
+      "committed_capability": "C17",
+      "committed_data_source": "D3"
+    },
+    {
+      "gid": "ofac-maritime-shipping/IND-14",
+      "blind_capability": "C15",
+      "blind_data_source": "D8",
+      "committed_capability": "C15",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-guid-casinos/IND-17",
+      "blind_capability": "C14",
+      "blind_data_source": "D8",
+      "committed_capability": "C26",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "ofac-sham-transactions/IND-03",
+      "blind_capability": "C15",
+      "blind_data_source": "D8",
+      "committed_capability": "C15",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-guid-financial-entities/IND-91",
+      "blind_capability": "C3",
+      "blind_data_source": "D3",
+      "committed_capability": "C3",
+      "committed_data_source": "D3"
+    },
+    {
+      "gid": "fintrac-human-trafficking/IND-25",
+      "blind_capability": "C9",
+      "blind_data_source": "D4",
+      "committed_capability": "C28",
+      "committed_data_source": "D4"
+    },
+    {
+      "gid": "fin-2025-a002/IND-08",
+      "blind_capability": "C22",
+      "blind_data_source": "D15",
+      "committed_capability": "C20",
+      "committed_data_source": "D3"
+    },
+    {
+      "gid": "fintrac-guid-real-estate/IND-77",
+      "blind_capability": "C27",
+      "blind_data_source": "D8",
+      "committed_capability": "C17",
+      "committed_data_source": "D12"
+    },
+    {
+      "gid": "fintrac-guid-life-insurance/IND-62",
+      "blind_capability": "C20",
+      "blind_data_source": "D17",
+      "committed_capability": "C20",
+      "committed_data_source": "D17"
+    },
+    {
+      "gid": "fintrac-guid-dpms/IND-57",
+      "blind_capability": "C16",
+      "blind_data_source": "D8",
+      "committed_capability": "C16",
+      "committed_data_source": "D19"
+    },
+    {
+      "gid": "fintrac-guid-life-insurance/IND-03",
+      "blind_capability": "C14",
+      "blind_data_source": "D8",
+      "committed_capability": "C14",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-guid-bc-notaries/IND-52",
+      "blind_capability": "C4",
+      "blind_data_source": "D1",
+      "committed_capability": "C4",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fintrac-guid-bc-notaries/IND-74",
+      "blind_capability": "C20",
+      "blind_data_source": "D17",
+      "committed_capability": "C20",
+      "committed_data_source": "D17"
+    },
+    {
+      "gid": "fintrac-guid-bc-notaries/IND-63",
+      "blind_capability": "C3",
+      "blind_data_source": "D3",
+      "committed_capability": "C3",
+      "committed_data_source": "D3"
+    },
+    {
+      "gid": "fin-2021-a004/IND-07",
+      "blind_capability": "C6",
+      "blind_data_source": "D1",
+      "committed_capability": "C6",
+      "committed_data_source": "D7"
+    },
+    {
+      "gid": "fintrac-guid-financial-entities/IND-12",
+      "blind_capability": "C13",
+      "blind_data_source": "D8",
+      "committed_capability": "C15",
+      "committed_data_source": "D10"
+    },
+    {
+      "gid": "fintrac-online-child-exploitation/IND-41",
+      "blind_capability": "C28",
+      "blind_data_source": "D4",
+      "committed_capability": "C8",
+      "committed_data_source": "D4"
+    },
+    {
+      "gid": "fin-2023-alert007/IND-05",
+      "blind_capability": "C11",
+      "blind_data_source": "D6",
+      "committed_capability": "C11",
+      "committed_data_source": "D6"
+    },
+    {
+      "gid": "fin-2025-a001/IND-11",
+      "blind_capability": "C6",
+      "blind_data_source": "D9",
+      "committed_capability": "C12",
+      "committed_data_source": "D9"
+    },
+    {
+      "gid": "fintrac-guid-accountants/IND-108",
+      "blind_capability": "C20",
+      "blind_data_source": "D3",
+      "committed_capability": "C20",
+      "committed_data_source": "D3"
+    },
+    {
+      "gid": "fintrac-guid-accountants/IND-47",
+      "blind_capability": "C6",
+      "blind_data_source": "D1",
+      "committed_capability": "C1",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fin-2022-a002/IND-08",
+      "blind_capability": "C26",
+      "blind_data_source": "D1",
+      "committed_capability": "C26",
+      "committed_data_source": "D20"
+    },
+    {
+      "gid": "fin-2024-alert004/IND-09",
+      "blind_capability": "C2",
+      "blind_data_source": "D3",
+      "committed_capability": "C2",
+      "committed_data_source": "D3"
+    },
+    {
+      "gid": "ofac-maritime-shipping/IND-15",
+      "blind_capability": "C15",
+      "blind_data_source": "D8",
+      "committed_capability": "C15",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-guid-securities/IND-04",
+      "blind_capability": "C12",
+      "blind_data_source": "D9",
+      "committed_capability": "C12",
+      "committed_data_source": "D9"
+    },
+    {
+      "gid": "fintrac-terrorist-financing/IND-32",
+      "blind_capability": "C6",
+      "blind_data_source": "D1",
+      "committed_capability": "C1",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-guid-financial-entities/IND-41",
+      "blind_capability": "C13",
+      "blind_data_source": "D8",
+      "committed_capability": "C13",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fintrac-terrorist-financing/IND-21",
+      "blind_capability": "C20",
+      "blind_data_source": "D3",
+      "committed_capability": "C20",
+      "committed_data_source": "D17"
+    },
+    {
+      "gid": "fintrac-guid-dpms/IND-30",
+      "blind_capability": "C6",
+      "blind_data_source": "D1",
+      "committed_capability": "C1",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fintrac-guid-casinos/IND-66",
+      "blind_capability": "C17",
+      "blind_data_source": "D12",
+      "committed_capability": "C17",
+      "committed_data_source": "D12"
+    },
+    {
+      "gid": "fintrac-guid-securities/IND-45",
+      "blind_capability": "C2",
+      "blind_data_source": "D1",
+      "committed_capability": "C2",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fintrac-guid-financial-entities/IND-40",
+      "blind_capability": "C1",
+      "blind_data_source": "D1",
+      "committed_capability": "C7",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fintrac-human-trafficking/IND-48",
+      "blind_capability": "C6",
+      "blind_data_source": "D4",
+      "committed_capability": "C7",
+      "committed_data_source": "D1"
+    },
+    {
+      "gid": "fintrac-real-estate/IND-36",
+      "blind_capability": "C1",
+      "blind_data_source": "D1",
+      "committed_capability": "C27",
+      "committed_data_source": "D18"
+    },
+    {
+      "gid": "fintrac-guid-msb/IND-87",
+      "blind_capability": "C13",
+      "blind_data_source": "D8",
+      "committed_capability": "C8",
+      "committed_data_source": "D8"
+    },
+    {
+      "gid": "fin-2024-alert004/IND-18",
+      "blind_capability": "C6",
+      "blind_data_source": "D1",
+      "committed_capability": "C6",
+      "committed_data_source": "D1"
+    }
+  ]
+}

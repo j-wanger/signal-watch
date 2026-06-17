@@ -176,6 +176,32 @@ the same document context the committed code had, or run flag-only-vs-flag-only 
 it re-measures the context gap, not reliability. A context-matched or genuinely-independent rater remains
 the path from "bounded + confounded" to a clean reliability number.
 
+## Phase 54 — the named follow-up, DELIVERED (executed, context-matched + cross-family)
+
+Phase 54 ran exactly that rater, as the *independent effectiveness challenge* of a standing **control**
+(`docs/cd-tag-control.md`; the measure-first workstream pivoted from a 4th number to the control the
+measurements were for). A **context-matched, genuinely cross-family** rater — a local **Qwen** model
+(a different model family), given the source-document region + the 28+20 interview posture (the inputs
+the committed assignment had, not flag-only) — re-rated the **same** committed n=96 sample.
+
+| Measure (n=96) | Value | Reading |
+|---|---|---|
+| independent C agreement | **0.604** (58/96), Wilson [0.504, 0.696], κ 0.583 | context-matched cross-family vs committed |
+| independent D agreement | **0.646** (62/96), Wilson [0.546, 0.734], κ 0.599 | " |
+| cross-rater (Opus-blind vs Qwen-context-matched) | C **0.677**, D **0.646** | genuine cross-family (neither is committed) |
+| Krippendorff's α over {committed, Opus-blind, Qwen-cm} | C **0.634**, D **0.618** | chance-corrected 3-rater panel consensus |
+
+**Two findings.** (1) The reliability is **genuine** — it survives a change of model family and is
+chance-corrected (α ≈ raw ≈ 0.62), so the ~⅔ self-consistency was never a same-model echo. (2)
+**Context-matching matters:** a context-matched independent rater agrees with committed at ≈0.6 —
+*statistically indistinguishable* from the same-family self-consistency (0.677; Wilson intervals
+overlap) and far above what the Phase-53 flag-only comparison implied — so Phase-53's
+"committed-questionable ≤61%" upper bound was **inflated by the context asymmetry** this stratum removes.
+The honest reliability of the unguarded dimension is **~0.6 per axis: soft, genuine, adjudicable — never
+validated-correct.** Still deferred-with-owner: a **human** domain-expert rater (the panel is two model
+families + committed, not yet a human). Reproduce: `cd_correctness.py --report` (the INDEPENDENT
+stratum) · `--control-check` (the monitoring loop).
+
 ## Honesty boundary (what this is NOT)
 
 - **Not validated correctness and not ground truth.** Both numbers are blind single-rater agreement /

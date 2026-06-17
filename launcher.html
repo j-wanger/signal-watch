@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signal Watch — Vision Prototype</title>
+<style>
+  :root{
+    --bg:#11100e; --panel:#1a1815; --ink:#ece6da; --muted:#9a9183; --line:#2c2823;
+    --signal:#f6a623; --ok:#5fb87a; --pending:#b9a86a; --bad:#d2685a;
+    --serif:'Newsreader',Georgia,'Times New Roman',serif;
+    --sans:'Archivo','Helvetica Neue',Arial,sans-serif;
+    --mono:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1040px;margin:0 auto;padding:32px 24px 64px}
+  header{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:18px}
+  .brand h1{font-family:var(--serif);font-weight:600;font-size:30px;margin:0;letter-spacing:.2px}
+  .brand .sub{color:var(--muted);font-size:13px;font-family:var(--mono);margin-top:4px}
+  .badge{font-family:var(--mono);font-size:11px;color:var(--bg);background:var(--signal);padding:5px 9px;border-radius:3px;white-space:nowrap;font-weight:600}
+  h2{font-family:var(--serif);font-weight:600;font-size:19px;margin:34px 0 6px}
+  .lead{color:var(--muted);font-size:14px;margin:0 0 16px;max-width:70ch}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:12px}
+  .card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:15px 16px;transition:border-color .15s}
+  .card:hover{border-color:var(--signal)}
+  .card .k{font-family:var(--mono);font-size:10px;color:var(--signal);letter-spacing:.5px;text-transform:uppercase}
+  .card .t{font-family:var(--serif);font-size:17px;margin:5px 0 4px}
+  .card .d{color:var(--muted);font-size:12.5px}
+  .chain{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 20px;margin-top:10px}
+  .flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-bottom:14px}
+  .flow b{color:var(--ink);font-weight:600}
+  .flow .arr{color:var(--signal)}
+  ul.bridges{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+  .bridge{display:grid;grid-template-columns:84px 1fr;gap:10px 12px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:5px;background:#16140f}
+  .bstate{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.5px;text-align:center;padding:3px 0;border-radius:3px;font-weight:700}
+  .bridge.ok .bstate{background:rgba(95,184,122,.16);color:var(--ok)}
+  .bridge.pending .bstate{background:rgba(185,168,106,.15);color:var(--pending)}
+  .bridge.bad .bstate{background:rgba(210,104,90,.16);color:var(--bad)}
+  .blabel{font-size:13.5px;color:var(--ink);grid-column:2}
+  .bdetail{font-size:12px;color:var(--muted);grid-column:2}
+  .meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  footer{color:var(--muted);font-size:12px;margin-top:40px;border-top:1px solid var(--line);padding-top:16px;font-family:var(--mono)}
+  @media (prefers-reduced-motion: reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Signal Watch</h1>
+      <div class="sub">AML Vision Prototype · the single front door</div>
+    </div>
+    <div class="badge" id="badge">Illustrative data &amp; outputs</div>
+  </header>
+
+  <h2>The demo artifacts</h2>
+  <p class="lead">Five offline single-file demos, in arc order: one grounded signal, the signal library at
+    regulator scale, a second atom stream, and the human gates that adjudicate what the machine proposes.</p>
+  <div class="cards">
+    <a class="card" href="fentanyl/index.html"><div class="k">Showcase · 1 of 3</div><div class="t">Fentanyl</div><div class="d">The six-act engine: one signal, source advisory → human gates → combination lift.</div></a>
+    <a class="card" href="trade-based/index.html"><div class="k">Showcase · 2 of 3</div><div class="t">Trade-based</div><div class="d">The same generic engine, a second typology — content is config, not code.</div></a>
+    <a class="card" href="elder-financial-exploitation/index.html"><div class="k">Showcase · 3 of 3</div><div class="t">Elder exploitation</div><div class="d">Renders the full verbatim FinCEN EFE advisory (public domain) in Act 1.</div></a>
+    <a class="card" href="corpus/index.html"><div class="k">Corpus explorer</div><div class="t">The signal library</div><div class="d">2,251 indicators · 5 regulators · 4 lenses · the per-doc build-recs human gate.</div></a>
+    <a class="card" href="news/index.html"><div class="k">News stream</div><div class="t">Adverse media</div><div class="d">A second atom stream: screen → disposition gate, real client-side fuzzy match.</div></a>
+    <a class="card" href="console/index.html"><div class="k">Gate console</div><div class="t">Class-J judgment</div><div class="d">213 real C/D adjudication cases: queue → evidence → graded disposition → ledger.</div></a>
+    <a class="card" href="triage/index.html"><div class="k">Triage console</div><div class="t">§14 adjudication loop</div><div class="d">20 stratified mini-triage scenarios → the discovery ledger.</div></a>
+  </div>
+
+  <h2>The 3-pillar program chain</h2>
+  <p class="lead">Beyond the demos: the real program builds one repo per pillar. The chain is connected when a
+    synthetic-substrate-detected case flows into casework and comes out a verified, signed SAR. The state below is
+    regenerated by <span style="font-family:var(--mono)">scripts/e2e_chain_check.py</span> — not a claim, a check.</p>
+  <div class="chain">
+    <div class="flow">
+      <b>Pillar 1 · substrate</b><span class="arr">→</span><span id="b1arr">persist</span><span class="arr">→</span>
+      <b>Pillar 2 · casework</b><span class="arr">→</span><b>signed SAR</b><span class="arr">→</span><b>human gate</b>
+    </div>
+    <ul class="bridges" id="bridges"></ul>
+    <div class="meta" id="meta"></div>
+  </div>
+
+  <footer>
+    All data &amp; outputs are illustrative / synthetic — never real customer or transaction data. Offline,
+    self-contained, no network. The cross-pillar chain state is a measured check, not a performance claim.
+  </footer>
+</div>
+
+<script>
+  const STATUS = __STATUS__;
+
+  // esc() is the sole escaper (the project convention — never pre-escape stored data).
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+  function stateClass(s){return s==='done'?'ok':(s==='failed'?'bad':'pending');}
+  function stateWord(s){return s==='done'?'done':(s==='failed'?'failed':'pending');}
+
+  // pure: status object -> the bridges list HTML (every injected value esc()'d).
+  function renderStatus(st){
+    const b=(st&&st.bridges)||{};
+    const rows=[
+      ['Bridge #1','Substrate persists the evidence bundle (§5a)',b.bridge_1_persist],
+      ['Bridge #2','Casework consumes a REAL bundle → signed SAR',b.bridge_2_consume],
+      ['End-to-end','e2e_chain_check --real green (the delivery gate)',b.e2e_real],
+    ];
+    let html='';
+    for(const [k,label,node] of rows){
+      const stt=stateWord(node&&node.state);
+      html+='<li class="bridge '+stateClass(node&&node.state)+'">'
+        +'<span class="bstate">'+esc(stt)+'</span>'
+        +'<span class="blabel"><b style="color:var(--signal);font-family:var(--mono);font-size:11px">'+esc(k)+'</b> &nbsp;'+esc(label)+'</span>'
+        +'<span class="bdetail">'+esc((node&&node.detail)||'')+'</span>'
+        +'</li>';
+    }
+    return html;
+  }
+
+  function metaLine(st){
+    const sp=(st&&st.spine)||{}, gh=(st&&st.grounding_heads)||{};
+    return 'spine: '+esc(sp.state||'unknown')+' ('+esc(sp.detail||'')+')  ·  grounding HEADs: '
+      +'aml-substrate@'+esc(gh.aml_substrate||'?')+' · aml-casework@'+esc(gh.aml_casework||'?');
+  }
+
+  (function(){
+    const list=document.getElementById('bridges'); if(list) list.innerHTML=renderStatus(STATUS);
+    const meta=document.getElementById('meta'); if(meta) meta.textContent=metaLine(STATUS);
+    if(typeof window!=='undefined' && window.__capture) window.__capture({esc,renderStatus,metaLine,STATUS});
+  })();
+</script>
+</body>
+</html>

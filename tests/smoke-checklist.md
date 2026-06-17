@@ -297,3 +297,13 @@ Deterministic gate run against both shipped `dist/<id>/index.html`. **Result: PA
 - [ ] The reveal appears ONLY post-disposition: history framed "decisions, not correctness"; S-01 or S-02 surfaces the process inconsistency (shared panel, divergent historical dispositions — "surfaced for adjudication, never auto-resolved"); a double-assigned scenario replays the SEEDED synthetic second rater with its label visible
 - [ ] Discovery ledger: every number derived at render with a "definition:" line (signal gaps from fired-rule state; agreement X/Y vs the seeded raters — consensus-class wording); design parameters boxed "chosen, not measured"; Export produces valid JSON; reload loses everything ("persists nothing" stated on screen)
 - [ ] Keys ←/→/Space/Esc navigate; typing in the rationale textarea or the C/D picker does NOT trigger key nav; reduced-motion mode lands each screen in one paint
+
+---
+
+## Launcher + cross-pillar chain (Phase 55 — `dist/index.html`)
+
+- [ ] `python3 scripts/build.py launcher` builds; open `dist/index.html` offline from `file://` — the "Illustrative data & outputs" badge is visible; the five artifact cards link (relative) to fentanyl/trade-based/elder/corpus/news/console/triage and each opens its self-contained artifact
+- [ ] The "3-pillar program chain" panel renders the three bridge states from the inlined `data/pillar-status.json` — today all read **pending** (honest: spine built, real chain gated); the meta line shows the spine state + both grounding HEADs
+- [ ] `python3 scripts/e2e_chain_check.py --selftest` PASSES (good C4 fixture pair connects; the broken fixture is caught); `--real --substrate /nope --casework /nope` prints an honest `GATED: sibling output absent` and exits non-zero
+- [ ] `python3 scripts/build.py --check all` → 8/8 zero drift (the 5 existing artifacts byte-identical; the launcher reproducible); `node tests/launcher.test.mjs` green
+- [ ] Full presenter script: `docs/e2e-walkthrough.md` (the two beats); acceptance contract: `docs/e2e-acceptance.md`

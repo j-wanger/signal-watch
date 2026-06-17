@@ -7,10 +7,11 @@
 > triple-null) on 2026-06-17; re-stamped from the original `0daa3cc` (Phase 11) grounding after
 > confirming the §1/§2 evidence dataclasses (`Alert`/`Dossier`/`STRRecord`/`LCTR`/`EFTR`/
 > `GroundingSnapshot`, `STR_REQUIRED_ELEMENTS`) are UNCHANGED P11→P13 — only `validate/*` moved
-> (the triple-null measurement, absorbed in §3 below). Ratified when the Pillar-1 enabling
-> increments (persist + ids; the network signal) land — until then the serialized schemas below
-> are PROPOSED, derived from the current in-memory dataclasses (which aml-substrate does NOT yet
-> persist — the §5a join has never executed).
+> (the triple-null measurement, absorbed in §3 below). **The serialized §2 schema + id-mint rule are
+> RATIFIED (Phase 55, 2026-06-17)** — derived from the current in-memory dataclasses + the consumer's
+> `validate_bundle` gate; what remains is EMISSION, not schema: aml-substrate does NOT yet persist the
+> bundle (the §5a join has never executed). Fully ratified-and-wired when the Pillar-1 enabling
+> increments (§5a persist + ids; §5b the network signal) land and `e2e_chain_check --real` passes.
 
 ## 0. Why this contract exists
 
@@ -47,17 +48,37 @@ The `GroundingSnapshot` is a COPY of corpus data taken when the alert fired, so 
 self-contained (no live corpus access needed to replay). **Pillar 2 adopts this chain unchanged**
 as the evidence substrate; its citation verifier (below) extends it upward to narrative statements.
 
-## 2. What Pillar 1 emits — the evidence substrate (PROPOSED serialized schema)
+## 2. What Pillar 1 emits — the evidence substrate (RATIFIED serialized schema — Phase 55, 2026-06-17)
 
-The records below exist as clean in-memory dataclasses today but are **NOT persisted** (the CLI
-prints a text summary and discards them; nothing is written to disk; there are no stable
-`alert_id`/`dossier_id`). The contract requires Pillar 1 to add a serialization + id-minting step
-(enabling increment §5a). The generic `io/serialize.py` already handles every one of these
-dataclasses, and DESIGN.md §8 lists "persist STR/LCTR/EFTR + verify" as deferred-but-planned.
+The records below exist as clean in-memory dataclasses today but are **NOT YET persisted** (the CLI
+prints a text summary and discards them; the generic `io/serialize.py` handles every one of these
+dataclasses, but nothing writes them out and there are no stable `alert_id`/`dossier_id`). The §5a
+enabling increment (an aml-substrate-rooted session) adds the serialization + id-minting step below.
 
-Serialized form (proposed, parquet/json under a committed-or-regenerated `evidence/` output dir):
+**RATIFIED on-disk form (the §7 open question, now closed — Phase 55).** Pillar 1 emits, per case,
+ONE **evidence-bundle json** at `evidence/<run_id>/<case_id>.json` (`run_id` = the deterministic
+monitoring-run stamp; committed-or-regenerated, never a stale snapshot — §4.3). The bundle is the
+on-disk UNION of the records below + the bundle-level honesty/identity keys, and **conforms by
+construction to the Pillar-2 bundle contract** (`aml_casework.contract.validate_bundle` — the
+consumer's authoritative structural gate, so "matches the schema" is a runnable check, not prose).
+json (not parquet) is ratified for the bundle: one case, human-auditable, diff-friendly; the bulk
+transaction/account substrate stays parquet (referenced by path, not embedded). Top-level keys:
+`contract_version` (e.g. "0.1") · `illustrative: true` (the always-on synthetic-output discipline,
+§4.4) · `case_id` · `subject{customer_id, account_ids[]}` · `transactions[]` (the cited data rows
+`{txn_id, account_id, …}`, optional boolean `exculpatory`) · `alerts[]` · `dossier{}` · the
+`str_record{}` SCAFFOLD with `narrative: null` and `completeness.grounds_for_suspicion_narrative:
+false` (Pillar 2 flips BOTH when it writes the grounded narrative — the seam invariant). `lctr`/`eftr`
+ride along when present.
 
-| Record | Key | Fields (current, real) | Minted id to ADD |
+**RATIFIED deterministic id-mint rule (§5a implements it).** Ids are a stable function of content so a
+re-run reproduces them byte-for-byte (the gen-freeze discipline extends to evidence):
+- `alert_id` = `"AL-" + sha1( detector + "|" + account_id + "|" + ",".join(sorted(txn_ids)) + "|" + signal_id )[:12]`
+- `dossier_id` = `"DS-" + sha1( account_id + "|" + ",".join(sorted(alert_ids)) )[:12]`
+- `str_record` keys on `case_id` (the labeled-oracle grouping, §4.1; the OBSERVABLE grouping is `customer_id`).
+
+Serialized record fields (current, real — the columns the bundle carries):
+
+| Record | Key | Fields (current, real) | Minted id (RATIFIED — the §2 sha1 rule) |
 |---|---|---|---|
 | `Alert` | structural | `detector, capability, account_id, txn_ids[], rule, grounding{signal_id, advisory_id, indicator_id, capability, data_source, flag}` | `alert_id` (deterministic from `(detector, account_id, txn_ids, signal_id)`) |
 | `Dossier` | `account_id` | `account_id, alerts[] (→alert_id), capabilities[], signal_ids[], cited_txn_ids[]` | `dossier_id` |
@@ -122,9 +143,14 @@ replaced by "≥1 grounded axis assembled into a complete, examinable dossier."
 Pillar 2 does NOT import `aml_substrate` as a library (that would couple the repos at code level,
 against the one-repo-per-pillar doctrine). Pillar 1 owns the serialized contract; Pillar 2 reads
 the committed/regenerated `evidence/` files. Enabling increments (Pillar-1-rooted session):
-- **§5a — persist + mint ids:** serialize Alert/Dossier/STRRecord/LCTR/EFTR + the overlays to
-  `evidence/`; mint deterministic `alert_id`/`dossier_id`. Re-baseline under the gen/ freeze guard
-  if it touches frozen `gen/` (it shouldn't — monitoring is downstream of `gen/`).
+- **§5a — persist + mint ids (RATIFIED format, §2):** serialize each case to its evidence-bundle json
+  at `evidence/<run_id>/<case_id>.json` (the §2 schema; conforms to
+  `aml_casework.contract.validate_bundle`); mint `alert_id`/`dossier_id` by the §2 deterministic sha1
+  rule. Re-baseline under the gen/ freeze guard only if it touches frozen `gen/` (it shouldn't —
+  monitoring is downstream of `gen/`). **Acceptance:** signal-watch's `scripts/e2e_chain_check.py
+  --real` (the cross-repo verifier — file-contract, no import) passes its substrate-side checks on the
+  emitted bundle, with the C4-structuring slice grounding to `fin-2026-alert001:IND-11`. Brief:
+  `aml-substrate/docs/persist-evidence-seam-PLAN-BRIEF.md` (Phase 55).
 - **§5b — the grounded network-structure signal** (§3 above).
 
 ## 6. What Pillar 2 owns (the workload, full chain — depth-first thin slice)
@@ -148,7 +174,10 @@ owned calibration measurement.
 
 ## 7. Open contract questions (resolve at ratification)
 
-- The exact `evidence/` serialization format + directory layout (parquet vs json per record class).
+- ~~The exact `evidence/` serialization format + directory layout (parquet vs json per record class).~~
+  **RESOLVED (Phase 55, 2026-06-17):** one evidence-bundle **json** per case at
+  `evidence/<run_id>/<case_id>.json`, conforming to `validate_bundle`; deterministic sha1 id-mint (§2).
+  The bulk substrate stays parquet (referenced by path). See §2 + `docs/e2e-acceptance.md`.
 - Whether the network-structure signal grounds to an existing committed FINTRAC/FinCEN network
   advisory or needs a new corpus indicator (corpus is FROZEN — likely an existing indicator).
 - The stratified bootstrap set: how many cases, drawn how (the §14 strata over the observable

@@ -3,10 +3,14 @@
 > **Status: ARCHITECTURE (design).** Cross-pillar data contract authored from the signal-watch
 > program-architecture home. References `docs/program-blueprint.md` (the FROZEN design
 > source-of-truth, §2 grounding chain · §3 rows 4–6 · §13 LFCM) — this is a NEW artifact, not a
-> blueprint edit. Grounded by code-verifying aml-substrate at HEAD `0daa3cc` (Phase 11) on
-> 2026-06-16. Ratified when the Pillar-1 enabling increments (persist + ids; the network signal)
-> land — until then the serialized schemas below are PROPOSED, derived from the current in-memory
-> dataclasses.
+> blueprint edit. Grounded by code-verifying aml-substrate at HEAD `bafc67d` (Phase 13 — the
+> triple-null) on 2026-06-17; re-stamped from the original `0daa3cc` (Phase 11) grounding after
+> confirming the §1/§2 evidence dataclasses (`Alert`/`Dossier`/`STRRecord`/`LCTR`/`EFTR`/
+> `GroundingSnapshot`, `STR_REQUIRED_ELEMENTS`) are UNCHANGED P11→P13 — only `validate/*` moved
+> (the triple-null measurement, absorbed in §3 below). Ratified when the Pillar-1 enabling
+> increments (persist + ids; the network signal) land — until then the serialized schemas below
+> are PROPOSED, derived from the current in-memory dataclasses (which aml-substrate does NOT yet
+> persist — the §5a join has never executed).
 
 ## 0. Why this contract exists
 

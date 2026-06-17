@@ -34,7 +34,7 @@ sys.path.insert(0, _HERE)
 from derive_signals import normalize  # signal-watch's OWN grounding core (NOT a sibling)
 
 # The current sibling grounding pins (the re-ground-before-consume rule updates these).
-GROUNDING_HEADS = {"aml_substrate": "bafc67d", "aml_casework": "0316580"}
+GROUNDING_HEADS = {"aml_substrate": "df23bba", "aml_casework": "85602c1"}
 
 # Mirrors aml_casework.contract.STR_REQUIRED_ELEMENTS (copied by the file-contract, NOT imported).
 STR_REQUIRED_ELEMENTS = (

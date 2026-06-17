@@ -78,6 +78,11 @@ whose every statement walks back through the evidence to the frozen regulator co
   casework consume-real-bundle bridges land in their own sessions. Absent pins → honest
   `GATED: sibling output absent` + nonzero exit. `data/pillar-status.json` flips to all-green only
   here.
+  - **Bridge #1 alone (substrate-side):** `--real --substrate <bundle>` with NO `--casework` runs the
+    A-checks only — the bridge-#1 acceptance. It flips `bridge_1_persist` → done **without** claiming the
+    full chain (`e2e_real` stays pending until the casework SAR lands). `--selftest` preserves real
+    bridge progress — only a `--real` run moves a bridge state. (Bridge #1 VERIFIED 2026-06-17 against
+    aml-substrate@`df23bba` `CASE-P-0010361`: schema + id-mint + corpus grounding all matched.)
 
 ## Honesty boundary
 

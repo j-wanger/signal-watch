@@ -17,7 +17,8 @@ DOCTRINE (load-bearing):
 Usage:
   python3 scripts/e2e_chain_check.py --selftest
   python3 scripts/e2e_chain_check.py --make-fixtures
-  python3 scripts/e2e_chain_check.py --real --substrate <bundle.json> --casework <signed.json>
+  python3 scripts/e2e_chain_check.py --real --substrate <bundle.json>                          # bridge-#1 (substrate-side only)
+  python3 scripts/e2e_chain_check.py --real --substrate <bundle.json> --casework <signed.json> # full chain (CONNECTED)
 """
 from __future__ import annotations
 
@@ -84,8 +85,12 @@ def _find_indicator_flag(advisory_id: str, indicator_id: str):
 
 
 # --- the chain check (docs/e2e-acceptance.md A/B/C) -----------------------------------------------
-def check_chain(bundle: dict, signed: dict) -> list:
-    """Return a list of join violations; [] == the chain is connected."""
+def check_substrate(bundle: dict) -> tuple:
+    """A-side checks (docs/e2e-acceptance.md A1-A4): the emitted evidence is well-formed + real-grounded.
+
+    Returns (violations, ctx); ctx carries acct_ids / txn_ids / grounded_signal_ids / alert_ids so the
+    full-chain B/C checks reuse them. This IS the bridge-#1 acceptance — it runs WITHOUT a casework SAR.
+    """
     v: list = []
 
     def req(obj, key, where):
@@ -157,6 +162,22 @@ def check_chain(bundle: dict, signed: dict) -> list:
         for aid in d.get("alert_ids", []):
             if aid not in alert_ids:
                 v.append(f"dossier: references unknown alert_id '{aid}'")
+
+    return v, {"acct_ids": acct_ids, "txn_ids": txn_ids,
+               "grounded_signal_ids": grounded_signal_ids, "alert_ids": alert_ids}
+
+
+def check_chain(bundle: dict, signed: dict) -> list:
+    """Full-chain join check; [] == connected (A substrate + B casework + C cross-pillar identity)."""
+    v, ctx = check_substrate(bundle)
+    txn_ids = ctx["txn_ids"]
+    grounded_signal_ids = ctx["grounded_signal_ids"]
+
+    def req(obj, key, where):
+        if not isinstance(obj, dict) or key not in obj or obj[key] in (None, "", [], {}):
+            v.append(f"{where}: missing/empty '{key}'")
+            return False
+        return True
 
     # === B. casework side — the SAR is verified + signed ===
     if signed.get("illustrative") is not True:
@@ -351,6 +372,18 @@ def _load(path: str) -> dict:
         return json.load(fh)
 
 
+def _current_bridges() -> tuple:
+    """Read the committed bridge states so --selftest can prove the SPINE without reverting real bridge
+    progress (a --real run is the only thing that should move a bridge state)."""
+    try:
+        b = json.load(open(STATUS_PATH, encoding="utf-8")).get("bridges", {})
+        return (b.get("bridge_1_persist", {}).get("state", "pending"),
+                b.get("bridge_2_consume", {}).get("state", "pending"),
+                b.get("e2e_real", {}).get("state", "pending"))
+    except (OSError, ValueError):
+        return ("pending", "pending", "pending")
+
+
 def selftest() -> int:
     # the mint rule is deterministic
     a = mint_alert_id("D", "A", ["t2", "t1"], "s")
@@ -369,7 +402,9 @@ def selftest() -> int:
     ok = check_chain(bundle, signed)
     bad = check_chain(broken, signed)
 
-    write_status(spine_proven=not ok, bridge_1="pending", bridge_2="pending", e2e_real="pending")
+    # preserve any real bridge progress (a --real run owns the bridge states; --selftest proves the spine)
+    _b1, _b2, _er = _current_bridges()
+    write_status(spine_proven=not ok, bridge_1=_b1, bridge_2=_b2, e2e_real=_er)
 
     failures = []
     if ok:
@@ -400,19 +435,35 @@ def real(substrate_path: str, casework_path: str) -> int:
                   f"sibling outputs (evidence/<run_id>/...); run --selftest to exercise the fixtures.",
                   file=sys.stderr)  # noqa: T201
             return 2
-    missing = [p for p in (substrate_path, casework_path) if not (p and os.path.exists(p))]
-    if missing:
-        # honest gate: the sibling outputs do not exist yet (bridges #1/#2 not landed)
-        b1 = "pending" if not (substrate_path and os.path.exists(substrate_path)) else "done"
-        b2 = "pending" if not (casework_path and os.path.exists(casework_path)) else "done"
-        write_status(spine_proven=True, bridge_1=b1, bridge_2=b2, e2e_real="pending")
-        for p in missing:
-            print(f"GATED: sibling output absent: {p}", file=sys.stderr)  # noqa: T201
-        print("GATED: the --real chain verification needs both sibling outputs (bridges #1 + #2). "
-              "Run after the aml-substrate persist + aml-casework consume-real-bundle sessions land.", file=sys.stderr)  # noqa: T201
+    sub_ok = bool(substrate_path and os.path.exists(substrate_path))
+    cw_ok = bool(casework_path and os.path.exists(casework_path))
+
+    if not sub_ok:
+        # nothing to verify without the substrate evidence bundle (bridge #1 has not landed)
+        write_status(spine_proven=True, bridge_1="pending",
+                     bridge_2="done" if cw_ok else "pending", e2e_real="pending")
+        print(f"GATED: substrate evidence bundle absent: {substrate_path}", file=sys.stderr)  # noqa: T201
+        print("GATED: bridge #1 (the aml-substrate §5a evidence bundle) has not landed.", file=sys.stderr)  # noqa: T201
         return 2
 
     bundle = _load(substrate_path)
+    sub_v, _ = check_substrate(bundle)
+
+    if not cw_ok:
+        # SUBSTRATE-SIDE ONLY — the bridge-#1 acceptance (the casework SAR / bridge #2 not landed yet)
+        if sub_v:
+            write_status(spine_proven=True, bridge_1="failed", bridge_2="pending", e2e_real="pending")
+            print(f"e2e_chain_check --real (substrate-side): bridge #1 NOT verified ({len(sub_v)} violation(s)):", file=sys.stderr)  # noqa: T201
+            for m in sub_v:
+                print(f"  - {m}", file=sys.stderr)  # noqa: T201
+            return 1
+        write_status(spine_proven=True, bridge_1="done", bridge_2="pending", e2e_real="pending")
+        print("e2e_chain_check --real (substrate-side): bridge #1 VERIFIED — the emitted evidence "  # noqa: T201
+              "conforms (§2 schema), the ids match the deterministic mint rule, and every alert grounds "
+              "to the frozen corpus. Full --real (CONNECTED) needs the casework signed SAR (bridge #2).")
+        return 0
+
+    # FULL CHAIN — both sibling outputs present
     signed = _load(casework_path)
     violations = check_chain(bundle, signed)
     if violations:

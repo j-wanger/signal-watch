@@ -12,7 +12,7 @@
   },
   "bridges": {
     "bridge_1_persist": {
-      "state": "pending",
+      "state": "done",
       "detail": "aml-substrate emits the §5a evidence bundle (persist + mint ids)"
     },
     "bridge_2_consume": {

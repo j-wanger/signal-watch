@@ -1,0 +1,80 @@
+{
+  "_comment": "PINNED cross-pillar snapshot for scripts/signal_coverage_map.py (Phase 58). Code-verified facts from the sibling repos at the recorded HEADs — NOT imported, transcribed (the vendored-pin / file-contract pattern, like data/chain-cases). The grounding gate: this file holds GROUNDED SUBSTRATE FACTS (schema-modeled? exposed to detector views? behaviorally emergent?); the SCRIPT holds the classification logic + MEASURES observable activity against the vendored emission. Re-ground (re-verify against the sibling HEADs) before editing. NON-ship; build.py never reads this.",
+  "meta": {
+    "grounding_heads": {
+      "aml_substrate": "df23bba",
+      "aml_casework": "2381d71",
+      "signal_watch_corpus": "472b44e"
+    },
+    "emission_sample": "data/chain-cases/CASE-P-0010361/bundle.json",
+    "emission_note": "The vendored substrate emission (aml-substrate@df23bba). The script MEASURES observable activity against its 71 transaction records (TxnView fields) + its alert capabilities. 'measured' reachability = this emission; 'reasoned' = DESIGN.md/gen behavioral judgement, flagged.",
+    "doctrine": "The corpus drives DETECTOR + observable-exposure design (top-down). data generation + labels stay emergent (bottom-up). This map MEASURES the behavioral-coverage gap; it NEVER stamps it."
+  },
+  "detector_views": {
+    "TxnView": ["txn_id", "timestamp", "channel", "amount_cents", "currency", "direction", "account_id", "counterparty_account_id", "counterparty_ref", "counterparty_country"],
+    "AccountView": ["account_id", "customer_id", "product_type", "status", "date_opened", "last_activity_date", "dormancy_flag"],
+    "party_view": null,
+    "note": "Detectors read ONLY these label-blind projections. There is NO Person/Organization view at df23bba — every KYC/CDD/ownership attribute is generated-but-UNEXPOSED to the detector layer."
+  },
+  "detectors": [
+    {"capability": "C4", "class": "StructuringDetector", "name": "structuring", "signal_id": "fin-2026-alert001:IND-11"},
+    {"capability": "C3", "class": "FunnelDetector", "name": "funnel_fan", "signal_id": "fin-2020-alert001:IND-05"},
+    {"capability": "C2", "class": "PassThroughDetector", "name": "pass_through", "signal_id": "fin-2023-alert001:IND-03"},
+    {"capability": "C5", "class": "CashPlacementDetector", "name": "cash_placement", "signal_id": "fin-2022-alert002:IND-08"},
+    {"capability": "C6", "class": "VelocityDormancyDetector", "name": "velocity_dormancy", "signal_id": "fin-2023-alert003:IND-05"},
+    {"capability": "C15", "class": "ShellDetector", "name": "shell_nominee", "signal_id": "fin-2023-alert006:IND-04"}
+  ],
+  "casework_assertions": ["C2", "C3", "C4", "C5", "C15"],
+  "data_sources": {
+    "D1": {"modeled": true, "exposed": true, "emission_probe": "any_txn", "observable": "Transaction ledger (amount_cents/direction/timestamp/account_id) in TxnView", "basis": "schema/transaction.py + detectors/views.TxnView"},
+    "D2": {"modeled": true, "exposed": true, "emission_probe": "channel:CASH", "observable": "CASH channel (TxnView.channel) + CashDetail", "basis": "Channel.CASH exposed in TxnView; CashDetail (denominations/conductor) is detail-table only"},
+    "D3": {"modeled": true, "exposed": true, "emission_probe": "channel:WIRE|EMT|AFT", "observable": "WIRE/EMT/AFT channels (TxnView.channel)", "basis": "channel exposed; WireDetail BICs/purpose_code + cross-border are detail-only/absent"},
+    "D4": {"modeled": true, "exposed": false, "emission_probe": null, "observable": "CardDetail.mcc/merchant (detail table)", "basis": "CardDetail exists + CARD channel appears as legit background, but MCC/merchant observable is NOT in any detector view"},
+    "D5": {"modeled": true, "exposed": false, "emission_probe": null, "observable": "EMTDetail.memo / WireDetail.remittance_info / AFTDetail.sundry_info", "basis": "channel-specific free-text exists; no unified Transaction.memo; not in views"},
+    "D6": {"modeled": true, "exposed": false, "emission_probe": null, "observable": "ChequeDetail MICR / image metadata", "basis": "ChequeDetail (MICR) exists + CHEQUE channel appears, but the image/MICR observable is detail-only"},
+    "D7": {"modeled": false, "exposed": false, "emission_probe": null, "observable": "none — no VC/blockchain/wallet field; Channel enum has no crypto value", "basis": "not modeled anywhere in schema/"},
+    "D8": {"modeled": true, "exposed": false, "emission_probe": null, "observable": "Person/Org KYC + RelationshipEdge BENEFICIAL_OWNER/CONTROLS/DIRECTOR_OF", "basis": "richly modeled (cdd_level/source_of_funds/ownership graph) but NO party view → entirely unexposed to detectors"},
+    "D9": {"modeled": true, "exposed": false, "emission_probe": null, "observable": "Person/Org id_doc_* + phone/email/device_id + SHARES_* edges", "basis": "P5 identity hooks modeled but unexposed"},
+    "D10": {"modeled": true, "exposed": true, "emission_probe": "field:counterparty_ref", "observable": "TxnView.counterparty_ref / counterparty_account_id + AccountView.customer_id", "basis": "counterparty_ref exposed + populated in emission (47/71); counterparty_account_id sparse (1/71)"},
+    "D11": {"modeled": false, "exposed": false, "emission_probe": null, "observable": "sanctions_flag field exists but is NEVER set True anywhere in src/; no watchlist table", "basis": "dead flag → treated as not-modeled (no usable observable)"},
+    "D12": {"modeled": true, "exposed": false, "emission_probe": null, "observable": "Person.pep_tier (populated at population time)", "basis": "pep_tier IS set (random draw) but unexposed to detectors → generated-unexposed"},
+    "D13": {"modeled": false, "exposed": false, "emission_probe": null, "observable": "adverse_media_flag field exists but is NEVER set True anywhere in src/", "basis": "dead flag → treated as not-modeled"},
+    "D14": {"modeled": false, "exposed": false, "emission_probe": null, "observable": "none — no benefit/program/enrollment field", "basis": "not modeled"},
+    "D15": {"modeled": false, "exposed": false, "emission_probe": null, "observable": "none — no invoice/BoL/customs/HS-code/trade field", "basis": "not modeled (WireDetail.purpose_code is generic ISO, not trade docs)"},
+    "D16": {"modeled": false, "exposed": false, "emission_probe": null, "observable": "none — no vessel/IMO/port/voyage field", "basis": "not modeled"},
+    "D17": {"modeled": true, "exposed": true, "emission_probe": "field:counterparty_country", "observable": "TxnView.counterparty_country + Address.country/incorporation_jurisdiction/nationality", "basis": "counterparty_country exposed but NEVER populated by the engine (0/71 in emission) → measured-inactive"},
+    "D18": {"modeled": false, "exposed": false, "emission_probe": null, "observable": "none — no property/deed record (ProductType.MORTGAGE exists, no property record)", "basis": "not modeled"},
+    "D19": {"modeled": false, "exposed": false, "emission_probe": null, "observable": "none — no trust-account/notary/IOLTA ledger (OrgType.TRUST is an entity type only)", "basis": "not modeled"},
+    "D20": {"modeled": false, "exposed": false, "emission_probe": null, "observable": "none — no lifestyle/external-reference field beyond source_of_wealth text", "basis": "not modeled"}
+  },
+  "capabilities": {
+    "C1": {"group": "Transaction patterns", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "emerges", "basis": "laundering bursts deviate from the modeled expected_activity baseline (out-of-pattern) — emergent on exposed txn observables, no detector yet"},
+    "C2": {"group": "Transaction patterns", "has_detector": true, "has_casework_assertion": true, "detector": "pass_through", "behavior_emergence": "emerges", "basis": "flows layering chain collector→shell→criminal (_SKIM 0.90/hop); detector live"},
+    "C3": {"group": "Transaction patterns", "has_detector": true, "has_casework_assertion": true, "detector": "funnel_fan", "behavior_emergence": "emerges", "basis": "mules→collector fan-in/out; detector live"},
+    "C4": {"group": "Transaction patterns", "has_detector": true, "has_casework_assertion": true, "detector": "structuring", "behavior_emergence": "emerges", "basis": "_PLACEMENT_PROFILES['structuring'] sub-$10k CASH; detector live"},
+    "C5": {"group": "Transaction patterns", "has_detector": true, "has_casework_assertion": true, "detector": "cash_placement", "behavior_emergence": "emerges", "basis": "cash placement mix; detector live"},
+    "C6": {"group": "Transaction patterns", "has_detector": true, "has_casework_assertion": false, "detector": "velocity_dormancy", "behavior_emergence": "absent", "basis": "DESIGN §6: the dormancy-then-burst recipe is SPEC-ONLY/DEFERRED — the engine does NOT generate it; AND no casework assertion → a C6 alert fails replay"},
+    "C7": {"group": "Transaction patterns", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "emerges", "basis": "laundering accounts deviate sharply from baseline volume/velocity (the measured single-feature separability, total_amount ROC ~= 0.95) -> an out-of-pattern / peer-activity deviation IS emergent + observable on exposed txn aggregates; no detector reads it yet"},
+    "C8": {"group": "Transaction patterns", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "data-only", "basis": "occupation + hidden illicit_income exist; no observable income-vs-activity mismatch emerges"},
+    "C9": {"group": "Transaction patterns", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "absent", "basis": "CardDetail.mcc exists + CARD background appears, but no MCC-anomaly behavior is generated"},
+    "C10": {"group": "Transaction patterns", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "data-only", "basis": "channel memo/remittance fields are thin; no keyword-bearing narrative behavior generated"},
+    "C11": {"group": "Entity, KYC & screening", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "absent", "basis": "ChequeDetail/MICR exists; no counterfeit/altered-instrument behavior generated"},
+    "C12": {"group": "Entity, KYC & screening", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "data-only", "basis": "identity hooks (id_doc/device) exist; no synthetic-identity laundering behavior generated"},
+    "C13": {"group": "Entity, KYC & screening", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "data-only", "basis": "cdd_level/risk_rating exist as static KYC data; unexposed; no emergent account-opening-risk behavior"},
+    "C14": {"group": "Entity, KYC & screening", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "data-only", "basis": "KYC-integrity attributes static; no customer-cooperation behavior generated"},
+    "C15": {"group": "Entity, KYC & screening", "has_detector": true, "has_casework_assertion": true, "detector": "shell_nominee", "behavior_emergence": "emerges", "basis": "designate sets LatentRole.SHELL; ~0-net-retention throughput emerges (transaction-observable shell; ownership-graph features are a recorded gap, grounded via proxy)"},
+    "C16": {"group": "Entity, KYC & screening", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "emerges", "basis": "mule recruitment + funnel forwarding IS third-party/nominee money movement — emergent on exposed txn observables, no detector yet"},
+    "C17": {"group": "Cross-border & sanctions", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "data-only", "basis": "pep_tier set by an INDEPENDENT random draw, uncorrelated with latent_role/illicit — no PEP-laundering behavior"},
+    "C18": {"group": "Cross-border & sanctions", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "absent", "basis": "sanctions_flag never set True; no sanctioned-party behavior or even data"},
+    "C19": {"group": "Cross-border & sanctions", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "absent", "basis": "adverse_media_flag never set True; no adverse-media coupling"},
+    "C20": {"group": "Cross-border & sanctions", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "absent", "basis": "laundering engine is CAD-only domestic; counterparty_country never populated; WIRE chosen by amount, not corridor"},
+    "C21": {"group": "Cross-border & sanctions", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "absent", "basis": "no virtual-currency schema or engine path"},
+    "C22": {"group": "Sector / specialized", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "absent", "basis": "no trade/invoice schema; no TBML behavior"},
+    "C23": {"group": "Sector / specialized", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "absent", "basis": "no maritime/vessel schema"},
+    "C24": {"group": "Sector / specialized", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "absent", "basis": "no trade/shipping/parcel schema"},
+    "C25": {"group": "Sector / specialized", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "absent", "basis": "no government-payment/reimbursement schema"},
+    "C26": {"group": "Sector / specialized", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "absent", "basis": "no scam-typology / vulnerable-customer behavior generated"},
+    "C27": {"group": "Sector / specialized", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "absent", "basis": "no real-estate/high-value-asset schema (ProductType.MORTGAGE has no property record)"},
+    "C28": {"group": "Sector / specialized", "has_detector": false, "has_casework_assertion": false, "detector": null, "behavior_emergence": "absent", "basis": "no lifestyle/utility/external-reference schema"}
+  }
+}

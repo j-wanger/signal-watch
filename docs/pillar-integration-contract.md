@@ -183,3 +183,27 @@ owned calibration measurement.
 - The stratified bootstrap set: how many cases, drawn how (the §14 strata over the observable
   grouping), and which are the known-disposition controls.
 - Pillar 2 repo name + its own dev-wiki bootstrap.
+
+## 8. Signal-coverage mapping — corpus-driven detector design (Phase 58, 2026-06-18)
+
+The signal SUPPLY this contract carries is not a fixed handful — it is the corpus catalog (2,251
+indicators / 523 *buildable* = `status=="gap" AND data=="available"`). **`docs/corpus-substrate-coverage.md`
++ `scripts/signal_coverage_map.py`** map each buildable corpus indicator to its reachability on the
+substrate, so the detection layer can be designed AGAINST the corpus (top-down) rather than ad hoc.
+
+**The doctrine boundary (load-bearing):** the corpus drives **detector + observable-exposure** design
+(top-down); **data generation + labels stay emergent (bottom-up)**. The map MEASURES the
+behavioral-coverage gap; it NEVER stamps it. Build briefs derived from it author detectors and
+view-exposure only — stamping a behavior or a label is out of bounds.
+
+Each indicator is classified into one of five tiers by its binding gap (observable-exposure MEASURED
+against the schema pin + the real emission; behavioral-emergence REASONED from DESIGN.md, flagged):
+`reachable-now` (a live detector + casework assertion + emergent behavior, `direct` or via
+transaction-`proxy`) · `needs-detector` · `needs-view-exposure` · `needs-behavior` · `out-of-reach`.
+
+**Measured headline (corpus@472b44e × aml-substrate@df23bba × aml-casework@2381d71):** 93 reachable-now
+(all C15, capability-scaled — 4 of 5 live detectors ground ZERO buildable gaps), 62 needs-detector, 312
+needs-view-exposure (the dominant gap — data the substrate GENERATES but does not EXPOSE to detectors),
+54 needs-behavior, **2 out-of-reach**. The signal supply is broad and capability-scaled: one capability
+detector + one `grounding_replay` assertion grounds many corpus indicators. Re-derive with
+`signal_coverage_map.py --check`; re-ground the pin before consuming (the process rule).

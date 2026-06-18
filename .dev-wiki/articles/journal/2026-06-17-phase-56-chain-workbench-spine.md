@@ -73,3 +73,17 @@ precedent + the bloat guard).
   that script is reopened.
 - **Multi-case "run all" / a session ledger** in the workbench (the console/triage export precedent) — only
   if the demo needs batch storytelling; YAGNI until asked.
+
+## Post-delivery (same session, after the spine commit 16920d4)
+
+- **Showed the workbench** (user asked): served it at `localhost:8020`, screenshotted the landing (real)
+  and the full chain arc. The arc screenshot drove the REAL client (loadCases → select → runCase →
+  the NDJSON reader) over the proven stub-consume run — so the ledger/SAR/audit-walk render exactly as the
+  page does; only the SAR narrative is the offline stand-in (the "deterministic stub" chip is visible).
+  Capture used `serve_chain.run_case(..., consume=_stub_signed_sar)`; pillar-status stayed byte-clean
+  (snapshot/restore held). All preview scaffolding lives in `/tmp` — zero repo change.
+- **DECISION (foreclosed option):** offered to wire that captured-run path into the LIVE `/run` as a
+  clearly-labeled offline preview mode (so a browser Run shows the full arc before beat 2). The user chose
+  **leave the live `/run` strictly gated as designed** — honesty over demo convenience: a stub SAR rendered
+  through the live server would blur beat 2's whole point (the live run IS the proof). No code change; the
+  "bridge gated" behavior stands. Don't re-raise the preview-mode idea.

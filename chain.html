@@ -119,6 +119,25 @@
   .err b{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:5px}
   footer{border-top:1px solid var(--line);margin-top:28px;padding:16px 0;color:var(--faint);font-size:11.5px;font-family:var(--mono);letter-spacing:.02em}
 
+  /* backend picker (the drafter selector — names only; creds stay server-side) */
+  .picker{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:14px 0 2px}
+  .picker .pl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-right:3px}
+  .pbtn{font-family:var(--mono);font-size:11px;letter-spacing:.03em;color:var(--muted);background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:6px 11px;cursor:pointer;transition:.16s}
+  .pbtn:hover:not(:disabled){border-color:var(--teal);color:var(--ink)}
+  .pbtn.sel{border-color:var(--signal);color:var(--ink);box-shadow:0 0 0 1px var(--signal) inset}
+  .pbtn.off{opacity:.4;cursor:not-allowed}
+  .note{font-family:var(--mono);font-size:11px;color:var(--signal);margin-top:7px}
+  .gateline{font-size:12px;color:var(--faint);margin-top:8px;font-style:italic}
+
+  /* stub-vs-neural comparison (same case, each backend's narrative, each gated) */
+  .cmp{margin-top:18px}
+  .cmpgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:10px}
+  .cmpcard{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:13px 15px}
+  .cmph{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .cmph b{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--teal);font-weight:500}
+  .cmpn{font-family:var(--display);font-size:13.5px;line-height:1.5;color:var(--ink)}
+  .reqd{font-family:var(--mono);font-size:10px;color:var(--faint)}
+
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -158,7 +177,8 @@
 <script>
 const CFG = Object.assign(
   {cases:"/cases", run:"/run", health:"/health", badge:"Illustrative data & outputs",
-   drafter:{mode:"stub", key_present:false}},
+   drafter:{mode:"stub", key_present:false, default:"stub", available:["stub"],
+            backends:[{name:"stub", available:true}]}},
   (typeof window!=="undefined" && window.__CHAIN_CONFIG__) || {});
 
 /* esc() — the SOLE escaper. Every dynamic value (case copy, model narrative, regulator flags) flows
@@ -174,6 +194,14 @@ const CANON = [
 
 let CASES = [];
 let STATE = null;   // {caseId, byKey:{}, done, error, running}
+let BACKEND = null; // the presenter's chosen drafter backend (a NAME; creds stay server-side)
+const DRAFTS = {};  // caseId -> { effectiveDrafter: {narrative, signed, blocking, label} } — stub-vs-neural
+
+/* the drafter backends — display names only; the picker sends a NAME, never a key/endpoint (§4.5) */
+function backendLabel(name){
+  return {stub:'deterministic stub', claude:'live · claude (Anthropic)',
+          openai:'live · OpenAI /v1', opencode:'live · opencode (agent loop)'}[name] || String(name||'stub');
+}
 
 /* ---------- case library ---------- */
 function capChips(caps){
@@ -212,12 +240,31 @@ function selectCase(caseId){
 /* ---------- the run pipeline ---------- */
 function caseById(id){ return CASES.find(c => c.case_id===id) || {case_id:id}; }
 
+/* the backend picker — the presenter chooses the drafter; only server-side-available backends are
+   selectable, the rest show "n/a" (no endpoint/key on the server). Disabled while a run is in flight. */
+function pickerHTML(){
+  const dr = CFG.drafter || {};
+  const backends = (dr.backends && dr.backends.length) ? dr.backends : [{name:'stub', available:true}];
+  const running = !!(STATE && STATE.running);
+  return `<div class="picker" id="picker"><span class="pl">Drafter</span>${backends.map(b => {
+    const sel = b.name === BACKEND, off = !b.available;
+    return `<button class="pbtn${sel?' sel':''}${off?' off':''}" data-backend="${esc(b.name)}"${(off||running)?' disabled':''}${off?' title="no endpoint/key server-side"':''}>${esc(backendLabel(b.name))}${off?' · n/a':''}</button>`;
+  }).join('')}</div>`;
+}
+function pickBackend(name){
+  if (STATE && STATE.running) return;          // never switch mid-run (single-flight)
+  const dr = CFG.drafter || {};
+  const avail = (dr.available || ['stub']);
+  if (avail.indexOf(name) < 0) return;          // unavailable backends are not selectable
+  BACKEND = name; setDraftChip(); paint();
+}
+
 function runCase(){
   if (!STATE || STATE.running) return;
   STATE = {caseId:STATE.caseId, byKey:{}, done:null, error:null, running:true};
   paint();
   return fetch(CFG.run, {method:'POST', headers:{'Content-Type':'application/json'},
-                         body:JSON.stringify({case:STATE.caseId})})
+                         body:JSON.stringify({case:STATE.caseId, backend:BACKEND})})
     .then(resp => readNDJSON(resp, applyMessage))
     .catch(e => { applyMessage({error:'could not reach the workbench companion: '+e}); })
     .then(() => { if (STATE) { STATE.running=false; paint(); } });
@@ -247,7 +294,7 @@ function readNDJSON(resp, onObj){
 function applyMessage(obj){
   if (!STATE) return;
   if (obj.error){ STATE.error = obj.error; paint(); return; }
-  if (obj.done){ STATE.done = obj.done; paint(); return; }
+  if (obj.done){ STATE.done = obj.done; storeDraft(obj.done); paint(); return; }
   const st = obj.stage; if (!st) return;
   if (st==='connected' || st==='not_connected'){
     STATE.byKey.connected = {status:'done', connected: st==='connected', ...obj};
@@ -281,17 +328,25 @@ function stageBody(key){
       <div class="caps" style="margin-top:9px">${caps}</div>`;
   }
   if (key==='consume'){
-    if (d.status==='running') return 'Drafting the SAR and running the six Class-G verifiers…';
-    const eff = d.drafter_effective||d.drafter||'';
-    const live = (eff==='claude');
+    if (d.status==='running'){
+      const req = d.requested ? `Drafting via ${esc(backendLabel(d.requested))}` : 'Drafting the SAR';
+      return `${req} and running the six Class-G verifiers…`;
+    }
+    const eff = d.drafter_effective||d.drafter||'stub';
+    const live = (eff!=='stub');
     const comp = d.completeness||{};
     const els = Object.keys(comp).filter(k=>comp[k]===true);
     const sign = d.signed ? `<span class="chk">✓ signed</span>` : `<span class="chk no">✗ not signed</span>`;
     const blk = (d.blocking_violations&&d.blocking_violations.length)
       ? `<span class="chk no">${esc(d.blocking_violations.length)} blocking</span>` : `<span class="chk">0 blocking</span>`;
-    return `<div class="kv"><span>drafter <b style="color:${live?'var(--green)':'var(--teal)'}">${esc(live?'live · claude-opus-4-8':'deterministic stub')}</b></span>
+    const reqd = (d.requested && d.requested!==eff)
+      ? `<span class="reqd">requested ${esc(backendLabel(d.requested))} →</span> ` : '';
+    const note = d.note ? `<div class="note">↳ ${esc(d.note)}</div>` : '';
+    return `<div class="kv"><span>drafter ${reqd}<b style="color:${live?'var(--green)':'var(--teal)'}">${esc(backendLabel(eff))}</b></span>
         <span>${sign}</span><span>${blk}</span>
         <span>${d.narrative_present?'<span class="chk">✓ narrative drafted</span>':'<span class="chk no">no narrative</span>'}</span></div>
+      ${note}
+      <div class="gateline">The six Class-G verifiers + narrative grounding disposed this draft — the gate is the oracle on whatever the backend produced.</div>
       <div class="vlist">${els.map(e=>`<span class="vchk">✓ ${esc(e)}</span>`).join('')}</div>`;
   }
   if (key==='verify'){
@@ -341,6 +396,33 @@ function sarHTML(done){
     ${claims?`<ul class="claims">${claims}</ul>`:''}</div></div>`;
 }
 
+/* stub-vs-neural: cache each backend's gated narrative per case so the presenter can run the
+   deterministic stub THEN a neural backend and see both drafts side by side — each one gated. */
+function storeDraft(done){
+  if (!STATE || !STATE.caseId || !done) return;
+  const rec = (done.signed_sar||{}).str_record||{};
+  const cons = done.consume||{};
+  const eff = cons.drafter_effective||cons.drafter||'stub';
+  if (!rec.narrative) return;
+  (DRAFTS[STATE.caseId] = DRAFTS[STATE.caseId]||{})[eff] = {
+    narrative: rec.narrative, signed: cons.signed===true,
+    blocking: (cons.blocking_violations||[]).length, label: backendLabel(eff)};
+}
+function compareHTML(){
+  if (!STATE || !STATE.caseId) return '';
+  const drafts = DRAFTS[STATE.caseId]||{};
+  const keys = Object.keys(drafts);
+  if (keys.length < 2) return '';
+  const cards = keys.map(k => { const x = drafts[k];
+    const sign = x.signed ? `<span class="chk">✓ signed</span>` : `<span class="chk no">✗ not signed</span>`;
+    const blk = x.blocking ? `<span class="chk no">${esc(x.blocking)} blocking</span>` : `<span class="chk">0 blocking</span>`;
+    return `<div class="cmpcard"><div class="cmph"><b>${esc(x.label)}</b>${sign}${blk}</div>
+      <div class="cmpn">${esc(x.narrative)}</div></div>`;
+  }).join('');
+  return `<div class="cmp"><div class="wh">Drafts compared · same case, each backend's narrative, each gated</div>
+    <div class="cmpgrid">${cards}</div></div>`;
+}
+
 function paint(){
   const run = document.getElementById('run');
   if (!STATE){ run.innerHTML = '<div class="empty">Select a case to run the chain.</div>'; return; }
@@ -355,18 +437,26 @@ function paint(){
         <p class="lead" style="margin-bottom:0">${esc(c.summary||'')}</p></div>
       <button class="btn" id="runBtn" ${STATE.running?'disabled':''}>${STATE.running?'Running…':(STATE.done||STATE.error?'Run again':'Run the chain')}</button>
     </div>
-    ${ledger}${err}${payoff}`;
+    ${pickerHTML()}
+    ${ledger}${err}${payoff}${compareHTML()}`;
   const btn = document.getElementById('runBtn');
   if (btn) btn.onclick = runCase;
+  // wire the picker buttons (real DOM; a no-op under the test shim, which drives pickBackend directly)
+  const pk = document.getElementById('picker');
+  if (pk && pk.querySelectorAll) (pk.querySelectorAll('[data-backend]')||[]).forEach(b => {
+    if (b && b.dataset) b.onclick = () => pickBackend(b.dataset.backend);
+  });
 }
 
 /* ---------- boot ---------- */
 function setDraftChip(){
   const chip = document.getElementById('draftChip');
   if (!chip) return;
-  const live = CFG.drafter && CFG.drafter.mode==='claude';
+  const dr = CFG.drafter || {};
+  const sel = BACKEND || dr.default || 'stub';
+  const live = sel !== 'stub';
   chip.className = 'draft-chip' + (live?' live':'');
-  chip.innerHTML = 'Narrative draft · <b>'+esc(live?'live · claude-opus-4-8':'deterministic stub')+'</b>';
+  chip.innerHTML = 'Drafter · <b>'+esc(backendLabel(sel))+'</b>';
 }
 function loadCases(){
   return fetch(CFG.cases).then(r=>r.json()).then(d=>renderCases(d.cases||[]))
@@ -375,6 +465,7 @@ function loadCases(){
 }
 function boot(){
   const b = document.getElementById('badge'); if (b) b.textContent = CFG.badge || 'Illustrative data & outputs';
+  BACKEND = (CFG.drafter && CFG.drafter.default) || 'stub';
   setDraftChip();
   loadCases();
 }

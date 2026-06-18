@@ -143,12 +143,71 @@ def audit_walk(bundle: dict) -> list:
     return walk
 
 
-# ---- drafter selection (server-side key; never reaches the browser) ------------------------------
-def drafter_for_env(env: dict | None = None) -> str:
-    """`claude` iff ANTHROPIC_API_KEY is set server-side, else `stub` — the neural draft is opt-in by
-    the presence of a key the browser never sees."""
+# ---- drafter backends (server-side creds/endpoints; the browser picks by NAME only) --------------
+# The neural draft is casework's pluggable Drafter Protocol. serve_chain offers a SET of backends; the
+# browser sends a backend NAME from BACKENDS, serve_chain maps it to the casework CLI's --drafter flag.
+# CREDS + ENDPOINTS live in serve_chain's OWN env (inherited by the casework subprocess in
+# casework_consume) and NEVER cross to the browser — the served config exposes only names + booleans
+# (non-negotiable §4.5: no key/token/base_url in the frontend). 'stub' is always available
+# (deterministic, no model); a neural backend is available iff its server-side env is present.
+BACKENDS = ("stub", "claude", "openai", "opencode")
+
+# The server-side env that makes each neural backend available (values are NEVER serialized to the page).
+#   claude   — Anthropic: OAuth subscription (ANTHROPIC_AUTH_TOKEN) OR an API key (ANTHROPIC_API_KEY)
+#   openai   — any OpenAI-standard /v1 server (OPENAI_BASE_URL; key optional for a local model)
+#   opencode — drafting driven THROUGH opencode's agent loop (OPENCODE_SERVE_URL — its serve endpoint)
+_BACKEND_ENV = {
+    "claude": ("ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_API_KEY"),
+    "openai": ("OPENAI_BASE_URL",),
+    "opencode": ("OPENCODE_SERVE_URL", "OPENCODE_BASE_URL"),
+}
+
+
+def backend_available(name: str, env: dict | None = None) -> bool:
+    """Is `name` usable given the SERVER-SIDE env? stub always; a neural backend iff its endpoint/cred
+    env is present (only this boolean ever leaves the server — never the value)."""
     e = env if env is not None else os.environ
-    return "claude" if e.get("ANTHROPIC_API_KEY") else "stub"
+    if name == "stub":
+        return True
+    return any(e.get(k) for k in _BACKEND_ENV.get(name, ()))
+
+
+def available_backends(env: dict | None = None) -> list:
+    """The backends the presenter may pick, in display order (stub first — the always-on baseline)."""
+    return [b for b in BACKENDS if backend_available(b, env)]
+
+
+def default_backend(env: dict | None = None) -> str:
+    """The auto-default when the browser names none: the first AVAILABLE neural backend (claude →
+    openai → opencode), else stub. Preserves Phase-56 behaviour (claude iff a key/token, else stub)."""
+    for b in ("claude", "openai", "opencode"):
+        if backend_available(b, env):
+            return b
+    return "stub"
+
+
+def resolve_backend(requested: str | None, env: dict | None = None) -> dict:
+    """Map a browser-sent backend NAME to the effective drafter, SERVER-SIDE. Returns
+    {requested, effective, available, note}. An unknown or unavailable backend falls back HONESTLY to
+    the stub (never a crash, never a silent neural→neural switch) with a named note; an empty request
+    uses the default. The effective name is what gets passed to the casework CLI's --drafter."""
+    avail = available_backends(env)
+    req = (requested or "").strip().lower()
+    if not req:
+        return {"requested": None, "effective": default_backend(env), "available": avail, "note": None}
+    if req not in BACKENDS:
+        return {"requested": requested, "effective": "stub", "available": avail,
+                "note": f"unknown backend '{requested}' — fell back to the deterministic stub"}
+    if req not in avail:
+        return {"requested": req, "effective": "stub", "available": avail,
+                "note": f"backend '{req}' unavailable server-side (no endpoint/key) — fell back to the stub"}
+    return {"requested": req, "effective": req, "available": avail, "note": None}
+
+
+def drafter_for_env(env: dict | None = None) -> str:
+    """Back-compat alias for the AUTO default (the CLI banner + /health). The neural draft is opt-in by
+    the presence of server-side env the browser never sees."""
+    return default_backend(env)
 
 
 # ---- the casework consume (subprocess of the SIBLING's OWN CLI; injectable for the offline test) --
@@ -221,12 +280,14 @@ def verify_e2e(bundle_path: Path, signed_path: Path) -> dict:
 
 # ---- the run pipeline (stage-streamed; consume + verify injectable for the offline selftest) -----
 def run_case(case_id: str, *, on_stage, consume=casework_consume, verify=verify_e2e,
-             drafter: str | None = None, tmpdir: Path | None = None) -> dict:
+             drafter: str | None = None, tmpdir: Path | None = None, env: dict | None = None) -> dict:
     """Drive one case end to end, emitting stages via on_stage(stage, **detail). Returns the final
     payload {case, bundle_summary, signed_sar, consume, verify, audit_walk, connected}.
 
-    `consume`/`verify` are injected so the selftest runs OFFLINE (casework subprocess stubbed); the
-    defaults are the real subprocesses. A failed stage raises RunError (named, emitted in-stream)."""
+    `drafter` is the browser-sent backend NAME (resolved server-side against `env`/os.environ — creds
+    never crossed the wire). `consume`/`verify` are injected so the selftest runs OFFLINE (casework
+    subprocess stubbed); the defaults are the real subprocesses. A failed stage raises RunError
+    (named, emitted in-stream)."""
     manifest = load_manifest()
     case = _case(manifest, case_id)
     bundle_path = _bundle_path(case)
@@ -238,9 +299,12 @@ def run_case(case_id: str, *, on_stage, consume=casework_consume, verify=verify_
              capabilities=[a.get("capability") for a in bundle.get("alerts", [])],
              subject=bundle.get("subject", {}))
 
-    # stage 2 — consume (the LIVE casework SAR draft + the 6 Class-G verifiers, via the sibling CLI)
-    eff_drafter = drafter or drafter_for_env()
-    on_stage("consume", drafter=eff_drafter, status="running")
+    # stage 2 — consume (the LIVE casework SAR draft + the 6 Class-G verifiers, via the sibling CLI).
+    # `drafter` is the browser-sent backend NAME; resolve it SERVER-SIDE (unknown/unavailable → honest stub).
+    resolved = resolve_backend(drafter, env)
+    eff_drafter = resolved["effective"]
+    on_stage("consume", drafter=eff_drafter, requested=resolved["requested"],
+             available=resolved["available"], note=resolved["note"], status="running")
     tdir = tmpdir or Path(os.environ.get("TMPDIR", "/tmp"))
     signed_path = tdir / f"{case_id}-signed.json"
     consume_res = consume(bundle_path, signed_path, eff_drafter)
@@ -307,9 +371,17 @@ def _stub_signed_sar(bundle_path: Path, out_path: Path, drafter: str) -> dict:
 CHAIN_PLACEHOLDER = "<!--__CHAIN_CONFIG__-->"
 
 
-def live_config(server=None) -> dict:
+def _drafter_config(env: dict | None = None) -> dict:
+    """The drafter view the browser gets — NAMES + booleans ONLY, never a key/token/base_url (§4.5).
+    `backends` drives the picker; `available` is the subset the presenter may actually run."""
+    return {"mode": drafter_for_env(env), "key_present": backend_available("claude", env),
+            "default": default_backend(env), "available": available_backends(env),
+            "backends": [{"name": b, "available": backend_available(b, env)} for b in BACKENDS]}
+
+
+def live_config(server=None, env: dict | None = None) -> dict:
     return {"cases": "/cases", "run": "/run", "health": "/health", "badge": BADGE,
-            "drafter": {"mode": drafter_for_env(), "key_present": drafter_for_env() == "claude"}}
+            "drafter": _drafter_config(env)}
 
 
 def render_page(cfg: dict) -> str:
@@ -353,7 +425,8 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200, {"badge": BADGE, "cases": list_cases()})
         elif path == "/health":
             self._json(200, {"ok": True, "live": True, "persist": False,
-                             "drafter": drafter_for_env(), "casework_dir": str(CASEWORK_DIR)})
+                             "drafter": drafter_for_env(), "backends": available_backends(),
+                             "casework_dir": str(CASEWORK_DIR)})
         else:
             self._json(404, {"error": f"not found: {path}"})
 
@@ -380,6 +453,8 @@ class Handler(BaseHTTPRequestHandler):
         case_id = (payload.get("case") or payload.get("case_id") or "").strip()
         if not case_id:
             self._json(400, {"error": "missing 'case' (the case_id to run; GET /cases lists them)"}); return
+        # the browser sends only a backend NAME; serve_chain resolves it server-side (creds never crossed)
+        backend = (payload.get("backend") or payload.get("drafter") or "").strip() or None
         # SINGLE-FLIGHT (the Phase-43 lesson): a second concurrent run would split the model's
         # throughput AND race the pillar-status snapshot/restore — honest 409 pre-stream instead.
         lock = self.server.__dict__.setdefault("run_lock", threading.Lock())
@@ -394,7 +469,7 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 import tempfile
                 with tempfile.TemporaryDirectory() as td:
-                    payload_out = run_case(case_id, tmpdir=Path(td),
+                    payload_out = run_case(case_id, tmpdir=Path(td), drafter=backend,
                                            on_stage=lambda stage, **kw: self._emit({"stage": stage, **kw}))
                 self._emit({"done": payload_out})
             except RunError as ex:
@@ -426,9 +501,45 @@ def selftest() -> int:
     assert all("transactions" not in c for c in cases), "cases listing must not carry txn bodies"
     case_id = cases[0]["case_id"]
 
-    # drafter selection: key present -> claude, absent -> stub (the server-side opt-in)
+    # backend availability from SERVER-SIDE env (the browser only ever sends a NAME)
+    assert backend_available("stub", {}) and backend_available("stub", {"X": "1"})
+    assert backend_available("claude", {"ANTHROPIC_AUTH_TOKEN": "oauth-x"})   # OAuth subscription
+    assert backend_available("claude", {"ANTHROPIC_API_KEY": "sk-x"})         # or an API key
+    assert not backend_available("claude", {})
+    assert backend_available("openai", {"OPENAI_BASE_URL": "http://127.0.0.1:8080/v1"})
+    assert not backend_available("openai", {})
+    assert backend_available("opencode", {"OPENCODE_SERVE_URL": "http://127.0.0.1:4096"})
+    assert not backend_available("opencode", {})
+    assert available_backends({}) == ["stub"]
+    assert available_backends({"OPENAI_BASE_URL": "http://x/v1"}) == ["stub", "openai"]
+
+    # back-compat auto-default (Phase-56): key present -> claude, absent -> stub
     assert drafter_for_env({"ANTHROPIC_API_KEY": "sk-x"}) == "claude"
     assert drafter_for_env({}) == "stub"
+    assert default_backend({"OPENAI_BASE_URL": "http://x/v1"}) == "openai"   # first available neural
+
+    # name pass-through + HONEST fallback (never a crash, never a silent neural->neural switch)
+    full = {"ANTHROPIC_API_KEY": "sk-x", "OPENAI_BASE_URL": "http://x/v1"}
+    assert resolve_backend("openai", full)["effective"] == "openai"
+    assert resolve_backend("claude", full)["effective"] == "claude"
+    assert resolve_backend(None, full)["effective"] == "claude"             # default = first neural
+    r_unavail = resolve_backend("opencode", full)                          # known but unavailable here
+    assert r_unavail["effective"] == "stub" and "unavailable" in (r_unavail["note"] or "")
+    r_unknown = resolve_backend("../etc/passwd", full)                     # unknown name -> stub, no injection
+    assert r_unknown["effective"] == "stub" and "unknown" in (r_unknown["note"] or "")
+    assert resolve_backend("stub", {})["effective"] == "stub"
+
+    # NO creds/endpoints reach the browser: the served config + page carry only names + booleans (§4.5)
+    secret_env = {"ANTHROPIC_API_KEY": "sk-SECRET-DEADBEEF", "ANTHROPIC_AUTH_TOKEN": "oauth-SECRET-DEADBEEF",
+                  "OPENAI_API_KEY": "sk-openai-SECRET", "OPENAI_BASE_URL": "http://127.0.0.1:8080/v1",
+                  "OPENCODE_SERVE_URL": "http://127.0.0.1:4096"}
+    cfg_secret = live_config(env=secret_env)
+    blob = json.dumps(cfg_secret) + render_page(cfg_secret)
+    for leak in ("sk-SECRET-DEADBEEF", "oauth-SECRET-DEADBEEF", "sk-openai-SECRET",
+                 "127.0.0.1:8080", "127.0.0.1:4096"):
+        assert leak not in blob, f"server-side cred/endpoint leaked into the served config/page: {leak}"
+    assert [b["name"] for b in cfg_secret["drafter"]["backends"]] == list(BACKENDS)
+    assert cfg_secret["drafter"]["available"] == ["stub", "claude", "openai", "opencode"]
 
     # the audit walk grounds every alert to the frozen corpus
     bundle = json.loads(_bundle_path(_case(manifest, case_id)).read_text(encoding="utf-8"))
@@ -457,6 +568,18 @@ def selftest() -> int:
     status_after = STATUS_PATH.read_bytes() if STATUS_PATH.exists() else None
     if status_before != status_after:
         failures.append("data/pillar-status.json was mutated by a run (verify_e2e must snapshot+restore)")
+
+    # the run resolves the requested backend SERVER-SIDE and hands the EFFECTIVE name to consume:
+    # an available request passes through; an unavailable one falls back to the stub (deterministic env)
+    for requested, env_in, expect in (("openai", {"OPENAI_BASE_URL": "http://x/v1"}, "openai"),
+                                      ("opencode", {"OPENAI_BASE_URL": "http://x/v1"}, "stub")):
+        seen = {}
+        with tempfile.TemporaryDirectory() as td:
+            run_case(case_id, tmpdir=Path(td), drafter=requested, env=env_in,
+                     consume=lambda b, o, d: (seen.__setitem__("d", d), _stub_signed_sar(b, o, d))[1],
+                     on_stage=lambda s, **kw: None)
+        if seen.get("d") != expect:
+            failures.append(f"backend '{requested}' should resolve to '{expect}', consume saw {seen.get('d')!r}")
 
     # honest GATED path: the REAL casework consume on an absent CLI raises a NAMED RunError (not a crash)
     try:

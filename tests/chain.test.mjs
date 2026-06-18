@@ -32,7 +32,8 @@ ok((html.match(/<script>/g)||[]).length === 1, 'exactly one inline <script> (the
 const open = html.indexOf('<script>'), close = html.lastIndexOf('</script>');
 const SCRIPT = html.slice(open + '<script>'.length, close)
   + `\n;globalThis.__T={esc,caseCardHTML,renderCases,selectCase,runCase,applyMessage,paint,`
-  + `auditWalkHTML,sarHTML,loadCases,getCASES:()=>CASES,getSTATE:()=>STATE};`;
+  + `auditWalkHTML,sarHTML,loadCases,backendLabel,pickerHTML,pickBackend,compareHTML,`
+  + `getCASES:()=>CASES,getSTATE:()=>STATE,getBACKEND:()=>BACKEND};`;
 
 /* ---------- DOM + fetch shim ---------- */
 function makeEl(id){
@@ -72,13 +73,24 @@ function ndjsonChunks(objs, splitAt){
 
 let CASES_RESPONSE = { badge:'Illustrative data & outputs', cases:[] };
 let RUN_CHUNKS = [];
+let LAST_RUN_BODY = null;
 function fetchShim(url, opts){
   if (String(url).includes('/cases')) return Promise.resolve({ ok:true, json:()=>Promise.resolve(CASES_RESPONSE) });
-  if (String(url).includes('/run'))   return Promise.resolve(streamResponse(RUN_CHUNKS));
+  if (String(url).includes('/run')){ try { LAST_RUN_BODY = JSON.parse((opts&&opts.body)||'{}'); } catch(e){ LAST_RUN_BODY = null; }
+    return Promise.resolve(streamResponse(RUN_CHUNKS)); }
   return Promise.reject(new Error('unexpected url '+url));
 }
 
-const sandbox = { document:documentShim, window:{}, fetch:fetchShim,
+// inject a multi-backend config (what serve_chain renders when several backends are available
+// server-side) so the picker, the live-draft labels, and the comparison are exercised. NAMES only —
+// no key/endpoint ever reaches this config (serve_chain's own --selftest asserts that separately).
+const CHAIN_CFG = { cases:'/cases', run:'/run', health:'/health', badge:'Illustrative data & outputs',
+  drafter:{ mode:'stub', key_present:false, default:'stub',
+            available:['stub','claude','openai'],
+            backends:[{name:'stub',available:true},{name:'claude',available:true},
+                      {name:'openai',available:true},{name:'opencode',available:false}] } };
+
+const sandbox = { document:documentShim, window:{ __CHAIN_CONFIG__: CHAIN_CFG }, fetch:fetchShim,
   TextDecoder, TextEncoder, Uint8Array, JSON, Promise, setTimeout, console };
 sandbox.globalThis = sandbox;
 vm.createContext(sandbox);
@@ -190,6 +202,62 @@ ok(/Run gated \/ failed/.test(ELEMENTS.run._html) && /bridge gated/.test(ELEMENT
 CASES_RESPONSE = { badge:'Illustrative data & outputs', cases:[CASES[0]] };
 await T.loadCases();
 ok(/Multi-typology mule/.test(ELEMENTS.caseList._html), 'loadCases() fetches /cases and renders the library');
+
+/* ---------- backend picker (multiple drafters; names only) ---------- */
+ok(T.backendLabel('stub')==='deterministic stub' && /claude/.test(T.backendLabel('claude'))
+   && /OpenAI/.test(T.backendLabel('openai')) && /opencode/.test(T.backendLabel('opencode')),
+   'backendLabel maps every backend to a display name');
+T.selectCase('CASE-P-0010361');
+const pickerH = ELEMENTS.run._html;
+ok(/data-backend="stub"/.test(pickerH) && /data-backend="claude"/.test(pickerH) && /data-backend="openai"/.test(pickerH),
+   'picker renders a button per backend');
+ok(/data-backend="opencode"[^>]*disabled/.test(pickerH) && /n\/a/.test(pickerH),
+   'an unavailable backend renders disabled + "n/a" (no endpoint/key server-side)');
+ok(T.getBACKEND()==='stub', 'default backend is the config default (stub)');
+T.pickBackend('openai');
+ok(T.getBACKEND()==='openai', 'pickBackend selects an AVAILABLE backend');
+T.pickBackend('opencode');
+ok(T.getBACKEND()==='openai', 'pickBackend IGNORES an unavailable backend (stays on the prior pick)');
+
+/* ---------- the picked backend is sent on /run (a NAME, not a cred) ---------- */
+T.pickBackend('claude');
+T.selectCase('CASE-P-0010361');
+RUN_CHUNKS = ndjsonChunks([{ stage:'connected', connected:true },
+  { done:{ case:{case_id:'CASE-P-0010361'}, signed_sar:{}, audit_walk:[], connected:true } }]);
+await T.runCase();
+ok(LAST_RUN_BODY && LAST_RUN_BODY.backend==='claude' && LAST_RUN_BODY.case==='CASE-P-0010361',
+   'runCase POSTs the selected backend NAME + the case to /run');
+
+/* ---------- live-draft label + honest requested→effective fallback ---------- */
+T.selectCase('CASE-P-0010361');
+T.applyMessage({ stage:'consume', status:'done', drafter:'claude', drafter_effective:'claude', signed:true,
+  blocking_violations:[], narrative_present:true, completeness:{ a:true } });
+ok(/live · claude \(Anthropic\)/.test(ELEMENTS.run._html), 'consume stage labels a live claude draft');
+ok(/the gate is the oracle/.test(ELEMENTS.run._html), 'consume stage frames the verifiers as the oracle on the generated draft');
+T.selectCase('CASE-P-0010361');
+T.applyMessage({ stage:'consume', status:'running', requested:'opencode' });
+ok(/Drafting via live · opencode/.test(ELEMENTS.run._html), 'a running neural draft names the requested backend');
+T.applyMessage({ stage:'consume', status:'done', drafter:'opencode', requested:'opencode', drafter_effective:'stub',
+  note:"backend 'opencode' unavailable server-side (no endpoint/key) — fell back to the stub",
+  signed:true, blocking_violations:[], narrative_present:true, completeness:{ a:true } });
+ok(/fell back to the stub/.test(ELEMENTS.run._html) && /requested live · opencode \(agent loop\) →/.test(ELEMENTS.run._html),
+   'drafter_effective honesty: an unavailable backend shows the named fallback note + requested→effective');
+
+/* ---------- stub-vs-neural comparison (two backends, one case, each gated) ---------- */
+T.selectCase('CASE-CMP');
+RUN_CHUNKS = ndjsonChunks([{ stage:'connected', connected:true }, { done:{ case:{case_id:'CASE-CMP'},
+  consume:{ drafter_effective:'stub', signed:true, blocking_violations:[] },
+  signed_sar:{ str_record:{ narrative:'STUB DRAFT baseline narrative.' } }, audit_walk:[], connected:true } }]);
+await T.runCase();
+RUN_CHUNKS = ndjsonChunks([{ stage:'connected', connected:true }, { done:{ case:{case_id:'CASE-CMP'},
+  consume:{ drafter_effective:'claude', signed:true, blocking_violations:[] },
+  signed_sar:{ str_record:{ narrative:'NEURAL DRAFT richer narrative <not a tag>.' } }, audit_walk:[], connected:true } }]);
+await T.runCase();
+const cmpH = ELEMENTS.run._html;
+ok(/Drafts compared/.test(cmpH), 'after a second backend runs the same case, the comparison panel renders');
+ok(/STUB DRAFT baseline/.test(cmpH) && /NEURAL DRAFT richer/.test(cmpH), 'comparison shows BOTH backends\' narratives');
+ok(/deterministic stub/.test(cmpH) && /live · claude/.test(cmpH), 'comparison labels each draft by its backend');
+ok(cmpH.includes(escH('<not a tag>')), 'XSS: a compared narrative is esc()-escaped');
 
 /* ---------- summary ---------- */
 console.log(`\n${pass} passed, ${fails.length} failed`);

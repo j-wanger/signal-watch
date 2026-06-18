@@ -1,7 +1,7 @@
 ---
 title: "Phase 57 — Live neural SAR/STR draft + pluggable drafter backends (claude · OpenAI /v1 · opencode)"
 type: phase
-status: active
+status: completed
 ceremony: lite
 milestone: M9
 created: 2026-06-18

@@ -87,3 +87,25 @@ precedent + the bloat guard).
   **leave the live `/run` strictly gated as designed** — honesty over demo convenience: a stub SAR rendered
   through the live server would blur beat 2's whole point (the live run IS the proof). No code change; the
   "bridge gated" behavior stands. Don't re-raise the preview-mode idea.
+
+## Beat 2 verified — phase COMPLETE (both beats; 2026-06-17)
+
+The user reported beat 2 done; code-verified the sibling (per the re-ground-before-consume rule, not on faith):
+- **The casework consume CLI landed** — aml-casework@`f0542b7` (Phase 7, "consume CLI + deterministic
+  drafter"): `python -m aml_casework.ingest <bundle> --out <signed> --drafter stub|claude` (argparse, `main`,
+  `__main__`), `--drafter claude` FAIL-SOFT, + a new SRC-resident `drafter_stub.py` — **exactly the brief-A0
+  bundle-derived design** (one inculpatory claim per `signal_id`; prose names only the grounded `account_id`
+  + generic lowercase typology phrases → grounds by construction). brief-A0 resolved YES. The consume-cli
+  brief is now tracked in casework.
+- **The chain CONNECTS from signal-watch** — `serve_chain.run_case("CASE-P-0010361")` drove the REAL CLI
+  (drafter fail-soft to stub, no key here) → signed, 0 blocking → real `e2e_chain_check --real` → CONNECTED,
+  audit walk 5/5 grounded; pillar-status byte-clean (snapshot/restore held). The neural path is key-gated
+  here (no `ANTHROPIC_API_KEY`); its fail-soft is verified and the end-to-end neural run is covered by
+  casework's `@integration` test — an honest gap from THIS env, not a defect.
+- **Close work:** re-grounded the casework pin `85602c1`→`f0542b7` in `e2e_chain_check.py` (the process
+  rule); emitted the real signed SAR via the CLI + ran `--real` → pillar-status all-green with `f0542b7`;
+  rebuilt the launcher (`dist/index.html`) → `--check all` 8/8 (7 dists byte-identical, only the launcher
+  moved with the pin). e2e_chain_check `--selftest` + launcher.test.mjs + the chain suite all green.
+- **Gate:** delivery accepted; `gate-log:phase-56 delivery=accepted`; the active-phase delivery checkbox
+  flipped `[x]`. A4 (the T0 weakest) HELD — the CLI was thin + one predicted src stub. Phase functionally
+  COMPLETE; active→completed left for the user's explicit call (Phase-55 precedent).

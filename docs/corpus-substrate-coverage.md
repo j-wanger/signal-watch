@@ -2,10 +2,14 @@
 
 > **Illustrative data & outputs.** NON-ship measure-first artifact (the `corpus_redundancy` /
 > `cd_correctness` pattern). Read-only over the committed corpus; the 8 ship dists stay byte-frozen.
-> Grounded against **aml-substrate@df23bba · aml-casework@2381d71 · signal-watch corpus@472b44e**
-> (recorded inline in `data/coverage-map/substrate-pin.json`; re-ground before consuming — the
-> 2026-06-16 cross-pillar process rule). Re-derive every number here with
-> `python3 scripts/signal_coverage_map.py --check`.
+> Grounded against **aml-substrate@5875241 · aml-casework@4ac9523 · signal-watch corpus@472b44e**
+> (re-grounded Phase 59, 2026-06-18; recorded inline in `data/coverage-map/substrate-pin.json`;
+> re-ground before consuming — the 2026-06-16 cross-pillar process rule). Re-derive every number here
+> with `python3 scripts/signal_coverage_map.py --check`.
+>
+> §3 below is the **Phase-58 baseline** (substrate@df23bba). **§3a** records the **Phase-15 landing**
+> (substrate@5875241) — the substrate half of the §5 briefs consumed — and is what the current frozen
+> `coverage.json` reflects.
 
 ## 0. Why this exists
 
@@ -126,6 +130,57 @@ Three findings, each measured:
 | view-exposure | **C9** Merchant-category (MCC) screening | 46 |
 
 (Full per-capability ranking + per-signal classification in `data/coverage-map/coverage.json`.)
+
+## 3a. The Phase-15 landing — the substrate half consumed (substrate@5875241, 2026-06-18)
+
+aml-substrate Phase 15 shipped the **substrate half** of the §5 briefs: a label-blind **PartyView**
+(exposes D8 KYC + D12 pep to a `SCREENING_DETECTORS` registry) + 4 screening detectors (**C7**
+business-activity · **C14** KYC-integrity · **C8** income-mismatch · **C26** scam). The pin was
+re-grounded to @5875241 (code-verified) and `coverage.json` re-frozen (Phase 59). The measured tier
+movement vs the §3 df23bba baseline:
+
+| Tier | df23bba (§3) | 5875241 (now) | Δ |
+|---|---:|---:|---:|
+| reachable-now | 93 | 93 | **0** |
+| needs-detector | 62 | 62 | 0 |
+| needs-view-exposure | 312 | **70** | **−242** |
+| needs-behavior | 54 | **296** | **+242** |
+| out-of-reach | 2 | 2 | 0 |
+
+**The finding: landing the detectors + views moved 0 signals into reachable-now.** Reachability is a
+**3-way AND** — `has_detector ∧ has_casework_assertion ∧ behavior_emergence=="emerges"`. The substrate
+half satisfied only the **exposure** conjunct:
+
+- The 242 D8/D12 (KYC/pep) signals **left needs-view-exposure** (the PartyView now exposes them) but
+  landed in **needs-behavior**, not reachable-now — because the **still-vendored emission sample
+  (`CASE-P-0010361`, aml-substrate@df23bba) is transaction-only and carries no party rows**, so the
+  classifier's `modeled-inactive` branch (exposed=true ∧ `emission_probe` inactive) cannot yet MEASURE
+  the KYC observable active. This is an **emission-sample limitation, NOT emergence-engine work.**
+- The 62 **C7** signals keep the **needs-detector** label even though the C7 detector now exists —
+  because they lack the paired casework `grounding_replay` assertion (`is_live` is false without it).
+
+**Read the tier counts with this caveat — the tier NAMES are now composite for the touched signals:**
+
+- **`needs-behavior = 296` is two very different populations:** ~242 **exposed-but-unmeasurable-on-the-
+  txn-emission** (cleared by ONE increment — a party-bearing bundle) **+ ~54 genuine emergence gaps**
+  (the C6/C26/C27 engine work). They are NOT the same distance from reachable. The per-signal
+  `data_source_class` (`modeled-inactive` vs the rest) + `behavior_confirmed:false` split them; don't
+  read 296 as "242 need emergence work."
+- **`needs-detector = 62`** (all C7) now means **"detector exists, blocked on the casework assertion,"**
+  not "no detector."
+
+**reachable-now rises above 93 only when BOTH remaining halves land** (both sibling-rooted — the §5
+briefs hand them off):
+
+1. **a party-bearing emission bundle** (aml-substrate) — re-vendor it and the 242 D8/D12 signals'
+   `emission_probe` flips active → they become map-measurable;
+2. **the 4 paired `grounding_replay` assertions** C7/C8/C14/C26 (aml-casework@4ac9523 has none yet —
+   Phase 9 added the pluggable drafter backends, not these).
+
+`--check` re-runs as each lands; the count is the honest scoreboard. The map's `--selftest` now pins
+this movement (D8 → `modeled-inactive`; C13/D8 → `needs-behavior`) as a regression anchor for the
+landing. The §3 "top capabilities to wire" detector half (C7/C14/C8/C26) is now BUILT; what remains for
+those capabilities is the casework-assertion half + the party-bearing emission.
 
 ## 4. Substrate observable classes (measured)
 

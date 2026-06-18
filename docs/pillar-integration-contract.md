@@ -201,9 +201,23 @@ against the schema pin + the real emission; behavioral-emergence REASONED from D
 `reachable-now` (a live detector + casework assertion + emergent behavior, `direct` or via
 transaction-`proxy`) · `needs-detector` · `needs-view-exposure` · `needs-behavior` · `out-of-reach`.
 
-**Measured headline (corpus@472b44e × aml-substrate@df23bba × aml-casework@2381d71):** 93 reachable-now
-(all C15, capability-scaled — 4 of 5 live detectors ground ZERO buildable gaps), 62 needs-detector, 312
-needs-view-exposure (the dominant gap — data the substrate GENERATES but does not EXPOSE to detectors),
-54 needs-behavior, **2 out-of-reach**. The signal supply is broad and capability-scaled: one capability
-detector + one `grounding_replay` assertion grounds many corpus indicators. Re-derive with
-`signal_coverage_map.py --check`; re-ground the pin before consuming (the process rule).
+**Measured headline — Phase-58 baseline (corpus@472b44e × aml-substrate@df23bba × aml-casework@2381d71):**
+93 reachable-now (all C15, capability-scaled — 4 of 5 live detectors ground ZERO buildable gaps), 62
+needs-detector, 312 needs-view-exposure (the dominant gap — data the substrate GENERATES but does not
+EXPOSE to detectors), 54 needs-behavior, **2 out-of-reach**. The signal supply is broad and
+capability-scaled: one capability detector + one `grounding_replay` assertion grounds many corpus
+indicators. Re-derive with `signal_coverage_map.py --check`; re-ground the pin before consuming (the
+process rule).
+
+**Phase-15 landing update (re-grounded Phase 59, 2026-06-18 — corpus@472b44e × aml-substrate@5875241 ×
+aml-casework@4ac9523).** aml-substrate Phase 15 shipped the **substrate half** of the §5 build briefs (a
+label-blind PartyView exposing D8/D12 + the C7/C14/C8/C26 screening detectors). The re-frozen map shows
+the movement: needs-view-exposure **312→70**, needs-behavior **54→296** — **and reachable-now UNCHANGED
+at 93.** Landing the detectors+views moved 0 signals into reachable-now because reachability is a **3-way
+AND** (`has_detector ∧ has_casework_assertion ∧ behavior_emergence=="emerges"`) and the substrate half
+satisfied only *exposure*: the 242 D8/D12 signals are exposed but **unmeasurable on the still-vendored
+txn-only emission** (no party rows → `modeled-inactive` → needs-behavior, an emission-sample limit not
+emergence work), and the 62 C7 stay needs-detector pending the casework assertion. **reachable-now rises
+only when BOTH remaining halves land:** a party-bearing emission bundle (aml-substrate) + the 4 paired
+`grounding_replay` assertions C7/C8/C14/C26 (aml-casework) — both sibling-rooted, handed off in the §5
+briefs. Detail + the composite-tier caveat: `docs/corpus-substrate-coverage.md` §3a.

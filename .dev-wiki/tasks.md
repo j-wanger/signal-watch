@@ -44,10 +44,33 @@
 > - Phase 8: Doc true-up + provenance fix (M6 debt) — COMPLETED + accepted
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
+<!-- phase:phase-59-consume-substrate-phase-15 -->
+<!-- gate-log:phase-59 direction=approved delivery=accepted -->
+
+## Phase 59 — Consume the substrate Phase 15 build into the coverage map (re-ground · re-freeze · document the exposure≠reachable-now coupling)
+
+aml-substrate Phase 15 (@5875241, DELIVERED) shipped the SUBSTRATE HALF of Phase 58's brief — a label-blind
+PartyView (exposes D8 KYC + D12 pep) + 4 SCREENING_DETECTORS (C7/C14/C8/C26). `substrate-pin.json` was
+re-grounded in the working tree but `coverage.json` was left un-frozen → `signal_coverage_map.py --check`
+fails. Direction A (re-freeze + document the coupling, tiers unchanged) over re-tiering (C) / hold-revert (B);
+the user chose "verify first, then re-confirm" → A0 (pin↔5875241) + A1 (the 242→needs-behavior /
+62-C7→needs-detector tiering is intended classifier semantics) CODE-VERIFIED before the freeze, both HELD,
+re-confirmed. The honest finding: the substrate half moved 0 signals into reachable-now (the 3-way AND);
+view-exposure 312→70, needs-behavior 54→296 (the 242 are exposed-but-unmeasurable on the txn-only emission,
+NOT emergence work); reachable-now stays 93. LITE, NON-ship; --check all 8/8. Plan:
+articles/phases/phase-59-consume-substrate-phase-15.md. Ledger: Phase-59 (all_accept:true; A0=T0 weakest,
+verified). Grounded against aml-substrate@5875241 + aml-casework@4ac9523 + corpus@472b44e. Gate 2026-06-18.
+
+- [x] T1 Verify the re-grounded pin against substrate@5875241 + re-freeze coverage.json | scope: data/coverage-map/**, scripts/signal_coverage_map.py (read-only verify), tests/ | success: substrate-pin.json code-verified faithful to aml-substrate@5875241 (PartyView 16 fields exact; C7/C14/C8/C26 detector classes + capabilities + signal_ids + SCREENING_DETECTORS membership; D8/D12 exposed) with the HEAD recorded in the pin's regrounding_note; the classifier's 242→needs-behavior (modeled-inactive) / 62-C7→needs-detector (emerges-but-not-is_live) assignment confirmed intended (not a pin-edit bug); `python3 scripts/signal_coverage_map.py --freeze` then `--check` byte-identical; `--selftest` green; `! grep -nE "import aml_substrate|import aml_casework" scripts/signal_coverage_map.py`; build.py never imports it; `python3 scripts/build.py --check all` 8/8 | size: M
+- [x] T2 Document the measured movement + the exposure≠reachable-now coupling | scope: docs/corpus-substrate-coverage.md, docs/pillar-integration-contract.md | success: docs/corpus-substrate-coverage.md gains a Phase-15-landing section — the measured tier movement (view-exposure 312→70, needs-behavior 54→296, reachable-now unchanged 93), the 3-way-AND finding (has_detector ∧ has_casework_assertion ∧ behavior_emergence=="emerges"; the substrate half satisfied only exposure → moved 0 into reachable-now), and the stale-label/composite-needs-behavior caveat (needs-behavior=296 = ~242 exposed-but-unmeasurable-on-the-txn-emission + ~54 genuine emergence gaps; needs-detector=62 = detector-exists-blocked-on-the-casework-assertion); HEADs re-pinned inline (substrate@5875241, casework@4ac9523, corpus@472b44e); the contract §8 subsection cross-references it; always-on illustrative framing; `python3 scripts/build.py --check all` 8/8 | size: S
+- [x] T3 Re-ground the two sibling briefs to current HEADs | scope: aml-substrate/docs/corpus-coverage-build-PLAN-BRIEF.md (sibling), aml-casework/docs/capability-assertions-PLAN-BRIEF.md (sibling) | success: the substrate brief marks the detector/view half DONE (C7/C14/C8/C26 + PartyView landed @5875241) + specs the remaining increment = emit a PARTY-BEARING evidence bundle (so the 242 KYC/pep observables become map-measurable); the casework brief re-grounds to @4ac9523 + specs the 4 paired grounding_replay assertions (C7/C8/C14/C26) still needed; both carry the SHARED acceptance (reachable-now rises only when BOTH halves land, re-run `--check`) + the DOCTRINE CONSTRAINT (detectors + observable-exposure ONLY, never behavior/label stamping); authored here, executed in sibling-rooted sessions | size: S
+
+> Phase 59 — T1–T3 all [x] (DELIVERED 2026-06-18, pending the user's delivery-gate acceptance). VERIFIED: substrate-pin.json code-verified faithful to aml-substrate@5875241 (PartyView 16 fields + C7/C14/C8/C26 + D8/D12 exposed) at the verify-first checkpoint, A0/A1 HELD before the freeze; coverage.json re-frozen → `--check` byte-identical + `--selftest` PASSED (2 stale D8-unexposed golden values re-grounded to the verified new reality — D8→modeled-inactive, C13/D8→needs-behavior — now a regression anchor for the landing, NOT a loosening; structural integrity tests untouched). MEASURED movement (corpus@472b44e × substrate@5875241 × casework@4ac9523): needs-view-exposure 312→70, needs-behavior 54→296, **reachable-now UNCHANGED 93** (the 3-way AND — the substrate half satisfied only exposure; the 242 are exposed-but-unmeasurable on the txn-only emission). docs/corpus-substrate-coverage.md §3a + contract §8 carry the finding + the composite-tier caveat; both sibling briefs re-grounded (substrate detector/view half DONE → party-bearing emission next; casework @4ac9523 → 4 paired assertions). --check all 8/8 zero drift; no sibling import; build.py never imports the script; ZERO ship artifacts in the change set. NOTE: the two sibling-brief edits dirty the sibling working trees (substrate brief is tracked; casework brief untracked) — a sibling-rooted session commits them.
+> Phase 59 — exit (phase-59): (1) substrate-pin.json verified faithful to @5875241; signal_coverage_map.py --check byte-identical (re-frozen) + --selftest green + no sibling import + build.py clean; (2) docs/corpus-substrate-coverage.md + contract §8 carry the measured movement + the 3-way-AND finding + the composite-tier caveat, HEADs re-pinned; (3) both sibling briefs re-grounded (substrate detector/view half DONE → party-bearing emission next; casework → 4 paired assertions; shared acceptance + doctrine constraint); (4) --check all 8/8, the 8 ship dists byte-identical, ZERO ship artifacts in the change set.
+> Abort: any of the 8 offline dists drift / a ship artifact touched → STOP and surface (never re-baseline). A brief that stamps behavior or labels → out of bounds (emergence doctrine). The companion importing sibling code → out of bounds. A validator/selftest looks like it needs loosening → fix the data/design, never the check.
+
 <!-- phase:phase-58-corpus-substrate-coverage-map -->
 <!-- gate-log:phase-58 direction=approved delivery=accepted -->
-
-## Phase 58 — Corpus→substrate signal-coverage map (design the detection layer FROM the corpus)
 
 The user's REFRAME at the dev-plan gate: the synthetic-data + detection layer (Pillar 1, aml-substrate)
 was built BOTTOM-UP (6 detectors C2/C3/C4/C5/C6/C15, "chosen-not-measured" thresholds from individual

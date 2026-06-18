@@ -321,7 +321,7 @@ def selftest() -> None:
     check(substrate_class("D1", pin, emission) == "exposed-active", "D1 should be exposed-active")
     check(substrate_class("D2", pin, emission) == "exposed-active", "D2 (CASH channel present) should be exposed-active")
     check(substrate_class("D3", pin, emission) == "exposed-active", "D3 (WIRE/EMT/AFT present) should be exposed-active")
-    check(substrate_class("D8", pin, emission) == "generated-unexposed", "D8 (KYC, no party view) should be generated-unexposed")
+    check(substrate_class("D8", pin, emission) == "modeled-inactive", "D8 (KYC exposed via PartyView @5875241, but the txn-only emission carries no party rows) should be modeled-inactive")
     check(substrate_class("D17", pin, emission) == "modeled-inactive", "D17 (counterparty_country 0/71) should be modeled-inactive")
     check(substrate_class("D7", pin, emission) == "not-modeled", "D7 (VC) should be not-modeled")
     check(substrate_class("D13", pin, emission) == "not-modeled", "D13 (adverse-media dead flag) should be not-modeled")
@@ -347,7 +347,7 @@ def selftest() -> None:
     check(classify("C18", "D11", pin, emission)[0] == "out-of-reach", "C18/D11 (sanctions, dead flag) must be out-of-reach")
     check(classify("C16", "D1", pin, emission)[0] == "needs-detector", "C16/D1 (third-party, emergent on exposed txns, no detector) -> needs-detector")
     check(classify("C7", "D1", pin, emission)[0] == "needs-detector", "C7/D1 (peer-anomaly, emergent via separability, no detector) -> needs-detector")
-    check(classify("C13", "D8", pin, emission)[0] == "needs-view-exposure", "C13/D8 (KYC, unexposed) -> needs-view-exposure")
+    check(classify("C13", "D8", pin, emission)[0] == "needs-behavior", "C13/D8 (KYC exposed via PartyView but unmeasurable on the txn-only emission -> modeled-inactive) -> needs-behavior")
     check(classify("C6", "D1", pin, emission)[0] == "needs-behavior", "C6/D1 (dormancy behavior absent) -> needs-behavior")
     check(classify("C8", "D1", pin, emission)[0] == "needs-behavior", "C8/D1 (income-mismatch data-only, no emergent observable pattern) -> needs-behavior")
 

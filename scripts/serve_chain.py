@@ -1,0 +1,520 @@
+#!/usr/bin/env python3
+"""Chain workbench companion (Phase 56 — dev/authoring-time ONLY; NEVER a ship artifact).
+
+The analyst case-workbench for the 3-pillar chain: detection is pre-baked upstream (the substrate
+evidence bundles are vendored under data/chain-cases/, pinned like the corpus), and per case the
+DOWNSTREAM runs LIVE — aml-casework consumes the bundle into a verified, signed SAR (the 6 Class-G
+verifiers + a neural OR deterministic narrative draft), then signal-watch's e2e_chain_check re-verifies
+the cross-pillar join. The result streams as NDJSON stages → CONNECTED + the flag→corpus audit walk.
+
+DOCTRINE (load-bearing — the same boundary the rest of the program holds):
+  * subprocess + file-handoff ONLY. This NEVER imports aml_substrate / aml_casework (the
+    one-repo-per-pillar rule). The casework consume is a subprocess of its OWN CLI
+    (`python -m aml_casework.ingest`, see aml-casework/docs/consume-cli-PLAN-BRIEF.md); the bundle and
+    the signed SAR cross the boundary as json files. The only imports are signal-watch's OWN modules
+    (e2e_chain_check, derive_signals, validate_chain_cases) — never a sibling.
+  * stdlib only. build.py NEVER imports this; chain.html is NOT a build target; the offline dists stay
+    byte-frozen. Nothing is persisted — a signed SAR is written to a per-run temp dir and discarded.
+  * the committed data/pillar-status.json (which the launcher inlines) is SNAPSHOT + RESTORED around the
+    e2e_chain_check subprocess — a workbench run reflects the pre-baked bridge states, it never moves them
+    (that would drift the launcher dist and break --check all).
+  * TWO-BEAT: the SPINE here is selftest-proven OFFLINE with the casework consume STUBBED. The LIVE run
+    (a real signed SAR → CONNECTED) needs the casework consume CLI (the sibling prerequisite). Until it
+    lands, the real consume fails HONESTLY in-stream (named "bridge gated"), never silently.
+
+Usage:
+    python3 scripts/serve_chain.py                 # http://localhost:8020 (chain.html + the live consume/verify)
+    python3 scripts/serve_chain.py --port 8021
+    python3 scripts/serve_chain.py --selftest      # offline assertions (no socket, casework stubbed), exit
+"""
+from __future__ import annotations
+
+import argparse
+import copy
+import glob
+import json
+import os
+import subprocess
+import sys
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+
+_HERE = Path(__file__).resolve().parent
+ROOT = _HERE.parent
+sys.path.insert(0, str(_HERE))
+import e2e_chain_check        # signal-watch's OWN cross-pillar harness (NOT a sibling)
+import validate_chain_cases   # signal-watch's OWN library validator (reuses check_substrate)
+from derive_signals import normalize  # the stable grounding core
+
+DEFAULT_PORT = 8020          # serve_news holds 8000, serve_corpus 8010 — all three run side by side
+CASES_DIR = ROOT / "data" / "chain-cases"
+MANIFEST_PATH = CASES_DIR / "manifest.json"
+CHAIN_TEMPLATE = ROOT / "chain.html"
+E2E_SCRIPT = _HERE / "e2e_chain_check.py"
+STATUS_PATH = Path(e2e_chain_check.STATUS_PATH)
+BADGE = "Illustrative data & outputs"
+
+# Where the casework consume CLI lives + how to invoke it. Subprocess only — never imported.
+# Overridable so a non-default checkout still works; the walkthrough documents these.
+CASEWORK_DIR = Path(os.environ.get("AML_CASEWORK_DIR", str(ROOT.parent / "aml-casework")))
+
+
+class RunError(ValueError):
+    """A pipeline failure with a NAMED, analyst-actionable reason — emitted verbatim in-stream
+    (the serve_corpus DeriveError pattern), never disguised as a generic crash."""
+
+
+# ---- the vendored case library (data, read-only) ------------------------------------------------
+def load_manifest() -> dict:
+    return json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+
+
+def list_cases(manifest: dict | None = None) -> list:
+    """The library index GET /cases returns — display metadata only (no transaction bodies)."""
+    m = manifest or load_manifest()
+    out = []
+    for c in m.get("cases", []):
+        out.append({k: c.get(k) for k in
+                    ("case_id", "title", "summary", "subject", "alert_count", "txn_count",
+                     "capabilities", "provenance")})
+    return out
+
+
+def _case(manifest: dict, case_id: str) -> dict:
+    for c in manifest.get("cases", []):
+        if c.get("case_id") == case_id:
+            return c
+    raise RunError(f"unknown case '{case_id}' — not in the vendored library (GET /cases)")
+
+
+def _bundle_path(case: dict) -> Path:
+    return CASES_DIR / case["bundle"]
+
+
+# ---- the flag→corpus audit walk (the demo's defensibility beat) ---------------------------------
+def _corpus_lookup(advisory_id: str, indicator_id: str) -> dict | None:
+    """Resolve <advisory_id>:<indicator_id> to the FROZEN corpus record: the verbatim flag, the
+    natural-AML red_flag translation, and the source regulator (the dir under data/)."""
+    matches = sorted(glob.glob(str(ROOT / "data" / "*" / "derived" / f"{advisory_id}.json")))
+    if not matches:
+        return None
+    path = matches[0]
+    source = Path(path).parent.parent.name  # data/<source>/derived/<id>.json -> <source>
+    record = json.loads(Path(path).read_text(encoding="utf-8"))
+
+    def walk(o):
+        if isinstance(o, dict):
+            if o.get("id") == indicator_id:
+                yield o
+            for v in o.values():
+                yield from walk(v)
+        elif isinstance(o, list):
+            for v in o:
+                yield from walk(v)
+
+    for ind in walk(record):
+        return {"source": source, "flag": ind.get("flag", ""), "red_flag": ind.get("red_flag", "")}
+    return None
+
+
+def audit_walk(bundle: dict) -> list:
+    """Per alert: the chain from the fired detector down to the verbatim regulator flag in the frozen
+    corpus, with a GROUNDED verdict (the bundle's flag is a normalize()-substring of the corpus flag).
+    This is the analyst's defensibility walk — every signal traces to a public-source indicator."""
+    walk = []
+    for a in bundle.get("alerts", []):
+        g = a.get("grounding", {})
+        adv, ind = g.get("advisory_id", ""), g.get("indicator_id", "")
+        corpus = _corpus_lookup(adv, ind)
+        grounded = bool(corpus) and normalize(g.get("flag", "")) in normalize(corpus["flag"])
+        walk.append({
+            "capability": a.get("capability"),
+            "detector": a.get("detector"),
+            "rule": a.get("rule"),
+            "signal_id": g.get("signal_id"),
+            "advisory_id": adv,
+            "indicator_id": ind,
+            "source": corpus["source"] if corpus else None,
+            "corpus_flag": corpus["flag"] if corpus else None,
+            "red_flag": corpus["red_flag"] if corpus else None,
+            "grounded": grounded,
+        })
+    return walk
+
+
+# ---- drafter selection (server-side key; never reaches the browser) ------------------------------
+def drafter_for_env(env: dict | None = None) -> str:
+    """`claude` iff ANTHROPIC_API_KEY is set server-side, else `stub` — the neural draft is opt-in by
+    the presence of a key the browser never sees."""
+    e = env if env is not None else os.environ
+    return "claude" if e.get("ANTHROPIC_API_KEY") else "stub"
+
+
+# ---- the casework consume (subprocess of the SIBLING's OWN CLI; injectable for the offline test) --
+def casework_consume(bundle_path: Path, out_path: Path, drafter: str) -> dict:
+    """Subprocess `python -m aml_casework.ingest <bundle> --out <signed> --drafter <drafter>` and read
+    back the signed SAR it wrote. file-handoff only — NO sibling import. Returns the consume result
+    {drafter, drafter_effective, signed, blocking_violations, narrative_present, completeness}.
+
+    Until the casework consume CLI lands (aml-casework/docs/consume-cli-PLAN-BRIEF.md), this raises a
+    NAMED RunError — the bridge is honestly gated, never faked."""
+    src = CASEWORK_DIR / "src"
+    py = os.environ.get("AML_CASEWORK_PYTHON")
+    if not py:
+        venv = CASEWORK_DIR / ".venv" / "bin" / "python"
+        py = str(venv) if venv.exists() else sys.executable
+    if not src.exists():
+        raise RunError(f"aml-casework not found at {CASEWORK_DIR} (set AML_CASEWORK_DIR) — the consume "
+                       f"CLI is the sibling prerequisite; the chain is GATED until it lands")
+    env = dict(os.environ)
+    env["PYTHONPATH"] = str(src) + os.pathsep + env.get("PYTHONPATH", "")
+    cmd = [py, "-m", "aml_casework.ingest", str(bundle_path),
+           "--out", str(out_path), "--drafter", drafter]
+    try:
+        proc = subprocess.run(cmd, cwd=str(CASEWORK_DIR), env=env, capture_output=True,
+                              text=True, timeout=300)
+    except (OSError, subprocess.SubprocessError) as ex:
+        raise RunError(f"casework consume could not be launched: {ex}") from None
+    if proc.returncode != 0 or not out_path.exists():
+        tail = (proc.stderr or proc.stdout or "").strip().splitlines()[-3:]
+        raise RunError("casework consume failed (the consume CLI may not be implemented yet — bridge "
+                       "gated; see aml-casework/docs/consume-cli-PLAN-BRIEF.md): " + " | ".join(tail))
+    return _consume_result_from_sar(json.loads(out_path.read_text(encoding="utf-8")), drafter)
+
+
+def _consume_result_from_sar(sar: dict, drafter: str) -> dict:
+    """Derive the consume-stage view from the SIGNED SAR (the contract artifact — more robust than the
+    CLI's stdout). drafter_effective falls back honestly if the SAR records a stub fallback."""
+    s = sar.get("str_record", {})
+    so = sar.get("signoff", {})
+    eff = (sar.get("drafter_effective") or so.get("drafter") or drafter)
+    return {
+        "drafter": drafter,
+        "drafter_effective": eff,
+        "signed": so.get("signed") is True,
+        "blocking_violations": so.get("blocking_violations", []),
+        "narrative_present": bool(s.get("narrative")),
+        "completeness": s.get("completeness", {}),
+    }
+
+
+# ---- the e2e_chain_check verify (subprocess; pillar-status snapshot+restored) --------------------
+def verify_e2e(bundle_path: Path, signed_path: Path) -> dict:
+    """Subprocess `e2e_chain_check.py --real --substrate <bundle> --casework <signed>` and read the
+    verdict. The committed data/pillar-status.json is SNAPSHOT before and RESTORED after — a workbench
+    run reflects the pre-baked bridge states, it must never move the committed file (the launcher inlines
+    it; a move would drift --check all). Returns {connected, exit, output}."""
+    snapshot = STATUS_PATH.read_bytes() if STATUS_PATH.exists() else None
+    cmd = [sys.executable, str(E2E_SCRIPT), "--real",
+           "--substrate", str(bundle_path), "--casework", str(signed_path)]
+    try:
+        proc = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True, timeout=120)
+        out = (proc.stdout or "") + (proc.stderr or "")
+        connected = proc.returncode == 0 and "CONNECTED" in out
+        return {"connected": connected, "exit": proc.returncode, "output": out.strip()}
+    finally:
+        # restore the committed bridge states regardless of the run's outcome
+        if snapshot is not None:
+            STATUS_PATH.write_bytes(snapshot)
+
+
+# ---- the run pipeline (stage-streamed; consume + verify injectable for the offline selftest) -----
+def run_case(case_id: str, *, on_stage, consume=casework_consume, verify=verify_e2e,
+             drafter: str | None = None, tmpdir: Path | None = None) -> dict:
+    """Drive one case end to end, emitting stages via on_stage(stage, **detail). Returns the final
+    payload {case, bundle_summary, signed_sar, consume, verify, audit_walk, connected}.
+
+    `consume`/`verify` are injected so the selftest runs OFFLINE (casework subprocess stubbed); the
+    defaults are the real subprocesses. A failed stage raises RunError (named, emitted in-stream)."""
+    manifest = load_manifest()
+    case = _case(manifest, case_id)
+    bundle_path = _bundle_path(case)
+    bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+
+    # stage 1 — evidence (the pre-baked detection input)
+    on_stage("evidence", case_id=case_id,
+             alert_count=len(bundle.get("alerts", [])), txn_count=len(bundle.get("transactions", [])),
+             capabilities=[a.get("capability") for a in bundle.get("alerts", [])],
+             subject=bundle.get("subject", {}))
+
+    # stage 2 — consume (the LIVE casework SAR draft + the 6 Class-G verifiers, via the sibling CLI)
+    eff_drafter = drafter or drafter_for_env()
+    on_stage("consume", drafter=eff_drafter, status="running")
+    tdir = tmpdir or Path(os.environ.get("TMPDIR", "/tmp"))
+    signed_path = tdir / f"{case_id}-signed.json"
+    consume_res = consume(bundle_path, signed_path, eff_drafter)
+    on_stage("consume", status="done", **consume_res)
+
+    # stage 3 — cross-pillar verify (signal-watch re-verifies the join; pillar-status preserved)
+    on_stage("verify", status="running")
+    verify_res = verify(bundle_path, signed_path)
+    on_stage("verify", status="done", connected=verify_res["connected"], exit=verify_res["exit"])
+
+    # stage 4 — connected (the final payload + the flag→corpus audit walk)
+    signed_sar = json.loads(signed_path.read_text(encoding="utf-8")) if signed_path.exists() else None
+    payload = {
+        "case": {k: case.get(k) for k in ("case_id", "title", "summary", "subject", "provenance")},
+        "bundle_summary": {
+            "alert_count": len(bundle.get("alerts", [])),
+            "txn_count": len(bundle.get("transactions", [])),
+            "capabilities": case.get("capabilities", []),
+        },
+        "consume": consume_res,
+        "verify": verify_res,
+        "signed_sar": signed_sar,
+        "audit_walk": audit_walk(bundle),
+        "connected": verify_res["connected"] and consume_res["signed"],
+    }
+    on_stage("connected" if payload["connected"] else "not_connected", **{
+        "connected": payload["connected"]})
+    return payload
+
+
+# ---- the offline casework stand-in (TEST DOUBLE — the selftest's stub, NEVER the real consume) ---
+def _stub_signed_sar(bundle_path: Path, out_path: Path, drafter: str) -> dict:
+    """A deterministic, offline stand-in for the casework consume — builds a check_chain-passing signed
+    SAR from the bundle WITHOUT the sibling CLI (the seam stays open until that CLI lands). Used ONLY by
+    --selftest. It mirrors the casework contract's signed-SAR shape: seam flipped, six completeness
+    elements, one grounded inculpatory claim per alert, signed signoff with empty blocking_violations."""
+    bundle = json.loads(Path(bundle_path).read_text(encoding="utf-8"))
+    sar = copy.deepcopy(bundle)
+    rec = sar.setdefault("str_record", {})
+    acct = (bundle.get("subject", {}).get("account_ids") or ["the subject account"])[0]
+    rec["narrative"] = (f"Account {acct} exhibits a multi-typology laundering pattern across the "
+                        f"reviewed period; each signal is grounded to the cited transactions and the "
+                        f"regulator corpus.")
+    rec["narrative_claims"] = [
+        {"text": f"Detector {a.get('detector')} fired and grounds to its cited indicator.",
+         "cites": [a.get("grounding", {}).get("signal_id")], "stance": "inculpatory"}
+        for a in bundle.get("alerts", [])
+    ]
+    comp = rec.setdefault("completeness", {})
+    for el in e2e_chain_check.STR_REQUIRED_ELEMENTS:
+        comp.setdefault(el, True)
+    comp["grounds_for_suspicion_narrative"] = True
+    sar["signoff"] = {"signed": True, "signer": "SYNTHETIC-stub (offline selftest)",
+                      "ts": "2026-06-17T00:00:00", "disposition": "file", "blocking_violations": []}
+    sar["drafter_effective"] = "stub"
+    Path(out_path).write_text(json.dumps(sar, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return _consume_result_from_sar(sar, drafter)
+
+
+# ---- the served page (chain.html + the workbench config) -----------------------------------------
+# An HTML-comment marker so the RAW chain.html stays valid, lintable, self-contained JS (the client
+# falls back to defaults when window.__CHAIN_CONFIG__ is absent). render_page replaces the marker with a
+# config <script>; tests/chain.test.mjs loads the raw template the same way (set window.__CHAIN_CONFIG__).
+CHAIN_PLACEHOLDER = "<!--__CHAIN_CONFIG__-->"
+
+
+def live_config(server=None) -> dict:
+    return {"cases": "/cases", "run": "/run", "health": "/health", "badge": BADGE,
+            "drafter": {"mode": drafter_for_env(), "key_present": drafter_for_env() == "claude"}}
+
+
+def render_page(cfg: dict) -> str:
+    """Inline the workbench config into chain.html (T4). If the template is absent (the spine is built
+    before T4), serve a labeled placeholder — the companion is still functional via /cases + /run."""
+    if not CHAIN_TEMPLATE.exists():
+        return ("<!doctype html><meta charset=utf-8><title>Chain workbench</title>"
+                f"<body style='font-family:monospace;background:#111;color:#eee;padding:2rem'>"
+                f"<h1>Chain workbench companion</h1><p>{BADGE}</p>"
+                "<p>chain.html (T4) is not built yet. The API is live: "
+                "<code>GET /cases</code>, <code>POST /run</code>, <code>GET /health</code>.</p>")
+    template = CHAIN_TEMPLATE.read_text(encoding="utf-8")
+    n = template.count(CHAIN_PLACEHOLDER)
+    if n != 1:
+        raise RunError(f"expected exactly one {CHAIN_PLACEHOLDER} in chain.html, found {n}")
+    inject = f"<script>window.__CHAIN_CONFIG__ = {json.dumps(cfg, ensure_ascii=False)};</script>"
+    return template.replace(CHAIN_PLACEHOLDER, inject)
+
+
+# ---- HTTP (the serve_corpus handler conventions: NDJSON stages, single-flight, named errors) -----
+class Handler(BaseHTTPRequestHandler):
+    server_version = "SignalWatchChainWorkbench/0.1"
+
+    def _send(self, code, body, ctype):
+        self.send_response(code)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        if self.command != "HEAD":
+            self.wfile.write(body)
+
+    def _json(self, code, obj):
+        self._send(code, json.dumps(obj).encode("utf-8"), "application/json; charset=utf-8")
+
+    def do_GET(self):
+        path = self.path.split("?", 1)[0]
+        if path in ("/", "/index.html"):
+            self._send(200, render_page(live_config(self.server)).encode("utf-8"),
+                       "text/html; charset=utf-8")
+        elif path == "/cases":
+            self._json(200, {"badge": BADGE, "cases": list_cases()})
+        elif path == "/health":
+            self._json(200, {"ok": True, "live": True, "persist": False,
+                             "drafter": drafter_for_env(), "casework_dir": str(CASEWORK_DIR)})
+        else:
+            self._json(404, {"error": f"not found: {path}"})
+
+    def do_POST(self):
+        if self.path.split("?", 1)[0] == "/run":
+            self._run(); return
+        self._json(404, {"error": f"not found: {self.path}"})
+
+    def _read_json(self):
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+            return json.loads(self.rfile.read(length) or b"{}"), None
+        except (ValueError, json.JSONDecodeError):
+            return None, "invalid JSON body"
+
+    def _emit(self, obj):
+        self.wfile.write((json.dumps(obj, ensure_ascii=False) + "\n").encode("utf-8"))
+        self.wfile.flush()
+
+    def _run(self):
+        payload, err = self._read_json()
+        if err:
+            self._json(400, {"error": err}); return
+        case_id = (payload.get("case") or payload.get("case_id") or "").strip()
+        if not case_id:
+            self._json(400, {"error": "missing 'case' (the case_id to run; GET /cases lists them)"}); return
+        # SINGLE-FLIGHT (the Phase-43 lesson): a second concurrent run would split the model's
+        # throughput AND race the pillar-status snapshot/restore — honest 409 pre-stream instead.
+        lock = self.server.__dict__.setdefault("run_lock", threading.Lock())
+        if not lock.acquire(blocking=False):
+            self._json(409, {"error": "another case run is already in progress — wait for it to finish "
+                                      "(single-flight: the verify step snapshots pillar-status)"}); return
+        try:
+            self.send_response(200)
+            self.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            try:
+                import tempfile
+                with tempfile.TemporaryDirectory() as td:
+                    payload_out = run_case(case_id, tmpdir=Path(td),
+                                           on_stage=lambda stage, **kw: self._emit({"stage": stage, **kw}))
+                self._emit({"done": payload_out})
+            except RunError as ex:
+                self._emit({"error": str(ex)})
+            except (OSError, ValueError, KeyError, json.JSONDecodeError) as ex:
+                self._emit({"error": f"run failed: {ex}"})
+        except (BrokenPipeError, ConnectionResetError):
+            self.log_message("client disconnected mid-run stream")  # nothing persisted by design
+        finally:
+            lock.release()
+
+    def log_message(self, fmt, *a):
+        sys.stderr.write("[serve_chain] " + (fmt % a) + "\n")
+
+
+# ---- selftest (offline: no socket, casework consume stubbed) ------------------------------------
+def selftest() -> int:
+    failures = []
+
+    # the vendored library validates (reuses validate_chain_cases — single source of truth)
+    manifest = load_manifest()
+    lib_v = validate_chain_cases.validate_library(manifest, str(CASES_DIR))
+    if lib_v:
+        failures.append(f"library should validate clean: {lib_v}")
+
+    # GET /cases shape: display metadata only, no transaction bodies leaked
+    cases = list_cases(manifest)
+    assert cases and all("case_id" in c for c in cases), "cases listing empty/malformed"
+    assert all("transactions" not in c for c in cases), "cases listing must not carry txn bodies"
+    case_id = cases[0]["case_id"]
+
+    # drafter selection: key present -> claude, absent -> stub (the server-side opt-in)
+    assert drafter_for_env({"ANTHROPIC_API_KEY": "sk-x"}) == "claude"
+    assert drafter_for_env({}) == "stub"
+
+    # the audit walk grounds every alert to the frozen corpus
+    bundle = json.loads(_bundle_path(_case(manifest, case_id)).read_text(encoding="utf-8"))
+    walk = audit_walk(bundle)
+    assert walk and all(w["grounded"] for w in walk), [w for w in walk if not w["grounded"]]
+    assert all(w["source"] and w["corpus_flag"] and w["red_flag"] for w in walk), walk
+
+    # the FULL run OFFLINE: casework consume STUBBED, e2e_chain_check verify is REAL (offline, pure
+    # Python) — the committed pillar-status.json is snapshot+restored by verify_e2e. Reaches CONNECTED.
+    status_before = STATUS_PATH.read_bytes() if STATUS_PATH.exists() else None
+    stages = []
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        payload = run_case(case_id, tmpdir=Path(td), drafter="stub",
+                           consume=_stub_signed_sar, on_stage=lambda s, **kw: stages.append((s, kw)))
+    seq = [s for s, _ in stages]
+    for needed in ("evidence", "consume", "verify", "connected"):
+        if needed not in seq:
+            failures.append(f"stage '{needed}' missing from {seq}")
+    if not payload["connected"]:
+        failures.append(f"stubbed run should reach CONNECTED, got verify={payload['verify']}, "
+                        f"consume={payload['consume']}")
+    if not payload["signed_sar"] or not payload["audit_walk"]:
+        failures.append("final payload missing signed_sar / audit_walk")
+    # the committed pillar-status.json MUST be byte-identical after the run (no launcher drift)
+    status_after = STATUS_PATH.read_bytes() if STATUS_PATH.exists() else None
+    if status_before != status_after:
+        failures.append("data/pillar-status.json was mutated by a run (verify_e2e must snapshot+restore)")
+
+    # honest GATED path: the REAL casework consume on an absent CLI raises a NAMED RunError (not a crash)
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            run_case(case_id, tmpdir=Path(td), drafter="stub",
+                     consume=lambda b, o, d: (_ for _ in ()).throw(
+                         RunError("casework consume failed (bridge gated)")),
+                     on_stage=lambda s, **kw: None)
+        failures.append("a failing consume should raise RunError, not pass")
+    except RunError as ex:
+        if "gated" not in str(ex):
+            failures.append(f"gated error not surfaced: {ex}")
+
+    # error path: an unknown case is a NAMED RunError
+    try:
+        run_case("CASE-DOES-NOT-EXIST", on_stage=lambda s, **kw: None, consume=_stub_signed_sar)
+        failures.append("unknown case should raise RunError")
+    except RunError:
+        pass
+
+    # the served page: placeholder substituted iff chain.html exists (T4); config inlined
+    cfg = live_config()
+    page = render_page(cfg)
+    if CHAIN_TEMPLATE.exists():
+        assert CHAIN_PLACEHOLDER not in page, "chain config placeholder survived substitution"
+        assert '"run"' in page and BADGE in page, "workbench config / badge not inlined"
+    else:
+        assert BADGE in page, "placeholder page must still carry the badge"
+
+    if failures:
+        for f in failures:
+            print(f"FAIL: {f}", file=sys.stderr)  # noqa: T201
+        return 1
+    print(f"serve_chain --selftest: PASS ({len(cases)} vendored case(s); audit walk grounds "  # noqa: T201
+          f"{len(walk)}/{len(walk)} alerts; stubbed run streams {seq} -> CONNECTED; "
+          f"pillar-status byte-stable; gated/error paths named)")
+    return 0
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="Chain workbench companion (dev/authoring-time only; never a ship artifact).")
+    ap.add_argument("--port", type=int, default=DEFAULT_PORT)
+    ap.add_argument("--selftest", action="store_true", help="offline assertions (no socket, casework stubbed), exit")
+    args = ap.parse_args()
+    if args.selftest:
+        return selftest()
+    httpd = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
+    drafter = drafter_for_env()
+    print(f"[serve_chain] chain workbench on http://localhost:{args.port}/  "  # noqa: T201
+          f"(casework={CASEWORK_DIR}, drafter={drafter})")
+    print(f"[serve_chain] {'ANTHROPIC_API_KEY set — LIVE neural SAR draft' if drafter == 'claude' else 'no key — deterministic stub draft'}; "  # noqa: T201
+          "nothing is persisted; the offline dists stay byte-frozen. Ctrl-C to stop.")
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\n[serve_chain] stopped.")  # noqa: T201
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

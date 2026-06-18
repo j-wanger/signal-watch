@@ -307,3 +307,14 @@ Deterministic gate run against both shipped `dist/<id>/index.html`. **Result: PA
 - [ ] `python3 scripts/e2e_chain_check.py --selftest` PASSES (good C4 fixture pair connects; the broken fixture is caught); `--real --substrate /nope --casework /nope` prints an honest `GATED: sibling output absent` and exits non-zero
 - [ ] `python3 scripts/build.py --check all` → 8/8 zero drift (the 5 existing artifacts byte-identical; the launcher reproducible); `node tests/launcher.test.mjs` green
 - [ ] Full presenter script: `docs/e2e-walkthrough.md` (the two beats); acceptance contract: `docs/e2e-acceptance.md`
+
+---
+
+## Chain workbench (Phase 56 — dev-time companion, dist-free)
+
+> The analyst UI for the substrate→casework→verify chain. NOT a ship artifact — companion-served, never built into `dist/`. Full recipe + two-beat framing: `docs/chain-workbench.md`.
+
+- [ ] `python3 scripts/serve_chain.py --selftest` PASSES offline (casework consume STUBBED): cases listed, a run streams `evidence → consume → verify → connected` to CONNECTED, audit walk grounds every alert, `data/pillar-status.json` byte-stable (no launcher drift), gated/unknown-case paths named
+- [ ] `node tests/chain.test.mjs` green (stage-rendering contract, the four-node ledger, six completeness chips, CONNECTED payoff + flag→corpus walk, badge, XSS-escape, line-buffered NDJSON); `python3 scripts/validate_chain_cases.py --selftest` green (vendored library + tamper/drift catch)
+- [ ] ISOLATION: `! grep -nE "chain\.html|serve_chain" scripts/build.py` · `! grep -nE "import aml_substrate|import aml_casework" scripts/serve_chain.py` · `python3 scripts/build.py --check all` → 8/8 (offline dists byte-identical; chain.html not in `dist/`)
+- [ ] LIVE walk (beat 2 — once `aml-casework/docs/consume-cli-PLAN-BRIEF.md` lands): start `serve_chain.py`, open `http://localhost:8020`, pick `CASE-P-0010361` → Run → the four stages reveal to CONNECTED; the always-on "Illustrative data & outputs" badge is visible; with `ANTHROPIC_API_KEY` set the header chip reads **live · claude-opus-4-8**, without it **deterministic stub**; the key never appears in the page source

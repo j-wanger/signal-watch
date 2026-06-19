@@ -221,3 +221,19 @@ emergence work), and the 62 C7 stay needs-detector pending the casework assertio
 only when BOTH remaining halves land:** a party-bearing emission bundle (aml-substrate) + the 4 paired
 `grounding_replay` assertions C7/C8/C14/C26 (aml-casework) — both sibling-rooted, handed off in the §5
 briefs. Detail + the composite-tier caveat: `docs/corpus-substrate-coverage.md` §3a.
+
+**Phase-60 landing update (re-grounded Phase 60, 2026-06-19 — corpus@472b44e × aml-substrate@9c75c03 ×
+aml-casework@c6d8401).** BOTH remaining halves landed: aml-casework Phase 12 shipped the paired
+`grounding_replay` assertions (C7 P10 · C8 P11 · C14 P12; C26 deliberately unregistered — the honest null),
+and aml-substrate Phase 18 emits the real C8 party-bearing v0.2 bundle. The re-frozen map shows the **first
+real reachable-now rise: 93→171 (+78)** — needs-detector **62→0**, needs-view-exposure **70→69**,
+needs-behavior **296→281**. **But only C7 moved**, and that is the honest headline: of the four screening
+caps whose assertions landed, only C7 has `behavior_emergence=="emerges"` → all 78 C7 buildable signals
+flip (62 direct + 16 proxy; `is_reachable` precedes the data_source_class branch). **C8/C14/C26 did NOT
+move** — `behavior_emergence` data-only (C8/C14) / absent (C26) is the binding 3rd conjunct, **neither
+emission nor assertion work**. So the "both halves must land" framing sharpens to **"only the cap whose
+behavior genuinely emerges reaches reachable-now"**; further rises need emergent-behavior work in the
+substrate (bottom-up, never stamped), not more wiring. Separately, the **real cross-pillar chain CONNECTS**:
+`e2e_chain_check --real` (re-grounded to the same HEADs) on substrate's C8 bundle (`CASE-P-0000251`) →
+casework signed SAR, zero blocking violations → CONNECTED; the launcher was re-grounded (only its
+`grounding_heads`, 7/8 dists byte-identical — the Phase-55/57 pattern). Detail: `docs/corpus-substrate-coverage.md` §3b.

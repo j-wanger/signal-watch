@@ -333,7 +333,7 @@ def selftest() -> None:
 
     # 3. the live capabilities are exactly the 5 that fire in the emission's alerts
     live = {c for c in pin["capabilities"] if is_live(c, pin)}
-    check(live == {"C2", "C3", "C4", "C5", "C15"}, f"live set should be C2/C3/C4/C5/C15, got {sorted(live)}")
+    check(live == {"C2", "C3", "C4", "C5", "C7", "C15"}, f"live set should be C2/C3/C4/C5/C7/C15 (C7 went live Phase 60 — casework grounding_replay assertion landed @c6d8401), got {sorted(live)}")
     check(set(emission["alert_caps"]) <= live, "every emission alert capability must be classified live")
     check(not is_live("C6", pin), "C6 has a detector but NO casework assertion AND behavior absent -> not live")
 
@@ -346,7 +346,7 @@ def selftest() -> None:
     check(classify("C21", "D7", pin, emission)[0] == "out-of-reach", "C21/D7 (VC) must be out-of-reach, never reachable-now")
     check(classify("C18", "D11", pin, emission)[0] == "out-of-reach", "C18/D11 (sanctions, dead flag) must be out-of-reach")
     check(classify("C16", "D1", pin, emission)[0] == "needs-detector", "C16/D1 (third-party, emergent on exposed txns, no detector) -> needs-detector")
-    check(classify("C7", "D1", pin, emission)[0] == "needs-detector", "C7/D1 (peer-anomaly, emergent via separability, no detector) -> needs-detector")
+    check(classify("C7", "D1", pin, emission) == ("reachable-now", "direct"), "C7/D1 (peer-anomaly: detector @P15 + casework assertion @c6d8401 + emerges) -> reachable-now/direct (Phase-60 landing; was needs-detector pre-assertion)")
     check(classify("C13", "D8", pin, emission)[0] == "needs-behavior", "C13/D8 (KYC exposed via PartyView but unmeasurable on the txn-only emission -> modeled-inactive) -> needs-behavior")
     check(classify("C6", "D1", pin, emission)[0] == "needs-behavior", "C6/D1 (dormancy behavior absent) -> needs-behavior")
     check(classify("C8", "D1", pin, emission)[0] == "needs-behavior", "C8/D1 (income-mismatch data-only, no emergent observable pattern) -> needs-behavior")

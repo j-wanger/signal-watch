@@ -34,7 +34,10 @@ sys.path.insert(0, _HERE)
 from derive_signals import normalize  # signal-watch's OWN grounding core (NOT a sibling)
 
 # The current sibling grounding pins (the re-ground-before-consume rule updates these).
-GROUNDING_HEADS = {"aml_substrate": "df23bba", "aml_casework": "2381d71"}
+# Phase 60 (2026-06-19): re-grounded to substrate@9c75c03 (Phase 18 — emits the real C8 party-bearing
+# v0.2 bundle) + casework@c6d8401 (Phase 12 — C7/C8/C14 grounding_replay assertions). The real C8 chain
+# (CASE-P-0000251 -> casework consume -> signed SAR) CONNECTS clean: signed=true, zero blocking violations.
+GROUNDING_HEADS = {"aml_substrate": "9c75c03", "aml_casework": "c6d8401"}
 
 # Mirrors aml_casework.contract.STR_REQUIRED_ELEMENTS (copied by the file-contract, NOT imported).
 STR_REQUIRED_ELEMENTS = (

@@ -2,14 +2,15 @@
 
 > **Illustrative data & outputs.** NON-ship measure-first artifact (the `corpus_redundancy` /
 > `cd_correctness` pattern). Read-only over the committed corpus; the 8 ship dists stay byte-frozen.
-> Grounded against **aml-substrate@5875241 · aml-casework@4ac9523 · signal-watch corpus@472b44e**
-> (re-grounded Phase 59, 2026-06-18; recorded inline in `data/coverage-map/substrate-pin.json`;
+> Grounded against **aml-substrate@9c75c03 · aml-casework@c6d8401 · signal-watch corpus@472b44e**
+> (re-grounded Phase 60, 2026-06-19; recorded inline in `data/coverage-map/substrate-pin.json`;
 > re-ground before consuming — the 2026-06-16 cross-pillar process rule). Re-derive every number here
 > with `python3 scripts/signal_coverage_map.py --check`.
 >
 > §3 below is the **Phase-58 baseline** (substrate@df23bba). **§3a** records the **Phase-15 landing**
-> (substrate@5875241) — the substrate half of the §5 briefs consumed — and is what the current frozen
-> `coverage.json` reflects.
+> (substrate@5875241, reachable-now held at 93). **§3b** records the **Phase-60 landing** — the casework
+> grounding_replay assertions + substrate's party-bearing emission consumed — the **first real
+> reachable-now rise (93→171)**, and is what the current frozen `coverage.json` reflects.
 
 ## 0. Why this exists
 
@@ -181,6 +182,58 @@ briefs hand them off):
 this movement (D8 → `modeled-inactive`; C13/D8 → `needs-behavior`) as a regression anchor for the
 landing. The §3 "top capabilities to wire" detector half (C7/C14/C8/C26) is now BUILT; what remains for
 those capabilities is the casework-assertion half + the party-bearing emission.
+
+## 3b. The Phase-60 landing — BOTH halves consumed, the first reachable-now rise (substrate@9c75c03 · casework@c6d8401, 2026-06-19)
+
+A cross-pillar review found **both siblings moved 3 phases** past the §3a pins. aml-casework Phase 12
+landed the paired `grounding_replay` assertions — **C7** (P10 `_screen_c7_peer_anomaly`), **C8** (P11),
+**C14** (P12 party-leaf reference-by-path); **C26** deliberately UNREGISTERED (honest null). aml-substrate
+Phase 18 emits the **real C8 party-bearing v0.2 bundle** (`CASE-P-0000251.json`); no new detectors (P16
+§13 fourth-null closure; P17 party-bearing bundle + `--screen`). Pin re-grounded to @9c75c03 / @c6d8401
+(code-verified, verify-first before the freeze); `coverage.json` re-frozen. The measured movement vs §3a:
+
+| Tier | 5875241 (§3a) | 9c75c03·c6d8401 (now) | Δ |
+|---|---:|---:|---:|
+| reachable-now | 93 | **171** | **+78** |
+| needs-detector | 62 | **0** | **−62** |
+| needs-view-exposure | 70 | **69** | −1 |
+| needs-behavior | 296 | **281** | −15 |
+| out-of-reach | 2 | 2 | 0 |
+
+**The finding: only C7 moved — and that is the honest headline.** Of the four screening capabilities whose
+casework assertions landed, **only C7 satisfies the full 3-way AND**, because it is the only one with
+`behavior_emergence=="emerges"`. Once C7's assertion lands, `is_reachable(C7)` is true and — since
+`is_reachable` is evaluated **before** the `data_source_class` branch — **all 78 C7 buildable signals**
+become reachable-now: **62 direct** (exposed-active D-codes) + **16 proxy** (the 15 in needs-behavior + 1 in
+needs-view-exposure, grounded via the transaction proxy, the existing 91/93-proxy convention). The
+`needs-detector` tier (the cheapest) is now **exhausted to 0**.
+
+**C8/C14/C26 did NOT move**, despite their now-landed casework assertions *and* substrate's party-bearing
+emission:
+
+- **C8** and **C14** carry `behavior_emergence=="data-only"` → they stay `needs-behavior`. The assertion
+  was never the binding gap; **emergent behavior is.** C8 (income-mismatch) and C14 (KYC-integrity) ground
+  on static party-state / threshold comparison, not an emergent transactional pattern. The map's
+  `--selftest` pins `C8/D1 → needs-behavior` as the regression anchor proving the assertion alone doesn't
+  move a data-only cap.
+- **C26** carries `behavior_emergence=="absent"` (no scam-VICTIM role designated — the honest null);
+  casework correctly left it unregistered. It is a **permanent null**, not pending work.
+
+**This sharpens the §3a "both halves must land" framing.** Both halves DID land — and the rise came only
+from the one capability whose behavior genuinely emerges. The binding gap for the residual screening
+capabilities is **emergent-behavior work in the substrate (bottom-up, never stamped)**, NOT more
+cross-pillar wiring. The 242 KYC/pep signals stay exposed-but-unmeasurable on the still-vendored txn-only
+emission (the §3a caveat persists — the party-emission re-vendor into the map is high-blast [shared with the
+launcher ship dist] so it is kept OUT of the coverage map; the substrate party-bearing emission is consumed
+instead via the e2e chain, below).
+
+**The real cross-pillar chain CONNECTS on the C8 bundle.** Separately from the coverage map, the e2e harness
+(`scripts/e2e_chain_check.py`, re-grounded to the same HEADs) was run `--real` on substrate's committed C8
+party-bearing v0.2 bundle (`CASE-P-0000251`): casework consumed it → **signed SAR, zero blocking
+violations** (first real contact; all 6 Class-G verifiers passed — no contract-version gap), and
+`e2e_chain_check --real` reports **CONNECTED**. The launcher (`dist/index.html`) was re-grounded to the new
+HEADs (the sanctioned cross-pillar status front door; only its `grounding_heads` moved — the 7 other ship
+dists stay byte-identical, the Phase-55/57 pattern).
 
 ## 4. Substrate observable classes (measured)
 

@@ -77,6 +77,7 @@
   td b{color:var(--ink)}
   td .built{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--green);border:1px solid var(--green);border-radius:6px;padding:1px 6px;white-space:nowrap}
   td .dstage{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--violet);border:1px solid var(--violet);border-radius:6px;padding:1px 6px;white-space:nowrap}
+  td .pbs{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--signal);border:1px solid var(--signal);border-radius:6px;padding:1px 6px}
   .gc{font-family:var(--mono);font-size:10px;font-weight:700;border-radius:5px;padding:1px 6px;border:1px solid currentColor;white-space:nowrap;display:inline-block;margin:1px 2px 1px 0}
   .gc.g{color:var(--teal)} .gc.m{color:var(--blue)} .gc.j{color:var(--signal)} .gc.a{color:var(--rose)}
 
@@ -205,6 +206,17 @@
     design of a real AML program. Nothing in this report claims to be built unless it names a
     committed artifact in the repository; workloads marked <em>(design-stage)</em> do not exist.
     Where probe figures appear, they are synthetic fixture measurements, labeled as such.
+  </div>
+  <div class="statusnote" style="border-left-color:var(--signal)">
+    <b style="color:var(--signal)">Trued up Phase 61 (2026-06-20).</b> Re-grounded against the
+    as-built program across three repos (signal-watch@67dbd65, aml-substrate@34400e2,
+    aml-casework@c6d8401). §3 status is now a <b>three-tier</b> vocabulary:
+    <em>(built/demo-built)</em> = a committed signal-watch demo artifact;
+    <em>(pillar-build-synthetic)</em> = committed SIBLING code, real-system-class but on SYNTHETIC
+    data at probe/demo scale (NOT deployed, never real data); <em>(design-stage)</em> = design
+    only. The per-§ audit + the both-direction drift inventory live in
+    <code>docs/blueprint-implementation-review.md</code>. The §3 chips below carry the trued-up
+    markers; the per-section Phase-61 annotations are in the Markdown source + the review doc.
   </div>
 </section>
 
@@ -611,28 +623,28 @@
         <td>Disposition decisions (escalate→watchlist, dismiss the common-name trap); match adjudication on near-hits; re-baseline only consciously (<code>--freeze</code>)</td>
       </tr>
       <tr>
-        <td><b>Transaction monitoring</b><br><span class="dstage">design-stage</span></td>
+        <td><b>Transaction monitoring</b><br><span class="pbs">pillar-build-synthetic — Class-G built; M/J deferred</span></td>
         <td>The committed signal definitions (themselves grounded to advisories — the chain) + the transactional and non-transactional data records the signal logic reads</td>
         <td>Referential/lineage verification: every alert cites its signal id + the data records satisfying its logic; deterministic replay of the cited signal over the cited data reproduces the alert</td>
         <td><span class="gc g">G</span><span class="gc m">M</span><span class="gc j">J</span><br><span style="font-size:10.5px">M = alert-quality baselines; above/below-threshold sampling agreement</span></td>
         <td>Graded alert/case dispositions with captured rationale; tuning and threshold judgment as risk-appetite calls; conceive new signals from covered indicators</td>
       </tr>
       <tr>
-        <td><b>Case investigation</b><br><span class="dstage">design-stage</span></td>
+        <td><b>Case investigation</b><br><span class="pbs">pillar-build-synthetic — Class-G gates built; J human</span></td>
         <td>The case evidence set: alerts, signals, screening hits, KYC/account data, investigation notes, entity anchors (the Phase-41 anchor model)</td>
         <td>Citation verification: every factual claim in the case assessment resolves to an evidence item; dangling-reference and entity-anchor resolution checks; conflicting values surfaced both-kept, never auto-resolved</td>
         <td><span class="gc g">G</span><span class="gc m">M</span><span class="gc j">J</span><br><span style="font-size:10.5px">M = blind second-rater agreement — consensus, never ground truth</span></td>
         <td>The investigation judgment — graded, rationale-captured; the narrative of intent is human; agents assemble and verify the evidence walk</td>
       </tr>
       <tr>
-        <td><b>SAR/STR narrative</b><br><span class="dstage">design-stage</span></td>
+        <td><b>SAR/STR narrative</b><br><span class="pbs">pillar-build-synthetic — drafting + Class-G; A sign-off human</span></td>
         <td>Filing guidance (FinCEN SAR instructions, FINTRAC STR requirements) + institutional policy + the case's signals, evidence, and data</td>
         <td>Citation verification of every narrative statement against case evidence; deterministic completeness checklist vs the filing guidance's required elements; format/vocabulary checks</td>
         <td><span class="gc g">G</span><span class="gc m">M</span><span class="gc j">J</span><span class="gc a">A</span><br><span style="font-size:10.5px">A = filer sign-off, compulsory and non-delegable</span></td>
         <td>The filing decision and the sign-off: a named person owns the SAR; drafting is agentic, accountability is not</td>
       </tr>
       <tr>
-        <td><b>Entity/event risk decisioning</b> — the LFCM assist layer (§13)<br><span class="dstage">design-stage</span></td>
+        <td><b>Entity/event risk decisioning</b> — the LFCM assist layer (§13)<br><span class="pbs">partial — Class-G spine pillar-built + CONNECTED; J demo; M design-stage</span></td>
         <td>The fired signals with their full grounding chains + entity anchors and properties (the live layer's anchor model) + the institution's coverage posture</td>
         <td>Referential replay: every signal contributing to a dossier is cited and independently re-derivable over its cited data; the no-unmeasured-number rule — no aggregate score without a named, owned calibration measurement</td>
         <td><span class="gc g">G</span><span class="gc m">M</span><span class="gc j">J</span><br><span style="font-size:10.5px">M = composition-quality sampling; elicited-judgment agreement (§14)</span></td>
@@ -1014,9 +1026,10 @@
      monolith is intractable, and opacity at that scale is unmitigable model risk.
      (Signal-library-scale governance has no documented prior art — an open design question the
      blueprint names rather than settles.) The five-source corpus — <b>2,251 grounded
-     indicators, 56 derived signals</b>, every quote gate-verified — is the library's committed
-     embryo; §12's decomposition adds internal history as the sixth source class, and the §11.1
-     chain is the build-out path.</p>
+     indicators (verified current), 56 derived signals (an embryo snapshot)</b>, every quote
+     gate-verified — is the library's committed embryo (the <code>signal_coverage_map.py</code>
+     tiers — 523 buildable / 171 reachable-now — are its measured instrument); §12's decomposition
+     adds internal history as the sixth source class, and the §11.1 chain is the build-out path.</p>
   <h3>Decisioning form: dossier now, score deferred — with owner</h3>
   <p>For any entity or event, the LFCM's designed-now output is <b>evidence assembly</b>: which
      signals fire, each carrying its full grounding walk (§2), over the entity's anchors and
@@ -1117,7 +1130,8 @@
   <p>The working agreement — "do not over-engineer; this project ships a demo, not a system" — is
      <b>transcended for design artifacts only</b>, under user override at the Phase-47 direction
      gate (2026-06-12): the blueprint designs the system; the repository still ships demos. The
-     four ship artifacts remain demo-class, byte-frozen through design phases, and nothing in
+     <b>five</b> ship artifacts (the triage console is the fifth, Phase 49) plus the launcher —
+     eight build targets — remain demo-class, byte-frozen through design phases, and nothing in
      this document changes a non-negotiable.</p>
 </section>
 
@@ -1129,6 +1143,11 @@
     <div class="fline"><b>Status: DESIGN.</b> This report renders a design; nothing is claimed
       built unless it names a committed artifact in the repository. Source:
       <code>docs/program-blueprint.md</code> (Phase 48 extension).</div>
+    <div class="fline"><b>Phase-61 sync.</b> This report's §3 status chips + the §15 count are
+      trued up to the as-built reality; the full per-§ audit, the both-direction drift inventory,
+      and the verified edit-list live in <code>docs/blueprint-implementation-review.md</code>.
+      The HTML is hand-synced with the Markdown source — structural true-ups here, the per-section
+      prose annotations there.</div>
     <div class="fline">All probe figures in this report are <b>SYNTHETIC fixture
       measurements</b> over invented material (an invented institution, rules, entities, and
       dispositions) — illustrative only, never performance claims. Source:

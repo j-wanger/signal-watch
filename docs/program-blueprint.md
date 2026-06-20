@@ -7,6 +7,15 @@
 > document claims to be built unless it names a committed artifact in this repository.
 > Workloads marked **(design-stage)** do not exist; the demo-proven workloads name their
 > committed implementations.
+>
+> **Trued up Phase 61 (2026-06-20).** Re-grounded against the as-built program across three repos
+> (signal-watch@67dbd65, aml-substrate@34400e2, aml-casework@c6d8401); the per-§ audit + the
+> both-direction drift inventory live in `docs/blueprint-implementation-review.md`. Two consequences
+> carry into the text below: (1) §3 status is now a **three-tier** vocabulary (see the legend at §3)
+> — the binary built/design-stage was outgrown by the pillar builds; (2) **(pillar-build-synthetic)**
+> names committed SIBLING code that is real-system-class but runs on SYNTHETIC data at probe/demo
+> scale — NOT deployed, never real data. "Nothing claims to be built unless it names a committed
+> artifact" still holds; it now cuts both ways (the doc had begun to UNDER-claim).
 
 ## 1. Operating direction
 
@@ -58,24 +67,42 @@ Three consequences:
 
 ## 3. Per-workload substrate / verifier table
 
-The six workloads of the target program. *Built* rows name committed implementations in this
-repository; *(design-stage)* rows are designs this blueprint proposes, with no implementation
-claim. Gate classes are defined in §4.
+The six workloads of the target program. Status uses a **three-tier vocabulary** (Phase-61 true-up —
+the original binary was outgrown by the pillar builds):
+
+- **(built)** / **(demo-built)** — a committed signal-watch demo artifact (vision-lab class).
+- **(pillar-build-synthetic)** — committed SIBLING code (`aml-substrate` / `aml-casework`):
+  real-system-class, tested, fail-closed, but running on SYNTHETIC data at probe/demo scale — NOT
+  deployed, never real data.
+- **(design-stage)** — no implementation; design/prose only (these rows "do not exist").
+
+A row may be **partial** (some gate classes built, some deferred); the status cell says which. Gate
+classes are defined in §4. Per-row evidence is in `docs/blueprint-implementation-review.md`.
 
 | Workload | Grounding substrate | Verifier mechanism | Gate classes | Human role |
 |---|---|---|---|---|
 | Corpus derivation (built) | Regulator advisory/guidance text — the committed source `md` (FinCEN, OFAC, FINTRAC) | Substring quote-grounding under `normalize()` within `rf_region` (`derive_signals.check_record`); cover×data matrix derives coverage deterministically from C/D codes | G (grounding) + M (C/D tag inter-rater agreement — the unguarded neural dimension) + J (divergence adjudication) + A (committing a derived record = a human-reviewed act under licence rules) | Adjudicate measured C/D divergences; decide promotion of derived records to committed data; conceive new sources/anchors |
 | Adverse-media screening (built) | Article body text + the book/watchlist records + the closed vocab (`news_ground.PROPERTY_KINDS`/`RELATION_LABELS`) | Grounded-or-stripped evidence checks with wrap-tolerant exact-byte requote (`locate_span`); referential vocab checks; quality-regression harness vs committed baseline | G (grounding + referential) + M (alias ownership measured-not-gated; `news_quality_harness --check`) + J (Disposition gate: escalate/dismiss) | Disposition decisions (escalate→watchlist, dismiss the common-name trap); match adjudication on near-hits; re-baseline only consciously (`--freeze`) |
-| Transaction monitoring (design-stage) | The committed signal definitions (themselves grounded to advisories — the chain) + the transactional and non-transactional data records the signal logic reads | Referential/lineage verification: every alert cites its signal id + the data records satisfying its logic; deterministic replay of the cited signal over the cited data reproduces the alert (alert reproducibility check) | G (referential/lineage) + M (alert-quality baselines; above/below-threshold sampling agreement) + J (graded alert disposition) | Graded alert/case dispositions with captured rationale; tuning and threshold judgment as risk-appetite calls; conceive new signals from covered indicators |
-| Case investigation (design-stage) | The case evidence set: alerts, signals, screening hits, KYC/account data, investigation notes, entity anchors (the Phase-41 anchor model) | Citation verification: every factual claim in the case assessment resolves to an evidence item; dangling-reference and entity-anchor resolution checks; conflicting values surfaced both-kept, never auto-resolved | G (citation/referential) + M (blind second-rater agreement on sampled cases — consensus, never ground truth) + J (the investigative conclusion itself: intent, story coherence, escalate/close) | The investigation judgment — graded, rationale-captured; the narrative of intent is human; agents assemble and verify the evidence walk |
-| SAR/STR narrative (design-stage) | Filing guidance (FinCEN SAR instructions, FINTRAC STR requirements) + institutional policy + the case's signals, evidence, and data | Citation verification of every narrative statement against case evidence; deterministic completeness checklist vs the filing guidance's required elements; format/vocabulary checks | G (citation + completeness) + M (narrative-quality sampling) + J (file/don't-file judgment) + A (filer sign-off — compulsory, non-delegable) | The filing decision and the sign-off: a named person owns the SAR; drafting is agentic, accountability is not |
-| Entity/event risk decisioning — the LFCM assist layer (design-stage, §13) | The fired signals with their full grounding chains + entity anchors and properties (the live layer's anchor model) + the institution's coverage posture | Referential replay: every signal contributing to a dossier is cited and independently re-derivable over its cited data; the no-unmeasured-number rule — no aggregate score without a named, owned calibration measurement | G (referential replay) + M (composition-quality sampling; elicited-judgment agreement, §14) + J (the risk call over the assembled dossier) | The risk judgment over the dossier; composition adjudication; risk-appetite thresholds — calls about the institution's posture, never delegated to an optimizer |
+| Transaction monitoring (pillar-build-synthetic — Class-G built; M/J deferred) | The committed signal definitions (themselves grounded to advisories — the chain) + the transactional and non-transactional data records the signal logic reads | Referential/lineage verification: every alert cites its signal id + the data records satisfying its logic; deterministic replay of the cited signal over the cited data reproduces the alert (alert reproducibility check) | G (referential/lineage) + M (alert-quality baselines; above/below-threshold sampling agreement) + J (graded alert disposition) | Graded alert/case dispositions with captured rationale; tuning and threshold judgment as risk-appetite calls; conceive new signals from covered indicators |
+| Case investigation (pillar-build-synthetic — Class-G gates built; J-conclusion human) | The case evidence set: alerts, signals, screening hits, KYC/account data, investigation notes, entity anchors (the Phase-41 anchor model) | Citation verification: every factual claim in the case assessment resolves to an evidence item; dangling-reference and entity-anchor resolution checks; conflicting values surfaced both-kept, never auto-resolved | G (citation/referential) + M (blind second-rater agreement on sampled cases — consensus, never ground truth) + J (the investigative conclusion itself: intent, story coherence, escalate/close) | The investigation judgment — graded, rationale-captured; the narrative of intent is human; agents assemble and verify the evidence walk |
+| SAR/STR narrative (pillar-build-synthetic — drafting + Class-G built; Class-A sign-off human) | Filing guidance (FinCEN SAR instructions, FINTRAC STR requirements) + institutional policy + the case's signals, evidence, and data | Citation verification of every narrative statement against case evidence; deterministic completeness checklist vs the filing guidance's required elements; format/vocabulary checks | G (citation + completeness) + M (narrative-quality sampling) + J (file/don't-file judgment) + A (filer sign-off — compulsory, non-delegable) | The filing decision and the sign-off: a named person owns the SAR; drafting is agentic, accountability is not |
+| Entity/event risk decisioning — the LFCM assist layer (partial — Class-G replay spine pillar-built + CONNECTED; J-console demo-built; Class-M composition-quality sampling design-stage, §13) | The fired signals with their full grounding chains + entity anchors and properties (the live layer's anchor model) + the institution's coverage posture | Referential replay: every signal contributing to a dossier is cited and independently re-derivable over its cited data; the no-unmeasured-number rule — no aggregate score without a named, owned calibration measurement | G (referential replay) + M (composition-quality sampling; elicited-judgment agreement, §14) + J (the risk call over the assembled dossier) | The risk judgment over the dossier; composition adjudication; risk-appetite thresholds — calls about the institution's posture, never delegated to an optimizer |
 
 Reading the table column-wise is the design argument: the substrate column is the grounding
 chain top to bottom (text → signals+data → evidence → guidance+case → fired-signals+chains+
 anchors); the verifier column is
 "the same principle, six implementations"; the human-role column **is** the 5% — and no row's
 human role contains transcription, rote review, or any work a verifier in its own row could do.
+
+**Status note (Phase-61 true-up).** Rows 3–5 — marked (design-stage) in the original blueprint — now
+carry committed SIBLING verifier code at pillar-build-synthetic scale: `aml-substrate@34400e2
+monitor/verify.py:verify_alert` (referential/lineage replay; all tamper classes tested) for monitoring;
+`aml-casework@c6d8401`'s six Class-G verifiers (`contract`/`grounding_replay`/`completeness`/`citation`/
+`corpus_grounding`/`narrative_grounding`) + `narrative_generator.py` (bounded regenerate loop) +
+`signoff.py:record_signoff` for case/SAR. The HUMAN-owned gates (Class-J graded disposition, Class-A
+filer sign-off) and the live-data Class-M layers remain unbuilt by design — `record_signoff` never
+weighs file/no-file. Real code, synthetic data, not deployed (`docs/blueprint-implementation-review.md`
+§2–§4).
 
 ## 4. The gate taxonomy
 
@@ -186,7 +213,7 @@ mapping below must be made by design rather than read off the guideline.
 | Review | P2 validation (conceptual soundness + outcomes analysis) | Independent re-gate of every derived output (`--check-derived`); blind inter-rater measurement on neural dimensions; adversarial review agents at phase gates |
 | Approval | P3 governance | Class-A human gates: committing a derived record is a human-reviewed act; model/pipeline approval before deployment |
 | Deployment | P1 implementation | Build-boundary fail-loud validation (schema, closed vocab, referential integrity); drift guard (`build.py --check`, byte-identity) |
-| Monitoring | P2 ongoing monitoring | Committed quality-regression baselines (`news_quality_harness --check`); conscious re-baseline (`--freeze`); surfaced-dimension completeness (§4-M) |
+| Monitoring | P2 ongoing monitoring | Committed quality-regression baselines (`news_quality_harness --check`) + the C/D-tag measured-not-gated control (`cd_correctness.py --control-check`/`--control-freeze` vs `cd-control-baseline.json`; `docs/cd-tag-control.md`, Phase 54); conscious re-baseline (`--freeze`); surfaced-dimension completeness (§4-M) |
 | Decommission | P3 governance (inventory/lifecycle policy) | Honest retirement: frozen archive + the record of WHY (the demo's archive/ + journal discipline, formalized) |
 
 Opacity is treated as model risk: every decision-time output carries its explanation artifact
@@ -210,6 +237,10 @@ validation is therefore *alternative by design*, and each control is disposition
   as a conscious, attributable re-baseline act — the embryo of E-23's *Monitoring* component.
 - Blind inter-rater agreement on neural dimensions, reported as consensus and never as accuracy
   (the Phase-34/38 doctrine); divergences routed to human adjudication (Class J).
+- The C/D-tag measured-not-gated control (Phase 54): `cd_correctness.py --control-check`/`--control-freeze`
+  against the committed `cd-control-baseline.json`, with integrity + self-consistency + independent
+  (cross-family rater) trip-wires; `docs/cd-tag-control.md` formalizes it as an SR 11-7 Pillar-2 / E-23
+  *Monitoring* control — consensus, never accuracy. The worked instance of the §4-M class made executable.
 
 **Deferred — with owner** (cannot be built in a vision lab; owned by the model-risk function of
 the adopting institution at program implementation, tracked as roadmap items in §11):
@@ -235,8 +266,8 @@ The demo's honesty constraints, dispositioned for the program (none silently dro
 | Demo constraint | Disposition | Program form |
 |---|---|---|
 | No fabricated numbers (no lift/precision claims) | **SURVIVES verbatim** | No unmeasured performance claim, ever; measured numbers carry their measurement definition |
-| "Illustrative data & outputs" badge, always visible | **TRANSFORMS** | Output-status labeling: illustrative vs live-unreviewed vs human-confirmed, always visible per record (the corpus live mode's "UNREVIEWED" group is the precedent); plus the §8 outcomes-analysis obligation once outputs are real |
-| NO real customer/transaction data, ever | **TRANSFORMS** | Privacy-by-construction generalized: governed data boundaries, local/in-perimeter inference (the 127.0.0.1 + gitignored-store pattern at institutional scale), licence/allowlist gates on what may persist |
+| "Illustrative data & outputs" badge, always visible | **TRANSFORMS** | Output-status labeling: illustrative vs live-unreviewed vs human-confirmed, always visible per record (the corpus live mode's "UNREVIEWED" group is the precedent); plus the §8 outcomes-analysis obligation once outputs are real. *(Phase-61: built to two strata — illustrative + live-UNREVIEWED; the per-record human-confirmed stratum is design-stage.)* |
+| NO real customer/transaction data, ever | **TRANSFORMS** | Privacy-by-construction generalized: governed data boundaries, local/in-perimeter inference (the 127.0.0.1 + gitignored-store pattern at institutional scale), licence/allowlist gates on what may persist. *(Phase-61: the PII-stripping projection is built pillar-side [`PartyView`, synthetic data]; the institutional governance layer — governed boundaries, licence/allowlist persistence gates — is design-stage.)* |
 | Verbatim only US-federal + FINTRAC-licensed; all else paraphrased | **SURVIVES** | Licence basis named per source in the registry; new jurisdictions enter only with a named reproduction basis |
 | Live mode optional/isolated, scripted fallback | **TRANSFORMS** | Graceful degradation as a deployment requirement: every agentic component has a deterministic fallback or an honest outage state — never a silent quality cliff |
 | Single-file offline ship artifact | **TRANSFORMS** | A demo-era constraint, not a program one; what survives is the property it enforced: deterministic, dependency-pinned, replayable builds with drift guards |
@@ -256,20 +287,26 @@ which is precisely the failure mode the charter invariants (§5) exist to preven
 The dev-wiki DEFERRED candidates, re-sequenced as program capabilities (each carries its open
 sub-questions with it; demo-track residue stays in the dev-wiki, not here):
 
-1. **Detection-content coverage** (corpus derivation, built): the FINTRAC `/intel/` frontier as
-   committed corpus extension; a third jurisdiction (AUSTRAC CC-BY / UK OGL — a third licence
-   basis is a compliance call per §9); internal history as the sixth source class (§12, Role 1).
+1. **Detection-content coverage** (corpus derivation, built): the FINTRAC `/intel/` family as a
+   CANDIDATE corpus extension (*Phase-61: NOT yet committed — `data/` holds exactly 5 sources; the
+   FINTRAC operational alerts already committed sit under the existing `fintrac` source*); a third
+   jurisdiction (AUSTRAC CC-BY / UK OGL — a third licence basis is a compliance call per §9, also
+   design-stage); internal history as the sixth source class (§12, Role 1 — a SYNTHETIC probe today).
    The content capability feeds every chain below it — its terminal state is the LFCM signal
    library (§13), built out source class by source class through the same gate discipline.
 2. **Screening recovery** (adverse-media, built): the news REQUOTE-RETRY pass — the worked
    example of agentification-criterion rule 2 (fold the loop's one idea into the deterministic
-   pipeline); then bulk-scan capacity with honest wall-time budgeting.
+   pipeline). *Phase-61: the REQUOTE half (`locate_span`, Phase 44) is folded in; the post-grounding
+   RETRY re-prompt loop remains the deferred candidate.* Then bulk-scan capacity with honest
+   wall-time budgeting.
 3. **Entity resolution** (the live layer's growth path): fuzzy-merge adjudication with
    identifier-layered matching over the anchor/properties model — reversible merge edges, human
    adjudication as a Class-J console (the gate console's natural sibling).
-4. **Monitoring / investigation / SAR designs** (design-stage, §3): each begins as
-   conceptualization work — substrate + verifier named, probe before agentifying — and each is a
-   candidate future engagement, not a vision-lab build (assumption A2).
+4. **Monitoring / investigation / SAR designs** (§3): each begins as conceptualization work —
+   substrate + verifier named, probe before agentifying. *Phase-61: the pillar-INTERNAL mechanics
+   are now `pillar-build-synthetic` (`aml-substrate@34400e2 monitor/`, `aml-casework@c6d8401`'s
+   verifiers + `narrative_generator.py`); what remains design-stage is the INTEGRATED cross-pillar
+   case/investigation flow + the live-data Class-M/J layers + production scale (assumption A2).*
 
 The **gate console** (Phase 47 T5, this phase) dramatizes the Class-J layer over real committed
 divergence data — the vision-lab artifact for exactly the human work §5 charters.
@@ -338,14 +375,20 @@ signal individually derived, quote- or referentially-grounded, replayable, and c
 lifecycle (design → review → approval → deployment → monitoring → decommission, the §7 mapping
 applied per signal, with the Class-G evidence automatable at scale) — plus a small **composition
 layer** that assembles fired signals into dossiers and is itself a separately validatable model.
+*(Phase-61 divergence: the built composition is deterministic evidence-assembly + referential
+verification, NOT a learned statistical aggregation model — aml-substrate measured a TRIPLE-NULL and
+RETIRED composition detection-lift. Honest and tighter for auditability; see
+`docs/blueprint-implementation-review.md` §13.)*
 The library IS the model inventory; tiering (per SR 11-7 inventory practice) sets validation
 depth per signal class. A single Tier-1 mega-model as the unit of validation is refused on
 defensibility grounds: conceptual-soundness review of a 10^4-signal monolith is intractable,
 and opacity at that scale is unmitigable model risk. (Signal-library-scale governance has no
 documented prior art — an open design question this blueprint names rather than settles.) The
-five-source corpus — 2,251 grounded indicators, 56 derived signals, every quote gate-verified —
-is the library's committed embryo; §12's decomposition adds internal history as the sixth
-source class, and the §11.1 chain is the build-out path.
+five-source corpus — 2,251 grounded indicators (verified current), 56 derived signals (an embryo
+snapshot count), every quote gate-verified — is the library's committed embryo, with the
+`signal_coverage_map.py` reachability tiers (523 buildable / 171 reachable-now) as its measured
+instrument; §12's decomposition adds internal history as the sixth source class (a synthetic probe
+today), and the §11.1 chain is the build-out path.
 
 **Decisioning form: dossier now, score deferred — with owner.** For any entity or event, the
 LFCM's designed-now output is **evidence assembly**: which signals fire, each carrying its full
@@ -356,13 +399,18 @@ maximum for an "any event/entity" claim, and an uncalibrated aggregate presented
 the fabricated-figure class (§9, row 1). The named embryos for eventual calibration: the
 adopter's filing history (§12, Role 3 — biased, Class-M) and the elicited-judgment stream
 (§14). Until a calibration measurement is defined, owned, and run, the LFCM states no number.
+*(Phase-61: REALIZED + ENFORCED — the coverage map + the CONNECTED e2e chain assemble the dossier;
+grep finds NO `score`/`risk`/`rating` aggregate field across the three repos, and `illustrative:True`
+is gated at three boundaries.)*
 
 **Named failure modes** (design constraints, not afterthoughts):
 
 1. **Correlated double-counting.** At library scale the signals are massively redundant across
    regulators and history (the corpus already refuses cross-regulator dedup on honesty grounds).
    Naive aggregation inflates risk for any entity touching a popular typology — the composition
-   layer must model redundancy explicitly or refuse to aggregate.
+   layer must model redundancy explicitly or refuse to aggregate. *(Phase-61: MEASURED —
+   `corpus_redundancy.py` (Phase 51): co-occurrence ceiling 0.325, ≈1.4% genuine semantic redundancy
+   (single-rater, illustrative) — the no-cross-regulator-dedup stance is empirically vindicated.)*
 2. **Volume inversion.** Thousands of signals firing per entity either get strangled by
    thresholds (the legacy TM failure, rebuilt) or bury the judgment layer — charter invariant 4.
    The design answer is **composition before escalation**: humans see composed dossiers, never
@@ -436,6 +484,7 @@ feedback channel exists at adoption, it enters Role 3 (§12), not this loop.
 
 HANDOFF's working agreement — "do not over-engineer; this project ships a demo, not a system" —
 is **transcended for design artifacts only**, under user override at the Phase-47 direction gate
-(2026-06-12): this blueprint designs the system; the repository still ships demos. The four
-ship artifacts remain demo-class, byte-frozen through design phases, and nothing in this
-document changes a non-negotiable.
+(2026-06-12): this blueprint designs the system; the repository still ships demos. The **five**
+ship artifacts (the triage console is the fifth, Phase 49) plus the launcher — eight build targets
+in all — remain demo-class, byte-frozen through design phases, and nothing in this document changes a
+non-negotiable.

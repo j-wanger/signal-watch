@@ -45,7 +45,7 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-61-blueprint-implementation-review -->
-<!-- gate-log:phase-61 direction=approved -->
+<!-- gate-log:phase-61 direction=approved delivery=accepted -->
 
 ## Phase 61 — Blueprint review against what's been implemented (+ batched cross-pillar re-ground; deep blueprint true-up)
 

@@ -17,6 +17,6 @@ Verified at delivery: `build.py --check all` 8/8; `git diff --stat HEAD -- dist/
 ## Gates
 
 - [x] Direction confirmed by user (2026-06-20; C deliverable + batched re-ground + HTML re-sync; A0 accept; all_accept:true)
-- [ ] Delivery accepted (flips to [x] only after the commit verifiably lands — gate-state follows git-state)
+- [x] Delivery accepted (post-implementation report 2026-06-20; committed a4f30e2, pushed to main)
 
 Plan [[phases/phase-61-blueprint-implementation-review]]; ledger Phase-61.

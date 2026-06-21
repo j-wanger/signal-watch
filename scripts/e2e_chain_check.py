@@ -34,12 +34,12 @@ sys.path.insert(0, _HERE)
 from derive_signals import normalize  # signal-watch's OWN grounding core (NOT a sibling)
 
 # The current sibling grounding pins (the re-ground-before-consume rule updates these).
-# Phase 61 (2026-06-20): re-grounded to substrate@34400e2 (Phase 20 — composition stress-bench + advisory
-# drift seam; P19 C14-emergence honest null) + casework@c6d8401 (Phase 12, UNCHANGED — C7/C8/C14
-# grounding_replay assertions). The real C8 chain (CASE-P-0000251 -> casework consume -> signed SAR) still
-# CONNECTS clean: signed=true, zero blocking violations (the bundle + casework are byte-unchanged since P60;
-# substrate P19/P20 touched only the composition bench + the drift seam, not the emission or the verifiers).
-GROUNDING_HEADS = {"aml_substrate": "34400e2", "aml_casework": "c6d8401"}
+# Phase 62 (2026-06-20): re-grounded to substrate@ae98924 (Phase 22 — grounded probe-history projector;
+# P21 temporal-fidelity §6) + casework@c6d8401 (Phase 12, UNCHANGED — C7/C8/C14 grounding_replay
+# assertions). The real C8 chain (CASE-P-0000251 -> casework consume -> signed SAR) still CONNECTS clean:
+# signed=true, zero blocking violations (the bundle + casework are byte-unchanged since P60; substrate
+# P21/P22 touched only gen/ + validate/ + report/loop_closure/ — NOT the emission or the verifiers).
+GROUNDING_HEADS = {"aml_substrate": "ae98924", "aml_casework": "c6d8401"}
 
 # Mirrors aml_casework.contract.STR_REQUIRED_ELEMENTS (copied by the file-contract, NOT imported).
 STR_REQUIRED_ELEMENTS = (

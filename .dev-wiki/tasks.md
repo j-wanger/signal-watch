@@ -44,6 +44,42 @@
 > - Phase 8: Doc true-up + provenance fix (M6 debt) — COMPLETED + accepted
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
+<!-- phase:phase-62-grounded-probe-history-consume -->
+<!-- gate-log:phase-62 direction=approved delivery=accepted -->
+
+## Phase 62 — Grounded probe-history consume (§12) + §14-frozen boundary + P22 pin re-ground
+
+Consume aml-substrate's P22 "grounded probe-history" into signal-watch's §12 non-ship measurement layer
+(probe_history_stats.py). Substrate P22 (loop-closure) projects monitor/compose.Dossier into a grounded
+`alert-history.json` (conformance-validated against a VENDORED copy of signal-watch's OWN probe_history_stats.py
+@58925a8); it REPLACES the SYNTHETIC Phase-48 probe-history fixture as the §12 curate source. Substrate output is
+itself synthetic (meta.synthetic:true) → "no real data" holds. The C-code→TM-### namespace map is now
+SHIP-LOAD-BEARING (the §12 silent_rules metric). The §14 triage-console unfreeze (planned as a sanctioned
+USER-OVERRIDE) was **STOOD DOWN on evidence at the T4 pause-checkpoint** — the substrate's label-blind probe-history
+is the RIGHT source for §12 (firing/disposition MEASUREMENT) but the WRONG source for §14 (the triage console needs
+adjudicable FACT PATTERNS the substrate doesn't emit; curate couples via only 5 metadata fields on 7/20 scenarios,
+and the marquee TM-104 pair is C20 — no substrate detector). The user accepted the boundary → **dist/triage stays
+BYTE-FROZEN; NO re-curation**. The ONLY dist change is the launcher pin cascade (dist/index.html, 1 line — the
+Phase-60 Option-A pattern); the other 7 dists incl. dist/triage byte-frozen; build.py NEVER imports the substrate
+(tool-use produces the file, build reads committed data/ only). Honesty split: the alert/entity/cited-evidence side
+becomes GROUNDED in real substrate detection output, but DISPOSITIONS stay label-blind ILLUSTRATIVE (never ground
+truth) — every disposition-derived metric tagged "[over illustrative dispositions]".
+LITE; the only ship change is the launcher pin cascade (dist/index.html, 1 line) — the other 7 dists byte-frozen.
+Plan: articles/phases/phase-62-grounded-probe-history-consume.md. Ledger: Phase-62 (all_accept:false; A0
+verify-first = T0 weakest; A1 reject→revised-accept w/ checkpoint — CHECKPOINT FIRED → §14 stood down; A3
+don't-know→delivery-checkpoint). Grounded against aml-substrate@ae98924 + aml-casework@c6d8401 + corpus@472b44e.
+Gate 2026-06-20 (direction) → delivered + accepted 2026-06-21.
+
+- [x] T1 Produce + pin the grounded probe-history | scope: data/probe-history/**, docs/** | success: VERIFY P22 committed in aml-substrate (`git -C /Users/jwang/aml-substrate` — PAUSE+ASK the user to commit it if still uncommitted, do NOT consume an uncommitted projector); run substrate's COMMITTED `--probe-history` projector (sanctioned tool-use, file-contract output — NOT lifecycle-driving) → a grounded `alert-history.json` under data/probe-history/ (labeled grounded; pin the substrate P22 HEAD inline in a provenance note); grounded alert-history.json EXISTS + is DETERMINISTIC (re-run byte-identical); validates against the probe-history schema
+- [x] T2 C-code→TM-### namespace map (ship-load-bearing) | scope: data/probe-history/**, data/**, scripts/** | success: a committed map (substrate capability C-code → signal-watch TM-### rule id), grounded in data/capability-taxonomy.json; closed-vocab validated; EVERY C-code in the grounded history resolves to a TM id OR an explicit honest-null (surfaced, never silently dropped); a `--selftest`/assert covers it
+- [x] T3 §12 non-ship measurement consume | scope: scripts/probe_history_stats.py, docs/** | success: re-point probe_history_stats.py at the grounded history (5/6 Role-2 metrics as-is; silent_rules via the T2 map); the stats run PRINTS all 6 Role-2 metrics over the grounded file; the A3 honesty framing (grounded detection / illustrative dispositions) DRAFTED explicitly; NO overclaim language
+- [x] T4 §14 triage re-curation → CHECKPOINT FIRED → boundary accepted (§14 stays frozen) | scope: scripts/curate_triage_scenarios.py, data/triage/** | RESOLUTION: read curate firsthand — the §14 scenarios couple to alert-history via only 5 metadata fields on 7/20 scenarios; everything substantive (panels/TM-pairing/divergent-pair/controls) is hand-authored; the substrate's label-blind alerts carry NO fact pattern + the marquee TM-104 pair is C20 (no substrate detector). So the grounded history is the WRONG source for §14 (it needs adjudicable fact patterns) → PAUSED + REPORTED → user chose "accept the boundary, keep §14 frozen" → NO re-curation, dist/triage byte-frozen, documented in docs/probe-history.md + substrate-pin.json + CLAUDE.md. ORIGINAL: READ curate_triage_scenarios.py FIRST; confirm strata coupling; CHECKPOINT — if the grounded history doesn't map cleanly into the §14 strata OR breaks build-boundary validation, PAUSE + REPORT (do NOT redesign the console to force the fit); re-run curate against the grounded probe-history → regenerate data/triage/scenarios.json (HISTORY-derived strata [fired-signal + below-the-line] re-grounded; novel+random strata BYTE-STABLE); the §14 grammar + decisions-not-correctness + no-real-data preserved; curate `--selftest` green; build-boundary validation passes
+- [x] T5 Exit verification (§14 frozen → NO rebuild; the sanctioned dist change is the launcher pin cascade, NOT triage) | scope: dist/**, scripts/build.py | success: `build.py --check all` 8/8; `git diff --stat HEAD -- dist/` shows ONLY dist/index.html (1 line — the Phase-60 Option-A launcher grounding_heads cascade; dist/triage + 6 others BYTE-FROZEN); `node tests/triage-console.test.mjs` green (console UNCHANGED); `! grep import aml_substrate` clean in build.py + the 3 cross-pillar scripts; probe_history_stats synthetic byte-identical + --selftest + --grounded green
+- [x] T6 Re-ground cross-pillar pins + document | scope: scripts/signal_coverage_map.py, scripts/e2e_chain_check.py, docs/**, .claude/rules/**, HANDOFF.md, CLAUDE.md | success: move the coverage-map / e2e-chain pins to substrate@<P22 commit> (absorb the no-op coverage re-ground); `signal_coverage_map.py --check` byte-identical (reachable-now still 171) + `--selftest` green; `e2e_chain_check.py --selftest` green; document ZERO coverage tier movement + the grounded provenance + the sanctioned-unfreeze rationale (IN-PLACE edits to active-phase.md / HANDOFF / CLAUDE.md current-state — replace facts in place, NO per-phase bullets)
+
+> Phase 62 — direction gate 2026-06-20 (all_accept:false): the user chose to consume substrate P22's grounded probe-history END-TO-END. A0 [T0 weakest] verify-first the substrate P22 committed HEAD (pause+ask if uncommitted) — ACCEPT. A1 the end-to-end dist/triage unfreeze REJECT→REVISED-ACCEPT (sanctioned USER-OVERRIDE, the Phase-60/61 precedent) with a built-in CHECKPOINT (no clean strata map / broken validation → PAUSE+report, do NOT force the fit). A3 honesty framing (grounded detection / illustrative dispositions) DON'T-KNOW → routed to the DELIVERY-gate checkpoint (the user checks it before anything is called "grounded"). A2 the C-code→TM-### map is ship-load-bearing + grounded/null-honest. Grounded against aml-substrate@<P22, pinned at T1> + aml-casework@c6d8401 + corpus@472b44e.
+> Abort: any of the OTHER 7 dists drift / a build.py substrate import → STOP and surface (only dist/triage may move — the sanctioned unfreeze). The substrate P22 projector still uncommitted at T1 → PAUSE + ask the user to commit it, do NOT consume an uncommitted projector. The grounded history doesn't map cleanly into the §14 strata / breaks build-boundary validation → PAUSE + report (A1 checkpoint), do NOT redesign the console to force the fit. The honesty framing reads as claiming grounded DISPOSITIONS → re-word at the delivery checkpoint before commit (A3). A C-code resolves to nothing AND the null is not surfaced → out of bounds (A2). A validator looks like it needs loosening → fix the data/design, never the check.
+
 <!-- phase:phase-61-blueprint-implementation-review -->
 <!-- gate-log:phase-61 direction=approved delivery=accepted -->
 

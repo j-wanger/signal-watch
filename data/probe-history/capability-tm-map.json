@@ -1,0 +1,24 @@
+{
+  "map": "aml-substrate capability C-code -> signal-watch legacy TM-### rule id(s)",
+  "purpose": "The namespace adoption seam (Phase 62). The grounded substrate probe-history carries capability C-codes as rule_id; signal-watch's §12 silent_rules metric (and the candidate §14 re-curation) speak legacy TM-### rule ids. Each substrate per-account detector capability maps to the legacy TM rule(s) that express it, or an explicit honest-null where the legacy rulebook authored no rule for that capability.",
+  "grounding": {
+    "capabilities_authority": "data/capability-taxonomy.json (C-code -> name)",
+    "tm_rules_authority": "data/probe-history/derived/legacy-rulebook.json (TM-### id + its capability field)",
+    "direction": "C-code -> TM rule(s); derived by INVERTING the rulebook's per-rule capability field (every listed TM's rulebook capability == the C-code key — validated by --selftest)"
+  },
+  "semantics": "A fired C-code marks ALL its mapped TM rules as capability-covered (not silent). silent_rules in the GROUNDED world is therefore CAPABILITY-level silence: a legacy TM rule whose capability never fired in the grounded history — NOT rule-variant-level silence. The substrate detects at capability granularity (one C-code detector), not per-TM-rule-variant, so it cannot distinguish TM-107 from TM-109 (both C3). This is a MEASURED definitional adaptation from the synthetic fixture's rule-id-native silence to capability-native silence — surfaced, never hidden.",
+  "capability_to_tm": {
+    "C2": ["TM-102"],
+    "C3": ["TM-107", "TM-109"],
+    "C4": ["TM-101", "TM-112"],
+    "C5": ["TM-106"],
+    "C6": ["TM-103", "TM-108"],
+    "C15": []
+  },
+  "honest_nulls": {
+    "C15": "Beneficial-ownership / shell-front-company & nominee-network analysis. The substrate's per-account monitoring fires this capability, but the legacy Northbridge TM rulebook authored NO rule for it — a genuine coverage finding (the substrate capability is AHEAD of the legacy rulebook). Surfaced as an explicit null; never silently dropped."
+  },
+  "scope_note": "Covers the 6 per-account detector capabilities the substrate projector can emit to the probe-history (C2, C3, C4, C5, C6, C15). Screening capabilities (C7, C8, C14, C26) are NOT emitted to the per-account probe-history (they flow to evidence bundles) and are out of this map's scope.",
+  "tm_universe": ["TM-101", "TM-102", "TM-103", "TM-104", "TM-105", "TM-106", "TM-107", "TM-108", "TM-109", "TM-110", "TM-111", "TM-112"],
+  "provenance": "signal-watch Phase 62 T2 (2026-06-20); substrate pin aml-substrate@ae98924 (P22). Grounded against the committed rulebook + taxonomy; closed-vocab + inversion-faithfulness asserted by `python3 scripts/probe_history_stats.py --selftest`."
+}

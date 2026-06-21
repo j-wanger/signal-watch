@@ -307,10 +307,15 @@ derivation loop, 5 sources, 4 lenses, cross-corpus synthesis, grounded coverage)
 stream (`dist/news/`) · M9 program design (`docs/program-blueprint.md` §1–§15 — Phase 48 added
 §12 brownfield history utilization ["history is evidence, never ground truth"], §13 LFCM target
 architecture [library-not-monolith; dossier-now/score-deferred], §14 the continuous adjudication
-loop — + the `dist/console/` gate console + the SYNTHETIC history-decomposition probe
-`data/probe-history/` w/ `scripts/probe_history_stats.py` [outside every build path; writeup
-`docs/probe-history.md`] + the NON-ship offline report `docs/blueprint-report.html` + the
-`dist/triage/` triage console [Phase 49 — §14's loop embryo made demo-able]).
+loop — + the `dist/console/` gate console + the history-decomposition probe `data/probe-history/`
+w/ `scripts/probe_history_stats.py` [outside every build path; writeup `docs/probe-history.md`; the
+SYNTHETIC Phase-48 fixture PLUS, since Phase 62, a GROUNDED probe-history `data/probe-history/grounded/`
+projected by the aml-substrate P22 projector (`probe_history_stats.py --grounded`, pinned to
+substrate@ae98924, capability→TM map `capability-tm-map.json`) — §12 MEASUREMENT only: the §14
+triage console stays synthetic-curated by design (the substrate's label-blind alerts carry no
+adjudicable fact pattern — the §12-right/§14-wrong-source boundary)] + the NON-ship offline report
+`docs/blueprint-report.html` + the `dist/triage/` triage console [Phase 49 — §14's loop embryo made
+demo-able]).
 Per-phase detail: git log + `.dev-wiki/` journal + HANDOFF.md §8.
 
 ## Definition of done

@@ -1,0 +1,36 @@
+{
+  "artifact": "GROUNDED probe-history (aml-substrate Phase 22 loop-closure projector output)",
+  "consumed_by": [
+    "scripts/probe_history_stats.py (§12 Role-2 measurement, non-ship) — Phase 62 T3",
+    "(candidate) scripts/curate_triage_scenarios.py (§14 triage console, ship) — Phase 62 T4 checkpoint"
+  ],
+  "substrate_pin": {
+    "repo": "/Users/jwang/aml-substrate",
+    "head": "ae989240c174db58e075bd97a58919134f482680",
+    "head_short": "ae98924",
+    "head_subject": "chore(dev-wiki): close Phase 22 — delivery gate accepted (e667fc2)",
+    "feature_commit": "e667fc2",
+    "phase": "P22 (loop-closure: grounded probe-history for signal-watch consoles)"
+  },
+  "reproduce": {
+    "command": "uv run python -m aml_substrate.cli --clients 1000 --months 10 --seed 42 --out <out> --probe-history",
+    "run_id": "seed42-n1000-m10",
+    "output_path": "<out>/probe_history/seed42-n1000-m10/alert-history.json",
+    "rationale": "matches the substrate's documented canonical CONFORMANT build (docs/phase-22 §: n=1000 / months=10); sanctioned tool-use producing a file-contract output, NOT lifecycle-driving",
+    "determinism": "byte-identical across re-runs at the pinned HEAD (verified)",
+    "sha256": "d9d1110e137586dd964b3aadc8198e76dd2258663a53460fa34138bd71d01e41"
+  },
+  "measured_shape": {
+    "alerts_total": 4966,
+    "base_alerts": 1360,
+    "re_review_alerts": 3606,
+    "entities": 618,
+    "below_the_line": 0,
+    "rule_ids_fired": { "C2": 2433, "C3": 2269, "C5": 210, "C15": 54 },
+    "rule_ids_absent": [ "C4", "C6" ],
+    "dispositions": { "dismissed": 4652, "data_requested": 190, "escalated": 76, "sar_filed": 48 }
+  },
+  "honesty": "meta.synthetic=true. Alerts are REAL label-blind detector firings over the substrate's SYNTHETIC data; dispositions/analysts are ILLUSTRATIVE (chosen-not-measured, seeded from observable alert content, never the hidden label). History is evidence, never ground truth. entity_id is a substrate account_id; rule_id is a capability C-code (the capability→TM map is the signal-watch adoption seam — see capability-tm-map.json).",
+  "generated_by": "signal-watch Phase 62 T1",
+  "generated_date": "2026-06-20"
+}

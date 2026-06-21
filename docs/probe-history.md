@@ -62,6 +62,60 @@ the script beside the number and is the only authority on what the number means.
   signal must beat on the same (synthetic) population.
 - `silent_rules: 1/12` (TM-111) — a silent rule is itself a finding at adoption.
 
+## Phase 62 — the GROUNDED consume (substrate P22)
+
+The §12 Role-2 stats above ran over the SYNTHETIC Phase-48 fixture. Phase 62 re-points the same
+measurement at a **grounded** probe-history projected by the aml-substrate P22 loop-closure
+projector — `data/probe-history/grounded/alert-history.json` (pin + reproduce command in
+`grounded/provenance.json`: `aml-substrate@ae98924`, `--clients 1000 --months 10 --seed 42
+--probe-history`, byte-deterministic). Run it with `python3 scripts/probe_history_stats.py
+--grounded`; the synthetic default path is byte-unchanged (regression baseline).
+
+**The honesty split (the load-bearing point).** The grounded history's alert FIRINGS are REAL
+label-blind detector output — which entity (substrate `account_id`), which capability (`rule_id`
+is a substrate C-code), the count, the near-misses. But the DISPOSITIONS are ILLUSTRATIVE: the
+substrate's chosen-not-measured §7 operating-funnel shape, seeded from observable alert content,
+never the hidden label. So:
+- **Firing-derived metrics are GROUNDED:** `alerts_total` (4,966 over C2/C3/C5/C15),
+  `silent_rules`, `below_the_line_count`.
+- **Disposition-derived metrics measure the ILLUSTRATIVE process, not analyst behaviour:**
+  `re_review_rate` (72.6%), `disposition_inconsistency_rate` (100% — a structural artefact of
+  the illustrative seed's spread over many alerts/capability, surfaced not hidden), `data_gap_rate`
+  (3.8%), `alert_to_escalation_rate` (2.5%). Each grounded line is tagged `[over illustrative
+  dispositions]`. This is NOT a claim about real re-review or escalation rates.
+
+**The namespace seam (`capability-tm-map.json`).** The grounded history speaks capability
+C-codes; the §12 `silent_rules` metric (and the §14 console) speak legacy `TM-###` ids. The
+committed `data/probe-history/capability-tm-map.json` maps each substrate per-account capability
+to the legacy TM rule(s) that express it, validated by `--selftest` (closed vocab + inversion
+faithfulness vs the rulebook + taxonomy). One **honest null**: C15 (shell/nominee) fires but the
+legacy rulebook authored no rule for it — the substrate capability is *ahead* of the rulebook.
+
+**Grounded `silent_rules` becomes CAPABILITY-level silence** (the substrate detects per-capability,
+not per-rule-variant): 8/12 legacy rules are silent — **4 have a substrate detector that did not
+fire** at this build (C4, C6) and **4 have no substrate detector at all** (C1/C10/C19/C20, the
+un-built capabilities). That split is the genuinely useful §12 measurement: it separates "dead at
+this scale" from "never buildable here."
+
+`below_the_line_count: 0` at this build is a measured 0 (the near-miss sampler found no qualifying
+accounts at seed42-n1000-m10), not an omission — the synthetic fixture had no such field at all.
+
+**Why §14 (the triage console) stays frozen on the synthetic source (the Phase-62 boundary).**
+The §14 triage console (`dist/triage/`) is NOT re-grounded on this substrate output, and the
+unfreeze authorized at the direction gate was stood down at the T4 checkpoint — on evidence, not
+preference. The two consoles need different inputs: §12 measures *firings + dispositions* (exactly
+what the substrate emits), but §14 needs **adjudicable fact patterns** — customer profile, activity
+narrative, KYC note — so an analyst can render a judgment. `curate_triage_scenarios.py` pulls only
+5 metadata fields (`alert_id, disposition, analyst, date, entity_id`) from the history into 7 of 20
+scenarios; everything substantive (the panels, the TM-rule pairing, the divergent-disposition pair,
+the controls) is hand-authored. The substrate's **label-blind alerts carry no fact pattern**, and
+the console's signature beat (the S-01/S-02 process-inconsistency pair on **TM-104 = C20**) is
+anchored on a capability the substrate has **no detector for** — structurally ungroundable. So the
+grounded probe-history is the right source for §12 (measurement) and the **wrong source for §14**
+(adjudication scenarios); §14 stays synthetic-curated by design. A genuinely grounded §14 would
+need a fact-pattern synthesizer pairing substrate alerts with adjudicable narratives — its own
+future phase, not a drop-in here.
+
 ## What this probe is NOT
 
 - NOT a performance claim: every figure is a property of authored fixtures, useful only as the

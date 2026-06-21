@@ -44,6 +44,57 @@
 > - Phase 8: Doc true-up + provenance fix (M6 debt) — COMPLETED + accepted
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
+<!-- phase:phase-64-precedent-confidence-gating-engine -->
+<!-- gate-log:phase-64 direction=approved delivery=pending -->
+
+## Phase 64 — Precedent-confidence gating engine + the elicitation loop (live)
+
+Turn the Phase-63 workbench's STATIC precedent-confidence bucketer into a LIVE, parameterized gating
+CONTROL with a feedback loop — the Phase-63 follow-on #3, "the LFCM elicitation-loop path" (the
+measuring→controlling pivot). Today `_confidence(combo, n_precedent)` in `curate_workbench_cases.py` is
+a static bucketer baked at curate time (sample-size → {high/auto-clear, medium/review, low/human-gate};
+thresholds 500/50 + cleared-% 88/62/28 HARDCODED; the gate frozen into `data/workbench/cases.json`; the
+129/52/19 funnel a static count). `serve_workbench.py` serves cases + the live finale but does NO live
+routing. The delta: (1) lift the hardcoded knobs into a visible `gating_policy` object ("chosen, not
+measured") + a pure `route(confidence, sample_size, policy) → {auto-decide|review|human-gate}`; (2) the
+decision APPLIED not displayed (auto-clear cases get an illustrative disposition applied automatically;
+human-gate cases escalate — the control EXECUTES); (3) the ELICITATION LOOP (the LFCM core): a human
+adjudicates a gated case → that disposition becomes session precedent → the combo's sample grows →
+confidence recomputes → the next similar case may re-route toward auto (blueprint §14's continuous
+adjudication loop made live; session-only, persists nothing); (4) EXECUTE ONCE live over the real
+200-case slice (re-derive the funnel + demonstrate the loop shifting one routing decision).
+THE HONESTY SEAM (load-bearing): the loop shifts ROUTING via REAL sample-growth (the §12-grounded firing
+frequency — genuine); the recorded/auto-applied DISPOSITION stays labeled illustrative. It demonstrates
+WHERE human judgment gets spent + how precedent concentrates it — NEVER that the auto-dispositions are
+correct. Holds the Phase-62 §12/§14 boundary: route on §12 measurement, do NOT re-ground §14 from
+probe-history. LITE; companion-only (serve_workbench extension, NOT a 9th ship target); the loop is
+session-only / persists nothing; records byte-frozen / recompute from cases.json; `--check all` 8/8
+ZERO dist drift; always-on "Illustrative data & outputs" badge; ZERO catch-rate/detection-lift number.
+Plan: articles/phases/phase-64-precedent-confidence-gating-engine.md. Ledger: Phase-64 (direction gate
+2026-06-21, all_accept:true — warned + restated per gate protocol [an all-accept on a NEW mechanism
+direction]). Grounded against the committed Phase-63 workbench (aml-substrate@f90bd39 / aml-casework@c6d8401).
+
+- [x] T1 Gating policy + live routing engine: lift the static 500/50 + cleared-% into an explicit `gating_policy`; add a pure `route(confidence, sample_size, policy)`; serve the live routing decision per case. | scope: scripts/serve_workbench.py, scripts/curate_workbench_cases.py | success: `python3 scripts/serve_workbench.py --selftest` passes — `route()` reproduces the committed 129/52/19 funnel from the policy DEFAULTS over the committed cases + the monotonicity invariant (a larger sample never yields a STRICTER gate); `! grep -E 'import (aml_substrate|aml_casework)' scripts/serve_workbench.py scripts/curate_workbench_cases.py` clean | size: M
+- [x] T2 The elicitation loop (session-only): a /adjudicate path — record a human disposition → grow the combo's session precedent → recompute confidence → return the re-routed decision; in-memory only, persists nothing; the disposition labeled illustrative. | scope: scripts/serve_workbench.py | success: `serve_workbench.py --selftest` covers the loop (a human-gate case, after adjudications of its combo, re-routes toward auto) + a persists-nothing assertion (no disk write across an /adjudicate cycle) | size: M
+- [x] T3 (L) The gating panel UI: visible policy knobs ("chosen, not measured"), per-case live routing decision, the human-gate adjudication action + the loop visualization (sample → confidence → re-route), the funnel re-derived live, always-on badge. | scope: workbench.html | success: `node tests/workbench.test.mjs` gating arc green — routing render + adjudication loop + the live-re-derived funnel + badge + both motion modes + XSS-escape | size: L
+- [x] T4 Execute-once + regression + drift guard: run the engine live ONCE over the 200-case slice (the funnel re-derived live + the loop shifts one decision, captured as evidence in the delivery report) + add the gating cases to the suites. | scope: tests/workbench.test.mjs, tests/test_selftests.py | success: `uv run pytest` green (gating selftests added) + `node tests/workbench.test.mjs` green + `python3 scripts/build.py --check all` 8/8 ZERO dist drift + `! grep -E 'import (aml_substrate|aml_casework)' scripts/build.py` | size: M
+- [x] T5 Docs + honesty boundary + smoke: the gating-engine section (the policy knobs · the elicitation loop · the §12-routing/§14-illustrative-disposition seam · the executed-once finding) + a smoke-checklist gating entry. | scope: docs/case-workbench.md, tests/smoke-checklist.md | success: `docs/case-workbench.md` has the gating section + the §12/§14 boundary statement (`grep -q` for both); `tests/smoke-checklist.md` has the gating entry | size: S
+
+> Phase 64 — direction gate 2026-06-21 (all_accept:true): the user picked the precedent-confidence GATING
+> engine (Phase-63 follow-on #3, "the LFCM elicitation-loop path") at the Step-9 direction question over
+> agentic tool-calling (local) + the sibling-rooted C3/C15 alignment. A0 [T0 weakest — the live
+> elicitation loop is the TARGET, with a build-time honesty checkpoint: the loop shifts ROUTING via real
+> sample-growth while the recorded/auto-applied DISPOSITION stays labeled illustrative + no learns-correct
+> claim] · A1 companion-only (the loop is live-stateful → a serve_workbench extension, NOT a 9th ship
+> target) · A2 recompute from data already in cases.json (n_precedent stored) → records byte-frozen, no
+> substrate re-emit, no sibling import · A3 the Phase-62 §12/§14 boundary (route on §12 confidence,
+> dispositions §14 illustrative, NO §14 re-grounding from probe-history) · A4 the engine EXECUTED ONCE
+> live over the 200-case slice (the measuring→controlling pivot). Grounded against the committed Phase-63
+> workbench (aml-substrate@f90bd39 / aml-casework@c6d8401).
+> Abort: if the live loop can't be kept honest over illustrative dispositions (reads as "learns correct
+> answers") → scope to display-only batch routing, report don't force (the A0 fallback). Any new ship
+> target / dist drift / a sibling import in build.py / a validator loosened to force a fit → STOP-and-surface.
+
 <!-- phase:phase-63-investigator-case-workbench -->
 <!-- gate-log:phase-63 direction=approved delivery=accepted -->
 <!-- status: T1–T5 ALL [x] — DELIVERED + accepted 2026-06-21 (committed a3fde1e; gate-state follows git-state) -->

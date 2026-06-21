@@ -44,6 +44,9 @@ from serve_chain import (  # noqa: E402
     BADGE, RunError, audit_walk, available_backends, casework_consume, default_backend,
     resolve_backend, verify_e2e, _stub_signed_sar,
 )
+# The GATING POLICY + the pure router live in curate (the authoring source of truth); the live engine
+# RE-DERIVES routing from the SAME route() so the live funnel can't drift from the baked one.
+from curate_workbench_cases import GATING_POLICY, route  # noqa: E402  (signal-watch's OWN module)
 
 DEFAULT_PORT = 8030          # serve_news 8000, serve_corpus 8010, serve_chain 8020 — all side by side
 WORKBENCH_DIR = ROOT / "data" / "workbench"
@@ -99,6 +102,99 @@ def case_detail(case_id: str, index: dict | None = None) -> dict:
     entry = _case_entry(idx, case_id)
     bundle = json.loads(_bundle_path(case_id).read_text(encoding="utf-8"))
     return {"badge": BADGE, "case": entry, "bundle": bundle, "signals": audit_walk(bundle)}
+
+
+# ---- the LIVE gating engine (the precedent-confidence CONTROL, re-derived per request) ------------
+# Phase 64: Phase 63 only DISPLAYED the baked gate. Here the routing is a LIVE control — route() over
+# the session precedent + an adjustable policy. The HONESTY SEAM: routing keys on the REAL firing
+# frequency (the §12-grounded sample size); the disposition direction it applies stays §14-illustrative.
+def session_precedent(index: dict) -> dict:
+    """The session precedent map = the committed REAL combo frequencies (a COPY the loop mutates; the
+    server never persists it). A case's n_precedent IS its combo's frequency, so routing from this
+    reproduces the baked gate under the default policy."""
+    return dict(index.get("meta", {}).get("combo_frequency", {}))
+
+
+def gate_cases(index: dict, policy: dict | None = None, precedent: dict | None = None) -> dict:
+    """Route every case LIVE: route(session precedent for its combo, policy). Under the default policy +
+    the committed precedent this reproduces the baked 129/52/19 funnel; adjust the policy knobs or grow
+    the precedent (the loop) and the funnel re-derives. Pure — persists nothing."""
+    policy = policy or GATING_POLICY
+    pre = session_precedent(index) if precedent is None else precedent
+    funnel: dict = {}
+    rows = []
+    for c in index.get("cases", []):
+        conf = c.get("confidence", {})
+        combo = conf.get("combo")
+        n = pre.get(combo, conf.get("n_precedent", 0))
+        r = route(n, policy)
+        funnel[r["gate"]] = funnel.get(r["gate"], 0) + 1
+        rows.append({"case_id": c.get("case_id"), "combo": combo, "n_precedent": n,
+                     "baked_gate": conf.get("gate"), "baked_n": conf.get("n_precedent"),
+                     "exemplar": c.get("exemplar"), **r})
+    return {"badge": BADGE, "policy": policy, "funnel": funnel,
+            "precedent_note": "session precedent = the REAL committed combo frequencies; the loop grows it",
+            "disposition_note": "ROUTING is §12-grounded (real firing frequency); the DISPOSITION it "
+                                "applies stays §14-ILLUSTRATIVE — the gate decides WHERE judgment is "
+                                "spent, never that an auto-disposition is correct",
+            "cases": rows}
+
+
+def policy_from_query(qs: str) -> dict:
+    """Build a gating policy from /gate query params (the live KNOBS): high=<int>&medium=<int>. Missing
+    params fall back to the default. Invalid values raise RunError (surfaced as a 400)."""
+    from urllib.parse import parse_qs
+    q = parse_qs(qs)
+    pol = json.loads(json.dumps(GATING_POLICY))   # deep copy — never mutate the shared default
+    for level in ("high", "medium"):
+        if level in q:
+            try:
+                pol["thresholds"][level] = int(q[level][0])
+            except (ValueError, IndexError):
+                raise RunError(f"bad gating knob {level}={q.get(level)!r} — must be an integer sample-size floor")
+    if pol["thresholds"]["high"] < pol["thresholds"]["medium"]:
+        raise RunError("policy invalid: the high (auto-clear) threshold must be >= the medium (review) threshold")
+    return pol
+
+
+# ---- the elicitation LOOP (Phase 64 T2 — blueprint §14's continuous adjudication loop, made live) --
+# A human adjudicates a gated case -> that disposition becomes PRECEDENT -> the combo's sample grows ->
+# confidence recomputes -> the next similar case may re-route toward auto. SESSION-ONLY: the precedent +
+# ledger live in memory and are NEVER written to disk (committing a record stays a human-reviewed act).
+DISPOSITION_VOCAB = ("cleared", "escalated", "needs_more_info")
+
+
+def new_session(index: dict | None = None) -> dict:
+    """A fresh in-memory session: precedent = a COPY of the committed REAL combo frequencies; an empty
+    adjudication ledger. The server holds ONE of these; /adjudicate mutates it; nothing persists."""
+    return {"precedent": session_precedent(index or load_index()), "ledger": {}}
+
+
+def adjudicate(index: dict, session: dict, case_id: str, disposition: str,
+               policy: dict | None = None, weight: int = 1) -> dict:
+    """Record a human disposition on a gated case and GROW the session precedent for its fired-signal
+    combo, then re-derive routing. Mutates `session` (precedent + ledger) IN MEMORY; never touches disk.
+    THE HONESTY SEAM: only the precedent COUNT grows (the §12-grounded sample size); the disposition
+    DIRECTION is recorded but labeled ILLUSTRATIVE and does NOT feed routing — the loop demonstrates
+    human judgment CONCENTRATING on sparse/novel patterns, never that an auto-disposition is correct."""
+    if disposition not in DISPOSITION_VOCAB:
+        raise RunError(f"unknown disposition '{disposition}' — one of {DISPOSITION_VOCAB}")
+    entry = _case_entry(index, case_id)                      # validates the case exists
+    combo = entry.get("confidence", {}).get("combo")
+    pol = policy or GATING_POLICY
+    pre = session["precedent"]
+    before = route(pre.get(combo, 0), pol)
+    pre[combo] = pre.get(combo, 0) + weight                  # one adjudication = one precedent data point
+    session["ledger"].setdefault(combo, []).append(
+        {"case_id": case_id, "disposition": disposition, "illustrative": True})
+    after = route(pre[combo], pol)
+    view = gate_cases(index, pol, pre)
+    return {"badge": BADGE, "case_id": case_id, "combo": combo,
+            "disposition_recorded": {"value": disposition,
+                "basis": "ILLUSTRATIVE — label-blind; recorded as precedent VOLUME, not a correctness signal"},
+            "before": before, "after": after, "rerouted": before["gate"] != after["gate"],
+            "n_precedent": pre[combo], "combo_adjudications": len(session["ledger"][combo]),
+            "funnel": view["funnel"], "cases": view["cases"]}
 
 
 # ---- the casework consume — a REFUSAL is a disposition outcome, not a crash (the embrace-fail-closed) -
@@ -186,7 +282,9 @@ def run_case(case_id: str, *, on_stage, consume=casework_consume_wb, verify=veri
 
 # ---- the served page -----------------------------------------------------------------------------
 def live_config(env: dict | None = None) -> dict:
-    return {"cases": "/cases", "case": "/case", "run": "/run", "health": "/health", "badge": BADGE,
+    return {"cases": "/cases", "case": "/case", "gate": "/gate", "adjudicate": "/adjudicate",
+            "run": "/run", "health": "/health", "badge": BADGE,
+            "policy": GATING_POLICY,              # the routing KNOBS (the live gating panel's defaults)
             "drafter": sc._drafter_config(env)}   # NAMES + booleans only (§4.5), reused verbatim
 
 
@@ -232,6 +330,14 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(200, case_detail(path[len("/case/"):]))
             except RunError as ex:
                 self._json(404, {"error": str(ex)})
+        elif path == "/gate":
+            try:
+                qs = self.path.split("?", 1)[1] if "?" in self.path else ""
+                with self._session_lock():
+                    sess = self._session()
+                    self._json(200, gate_cases(load_index(), policy_from_query(qs), sess["precedent"]))
+            except RunError as ex:
+                self._json(400, {"error": str(ex)})
         elif path == "/health":
             self._json(200, {"ok": True, "live": True, "persist": False,
                              "drafter": default_backend(), "backends": available_backends(),
@@ -240,9 +346,48 @@ class Handler(BaseHTTPRequestHandler):
             self._json(404, {"error": f"not found: {path}"})
 
     def do_POST(self):
-        if self.path.split("?", 1)[0] == "/run":
+        p = self.path.split("?", 1)[0]
+        if p == "/run":
             self._run(); return
+        if p == "/adjudicate":
+            self._adjudicate(); return
         self._json(404, {"error": f"not found: {self.path}"})
+
+    # ---- the session: in-memory precedent + ledger the elicitation loop mutates (persists NOTHING) ----
+    def _session_lock(self):
+        return self.server.__dict__.setdefault("session_lock", threading.Lock())
+
+    def _session(self):
+        return self.server.__dict__.setdefault("session", new_session())
+
+    @staticmethod
+    def _policy_from_payload(payload):
+        pol = payload.get("policy") or {}
+        parts = [f"{lvl}={pol.get(lvl, payload.get(lvl))}" for lvl in ("high", "medium")
+                 if lvl in pol or lvl in payload]
+        return policy_from_query("&".join(parts)) if parts else None
+
+    def _adjudicate(self):
+        payload, err = self._read_json()
+        if err:
+            self._json(400, {"error": err}); return
+        with self._session_lock():
+            index = load_index()
+            if payload.get("reset"):     # the demo/test reset — back to the committed baseline precedent
+                self.server.__dict__["session"] = new_session(index)
+                view = gate_cases(index, None, self.server.__dict__["session"]["precedent"])
+                self._json(200, {"badge": BADGE, "reset": True, "funnel": view["funnel"],
+                                 "cases": view["cases"]}); return
+            case_id = (payload.get("case") or payload.get("case_id") or "").strip()
+            if not case_id:
+                self._json(400, {"error": "missing 'case' (the case_id to adjudicate; GET /cases lists them)"}); return
+            disposition = (payload.get("disposition") or "").strip()
+            try:
+                out = adjudicate(index, self._session(), case_id, disposition,
+                                 self._policy_from_payload(payload))
+                self._json(200, out)
+            except RunError as ex:
+                self._json(400, {"error": str(ex)})
 
     def _read_json(self):
         try:
@@ -301,6 +446,63 @@ def selftest() -> int:
     funnel = cases["meta"]["gate_funnel"]
     assert sum(funnel.values()) == len(cases["cases"]), "gate funnel must cover every case"
     assert cases["meta"]["coverage"]["total"] == len(cases["cases"]), "coverage total mismatch"
+
+    # ---- the LIVE gating engine (Phase 64) re-derives the baked funnel under the default policy ----
+    live = gate_cases(index)
+    if live["funnel"] != funnel:
+        failures.append(f"live gate engine funnel {live['funnel']} != the baked funnel {funnel}")
+    baked = {c["case_id"]: c["confidence"]["gate"] for c in index["cases"]}
+    for r in live["cases"]:
+        if r["gate"] != baked.get(r["case_id"]):
+            failures.append(f"{r['case_id']}: live gate {r['gate']} != baked {baked.get(r['case_id'])}")
+    # route() monotonicity: a larger sample never yields a STRICTER gate (pure-function property)
+    strict = {"auto-clear": 0, "review": 1, "human-gate": 2}
+    samples = [0, 1, 49, 50, 51, 499, 500, 501, 5000]
+    strs = [strict[route(n)["gate"]] for n in samples]
+    if any(strs[i] < strs[i + 1] for i in range(len(strs) - 1)):
+        failures.append(f"route() gate not monotone in sample size: {list(zip(samples, strs))}")
+    # a custom policy (the live KNOBS) re-derives a DIFFERENT but still-complete funnel
+    loosened = gate_cases(index, policy_from_query("medium=1"))
+    if sum(loosened["funnel"].values()) != len(index["cases"]):
+        failures.append("custom-policy funnel must still cover every case")
+    if loosened["funnel"].get("human-gate", 0) != 0:
+        failures.append(f"medium=1 should leave no human-gate cases, got {loosened['funnel']}")
+    # an invalid knob is a NAMED 400, not a crash
+    try:
+        policy_from_query("high=10&medium=50"); failures.append("high<medium policy should raise")
+    except RunError:
+        pass
+
+    # ---- the elicitation LOOP (Phase 64 T2): adjudicate -> grow precedent -> re-route; persists NOTHING
+    disk_before = (CASES_JSON.read_bytes(), sorted(p.name for p in BUNDLES_DIR.iterdir()))
+    sess = new_session(index)
+    hg = next(c for c in index["cases"] if c["confidence"]["gate"] == "human-gate")
+    combo = hg["confidence"]["combo"]
+    n0 = sess["precedent"][combo]
+    # set the knobs so this combo sits exactly 1 below the review threshold -> ONE adjudication crosses it
+    pol = policy_from_query(f"medium={n0 + 1}&high={n0 + 1000}")
+    start = gate_cases(index, pol, sess["precedent"])
+    if next(r for r in start["cases"] if r["case_id"] == hg["case_id"])["gate"] != "human-gate":
+        failures.append("the chosen case should start human-gate under the near-threshold policy")
+    res = adjudicate(index, sess, hg["case_id"], "cleared", pol)
+    if not res["rerouted"] or res["after"]["gate"] != "review":
+        failures.append(f"one adjudication should re-route the human-gate case to review, got {res['after']}")
+    if res["n_precedent"] != n0 + 1 or res["combo_adjudications"] != 1:
+        failures.append(f"the session precedent should grow by exactly 1, got n={res['n_precedent']} (from {n0})")
+    if "ILLUSTRATIVE" not in res["disposition_recorded"]["basis"]:
+        failures.append("the recorded disposition must be labeled ILLUSTRATIVE (the §14 honesty seam)")
+    # an unknown disposition is a NAMED error, not a crash (and must not mutate the session)
+    try:
+        adjudicate(index, sess, hg["case_id"], "definitely-guilty", pol)
+        failures.append("an unknown disposition should raise")
+    except RunError:
+        pass
+    if sess["precedent"][combo] != n0 + 1:
+        failures.append("a rejected adjudication must NOT have grown the precedent")
+    # PERSISTS NOTHING: the committed slice is byte-identical after the whole loop ran
+    disk_after = (CASES_JSON.read_bytes(), sorted(p.name for p in BUNDLES_DIR.iterdir()))
+    if disk_before != disk_after:
+        failures.append("the elicitation loop must persist NOTHING — cases.json/bundles changed on disk")
 
     # an exemplar case detail carries the full clutter + the GROUNDED signal walk (model-free)
     mule_id = index["meta"]["exemplars"]["mule"]
@@ -385,7 +587,8 @@ def selftest() -> int:
             print(f"FAIL: {f}", file=sys.stderr)  # noqa: T201
         return 1
     print(f"serve_workbench --selftest: PASS ({len(cases['cases'])} cases; gate funnel {funnel}; "  # noqa: T201
-          f"coverage {cases['meta']['coverage']['groundable']}/{cases['meta']['coverage']['total']}; "
+          f"live route() reproduces it + monotone; coverage "
+          f"{cases['meta']['coverage']['groundable']}/{cases['meta']['coverage']['total']}; "
           f"mule detail grounds {len(detail['signals'])}/{len(detail['signals'])} signals; "
           f"stubbed finale {seq} -> CONNECTED; pillar-status byte-stable)")
     return 0

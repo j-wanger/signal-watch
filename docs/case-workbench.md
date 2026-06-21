@@ -50,6 +50,42 @@ size is real; the disposition is not.
 The gate funnel over the vendored slice: **129 auto-clear / 52 review / 19 human-gate** — the firehose
 collapsing to a real human workload.
 
+## The precedent-confidence gating engine + the elicitation loop (Phase 64)
+
+Phase 63 **displayed** the gate (the funnel, a frozen label per case). Phase 64 makes the routing a
+**live, parameterized control** with a feedback loop — blueprint §14's continuous adjudication loop, the
+LFCM elicitation path. The mechanic is unchanged; what moves is that it now *runs*.
+
+**The policy is a knob, not a constant.** The routing thresholds (`auto-clear at ≥ N prior firings`,
+`review at ≥ M`) are an explicit `gating_policy` — **chosen, not measured** — adjustable live in the
+gating panel. `route(n_precedent, policy)` is **one pure function**: `curate_workbench_cases.py` bakes
+the baseline gate with it, and `serve_workbench.py`'s live engine re-derives routing from the *same*
+function, so the live funnel can never drift from the committed one (the selftest asserts the default
+policy reproduces **129 / 52 / 19**). Routing is **monotone** — a larger precedent sample never yields a
+stricter gate.
+
+**The elicitation loop.** A human adjudicates a gated case (`POST /adjudicate`); that disposition becomes
+**precedent** — the combo's session sample grows by one — confidence recomputes, and the next similar
+case may re-route toward auto. Session-only and **in-memory: nothing is persisted** (committing a record
+stays a human-reviewed act). As precedent accumulates on a pattern, the human-gate funnel shrinks and
+judgment **concentrates on the sparse / novel patterns** — the bank's scarce judgment spent where there
+is no precedent to lean on.
+
+**The §12 / §14 honesty seam (load-bearing).** The loop grows the **count** — the **§12**-grounded real
+firing frequency — and routes on it. The disposition *direction* it records and auto-applies stays
+**§14-illustrative** (label-blind; recorded as precedent *volume*, never as a correctness signal). The
+loop demonstrates *where human judgment is spent and how precedent concentrates it* — it **never claims an
+auto-disposition is correct**. This holds the Phase-62 boundary: route on §12 *measurement*; do **not**
+re-ground §14 from the substrate's label-blind history. The thresholds are presenter knobs, not a
+calibration; the funnel is honest counts, never a precision/lift figure.
+
+**Executed once over the real slice.** The engine ran live over the committed 200-case population: the
+funnel re-derives to the baked **129 / 52 / 19**, and the loop shifts one real decision —
+`CASE-P-0003008` (signal combo `C3+C5`, **45** prior firings, human-gate) crosses to **review** after 5
+adjudications (sample 45 → 50, the review threshold), the human-gate funnel ticking **19 → 18**. The
+knobs move it instantly too — dropping the review threshold folds the rare composed cases out of the
+human queue, live.
+
 ## Coverage is MEASURED, not assumed (the cross-pillar finding)
 
 The headline coverage number — **57 of 200 cases ground end-to-end** — is **measured**, not a capability
@@ -85,18 +121,23 @@ nothing real leaves the box; no key/token in the frontend.
 ## Tests
 
 ```bash
-node tests/workbench.test.mjs                 # the full arc: clutter, signals-on, finale (signed + fail-closed), XSS, both motion modes, no catch-rate vocabulary
-python3 scripts/serve_workbench.py --selftest # the companion: queue/detail, grounded walk, the live finale (stubbed) + the fail-closed disposition, §4.5 no-leak, pillar-status byte-stable
-python3 scripts/curate_workbench_cases.py --selftest  # the committed slice: schema, exemplars span the gates, MEASURED coverage matches per-case grounds_e2e
+node tests/workbench.test.mjs                 # the full arc: clutter, signals-on, finale (signed + fail-closed), the GATING panel + knobs + the adjudication LOOP, XSS, both motion modes, no catch-rate/% vocabulary
+python3 scripts/serve_workbench.py --selftest # the companion: queue/detail, grounded walk, the live finale (stubbed) + the fail-closed disposition, the live GATE engine (funnel reproduced + monotone) + the elicitation LOOP (re-route + persists-nothing), §4.5 no-leak, pillar-status byte-stable
+python3 scripts/curate_workbench_cases.py --selftest  # the committed slice: schema, exemplars span the gates, MEASURED coverage matches per-case grounds_e2e, route() faithful to the baked gate
 ```
 
 ## Deferred to follow-on phases
 
 - The **agentic tool-calling** during investigation/narrative (open-source verification, counterparty
   gathering, network/entity-resolution) — tool-gathered evidence extending the grounding chain.
-- The **precedent-confidence gating engine** (confidence + sample-size → auto-decide vs human-gate as a
-  live mechanism, not a display).
 - The substrate **ownership/beneficial-owner graph emission** (a richer network view than the emitted
   transaction counterparty edges).
 - The **C3/C15 cross-pillar contract alignment** (substrate fan-in vs casework fan-out) — the
   composed-case grounding frontier.
+- **Precedent-confidence as a *governed* control** — Phase 64 made the gating mechanism live; a real
+  deployment would add the calibration + monitoring (SR-11-7) that turns the "chosen, not measured" knobs
+  into measured thresholds, and would source dispositions from a real adjudication record (not the
+  substrate's label-blind history — the §12/§14 boundary still binds).
+
+> **Built in Phase 64:** the precedent-confidence **gating engine + the elicitation loop** (above) — the
+> confidence display became a live routing control with an adjudicate→grow-precedent→re-route loop.

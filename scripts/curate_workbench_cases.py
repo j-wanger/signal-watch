@@ -110,22 +110,42 @@ def _advisories(bundle: dict) -> list:
                    for a in bundle.get("alerts", []) if a.get("grounding", {}).get("advisory_id")})
 
 
+# The GATING POLICY — the routing KNOBS over the REAL precedent sample size ("chosen, not measured").
+# ONE source of truth: curate bakes the baseline gate with route(); serve_workbench's live engine
+# RE-DERIVES routing from the same route() (and lets the presenter adjust the knobs + grow the session
+# precedent — the Phase-64 elicitation loop). §12-grounded: the routing keys on the REAL firing
+# frequency; the disposition direction it applies stays §14-illustrative.
+GATING_POLICY = {
+    "thresholds": {"high": 500, "medium": 50},   # n_precedent floors: >=high -> high, >=medium -> medium
+    "gate_of_level": {"high": "auto-clear", "medium": "review", "low": "human-gate"},
+    "cleared_pct": {"high": 88, "medium": 62, "low": 28},   # the ILLUSTRATIVE auto-clear share per level
+    "basis": "chosen, not measured — routing knobs over the REAL precedent sample size",
+}
+
+
+def route(n_precedent: int, policy: dict = GATING_POLICY) -> dict:
+    """Pure routing: map a precedent SAMPLE SIZE to a gate via the policy thresholds. The sample size is
+    REAL (the combo's firing frequency); the gate + cleared_pct are ILLUSTRATIVE knobs. Common combo =
+    large precedent = auto-clear; rare combo = small precedent = human-gate. Monotone by construction:
+    a larger sample never yields a STRICTER gate."""
+    th = policy["thresholds"]
+    level = "high" if n_precedent >= th["high"] else "medium" if n_precedent >= th["medium"] else "low"
+    return {"level": level, "gate": policy["gate_of_level"][level],
+            "cleared_pct": policy["cleared_pct"][level]}
+
+
 def _confidence(combo: str, n_precedent: int) -> dict:
     """Precedent-confidence: SAMPLE SIZE is REAL (the combo's firing frequency over the full
-    population); the disposition direction + gate are ILLUSTRATIVE, bucketed from the sample size.
-    The mechanic: common combo = large precedent = auto-clear; rare combo = small precedent = human gate."""
-    if n_precedent >= 500:
-        level, gate, cleared = "high", "auto-clear", 88
-    elif n_precedent >= 50:
-        level, gate, cleared = "medium", "review", 62
-    else:
-        level, gate, cleared = "low", "human-gate", 28
+    population); the disposition direction + gate are ILLUSTRATIVE, routed from the sample size via the
+    GATING_POLICY through route() (the live engine re-derives the SAME routing — one source of truth)."""
+    r = route(n_precedent)
+    cleared = r["cleared_pct"]
     return {
         "combo": combo,
         "n_precedent": n_precedent,
         "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)",
-        "level": level,
-        "gate": gate,
+        "level": r["level"],
+        "gate": r["gate"],
         "disposition_illustrative": {"cleared_pct": cleared, "escalated_pct": 100 - cleared},
         "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
     }
@@ -432,6 +452,15 @@ def selftest() -> int:
                    key=lambda t: t[0])
     if any(pairs[i][1] < pairs[i + 1][1] for i in range(len(pairs) - 1)):
         failures.append("confidence gate is not monotone in the precedent sample size")
+
+    # route() (the live-engine source of truth) reproduces every committed gate from its sample size —
+    # proves the _confidence -> route() refactor stays faithful to the frozen records (one routing logic)
+    for c in index["cases"]:
+        conf = c["confidence"]
+        r = route(conf["n_precedent"])
+        if (r["level"], r["gate"]) != (conf["level"], conf["gate"]):
+            failures.append(f"{c['case_id']}: route() {r['level']}/{r['gate']} disagrees with the "
+                            f"committed {conf['level']}/{conf['gate']}")
 
     # coverage statistic is REAL + within bounds
     cov = index["meta"]["coverage"]

@@ -1,31 +1,28 @@
 # Active Phase Context
 
-**Phase 63 — *Investigator Case Workbench (capstone sales-pitch demo)*** (signal-watch-local, LITE) — DELIVERED 2026-06-21, READY FOR COMPLETION (delivery gate pending the commit). A companion-served investigator case workbench over a REAL (synthetic) aml-substrate alert POPULATION, walking clutter → clarity → live decisioning.
+**Phase 64 — *Precedent-confidence gating engine + the elicitation loop (live)*** (signal-watch-local, LITE) — direction gate accepted 2026-06-21 (all_accept:true). Turn the Phase-63 workbench's STATIC precedent-confidence bucketer into a LIVE, parameterized gating CONTROL + the LFCM elicitation loop, executed once over the 200-case slice.
 
-## Objective (DELIVERED)
-`workbench.html` + `scripts/serve_workbench.py` (companion-only, NOT a 9th build/dist target — lite holds) over a 200-case deterministic slice vendored into `data/workbench/`, pinned aml-substrate@f90bd39 (`meta.synthetic:true`), produced via TOOL-USE / file-contract (build.py imports NO sibling — the Phase-62 pattern). RE-SCOPED post-gate to option B (USER OVERRIDE — A0 flipped → substrate-grounded real population VERIFIED feasible @f90bd39). Beats: clutter (real PartyView KYC + cross-account aggregation + txn detail + REAL counterparty edges; synthetic display identity over the real KYC) → signals-on clarity (grounding/corroboration; ZERO catch-rate number) → live finale (serve_chain → casework consume; default Claude, stub fallback). PLUS a thin pytest wrapper (USER OVERRIDE — `pyproject.toml` package=false + `tests/test_selftests.py` + `uv.lock`; NOT full py-init).
-
-## The T4 finding → the fail-closed defensibility climax
-Coverage is MEASURED (curate runs casework's stub over all 200 bundles → 57/200 sign end-to-end); composed cases fail on a real substrate↔casework C3/C15 replay divergence → the gate REFUSING → escalate-to-human. The verifier was NEVER loosened (abort rule held); the user accepted the framing. Precedent-confidence anchored to REAL firing frequency (gate funnel 129 auto-clear / 52 review / 19 human-gate); DISPOSITION direction stays ILLUSTRATIVE (the Phase-62 split).
+## Objective
+Lift the static `_confidence(combo, n_precedent)` (hardcoded 500/50 + cleared-% 88/62/28 in `curate_workbench_cases.py`; 129/52/19 funnel baked into cases.json) into a visible `gating_policy` + a pure `route(confidence, sample_size, policy)`; APPLY the decision (auto-clear → illustrative disposition; human-gate → escalate); add the session-only ELICITATION LOOP (adjudicate → grow precedent → recompute → re-route, persists nothing); EXECUTE ONCE live over the real 200-case slice (funnel re-derived + the loop shifting one decision).
 
 ## Scope
-`workbench.html` · `scripts/{serve_workbench,curate_workbench_cases}.py` · `data/workbench/**` · `tests/{workbench.test.mjs,test_selftests.py}` · `pyproject.toml` · `uv.lock` · `docs/case-workbench.md` · `tests/smoke-checklist.md`. build.py NEVER imports aml_substrate/aml_casework.
+`workbench.html` · `scripts/serve_workbench.py` · `scripts/curate_workbench_cases.py` · `tests/{workbench.test.mjs,test_selftests.py}` · `docs/case-workbench.md` · `tests/smoke-checklist.md` (build.py NEVER imports aml_substrate/aml_casework).
 
 ## Key constraints
-- Companion-only, off by default, scripted stub fallback; NO keys in the frontend (creds server-side, browser sends a backend NAME only — Phase-57 §4.5); synthetic data only (`meta.synthetic:true`, pinned @f90bd39); `--check all` 8/8 with ZERO dist drift.
-- Coverage REAL/measured; dispositions label-blind ILLUSTRATIVE; the always-on "Illustrative data & outputs" badge stays; ZERO catch-rate/detection-lift number (the triple-null governs).
+- Companion-only / NOT a 9th ship target / LITE holds; the loop is session-only / persists nothing.
+- THE §12-routing / §14-illustrative-disposition seam (load-bearing): route on REAL firing frequency; dispositions stay ILLUSTRATIVE; NO §14 re-grounding from probe-history (the Phase-62 boundary).
+- Records byte-frozen / recompute from cases.json (n_precedent stored); no substrate re-emit, no sibling import.
+- Always-on "Illustrative data & outputs" badge; ZERO catch-rate/detection-lift number; `--check all` 8/8 ZERO dist drift.
 
-## Exit criteria (MET)
-`uv run pytest` 17 passed; `build.py --check all` 8/8 ZERO dist drift; `tests/workbench.test.mjs` 61 assertions green; no sibling import in build.py; `data/workbench/cases.json` = 200 cases, coverage 57/200, pinned aml-substrate@f90bd39 / aml-casework@c6d8401; docs/case-workbench.md written.
+## Exit criteria
+The 5 tasks' success fields met; `--check all` 8/8 ZERO dist drift; no sibling import; the engine EXECUTED ONCE live.
 
-## Abort (held)
-build.py importing aml_substrate/aml_casework / any dist drift / a keys-token reaching the browser / a validator loosened to force the fit → STOP-and-surface. (All held: the T4 finding was surfaced + measured, never absorbed by loosening the gate.)
-
-## Deferred follow-on phases
-(1) C3/C15 cross-pillar contract alignment (substrate fan-IN vs casework fan-OUT C3 + C15 shell-threshold — a sibling-repo phase); (2) agentic tool-calling (OSINT / counterparty / network-ER); (3) the precedent-confidence GATING engine (the LFCM elicitation-loop path); (4) the substrate ownership/beneficial-owner graph emission.
+## Abort
+If the live loop can't be kept honest over illustrative dispositions (reads as "learns correct answers") → scope to display-only batch routing, report don't force (the A0 fallback). Any new ship target / dist drift / sibling import in build.py / a validator loosened to force a fit → STOP-and-surface.
 
 ## Gates
-- [x] Direction confirmed by user (direction gate 2026-06-21, all_accept:true; RE-SCOPED post-gate to option B — A0 flipped → verified-revised-accept, all_accept now false)
-- [x] Delivery accepted (post-implementation report 2026-06-21; framing accepted; committed a3fde1e)
+- [x] spec — waived under LITE ceremony (dev-plan Step 2 is a Lite skip; the assumption-ledger gate IS the direction gate)
+- [x] Direction confirmed by user (assumption positions taken 2026-06-21, all_accept:true)
+- [x] Delivery accepted (post-implementation report 2026-06-21; framing accepted; committed)
 
-Plan [[phases/phase-63-investigator-case-workbench]]; ledger Phase-63.
+Plan [[phases/phase-64-precedent-confidence-gating-engine]]; ledger Phase-64.

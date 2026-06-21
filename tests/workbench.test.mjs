@@ -36,8 +36,9 @@ const open = html.indexOf('<script>'), close = html.lastIndexOf('</script>');
 const SCRIPT = html.slice(open + '<script>'.length, close)
   + `\n;globalThis.__T={esc,money,gateClass,gateLabel,channelSummary,counterpartySummary,kycPanel,citedTxnIds,`
   + `toggleSignals,selectCase,pickBackend,applyMessage,runDecision,paintSurface,renderQueue,renderPop,loadQueue,backendLabel,`
-  + `setState:(s)=>{ if('META'in s)META=s.META; if('QUEUE'in s)QUEUE=s.QUEUE; if('FILTER'in s)FILTER=s.FILTER; if('SEL'in s)SEL=s.SEL; if('DETAIL'in s)DETAIL=s.DETAIL; if('SIGNALS'in s)SIGNALS=s.SIGNALS; if('RUN'in s)RUN=s.RUN; },`
-  + `getState:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN})};`;
+  + `liveGate,liveFunnel,setGate,renderGate,loadGate,onKnob,resetGating,doAdjudicate,policyThresholds,`
+  + `setState:(s)=>{ if('META'in s)META=s.META; if('QUEUE'in s)QUEUE=s.QUEUE; if('FILTER'in s)FILTER=s.FILTER; if('SEL'in s)SEL=s.SEL; if('DETAIL'in s)DETAIL=s.DETAIL; if('SIGNALS'in s)SIGNALS=s.SIGNALS; if('RUN'in s)RUN=s.RUN; if('GATE'in s)setGate(s.GATE); if('POLICY'in s)POLICY=s.POLICY; if('ADJ'in s)ADJ=s.ADJ; },`
+  + `getState:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ})};`;
 
 /* ---------- DOM + fetch shim ---------- */
 function makeEl(id){
@@ -48,7 +49,8 @@ function makeEl(id){
     set className(v){ this._class = String(v); }, get className(){ return this._class; },
     querySelector(){ return { onclick:null, dataset:{} }; },
     querySelectorAll(sel){
-      const attr = /data-backend/.test(sel) ? 'data-backend' : /data-f"?/.test(sel) ? 'data-f' : 'data-case';
+      const attr = /data-backend/.test(sel) ? 'data-backend' : /data-disp/.test(sel) ? 'data-disp'
+                 : /data-f"?/.test(sel) ? 'data-f' : 'data-case';
       const out = []; const re = new RegExp(attr + '="([^"]*)"', 'g'); let m;
       while ((m = re.exec(this._html))) out.push({ dataset:{ [attr.replace('data-','')]: m[1] }, onclick:null });
       return out;
@@ -56,7 +58,8 @@ function makeEl(id){
   };
 }
 const ELEMENTS = {};
-['badge','draftChip','popStrip','queue','qcount','filters','surf','masterSwitch','decideBtn','picker'].forEach(id => ELEMENTS[id] = makeEl(id));
+['badge','draftChip','popStrip','queue','qcount','filters','surf','masterSwitch','decideBtn','picker',
+ 'gatePanel','knobHigh','knobMed','gateReset','adjud','adjudRead'].forEach(id => ELEMENTS[id] = makeEl(id));
 const documentShim = { getElementById(id){ return ELEMENTS[id] || (ELEMENTS[id] = makeEl(id)); } };
 
 function streamResponse(chunks){
@@ -76,16 +79,24 @@ let CASES_RESPONSE = { badge:'Illustrative data & outputs', meta:{}, cases:[] };
 let CASE_RESPONSE = {};
 let RUN_CHUNKS = [];
 let LAST_RUN_BODY = null;
+let GATE_RESPONSE = null, ADJ_RESPONSE = null;     // the gating-engine stubs (set per gating test)
+let LAST_GATE_URL = null, LAST_ADJ_BODY = null;
 function fetchShim(url, opts){
   const u = String(url);
   if (u.includes('/cases')) return Promise.resolve({ ok:true, json:()=>Promise.resolve(CASES_RESPONSE) });
   if (u.includes('/case/')) return Promise.resolve({ ok:true, json:()=>Promise.resolve(CASE_RESPONSE) });
+  if (u.includes('/gate')){ LAST_GATE_URL = u;
+    return Promise.resolve({ ok:true, json:()=>Promise.resolve(GATE_RESPONSE||{error:'no gate stub'}) }); }
+  if (u.includes('/adjudicate')){ try { LAST_ADJ_BODY = JSON.parse((opts&&opts.body)||'{}'); } catch(e){ LAST_ADJ_BODY = null; }
+    return Promise.resolve({ ok:true, json:()=>Promise.resolve(ADJ_RESPONSE||{ok:true}) }); }
   if (u.includes('/run')){ try { LAST_RUN_BODY = JSON.parse((opts&&opts.body)||'{}'); } catch(e){ LAST_RUN_BODY = null; }
     return Promise.resolve(streamResponse(RUN_CHUNKS)); }
   return Promise.reject(new Error('unexpected url '+url));
 }
 
-const WB_CFG = { cases:'/cases', case:'/case', run:'/run', health:'/health', badge:'Illustrative data & outputs',
+const WB_CFG = { cases:'/cases', case:'/case', gate:'/gate', adjudicate:'/adjudicate', run:'/run',
+  health:'/health', badge:'Illustrative data & outputs',
+  policy:{ thresholds:{high:500, medium:50}, gate_of_level:{high:'auto-clear', medium:'review', low:'human-gate'} },
   drafter:{ default:'stub', available:['stub','claude','openai'],
             backends:[{name:'stub',available:true},{name:'claude',available:true},
                       {name:'openai',available:true},{name:'opencode',available:false}] } };
@@ -297,6 +308,76 @@ ok(/Zane Zhao/.test(ELEMENTS.queue._html), 'loadQueue() fetches /cases and rende
 CASE_RESPONSE = MULE_DETAIL;
 await T.selectCase('CASE-P-MULE');
 ok(/risk rating/.test(ELEMENTS.surf._html) && /HIGH/.test(ELEMENTS.surf._html), 'selectCase() fetches /case/<id> and renders the clutter');
+
+/* ===================== PHASE 64: the gating engine + the elicitation loop ===================== */
+/* the LIVE /gate response: per-case routing + funnel under the default policy (reproduces the baked funnel) */
+const GATE_DEFAULT = {
+  badge:'Illustrative data & outputs',
+  policy:{ thresholds:{high:500, medium:50} },
+  funnel:{ 'auto-clear':2, 'review':1, 'human-gate':1 },
+  cases:[
+    { case_id:'CASE-P-MULE', combo:'C15+C2+C3+C4+C5', n_precedent:4,     baked_n:4,     gate:'human-gate', level:'low' },
+    { case_id:'CASE-O-AMB',  combo:'C15+C2+C3+C5',    n_precedent:58,    baked_n:58,    gate:'review',     level:'medium' },
+    { case_id:'CASE-P-FP',   combo:'C2+C3',           n_precedent:16856, baked_n:16856, gate:'auto-clear', level:'high' },
+    { case_id:'CASE-XSS',    combo:'C2',              n_precedent:1031,  baked_n:1031,  gate:'auto-clear', level:'high' },
+  ],
+};
+/* --- the gating panel renders from the live engine --- */
+GATE_RESPONSE = GATE_DEFAULT;
+T.setState({ META, QUEUE, FILTER:'all', SIGNALS:false, SEL:null, GATE:null, POLICY:WB_CFG.policy, ADJ:null });
+await T.loadGate();
+const gp = ELEMENTS.gatePanel._html;
+ok(/Gating control/.test(gp), 'the gating control panel renders');
+ok(/id="knobHigh"/.test(gp) && /id="knobMed"/.test(gp), 'the policy KNOBS render (auto-clear + review thresholds)');
+ok(/Auto-clear at ≥/.test(gp) && /Review at ≥/.test(gp) && /prior firings/.test(gp), 'the knobs are framed as sample-size counts (prior firings)');
+ok(/chosen, not measured/.test(gp), 'the panel states the thresholds are chosen, not measured');
+ok(/real/.test(gp) && /illustrative/.test(gp), 'the panel states the §12 (real routing) / §14 (illustrative disposition) seam');
+ok(/<b>2<\/b> auto-clear/.test(gp) && /<b>1<\/b> review/.test(gp) && /<b>1<\/b> human gate/.test(gp), 'the gating panel shows the live funnel (reproduces the baked funnel under the default policy)');
+ok(/high=500/.test(LAST_GATE_URL) && /medium=50/.test(LAST_GATE_URL), '/gate is queried with the policy thresholds');
+
+/* --- the knobs are live: dragging the review threshold re-derives the funnel --- */
+GATE_RESPONSE = { ...GATE_DEFAULT, funnel:{ 'auto-clear':2, 'review':2, 'human-gate':0 },
+  cases: GATE_DEFAULT.cases.map(c => c.case_id==='CASE-P-MULE' ? { ...c, gate:'review', level:'medium' } : c) };
+await T.onKnob('medium', 3);
+ok(T.getState().POLICY.thresholds.medium === 3, 'dragging the review knob updates the live policy');
+ok(/medium=3\b/.test(LAST_GATE_URL), 'the knob change re-queries /gate with the new threshold');
+ok(/<b>0<\/b> human gate/.test(ELEMENTS.gatePanel._html), 'lowering the review threshold folds the rare case out of human-gate (the funnel re-derives live)');
+const qLive = ELEMENTS.queue._html;
+ok(!/gdot human/.test(qLive), 'the queue re-routes live too — no human-gate dot remains after loosening');
+
+/* --- the ELICITATION LOOP: adjudicate a gated case → grow precedent → re-route live --- */
+T.setState({ SEL:'CASE-P-MULE', DETAIL:MULE_DETAIL, SIGNALS:true, GATE:GATE_DEFAULT, POLICY:WB_CFG.policy, ADJ:null, RUN:null });
+T.paintSurface();
+const sAdj = ELEMENTS.surf._html;
+ok(/Adjudicate \(grows precedent\)/.test(sAdj), 'the signals-on surface offers the adjudication control');
+ok(/data-disp="cleared"/.test(sAdj) && /data-disp="escalated"/.test(sAdj) && /data-disp="needs_more_info"/.test(sAdj),
+   'the adjudication control offers the disposition vocabulary');
+ok(/<b>4<\/b> prior firings → Human gate/.test(sAdj), 'before adjudication the case reads its real precedent + the human-gate routing');
+/* the server returns the re-route (precedent 4 → 50 crosses the review threshold) */
+ADJ_RESPONSE = { badge:'Illustrative data & outputs', case_id:'CASE-P-MULE', combo:'C15+C2+C3+C4+C5',
+  before:{ gate:'human-gate', level:'low' }, after:{ gate:'review', level:'medium' }, rerouted:true,
+  n_precedent:50, combo_adjudications:1, funnel:{ 'auto-clear':2, 'review':2, 'human-gate':0 },
+  cases: GATE_DEFAULT.cases.map(c => c.case_id==='CASE-P-MULE' ? { ...c, n_precedent:50, gate:'review', level:'medium' } : c) };
+await T.doAdjudicate('cleared');
+const sLoop = ELEMENTS.surf._html;
+ok(LAST_ADJ_BODY && LAST_ADJ_BODY.case==='CASE-P-MULE' && LAST_ADJ_BODY.disposition==='cleared',
+   'doAdjudicate POSTs the case + disposition to /adjudicate (a NAME, never a cred)');
+ok(/re-routed Human gate → Review/.test(sLoop), 'the loop re-routes the case live: human gate → review (precedent crossed the threshold)');
+ok(/now <b>50<\/b> prior firings → Review/.test(sLoop), 'the precedent read reflects the grown session sample size');
+ok(/<b>1<\/b> recorded this session/.test(sLoop), 'the session adjudication count is shown');
+ok(/<b>0<\/b> human gate/.test(ELEMENTS.gatePanel._html), 'the loop shrinks the human-gate funnel as precedent accumulates (judgment concentrates)');
+
+/* --- an unknown/refused adjudication is surfaced, not a crash; nothing claims correctness --- */
+ADJ_RESPONSE = { error:"unknown disposition 'definitely-guilty'" };
+await T.doAdjudicate('definitely-guilty');
+ok(T.getState().ADJ && T.getState().ADJ.error, 'a refused adjudication is captured as an error, not a crash');
+
+/* --- HONESTY re-check over the gating surfaces: still counts-only, no % / lift / correctness claim --- */
+const gateRendered = ELEMENTS.gatePanel._html + ELEMENTS.surf._html;
+ok(!/\d+(\.\d+)?\s*%/.test(gateRendered) && !/\d+(\.\d+)?x\b/.test(gateRendered),
+   'the gating panel + loop render counts only — NO percentage or "Nx" figure');
+ok(!/\b(lift|precision|recall|catch[\s-]?rate|f1|auroc)\b/i.test(gateRendered),
+   'the gating surfaces carry NO detection-performance vocabulary (routing concentrates judgment, it does not score)');
 
 /* ---------- summary ---------- */
 console.log(`\n${pass} passed, ${fails.length} failed`);

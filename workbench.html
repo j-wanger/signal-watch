@@ -54,6 +54,30 @@
   .gpill.human{border-color:rgba(239,96,121,.4);color:var(--rose)}
   .gpill.review{border-color:rgba(246,166,35,.4);color:var(--signal)}
   .gpill.auto{border-color:rgba(84,201,138,.36);color:var(--green)}
+  .gpill.moved{box-shadow:0 0 0 1px currentColor inset;transition:.3s}
+
+  /* gating control panel (Phase 64) — the policy KNOBS over the real precedent; counts only, no % */
+  .gatectl{border:1px solid var(--line);border-radius:13px;background:linear-gradient(180deg,var(--panel),var(--panel2));padding:15px 18px;margin:0 0 16px;display:grid;gap:12px}
+  .gxh{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);display:flex;align-items:center;gap:9px}
+  .gxnote{color:var(--muted);font-size:12.5px;max-width:860px;line-height:1.5}.gxnote b{color:var(--ink)}
+  .gxnote .g12{color:var(--teal)}.gxnote .g14{color:var(--signal)}
+  .knobs{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+  .knob{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .knob .kl{color:var(--faint);text-transform:uppercase;letter-spacing:.05em}
+  .knob input[type=range]{width:150px;accent-color:var(--signal);cursor:pointer}
+  .knob .kv{color:var(--ink);font-weight:600;min-width:38px;text-align:right}
+  .knob .ku{color:var(--faint)}
+  .gatefun-lg{align-items:center}.gatefun-lg .gpill{font-size:11px;padding:4px 10px}
+  .gxbtn{font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--muted);background:var(--panel);border:1px solid var(--line2);border-radius:7px;padding:5px 9px;cursor:pointer;transition:.15s}
+  .gxbtn:hover{border-color:var(--teal);color:var(--ink)}
+
+  /* the adjudication loop control (on the case surface) — grows precedent, re-routes live */
+  .adjud{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:12px;border-top:1px solid var(--line);padding-top:11px}
+  .adjud .al{font-family:var(--mono);font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.05em}
+  .abtn{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line2);border-radius:7px;padding:5px 11px;cursor:pointer;transition:.15s}
+  .abtn:hover{border-color:var(--teal);color:var(--ink)}
+  .aread{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-left:2px}.aread b{color:var(--ink)}
+  .aread .reroute{color:var(--green);font-weight:600}
 
   /* the signals master switch — the dramatization */
   .switchwrap{margin-left:auto;display:flex;align-items:center;gap:11px}
@@ -212,6 +236,8 @@
 
   <div class="pop" id="popStrip"><div class="stat"><span class="n">—</span><span class="l">loading population…</span></div></div>
 
+  <div id="gatePanel"></div>
+
   <div class="wb">
     <aside>
       <div class="rail-h"><span>Case queue</span><span id="qcount"></span></div>
@@ -228,7 +254,9 @@
 
 <script>
 const CFG = Object.assign(
-  {cases:"/cases", case:"/case", run:"/run", health:"/health", badge:"Illustrative data & outputs",
+  {cases:"/cases", case:"/case", gate:"/gate", adjudicate:"/adjudicate", run:"/run", health:"/health",
+   badge:"Illustrative data & outputs",
+   policy:{thresholds:{high:500, medium:50}, gate_of_level:{high:"auto-clear", medium:"review", low:"human-gate"}},
    drafter:{default:"stub", available:["stub"], backends:[{name:"stub", available:true}]}},
   (typeof window!=="undefined" && window.__WORKBENCH_CONFIG__) || {});
 
@@ -244,10 +272,28 @@ function backendLabel(n){return {stub:'deterministic stub',claude:'live · claud
 let META=null, QUEUE=[], FILTER='all';
 let SEL=null, DETAIL=null, SIGNALS=false;
 let BACKEND=null, RUN=null;
+/* Phase 64 — the LIVE gating engine: GATE = the latest /gate response (per-case routing + funnel under
+   the current policy + the session precedent); POLICY = the live knob thresholds; ADJ = the last
+   adjudication result (the loop read). Routing keys on the REAL precedent (§12); the disposition it
+   applies stays ILLUSTRATIVE (§14). All session-only — nothing persists. */
+let GATE=null, GATEBYID={}, POLICY=null, ADJ=null;
+
+function defaultPolicy(){ return JSON.parse(JSON.stringify((CFG.policy)||{thresholds:{high:500,medium:50}})); }
+function setGate(g){ GATE=g; GATEBYID={}; ((g&&g.cases)||[]).forEach(r=>{ GATEBYID[r.case_id]=r; }); }
+function liveFunnel(){ return (GATE&&GATE.funnel)||(META&&META.gate_funnel)||{}; }
+/* the LIVE routing for a case (object or id) — falls back to the BAKED gate when /gate hasn't loaded */
+function liveGate(c){
+  const id=(typeof c==='string')?c:(c&&c.case_id);
+  const r=id&&GATEBYID[id];
+  if(r) return {gate:r.gate, level:r.level, n_precedent:r.n_precedent, baked_n:r.baked_n, combo:r.combo};
+  const conf=(c&&typeof c==='object'&&c.confidence)||null;
+  return conf?{gate:conf.gate, level:conf.level, n_precedent:conf.n_precedent, baked_n:conf.n_precedent, combo:conf.combo}
+             :{gate:'auto-clear', n_precedent:0};
+}
 
 /* ---------- population strip + queue ---------- */
 function renderPop(){
-  const m=META||{}, cov=m.coverage||{}, fun=m.gate_funnel||{};
+  const m=META||{}, cov=m.coverage||{}, fun=liveFunnel();
   const el=document.getElementById('popStrip');
   el.innerHTML=`
     <div class="stat"><span class="n amber">${esc(m.slice_total||QUEUE.length)}</span><span class="l">cases in queue</span></div>
@@ -267,7 +313,7 @@ function renderPop(){
   if(sw) sw.onclick=toggleSignals;
 }
 function renderFilters(){
-  const fun=(META&&META.gate_funnel)||{};
+  const fun=liveFunnel();
   const opts=[['all','All',QUEUE.length],['human-gate','Human gate',fun['human-gate']||0],
               ['review','Review',fun['review']||0],['auto-clear','Auto-clear',fun['auto-clear']||0]];
   const f=document.getElementById('filters');
@@ -275,7 +321,7 @@ function renderFilters(){
   (f.querySelectorAll('[data-f]')||[]).forEach(b=>{ if(b.dataset) b.onclick=()=>{FILTER=b.dataset.f;renderQueue();}; });
 }
 function visibleQueue(){
-  return FILTER==='all'?QUEUE:QUEUE.filter(c=>(c.confidence||{}).gate===FILTER);
+  return FILTER==='all'?QUEUE:QUEUE.filter(c=>liveGate(c).gate===FILTER);
 }
 function groundsTag(c){
   if(c.grounds_e2e===true) return '<span style="color:var(--green)" title="casework signs end-to-end">✓ grounds</span>';
@@ -283,7 +329,7 @@ function groundsTag(c){
   return '';
 }
 function qcardHTML(c){
-  const g=(c.confidence||{}).gate, d=c.display||{};
+  const g=liveGate(c).gate, d=c.display||{};
   const caps=(c.capabilities||[]).map(x=>`<span class="qcap">${esc(x)}</span>`).join('');
   const xt=c.exemplar?`<span class="xtag">${esc(c.exemplar)}</span>`:'';
   return `<button class="qcard${SEL===c.case_id?' sel':''}" data-case="${esc(c.case_id)}">
@@ -299,6 +345,63 @@ function renderQueue(){
   document.getElementById('qcount').textContent=vis.length+' shown';
   q.innerHTML=vis.length?vis.map(qcardHTML).join(''):'<div class="empty" style="padding:24px">No cases match this filter.</div>';
   (q.querySelectorAll('[data-case]')||[]).forEach(el=>{ if(el.dataset) el.onclick=()=>selectCase(el.dataset.case); });
+}
+
+/* ---------- the gating control panel (Phase 64): the policy KNOBS + the live funnel ---------- */
+function policyThresholds(){ return ((POLICY||defaultPolicy()).thresholds)||{high:500,medium:50}; }
+function policyQS(){ const th=policyThresholds(); return 'high='+(th.high)+'&medium='+(th.medium); }
+function renderGate(){
+  const el=document.getElementById('gatePanel'); if(!el) return;
+  const th=policyThresholds(), fun=liveFunnel();
+  el.innerHTML=`<div class="gatectl">
+    <div>
+      <div class="gxh">Gating control · precedent → routing<span class="gxbtn" id="gateReset" role="button">reset</span></div>
+      <div class="gxnote">The bank's policy decides <b>where human judgment is spent</b>. Routing keys on the
+        <span class="g12">real</span> number of prior firings of each signal combination — common patterns
+        auto-clear, rare ones go to a human. The thresholds are <b>chosen, not measured</b>; drag them. The
+        disposition the gate then applies stays <span class="g14">illustrative</span> — the loop concentrates
+        attention, it never claims an auto-decision is correct.</div>
+    </div>
+    <div class="knobs">
+      <label class="knob"><span class="kl">Auto-clear at ≥</span>
+        <input type="range" id="knobHigh" min="1" max="2000" step="1" value="${esc(th.high)}">
+        <span class="kv" id="knobHighV">${esc(th.high)}</span><span class="ku">prior firings</span></label>
+      <label class="knob"><span class="kl">Review at ≥</span>
+        <input type="range" id="knobMed" min="1" max="1000" step="1" value="${esc(th.medium)}">
+        <span class="kv" id="knobMedV">${esc(th.medium)}</span><span class="ku">prior firings</span></label>
+      <div class="gatefun gatefun-lg">
+        <span class="gpill auto"><b>${esc(fun['auto-clear']||0)}</b> auto-clear</span>
+        <span class="gpill review"><b>${esc(fun['review']||0)}</b> review</span>
+        <span class="gpill human"><b>${esc(fun['human-gate']||0)}</b> human gate</span>
+      </div>
+    </div>
+  </div>`;
+  const hi=document.getElementById('knobHigh'), me=document.getElementById('knobMed');
+  if(hi) hi.oninput=()=>onKnob('high',hi.value);
+  if(me) me.oninput=()=>onKnob('medium',me.value);
+  const rs=document.getElementById('gateReset'); if(rs) rs.onclick=resetGating;
+}
+function onKnob(level,val){
+  if(!POLICY) POLICY=defaultPolicy();
+  POLICY.thresholds[level]=parseInt(val,10)||1;
+  // mirror the server's high>=medium invariant so the slider never emits a 400
+  if(POLICY.thresholds.high<POLICY.thresholds.medium){
+    if(level==='high') POLICY.thresholds.medium=POLICY.thresholds.high;
+    else POLICY.thresholds.high=POLICY.thresholds.medium;
+  }
+  return loadGate();
+}
+function loadGate(){
+  return fetch(CFG.gate+'?'+policyQS()).then(r=>r.json()).then(d=>{
+    if(d&&!d.error){ setGate(d); renderPop(); renderGate(); renderQueue(); if(SEL) paintSurface(); }
+    return d;
+  }).catch(()=>{ /* keep the baked fallback — the page still works offline-of-/gate */ });
+}
+function resetGating(){
+  POLICY=defaultPolicy(); ADJ=null;
+  // reset the server-side session precedent too (the loop), then re-derive
+  return fetch(CFG.adjudicate,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({reset:true})}).then(()=>loadGate()).catch(()=>loadGate());
 }
 
 /* ---------- case selection + the investigator surface ---------- */
@@ -355,19 +458,45 @@ function txTable(txns){
 
 /* beat 2 — the grounded risk picture + the signal walk */
 function riskPanel(){
-  const c=(DETAIL&&DETAIL.case)||{}, conf=c.confidence||{}, di=conf.disposition_illustrative||{};
+  const c=(DETAIL&&DETAIL.case)||{}, conf=c.confidence||{};
   const caps=(c.capabilities||[]).map(x=>`<span class="typ">${esc(x)}</span>`).join(', ');
-  const g=conf.gate;
+  const lg=liveGate(c), g=lg.gate;
   return `<div class="risk reveal">
     <div class="rl">Grounded risk picture</div>
     <div class="compose">${(c.capabilities||[]).length} grounded signals compose on this subject — ${caps}.</div>
     <div style="color:var(--muted);font-size:13px">Each is a real detector firing on cited transactions, every one traceable to a public-source regulator indicator (the walk below). This is corroboration, not a score.</div>
     <div class="gateread">
       <span class="gatebadge ${gateClass(g)}">${esc(gateLabel(g))}</span>
-      <span class="precread"><b>${esc(conf.n_precedent)}</b> similar prior firings of this signal combo in the population.</span>
+      <span class="precread"><b>${esc(lg.n_precedent)}</b> similar prior firings of this signal combo in the population.</span>
     </div>
     <div class="illus">Disposition history illustrative — chosen, not measured (the substrate is label-blind). The sample size is real.</div>
+    ${adjudControlHTML(c)}
   </div>`;
+}
+/* the elicitation-loop control — a human disposition GROWS the combo's precedent → re-routes live */
+function adjudControlHTML(c){
+  const lg=liveGate(c);
+  const hot=ADJ&&!ADJ.error&&ADJ.case_id===SEL;
+  const cnt=hot?` <b>${esc(ADJ.combo_adjudications)}</b> recorded this session ·`:'';
+  const rr=(hot&&ADJ.rerouted)?` <span class="reroute">re-routed ${esc(gateLabel(ADJ.before.gate))} → ${esc(gateLabel(ADJ.after.gate))}</span>`:'';
+  return `<div class="adjud" id="adjud">
+    <span class="al">Adjudicate (grows precedent):</span>
+    <button class="abtn" data-disp="cleared">cleared</button>
+    <button class="abtn" data-disp="escalated">escalated</button>
+    <button class="abtn" data-disp="needs_more_info">needs more info</button>
+    <span class="aread" id="adjudRead">${cnt} now <b>${esc(lg.n_precedent)}</b> prior firings → ${esc(gateLabel(lg.gate))}${rr}</span>
+  </div>`;
+}
+function doAdjudicate(disp){
+  if(!SEL) return Promise.resolve();
+  return fetch(CFG.adjudicate,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({case:SEL, disposition:disp, policy:policyThresholds()})})
+    .then(r=>r.json()).then(d=>{
+      if(d&&d.error){ ADJ={error:d.error, case_id:SEL}; }
+      else { ADJ=d; setGate({cases:d.cases, funnel:d.funnel}); }
+      renderPop(); renderGate(); renderQueue(); paintSurface();
+      return d;
+    }).catch(e=>{ ADJ={error:String(e), case_id:SEL}; paintSurface(); });
 }
 function walkHTML(){
   const walk=(DETAIL&&DETAIL.signals)||[];
@@ -499,6 +628,8 @@ function paintSurface(loading){
   const db=document.getElementById('decideBtn'); if(db) db.onclick=runDecision;
   const pk=document.getElementById('picker');
   if(pk&&pk.querySelectorAll) (pk.querySelectorAll('[data-backend]')||[]).forEach(x=>{ if(x.dataset) x.onclick=()=>pickBackend(x.dataset.backend); });
+  const ad=document.getElementById('adjud');
+  if(ad&&ad.querySelectorAll) (ad.querySelectorAll('[data-disp]')||[]).forEach(x=>{ if(x.dataset) x.onclick=()=>doAdjudicate(x.dataset.disp); });
 }
 
 /* ---------- the live finale ---------- */
@@ -547,7 +678,8 @@ function loadQueue(){
 function boot(){
   const bg=document.getElementById('badge'); if(bg) bg.textContent=CFG.badge||'Illustrative data & outputs';
   BACKEND=(CFG.drafter&&CFG.drafter.default)||'stub';
-  setDraftChip(); loadQueue();
+  POLICY=defaultPolicy();
+  setDraftChip(); renderGate(); loadQueue().then(loadGate);
 }
 if(typeof document!=='undefined'&&document.getElementById('queue')) boot();
 
@@ -555,8 +687,9 @@ if(typeof document!=='undefined'&&document.getElementById('queue')) boot();
 if(typeof module!=='undefined'&&module.exports){ module.exports={
   esc,money,gateClass,gateLabel,channelSummary,counterpartySummary,kycPanel,citedTxnIds,
   toggleSignals,selectCase,pickBackend,
-  _state:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN}),
-  _set:(s)=>{ if(s.META!==undefined)META=s.META; if(s.QUEUE!==undefined)QUEUE=s.QUEUE; if(s.SEL!==undefined)SEL=s.SEL; if(s.DETAIL!==undefined)DETAIL=s.DETAIL; if(s.SIGNALS!==undefined)SIGNALS=s.SIGNALS; if(s.RUN!==undefined)RUN=s.RUN; },
+  liveGate,liveFunnel,setGate,renderGate,loadGate,onKnob,resetGating,doAdjudicate,adjudControlHTML,
+  _state:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ}),
+  _set:(s)=>{ if(s.META!==undefined)META=s.META; if(s.QUEUE!==undefined)QUEUE=s.QUEUE; if(s.SEL!==undefined)SEL=s.SEL; if(s.DETAIL!==undefined)DETAIL=s.DETAIL; if(s.SIGNALS!==undefined)SIGNALS=s.SIGNALS; if(s.RUN!==undefined)RUN=s.RUN; if(s.GATE!==undefined)setGate(s.GATE); if(s.POLICY!==undefined)POLICY=s.POLICY; if(s.ADJ!==undefined)ADJ=s.ADJ; },
   paintSurface,renderQueue,renderPop,riskPanel,walkHTML,ledgerHTML,CANON }; }
 </script>
 </body>

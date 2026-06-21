@@ -45,8 +45,8 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-63-investigator-case-workbench -->
-<!-- gate-log:phase-63 direction=approved delivery=pending -->
-<!-- status: T1–T5 ALL [x] — READY FOR COMPLETION; delivery gate flips to accepted post-commit (gate-state follows git-state) -->
+<!-- gate-log:phase-63 direction=approved delivery=accepted -->
+<!-- status: T1–T5 ALL [x] — DELIVERED + accepted 2026-06-21 (committed a3fde1e; gate-state follows git-state) -->
 
 ## Phase 63 — Investigator Case Workbench (capstone sales-pitch demo)
 

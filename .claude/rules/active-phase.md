@@ -26,6 +26,6 @@ build.py importing aml_substrate/aml_casework / any dist drift / a keys-token re
 
 ## Gates
 - [x] Direction confirmed by user (direction gate 2026-06-21, all_accept:true; RE-SCOPED post-gate to option B — A0 flipped → verified-revised-accept, all_accept now false)
-- [ ] Delivery accepted
+- [x] Delivery accepted (post-implementation report 2026-06-21; framing accepted; committed a3fde1e)
 
 Plan [[phases/phase-63-investigator-case-workbench]]; ledger Phase-63.

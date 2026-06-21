@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signal Watch — Investigator Case Workbench</title>
+<!--__WORKBENCH_CONFIG__-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0e12;--bg2:#10131a;--panel:#151922;--panel2:#1a1f29;
+    --line:#262c39;--line2:#333b4c;--ink:#e9ebf0;--muted:#98a2b5;--faint:#6a7388;
+    --signal:#f6a623;--teal:#4fd1c5;--blue:#5aa9ff;--rose:#ef6079;--green:#54c98a;--violet:#b08cff;
+    --mono:'JetBrains Mono',ui-monospace,monospace;--body:'Archivo',system-ui,sans-serif;--display:'Newsreader',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1100px 560px at 84% -10%,rgba(246,166,35,.08),transparent 60%),
+      radial-gradient(820px 460px at -6% 8%,rgba(90,169,255,.06),transparent 55%),
+      var(--bg);
+    color:var(--ink);font-family:var(--body);line-height:1.5;-webkit-font-smoothing:antialiased;
+    min-height:100vh;display:flex;flex-direction:column}
+  .shell{max-width:1280px;margin:0 auto;width:100%;padding:0 22px 40px;flex:1;display:flex;flex-direction:column}
+  a{color:var(--blue);text-decoration:none}
+
+  header{padding:26px 0 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:13px}
+  .brand .mark{width:34px;height:34px;border-radius:9px;border:1px solid var(--signal);display:grid;place-items:center;color:var(--signal);font-family:var(--mono);font-size:15px;box-shadow:0 0 18px -4px var(--signal) inset}
+  .brand .bt{font-family:var(--display);font-size:20px;line-height:1}
+  .brand .bs{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);margin-top:3px}
+  .hd-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .badge{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--signal);border:1px solid var(--signal);border-radius:999px;padding:6px 12px;background:rgba(246,166,35,.06)}
+  .draft-chip{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line2);border-radius:999px;padding:6px 11px}
+  .draft-chip b{color:var(--teal);font-weight:500}.draft-chip.live b{color:var(--green)}
+
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--signal);margin:22px 0 8px}
+  h2{font-family:var(--display);font-weight:500;font-size:clamp(22px,3.4vw,31px);line-height:1.1;letter-spacing:-.01em;margin-bottom:8px}
+  .lead{color:var(--muted);max-width:760px;font-size:15px;margin-bottom:14px}
+  .lead b{color:var(--ink)}
+
+  /* population strip — the coverage + gate funnel (honest counts, no catch-rate) */
+  .pop{display:flex;align-items:center;gap:10px 22px;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:13px 17px;margin:6px 0 16px}
+  .stat{display:flex;flex-direction:column;gap:2px}
+  .stat .n{font-family:var(--mono);font-size:18px;color:var(--ink);font-weight:500}
+  .stat .l{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .stat .n.amber{color:var(--signal)}.stat .n.teal{color:var(--teal)}.stat .n.rose{color:var(--rose)}.stat .n.green{color:var(--green)}
+  .popsep{width:1px;align-self:stretch;background:var(--line2)}
+  .gatefun{display:flex;gap:6px;flex-wrap:wrap}
+  .gpill{font-family:var(--mono);font-size:10px;letter-spacing:.03em;border-radius:6px;padding:3px 8px;border:1px solid var(--line2);color:var(--muted)}
+  .gpill b{color:var(--ink);font-weight:600}
+  .gpill.human{border-color:rgba(239,96,121,.4);color:var(--rose)}
+  .gpill.review{border-color:rgba(246,166,35,.4);color:var(--signal)}
+  .gpill.auto{border-color:rgba(84,201,138,.36);color:var(--green)}
+
+  /* the signals master switch — the dramatization */
+  .switchwrap{margin-left:auto;display:flex;align-items:center;gap:11px}
+  .switchwrap .sl{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+  .switch{position:relative;width:54px;height:28px;border-radius:999px;border:1px solid var(--line2);background:var(--bg2);cursor:pointer;transition:.22s;flex:none}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--faint);transition:.22s}
+  .switch.on{border-color:var(--signal);background:rgba(246,166,35,.16)}
+  .switch.on::after{left:29px;background:var(--signal);box-shadow:0 0 12px -1px var(--signal)}
+  .switch .swl{position:absolute;top:-18px;right:0;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--signal);white-space:nowrap;opacity:0;transition:.2s}
+  .switch.on .swl{opacity:1}
+
+  /* workbench split: case queue | investigator surface */
+  .wb{display:grid;grid-template-columns:340px 1fr;gap:24px;margin-top:6px;align-items:start}
+  @media(max-width:980px){.wb{grid-template-columns:1fr}}
+
+  .rail-h{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:9px;display:flex;align-items:center;justify-content:space-between}
+  .filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px}
+  .fbtn{font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--muted);background:var(--panel);border:1px solid var(--line2);border-radius:7px;padding:5px 9px;cursor:pointer;transition:.15s}
+  .fbtn:hover{border-color:var(--teal);color:var(--ink)}
+  .fbtn.sel{border-color:var(--signal);color:var(--ink);box-shadow:0 0 0 1px var(--signal) inset}
+  .queue{max-height:74vh;overflow:auto;padding-right:4px}
+  .qcard{display:block;width:100%;text-align:left;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-bottom:9px;cursor:pointer;transition:.16s;color:inherit;font:inherit}
+  .qcard:hover{border-color:var(--line2);transform:translateY(-1px)}
+  .qcard.sel{border-color:var(--signal);box-shadow:0 0 0 1px var(--signal) inset}
+  .qtop{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+  .qnm{font-family:var(--display);font-size:15px;line-height:1.1;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gdot{width:8px;height:8px;border-radius:50%;flex:none}
+  .gdot.human{background:var(--rose)}.gdot.review{background:var(--signal)}.gdot.auto{background:var(--green)}
+  .qsub{font-family:var(--mono);font-size:10px;color:var(--faint);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .xtag{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--violet);border:1px solid rgba(176,140,255,.4);border-radius:4px;padding:1px 5px}
+  .qcaps{display:flex;gap:3px;flex-wrap:wrap;margin-top:6px}
+  .qcap{font-family:var(--mono);font-size:8.5px;color:var(--faint);border:1px solid var(--line2);border-radius:4px;padding:1px 5px}
+  .qcaps.on .qcap{color:var(--blue);border-color:rgba(90,169,255,.34)}
+
+  /* investigator surface */
+  .surf{min-height:480px}
+  .empty{border:1px dashed var(--line2);border-radius:13px;padding:60px 28px;text-align:center;color:var(--faint);font-size:14px}
+  .casehead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+  .synthnote{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-top:4px}
+
+  /* clutter panels */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+  .pnl{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .pnl.span{grid-column:1/-1}
+  .ph{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+  .kv2{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;font-size:13px}
+  .kv2 .k{color:var(--faint);font-family:var(--mono);font-size:11px}
+  .kv2 .v{color:var(--ink)}
+  .kv2 .v.flag{color:var(--rose)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--line2);border-radius:6px;padding:3px 8px}
+
+  /* transaction table (the clutter — dense; rows dim/highlight under signals) */
+  .txwrap{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:9px;margin-top:4px}
+  table.tx{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+  table.tx th{position:sticky;top:0;background:var(--panel2);color:var(--faint);font-weight:500;text-align:left;padding:7px 9px;letter-spacing:.04em;border-bottom:1px solid var(--line)}
+  table.tx td{padding:6px 9px;border-bottom:1px solid var(--line);color:var(--muted)}
+  table.tx tr:last-child td{border-bottom:none}
+  td.amt{text-align:right;color:var(--ink)}
+  td.dir-CREDIT{color:var(--green)}td.dir-DEBIT{color:var(--rose)}
+  .signals-on table.tx tbody tr{opacity:.32;transition:.25s}
+  .signals-on table.tx tbody tr.cited{opacity:1;background:rgba(246,166,35,.08)}
+  .signals-on table.tx tbody tr.cited td:first-child{box-shadow:inset 2px 0 0 var(--signal)}
+
+  /* the signals overlay (beat 2) — hidden until the switch is on */
+  .reveal{display:none}
+  .signals-on .reveal{display:block;animation:fade .45s ease}
+  .clutter-only{display:block}
+  .signals-on .clutter-only{display:none}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .risk{border:1px solid var(--line);border-left:3px solid var(--signal);border-radius:0 12px 12px 0;background:var(--panel2);padding:15px 18px;margin-top:14px}
+  .risk .rl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);margin-bottom:9px}
+  .risk .compose{font-family:var(--display);font-size:16px;line-height:1.5;color:var(--ink);margin-bottom:6px}
+  .risk .typ{color:var(--signal)}
+  .gateread{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+  .gatebadge{font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;border-radius:8px;padding:6px 12px;font-weight:600}
+  .gatebadge.human{color:var(--rose);border:1px solid var(--rose);background:rgba(239,96,121,.08)}
+  .gatebadge.review{color:var(--signal);border:1px solid var(--signal);background:rgba(246,166,35,.08)}
+  .gatebadge.auto{color:var(--green);border:1px solid var(--green);background:rgba(84,201,138,.08)}
+  .precread{font-size:12.5px;color:var(--muted)}.precread b{color:var(--ink)}
+  .illus{font-family:var(--mono);font-size:10px;color:var(--faint);font-style:italic;margin-top:6px}
+
+  /* grounded signal walk */
+  .walk{margin-top:14px}
+  .wrow{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:12px 14px;margin-bottom:9px}
+  .wtop{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px}
+  .cap{font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;color:var(--signal);border:1px solid rgba(246,166,35,.34);border-radius:5px;padding:2px 6px}
+  .det{font-family:var(--mono);font-size:11px;color:var(--ink)}
+  .arrow{color:var(--faint)}.sig{font-family:var(--mono);font-size:11px;color:var(--blue)}
+  .src{margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--teal);border:1px solid rgba(79,209,197,.3);border-radius:5px;padding:2px 7px}
+  .chk{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10.5px;color:var(--green)}.chk.no{color:var(--rose)}
+  .flagq{border-left:2px solid var(--line2);padding:3px 0 3px 11px;color:var(--muted);font-size:12.5px;line-height:1.5;margin-bottom:6px}
+  .rf{font-size:12.5px;color:var(--ink)}.rf b{color:var(--signal);font-weight:500;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-right:6px}
+
+  /* decide (beat 3) + the chain ledger + signed SAR */
+  .decidebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .btn{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--bg);background:var(--signal);border:none;border-radius:9px;padding:11px 20px;cursor:pointer;transition:.16s;white-space:nowrap}
+  .btn:hover{filter:brightness(1.08)}.btn:disabled{opacity:.5;cursor:default;filter:none}
+  .picker{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .picker .pl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .pbtn{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:6px 11px;cursor:pointer;transition:.15s}
+  .pbtn:hover:not(:disabled){border-color:var(--teal);color:var(--ink)}
+  .pbtn.sel{border-color:var(--signal);color:var(--ink);box-shadow:0 0 0 1px var(--signal) inset}
+  .pbtn.off{opacity:.4;cursor:not-allowed}
+
+  .chain{position:relative;margin:18px 0 4px;padding-left:30px}
+  .chain::before{content:"";position:absolute;left:10px;top:8px;bottom:18px;width:2px;background:var(--line2)}
+  .node{position:relative;margin-bottom:13px}
+  .node::before{content:"";position:absolute;left:-26px;top:5px;width:13px;height:13px;border-radius:50%;background:var(--bg2);border:2px solid var(--line2);transition:.3s;z-index:1}
+  .node.active::before{border-color:var(--signal);box-shadow:0 0 0 4px rgba(246,166,35,.14)}
+  .node.done::before{border-color:var(--signal);background:var(--signal)}
+  .node.connected::before{border-color:var(--green);background:var(--green);box-shadow:0 0 0 5px rgba(84,201,138,.18)}
+  .node.failed::before{border-color:var(--rose);background:var(--rose)}
+  .nh{display:flex;align-items:center;gap:10px}
+  .nk{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .node.active .nk,.node.done .nk{color:var(--signal)}.node.connected .nk{color:var(--green)}
+  .nt{font-family:var(--display);font-size:16px}
+  .nstat{margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}.nstat.run{color:var(--signal)}
+  .nbody{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:11px 14px;margin-top:8px;font-size:13px;color:var(--muted)}
+  .node.pending .nbody{display:none}
+  .vlist{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+  .vchk{font-family:var(--mono);font-size:10px;color:var(--green);border:1px solid rgba(84,201,138,.3);border-radius:5px;padding:2px 7px}
+  .saw{border:1px solid var(--line);border-left:3px solid var(--green);border-radius:0 11px 11px 0;background:var(--panel2);padding:15px 18px;margin-top:16px}
+  .saw .sl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:8px}
+  .saw .narr{font-family:var(--display);font-size:15px;line-height:1.55;color:var(--ink)}
+  .claims{list-style:none;margin-top:12px;border-top:1px solid var(--line);padding-top:11px}
+  .claims li{font-size:13px;color:var(--muted);padding:5px 0;display:flex;gap:9px}
+  .claims .cite{font-family:var(--mono);font-size:10.5px;color:var(--teal);white-space:nowrap}
+  .err{border:1px solid var(--rose);border-radius:11px;background:rgba(239,96,121,.07);padding:13px 16px;color:var(--rose);font-size:13px;margin-top:14px}
+  .err b{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:5px}
+
+  footer{border-top:1px solid var(--line);margin-top:28px;padding:16px 0;color:var(--faint);font-size:11.5px;font-family:var(--mono);letter-spacing:.02em}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <div class="mark">◆</div>
+      <div><div class="bt">Signal Watch</div><div class="bs">Investigator Case Workbench · Vision Prototype</div></div>
+    </div>
+    <div class="hd-right">
+      <span class="draft-chip" id="draftChip">Drafter · <b>—</b></span>
+      <span class="badge" id="badge">Illustrative data &amp; outputs</span>
+    </div>
+  </header>
+
+  <div class="eyebrow">The investigator's queue — before &amp; after the signals</div>
+  <h2>An alert population, the way it lands today</h2>
+  <p class="lead">Every case below is a real <b>aml-substrate</b> evidence bundle — full KYC, accounts and
+    transactions, exactly the wall of information an investigator opens cold. Turn <b>signals</b> on and the
+    grounded risk crystallises out of the noise; pick a case and <b>decide</b> it live. Synthetic throughout.</p>
+
+  <div class="pop" id="popStrip"><div class="stat"><span class="n">—</span><span class="l">loading population…</span></div></div>
+
+  <div class="wb">
+    <aside>
+      <div class="rail-h"><span>Case queue</span><span id="qcount"></span></div>
+      <div class="filters" id="filters"></div>
+      <div class="queue" id="queue"><div class="empty" style="padding:24px">Loading…</div></div>
+    </aside>
+    <main class="surf" id="surf">
+      <div class="empty">Select a case from the queue.</div>
+    </main>
+  </div>
+
+  <footer>Dev-time companion · grounded detection / illustrative dispositions · nothing is persisted · the offline ship artifacts are unaffected.</footer>
+</div>
+
+<script>
+const CFG = Object.assign(
+  {cases:"/cases", case:"/case", run:"/run", health:"/health", badge:"Illustrative data & outputs",
+   drafter:{default:"stub", available:["stub"], backends:[{name:"stub", available:true}]}},
+  (typeof window!=="undefined" && window.__WORKBENCH_CONFIG__) || {});
+
+/* esc() — the SOLE escaper; every dynamic value (KYC, names, regulator flags, model narrative) flows
+   through it. Records store RAW text; nothing is pre-escaped. */
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function cssq(s){return String(s).replace(/["\\]/g,'\\$&');}
+function gateClass(g){return g==='human-gate'?'human':g==='review'?'review':'auto';}
+function gateLabel(g){return g==='human-gate'?'Human gate':g==='review'?'Review':'Auto-clear';}
+function money(cents){const v=(Number(cents||0)/100);return '$'+v.toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function backendLabel(n){return {stub:'deterministic stub',claude:'live · claude (Anthropic)',openai:'live · OpenAI /v1',opencode:'live · opencode'}[n]||String(n||'stub');}
+
+let META=null, QUEUE=[], FILTER='all';
+let SEL=null, DETAIL=null, SIGNALS=false;
+let BACKEND=null, RUN=null;
+
+/* ---------- population strip + queue ---------- */
+function renderPop(){
+  const m=META||{}, cov=m.coverage||{}, fun=m.gate_funnel||{};
+  const el=document.getElementById('popStrip');
+  el.innerHTML=`
+    <div class="stat"><span class="n amber">${esc(m.slice_total||QUEUE.length)}</span><span class="l">cases in queue</span></div>
+    <div class="popsep"></div>
+    <div class="stat"><span class="n teal">${esc(cov.groundable||0)}/${esc(cov.total||0)}</span><span class="l">ground end-to-end</span></div>
+    <div class="popsep"></div>
+    <div class="gatefun">
+      <span class="gpill human"><b>${esc(fun['human-gate']||0)}</b> human gate</span>
+      <span class="gpill review"><b>${esc(fun['review']||0)}</b> review</span>
+      <span class="gpill auto"><b>${esc(fun['auto-clear']||0)}</b> auto-clear</span>
+    </div>
+    <div class="switchwrap">
+      <span class="sl">Signals</span>
+      <div class="switch${SIGNALS?' on':''}" id="masterSwitch" role="switch" aria-checked="${SIGNALS}"><span class="swl">grounded</span></div>
+    </div>`;
+  const sw=document.getElementById('masterSwitch');
+  if(sw) sw.onclick=toggleSignals;
+}
+function renderFilters(){
+  const fun=(META&&META.gate_funnel)||{};
+  const opts=[['all','All',QUEUE.length],['human-gate','Human gate',fun['human-gate']||0],
+              ['review','Review',fun['review']||0],['auto-clear','Auto-clear',fun['auto-clear']||0]];
+  const f=document.getElementById('filters');
+  f.innerHTML=opts.map(([k,l,n])=>`<button class="fbtn${FILTER===k?' sel':''}" data-f="${esc(k)}">${esc(l)} · ${esc(n)}</button>`).join('');
+  (f.querySelectorAll('[data-f]')||[]).forEach(b=>{ if(b.dataset) b.onclick=()=>{FILTER=b.dataset.f;renderQueue();}; });
+}
+function visibleQueue(){
+  return FILTER==='all'?QUEUE:QUEUE.filter(c=>(c.confidence||{}).gate===FILTER);
+}
+function groundsTag(c){
+  if(c.grounds_e2e===true) return '<span style="color:var(--green)" title="casework signs end-to-end">✓ grounds</span>';
+  if(c.grounds_e2e===false) return '<span style="color:var(--rose)" title="casework refuses — fails closed">⊘ won\'t sign</span>';
+  return '';
+}
+function qcardHTML(c){
+  const g=(c.confidence||{}).gate, d=c.display||{};
+  const caps=(c.capabilities||[]).map(x=>`<span class="qcap">${esc(x)}</span>`).join('');
+  const xt=c.exemplar?`<span class="xtag">${esc(c.exemplar)}</span>`:'';
+  return `<button class="qcard${SEL===c.case_id?' sel':''}" data-case="${esc(c.case_id)}">
+    <div class="qtop"><span class="gdot ${gateClass(g)}"></span><span class="qnm">${esc(d.name||c.case_id)}</span>${xt}</div>
+    <div class="qsub"><span>${esc(c.case_id)}</span><span>·</span><span>${esc(c.n_alerts||0)} alerts</span><span>·</span><span>${esc(c.n_txns||0)} txns</span><span>·</span>${groundsTag(c)}</div>
+    <div class="qcaps${SIGNALS?' on':''}">${caps}</div>
+  </button>`;
+}
+function renderQueue(){
+  renderFilters();
+  const vis=visibleQueue();
+  const q=document.getElementById('queue');
+  document.getElementById('qcount').textContent=vis.length+' shown';
+  q.innerHTML=vis.length?vis.map(qcardHTML).join(''):'<div class="empty" style="padding:24px">No cases match this filter.</div>';
+  (q.querySelectorAll('[data-case]')||[]).forEach(el=>{ if(el.dataset) el.onclick=()=>selectCase(el.dataset.case); });
+}
+
+/* ---------- case selection + the investigator surface ---------- */
+function selectCase(id){
+  SEL=id; DETAIL=null; RUN=null;
+  renderQueue(); paintSurface(true);
+  return fetch(CFG.case+'/'+encodeURIComponent(id)).then(r=>r.json()).then(d=>{
+    DETAIL=d&&d.error?{error:d.error}:d;
+    paintSurface();
+  }).catch(e=>{ DETAIL={error:String(e)}; paintSurface(); });
+}
+function toggleSignals(){ SIGNALS=!SIGNALS; renderPop(); renderQueue(); paintSurface(); }
+
+function citedTxnIds(){
+  const ids=new Set();
+  ((DETAIL&&DETAIL.bundle&&DETAIL.bundle.alerts)||[]).forEach(a=>(a.txn_ids||[]).forEach(t=>ids.add(t)));
+  return ids;
+}
+function channelSummary(txns){
+  const by={};
+  (txns||[]).forEach(t=>{const k=t.channel||'?'; by[k]=by[k]||{n:0,cents:0}; by[k].n++; by[k].cents+=Number(t.amount_cents||0);});
+  return Object.keys(by).sort().map(k=>`<span class="chip">${esc(k)} · ${esc(by[k].n)} · ${esc(money(by[k].cents))}</span>`).join('');
+}
+function counterpartySummary(txns){
+  const by={};
+  (txns||[]).forEach(t=>{const k=t.counterparty_ref||t.counterparty_account_id||'—'; by[k]=(by[k]||0)+1;});
+  const ks=Object.keys(by).sort((a,b)=>by[b]-by[a]).slice(0,12);
+  return ks.map(k=>`<span class="chip">${esc(k)} · ${esc(by[k])}</span>`).join('') + (Object.keys(by).length>12?` <span class="chip">+${Object.keys(by).length-12} more</span>`:'');
+}
+function kycPanel(kyc){
+  const rows=[['risk rating',kyc.risk_rating,kyc.risk_rating==='HIGH'],['CDD level',kyc.cdd_level],
+    ['PEP tier',kyc.pep_tier||'none',!!kyc.pep_tier],['sanctions',kyc.sanctions_flag?'FLAGGED':'clear',kyc.sanctions_flag],
+    ['adverse media',kyc.adverse_media_flag?'FLAGGED':'clear',kyc.adverse_media_flag],
+    [kyc.is_person?'occupation':'nature of business',kyc.is_person?kyc.occupation:kyc.nature_of_business],
+    ['NAICS',kyc.naics_code],['source of funds',kyc.source_of_funds],['source of wealth',kyc.source_of_wealth],
+    ['nationality',kyc.nationality],['residency',kyc.residency_status],
+    ['expected vol/mo',kyc.expected_monthly_volume_cents!=null?money(kyc.expected_monthly_volume_cents):null],
+    ['expected txns/mo',kyc.expected_monthly_txn_count]];
+  return rows.filter(r=>r[1]!=null&&r[1]!=='').map(r=>
+    `<div class="k">${esc(r[0])}</div><div class="v${r[2]?' flag':''}">${esc(r[1])}</div>`).join('');
+}
+function txTable(txns){
+  const cited=citedTxnIds();
+  const rows=(txns||[]).map(t=>{
+    const c=cited.has(t.txn_id)?' cited':'';
+    return `<tr class="${c.trim()}" data-tx="${esc(t.txn_id)}">
+      <td>${esc((t.timestamp||'').slice(0,10))}</td><td>${esc(t.channel)}</td>
+      <td class="dir-${esc(t.direction)}">${esc(t.direction)}</td>
+      <td class="amt">${esc(money(t.amount_cents))}</td>
+      <td>${esc(t.counterparty_ref||t.counterparty_account_id||'—')}</td></tr>`;
+  }).join('');
+  return `<div class="txwrap"><table class="tx"><thead><tr><th>date</th><th>channel</th><th>dir</th><th>amount</th><th>counterparty</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+/* beat 2 — the grounded risk picture + the signal walk */
+function riskPanel(){
+  const c=(DETAIL&&DETAIL.case)||{}, conf=c.confidence||{}, di=conf.disposition_illustrative||{};
+  const caps=(c.capabilities||[]).map(x=>`<span class="typ">${esc(x)}</span>`).join(', ');
+  const g=conf.gate;
+  return `<div class="risk reveal">
+    <div class="rl">Grounded risk picture</div>
+    <div class="compose">${(c.capabilities||[]).length} grounded signals compose on this subject — ${caps}.</div>
+    <div style="color:var(--muted);font-size:13px">Each is a real detector firing on cited transactions, every one traceable to a public-source regulator indicator (the walk below). This is corroboration, not a score.</div>
+    <div class="gateread">
+      <span class="gatebadge ${gateClass(g)}">${esc(gateLabel(g))}</span>
+      <span class="precread"><b>${esc(conf.n_precedent)}</b> similar prior firings of this signal combo in the population.</span>
+    </div>
+    <div class="illus">Disposition history illustrative — chosen, not measured (the substrate is label-blind). The sample size is real.</div>
+  </div>`;
+}
+function walkHTML(){
+  const walk=(DETAIL&&DETAIL.signals)||[];
+  if(!walk.length) return '';
+  const rows=walk.map(w=>`<div class="wrow">
+    <div class="wtop"><span class="cap">${esc(w.capability)}</span><span class="det">${esc(w.detector)}</span>
+      <span class="arrow">→</span><span class="sig">${esc(w.signal_id)}</span>
+      ${w.grounded?'<span class="chk">✓ grounded</span>':'<span class="chk no">✗ ungrounded</span>'}
+      <span class="src">${esc(w.source||'—')}</span></div>
+    ${w.corpus_flag?`<div class="flagq">${esc(w.corpus_flag)}</div>`:''}
+    ${w.red_flag?`<div class="rf"><b>reads as</b>${esc(w.red_flag)}</div>`:''}</div>`).join('');
+  return `<div class="walk reveal"><div class="ph" style="margin-bottom:10px">Audit walk · every signal → its public-source indicator</div>${rows}</div>`;
+}
+
+/* beat 3 — decide (the live finale), reuses the chain ledger pattern */
+const CANON=[{key:'evidence',label:'Evidence',title:'Detection bundle'},
+  {key:'consume',label:'Consume',title:'Casework SAR + verifiers'},
+  {key:'verify',label:'Verify',title:'Cross-pillar check'},
+  {key:'connected',label:'Connected',title:'Signed SAR, grounded'}];
+function pickerHTML(){
+  const dr=CFG.drafter||{}, backends=(dr.backends&&dr.backends.length)?dr.backends:[{name:'stub',available:true}];
+  const running=!!(RUN&&RUN.running);
+  return `<div class="picker" id="picker"><span class="pl">Drafter</span>${backends.map(b=>{
+    const sel=b.name===BACKEND, off=!b.available;
+    return `<button class="pbtn${sel?' sel':''}${off?' off':''}" data-backend="${esc(b.name)}"${(off||running)?' disabled':''}${off?' title="no endpoint/key server-side"':''}>${esc(backendLabel(b.name))}${off?' · n/a':''}</button>`;
+  }).join('')}</div>`;
+}
+function pickBackend(name){
+  if(RUN&&RUN.running) return;
+  const avail=(CFG.drafter&&CFG.drafter.available)||['stub'];
+  if(avail.indexOf(name)<0) return;
+  BACKEND=name; setDraftChip(); paintSurface();
+}
+function decideBarHTML(){
+  const running=!!(RUN&&RUN.running);
+  return `<div class="decidebar">
+    <button class="btn" id="decideBtn" ${running?'disabled':''}>${running?'Deciding…':(RUN&&(RUN.done||RUN.error)?'Decide again':'Decide this case')}</button>
+    ${pickerHTML()}</div>`;
+}
+function nodeStatus(key){
+  if(!RUN) return 'pending';
+  if(key==='connected'){ if(RUN.done) return RUN.done.connected?'connected':'failed';
+    const d=RUN.byKey.connected; if(d) return d.connected?'connected':'failed'; return 'pending'; }
+  const d=RUN.byKey[key]; if(!d) return 'pending'; return d.status==='running'?'active':'done';
+}
+function stageBody(key){
+  const d=(RUN&&RUN.byKey[key])||{};
+  if(key==='consume'&&d.status!=='running'&&(d.drafter_effective||d.drafter)){
+    const eff=d.drafter_effective||d.drafter, comp=d.completeness||{};
+    const els=Object.keys(comp).filter(k=>comp[k]===true);
+    const note=d.note?`<div style="color:var(--signal);font-family:var(--mono);font-size:11px;margin-top:6px">↳ ${esc(d.note)}</div>`:'';
+    const viols=(d.blocking_violations||[]);
+    const refusal=(!d.signed&&viols.length)?`<div class="vlist" style="flex-direction:column;gap:6px;margin-top:8px">${viols.map(v=>`<span class="vchk" style="color:var(--rose);border-color:rgba(239,96,121,.3)">✗ ${esc(v)}</span>`).join('')}</div>`:'';
+    return `<div>Backend <b style="color:var(--teal)">${esc(backendLabel(eff))}</b> · ${d.signed?'<span class="chk">✓ signed</span>':'<span class="chk no">✗ refused</span>'} · ${esc(viols.length)} blocking</div>${note}
+      <div style="font-size:12px;color:var(--faint);margin-top:6px">The six Class-G verifiers disposed the draft — the gate is the oracle on whatever the backend wrote.</div>
+      <div class="vlist">${els.map(e=>`<span class="vchk">✓ ${esc(e)}</span>`).join('')}</div>${refusal}`;
+  }
+  if(key==='consume') return 'Drafting the SAR and running the six Class-G verifiers…';
+  if(key==='verify'){
+    if(d.status==='running') return 'Re-verifying the cross-pillar join…';
+    if(d.status==='skipped') return `<span class="chk no">⊘ skipped</span> — ${esc(d.note||'casework did not sign; the join is moot')}.`;
+    return d.connected?'<span class="chk">✓ join verified</span> — every signal walks back to the frozen corpus.':'<span class="chk no">✗ not connected</span>';
+  }
+  if(key==='evidence') return d.case_id?`Pre-baked detection — <b>${esc(d.alert_count)}</b> alerts, <b>${esc(d.txn_count)}</b> transactions.`:'';
+  if(key==='connected'){
+    const done=RUN&&RUN.done, fc=done?done.fail_closed:d.fail_closed, ok=done?done.connected:d.connected;
+    if(fc) return 'The gate <b>refused to sign</b> — disposition: <b>escalate to a human</b>. The case-investigation pillar will not author a SAR it cannot independently reproduce.';
+    return ok?'The case is decided — a verified, signed SAR, grounded end to end.':'The chain did not connect — see verify.';
+  }
+  return '';
+}
+function statusLabel(s){return {pending:'—',active:'running',done:'done',connected:'connected',failed:'failed'}[s]||s;}
+function ledgerHTML(){
+  if(!RUN) return '';
+  const done=RUN.done, fc=done&&done.fail_closed;
+  const nodes=CANON.map(spec=>{const st=nodeStatus(spec.key);
+    let title=spec.title, label=spec.label;
+    if(spec.key==='connected'&&fc){ title='Escalate to a human'; label='Fail-closed'; }
+    return `<div class="node ${st}"><div class="nh"><span class="nk">${esc(label)}</span><span class="nt">${esc(title)}</span>
+      <span class="nstat ${st==='active'?'run':''}">${esc(fc&&spec.key==='connected'?'refused':statusLabel(st))}</span></div><div class="nbody">${stageBody(spec.key)}</div></div>`;}).join('');
+  const err=RUN.error?`<div class="err"><b>Decision gated / failed</b>${esc(RUN.error)}</div>`:'';
+  return `<div class="chain">${nodes}</div>${err}${dispositionHTML()}`;
+}
+function dispositionHTML(){
+  const done=RUN&&RUN.done; if(!done) return '';
+  if(done.fail_closed){
+    const viols=(done.consume&&done.consume.blocking_violations)||[];
+    return `<div class="saw" style="border-left-color:var(--rose)">
+      <div class="sl" style="color:var(--rose)">Disposition · escalate to a human · fail-closed</div>
+      <div class="narr">The case-investigation pillar <b>refused to sign</b>. Its verifiers independently re-derive every signal from the cited evidence and could not reproduce these — so it will not author a SAR it cannot defend. The detector fired; the gate would not corroborate. <b>That refusal is the defensibility.</b></div>
+      ${viols.length?`<ul class="claims">${viols.map(v=>`<li><span>${esc(v)}</span></li>`).join('')}</ul>`:''}
+      <div style="font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:10px">Routed to a human investigator — not auto-filed, not silently dropped.</div></div>`;
+  }
+  const rec=(done.signed_sar||{}).str_record||{};
+  if(!rec.narrative) return '';
+  const claims=(rec.narrative_claims||[]).map(c=>`<li><span>${esc(c.text)}</span><span class="cite">${esc((c.cites||[]).join(' · '))}</span></li>`).join('');
+  return `<div class="saw"><div class="sl">Signed SAR · grounds for suspicion · disposition: file</div><div class="narr">${esc(rec.narrative)}</div>${claims?`<ul class="claims">${claims}</ul>`:''}</div>`;
+}
+
+function paintSurface(loading){
+  const surf=document.getElementById('surf');
+  if(!SEL){ surf.innerHTML='<div class="empty">Select a case from the queue.</div>'; return; }
+  if(loading&&!DETAIL){ surf.innerHTML='<div class="empty">Opening the case file…</div>'; return; }
+  if(DETAIL&&DETAIL.error){ surf.innerHTML=`<div class="err"><b>Cannot open case</b>${esc(DETAIL.error)}</div>`; return; }
+  if(!DETAIL){ return; }
+  const c=DETAIL.case||{}, b=DETAIL.bundle||{}, d=c.display||{}, kyc=c.kyc||{};
+  const txns=b.transactions||[];
+  surf.className='surf'+(SIGNALS?' signals-on':'');
+  surf.innerHTML=`
+    <div class="casehead">
+      <div><div class="eyebrow" style="margin-top:0">${esc(c.case_id||'')}</div>
+        <h2 style="font-size:23px">${esc(d.name||c.case_id||'')}</h2>
+        <div class="synthnote">${esc(d.kind||'subject')} · synthetic display identity over real KYC · ${esc((c.capabilities||[]).length)} signals · ${esc(c.n_txns||txns.length)} transactions</div>
+      </div>
+    </div>
+    ${riskPanel()}
+    <div class="grid2">
+      <div class="pnl"><div class="ph">KYC profile</div><div class="kv2">${kycPanel(kyc)}</div></div>
+      <div class="pnl"><div class="ph">Accounts &amp; channels</div>
+        <div class="chips" style="margin-bottom:10px">${((b.subject||{}).account_ids||[]).map(a=>`<span class="chip">${esc(a)}</span>`).join('')}</div>
+        <div class="ph" style="margin-top:4px">Activity by channel</div><div class="chips">${channelSummary(txns)}</div></div>
+      <div class="pnl span"><div class="ph">Counterparties <span style="color:var(--faint)">${esc(txns.length)} transactions</span></div>
+        <div class="chips" style="margin-bottom:10px">${counterpartySummary(txns)}</div>
+        ${txTable(txns)}</div>
+    </div>
+    ${walkHTML()}
+    ${decideBarHTML()}
+    ${ledgerHTML()}`;
+  const db=document.getElementById('decideBtn'); if(db) db.onclick=runDecision;
+  const pk=document.getElementById('picker');
+  if(pk&&pk.querySelectorAll) (pk.querySelectorAll('[data-backend]')||[]).forEach(x=>{ if(x.dataset) x.onclick=()=>pickBackend(x.dataset.backend); });
+}
+
+/* ---------- the live finale ---------- */
+function runDecision(){
+  if(!SEL||(RUN&&RUN.running)) return;
+  RUN={caseId:SEL,byKey:{},done:null,error:null,running:true}; paintSurface();
+  return fetch(CFG.run,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({case:SEL,backend:BACKEND})})
+    .then(resp=>readNDJSON(resp,applyMessage))
+    .catch(e=>applyMessage({error:'could not reach the workbench companion: '+e}))
+    .then(()=>{ if(RUN){RUN.running=false; paintSurface();} });
+}
+function readNDJSON(resp,onObj){
+  const reader=resp.body.getReader(); const dec=new TextDecoder(); let buf='';
+  function pump(){ return reader.read().then(({done,value})=>{
+    buf+=dec.decode(value||new Uint8Array(),{stream:!done}); let nl;
+    while((nl=buf.indexOf('\n'))>=0){ const line=buf.slice(0,nl).trim(); buf=buf.slice(nl+1);
+      if(line){ try{onObj(JSON.parse(line));}catch(e){} } }
+    if(done){ const last=buf.trim(); if(last){ try{onObj(JSON.parse(last));}catch(e){} } return; }
+    return pump(); }); }
+  return pump();
+}
+function applyMessage(obj){
+  if(!RUN) return;
+  if(obj.error){ RUN.error=obj.error; paintSurface(); return; }
+  if(obj.done){ RUN.done=obj.done; paintSurface(); return; }
+  const st=obj.stage; if(!st) return;
+  if(st==='connected'||st==='not_connected') RUN.byKey.connected={status:'done',...obj};
+  else RUN.byKey[st]={...(RUN.byKey[st]||{}),...obj,status:obj.status||'done'};
+  paintSurface();
+}
+
+/* ---------- boot ---------- */
+function setDraftChip(){
+  const chip=document.getElementById('draftChip'); if(!chip) return;
+  const sel=BACKEND||(CFG.drafter&&CFG.drafter.default)||'stub';
+  chip.className='draft-chip'+(sel!=='stub'?' live':'');
+  chip.innerHTML='Drafter · <b>'+esc(backendLabel(sel))+'</b>';
+}
+function loadQueue(){
+  return fetch(CFG.cases).then(r=>r.json()).then(d=>{
+    META=d.meta||{}; QUEUE=d.cases||[];
+    renderPop(); renderQueue();
+  }).catch(e=>{ document.getElementById('queue').innerHTML='<div class="err"><b>Cannot load cases</b>'+esc(String(e))+'</div>'; });
+}
+function boot(){
+  const bg=document.getElementById('badge'); if(bg) bg.textContent=CFG.badge||'Illustrative data & outputs';
+  BACKEND=(CFG.drafter&&CFG.drafter.default)||'stub';
+  setDraftChip(); loadQueue();
+}
+if(typeof document!=='undefined'&&document.getElementById('queue')) boot();
+
+/* test hooks (no-ops in the browser) */
+if(typeof module!=='undefined'&&module.exports){ module.exports={
+  esc,money,gateClass,gateLabel,channelSummary,counterpartySummary,kycPanel,citedTxnIds,
+  toggleSignals,selectCase,pickBackend,
+  _state:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN}),
+  _set:(s)=>{ if(s.META!==undefined)META=s.META; if(s.QUEUE!==undefined)QUEUE=s.QUEUE; if(s.SEL!==undefined)SEL=s.SEL; if(s.DETAIL!==undefined)DETAIL=s.DETAIL; if(s.SIGNALS!==undefined)SIGNALS=s.SIGNALS; if(s.RUN!==undefined)RUN=s.RUN; },
+  paintSurface,renderQueue,renderPop,riskPanel,walkHTML,ledgerHTML,CANON }; }
+</script>
+</body>
+</html>

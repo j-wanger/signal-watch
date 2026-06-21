@@ -44,6 +44,65 @@
 > - Phase 8: Doc true-up + provenance fix (M6 debt) — COMPLETED + accepted
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
+<!-- phase:phase-63-investigator-case-workbench -->
+<!-- gate-log:phase-63 direction=approved delivery=pending -->
+<!-- status: T1–T5 ALL [x] — READY FOR COMPLETION; delivery gate flips to accepted post-commit (gate-state follows git-state) -->
+
+## Phase 63 — Investigator Case Workbench (capstone sales-pitch demo)
+
+> RE-SCOPED 2026-06-21 (post direction-gate): the gate originally closed all-accept on a CURATED-4 / local-synthetic
+> / self-contained set; the user then chose option (B) — feed the REAL (synthetic) substrate alert POPULATION. This
+> was VERIFIED feasible this session: aml-substrate@f90bd39 already emits the rich investigator clutter (contract v0.2
+> PartyView: risk_rating/cdd_level/pep_tier/sanctions+adverse-media flags/occupation/source_of_funds/source_of_wealth/
+> nationality/residency/NAICS/expected_monthly_volume+count, label-leak-proof) at POPULATION scale (`--emergence
+> --monitor --emit-evidence --emit-screening`, ~500–2,000 deterministic synthetic bundles per 50k-client run) → NO
+> substrate precursor phase is needed. Two build parameters chosen: a BOUNDED slice (~100–300 cases), and REAL txn
+> counterparty edges only (the formal ownership/beneficial-owner graph is a substrate follow-on).
+
+A companion-served INVESTIGATOR CASE WORKBENCH (served by `serve_chain.py`; NOT a build/dist target → lite ceremony
+holds; the chain.html / Phase-56 precedent) over a REAL (synthetic) substrate alert POPULATION. The substrate emit is
+run as TOOL-USE (file-contract; build.py NEVER imports aml_substrate/aml_casework — the Phase-62 probe-history-consume
+pattern); a deterministic BOUNDED SLICE (~100–300 cases) is vendored into `data/workbench/` pinned to
+aml-substrate@f90bd39 (`meta.synthetic:true` → "no real data" holds). THREE beats: (1) CLUTTER — a QUEUE of the real
+population + a per-case dense investigator page (the real PartyView KYC profile + cross-account aggregation over
+subject.account_ids + txn summaries/details + REAL counterparty edges); offline/model-free; a clearly-SYNTHETIC
+display identity is laid over the real grounded KYC (the substrate omits name/DOB by privacy design). (2) SIGNALS-ON —
+a presenter toggle overlays the case's grounded signals + composes the risk picture (grounding/clarity/corroboration;
+ZERO catch-rate/precision number — the substrate detection-lift triple-null governs; badge always on). (3) LIVE FINALE
+— the workbench "decide" action wires the EXISTING serve_chain → casework consume on a SELECTED real case (default
+Claude backend, configurable openai/opencode/stub, deterministic-stub fallback; NDJSON stage reveal, stage-completion
+never a token stream). The 4 named exemplars (textbook mule / false-positive trap / thin single-signal /
+ambiguous-medium) are tagged WITHIN the real population. An HONEST COVERAGE STATISTIC ("N of M cases ground
+end-to-end now; the rest is the visible frontier") is computed over the slice — REAL/measured. Each case shows an
+illustrative precedent-confidence badge anchored to REAL probe-history firing frequency (the 4,966-firing history) but
+DISPOSITIONS stay label-blind ILLUSTRATIVE (the Phase-62 grounded-detection / illustrative-disposition split).
+DEFERRED to follow-on phases: the agentic tool-calling (OSINT / counterparty / network-ER), the precedent-confidence
+GATING engine, and the substrate ownership-graph emission (for a richer network view).
+ARCHITECTURE INVARIANTS: companion-served, off by default, scripted fallback; NO keys in the frontend (creds
+server-side, browser sends a backend NAME only — Phase-57 §4.5); synthetic data only, nothing real leaves; build.py
+NEVER imports aml_substrate/aml_casework; `--check all` stays 8/8 with ZERO dist drift (companion-only, no build
+target). Honest value framing: clutter→clarity = grounding/defensibility/corroboration, NOT a higher catch rate
+(combo-strength = richer converging defensible evidence). LITE; companion-served, NO new build target. Plan:
+articles/phases/phase-63-investigator-case-workbench.md. Ledger: Phase-63 (direction gate 2026-06-21, all_accept:true;
+RE-SCOPED post-gate to option B — A0 flipped → substrate-grounded real population VERIFIED feasible @f90bd39 · A1'
+real txn edges only · A2' bounded vendored slice ~100–300 · A3' coverage REAL / dispositions illustrative). Grounded
+against aml-substrate@f90bd39 + aml-casework@c6d8401 + corpus@472b44e.
+
+- [x] T1 Vendor a real substrate population slice + curate exemplars — DONE: 200-case deterministic slice vendored into `data/workbench/` (pinned aml-substrate@f90bd39, `meta.synthetic`); `scripts/curate_workbench_cases.py` validates the bundles, tags the 4 exemplars (mule CASE-P-0002174 / fp_trap CASE-P-0018660 / thin CASE-P-0008468 / ambiguous CASE-O-000008), computes the precedent-confidence badge over REAL firing frequency, and MEASURES the coverage statistic by running casework's stub over all 200 bundles (grounds_e2e per case → 57/200). `--selftest` green. NOTE: companion is a NEW `serve_workbench.py` (reuses serve_chain's consume/verify/audit primitives), not a serve_chain route.
+- [x] T2 Cluttered investigator QUEUE + per-case view (Beat 1) — DONE: `workbench.html` renders the 200-case queue + a per-case dense clutter view (real PartyView KYC, cross-account aggregation over subject.account_ids, txn summaries+details, real counterparty edges); companion-served via the new `scripts/serve_workbench.py`; offline/model-free; badge always on.
+- [x] T3 "Turn on signals" reveal (Beat 2) — DONE: presenter toggle overlays the grounded signals + composes the risk picture (grounding/clarity/corroboration; ZERO quantitative-lift number); both motion modes; badge on.
+- [x] T4 (L) Wire + run the live finale + coverage statistic (Beat 3) — DONE: the "decide" action wires serve_workbench → casework consume on a selected real case (default Claude, configurable, stub fallback; NDJSON stage reveal). The MEASURED coverage statistic (57/200 ground end-to-end; the rest = the visible frontier) is displayed. **The T4 checkpoint FIRED productively** — measured a real cross-pillar finding (composed cases fail on the substrate↔casework C3/C15 replay divergence; ~28% of composed cases sign) → EMBRACED as the FAIL-CLOSED defensibility climax (the gate refuses → escalate-to-human, never loosening). The verifier was never loosened (abort rule held); user accepted the framing.
+- [x] T5 Confidence badge + tests + docs + smoke + regate — DONE: per-case precedent-confidence badge (real firing frequency; "chosen, not measured" disposition; gate funnel 129 auto-clear / 52 review / 19 human-gate); `tests/workbench.test.mjs` (61 assertions) green; `docs/case-workbench.md` written (walkthrough + honesty framing + the deferred follow-ons incl. ownership-graph emission); smoke-checklist entry added. `build.py --check all` 8/8 ZERO dist drift. PLUS (USER OVERRIDE, mid-phase): a thin pytest wrapper — `pyproject.toml` (package=false) + `tests/test_selftests.py` (17 parametrized cases) + `uv.lock` → `uv run pytest` runs the whole suite; dep-free paths stay the source of truth.
+
+### Phase 63 — discovered follow-on tasks (deferred to future phases — NOT this phase)
+- [ ] (FOLLOW-ON) C3/C15 cross-pillar contract alignment — substrate fan-IN C3 vs casework fan-OUT C3 replay + the C15 shell-threshold divergence (the composed-case grounding frontier; only ~28% of composed cases sign). A substrate/casework sibling-repo phase.
+- [ ] (FOLLOW-ON) Agentic tool-calling phase — OSINT / counterparty gathering / network-ER; tool-evidence extending the grounding chain.
+- [ ] (FOLLOW-ON) Precedent-confidence GATING engine — confidence + sample-size → auto-decide-vs-human-gate as a LIVE mechanism (not the current display); the LFCM elicitation-loop path.
+- [ ] (FOLLOW-ON) Substrate ownership/beneficial-owner graph emission — a richer network view than the emitted txn-counterparty edges (a substrate-rooted phase).
+
+> Phase 63 — direction gate 2026-06-21 (all_accept:true), RE-SCOPED post-gate to option (B): the user chose to feed the REAL (synthetic) substrate alert POPULATION over the curated-4 hybrid. A0 FLIPPED → substrate-grounded real population (A0's "verify feasible" resolved THIS session — aml-substrate@f90bd39 emits the rich v0.2-PartyView investigator clutter at population scale → NO precursor phase). A1' real txn counterparty edges only for the network view (ownership-graph emission deferred to a substrate follow-on). A2' a bounded vendored slice ~100–300 cases (the 4 shapes are exemplars tagged WITHIN the real population). A3' the coverage statistic is REAL/measured; precedent-confidence is anchored to real firing frequency but DISPOSITIONS stay label-blind illustrative (the Phase-62 split). Live finale = wiring + the Phase-57-backend checkpoint; honest value framing = grounding/clarity/defensibility, NOT catch-rate. 3 emission gaps handled in signal-watch (NOT a substrate change): synthetic display identity over real KYC; cross-account display aggregation; the txn-edge network. Grounded against aml-substrate@f90bd39 + aml-casework@c6d8401 + corpus@472b44e.
+> Abort: any dist drifts / build.py imports aml_substrate or aml_casework → STOP-and-surface. The substrate emit isn't as rich/deterministic as verified → STOP at the T1 emit-checkpoint, fall back to a bounded curated set (do NOT hand-fabricate at population scale). The Phase-57 live backend needs real debugging beyond creds → surface as a FINDING (do not silently absorb). A keys/token reaches the browser → out of bounds (Phase-57 §4.5).
+
 <!-- phase:phase-62-grounded-probe-history-consume -->
 <!-- gate-log:phase-62 direction=approved delivery=accepted -->
 

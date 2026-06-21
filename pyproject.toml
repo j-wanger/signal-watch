@@ -1,0 +1,25 @@
+# signal-watch is NOT a Python package — the SHIP artifacts are self-contained offline HTML (dist/*);
+# NO Python ships. `scripts/` are build/authoring-time tools, tested DEP-FREE via `--selftest`. This
+# pyproject declares ONLY the dev/authoring toolchain so `uv run pytest` runs the suite (parity with the
+# sibling Python pillars). There is intentionally no `src/` and no runtime dependency.
+[project]
+name = "signal-watch"
+version = "0.0.0"
+description = "AML vision demo — self-contained offline HTML deliverables + dep-free Python authoring tooling."
+requires-python = ">=3.10"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.uv]
+# do NOT try to build/install signal-watch as a package — there is no src/ and nothing Python ships.
+package = false
+
+[tool.pytest.ini_options]
+# pytest is an UMBRELLA over the real, dep-free mechanism: tests/test_selftests.py shells out to each
+# `scripts/*.py --selftest` (stdlib) and `node tests/*.test.mjs` (zero-dep). Only test_*.py is collected
+# so the script-style tests/news_live_test.py (run via `python3 …`) is not mis-collected.
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra"

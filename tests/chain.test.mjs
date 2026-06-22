@@ -211,13 +211,15 @@ T.selectCase('CASE-P-0010361');
 const pickerH = ELEMENTS.run._html;
 ok(/data-backend="stub"/.test(pickerH) && /data-backend="claude"/.test(pickerH) && /data-backend="openai"/.test(pickerH),
    'picker renders a button per backend');
-ok(/data-backend="opencode"[^>]*disabled/.test(pickerH) && /n\/a/.test(pickerH),
-   'an unavailable backend renders disabled + "n/a" (no endpoint/key server-side)');
+const ocBtnC = (pickerH.match(/data-backend="opencode"[^>]*>/)||[''])[0];
+ok(!/disabled/.test(ocBtnC) && /server n\/a/.test(pickerH),
+   'an unavailable backend renders ENABLED (selectable) + "server n/a", not greyed — the consume stage then shows "requested X → stub"');
 ok(T.getBACKEND()==='stub', 'default backend is the config default (stub)');
 T.pickBackend('openai');
 ok(T.getBACKEND()==='openai', 'pickBackend selects an AVAILABLE backend');
 T.pickBackend('opencode');
-ok(T.getBACKEND()==='openai', 'pickBackend IGNORES an unavailable backend (stays on the prior pick)');
+ok(T.getBACKEND()==='opencode', 'pickBackend now selects an UNAVAILABLE backend too (it runs the stub + the consume says so)');
+T.pickBackend('stub');  // reset
 
 /* ---------- the picked backend is sent on /run (a NAME, not a cred) ---------- */
 T.pickBackend('claude');

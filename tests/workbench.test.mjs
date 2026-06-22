@@ -256,6 +256,25 @@ ok(st.RUN && st.RUN.done && st.RUN.running === false, 'the decision settles (don
 /* the picked backend NAME is POSTed to /run (never a cred) */
 ok(LAST_RUN_BODY && LAST_RUN_BODY.case === 'CASE-P-MULE', 'runDecision POSTs the case to /run');
 
+/* a NEURAL backend the server didn't actually run → a LOUD "server unavailable, ran the stub" banner
+   (the "all enabled, say unavailable" UX), distinguishing not-configured from a configured-but-failed draft.
+   (a) UNCONFIGURED (opencode is available:false here) → "not configured" + the env NAME (never a value, §4.5) */
+T.pickBackend('opencode');
+T.setState({ SEL:'CASE-P-MULE', DETAIL:MULE_DETAIL, RUN:null });
+RUN_CHUNKS = ndjsonChunks(RUN_MSGS, 35);   // consume settles drafter_effective:'stub' → it fell back
+await T.runDecision();
+const banner = (ELEMENTS.surf._html.match(/<div class="srvna">[\s\S]*?<\/div>/)||[''])[0];
+ok(banner && /not configured/.test(banner), 'an UNCONFIGURED backend that ran the stub shows the prominent "server unavailable" banner (no silent stub-as-neural)');
+ok(/OPENCODE_SERVE_URL/.test(banner) && !/sk-[A-Za-z0-9]{6,}/.test(banner), 'the banner names the env var to set — a NAME, never a credential value (§4.5)');
+/* (b) a CONFIGURED backend (claude available:true) that still fell back → "live draft failed", NOT "not configured" */
+T.pickBackend('claude');
+T.setState({ SEL:'CASE-P-MULE', DETAIL:MULE_DETAIL, RUN:null });
+RUN_CHUNKS = ndjsonChunks(RUN_MSGS, 35);
+await T.runDecision();
+const banner2 = (ELEMENTS.surf._html.match(/<div class="srvna">[\s\S]*?<\/div>/)||[''])[0];
+ok(banner2 && /live draft failed/.test(banner2) && !/not configured/.test(banner2), 'a CONFIGURED backend that fell back says the live draft failed — the honest distinction, not "not configured"');
+T.pickBackend('stub');  // reset
+
 /* ---------- BEAT 3 (fail-closed): the defensibility climax — casework REFUSES a composed mule ---------- */
 const VIOLS = ['grounding_replay: alerts[AL-x].replay(C3): only 0 cited outflow(s); the fan-out pattern needs >=5',
                'grounding_replay: alerts[AL-y].replay(C15): no shell pattern in the cited evidence'];
@@ -298,10 +317,12 @@ ok(T.backendLabel('stub')==='deterministic stub' && /claude/.test(T.backendLabel
 T.setState({ SEL:'CASE-P-MULE', DETAIL:MULE_DETAIL, RUN:null }); T.paintSurface();
 const pk = ELEMENTS.surf._html;
 ok(/data-backend="stub"/.test(pk) && /data-backend="claude"/.test(pk), 'the picker renders a button per backend');
-ok(/data-backend="opencode"[^>]*disabled/.test(pk) && /n\/a/.test(pk), 'an unavailable backend is disabled + "n/a"');
+const ocBtn = (pk.match(/data-backend="opencode"[^>]*>/)||[''])[0];
+ok(!/disabled/.test(ocBtn) && /server n\/a/.test(pk), 'an unavailable backend is shown ENABLED (selectable) + marked "server n/a" — not greyed/disabled');
 ok(T.getState().BACKEND === 'stub', 'default backend is the config default (stub)');
 T.pickBackend('openai'); ok(T.getState().BACKEND === 'openai', 'pickBackend selects an available backend');
-T.pickBackend('opencode'); ok(T.getState().BACKEND === 'openai', 'pickBackend ignores an unavailable backend');
+T.pickBackend('opencode'); ok(T.getState().BACKEND === 'opencode', 'pickBackend now selects an UNAVAILABLE backend too (it will run the stub + say so)');
+T.pickBackend('stub');  // reset for the run tests below
 
 /* ---------- loadQueue via the shimmed /cases endpoint ---------- */
 CASES_RESPONSE = { badge:'Illustrative data & outputs', meta:META, cases:QUEUE };

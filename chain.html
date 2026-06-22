@@ -248,14 +248,13 @@ function pickerHTML(){
   const running = !!(STATE && STATE.running);
   return `<div class="picker" id="picker"><span class="pl">Drafter</span>${backends.map(b => {
     const sel = b.name === BACKEND, off = !b.available;
-    return `<button class="pbtn${sel?' sel':''}${off?' off':''}" data-backend="${esc(b.name)}"${(off||running)?' disabled':''}${off?' title="no endpoint/key server-side"':''}>${esc(backendLabel(b.name))}${off?' · n/a':''}</button>`;
+    return `<button class="pbtn${sel?' sel':''}${off?' off':''}" data-backend="${esc(b.name)}"${running?' disabled':''}${off?' title="server not configured — selecting it runs the deterministic stub; set the endpoint/key server-side and relaunch to enable the live model"':''}>${esc(backendLabel(b.name))}${off?' · server n/a':''}</button>`;
   }).join('')}</div>`;
 }
 function pickBackend(name){
   if (STATE && STATE.running) return;          // never switch mid-run (single-flight)
-  const dr = CFG.drafter || {};
-  const avail = (dr.available || ['stub']);
-  if (avail.indexOf(name) < 0) return;          // unavailable backends are not selectable
+  // every backend is selectable; an unconfigured one runs the stub and the consume stage says so
+  // ("requested X → stub") rather than the option being greyed out with no explanation.
   BACKEND = name; setDraftChip(); paint();
 }
 

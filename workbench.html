@@ -183,7 +183,8 @@
   .pbtn{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:6px 11px;cursor:pointer;transition:.15s}
   .pbtn:hover:not(:disabled){border-color:var(--teal);color:var(--ink)}
   .pbtn.sel{border-color:var(--signal);color:var(--ink);box-shadow:0 0 0 1px var(--signal) inset}
-  .pbtn.off{opacity:.4;cursor:not-allowed}
+  .pbtn.off{opacity:.6;border-style:dashed}
+  .srvna{margin-top:8px;padding:8px 11px;border:1px solid rgba(246,166,35,.45);background:rgba(246,166,35,.08);border-radius:8px;color:var(--signal);font-family:var(--mono);font-size:11px;line-height:1.55}
 
   .chain{position:relative;margin:18px 0 4px;padding-left:30px}
   .chain::before{content:"";position:absolute;left:10px;top:8px;bottom:18px;width:2px;background:var(--line2)}
@@ -646,7 +647,8 @@ function gatherStagesHTML(){
   if(!tools.length) return GATHER&&GATHER.running?'<div class="gchip">querying the synthetic corpus…</div>':'';
   const chips=tools.map(s=>`<span class="gchip${s.skipped?' skip':''}">${esc(toolLabel(s.tool))} · ${esc(s.n_records||0)} record${(s.n_records===1)?'':'s'}</span>`).join('');
   const be=st.find(s=>s.stage==='backend');
-  const note=(be&&be.note)?`<div class="gnote">↳ ${esc(be.note)}</div>`:'';
+  const fell=!!(be&&be.requested&&be.requested!=='stub'&&be.effective==='stub');  // picked a model, ran the stub
+  const note=(be&&be.note)?`<div class="${fell?'srvna':'gnote'}">${fell?'⚠ ':'↳ '}${esc(be.note)}</div>`:'';
   return `<div class="gstages">${chips}</div>${note}`;
 }
 function gatherResultHTML(){
@@ -705,13 +707,13 @@ function pickerHTML(){
   const running=!!(RUN&&RUN.running);
   return `<div class="picker" id="picker"><span class="pl">Drafter</span>${backends.map(b=>{
     const sel=b.name===BACKEND, off=!b.available;
-    return `<button class="pbtn${sel?' sel':''}${off?' off':''}" data-backend="${esc(b.name)}"${(off||running)?' disabled':''}${off?' title="no endpoint/key server-side"':''}>${esc(backendLabel(b.name))}${off?' · n/a':''}</button>`;
+    return `<button class="pbtn${sel?' sel':''}${off?' off':''}" data-backend="${esc(b.name)}"${running?' disabled':''}${off?' title="server not configured — selecting it runs the deterministic stub; set the endpoint/key server-side and relaunch to enable the live model"':''}>${esc(backendLabel(b.name))}${off?' · server n/a':''}</button>`;
   }).join('')}</div>`;
 }
 function pickBackend(name){
   if(RUN&&RUN.running) return;
-  const avail=(CFG.drafter&&CFG.drafter.available)||['stub'];
-  if(avail.indexOf(name)<0) return;
+  // every backend is selectable; an unconfigured one runs the deterministic stub and the result says so
+  // ("server unavailable") rather than the option being greyed out with no explanation.
   BACKEND=name; setDraftChip(); paintSurface();
 }
 function decideBarHTML(){
@@ -731,10 +733,19 @@ function stageBody(key){
   if(key==='consume'&&d.status!=='running'&&(d.drafter_effective||d.drafter)){
     const eff=d.drafter_effective||d.drafter, comp=d.completeness||{};
     const els=Object.keys(comp).filter(k=>comp[k]===true);
+    // a NEURAL backend was picked but the consume ran the stub → the server isn't configured for it. Say so
+    // LOUDLY (env-var NAMES only — never a value; §4.5), so a stub result is never mistaken for the model's.
+    const avail=(CFG.drafter&&CFG.drafter.available)||['stub'];
+    const envHint={claude:'ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN',openai:'OPENAI_BASE_URL',opencode:'OPENCODE_SERVE_URL'}[BACKEND]||'the backend endpoint/key';
+    const fellBack=(BACKEND&&BACKEND!=='stub'&&eff==='stub');   // a model was picked but the stub ran
+    const why=avail.indexOf(BACKEND)<0
+      ? `is not configured on this server — set ${esc(envHint)} server-side and relaunch to enable it`
+      : 'did not run (the live draft failed server-side) — see the note below';
+    const unavail=fellBack?`<div class="srvna">⚠ <b>${esc(backendLabel(BACKEND))}</b> ${why}. Ran the deterministic stub instead.</div>`:'';
     const note=d.note?`<div style="color:var(--signal);font-family:var(--mono);font-size:11px;margin-top:6px">↳ ${esc(d.note)}</div>`:'';
     const viols=(d.blocking_violations||[]);
     const refusal=(!d.signed&&viols.length)?`<div class="vlist" style="flex-direction:column;gap:6px;margin-top:8px">${viols.map(v=>`<span class="vchk" style="color:var(--rose);border-color:rgba(239,96,121,.3)">✗ ${esc(v)}</span>`).join('')}</div>`:'';
-    return `<div>Backend <b style="color:var(--teal)">${esc(backendLabel(eff))}</b> · ${d.signed?'<span class="chk">✓ signed</span>':'<span class="chk no">✗ refused</span>'} · ${esc(viols.length)} blocking</div>${note}
+    return `${unavail}<div>Backend <b style="color:var(--teal)">${esc(backendLabel(eff))}</b> · ${d.signed?'<span class="chk">✓ signed</span>':'<span class="chk no">✗ refused</span>'} · ${esc(viols.length)} blocking</div>${note}
       <div style="font-size:12px;color:var(--faint);margin-top:6px">The six Class-G verifiers disposed the draft — the gate is the oracle on whatever the backend wrote.</div>
       <div class="vlist">${els.map(e=>`<span class="vchk">✓ ${esc(e)}</span>`).join('')}</div>${refusal}`;
   }

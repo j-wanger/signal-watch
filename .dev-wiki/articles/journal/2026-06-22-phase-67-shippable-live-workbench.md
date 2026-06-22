@@ -60,3 +60,22 @@ casework. A composed mule still `fail_closed`s at the verifier — the designed 
   (a non-enforcement path) points at a sibling path that won't resolve from the vendored location — harmless
   (the enforcement path uses the vendored snapshot), worth knowing if casework's drift check is ever relied on.
 - Grounded against signal-watch HEAD (Phase-66 `0fa3830` + the doc-hygiene `7340012`) and aml-casework@`81df91c`.
+
+### Review Gate (dev-debrief Step 5 — size-gated, 4 tasks → unified reviewer)
+
+**Score 10/10 · verdict: accept · no issues.** The reviewer independently re-verified the load-bearing
+claims by running commands: `build.py` imports no casework/vendor (grep empty); `--check all` 8/8 ZERO
+dist drift; the consume is a subprocess/file-handoff (no import); the vendored content is casework's 15
+.py modules + signal-watch's own public-domain FinCEN-alert derived records (no PII / customer / txn data);
+`CASEWORK_DIR` resolves to the vendored copy with no env; and the headline holds — multiple cases sign a
+SAR fully OFFLINE through the vendored casework with all model/sibling env unset, while composed mules
+fail-close at the C3 grounding_replay verifier (the documented climax). Two non-blocking suggestions:
+(1) self-document the `fixtures/corpus` coupling next to that rsync — *already covered* by the comment
+above the line; (2) the `make setup` echo points at `serve_workbench.py` while the resolution logic lives
+in `serve_chain.py` (discoverability only — fine as-is). No HIGH+ findings; no inline fixes required.
+
+### Gate Compliance + Assumption-Ledger Revisit (Step 21)
+
+`gate-log:phase-67 direction=approved delivery=accepted` — compliant (2-gate ceremony). The Phase-67
+ledger block's A0–A4 all carry a filled `revisit-status` (HELD/PROVEN, with verification detail) — no
+blank rows. Cooldown: 2 phases (66 + 67) completed this session → a fresh session is advised for Phase 68.

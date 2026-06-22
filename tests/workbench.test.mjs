@@ -248,7 +248,7 @@ const f = ELEMENTS.surf._html;
 ok((f.match(/class="node /g)||[]).length === 4, 'the decision ledger has the four canonical stage nodes');
 ok(/class="node connected"/.test(f), 'the streamed finale reaches the CONNECTED node');
 ok((f.match(/class="vchk"/g)||[]).length === 6, 'the consume stage lists the six completeness elements (the verifier gate)');
-ok(/Signed SAR/.test(f) && /multi-typology pattern/.test(f), 'the signed-SAR narrative renders');
+ok(/Signed STR/.test(f) && /multi-typology pattern/.test(f), 'the signed-STR narrative renders');
 ok(f.includes(escH('<not a tag>')), 'XSS: the model narrative is esc()-escaped');
 const st = T.getState();
 ok(st.RUN && st.RUN.done && st.RUN.running === false, 'the decision settles (done payload, not running)');
@@ -300,7 +300,7 @@ ok(/escalate to a human/.test(fc) && /That refusal is the defensibility/.test(fc
 ok(/replay\(C3\)/.test(fc) && /replay\(C15\)/.test(fc), 'fail-closed: the disposition panel lists the blocking violations (the honest reason)');
 ok(/⊘ skipped/.test(fc), 'fail-closed: the verify stage renders as skipped (the join is moot), not failed');
 ok(!/class="err"/.test(fc), 'fail-closed is a DISPOSITION, not an error banner (no crash framing)');
-ok(!/Signed SAR/.test(fc), 'fail-closed renders NO signed-SAR card');
+ok(!/Signed STR/.test(fc), 'fail-closed renders NO signed-STR card');
 const fcst = T.getState();
 ok(fcst.RUN && fcst.RUN.done && fcst.RUN.done.fail_closed === true && fcst.RUN.running === false,
    'the fail-closed decision settles (fail_closed payload, not running, not errored)');

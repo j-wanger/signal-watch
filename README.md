@@ -33,12 +33,12 @@ opened with no server:
 
 **One companion-only investigator workbench** (`workbench.html`, served — **not** a ship/build target):
 the clutter → signals → decide arc over a vendored case population, with an agentic GATHER beat and a
-cross-pillar signed-SAR finale.
+cross-pillar signed-STR finale.
 
 > **Shippable vs companion — the whole dependency story in one place.** The **five ship artifacts above are
 > the deliverable, fully self-contained**: a browser opens them, zero external dependencies (verified by an
 > isolated clone with no sibling repos present). The **investigator workbench is a companion**, but it too is
-> now shippable from a bare clone — its DECIDE signed-SAR finale runs `aml-casework`, which is **vendored** into
+> now shippable from a bare clone — its DECIDE signed-STR finale runs `aml-casework`, which is **vendored** into
 > `vendor/aml-casework/` and built by a cross-platform `python scripts/setup_workbench.py` (Windows/mac/Linux;
 > no sibling repo; offline; a model is optional, see below).
 > `build.py` never imports a sibling and the offline artifacts are byte-frozen, so vendoring is a *distribution*
@@ -68,7 +68,7 @@ python3 scripts/build.py --check all  # drift guard — committed dist == a fres
 
 Each is a thin server on `localhost` that reads committed data and **persists nothing**.
 
-The **investigator workbench** has a one-time setup — its DECIDE signed-SAR finale runs the **vendored**
+The **investigator workbench** has a one-time setup — its DECIDE signed-STR finale runs the **vendored**
 `aml-casework` pipeline (`vendor/aml-casework/`), so build that venv once (needs **Python ≥3.11 + uv** [or
 pip], and network the first time). The setup is a **cross-platform Python script** — no `make`, no Unix
 shell — so it runs the same on Windows / macOS / Linux:
@@ -93,8 +93,8 @@ python3 scripts/serve_corpus.py        # → http://localhost:8010   live corpus
 **`127.0.0.1:8080`** by default, so just start your model there and **pick "openai"** in the workbench — no env
 needed. Set `OPENAI_BASE_URL` **only to override** the host/port (e.g. a different port), or set an Anthropic
 key for the "claude" backend — both **server-side** (the browser never sees them). Without any model, GATHER
-and the SAR narrative fall back to the deterministic
-stub with a named note — and the casework pipeline still shapes / signs / verifies the SAR **offline**. The
+and the STR narrative fall back to the deterministic
+stub with a named note — and the casework pipeline still shapes / signs / verifies the STR **offline**. The
 vendored casework copy is pinned in `vendor/aml-casework/VENDORED_AT`; refresh it (POSIX maintainer) with
 `scripts/vendor_casework.sh`, which rebuilds the wheel.
 

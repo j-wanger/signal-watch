@@ -6,7 +6,7 @@ regenerate-against-verifier-feedback loop. Each attempt: draft -> fill the seam 
 (``signoff.run_verifiers``). A clean candidate is returned; a violating candidate's violations are fed
 back to the drafter and it regenerates, up to ``MAX_DRAFT_ATTEMPTS``. If the drafter refuses or no attempt
 verifies, the seam is left OPEN — fail-closed; the chain then reports ``needs_more_info``, never a filed
-SAR. The "judge" is the deterministic verifier chain, never a neural judge (a stronger, deterministic form
+STR. The "judge" is the deterministic verifier chain, never a neural judge (a stronger, deterministic form
 of the "Agent-as-a-Judge" guardrail).
 
 The Drafter is the boundary where a real LLM adapter (``ClaudeDrafter``, a later increment) or a
@@ -23,14 +23,20 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Protocol
 
-from aml_casework.contract import cited_transactions
+from aml_casework.contract import (
+    ACTION_FILED_TO,
+    ACTION_TIPPING_OFF_NOTE,
+    cited_transactions,
+    crime_type_for,
+    transaction_summary,
+)
 from aml_casework.signoff import flatten_violations, run_verifiers
 
 _log = logging.getLogger(__name__)
 
 # How many times the drafter may regenerate against verifier feedback before the generator fails closed.
 # Pinned: the loop is BOUNDED (no infinite regenerate), and a draft that cannot be made groundable within
-# this many tries leaves the seam OPEN — never a filed SAR.
+# this many tries leaves the seam OPEN — never a filed STR.
 MAX_DRAFT_ATTEMPTS = 3
 
 
@@ -76,13 +82,68 @@ def _build_context(bundle: dict[str, Any]) -> GenerationContext:
     )
 
 
+def build_str_blocks(bundle: dict[str, Any]) -> dict[str, Any]:
+    """Assemble the deterministic FINTRAC STR structured blocks from the bundle — SYSTEM-STAMPED, never
+    model-authored (the Phase-66 lesson: a real model fabricates structured facts — pct, direction, names).
+    Every value is bundle-grounded or HONEST-NULL; the no-PII bundle yields null name/aliases/BO/IP/VC. The
+    aggregate total lives here as a structured integer (``transaction_summary.total_cited_amount_cents``),
+    grounded by recomputation — the figure the gated prose deliberately never prints. Attached at the seam
+    (``_apply_draft``) regardless of which drafter produced the prose, so it cannot diverge by backend."""
+    subject = bundle.get("subject", {})
+    ts = transaction_summary(bundle)
+    txns = cited_transactions(bundle)
+    counterparties = {(t.get("counterparty_account_id") or t.get("counterparty_ref")) for t in txns}
+    refs = sorted(r for r in counterparties if r is not None)
+    return {
+        "crime_type": crime_type_for(bundle),
+        "reporting_entity": {
+            # The reporting entity's identity/sector is the FILER's, supplied at filing time — NOT carried
+            # by this evidence bundle. Honest-NULL unless the bundle declares it (it never does today); the
+            # demo frames "financial entity" at the UI layer, not as a fabricated structured fact.
+            "entity_type": bundle.get("reporting_entity", {}).get("entity_type"),
+            "entity_ref": None,
+            "illustrative": bundle.get("illustrative"),
+        },
+        "subject": {
+            "customer_id": subject.get("customer_id"),
+            "account_ids": list(subject.get("account_ids", [])),
+            "name": subject.get("name"),
+            "aliases": [],
+            "beneficial_ownership": None,
+            "ip_addresses": [],
+            "vc_addresses": [],
+            "emt_details": None,
+            "date_of_birth": None,
+        },
+        "transaction_summary": dict(ts),  # carries disposition (honest-NULL unless a txn declares one)
+        "action_taken": {
+            "filing_disposition": None,  # set post-signoff by ingest.build_signed_sar (the human's act)
+            "filed_to": ACTION_FILED_TO,
+            "tipping_off_guard": ACTION_TIPPING_OFF_NOTE,
+            "account_action": None,
+        },
+        "relationships": {
+            "counterparty_count": ts["counterparty_count"],
+            "counterparty_refs": refs,
+            "counterparty_country": None,
+            "named_relationships": [],
+        },
+    }
+
+
 def _apply_draft(bundle: dict[str, Any], draft: Draft) -> dict[str, Any]:
-    """Return a NEW bundle with the three seam fields filled from the draft (the input is not mutated)."""
+    """Return a NEW bundle with the seam fields filled from the draft plus the deterministic FINTRAC STR
+    structured blocks attached (the input is not mutated).
+
+    The drafter authored ONLY ``narrative`` + ``narrative_claims`` (the one neural step). The structured
+    blocks + crime_type are recomputed from the bundle and ATTACHED here — so they are identical regardless
+    of backend AND any model-supplied block is OVERWRITTEN (the Phase-66 fabrication guard)."""
     result = copy.deepcopy(bundle)
     record = result.setdefault("str_record", {})
     record["narrative"] = draft.narrative
     record["narrative_claims"] = draft.narrative_claims
     record.setdefault("completeness", {})["grounds_for_suspicion_narrative"] = True
+    record.update(build_str_blocks(bundle))  # system-stamped; overwrites any model-supplied block
     return result
 
 

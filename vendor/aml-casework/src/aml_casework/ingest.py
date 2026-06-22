@@ -15,7 +15,7 @@ is never mutated (read-as-data; deepcopy).
 
 Phase 7 adds the CLI (``python -m aml_casework.ingest <bundle> --out <signed> [--drafter stub|claude] …``):
 a stable command-line entrypoint signal-watch's chain workbench subprocesses per case. It validates FIRST
-(the schema gate), runs the Phase-6 chain with a runtime-chosen drafter, emits the signed SAR, and prints a
+(the schema gate), runs the Phase-6 chain with a runtime-chosen drafter, emits the signed STR, and prints a
 one-line JSON summary so the caller can stage-stream without re-parsing the file. The boundary stays
 subprocess + file-handoff — neither pillar imports the other.
 """
@@ -30,7 +30,7 @@ import urllib.error
 from typing import Any
 
 from aml_casework.contract import load_bundle, validate_bundle
-from aml_casework.drafter_stub import DeterministicDrafter
+from aml_casework.drafter_stub import RichDeterministicDrafter
 from aml_casework.narrative_generator import Drafter, generate_narrative
 from aml_casework.signoff import record_signoff
 
@@ -78,7 +78,7 @@ def load_real_bundle(path: str) -> dict[str, Any]:
 
 
 def build_signed_sar(generated_bundle: dict[str, Any], signoff_record: dict[str, Any]) -> dict[str, Any]:
-    """The generated (seam-filled) bundle plus a ``signoff`` block — the SIGNED SAR artifact the
+    """The generated (seam-filled) bundle plus a ``signoff`` block — the SIGNED STR artifact the
     cross-pillar harness (signal-watch ``e2e_chain_check --real``, B/C side) reads. Pure: returns a new
     object. The signoff block mirrors the keys the harness checks (``signed`` true + empty
     ``blocking_violations``), carrying the signer/ts/disposition for provenance."""
@@ -90,11 +90,16 @@ def build_signed_sar(generated_bundle: dict[str, Any], signoff_record: dict[str,
         "disposition": signoff_record["disposition"],
         "blocking_violations": signoff_record["blocking_violations"],
     }
+    # Phase 13: stamp the human signer's disposition into the FINTRAC STR action_taken block (when present),
+    # so the signed STR records the filing decision. The contract validates filing_disposition == this.
+    action = sar.get("str_record", {}).get("action_taken")
+    if isinstance(action, dict):
+        action["filing_disposition"] = signoff_record["disposition"]
     return sar
 
 
 def emit_signed_sar(generated_bundle: dict[str, Any], signoff_record: dict[str, Any], path: str) -> dict[str, Any]:
-    """Write the signed SAR (see :func:`build_signed_sar`) to ``path`` as JSON. Returns the written object."""
+    """Write the signed STR (see :func:`build_signed_sar`) to ``path`` as JSON. Returns the written object."""
     sar = build_signed_sar(generated_bundle, signoff_record)
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(sar, fh, indent=2, ensure_ascii=False)
@@ -149,7 +154,7 @@ def _generate_with_drafter(bundle: dict[str, Any], drafter_name: str) -> tuple[d
     the (server-side) environment, never passed here."""
 
     def _stub(note: str | None) -> tuple[dict[str, Any], str, str | None]:
-        return generate_narrative(bundle, DeterministicDrafter(bundle)), "stub", note
+        return generate_narrative(bundle, RichDeterministicDrafter(bundle)), "stub", note
 
     if drafter_name == "stub":
         return _stub(None)
@@ -168,10 +173,10 @@ def _generate_with_drafter(bundle: dict[str, Any], drafter_name: str) -> tuple[d
 def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="python -m aml_casework.ingest",
-        description="Consume a substrate evidence bundle -> a signed SAR (the chain-workbench entrypoint).",
+        description="Consume a substrate evidence bundle -> a signed STR (the chain-workbench entrypoint).",
     )
     parser.add_argument("bundle", help="path to the substrate evidence bundle (JSON), read as data")
-    parser.add_argument("--out", required=True, help="path to write the signed SAR (JSON)")
+    parser.add_argument("--out", required=True, help="path to write the signed STR (JSON)")
     parser.add_argument(
         "--drafter",
         choices=("stub", "claude", "openai", "opencode"),
@@ -188,7 +193,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
 
 def main(argv: list[str]) -> int:
     """Run the consume chain end-to-end. Exit 0 iff the record is signed with no blocking violations; a
-    schema-invalid bundle fails loud at the validator (the violations to stderr) and never produces a SAR.
+    schema-invalid bundle fails loud at the validator (the violations to stderr) and never produces an STR.
 
     print() IS the legitimate channel here (this is the CLI boundary): a single JSON summary line to stdout
     (serve_chain.py reads it to stage-stream), validator violations to stderr. The no-print rule targets

@@ -24,17 +24,17 @@ python3 tests/test_chain.py                 # SIGNED slice walks all 6 verifiers
 python3 tests/test_strata.py                # the disposition strata: conflict / data-gap / both-defensible
 python3 tests/test_corpus_drift.py          # advisory: has the live corpus drifted off the vendored pin?
 python3 tests/test_ingest.py                # the boundary adapter: reconcile a REAL Pillar-1 txn shape
-python3 tests/test_real_ingest_chain.py     # the REAL multi-typology bundle -> signed SAR (the chain end-to-end)
+python3 tests/test_real_ingest_chain.py     # the REAL multi-typology bundle -> signed STR (the chain end-to-end)
 
 # the 6th verifier + the neural generator (widened across the strata) run under the suite (pytest-only):
 uv run pytest                               # the full deterministic suite — stub drafters, no network
 uv run pytest -m integration                # demos: the real model drafts per stratum behind the gates (needs ANTHROPIC_API_KEY)
 
-# the consume CLI (Phase 7): take a substrate bundle -> a signed SAR, choosing the drafter at runtime.
+# the consume CLI (Phase 7): take a substrate bundle -> a signed STR, choosing the drafter at runtime.
 # This is the chain-workbench entrypoint signal-watch's serve_chain.py subprocesses per case. It validates
-# FIRST, runs the 6-verifier chain, emits the signed SAR, prints a one-line JSON summary, exits 0 iff signed.
+# FIRST, runs the 6-verifier chain, emits the signed STR, prints a one-line JSON summary, exits 0 iff signed.
 python -m aml_casework.ingest fixtures/evidence/real/CASE-P-0010361.json \
-  --out fixtures/evidence/real/CASE-P-0010361-signed.json --drafter stub   # reproduces the committed signed SAR
+  --out fixtures/evidence/real/CASE-P-0010361-signed.json --drafter stub   # reproduces the committed signed STR
 # -> {"case_id": "...", "drafter": "stub", "drafter_effective": "stub", "signed": true, "blocking_violations": [], "out": "..."}
 #   --drafter claude  uses the live model (server-side ANTHROPIC_API_KEY); fail-soft -> stub on any error,
 #                     reporting drafter_effective. The deterministic stub drives CI; claude is one excluded demo.
@@ -47,7 +47,7 @@ python3 ../signal-watch/scripts/e2e_chain_check.py --real \
 
 ## Status
 
-Phase 1 — the deterministic chain to a signed SAR over the real-grounded thin slice. Five Class-G
+Phase 1 — the deterministic chain to a signed STR over the real-grounded thin slice. Five Class-G
 verifiers + a sign-off seam, all stdlib-only, each returning `list[str]` violations:
 
 - **Contract/referential** (`contract.validate_bundle`) — reference-by-path integrity, the narrative-seam
@@ -65,7 +65,7 @@ verifiers + a sign-off seam, all stdlib-only, each returning `list[str]` violati
   (below), snapshotting every result so the named signer is the best-informed person. Never auto-approves.
 
 The narrative here is a **structured set of cited claims** (`narrative_claims`), so citation is a deterministic
-resolution check. `case-thin-slice-01-signed.json` is the depth-first end state — a signed SAR, deterministic.
+resolution check. `case-thin-slice-01-signed.json` is the depth-first end state — a signed STR, deterministic.
 
 Phase 2 — the **disposition model** + a stratified fixture set (DESIGN §14, "never the happy path only").
 The system *represents and evidence-validates* dispositions; it **never weighs suspicion strength** —
@@ -117,7 +117,7 @@ left open — making this the only non-deterministic component in a deliberately
 - **Generator + bounded loop** (`narrative_generator.generate_narrative(bundle, drafter)`) — fills the three
   seam fields over an injected `Drafter`, wrapped in a bounded regenerate-against-verifier-feedback loop: draft
   → run the six verifiers → feed the violations back → regenerate up to `MAX_DRAFT_ATTEMPTS`, else fail-closed
-  (the seam is left open, never a filed SAR). The "judge" is the deterministic chain, not a neural one. The
+  (the seam is left open, never a filed STR). The "judge" is the deterministic chain, not a neural one. The
   function is pure (deepcopy, no I/O beyond logging), so CI injects deterministic stub drafters and the
   verifier suite stays reproducible — **the gate, not the model, is the oracle** (temperature is gone on Opus
   4.8 anyway; you cannot pin the model, so the gate is the only determinism mechanism).
@@ -151,7 +151,7 @@ adapter for stance retention.
   conflict-both-kept; the gate enforces it regardless. Per-stratum end-to-end demos are
   `@pytest.mark.integration` and excluded from CI — stub drafters drive the whole gate.
 
-Phase 6 — **consume a REAL substrate bundle → signed SAR** (the substrate→casework seam; bridge #2 of the
+Phase 6 — **consume a REAL substrate bundle → signed STR** (the substrate→casework seam; bridge #2 of the
 cross-pillar end-to-end demo). The chain had only ever run on hand-authored fixtures; pointing it at the
 real Pillar-1 emission (`CASE-P-0010361`, a 5-typology mule: C4 structuring · C3 funnel/fan · C2
 pass-through · C5 cash-placement · C15 shell) surfaced — exactly as a first real ingest should — that the
@@ -180,10 +180,10 @@ replay layer had been grounded against *invented fixture semantics*, and reconci
   `signal-watch@a75a136`) are vendored read-only under `fixtures/` (the Phase-3 pin precedent); CI runs
   deterministically without the sibling trees.
 - **End-to-end → CONNECTED** — `generate_narrative` (a deterministic stub in CI; `ClaudeDrafter` in the
-  `@pytest.mark.integration` demo) fills the seam, `record_signoff` reaches `file`, and the signed SAR
+  `@pytest.mark.integration` demo) fills the seam, `record_signoff` reaches `file`, and the signed STR
   (`fixtures/evidence/real/CASE-P-0010361-signed.json`) is emitted. signal-watch's
   `e2e_chain_check.py --real` then prints **CONNECTED**: a synthetic-substrate-detected case became a
-  verified, signed SAR whose every statement walks back through the evidence to the frozen regulator corpus.
+  verified, signed STR whose every statement walks back through the evidence to the frozen regulator corpus.
 
 Deferred: migrating the Phase 1–5 fixtures to the canonical real txn shape + tightening the contract §2 txn
 row (the ingest adapter isolates the drift for now); enriching the bundle with counterparty refs so C3 can
@@ -199,14 +199,14 @@ subprocess** — the boundary stays subprocess + file-handoff, neither pillar im
 - **The CLI** (`ingest.main`) — `python -m aml_casework.ingest <bundle> --out <signed> [--drafter stub|claude]
   [--signer …] [--ts …] [--disposition file]`. It runs `validate_bundle` **first** (a schema-drifted bundle
   fails loud + nonzero, no SAR written — never loosen the validator), reconciles the txn shape, runs the
-  6-verifier chain with the chosen drafter, emits the signed SAR, and prints a one-line JSON summary
+  6-verifier chain with the chosen drafter, emits the signed STR, and prints a one-line JSON summary
   (`case_id`, `drafter`, `drafter_effective`, `signed`, `blocking_violations`, `out`) so the caller
   stage-streams without re-parsing the file. Exit 0 iff signed with no blocking violations.
 - **The deterministic drafter** (`drafter_stub.DeterministicDrafter`) — the **first production drafter in
   `src/`** (prior drafters were test-only or demo-only). It builds a minimally-grounded draft mechanically:
   one inculpatory claim per cited signal + prose naming only the subject `account_id` and lowercase typology
   phrases — no amount, date, or named party the gate cannot ground. So it grounds for **any inculpatory-only
-  library case** without per-case authoring; the committed signed SAR is regenerated from it (single source
+  library case** without per-case authoring; the committed signed STR is regenerated from it (single source
   of truth — `python -m aml_casework.ingest … --drafter stub` reproduces it byte-for-byte). **Scope
   (documented):** inculpatory-only — an exculpatory bundle would trip conflict-both-kept and fail *closed* to
   `needs_more_info`, visibly; the documented fallback there is a per-case committed-draft replay, never a
@@ -320,7 +320,7 @@ transaction-monitoring detectors only). casework's `grounding_replay` now mirror
 - **Dispatch stays fail-closed** — `_ASSERTIONS` → `_SCREENING` → violation. Screening-grounded is **not**
   a loosening of grounded-or-dropped: an alert whose cited inflow is below the floor, whose capability is
   unregistered, or whose flag doesn't resolve to the corpus still fails closed and blocks sign-off. A
-  synthetic C7 alert (`fixtures/evidence/case-c7-screening-01.json`) reaches a **signed SAR** through all
+  synthetic C7 alert (`fixtures/evidence/case-c7-screening-01.json`) reaches a **signed STR** through all
   six verifiers; a below-floor mutation blocks it (`test_chain.py` / `test_signoff.py`).
 
 No contract or §2 schema change — the alert already carries `rule`. The entity/KYC screening siblings
@@ -355,7 +355,7 @@ Person/Organization). casework consumes it to register the first **party-grounde
   cited transactions — neither is faked. Constants are copied from the substrate's `income_mismatch.py`
   (no sibling import). Fail-closed: no resolved party, no positive declared volume, or inflow below the
   ratio/floor is a violation that blocks sign-off — screening-grounded is **not** a loosening. A synthetic
-  C8 alert (`fixtures/evidence/case-c8-screening-01.json`) reaches a **signed SAR** through all six
+  C8 alert (`fixtures/evidence/case-c8-screening-01.json`) reaches a **signed STR** through all six
   verifiers; raising the declared volume so inflow falls below 12× blocks it (`test_chain.py` /
   `test_signoff.py`).
 
@@ -368,7 +368,7 @@ extension*, not an additive change. **C26** scam is transaction-behavioral and h
 **Cross-pillar seam (real demo, pending).** The substrate fires C8/C14 in volume but does **not yet
 compose screening detections into evidence bundles** (`emit_evidence_bundles` carries only the
 transaction-monitoring alerts + the `parties` block). The **real-substrate-C8 acceptance** — a real
-composed C8 bundle through the chain → signed SAR, with casework's copied re-derivation reconciled against
+composed C8 bundle through the chain → signed STR, with casework's copied re-derivation reconciled against
 the real detector, and `reachable-now` rising off 93 — is therefore gated on a **substrate Phase 18**
 (compose C8 screening detections into bundles, an aml-substrate-repo phase). casework's contract amendment
 + `_screen_c8` + the synthetic fixture **specify** what that emission must look like.
@@ -398,7 +398,7 @@ ride the additive path C8 took. Phase 12 **widens the leaf doctrine** from *txn-
   (still fail-closed: no cited txns *and* no resolving party leaf is unsubstantiated; whether the leaf
   actually grounds stays grounding-replay's job). citation / corpus-grounding / narrative-grounding /
   sign-off needed no change. A synthetic txn-less C14 alert
-  (`fixtures/evidence/case-c14-screening-01.json`) reaches a **signed SAR** through all six verifiers; an
+  (`fixtures/evidence/case-c14-screening-01.json`) reaches a **signed STR** through all six verifiers; an
   unresolved-party or unscreened-KYC-state mutation **blocks** (`test_chain.py`, `test_signoff.py`).
 
 **C26 stays UNREGISTERED — the honest NULL.** C26 (scam) is transaction-behavioral and the substrate
@@ -414,6 +414,6 @@ Phase 10). C14 carries `behavior_emergence=absent`, so no reachable-now is claim
 **Cross-pillar sequence (casework LEADS).** casework ships the party-leaf **doctrine first**; the synthetic
 fixture **defines** the shape (framing A: `txn_ids=()` + a `party_ref`). The substrate screening-emission
 brief (Increment 3) then emits a **real composed C14 bundle to match**. That real bundle — through the
-chain to a signed SAR — is the shared **cross-pillar acceptance gate** (it lands after casework ships).
+chain to a signed STR — is the shared **cross-pillar acceptance gate** (it lands after casework ships).
 
 See `.dev-wiki/` for phase/task state and `DESIGN.md` for full doctrine.

@@ -153,6 +153,15 @@ const SUBJ = 'A-00038593';
 const DONE = {
   case:{ case_id:'CASE-P-0010361', title:'Multi-typology mule', summary:'…' },
   signed_sar:{ str_record:{
+    crime_type:'money_laundering',
+    reporting_entity:{ entity_type:null, entity_ref:null, illustrative:true },
+    subject:{ customer_id:'P-0010361', account_ids:['A-00038593'], name:null, aliases:[] },
+    transaction_summary:{ cited_txn_count:71, total_cited_amount_cents:20408570, amount_min_cents:509,
+      amount_max_cents:7156160, currencies:['CAD'], channels:['CASH','WIRE'],
+      date_range:{ first:'2024-01-01', last:'2024-03-28' }, counterparty_count:15,
+      direction_breakdown:{ CREDIT:38, DEBIT:33 }, disposition:null },
+    action_taken:{ filing_disposition:'file', filed_to:'FINTRAC', account_action:null },
+    relationships:{ counterparty_count:15, named_relationships:[] },
     narrative:'Account A-00038593 exhibits a multi-typology laundering pattern. <not a tag>',
     narrative_claims:[{ text:'Sub-$10,000 cash deposits indicate structuring.', cites:['fin-2026-alert001:IND-11'] }] } },
   audit_walk:[
@@ -179,8 +188,12 @@ RUN_CHUNKS = ndjsonChunks(RUN_MSGS, 40);   // split the first line mid-way → e
 await T.runCase();
 const finalHTML = ELEMENTS.run._html;
 ok(/class="node connected"/.test(finalHTML), 'streamed run reaches the CONNECTED node');
-ok(/Signed SAR/.test(finalHTML) && /multi-typology laundering pattern/.test(finalHTML),
-   'CONNECTED payoff renders the signed-SAR narrative');
+ok(/Signed STR/.test(finalHTML) && /multi-typology laundering pattern/.test(finalHTML),
+   'CONNECTED payoff renders the signed-STR narrative');
+ok(/Suspected offence/.test(finalHTML) && /money laundering/.test(finalHTML) && /\$204,085\.70/.test(finalHTML),
+   'the structured FINTRAC STR record renders the offence + the structured aggregate total');
+ok(/not available \(no-PII record\)/.test(finalHTML),
+   'an absent FINTRAC field (subject name) renders as an explicit honest-NULL gap, not blank');
 ok(finalHTML.includes(escH('<not a tag>')), 'XSS: the model narrative is esc()-escaped');
 ok(/Audit walk/.test(finalHTML), 'the flag→corpus audit walk renders');
 ok((finalHTML.match(/class="wrow"/g)||[]).length === 2, 'audit walk renders one row per grounded alert');

@@ -15,7 +15,7 @@ The capstone that ties the three pillars together in one investigator surface:
 - **aml-substrate** (Pillar 1) emits the evidence — real detectors firing real advisory-grounded alerts
   over real (synthetic) KYC profiles.
 - **signal-watch** renders the investigator view + the grounded signals + the precedent-confidence read.
-- **aml-casework** (Pillar 2) decides the case live — drafts + verifies a SAR, or **refuses to sign**.
+- **aml-casework** (Pillar 2) decides the case live — drafts + verifies an STR, or **refuses to sign**.
 
 ## The three beats
 
@@ -193,7 +193,7 @@ sibling-repo phase.
 ```bash
 python scripts/setup_workbench.py   # CROSS-PLATFORM (Win: python scripts\setup_workbench.py; POSIX: make setup)
                                      #   builds vendor/aml-casework/.venv from the committed wheel — Python >=3.11 + uv-or-pip, network once
-python scripts/serve_workbench.py   # http://localhost:8030 — the FULL arc incl. the DECIDE signed-SAR finale, OFFLINE, no sibling
+python scripts/serve_workbench.py   # http://localhost:8030 — the FULL arc incl. the DECIDE signed-STR finale, OFFLINE, no sibling
 #   aml-casework is VENDORED into vendor/aml-casework/ (src + a cross-platform WHEEL under dist/ + its pinned
 #   corpus snapshot under fixtures/corpus/). resolution: AML_CASEWORK_DIR > vendored > ../aml-casework > GATED;
 #   the venv-python + SIGNAL_WATCH_CORPUS are resolved cross-platform (serve_chain.casework_python/_corpus_env).

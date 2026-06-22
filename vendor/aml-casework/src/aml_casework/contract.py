@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import sys
+from collections import Counter
 from typing import Any
 
 # The STR completeness checklist Pillar 1 emits; the last element is the seam
@@ -71,6 +72,53 @@ PARTY_VIEW_FIELDS = (
     "expected_monthly_txn_count",
 )
 
+# --- Phase 13: closed vocabularies for the additive FINTRAC STR structured blocks ------------------
+# Each is a CLOSED vocab a present block value must fall within (fail-closed on an unknown value). The
+# blocks are OPTIONAL/additive (an absent block is valid); the str_record model is already STR-shaped, so
+# these formalize the FINTRAC STR information sections without renaming any existing field.
+
+# The PCMLTFA reporting-entity sectors a Canadian STR is filed by (FINTRAC sector enum, paraphrased).
+REPORTING_ENTITY_TYPES = (
+    "financial_entity",
+    "msb",
+    "securities_dealer",
+    "life_insurance",
+    "dpms",
+    "casino",
+    "real_estate",
+)
+# FINTRAC files both completed and attempted transactions; this is the TXN disposition (distinct from the
+# human signer's FILING disposition, which simply MIRRORS signoff.disposition — see _validate_action_taken).
+TXN_DISPOSITIONS = ("completed", "attempted")
+# Account action the reporting entity recorded (the no-PII synthetic bundle records none -> honest NULL).
+ACCOUNT_ACTIONS = ("none_recorded", "account_restricted", "relationship_terminated")
+# The suspected offence a str_record.crime_type may carry. SURVEYED against the committed fixtures
+# (money_laundering, kyc_integrity, None observed); terrorist_financing is the other PCMLTFA STR class.
+# None (absent) is always valid — an ungroundable crime class is honest NULL, never fabricated.
+CRIME_TYPES = ("money_laundering", "terrorist_financing", "kyc_integrity")
+# The capability -> suspected-offence map: the OFFENCE a cited alert's capability implies. The single source
+# of truth shared by crime_type_for (the stamped value), validate_bundle's crime_type agree-with-bundle arm,
+# and the drafter's offence-aware narrative — so the structured offence, the contract check, and the prose
+# can never drift. An unmapped capability implies no offence (contributes nothing -> honest NULL).
+CRIME_BY_CAPABILITY: dict[str, str] = {
+    "C2": "money_laundering",
+    "C3": "money_laundering",
+    "C4": "money_laundering",
+    "C5": "money_laundering",
+    "C7": "money_laundering",
+    "C8": "money_laundering",
+    "C15": "money_laundering",
+    "C14": "kyc_integrity",
+}
+# Fixed regulatory-constant strings the action_taken block carries (canonical here so the drafter's
+# assembler and this validator never drift). 'FINTRAC' is the statutory STR recipient; the tipping-off
+# note is a forward CONTROL/intent statement (NOT an asserted past event) paraphrasing the PCMLTFA s.8
+# prohibition on disclosing a report to the client.
+ACTION_FILED_TO = "FINTRAC"
+ACTION_TIPPING_OFF_NOTE = (
+    "This report and the intent to file it must not be disclosed to the client (PCMLTFA tipping-off prohibition)."
+)
+
 
 def _validate_parties(b: dict[str, Any]) -> list[str]:
     """Validate the optional v0.2 `parties` PartyView block -- SHAPE only (every allow-list key is
@@ -94,6 +142,139 @@ def _validate_parties(b: dict[str, Any]) -> list[str]:
     return out
 
 
+# --- Phase 13: the additive FINTRAC STR structured blocks (under str_record) -----------------------
+# Each validator mirrors `_validate_parties`: an ABSENT block is valid (additive/back-compat); a PRESENT
+# block is validated SHAPE + AGREE-WITH-BUNDLE (a stored value that disagrees with the bundle's own facts
+# is a violation — a structured field is grounded-or-empty, never fabricated). Unknown extra keys are
+# tolerated. The blocks live under str_record, so each reads `b["str_record"].get(<block>)`.
+
+
+def _str_block(b: dict[str, Any], name: str) -> Any:
+    return b.get("str_record", {}).get(name)
+
+
+def _validate_reporting_entity(b: dict[str, Any]) -> list[str]:
+    block = _str_block(b, "reporting_entity")
+    if block is None:
+        return []
+    if not isinstance(block, dict):
+        return [f"str_record.reporting_entity: must be an object (got {type(block).__name__})"]
+    out: list[str] = []
+    et = block.get("entity_type")
+    if et is not None and et not in REPORTING_ENTITY_TYPES:
+        out.append(f"str_record.reporting_entity: entity_type '{et}' not in {REPORTING_ENTITY_TYPES}")
+    if "illustrative" in block and block["illustrative"] != b.get("illustrative"):
+        out.append("str_record.reporting_entity: 'illustrative' disagrees with bundle.illustrative")
+    return out
+
+
+def _validate_subject_block(b: dict[str, Any]) -> list[str]:
+    block = _str_block(b, "subject")
+    if block is None:
+        return []
+    if not isinstance(block, dict):
+        return [f"str_record.subject: must be an object (got {type(block).__name__})"]
+    out: list[str] = []
+    subject = b.get("subject", {})
+    if "customer_id" in block and block["customer_id"] != subject.get("customer_id"):
+        out.append("str_record.subject: customer_id disagrees with bundle.subject.customer_id")
+    acct_ids = set(subject.get("account_ids", []))
+    for aid in block.get("account_ids", []):
+        if aid not in acct_ids:
+            out.append(f"str_record.subject: account_id '{aid}' not in bundle.subject.account_ids")
+    # A name may appear ONLY when the bundle actually carries it (grounded-or-empty at the contract): the
+    # no-PII substrate emits name=None, so a non-null name disagreeing with the bundle is a fabrication.
+    name = block.get("name")
+    if name is not None and name != subject.get("name"):
+        out.append("str_record.subject: name disagrees with bundle.subject.name (a name may appear only when grounded)")
+    for list_field in ("aliases", "ip_addresses", "vc_addresses"):
+        if list_field in block and not isinstance(block[list_field], list):
+            out.append(f"str_record.subject: '{list_field}' must be a list")
+    return out
+
+
+def _validate_transaction_summary(b: dict[str, Any]) -> list[str]:
+    block = _str_block(b, "transaction_summary")
+    if block is None:
+        return []
+    if not isinstance(block, dict):
+        return [f"str_record.transaction_summary: must be an object (got {type(block).__name__})"]
+    out: list[str] = []
+    expected = transaction_summary(b)
+    # Agree-by-recomputation: every present roll-up field must equal the value recomputed from the cited
+    # transactions (the single-source-of-truth helper) — a tampered aggregate (incl. the structured total)
+    # fails closed. The aggregate sum is grounded HERE, never as a prose $ atom.
+    # Every roll-up field (incl. direction_breakdown + disposition) is AGREE-BY-RECOMPUTE: the recomputed
+    # value fully grounds it, so a tampered / fabricated / extra / missing entry fails equality and closes —
+    # no separate closed-vocab gate (a vocab subset gate over an open source field only false-fails a valid
+    # non-CREDIT/DEBIT direction the builder would itself recompute).
+    for key in (
+        "cited_txn_count",
+        "total_cited_amount_cents",
+        "amount_min_cents",
+        "amount_max_cents",
+        "currencies",
+        "channels",
+        "counterparty_count",
+        "date_range",
+        "direction_breakdown",
+        "disposition",
+    ):
+        if key in block and block[key] != expected[key]:
+            out.append(f"str_record.transaction_summary: '{key}' disagrees with the value recomputed from cited txns")
+    return out
+
+
+def _validate_action_taken(b: dict[str, Any]) -> list[str]:
+    block = _str_block(b, "action_taken")
+    if block is None:
+        return []
+    if not isinstance(block, dict):
+        return [f"str_record.action_taken: must be an object (got {type(block).__name__})"]
+    out: list[str] = []
+    # filing_disposition MIRRORS signoff.disposition (the human signer's act) — it is None pre-signoff and
+    # stamped by ingest.build_signed_sar at sign time. Validate AGREEMENT only: signoff owns the disposition
+    # vocabulary (SYSTEM_/HUMAN_DISPOSITIONS), so a separate closed vocab here would falsely reject a valid one.
+    fd = block.get("filing_disposition")
+    if fd is not None:
+        signoff = b.get("signoff")
+        if isinstance(signoff, dict) and signoff.get("disposition") is not None and fd != signoff["disposition"]:
+            out.append("str_record.action_taken: filing_disposition disagrees with signoff.disposition")
+    if "filed_to" in block and block["filed_to"] != ACTION_FILED_TO:
+        out.append(f"str_record.action_taken: filed_to must equal '{ACTION_FILED_TO}' (the statutory STR recipient)")
+    if "tipping_off_guard" in block and block["tipping_off_guard"] != ACTION_TIPPING_OFF_NOTE:
+        out.append("str_record.action_taken: tipping_off_guard disagrees with the canonical regulatory note")
+    aa = block.get("account_action")
+    if aa is not None and aa not in ACCOUNT_ACTIONS:
+        out.append(f"str_record.action_taken: account_action '{aa}' not in {ACCOUNT_ACTIONS}")
+    return out
+
+
+def _validate_relationships(b: dict[str, Any]) -> list[str]:
+    block = _str_block(b, "relationships")
+    if block is None:
+        return []
+    if not isinstance(block, dict):
+        return [f"str_record.relationships: must be an object (got {type(block).__name__})"]
+    out: list[str] = []
+    txns = cited_transactions(b)
+    cited_refs = {t.get("counterparty_account_id") for t in txns} | {t.get("counterparty_ref") for t in txns}
+    cited_refs.discard(None)
+    count = block.get("counterparty_count")
+    if count is not None and count != transaction_summary(b)["counterparty_count"]:
+        out.append("str_record.relationships: counterparty_count disagrees with the cited transactions")
+    for ref in block.get("counterparty_refs", []):
+        if ref not in cited_refs:
+            out.append(f"str_record.relationships: counterparty_ref '{ref}' appears on no cited transaction")
+    country = block.get("counterparty_country")
+    if country is not None and country not in ({t.get("counterparty_country") for t in txns} - {None}):
+        out.append("str_record.relationships: counterparty_country is present on no cited transaction")
+    named = block.get("named_relationships")
+    if named is not None and not isinstance(named, list):
+        out.append("str_record.relationships: named_relationships must be a list")
+    return out
+
+
 def load_bundle(path: str) -> dict[str, Any]:
     with open(path, encoding="utf-8") as fh:
         data: dict[str, Any] = json.load(fh)
@@ -108,6 +289,73 @@ def cited_transactions(bundle: dict[str, Any]) -> list[dict[str, Any]]:
     cited = set(bundle.get("str_record", {}).get("cited_txn_ids", []))
     txns: list[dict[str, Any]] = bundle.get("transactions", [])
     return [t for t in txns if t.get("txn_id") in cited] or txns
+
+
+def _txn_date(t: dict[str, Any]) -> str | None:
+    """A transaction's ISO date prefix, tolerant of the canonicalize boundary: a real Pillar-1 row carries
+    ``timestamp``; ``ingest.canonicalize`` adds ``ts``. Read either so the roll-up is identical pre/post
+    canonicalize (the narrative-grounding verifier itself reads the canonicalized ``ts``)."""
+    raw = t.get("ts") or t.get("timestamp")
+    return raw[:10] if isinstance(raw, str) else None
+
+
+def transaction_summary(bundle: dict[str, Any]) -> dict[str, Any]:
+    """The structured roll-up of the CITED transactions — the FINTRAC STR 'transaction(s) & disposition'
+    section as pure, recomputable arithmetic. ONE source of truth (like ``cited_transactions``): the drafter's
+    block assembler and the contract validator both call this, so the stored block and its check can never
+    diverge. Carries the AGGREGATE total as a structured integer (``total_cited_amount_cents``) — the figure
+    the gated narrative deliberately never prints as a $ atom (a sum equals no individual cited amount, so it
+    is grounded HERE by recomputation, not through the prose gate)."""
+    txns = cited_transactions(bundle)
+    cents = [t["amount_cents"] for t in txns if isinstance(t.get("amount_cents"), int)]
+    dates = sorted(d for d in (_txn_date(t) for t in txns) if d)
+    counterparties = {(t.get("counterparty_account_id") or t.get("counterparty_ref")) for t in txns}
+    counterparties.discard(None)
+    directions = Counter(t["direction"] for t in txns if t.get("direction"))
+    # Txn disposition (TXN_DISPOSITIONS: completed vs attempted — FINTRAC files both) is DERIVED from a
+    # per-txn status/disposition field, never defaulted: the no-PII synthetic bundle carries none, so this
+    # is honest None (a "completed" default would assert a regulatory fact the evidence is silent on).
+    statuses = {(t.get("disposition") or t.get("status")) for t in txns}
+    statuses.discard(None)
+    return {
+        "cited_txn_count": len(txns),
+        "total_cited_amount_cents": sum(cents),
+        "amount_min_cents": min(cents) if cents else None,
+        "amount_max_cents": max(cents) if cents else None,
+        "currencies": sorted({t["currency"] for t in txns if t.get("currency")}),
+        "channels": sorted({t["channel"] for t in txns if t.get("channel")}),
+        "direction_breakdown": dict(directions),
+        "date_range": {"first": dates[0], "last": dates[-1]} if dates else {"first": None, "last": None},
+        "counterparty_count": len(counterparties),
+        "disposition": next(iter(statuses)) if len(statuses) == 1 else None,
+    }
+
+
+def _implied_crime_types(bundle: dict[str, Any]) -> set[str]:
+    """The offence classes the CITED signals' capabilities imply (``CRIME_BY_CAPABILITY`` over the cited
+    alerts) — the grounding basis for ``crime_type``: a declared offence must be one the cited evidence
+    actually implies, else it is ungrounded (the validator flags the disagreement)."""
+    cited = set(bundle.get("str_record", {}).get("cited_signal_ids") or [])
+    implied: set[str] = set()
+    for alert in bundle.get("alerts", []):
+        if alert.get("grounding", {}).get("signal_id") in cited:
+            crime = CRIME_BY_CAPABILITY.get(alert.get("capability") or "")
+            if crime is not None:
+                implied.add(crime)
+    return implied
+
+
+def crime_type_for(bundle: dict[str, Any]) -> str | None:
+    """The suspected offence to STAMP on str_record — PRESERVED if the bundle already declares one (a human
+    judgment), else DERIVED as the single offence the cited capabilities imply, else None (honest NULL: no
+    cited signal, or the cited capabilities imply no single offence). A declared offence that CONTRADICTS the
+    cited capabilities is NOT silently overridden here — ``validate_bundle``'s crime_type arm flags it
+    (fail-closed). The single source of truth for both the structured field and the drafter's offence label."""
+    declared = bundle.get("str_record", {}).get("crime_type")
+    if isinstance(declared, str):
+        return declared
+    implied = _implied_crime_types(bundle)
+    return next(iter(implied)) if len(implied) == 1 else None
 
 
 def party_ids(bundle: dict[str, Any]) -> set[str]:
@@ -259,9 +507,35 @@ def validate_bundle(b: dict[str, Any]) -> list[str]:
             stance = claim.get("stance")
             if stance is not None and stance not in CLAIM_STANCES:
                 v.append(f"{cw}: invalid stance '{stance}' (allowed: {CLAIM_STANCES}; absent = inculpatory)")
+        # crime_type (Phase 13): the suspected offence, a closed-vocab enum. None (absent) is valid —
+        # an ungroundable crime class is honest NULL, never fabricated. A non-None crime_type must be in
+        # the closed vocab AND be grounded by at least one cited signal (a crime claim with no grounding
+        # signal fails closed — grounded-or-dropped applied to the offence label).
+        crime_type = s.get("crime_type")
+        if crime_type is not None:
+            if crime_type not in CRIME_TYPES:
+                v.append(f"str_record: crime_type '{crime_type}' not in {CRIME_TYPES}")
+            if not s.get("cited_signal_ids"):
+                v.append("str_record: crime_type is set but cited_signal_ids is empty (no grounding signal)")
+            else:
+                # Agree-with-bundle: a declared offence must be one the CITED capabilities actually imply —
+                # else the label contradicts the evidence (e.g. 'money_laundering' over a kyc_integrity-only
+                # case). Mirrors the structured blocks' agree-with-bundle arms.
+                implied = _implied_crime_types(b)
+                if implied and crime_type not in implied:
+                    v.append(
+                        f"str_record: crime_type '{crime_type}' disagrees with the cited capabilities' "
+                        f"implied offence {sorted(implied)}"
+                    )
 
     # --- v0.2 additive: the optional `parties` PartyView block (the screening-grounding data source) ---
     v.extend(_validate_parties(b))
+    # --- Phase 13 additive: the optional FINTRAC STR structured blocks (under str_record) ---
+    v.extend(_validate_reporting_entity(b))
+    v.extend(_validate_subject_block(b))
+    v.extend(_validate_transaction_summary(b))
+    v.extend(_validate_action_taken(b))
+    v.extend(_validate_relationships(b))
 
     return v
 

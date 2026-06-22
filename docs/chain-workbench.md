@@ -10,7 +10,7 @@
 > **Illustrative data & outputs.** A **dev/authoring-time companion**, NOT a ship artifact. `chain.html`
 > is companion-served by `scripts/serve_chain.py`; it is never built into `dist/` and is not a
 > `build.py` target. The 8 offline ship dists stay byte-frozen (`build.py --check all` → 8/8). Nothing is
-> persisted — a signed SAR is written to a per-run temp dir and discarded.
+> persisted — a signed STR is written to a per-run temp dir and discarded.
 
 ## What it is
 
@@ -19,12 +19,12 @@ real `aml-substrate` evidence bundle, vendored under `data/chain-cases/` like th
 illustrative). Per case, the **downstream runs live**:
 
 1. **Evidence** — the vendored detection bundle (alerts across capabilities, transactions, subject).
-2. **Consume** — `aml-casework` ingests the bundle, drafts the SAR narrative (the **picked backend** —
+2. **Consume** — `aml-casework` ingests the bundle, drafts the STR narrative (the **picked backend** —
    live neural via claude/openai/opencode **or** the deterministic stub), and runs the six Class-G
    verifiers + narrative grounding → signed, zero blocking violations. The consume stage shows the
    **gate verdict on the generated draft** (the gate is the oracle, whatever the backend produced).
 3. **Verify** — signal-watch's `e2e_chain_check --real` re-verifies the cross-pillar join.
-4. **Connected** — the signed SAR + the **flag→corpus audit walk**: every signal traces back to a
+4. **Connected** — the signed STR + the **flag→corpus audit walk**: every signal traces back to a
    public-source regulator indicator in the frozen corpus.
 
 Results stream as NDJSON **stages** (completed/grounded reveals — never a token stream).
@@ -33,7 +33,7 @@ Results stream as NDJSON **stages** (completed/grounded reveals — never a toke
 
 **Subprocess + file-handoff only.** `serve_chain.py` never imports `aml_substrate` / `aml_casework`
 (the one-repo-per-pillar rule). The casework consume is a subprocess of its **own** CLI
-(`python -m aml_casework.ingest`); the bundle and the signed SAR cross as json files. The only imports are
+(`python -m aml_casework.ingest`); the bundle and the signed STR cross as json files. The only imports are
 signal-watch's own modules (`e2e_chain_check`, `derive_signals`, `validate_chain_cases`).
 
 The committed `data/pillar-status.json` (which the launcher inlines) is **snapshot + restored** around the
@@ -62,7 +62,7 @@ python3 scripts/serve_chain.py                     # http://localhost:8020
 ```
 
 Pick a case → choose a **Drafter** in the picker (only server-side-available backends are selectable) →
-**Run the chain** → watch the stages reveal to CONNECTED, read the signed SAR, and walk each signal down to
+**Run the chain** → watch the stages reveal to CONNECTED, read the signed STR, and walk each signal down to
 its regulator flag. Run the **stub** then a **neural** backend on the same case to see the **drafts
 compared** side by side — each one gated. The header chip shows the selected drafter.
 
@@ -111,7 +111,7 @@ python3 scripts/build.py --check all                # 8/8 — chain.html is not 
 ```
 
 `serve_chain --selftest` runs the full pipeline with the casework consume replaced by an offline
-stand-in (a deterministic, check-passing signed SAR built from the bundle), and the **real**
+stand-in (a deterministic, check-passing signed STR built from the bundle), and the **real**
 `e2e_chain_check --real` verify (offline, pure Python) reaches **CONNECTED** — proving the orchestration,
 the audit walk, the stage stream, and the `pillar-status` snapshot/restore, without the sibling CLI.
 

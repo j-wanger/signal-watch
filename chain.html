@@ -94,11 +94,15 @@
   .vlist{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
   .vchk{font-family:var(--mono);font-size:10px;color:var(--green);border:1px solid rgba(84,201,138,.3);border-radius:5px;padding:2px 7px}
 
-  /* connected payoff + signed SAR + the flag→corpus audit walk */
+  /* connected payoff + signed STR + the flag→corpus audit walk */
   .payoff{margin-top:18px}
   .saw{border:1px solid var(--line);border-left:3px solid var(--green);border-radius:0 11px 11px 0;background:var(--panel2);padding:16px 18px}
   .saw .sl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:8px}
   .saw .narr{font-family:var(--display);font-size:15.5px;line-height:1.55;color:var(--ink)}
+  .saw .strrec{width:100%;border-collapse:collapse;margin:2px 0 14px;font-family:var(--mono);font-size:11px}
+  .saw .strrec th{text-align:left;vertical-align:top;color:var(--muted);font-weight:500;letter-spacing:.05em;text-transform:uppercase;padding:3px 14px 3px 0;white-space:nowrap;width:1%}
+  .saw .strrec td{color:var(--ink);padding:3px 0;border-bottom:1px solid var(--line)}
+  .saw .strrec .nullf{color:var(--muted);font-style:italic}
   .claims{list-style:none;margin-top:12px;border-top:1px solid var(--line);padding-top:11px}
   .claims li{font-size:13px;color:var(--muted);padding:5px 0;display:flex;gap:9px}
   .claims .cite{font-family:var(--mono);font-size:10.5px;color:var(--teal);white-space:nowrap}
@@ -158,7 +162,7 @@
   <h2>The three-pillar chain, run case by case</h2>
   <p class="lead">Detection is pre-baked upstream — each case is a real <b>aml-substrate</b> evidence
     bundle, vendored like the corpus. Pick one to run the downstream <b>live</b>: aml-casework drafts and
-    verifies the SAR, then the cross-pillar check confirms every signal walks back to a public-source
+    verifies the STR, then the cross-pillar check confirms every signal walks back to a public-source
     regulator indicator. Synthetic throughout.</p>
 
   <div class="wb">
@@ -187,9 +191,9 @@ function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'
 
 const CANON = [
   {key:'evidence', label:'Evidence', title:'Detection bundle'},
-  {key:'consume',  label:'Consume',  title:'Casework SAR + verifiers'},
+  {key:'consume',  label:'Consume',  title:'Casework STR + verifiers'},
   {key:'verify',   label:'Verify',   title:'Cross-pillar check'},
-  {key:'connected',label:'Connected',title:'Signed SAR, grounded'},
+  {key:'connected',label:'Connected',title:'Signed STR, grounded'},
 ];
 
 let CASES = [];
@@ -328,7 +332,7 @@ function stageBody(key){
   }
   if (key==='consume'){
     if (d.status==='running'){
-      const req = d.requested ? `Drafting via ${esc(backendLabel(d.requested))}` : 'Drafting the SAR';
+      const req = d.requested ? `Drafting via ${esc(backendLabel(d.requested))}` : 'Drafting the STR';
       return `${req} and running the six Class-G verifiers…`;
     }
     const eff = d.drafter_effective||d.drafter||'stub';
@@ -352,7 +356,7 @@ function stageBody(key){
     if (d.status==='running') return 'Re-verifying the cross-pillar join (e2e_chain_check)…';
     return d.connected
       ? `<div class="kv"><span class="chk">✓ join verified</span><span>exit ${esc(d.exit)}</span></div>
-         <div style="margin-top:6px">Substrate-detected case → verified, signed SAR → grounded to the frozen corpus.</div>`
+         <div style="margin-top:6px">Substrate-detected case → verified, signed STR → grounded to the frozen corpus.</div>`
       : `<div class="kv"><span class="chk no">✗ not connected</span><span>exit ${esc(d.exit)}</span></div>`;
   }
   if (key==='connected'){
@@ -385,12 +389,39 @@ function auditWalkHTML(walk){
   return `<div class="walk"><div class="wh">Audit walk · every signal → its public-source indicator</div>${rows}</div>`;
 }
 
+/* nn() — render a value, or an italic HONEST-NULL fallback when absent/empty (the grounded-or-empty
+   discipline made visible: an unavailable FINTRAC field is shown as a stated gap, never blank or faked).
+   Every dynamic value flows through esc() (the sole escaper). */
+function nn(v, fb){
+  const empty = v===null || v===undefined || v==='' || (Array.isArray(v) && v.length===0);
+  return empty ? `<span class="nullf">${esc(fb)}</span>` : esc(String(Array.isArray(v) ? v.join(', ') : v));
+}
+function money(cents){ return (typeof cents==='number') ? '$'+(cents/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—'; }
+
+/* The structured FINTRAC STR record — the information sections beside the Details-of-suspicion narrative.
+   Every value is bundle-grounded (from casework) or an honest NULL; the aggregate total is the structured
+   figure the narrative deliberately never prints. */
+function strRecordHTML(rec){
+  const ts=rec.transaction_summary||{}, subj=rec.subject||{}, act=rec.action_taken||{}, rel=rec.relationships||{}, re_=rec.reporting_entity||{}, dr=ts.date_range||{};
+  const rows = [
+    ['Suspected offence', nn((rec.crime_type||'').replace(/_/g,' '), 'not determined')],
+    ['Subject', `account ${nn(subj.account_ids,'—')} · customer ${nn(subj.customer_id,'—')} · name ${nn(subj.name,'not available (no-PII record)')}`],
+    ['Transactions', `${nn(ts.cited_txn_count,'—')} cited · ${money(ts.amount_min_cents)}–${money(ts.amount_max_cents)} · total ${money(ts.total_cited_amount_cents)} · ${nn(ts.currencies,'—')}`],
+    ['Period · channels', `${nn(dr.first,'—')} → ${nn(dr.last,'—')} · ${nn(ts.channels,'—')}`],
+    ['Counterparties', `${nn(rel.counterparty_count,'—')} distinct · named: ${nn(rel.named_relationships,'none resolvable from available data')}`],
+    ['Disposition', `txn ${nn(ts.disposition,'not recorded')} · filing ${nn(act.filing_disposition,'pending signer')} · to ${nn(act.filed_to,'—')}`],
+    ['Reporting entity', `${nn(re_.entity_type,'not supplied by the bundle')}${re_.illustrative?' · illustrative':''}`],
+  ];
+  return `<table class="strrec">${rows.map(r=>`<tr><th>${esc(r[0])}</th><td>${r[1]}</td></tr>`).join('')}</table>`;
+}
+
 function sarHTML(done){
   const sar = done.signed_sar||{}; const rec = sar.str_record||{};
   if (!rec.narrative) return '';
   const claims = (rec.narrative_claims||[]).map(c =>
     `<li><span>${esc(c.text)}</span><span class="cite">${esc((c.cites||[]).join(' · '))}</span></li>`).join('');
-  return `<div class="payoff"><div class="saw"><div class="sl">Signed SAR · grounds for suspicion</div>
+  return `<div class="payoff"><div class="saw"><div class="sl">Signed STR · FINTRAC · Details of suspicion</div>
+    ${strRecordHTML(rec)}
     <div class="narr">${esc(rec.narrative)}</div>
     ${claims?`<ul class="claims">${claims}</ul>`:''}</div></div>`;
 }

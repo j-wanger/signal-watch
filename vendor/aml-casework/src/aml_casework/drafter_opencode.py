@@ -15,7 +15,7 @@ The six verifiers gate whatever it returns, so the adapter carries no business l
 * a transport / connection fault (serve unreachable, non-2xx, garbage response) PROPAGATES as ``URLError``
   to ingest's fail-soft envelope -> the deterministic stub (it is infra, not a model refusal);
 * the agent's final message is not a valid Draft, OR the poll bound is exceeded -> ``None`` (fail-closed
-  refuse — the seam stays open, the chain reports ``needs_more_info``, never a faked SAR).
+  refuse — the seam stays open, the chain reports ``needs_more_info``, never a faked STR).
 
 Testing split (so the verifiable part is CI-tested and the unverified part is honestly isolated): the
 ORCHESTRATION runs against an injectable ``_ServeClient`` seam (CI stubs it offline). The default

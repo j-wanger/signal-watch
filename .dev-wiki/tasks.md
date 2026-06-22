@@ -44,6 +44,19 @@
 > - Phase 8: Doc true-up + provenance fix (M6 debt) — COMPLETED + accepted
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
+<!-- phase:phase-68-restr-vendor-render -->
+<!-- gate-log:phase-68 direction=approved delivery=pending -->
+<!-- status: PLANNED + BLOCKED on aml-casework Phase 13 shipping (signal-watch re-vendors casework's NEW commit; implementation is casework-side first) -->
+
+## Phase 68 — Re-vendor the FINTRAC-STR-rich casework + render the structured STR
+
+Objective: after aml-casework Phase 13 ships the FINTRAC-STR-rich drafter, RE-VENDOR it into signal-watch + render the structured FINTRAC STR record + the rich grounded Details-of-suspicion narrative in the workbench DECIDE view (currently a thin narrative blob), and true up SAR->STR vocab — boundary held, the 8 offline dists byte-frozen. PLANNED + BLOCKED on aml-casework Phase 13 (cannot implement until casework commits Phase 13). Direction gate accepted 2026-06-22; ledger Phase-68; plan [[phases/phase-68-restr-vendor-render]].
+
+- [x] Re-vendor aml-casework Phase 13 (run scripts/vendor_casework.sh) + update VENDORED_AT pin | scope: vendor/aml-casework/**, scripts/vendor_casework.sh, vendor/aml-casework/VENDORED_AT | success: vendor reflects casework HEAD@Phase13 (021fb80; venv rebuilt); VENDORED_AT pins 021fb80 + date — VERIFIED: serve_chain CASE-P signs a SIGNED STR carrying all 5 structured blocks + the rich narrative
+- [x] SAR->STR vocab true-up across the workbench UI/docs | scope: chain.html, workbench.html, docs/case-workbench.md, docs/chain-workbench.md, CLAUDE.md, README.md | success: "Signed STR" in the chain/case workbench surfaces + docs; no stray filer-facing "signed SAR"
+- [x] Render the structured FINTRAC STR record + rich narrative in the workbench DECIDE view | scope: chain.html (the LIVE signed-STR view — the case workbench fails-closed by design), workbench.html | success: node tests/chain.test.mjs covers the structured-blocks render (offence + structured aggregate total) + honest-NULL display; the rich narrative flows through automatically via the re-vendor
+- [x] Verify boundary + drift | scope: tests/ | success: build.py --check all 8/8 byte-frozen (chain/workbench.html companion-only); build.py imports no casework (grep clean); serve_chain + serve_workbench --selftest + all 7 .mjs arcs green
+
 <!-- phase:phase-67-shippable-live-workbench -->
 <!-- gate-log:phase-67 direction=approved delivery=accepted -->
 <!-- status: T1–T4 ALL [x] — DELIVERED + accepted 2026-06-22 (A0 proven in isolation: clone → make setup → signed SAR offline, no sibling) -->

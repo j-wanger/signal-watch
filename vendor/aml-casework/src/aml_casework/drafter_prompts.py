@@ -49,7 +49,7 @@ def _schema_to_draft(parsed: _DraftSchema) -> Draft:
 
 def parse_draft_json(content: str) -> Draft | None:
     """Tolerantly parse a model's structured-output STRING into a ``Draft``; return ``None`` on any
-    malformed/missing field (fail-closed refuse — the seam stays open, never a faked SAR).
+    malformed/missing field (fail-closed refuse — the seam stays open, never a faked STR).
 
     Used by the openai + opencode adapters, which receive the structured output as a string. (``ClaudeDrafter``
     gets an already-parsed object from ``messages.parse`` and calls ``_schema_to_draft`` directly.) NO
@@ -108,10 +108,17 @@ def build_user_prompt(context: GenerationContext, feedback: list[str] | None = N
         "",
         "REQUIRED ELEMENTS the filing must support: " + ", ".join(STR_REQUIRED_ELEMENTS),
         "",
-        "Write the SAR narrative. Emit narrative_claims (each {text, cites:[signal_id|txn_id], stance}) that "
-        "connect each cited indicator to the specific suspicion; tag stance inculpatory/exculpatory and "
-        "retain any counter-evidence. Also write the prose `narrative`; every grounding-bearing fact in it "
-        "must appear in the evidence above. The file/no-file judgment stays with the human signer.",
+        "Write the STR 'Details of suspicion' narrative (FINTRAC). Emit narrative_claims (each "
+        "{text, cites:[signal_id|txn_id], stance}) that connect each cited indicator to the specific "
+        "suspicion — articulate the reasonable grounds to suspect; do NOT merely restate transaction "
+        "detail. Tag stance inculpatory/exculpatory and retain any counter-evidence. Also write the prose "
+        "`narrative`; every grounding-bearing fact in it must appear in the evidence above. Do NOT print: an "
+        "aggregate or summed dollar total (state magnitude only as a count and a min-max range); the "
+        "subject's customer_id or any counterparty id/reference; a country or jurisdiction not present in "
+        "the evidence; or a subject/counterparty NAME (none is provided — state it is unavailable). The "
+        "structured STR record (reporting entity, subject, transaction summary, action taken, relationships) "
+        "is SYSTEM-STAMPED from the evidence and attached after your draft — do NOT author those fields. The "
+        "file/no-file judgment stays with the human signer.",
     ]
     if feedback:
         lines += ["", "Your previous draft FAILED these deterministic checks — fix every one:"]

@@ -13,7 +13,7 @@ servers vary): the ``response_format`` json_schema is best-effort. TWO parse sta
   ``ingest``'s fail-soft envelope → the deterministic stub (it is a server/transport problem, not a model
   refusal);
 * a content-refusal (the model's message is not a valid Draft) → ``None`` (fail-closed refuse — the seam
-  stays open, the chain reports ``needs_more_info``, never a faked SAR).
+  stays open, the chain reports ``needs_more_info``, never a faked STR).
 
 The optional ``OPENAI_API_KEY`` is read from the (server-side) env at runtime, never logged. A local model
 needs no key.

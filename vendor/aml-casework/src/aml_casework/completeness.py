@@ -19,6 +19,16 @@ case ``transaction_details`` is substantiated by that party leaf, not by cited t
 fail-closed: no cited txns AND no resolving party leaf is unsubstantiated; whether the leaf actually
 GROUNDS is grounding-replay's job (a distinct gate — completeness is not a grounding gate).
 
+Phase 13 FINTRAC STR structured blocks: the additive ``str_record`` blocks (reporting_entity / subject /
+transaction_summary / action_taken / relationships) are validated GROUNDED-OR-EMPTY by ``contract.py`` —
+their presence does NOT change this checklist. ``STR_REQUIRED_ELEMENTS`` stays at SIX: the structured
+subject/transaction blocks back the EXISTING ``subject_information`` / ``transaction_details`` /
+``reporting_entity`` elements (the substantiation predicates read the bundle loci, unchanged), and the
+FINTRAC-DESIRED enrichment blocks (relationships, action_taken) are deliberately NOT required elements —
+an honestly-empty enrichment block (the no-PII bundle has no relationships/account-action) is NOT an
+incompleteness. Adding them to the required set would falsely fail every real emission; grounded-or-empty
+means surfaced-honestly, never gated.
+
 Returns ``list[str]`` violations (empty == every claimed element is substantiated).
 """
 

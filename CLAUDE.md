@@ -252,7 +252,7 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   scripts/setup_workbench.py` (Phase 67 — CROSS-PLATFORM [Windows/mac/Linux, no make/Unix-shell]; builds the
   VENDORED casework venv from the committed wheel) then `python scripts/serve_workbench.py` → http://localhost:8030
   (reads committed `data/workbench/**` + `data/osint/corpus.json`; binds 127.0.0.1; persists nothing). The FULL
-  live arc — CLUTTER→SIGNALS→gating-loop + GATHER + the DECIDE signed-SAR finale — runs OFFLINE on the
+  live arc — CLUTTER→SIGNALS→gating-loop + GATHER + the DECIDE signed-STR finale — runs OFFLINE on the
   deterministic STUB from a BARE CLONE: `aml-casework` is VENDORED into `vendor/aml-casework/` (its src + a
   cross-platform WHEEL under `dist/` + its pinned corpus snapshot under `fixtures/corpus/`); resolution =
   `AML_CASEWORK_DIR` > vendored > `../aml-casework` sibling > GATED; venv python + `SIGNAL_WATCH_CORPUS` are

@@ -8,7 +8,7 @@ This verifier closes that hole by ATOM-GROUNDING: every grounding-bearing atom i
 to the cited evidence, or the draft is not groundable (grounded-or-dropped, extended to the prose).
 
 The atoms a draft most easily hallucinates: account/txn/signal ids, monetary amounts (including ranges
-and the regulatory constants a SAR legitimately cites, e.g. the CTR threshold), dates, and named parties
+and the regulatory constants an STR/SAR legitimately cites, e.g. the CTR threshold), dates, and named parties
 (the subject and cited counterparties). Free connective language ("consistent with", "the account")
 carries no atom and is correctly out of scope. The check is regex + membership/substring under a copied
 ``normalize`` — never an NLP/neural judge (that would re-introduce the non-determinism the gate chain
@@ -52,10 +52,14 @@ _AMOUNT_RE = re.compile(r"\$\s?(\d[\d,]*(?:\.\d+)?)")
 # ISO dates (the transaction ``ts`` date prefix).
 _DATE_RE = re.compile(r"\b(\d{4}-\d{2}-\d{2})\b")
 
-# Regulatory thresholds a SAR narrative legitimately cites that are NOT transaction amounts — they
+# Regulatory thresholds an STR/SAR narrative legitimately cites that are NOT transaction amounts — they
 # ground to published guidance, not bundle data. Keep small + documented; extend only with provenance.
+# The $10,000 threshold is dual-provenance: the US CTR filing threshold (31 CFR 1010.311 / FinCEN) AND,
+# in Canadian dollars, the PCMLTFA Large Cash Transaction Report (LCTR) threshold FINTRAC enforces — so a
+# FINTRAC STR's structuring grounds may cite it on the same basis. (The KEY 10000.0 is what grounds; this
+# value string is documentation only.)
 REGULATORY_CONSTANTS: dict[float, str] = {
-    10000.0: "CTR filing threshold (31 CFR 1010.311 / FinCEN)",
+    10000.0: "CTR/LCTR reporting threshold (31 CFR 1010.311 / FinCEN; CAD 10,000 PCMLTFA LCTR / FINTRAC)",
 }
 
 # Named-party spans: single-quoted entities ('Crescent Generic Trading FZE') and maximal runs of >=2

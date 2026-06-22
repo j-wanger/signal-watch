@@ -248,6 +248,17 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   then `python3 scripts/serve_corpus.py` → http://localhost:8010 (paste a converted advisory md;
   derives through the frozen gate, propose-only). Offline `dist/corpus` unaffected; doc:
   `docs/corpus-live.md`.
+- Investigator WORKBENCH (companion-only — NOT a ship/build target; never goes to `dist/`): `python3
+  scripts/serve_workbench.py` → http://localhost:8030 (stdlib, no venv; reads committed `data/workbench/**`
+  + `data/osint/corpus.json`; binds 127.0.0.1; persists nothing). CLUTTER→SIGNALS→gating-loop + GATHER run on
+  the deterministic STUB with NO model — clone + run + open the URL gives that arc offline. The DECIDE
+  signed-SAR finale is the ONE beat with an external dep: it subprocesses the `../aml-casework` sibling
+  (`AML_CASEWORK_DIR`) in BOTH stub and live modes (the model only chooses the SAR prose; NO local fallback) —
+  absent → a named GATED stage, the rest of the arc unaffected. LIVE neural (optional, server-side only, never
+  in the browser §4.5): a model on `127.0.0.1:8080` (`OPENAI_BASE_URL`) drives the GATHER loop / DECIDE prose,
+  else the stub. Doc: `docs/case-workbench.md`. Precursor the CHAIN workbench: `python3 scripts/serve_chain.py`
+  → http://localhost:8020 (`docs/chain-workbench.md`). Companion ports: news 8000 · corpus 8010 · chain 8020 ·
+  workbench 8030.
 - Drift guard before presenting: `python3 scripts/build.py --check all` (frozen dists byte-identical).
 - Test (dep-free, no install — except the DuckDB store selftests, which run under `.venv`):
   - `node tests/corpus-explorer.test.mjs` — the story landing + the 6-screen per-doc arc + the

@@ -44,8 +44,11 @@ if [ -z "$TOOL_ACTIVITY" ]; then
   fi
 fi
 
-# Condition 1 (hardened): Python files MODIFIED this session — write-class activity only
-HAS_PY_CHANGES=$(printf '%s' "$WRITE_ACTIVITY" | grep -q '\.py' && echo true || echo false)
+# Condition 1 (hardened): Python files MODIFIED this session — write-class activity only.
+# Use bash-native substring matching (NOT `printf | grep -q`): on a large session the activity string
+# exceeds the pipe buffer, grep -q closes the pipe on first match, printf gets SIGPIPE, and under
+# `set -o pipefail` the pipeline returns non-zero — flipping a real match to false (fail-closed bug).
+if [[ "$WRITE_ACTIVITY" == *".py"* ]]; then HAS_PY_CHANGES=true; else HAS_PY_CHANGES=false; fi
 
 # If no Python files were touched, allow stop
 if [ "$HAS_PY_CHANGES" != "true" ]; then
@@ -53,8 +56,8 @@ if [ "$HAS_PY_CHANGES" != "true" ]; then
   exit 0
 fi
 
-# Check if pytest was run at any point
-PYTEST_RAN=$(printf '%s' "$TOOL_ACTIVITY" | grep -q 'pytest' && echo true || echo false)
+# Check if pytest was run at any point (bash-native — same SIGPIPE/pipefail reason as above)
+if [[ "$TOOL_ACTIVITY" == *"pytest"* ]]; then PYTEST_RAN=true; else PYTEST_RAN=false; fi
 
 if [ "$PYTEST_RAN" != "true" ]; then
   log_firing block tests-not-run || true

@@ -1,6 +1,15 @@
 # Signal Watch — AML Vision Demo
 ## Claude Code Project Handoff & Bootstrap
 
+> ⚠️ **HISTORICAL — a frozen M0-bootstrap handoff (its content was last current ~Phase 54).** This document
+> captured the project's *starting point* and early milestone plan; it is **NOT current state**. The repo is
+> now at **Phase 66**, with five offline ship artifacts (showcase / corpus / news / console / triage) plus
+> the companion investigator workbench and a 3-pillar program — a different shape and run story than the §7
+> "How to run" skeleton and §8/§9 milestone/backlog below describe.
+> **For current state, read instead:** `README.md` (the run story), `CLAUDE.md` (architecture +
+> non-negotiables, self-maintained each phase), `docs/` (per-subsystem detail), `.dev-wiki/` (phase history).
+> Keep this only for origin/intent context (the POC 5→1→3 framing, the original "shipped" definition).
+
 > **Purpose of this doc:** bring a fresh Claude Code session up to speed to formally **ship** the interactive vision demo as a maintained project.
 > **What you are inheriting:** a single self-contained HTML file (`aml_vision_demo_fentanyl.html`) — a working, fully-scripted, six-act interactive walkthrough of the target AML detection loop.
 > **Upstream context (read if available):** `AML_signal_atom_transformation_handoff.md` (the program framework this demo dramatizes) and the transformation blueprint HTML. The demo is the *felt experience* of **POC 5 → POC 1 → POC 3** from that framework. Keep vocabulary consistent with it (atoms, composition, promotion gate, etc.).

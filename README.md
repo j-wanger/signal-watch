@@ -39,7 +39,8 @@ cross-pillar signed-SAR finale.
 > the deliverable, fully self-contained**: a browser opens them, zero external dependencies (verified by an
 > isolated clone with no sibling repos present). The **investigator workbench is a companion**, but it too is
 > now shippable from a bare clone — its DECIDE signed-SAR finale runs `aml-casework`, which is **vendored** into
-> `vendor/aml-casework/` and built by `make setup` (no sibling repo; offline; a model is optional, see below).
+> `vendor/aml-casework/` and built by a cross-platform `python scripts/setup_workbench.py` (Windows/mac/Linux;
+> no sibling repo; offline; a model is optional, see below).
 > `build.py` never imports a sibling and the offline artifacts are byte-frozen, so vendoring is a *distribution*
 > choice, not coupling. The only remaining sibling touch is `../aml-substrate`, needed solely to *regenerate*
 > the committed case data — never to run the demo.
@@ -68,16 +69,19 @@ python3 scripts/build.py --check all  # drift guard — committed dist == a fres
 Each is a thin server on `localhost` that reads committed data and **persists nothing**.
 
 The **investigator workbench** has a one-time setup — its DECIDE signed-SAR finale runs the **vendored**
-`aml-casework` pipeline (`vendor/aml-casework/`), so build that venv once (needs **Python ≥3.11 + uv**, and
-network the first time):
+`aml-casework` pipeline (`vendor/aml-casework/`), so build that venv once (needs **Python ≥3.11 + uv** [or
+pip], and network the first time). The setup is a **cross-platform Python script** — no `make`, no Unix
+shell — so it runs the same on Windows / macOS / Linux:
 
 ```sh
-make setup                          # builds vendor/aml-casework/.venv (the DECIDE finale) — once
-python3 scripts/serve_workbench.py  # → http://localhost:8030   the investigator workbench
+python  scripts/setup_workbench.py    # Windows: python scripts\setup_workbench.py  (or, on POSIX: make setup)
+python  scripts/serve_workbench.py    # → http://localhost:8030   the investigator workbench
 ```
 
-Without `make setup`, the workbench still runs clutter → signals → GATHER on the stdlib stub; only the DECIDE
-finale is GATED (a named message, never a crash). The other three companions are pure **stdlib**, no setup:
+It installs the **committed wheel** (`vendor/aml-casework/dist/aml_casework-*.whl`, pure-Python /
+cross-platform) into `vendor/aml-casework/.venv`. Without setup, the workbench still runs clutter → signals
+→ GATHER on the stdlib stub; only the DECIDE finale is GATED (a named message, never a crash). The other
+three companions are pure **stdlib**, no setup:
 
 ```sh
 python3 scripts/serve_chain.py         # → http://localhost:8020   the 3-pillar chain workbench (its precursor)
@@ -89,13 +93,14 @@ python3 scripts/serve_corpus.py        # → http://localhost:8010   live corpus
 `export OPENAI_BASE_URL=http://127.0.0.1:8080/v1` (a local llama-server with a Qwen ~30B-A3B GGUF), or an
 Anthropic key for the DECIDE prose. Without one, GATHER and the SAR narrative fall back to the deterministic
 stub with a named note — and the casework pipeline still shapes / signs / verifies the SAR **offline**. The
-vendored casework copy is pinned in `vendor/aml-casework/VENDORED_AT`; refresh it with `make vendor-refresh`.
+vendored casework copy is pinned in `vendor/aml-casework/VENDORED_AT`; refresh it (POSIX maintainer) with
+`scripts/vendor_casework.sh`, which rebuilds the wheel.
 
 Walkthroughs: `docs/case-workbench.md`, `docs/chain-workbench.md`, `docs/corpus-live.md`, `docs/news-live.md`.
 
-> Note: the **offline ship artifacts** need nothing but a browser. `uv` is for `make setup` (the live
-> workbench's vendored casework venv), the DuckDB news store, the `markitdown` PDF→md authoring pipeline, and
-> `uv run pytest` — never to open a ship demo.
+> Note: the **offline ship artifacts** need nothing but a browser. `uv` (or pip) is for
+> `setup_workbench.py` (the live workbench's vendored casework venv), the DuckDB news store, the `markitdown`
+> PDF→md authoring pipeline, and `uv run pytest` — never to open a ship demo.
 
 ## Test
 

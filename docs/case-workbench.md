@@ -191,16 +191,18 @@ sibling-repo phase.
 **From a bare clone — the shippable live workbench (Phase 67):**
 
 ```bash
-make setup                          # builds vendor/aml-casework/.venv (the DECIDE finale) — needs Python >=3.11 + uv, network once
-python3 scripts/serve_workbench.py  # http://localhost:8030 — the FULL arc incl. the DECIDE signed-SAR finale, OFFLINE, no sibling
-#   aml-casework is VENDORED into vendor/aml-casework/ (+ its pinned corpus snapshot under fixtures/corpus/).
-#   resolution: AML_CASEWORK_DIR > the vendored copy > ../aml-casework sibling > a named GATED stage.
+python scripts/setup_workbench.py   # CROSS-PLATFORM (Win: python scripts\setup_workbench.py; POSIX: make setup)
+                                     #   builds vendor/aml-casework/.venv from the committed wheel — Python >=3.11 + uv-or-pip, network once
+python scripts/serve_workbench.py   # http://localhost:8030 — the FULL arc incl. the DECIDE signed-SAR finale, OFFLINE, no sibling
+#   aml-casework is VENDORED into vendor/aml-casework/ (src + a cross-platform WHEEL under dist/ + its pinned
+#   corpus snapshot under fixtures/corpus/). resolution: AML_CASEWORK_DIR > vendored > ../aml-casework > GATED;
+#   the venv-python + SIGNAL_WATCH_CORPUS are resolved cross-platform (serve_chain.casework_python/_corpus_env).
 #   default drafter = stub (offline). For the neural SAR prose / GATHER, set ANTHROPIC_API_KEY|ANTHROPIC_AUTH_TOKEN
 #   or OPENAI_BASE_URL SERVER-SIDE — the browser sends a backend NAME only, creds never cross the wire (§4.5).
-#   refresh the vendored copy: make vendor-refresh    (pin recorded in vendor/aml-casework/VENDORED_AT)
+#   refresh the vendored copy + rebuild the wheel (POSIX maintainer): scripts/vendor_casework.sh
 ```
 
-Without `make setup`, the workbench still runs clutter → signals → GATHER on the stdlib stub; only the DECIDE
+Without setup, the workbench still runs clutter → signals → GATHER on the stdlib stub; only the DECIDE
 finale is GATED (a named stage, never a crash).
 
 **Re-vendor the case population (authoring-time only — needs `../aml-substrate`):**

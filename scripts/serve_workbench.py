@@ -210,13 +210,13 @@ def casework_consume_wb(bundle_path: Path, out_path: Path, drafter: str) -> dict
     divergence) is a RETURNED outcome (signed:false + blocking_violations), NOT a raised error. Only a
     genuine launch/crash (no SAR written) raises. The verifier is the oracle — we surface its verdict."""
     src = sc.CASEWORK_DIR / "src"
-    venv = sc.CASEWORK_DIR / ".venv" / "bin" / "python"
-    py = os.environ.get("AML_CASEWORK_PYTHON") or (str(venv) if venv.exists() else sys.executable)
+    py = sc.casework_python()                     # cross-platform venv resolution (Phase 67)
     if not src.exists():
         raise RunError(f"aml-casework not found at {sc.CASEWORK_DIR} (set AML_CASEWORK_DIR) — the consume "
                        f"is the sibling prerequisite; the finale is GATED until it lands")
     env = dict(os.environ)
     env["PYTHONPATH"] = str(src) + os.pathsep + env.get("PYTHONPATH", "")
+    env.update(sc.casework_corpus_env())
     cmd = [py, "-m", "aml_casework.ingest", str(bundle_path), "--out", str(out_path), "--drafter", drafter]
     try:
         proc = subprocess.run(cmd, cwd=str(sc.CASEWORK_DIR), env=env, capture_output=True,

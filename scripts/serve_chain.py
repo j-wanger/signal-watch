@@ -72,6 +72,26 @@ def _resolve_casework_dir() -> Path:
 CASEWORK_DIR = _resolve_casework_dir()
 
 
+def casework_python() -> str:
+    """The interpreter that runs the casework consume (Phase 67 cross-platform): $AML_CASEWORK_PYTHON >
+    the casework venv built by `python scripts/setup_workbench.py` (Windows: .venv\\Scripts\\python.exe;
+    POSIX: .venv/bin/python) > this interpreter."""
+    explicit = os.environ.get("AML_CASEWORK_PYTHON")
+    if explicit:
+        return explicit
+    venv = CASEWORK_DIR / ".venv" / ("Scripts" if os.name == "nt" else "bin") / ("python.exe" if os.name == "nt" else "python")
+    return str(venv) if venv.exists() else sys.executable
+
+
+def casework_corpus_env() -> dict:
+    """Point SIGNAL_WATCH_CORPUS at the vendored (or sibling) pinned corpus snapshot, so the
+    corpus_grounding verifier grounds REGARDLESS of how casework is installed — source-on-PYTHONPATH OR a
+    wheel/pip install in site-packages (where the package-relative default root would not resolve). No-op
+    if the snapshot is absent."""
+    corpus = CASEWORK_DIR / "fixtures" / "corpus" / "fincen-alerts" / "derived"
+    return {"SIGNAL_WATCH_CORPUS": str(corpus)} if corpus.is_dir() else {}
+
+
 class RunError(ValueError):
     """A pipeline failure with a NAMED, analyst-actionable reason — emitted verbatim in-stream
     (the serve_corpus DeriveError pattern), never disguised as a generic crash."""
@@ -231,15 +251,13 @@ def casework_consume(bundle_path: Path, out_path: Path, drafter: str) -> dict:
     Until the casework consume CLI lands (aml-casework/docs/consume-cli-PLAN-BRIEF.md), this raises a
     NAMED RunError — the bridge is honestly gated, never faked."""
     src = CASEWORK_DIR / "src"
-    py = os.environ.get("AML_CASEWORK_PYTHON")
-    if not py:
-        venv = CASEWORK_DIR / ".venv" / "bin" / "python"
-        py = str(venv) if venv.exists() else sys.executable
+    py = casework_python()
     if not src.exists():
         raise RunError(f"aml-casework not found at {CASEWORK_DIR} (set AML_CASEWORK_DIR) — the consume "
                        f"CLI is the sibling prerequisite; the chain is GATED until it lands")
     env = dict(os.environ)
     env["PYTHONPATH"] = str(src) + os.pathsep + env.get("PYTHONPATH", "")
+    env.update(casework_corpus_env())
     cmd = [py, "-m", "aml_casework.ingest", str(bundle_path),
            "--out", str(out_path), "--drafter", drafter]
     try:

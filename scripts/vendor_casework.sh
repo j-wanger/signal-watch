@@ -50,5 +50,16 @@ boundary:    DISTRIBUTION copy only. The companion subprocesses this over the fi
 build:       make setup   (builds vendor/aml-casework/.venv from pyproject + uv.lock; needs network once)
 EOF
 
+# Build the cross-platform wheel (Phase 67 — Windows/pip-friendly install; py3-none-any, pure Python) so it
+# ships committed. `uv build` drops a dist/.gitignore (`*`) that would un-track it — remove it so the wheel
+# commits (setup_workbench.py installs from vendor/aml-casework/dist/*.whl).
+if command -v uv >/dev/null 2>&1; then
+  ( cd "$DST" && uv build --wheel >/dev/null 2>&1 ) && rm -f "$DST/dist/.gitignore" \
+    && echo "built wheel: $(cd "$DST" && ls dist/*.whl 2>/dev/null | tail -1)" \
+    || echo "WARN: wheel build skipped/failed (uv build) — setup_workbench.py will fall back to a source install"
+else
+  echo "NOTE: uv not found — skipped the wheel build; setup_workbench.py installs from source"
+fi
+
 echo "vendored aml-casework@$COMMIT ($BRANCH, $DIRTY uncommitted) → $DST"
-echo "next: make setup   (build the venv, then: python3 scripts/serve_workbench.py)"
+echo "next: python scripts/setup_workbench.py   (then: python scripts/serve_workbench.py)"

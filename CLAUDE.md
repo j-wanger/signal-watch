@@ -248,18 +248,21 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   then `python3 scripts/serve_corpus.py` → http://localhost:8010 (paste a converted advisory md;
   derives through the frozen gate, propose-only). Offline `dist/corpus` unaffected; doc:
   `docs/corpus-live.md`.
-- Investigator WORKBENCH (companion-only — NOT a ship/build target; never goes to `dist/`): `make setup`
-  (Phase 67 — builds the VENDORED casework venv) then `python3 scripts/serve_workbench.py` → http://localhost:8030
+- Investigator WORKBENCH (companion-only — NOT a ship/build target; never goes to `dist/`): `python
+  scripts/setup_workbench.py` (Phase 67 — CROSS-PLATFORM [Windows/mac/Linux, no make/Unix-shell]; builds the
+  VENDORED casework venv from the committed wheel) then `python scripts/serve_workbench.py` → http://localhost:8030
   (reads committed `data/workbench/**` + `data/osint/corpus.json`; binds 127.0.0.1; persists nothing). The FULL
   live arc — CLUTTER→SIGNALS→gating-loop + GATHER + the DECIDE signed-SAR finale — runs OFFLINE on the
-  deterministic STUB from a BARE CLONE: `aml-casework` is VENDORED into `vendor/aml-casework/` (+ its pinned
-  corpus snapshot at `vendor/aml-casework/fixtures/corpus/`); resolution = `AML_CASEWORK_DIR` > vendored >
-  `../aml-casework` sibling > GATED. The DECIDE consume is still a SUBPROCESS file-handoff — build.py NEVER
-  imports casework, the 8 dists stay byte-frozen (vendoring is DISTRIBUTION, not coupling). Without `make setup`
-  the DECIDE finale is a named GATED stage; the rest of the arc is unaffected. LIVE neural (optional,
-  server-side only, never in the browser §4.5): a model on `127.0.0.1:8080` (`OPENAI_BASE_URL`) / an Anthropic
-  key drives the GATHER loop + DECIDE prose, else the stub (the casework pipeline still shapes/signs/verifies
-  offline). Live tier needs Python ≥3.11 + uv (the offline ship artifacts stay zero-dep, stdlib-3.10). Doc:
+  deterministic STUB from a BARE CLONE: `aml-casework` is VENDORED into `vendor/aml-casework/` (its src + a
+  cross-platform WHEEL under `dist/` + its pinned corpus snapshot under `fixtures/corpus/`); resolution =
+  `AML_CASEWORK_DIR` > vendored > `../aml-casework` sibling > GATED; venv python + `SIGNAL_WATCH_CORPUS` are
+  resolved CROSS-PLATFORM (`serve_chain.casework_python`/`casework_corpus_env`). The DECIDE consume is still a
+  SUBPROCESS file-handoff — build.py NEVER imports casework, the 8 dists stay byte-frozen (vendoring is
+  DISTRIBUTION, not coupling). Without setup the DECIDE finale is a named GATED stage; the rest of the arc is
+  unaffected. LIVE neural (optional, server-side only, never in the browser §4.5): a model on
+  `127.0.0.1:8080` (`OPENAI_BASE_URL`) / an Anthropic key drives the GATHER loop + DECIDE prose, else the stub
+  (the casework pipeline still shapes/signs/verifies offline). Live tier needs Python ≥3.11 + uv-or-pip (the
+  offline ship artifacts stay zero-dep, stdlib-3.10; `make setup` is a POSIX shortcut for the script). Doc:
   `docs/case-workbench.md`. Precursor the CHAIN workbench: `python3 scripts/serve_chain.py` → http://localhost:8020
   (`docs/chain-workbench.md`). Companion ports: news 8000 · corpus 8010 · chain 8020 · workbench 8030.
 - Drift guard before presenting: `python3 scripts/build.py --check all` (frozen dists byte-identical).

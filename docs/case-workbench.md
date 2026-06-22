@@ -219,6 +219,23 @@ Offline `dist/*` are unaffected (the workbench is never built). Privacy by check
 real leaves the box; no key/token in the frontend. Vendoring aml-casework is a **distribution** choice —
 `build.py` never imports it; the companion subprocesses the vendored CLI over the file-handoff.
 
+## The DETERMINATION beat (Phase 69) — evidence-sufficiency, not frequency
+
+Between GATHER and DECIDE the workbench now asks the load-bearing question: *is there enough evidence for a
+**determination**, or only a defensive filing?* The decision is licensed by a per-typology
+**evidence-requirement profile** (`data/workbench/evidence-requirements.json`, chosen-not-measured) — a
+money_laundering determination needs a mechanism atom (placement/layering / evasion-intent) **AND ≥2 corroborating legs**
+(network, external corroboration, profile-inconsistency, anticipated-activity, source-of-funds) **AND** a
+**named predicate risk** (the specific risk we file for) **AND** **no unrebutted mitigation**. The Phase-64
+combo-frequency gate is **demoted to context** — it decides *where* to spend judgment, never *that* a
+determination holds. `POST /determine` (pure; `scripts/evidence_requirements.py` `determine` / `serve_workbench
+determine_case`) returns the verdict; `named_risk` + `mitigation_rebutted` are the **human elicitation**.
+Insufficiency is a legitimate non-decision whose gaps NAME what to gather; the unmet, **non-gatherable** atoms
+become a **§12 substrate-signal brief** (what to build next). Measured over the population: every auto-clear
+case is `needs_more_info` from signals alone (no case reaches the ≥2-leg bar) — the defensive-filing exposure,
+concrete. The live execute-once held the honesty seam (zero structured-fact fabrication; the determination
+withholds honestly when the live gather under-closes). Full design: `docs/evidence-driven-filing.md`.
+
 ## Tests
 
 ```bash

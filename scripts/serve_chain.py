@@ -46,6 +46,9 @@ sys.path.insert(0, str(_HERE))
 import e2e_chain_check        # signal-watch's OWN cross-pillar harness (NOT a sibling)
 import validate_chain_cases   # signal-watch's OWN library validator (reuses check_substrate)
 from derive_signals import normalize  # the stable grounding core
+# Phase 69 — the evidence-requirement profile + the COMPLETENESS measurement (companion; chosen-not-measured).
+from evidence_requirements import assess_completeness, crime_type_for_capabilities
+from evidence_requirements import requirements as _requirements
 
 DEFAULT_PORT = 8020          # serve_news holds 8000, serve_corpus 8010 — all three run side by side
 CASES_DIR = ROOT / "data" / "chain-cases"
@@ -361,6 +364,16 @@ def run_case(case_id: str, *, on_stage, consume=casework_consume, verify=verify_
 
     # stage 4 — connected (the final payload + the flag→corpus audit walk)
     signed_sar = json.loads(signed_path.read_text(encoding="utf-8")) if signed_path.exists() else None
+    # Phase 69 — the COMPLETENESS measurement: required STR elements (vs casework's completeness dict) +
+    # the determination ATOMS the case carries vs the honest gaps. crime_type comes from the stamped STR
+    # record (casework), falling back to the capability→offence map for the stub. Pure; renders honest-NULL.
+    _rec = (signed_sar or {}).get("str_record", {})
+    _caps = [c.get("capability") for c in case.get("capabilities", []) if isinstance(c, dict)]
+    _ct = _rec.get("crime_type") or crime_type_for_capabilities(_caps, _requirements())
+    completeness = (assess_completeness(_ct, _caps, _requirements(), str_completeness=_rec.get("completeness", {}))
+                    if _ct else {"crime_type": None, "profiled": False,
+                                 "str": {"required": [], "satisfied": [], "missing": []},
+                                 "atoms": [], "present_atom_ids": []})
     payload = {
         "case": {k: case.get(k) for k in ("case_id", "title", "summary", "subject", "provenance")},
         "bundle_summary": {
@@ -371,6 +384,7 @@ def run_case(case_id: str, *, on_stage, consume=casework_consume, verify=verify_
         "consume": consume_res,
         "verify": verify_res,
         "signed_sar": signed_sar,
+        "completeness": completeness,
         "audit_walk": audit_walk(bundle),
         "connected": verify_res["connected"] and consume_res["signed"],
     }
@@ -610,6 +624,16 @@ def selftest() -> int:
                         f"consume={payload['consume']}")
     if not payload["signed_sar"] or not payload["audit_walk"]:
         failures.append("final payload missing signed_sar / audit_walk")
+    # Phase 69 — the COMPLETENESS measurement rides the payload: the mule is money_laundering, its
+    # mechanism atoms light up from the structuring/funnel/pass-through capabilities, and the determination
+    # legs that did NOT fire are the honest GAPS the GATHER beat targets (the "lazy filing" made visible).
+    comp = payload.get("completeness") or {}
+    if not comp.get("profiled") or comp.get("crime_type") != "money_laundering":
+        failures.append(f"the mule completeness should profile money_laundering, got {comp.get('crime_type')}")
+    if "ML-A1" not in comp.get("present_atom_ids", []) and "ML-A2" not in comp.get("present_atom_ids", []):
+        failures.append(f"a mechanism atom should be present for the mule, got {comp.get('present_atom_ids')}")
+    if not any(not a["present"] for a in comp.get("atoms", [])):
+        failures.append("the mule should carry at least one HONEST GAP (an unmet determination atom)")
     # the committed pillar-status.json MUST be byte-identical after the run (no launcher drift)
     status_after = STATUS_PATH.read_bytes() if STATUS_PATH.exists() else None
     if status_before != status_after:

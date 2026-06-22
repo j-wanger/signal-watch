@@ -38,8 +38,9 @@ const SCRIPT = html.slice(open + '<script>'.length, close)
   + `toggleSignals,selectCase,pickBackend,applyMessage,runDecision,paintSurface,renderQueue,renderPop,loadQueue,backendLabel,`
   + `liveGate,liveFunnel,setGate,renderGate,loadGate,onKnob,resetGating,doAdjudicate,policyThresholds,`
   + `runGather,applyGather,gatherPanelHTML,gatherResultHTML,gatherGraphHTML,liveGraphLayout,toolLabel,kindLabel,`
-  + `setState:(s)=>{ if('META'in s)META=s.META; if('QUEUE'in s)QUEUE=s.QUEUE; if('FILTER'in s)FILTER=s.FILTER; if('SEL'in s)SEL=s.SEL; if('DETAIL'in s)DETAIL=s.DETAIL; if('SIGNALS'in s)SIGNALS=s.SIGNALS; if('RUN'in s)RUN=s.RUN; if('GATE'in s)setGate(s.GATE); if('POLICY'in s)POLICY=s.POLICY; if('ADJ'in s)ADJ=s.ADJ; if('GATHER'in s)GATHER=s.GATHER; },`
-  + `getState:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ,GATHER})};`;
+  + `runDetermine,determinePanelHTML,`
+  + `setState:(s)=>{ if('META'in s)META=s.META; if('QUEUE'in s)QUEUE=s.QUEUE; if('FILTER'in s)FILTER=s.FILTER; if('SEL'in s)SEL=s.SEL; if('DETAIL'in s)DETAIL=s.DETAIL; if('SIGNALS'in s)SIGNALS=s.SIGNALS; if('RUN'in s)RUN=s.RUN; if('GATE'in s)setGate(s.GATE); if('POLICY'in s)POLICY=s.POLICY; if('ADJ'in s)ADJ=s.ADJ; if('GATHER'in s)GATHER=s.GATHER; if('DET'in s)DET=s.DET; },`
+  + `getState:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ,GATHER,DET})};`;
 
 /* ---------- DOM + fetch shim ---------- */
 function makeEl(id){
@@ -60,7 +61,7 @@ function makeEl(id){
 }
 const ELEMENTS = {};
 ['badge','draftChip','popStrip','queue','qcount','filters','surf','masterSwitch','decideBtn','picker',
- 'gatePanel','knobHigh','knobMed','gateReset','adjud','adjudRead','gatherBtn'].forEach(id => ELEMENTS[id] = makeEl(id));
+ 'gatePanel','knobHigh','knobMed','gateReset','adjud','adjudRead','gatherBtn','detBtn','detRisk','detMit'].forEach(id => ELEMENTS[id] = makeEl(id));
 const documentShim = { getElementById(id){ return ELEMENTS[id] || (ELEMENTS[id] = makeEl(id)); } };
 
 function streamResponse(chunks){
@@ -83,8 +84,11 @@ let LAST_RUN_BODY = null;
 let GATE_RESPONSE = null, ADJ_RESPONSE = null;     // the gating-engine stubs (set per gating test)
 let LAST_GATE_URL = null, LAST_ADJ_BODY = null;
 let GATHER_CHUNKS = [], LAST_GATHER_BODY = null;    // the gather-beat stream stub (Phase 65)
+let DETERMINE_RESPONSE = null, LAST_DETERMINE_BODY = null;   // the determination stub (Phase 69 T4)
 function fetchShim(url, opts){
   const u = String(url);
+  if (u.includes('/determine')){ try { LAST_DETERMINE_BODY = JSON.parse((opts&&opts.body)||'{}'); } catch(e){ LAST_DETERMINE_BODY = null; }
+    return Promise.resolve({ ok:true, json:()=>Promise.resolve(DETERMINE_RESPONSE||{error:'no determine stub'}) }); }
   if (u.includes('/gather')){ try { LAST_GATHER_BODY = JSON.parse((opts&&opts.body)||'{}'); } catch(e){ LAST_GATHER_BODY = null; }
     return Promise.resolve(streamResponse(GATHER_CHUNKS)); }
   if (u.includes('/cases')) return Promise.resolve({ ok:true, json:()=>Promise.resolve(CASES_RESPONSE) });
@@ -99,6 +103,7 @@ function fetchShim(url, opts){
 }
 
 const WB_CFG = { cases:'/cases', case:'/case', gate:'/gate', adjudicate:'/adjudicate', run:'/run',
+  gather:'/gather', determine:'/determine',
   health:'/health', badge:'Illustrative data & outputs',
   policy:{ thresholds:{high:500, medium:50}, gate_of_level:{high:'auto-clear', medium:'review', low:'human-gate'} },
   drafter:{ default:'stub', available:['stub','claude','openai'],
@@ -491,6 +496,72 @@ ok(/No external findings grounded/.test(ELEMENTS.surf._html), 'an honest empty r
 T.setState({ GATHER:{ caseId:'CASE-P-MULE', stages:[], done:null, error:'could not reach the workbench companion', running:false } }); T.paintSurface();
 ok(/Gather failed/.test(ELEMENTS.surf._html) && !/class="gfind"/.test(ELEMENTS.surf._html),
    'a gather transport failure renders the named error banner (no findings, not a crash)');
+
+/* ---------- the DIFFERENTIATED DETERMINATION (Phase 69 T4): sufficiency SUPERSEDES frequency ---------- */
+T.setState({ SEL:'CASE-P-MULE', DETAIL:MULE_DETAIL, GATHER:null, RUN:null, DET:null }); T.paintSurface();
+const dp = ELEMENTS.surf._html;
+ok(/Determination · licensed by evidence-sufficiency, not frequency/.test(dp),
+   'the determination beat frames the decision as evidence-sufficiency, not frequency');
+ok(/Precedent context: combo seen <b>4<\/b>× → the frequency gate would <b>human-gate<\/b>/.test(dp)
+   && /context only, never the determination trigger/.test(dp),
+   'the frequency gate is DEMOTED to context (the Phase-64 engine, no longer the trigger)');
+ok(/id="detRisk"/.test(dp) && /id="detMit"/.test(dp) && /id="detBtn"/.test(dp),
+   'the elicitation form renders: name the predicate risk + confirm mitigation + a Determine button');
+
+/* click Determine with NO named risk + insufficient evidence → NEEDS MORE INFO, each gap NAMED */
+DETERMINE_RESPONSE = {
+  badge:'Illustrative data & outputs', case_id:'CASE-P-MULE', crime_type:'money_laundering', named_risk:null,
+  frequency_context:{ combo:'C15+C2+C3+C4+C5', n_precedent:4, gate:'human-gate' },
+  determination:{ crime_type:'money_laundering', verdict:'needs_more_info', sufficient:false,
+    missing:['need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)',
+             'the specific predicate risk is not named (ground to the cited signals\' typology guidance)'],
+    signal_brief:[ { atom:'ML-A6', label:'Anticipated-activity inconsistency', capabilities:['C1'], data_sources:['D8','D10'] },
+                   { atom:'ML-A7', label:'Source of funds not established', capabilities:['C14'], data_sources:['D8','D20'] } ],
+    completeness:{ str:{ required:[], satisfied:[], missing:[] }, present_atom_ids:['ML-A1','ML-A2','ML-A4'],
+      atoms:[ { id:'ML-A1', label:'Layering mechanism', kind:'mechanism', present:true },
+              { id:'ML-A2', label:'Evasion intent, not amount', kind:'mechanism', present:true },
+              { id:'ML-A4', label:'Network / beneficial-ownership linkage', kind:'leg', present:true },
+              { id:'ML-A5', label:'External corroboration', kind:'leg', present:false } ] } } };
+ELEMENTS.detRisk.value = ''; ELEMENTS.detMit.checked = false;
+await T.runDetermine();
+const dn = ELEMENTS.surf._html;
+ok(/NEEDS MORE INFO/.test(dn) && /a determination is not yet licensed/.test(dn),
+   'insufficient evidence WITHHOLDS the determination (defensive filing refused)');
+ok(/corroborating leg/.test(dn) && /predicate risk is not named/.test(dn),
+   'each gap is NAMED — what to gather, or what signal to build (the §12 loop)');
+ok((dn.match(/class="(?:has|gap)"/g)||[]).length === 4 && /<span class="dmk">○<\/span><span class="did">ML-A5/.test(dn),
+   'the atom assessment renders present vs the honest gap (ML-A5)');
+ok(/Signals to build \(§12 discovery loop\)/.test(dn) && /ML-A7/.test(dn) && /Source of funds not established/.test(dn),
+   'the §12 brief renders: the non-gatherable gaps name what to BUILD in aml-substrate (C14/D8/D20)');
+
+/* now name the risk + confirm mitigation + a gathered corroboration → DETERMINATION */
+DETERMINE_RESPONSE = {
+  badge:'Illustrative data & outputs', case_id:'CASE-P-MULE', crime_type:'money_laundering', named_risk:'human trafficking',
+  frequency_context:{ combo:'C15+C2+C3+C4+C5', n_precedent:4, gate:'human-gate' },
+  determination:{ crime_type:'money_laundering', verdict:'determination', sufficient:true, missing:[],
+    completeness:{ str:{ required:[], satisfied:[], missing:[] }, present_atom_ids:['ML-A1','ML-A2','ML-A4','ML-A5'],
+      atoms:[ { id:'ML-A1', label:'Layering mechanism', kind:'mechanism', present:true },
+              { id:'ML-A5', label:'External corroboration', kind:'leg', present:true } ] } } };
+T.setState({ GATHER:{ caseId:'CASE-P-MULE', done:{ requirement:{ gathered_signals:['ownership','corroboration'] } } } });
+ELEMENTS.detRisk.value = 'human trafficking'; ELEMENTS.detMit.checked = true;
+await T.runDetermine();
+const dy = ELEMENTS.surf._html;
+ok(/DETERMINATION · human trafficking — the evidence is sufficient/.test(dy),
+   'naming the risk + mitigation + gathered corroboration LICENSES a determination (effective monitoring)');
+ok(LAST_DETERMINE_BODY && LAST_DETERMINE_BODY.named_risk === 'human trafficking'
+   && LAST_DETERMINE_BODY.mitigation_rebutted === true
+   && JSON.stringify(LAST_DETERMINE_BODY.gathered) === JSON.stringify(['ownership','corroboration']),
+   'runDetermine POSTs the named risk + mitigation + the gather-closed signals');
+
+/* XSS: a named risk is esc()-escaped in the verdict */
+DETERMINE_RESPONSE = { case_id:'CASE-P-MULE', crime_type:'money_laundering', named_risk:'<img src=x>',
+  frequency_context:{ combo:'x', n_precedent:1, gate:'human-gate' },
+  determination:{ crime_type:'money_laundering', verdict:'determination', sufficient:true, missing:[],
+    completeness:{ str:{required:[],satisfied:[],missing:[]}, present_atom_ids:[], atoms:[] } } };
+ELEMENTS.detRisk.value = '<img src=x>';
+await T.runDetermine();
+ok(ELEMENTS.surf._html.includes(escH('<img src=x>')) && !/DETERMINATION · <img src=x>/.test(ELEMENTS.surf._html),
+   'XSS: a model/operator-supplied named risk is esc()-escaped in the determination verdict');
 
 /* ---------- summary ---------- */
 console.log(`\n${pass} passed, ${fails.length} failed`);

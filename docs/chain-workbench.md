@@ -25,7 +25,11 @@ illustrative). Per case, the **downstream runs live**:
    **gate verdict on the generated draft** (the gate is the oracle, whatever the backend produced).
 3. **Verify** — signal-watch's `e2e_chain_check --real` re-verifies the cross-pillar join.
 4. **Connected** — the signed STR + the **flag→corpus audit walk**: every signal traces back to a
-   public-source regulator indicator in the frozen corpus.
+   public-source regulator indicator in the frozen corpus. The structured STR record renders its
+   **completeness** (Phase 69): the previously-dropped FINTRAC fields (aliases, beneficial ownership, IP/VC,
+   DOB, named relationships, account action) are surfaced as explicit **honest-NULL** gaps, and a completeness
+   panel reports the required STR elements + the determination ATOMS the case carries vs the honest gaps (what
+   a determination needs beyond a filing — see `docs/evidence-driven-filing.md`).
 
 Results stream as NDJSON **stages** (completed/grounded reveals — never a token stream).
 

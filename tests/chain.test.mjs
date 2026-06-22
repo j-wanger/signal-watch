@@ -155,15 +155,28 @@ const DONE = {
   signed_sar:{ str_record:{
     crime_type:'money_laundering',
     reporting_entity:{ entity_type:null, entity_ref:null, illustrative:true },
-    subject:{ customer_id:'P-0010361', account_ids:['A-00038593'], name:null, aliases:[] },
+    subject:{ customer_id:'P-0010361', account_ids:['A-00038593'], name:null, aliases:[],
+      beneficial_ownership:null, ip_addresses:[], vc_addresses:[], emt_details:null, date_of_birth:null },
     transaction_summary:{ cited_txn_count:71, total_cited_amount_cents:20408570, amount_min_cents:509,
       amount_max_cents:7156160, currencies:['CAD'], channels:['CASH','WIRE'],
       date_range:{ first:'2024-01-01', last:'2024-03-28' }, counterparty_count:15,
       direction_breakdown:{ CREDIT:38, DEBIT:33 }, disposition:null },
     action_taken:{ filing_disposition:'file', filed_to:'FINTRAC', account_action:null },
-    relationships:{ counterparty_count:15, named_relationships:[] },
+    relationships:{ counterparty_count:15, counterparty_country:null, named_relationships:[] },
     narrative:'Account A-00038593 exhibits a multi-typology laundering pattern. <not a tag>',
     narrative_claims:[{ text:'Sub-$10,000 cash deposits indicate structuring.', cites:['fin-2026-alert001:IND-11'] }] } },
+  completeness:{ crime_type:'money_laundering', profiled:true,
+    str:{ required:['reporting_entity','transaction_details','account_information','subject_information','typology_grounds','grounds_for_suspicion_narrative'],
+      satisfied:['reporting_entity','transaction_details','account_information','subject_information','typology_grounds','grounds_for_suspicion_narrative'], missing:[] },
+    atoms:[
+      { id:'ML-A1', label:'Layering mechanism', kind:'mechanism', present:true },
+      { id:'ML-A2', label:'Evasion intent, not amount', kind:'mechanism', present:true },
+      { id:'ML-A3', label:'Profile inconsistency', kind:'leg', present:false },
+      { id:'ML-A4', label:'Network / beneficial-ownership linkage', kind:'leg', present:true },
+      { id:'ML-A5', label:'External corroboration', kind:'leg', present:false },
+      { id:'ML-A6', label:'Anticipated-activity inconsistency', kind:'leg', present:false },
+      { id:'ML-A7', label:'Source of funds not established', kind:'leg', present:false } ],
+    present_atom_ids:['ML-A1','ML-A2','ML-A4'] },
   audit_walk:[
     { capability:'C4', detector:'structuring', signal_id:'fin-2026-alert001:IND-11', source:'fincen-alerts',
       corpus_flag:'engages in structuring with multiple cash transactions for under $10,000',
@@ -194,6 +207,20 @@ ok(/Suspected offence/.test(finalHTML) && /money laundering/.test(finalHTML) && 
    'the structured FINTRAC STR record renders the offence + the structured aggregate total');
 ok(/not available \(no-PII record\)/.test(finalHTML),
    'an absent FINTRAC field (subject name) renders as an explicit honest-NULL gap, not blank');
+/* ---- Phase 69 T2: the previously-DROPPED STR fields now render (honest-NULL), + the completeness panel ---- */
+ok(/Beneficial ownership/.test(finalHTML) && /not disclosed \/ not resolvable — GATHER target/.test(finalHTML),
+   'the beneficial-ownership field renders as an honest-NULL GATHER target (was dropped before)');
+ok(/Subject identity/.test(finalHTML) && /Other identifiers/.test(finalHTML),
+   'the previously-dropped subject identity / identifier fields now render');
+ok(/Completeness · what a determination of money laundering requires/.test(finalHTML),
+   'the completeness panel frames what a determination requires (not just a filing)');
+ok(/STR elements: 6\/6 present · complete/.test(finalHTML),
+   'the completeness panel reports the STR required-element coverage');
+ok(/Determination evidence: 3\/7 atoms present/.test(finalHTML) && /GATHER targets/.test(finalHTML),
+   'the panel reports atoms-present vs gaps and frames the gaps as GATHER targets');
+ok((finalHTML.match(/class="cid"/g)||[]).length === 7, 'the panel lists all seven determination atoms');
+ok(/class="[^"]*\bgap\b[^"]*"[^>]*><span class="cmk">○<\/span><span class="cid">ML-A5/.test(finalHTML),
+   'an unmet determination atom (ML-A5 external corroboration) renders as an HONEST GAP');
 ok(finalHTML.includes(escH('<not a tag>')), 'XSS: the model narrative is esc()-escaped');
 ok(/Audit walk/.test(finalHTML), 'the flag→corpus audit walk renders');
 ok((finalHTML.match(/class="wrow"/g)||[]).length === 2, 'audit walk renders one row per grounded alert');

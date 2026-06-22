@@ -32,8 +32,10 @@ opened with no server:
 | Triage console | `triage` | the §14 continuous-adjudication loop |
 
 **One companion-only investigator workbench** (`workbench.html`, served — **not** a ship/build target):
-the clutter → signals → decide arc over a vendored case population, with an agentic GATHER beat and a
-cross-pillar signed-STR finale.
+the clutter → signals → GATHER → DETERMINATION → decide arc over a vendored case population. The
+DETERMINATION beat licenses the decision by **evidence-sufficiency, not combo-frequency** (a chosen-not-measured
+per-typology requirement profile; the unmet gaps name what to gather or build — see `docs/evidence-driven-filing.md`);
+the agentic GATHER beat is requirement-targeted; the finale is a cross-pillar signed STR.
 
 > **Shippable vs companion — the whole dependency story in one place.** The **five ship artifacts above are
 > the deliverable, fully self-contained**: a browser opens them, zero external dependencies (verified by an

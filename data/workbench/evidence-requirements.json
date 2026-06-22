@@ -1,0 +1,124 @@
+{
+  "note": "EVIDENCE-REQUIREMENT PROFILE (Phase 69) — the determination-licensing evidence a case must carry before the workbench will license a DETERMINATION rather than a defensive filing. CHOSEN, not measured: the atoms + sufficiency thresholds are authored from public AML guidance + the capability taxonomy, NOT learned from past dispositions (the substrate is label-blind — see the §12/§14 honesty seam). Illustrative — the always-on 'Illustrative data & outputs' badge applies. required_elements mirror aml_casework.contract.STR_REQUIRED_ELEMENTS at the vendored pin (vendor/aml-casework/VENDORED_AT); evidence/data codes are capability (C*) / data-source (D*) codes from data/capability-taxonomy.json. Companion-only: NOT a ship or build input (build.py never reads it).",
+  "basis": "chosen-not-measured",
+  "schema_version": "1",
+  "crime_types": {
+    "money_laundering": {
+      "label": "Money laundering",
+      "required_elements": [
+        "reporting_entity",
+        "transaction_details",
+        "account_information",
+        "subject_information",
+        "typology_grounds",
+        "grounds_for_suspicion_narrative"
+      ],
+      "atoms": [
+        {
+          "id": "ML-A1",
+          "kind": "mechanism",
+          "label": "Placement / layering mechanism",
+          "evidence": ["C2", "C3", "C5"],
+          "data": ["D1", "D2", "D3"],
+          "rationale": "funds moved in a laundering shape — cash placement (C5 cash-intensity anomaly), rapid pass-through (C2), or multi-originator funnel-in / fan-out (C3) — not a single threshold touch"
+        },
+        {
+          "id": "ML-A2",
+          "kind": "mechanism",
+          "label": "Evasion intent, not amount",
+          "evidence": ["C4"],
+          "data": ["D1", "D2"],
+          "rationale": "structuring WITH design evidence (cancel-on-trigger, same-day multi-location) — the FinCEN-2025 principle that an amount near a reporting threshold is not, by itself, suspicion; the intent to evade is"
+        },
+        {
+          "id": "ML-A3",
+          "kind": "leg",
+          "label": "Profile inconsistency",
+          "evidence": ["C7", "C8"],
+          "data": ["D8", "D20"],
+          "rationale": "activity off the customer's expected peer (C7) or income / occupation (C8) profile — the 'no legitimate economic purpose' leg"
+        },
+        {
+          "id": "ML-A4",
+          "kind": "leg",
+          "label": "Network / beneficial-ownership linkage",
+          "evidence": ["C15"],
+          "data": ["D8", "D12", "D13"],
+          "gather_signal": "ownership",
+          "rationale": "shell / nominee / beneficial-ownership link or a counterparty-network edge — who really controls the funds (network analysis)"
+        },
+        {
+          "id": "ML-A5",
+          "kind": "leg",
+          "label": "External corroboration",
+          "evidence": [],
+          "data": ["D11", "D13"],
+          "gather_signal": "corroboration",
+          "rationale": "a sanctions / watchlist or adverse-media hit on the subject or a network affiliate, gathered and record-sourced"
+        },
+        {
+          "id": "ML-A6",
+          "kind": "leg",
+          "label": "Anticipated-activity inconsistency",
+          "evidence": ["C1"],
+          "data": ["D8", "D10"],
+          "rationale": "actual activity inconsistent with the ONBOARDING anticipated profile (expected volume / value / nature of business); activity consistent with the anticipated profile would instead MITIGATE"
+        },
+        {
+          "id": "ML-A7",
+          "kind": "leg",
+          "label": "Source of funds not established",
+          "evidence": ["C14"],
+          "data": ["D8", "D20"],
+          "rationale": "source of funds / source of wealth not established or inconsistent with the activity; an established legitimate source would MITIGATE"
+        }
+      ],
+      "sufficiency_rule": {
+        "mechanism_required": 1,
+        "additional_legs_required": 2,
+        "named_predicate_risk_required": true,
+        "no_unrebutted_mitigation_required": true
+      },
+      "mitigation_atoms": ["ML-A6", "ML-A7"],
+      "guidance": "the named predicate risk grounds back to the corpus specific-risk guidance — the typology of the case's cited signals (data/indicator-typology-map.json / data/typology-map.json). A program becomes effective by naming the specific risk it files for (e.g. human trafficking, fentanyl), not the generic offence."
+    },
+    "kyc_integrity": {
+      "label": "KYC integrity",
+      "required_elements": [
+        "reporting_entity",
+        "transaction_details",
+        "account_information",
+        "subject_information",
+        "typology_grounds",
+        "grounds_for_suspicion_narrative"
+      ],
+      "atoms": [
+        {
+          "id": "KYC-A1",
+          "kind": "mechanism",
+          "label": "Customer-cooperation / KYC-integrity failure",
+          "evidence": ["C14"],
+          "data": ["D8", "D9"],
+          "rationale": "refusal to provide CDD, evasive answers, or document inconsistency — the C14 integrity signal itself"
+        },
+        {
+          "id": "KYC-A2",
+          "kind": "leg",
+          "label": "Beneficial-ownership opacity",
+          "evidence": ["C15"],
+          "data": ["D8", "D12"],
+          "gather_signal": "ownership",
+          "rationale": "the beneficial owner is not disclosed or not resolvable — the inability to identify who controls the entity IS the suspicion (absence is evidence)"
+        }
+      ],
+      "sufficiency_rule": {
+        "mechanism_required": 1,
+        "additional_legs_required": 0,
+        "named_predicate_risk_required": true,
+        "no_unrebutted_mitigation_required": false
+      },
+      "mitigation_atoms": [],
+      "guidance": "kyc_integrity files on the integrity failure itself; subject_information must be present — you must know WHO you cannot verify. The named risk grounds to the C14/C15 guidance the cited signals derive from."
+    }
+  }
+}

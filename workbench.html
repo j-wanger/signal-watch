@@ -260,6 +260,37 @@
   .gerow:hover{color:var(--ink)}.gerow .gw{color:var(--ink)}.gerow .gl{color:var(--faint)}
   .gev{flex-basis:100%;border-left:2px solid var(--teal);padding:4px 0 2px 10px;color:var(--ink);font-style:italic;margin-top:4px}
 
+  /* DETERMINATION beat (Phase 69) — evidence-sufficiency supersedes frequency; named risk + mitigation = the human gate */
+  .determine{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .determine .dh{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--signal);margin-bottom:10px}
+  .detctx{font-family:var(--mono);font-size:11px;line-height:1.55;color:var(--muted);border:1px dashed var(--line2);border-radius:9px;padding:9px 12px;margin-bottom:11px}
+  .detctx .dmut{color:var(--faint)}
+  .datoms{list-style:none;display:grid;gap:4px;margin:0 0 12px}
+  .datoms li{display:flex;align-items:baseline;gap:9px;font-size:12.5px;padding:2px 0}
+  .datoms li.gap{color:var(--muted)}
+  .datoms .dmk{font-family:var(--mono);width:1em}
+  .datoms li.has .dmk{color:var(--green)}.datoms li.gap .dmk{color:var(--signal)}
+  .datoms .did{font-family:var(--mono);font-size:10.5px;color:var(--teal);white-space:nowrap}
+  .datoms .dlab{color:var(--ink);flex:1}.datoms li.gap .dlab{color:var(--muted)}
+  .datoms .dkind{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+  .detform{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .detinput{flex:1;min-width:260px;background:var(--panel2);border:1px solid var(--line2);border-radius:8px;color:var(--ink);font-family:var(--mono);font-size:12px;padding:8px 11px}
+  .detinput:focus{outline:none;border-color:var(--signal)}
+  .detlbl{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px;cursor:pointer}
+  .detv{border-radius:0 11px 11px 0;padding:12px 15px;font-size:13.5px;line-height:1.55}
+  .detv.yes{border:1px solid var(--green);border-left:3px solid var(--green);background:rgba(84,201,138,.08);color:var(--ink)}
+  .detv.no{border:1px solid var(--signal);border-left:3px solid var(--signal);background:rgba(246,166,35,.07);color:var(--ink)}
+  .dgaps{list-style:none;margin-top:8px;display:grid;gap:5px}
+  .dgaps li{font-family:var(--mono);font-size:11.5px;color:var(--muted);padding-left:14px;position:relative}
+  .dgaps li::before{content:'→';position:absolute;left:0;color:var(--signal)}
+  .sbrief{margin-top:12px;border:1px solid var(--line2);border-left:3px solid var(--violet);border-radius:0 11px 11px 0;background:rgba(176,140,255,.05);padding:11px 14px}
+  .sbh{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--violet);line-height:1.5;margin-bottom:9px}
+  .sblist{list-style:none;display:grid;gap:6px}
+  .sblist li{display:flex;align-items:baseline;gap:9px;font-size:12.5px;flex-wrap:wrap}
+  .sba{font-family:var(--mono);font-size:10.5px;color:var(--violet);white-space:nowrap}
+  .sbl{color:var(--ink)}
+  .sbc{font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;color:var(--faint)}
+
   footer{border-top:1px solid var(--line);margin-top:28px;padding:16px 0;color:var(--faint);font-size:11.5px;font-family:var(--mono);letter-spacing:.02em}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -330,6 +361,10 @@ let GATE=null, GATEBYID={}, POLICY=null, ADJ=null;
    dropped/graph result). The agent PROPOSES over a SYNTHETIC OSINT corpus; the gate DISPOSES; every kept
    finding shows the GROUNDED quote (evidence) beside a SUBORDINATE illustrative synthesis. Session-only. */
 let GATHER=null;
+/* Phase 69 — the DIFFERENTIATED DETERMINATION: DET = the last /determine response for the selected case
+   (the verdict, the atom assessment, the frequency context). The decision is licensed by evidence-
+   SUFFICIENCY (mechanism + corroborating legs + a named risk + no unrebutted mitigation), NOT frequency. */
+let DET=null;
 
 function defaultPolicy(){ return JSON.parse(JSON.stringify((CFG.policy)||{thresholds:{high:500,medium:50}})); }
 function setGate(g){ GATE=g; GATEBYID={}; ((g&&g.cases)||[]).forEach(r=>{ GATEBYID[r.case_id]=r; }); }
@@ -716,6 +751,51 @@ function pickBackend(name){
   // ("server unavailable") rather than the option being greyed out with no explanation.
   BACKEND=name; setDraftChip(); paintSurface();
 }
+/* ---------- the DIFFERENTIATED DETERMINATION (Phase 69 T4): sufficiency SUPERSEDES frequency ----------
+   The decision is licensed by evidence-SUFFICIENCY, not combo-frequency. The frequency gate (Phase 64) is
+   DEMOTED to CONTEXT for the contrast. named risk + mitigation are the HUMAN elicitation (where a person
+   fills what the data cannot); insufficiency NAMES the gap — gather it, or build the signal (the §12 loop). */
+function determinePanelHTML(){
+  if(!SEL) return '';
+  const conf=((DETAIL&&DETAIL.case)||{}).confidence||{};
+  const det=(DET&&DET.caseId===SEL)?DET:null;
+  const res=det&&det.res, d=res&&res.determination;
+  // the frequency CONTRAST — from the case confidence pre-determine, from the result after
+  const fg=(res&&res.frequency_context)||{n_precedent:conf.n_precedent, gate:conf.gate};
+  const contrast=`<div class="detctx">Precedent context: combo seen <b>${esc(fg.n_precedent==null?'—':fg.n_precedent)}</b>× → the frequency gate would <b>${esc(fg.gate||'—')}</b> <span class="dmut">— context only, never the determination trigger</span></div>`;
+  const atoms=(d&&d.completeness&&d.completeness.atoms)||[];
+  const atomList=atoms.length?`<ul class="datoms">${atoms.map(a=>`<li class="${a.present?'has':'gap'}"><span class="dmk">${a.present?'✓':'○'}</span><span class="did">${esc(a.id)}</span><span class="dlab">${esc(a.label)}</span><span class="dkind">${esc(a.kind)}</span></li>`).join('')}</ul>`:'';
+  let verdict='';
+  if(det&&det.error){ verdict=`<div class="err"><b>Determination failed</b>${esc(det.error)}</div>`; }
+  else if(d){
+    if(d.verdict==='determination') verdict=`<div class="detv yes">DETERMINATION · ${esc(res.named_risk||'risk named')} — the evidence is sufficient (mechanism + corroborating legs + named risk + no unrebutted mitigation).</div>`;
+    else verdict=`<div class="detv no">NEEDS MORE INFO — a determination is not yet licensed. Gaps that name what to gather, or what signal to build (the §12 loop):<ul class="dgaps">${(d.missing||[]).map(m=>`<li>${esc(m)}</li>`).join('')}</ul></div>`;
+  }
+  // the §12 DISCOVERY-LOOP brief: the unmet, NON-gatherable atoms → signals/data to BUILD in aml-substrate
+  const brief=(d&&d.signal_brief)||[];
+  const briefHTML=brief.length?`<div class="sbrief"><div class="sbh">Signals to build (§12 discovery loop) · the unmet evidence GATHER cannot supply names what the program should build next</div><ul class="sblist">${brief.map(b=>`<li><span class="sba">${esc(b.atom)}</span><span class="sbl">${esc(b.label)}</span><span class="sbc">${esc([...(b.capabilities||[]),...(b.data_sources||[])].join(' · '))}</span></li>`).join('')}</ul></div>`:'';
+  const risk=(det&&det.risk)||'';
+  const mit=!!(det&&det.mit);
+  return `<div class="determine">
+    <div class="dh">Determination · licensed by evidence-sufficiency, not frequency</div>
+    ${contrast}${atomList}
+    <div class="detform">
+      <input id="detRisk" class="detinput" placeholder="State the specific risk you are filing for (e.g. human trafficking, fentanyl)" value="${esc(risk)}">
+      <label class="detlbl"><input type="checkbox" id="detMit"${mit?' checked':''}> source-of-funds / anticipated-activity considered — no benign explanation remains</label>
+      <button class="btn" id="detBtn">Determine</button>
+    </div>
+    ${verdict}${briefHTML}</div>`;
+}
+function runDetermine(){
+  if(!SEL) return;
+  const ri=document.getElementById('detRisk'), mi=document.getElementById('detMit');
+  const risk=(ri&&ri.value||'').trim(), mit=!!(mi&&mi.checked);
+  const gathered=(GATHER&&GATHER.caseId===SEL&&GATHER.done&&GATHER.done.requirement&&GATHER.done.requirement.gathered_signals)||[];
+  return fetch(CFG.determine,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({case:SEL, named_risk:risk, mitigation_rebutted:mit, gathered})})
+    .then(r=>r.json()).then(res=>{ if(res&&res.error){DET={caseId:SEL,error:res.error};} else {DET={caseId:SEL,res,risk,mit};} paintSurface(); })
+    .catch(e=>{ DET={caseId:SEL,error:String(e)}; paintSurface(); });
+}
 function decideBarHTML(){
   const running=!!(RUN&&RUN.running);
   return `<div class="decidebar">
@@ -821,9 +901,11 @@ function paintSurface(loading){
     </div>
     ${walkHTML()}
     ${gatherPanelHTML()}
+    ${determinePanelHTML()}
     ${decideBarHTML()}
     ${ledgerHTML()}`;
   const gb=document.getElementById('gatherBtn'); if(gb) gb.onclick=runGather;
+  const detb=document.getElementById('detBtn'); if(detb) detb.onclick=runDetermine;
   if(surf&&surf.querySelectorAll) (surf.querySelectorAll('[data-ei]')||[]).forEach(x=>{ if(x.dataset&&x.dataset.ei!=null) x.onclick=()=>{ if(GATHER){const i=parseInt(x.dataset.ei,10); GATHER.gsel=(GATHER.gsel===i)?null:i; paintSurface();} }; });
   const db=document.getElementById('decideBtn'); if(db) db.onclick=runDecision;
   const pk=document.getElementById('picker');

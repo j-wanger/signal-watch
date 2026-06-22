@@ -53,6 +53,12 @@ from osint_tools import (  # noqa: E402  (signal-watch's OWN companion module)
     call_openai, gather as osint_gather, load_corpus as osint_load_corpus, resolve_gather_backend,
     validate_osint_corpus,
 )
+# Phase 69 — the evidence-requirement profile: the determination-sufficiency control (chosen-not-measured).
+from evidence_requirements import (  # noqa: E402  (signal-watch's OWN companion module)
+    REQUIREMENTS_JSON, assess_completeness, crime_type_for_capabilities, determine, evaluate_sufficiency,
+    gather_targets, gathered_signals, load_requirements, present_atoms, requirements as _requirements,
+    validate_requirements,
+)
 
 DEFAULT_PORT = 8030          # serve_news 8000, serve_corpus 8010, serve_chain 8020 — all side by side
 WORKBENCH_DIR = ROOT / "data" / "workbench"
@@ -72,6 +78,12 @@ def _case_entry(index: dict, case_id: str) -> dict:
         if c.get("case_id") == case_id:
             return c
     raise RunError(f"unknown case '{case_id}' — not in the vendored population (GET /cases)")
+
+
+def _entry_caps(entry: dict) -> list:
+    """The capability CODES a case fired — the index stores plain strings, the chain manifest stores dicts;
+    normalize both to codes (the determination control keys on these)."""
+    return [c.get("capability") if isinstance(c, dict) else c for c in entry.get("capabilities", [])]
 
 
 def _bundle_path(case_id: str) -> Path:
@@ -334,16 +346,74 @@ def run_gather(case_id: str, *, on_stage, backend: str | None = None, env: dict 
     cv = gather_view(entry, bundle)
     be = resolve_gather_backend(backend, env)
     on_stage("backend", requested=be.get("requested"), effective=be.get("effective"), note=be.get("note"))
+
+    # Phase 69 — REQUIREMENT-TARGETED gather: derive the case's crime_type + the atoms already carried by its
+    # fired signals, then NAME the unmet determination atoms a gather pass could close (network / corroboration)
+    # BEFORE running. This is the difference between additive discovery and seeking the evidence a determination
+    # actually needs.
+    prof = _requirements()
+    caps = _entry_caps(entry)
+    ctype = crime_type_for_capabilities(caps, prof)
+    present_before = present_atoms(ctype, caps, prof) if ctype else []
+    targets = gather_targets(ctype, present_before, prof) if ctype else []
+    on_stage("requirement", crime_type=ctype, present_before=present_before,
+             targets=[{"id": t["id"], "label": t["label"]} for t in targets])
+
     if planner is None:
         planner = (LivePlanner(cv, lambda msgs: call_openai(msgs, env))
                    if be.get("effective") == "openai" else StubPlanner(cv, oidx))
-    return osint_gather(cv, on_stage=on_stage, corpus=corpus, index=oidx, planner=planner, backend_note=be)
+    result = osint_gather(cv, on_stage=on_stage, corpus=corpus, index=oidx, planner=planner, backend_note=be)
+
+    # which targeted atoms the record-sourced findings CLOSED (vs the gaps that stay open → the §12 brief).
+    gathered = gathered_signals(result.get("grounded", []))
+    present_after = present_atoms(ctype, caps, prof, gathered=gathered) if ctype else []
+    closed_ids = [t for t in present_after if t not in present_before]
+    target_ids = {t["id"] for t in targets}
+    result["requirement"] = {
+        "crime_type": ctype,
+        "present_before": present_before, "present_after": present_after, "gathered_signals": gathered,
+        "targets": [{"id": t["id"], "label": t["label"]} for t in targets],
+        "closed": [{"id": tid, "label": next((t["label"] for t in targets if t["id"] == tid), tid)}
+                   for tid in closed_ids if tid in target_ids],
+        "still_open": [{"id": t["id"], "label": t["label"]} for t in targets if t["id"] not in closed_ids],
+    }
+    return result
+
+
+# ---- the DIFFERENTIATED DETERMINATION (Phase 69 T4) — sufficiency supersedes frequency ------------
+def determine_case(case_id: str, *, gathered=(), named_risk: str | None = None,
+                   mitigation_rebutted: bool = False, index: dict | None = None,
+                   precedent: dict | None = None) -> dict:
+    """The DETERMINATION for one case: licensed by evidence-SUFFICIENCY (mechanism + corroborating legs +
+    a NAMED predicate risk + no unrebutted mitigation), NOT combo-frequency. The Phase-64 frequency gate is
+    DEMOTED to CONTEXT for the contrast — it decides WHERE to spend judgment (§12), never that a
+    determination holds. Insufficiency is a legitimate non-decision whose `missing` NAMES the gap. Pure;
+    persists nothing. named_risk + mitigation_rebutted are the HUMAN elicitation inputs (the gate where a
+    person fills what the data cannot)."""
+    index = index or load_index()
+    entry = _case_entry(index, case_id)
+    prof = _requirements()
+    caps = _entry_caps(entry)
+    ctype = crime_type_for_capabilities(caps, prof)
+    det = (determine(ctype, caps, prof, gathered=gathered, named_predicate_risk=bool(named_risk),
+                     mitigation_rebutted=mitigation_rebutted) if ctype else None)
+    conf = entry.get("confidence", {})
+    combo = conf.get("combo")
+    n = (precedent or session_precedent(index)).get(combo, conf.get("n_precedent", 0))
+    freq = route(n)
+    return {"badge": BADGE, "case_id": case_id, "crime_type": ctype, "named_risk": named_risk or None,
+            "determination": det,
+            "frequency_context": {"combo": combo, "n_precedent": n, "gate": freq["gate"],
+                                  "note": "precedent FREQUENCY — context for WHERE to spend judgment, "
+                                          "never the determination trigger"},
+            "supersedes": ("the determination is licensed by evidence-sufficiency; the Phase-64 frequency "
+                           "gate is context only — seeing a combo more often is not a determination")}
 
 
 # ---- the served page -----------------------------------------------------------------------------
 def live_config(env: dict | None = None) -> dict:
     return {"cases": "/cases", "case": "/case", "gate": "/gate", "adjudicate": "/adjudicate",
-            "gather": "/gather", "run": "/run", "health": "/health", "badge": BADGE,
+            "gather": "/gather", "run": "/run", "determine": "/determine", "health": "/health", "badge": BADGE,
             "policy": GATING_POLICY,              # the routing KNOBS (the live gating panel's defaults)
             "drafter": sc._drafter_config(env)}   # NAMES + booleans only (§4.5), reused verbatim
 
@@ -411,9 +481,28 @@ class Handler(BaseHTTPRequestHandler):
             self._run(); return
         if p == "/gather":
             self._gather(); return
+        if p == "/determine":
+            self._determine(); return
         if p == "/adjudicate":
             self._adjudicate(); return
         self._json(404, {"error": f"not found: {self.path}"})
+
+    def _determine(self):
+        payload, err = self._read_json()
+        if err:
+            self._json(400, {"error": err}); return
+        case_id = (payload.get("case") or payload.get("case_id") or "").strip()
+        if not case_id:
+            self._json(400, {"error": "missing 'case' (the case_id to determine; GET /cases lists them)"}); return
+        named_risk = (payload.get("named_risk") or "").strip() or None
+        mitigation_rebutted = bool(payload.get("mitigation_rebutted"))
+        gathered = payload.get("gathered")
+        gathered = gathered if isinstance(gathered, list) else []
+        try:
+            self._json(200, determine_case(case_id, gathered=gathered, named_risk=named_risk,
+                                           mitigation_rebutted=mitigation_rebutted))
+        except RunError as ex:
+            self._json(400, {"error": str(ex)})
 
     # ---- the session: in-memory precedent + ledger the elicitation loop mutates (persists NOTHING) ----
     def _session_lock(self):
@@ -685,14 +774,52 @@ def selftest() -> int:
     if not any(f["source_kind"] == "sanctions" for f in gout["grounded"]):
         failures.append("the gather CHAIN should reach a sanctions finding on the registry-discovered entity")
     gseq = [s for s, _ in gstages]
-    for needed in ("backend", "plan", "tool", "findings"):
+    for needed in ("backend", "requirement", "plan", "tool", "findings"):
         if needed not in gseq:
             failures.append(f"gather stage '{needed}' missing from {gseq}")
+    # Phase 69 — REQUIREMENT-TARGETED gather: the mule (mechanism + ML-A4 from C15) is one corroborating leg
+    # short; gather TARGETS ML-A5 and CLOSES it record-sourced (the sanctions + adverse hits on the network),
+    # reaching two legs — the determination becomes reachable (the GATHER payoff, not additive discovery).
+    req = gout.get("requirement") or {}
+    if req.get("crime_type") != "money_laundering":
+        failures.append(f"gather requirement should profile money_laundering, got {req.get('crime_type')}")
+    if "ML-A5" not in [t["id"] for t in req.get("targets", [])]:
+        failures.append(f"gather should TARGET the unmet corroboration atom ML-A5, got {req.get('targets')}")
+    if "ML-A5" not in [c["id"] for c in req.get("closed", [])]:
+        failures.append(f"gather should CLOSE ML-A5 from the record-sourced sanctions/adverse findings, got {req.get('closed')}")
     # PERSISTS NOTHING: the committed slice + the OSINT corpus are byte-identical after a gather ran
     if disk_before != (CASES_JSON.read_bytes(), sorted(p.name for p in BUNDLES_DIR.iterdir())):
         failures.append("a gather run must persist NOTHING — cases.json/bundles changed on disk")
     if osint_before != OSINT_CORPUS_PATH.read_bytes():
         failures.append("a gather run must persist NOTHING — data/osint/corpus.json changed on disk")
+
+    # ---- the DIFFERENTIATED DETERMINATION (Phase 69 T4): sufficiency SUPERSEDES frequency ----
+    # the mule's frequency gate AUTO-CLEARS (high precedent), but from SIGNALS the determination is
+    # WITHHELD (one corroborating leg short) — the defensive-filing exposure made concrete.
+    d_sig = determine_case(mule_id)
+    if d_sig["determination"]["verdict"] != "needs_more_info":
+        failures.append(f"the mule determination from signals alone should be needs_more_info, got {d_sig['determination']['verdict']}")
+    if d_sig["frequency_context"]["gate"] not in ("auto-clear", "review", "human-gate"):
+        failures.append("the determination must carry the frequency gate as DEMOTED context")
+    # after GATHER closes corroboration + a named risk + mitigation rebutted -> a DETERMINATION
+    d_full = determine_case(mule_id, gathered=["corroboration"], named_risk="human trafficking",
+                            mitigation_rebutted=True)
+    if d_full["determination"]["verdict"] != "determination" or not d_full["determination"]["sufficient"]:
+        failures.append(f"the mule with gather+risk+mitigation should reach a determination, got {d_full['determination']}")
+    # the contrast is real: at least one auto-clear case is NOT a determination from signals (defensive filing)
+    auto_clear = next((c for c in index["cases"] if c["confidence"]["gate"] == "auto-clear"), None)
+    if auto_clear:
+        dc = determine_case(auto_clear["case_id"])
+        if dc["frequency_context"]["gate"] != "auto-clear":
+            failures.append("an auto-clear case's frequency context should read auto-clear")
+        if dc["determination"]["verdict"] == "determination":
+            failures.append("an auto-clear case should NOT be an auto-determination from signals alone "
+                            "(no case reaches the >=2-leg bar without corroboration — the thesis)")
+    # an unknown case is a NAMED error, not a crash
+    try:
+        determine_case("CASE-DOES-NOT-EXIST"); failures.append("determine_case on an unknown case should raise")
+    except RunError:
+        pass
 
     # §4.5: NO server-side cred/endpoint reaches the browser via ANY gather NDJSON stage OR the done result
     # (distinctive endpoint, not the generic 127.0.0.1:8080 default — see the §4.5 page-leak note above)
@@ -704,6 +831,22 @@ def selftest() -> int:
     for leak in ("sk-SECRET-DEAD", "leak-probe.example:59999"):
         if leak in gblob:
             failures.append(f"gather leaked a server-side cred/endpoint into a stage/result: {leak}")
+
+    # ---- the EVIDENCE-REQUIREMENT profile (Phase 69 T1): the committed profile validates clean, and the
+    # sufficiency evaluator is the determination control (mechanism + legs + named risk + no unrebutted
+    # mitigation). The deep tamper/evaluator coverage lives in evidence_requirements --selftest; here we
+    # assert the COMMITTED profile is consumable by the workbench + the two in-scope crime_types are present.
+    prof = load_requirements()
+    rerrs = validate_requirements(prof)
+    if rerrs:
+        failures.append(f"evidence-requirements.json failed validation: {'; '.join(rerrs[:4])}")
+    if set(prof.get("crime_types", {})) != {"money_laundering", "kyc_integrity"}:
+        failures.append(f"profile crime_types should be ML + kyc_integrity, got {set(prof.get('crime_types', {}))}")
+    # the determination control is live: the stricter ML bar withholds when a corroborating leg is short
+    _suff = evaluate_sufficiency("money_laundering", ["ML-A1", "ML-A3"], named_predicate_risk=True,
+                                 mitigation_rebutted=True, profile=prof, required_elements_satisfied=True)
+    if _suff["sufficient"] or not any("corroborating leg" in m for m in _suff["missing"]):
+        failures.append(f"the ML sufficiency bar should withhold a determination one leg short, got {_suff}")
 
     # the served page substitutes the config placeholder iff workbench.html exists
     page = render_page(live_config())

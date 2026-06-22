@@ -252,8 +252,16 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   scripts/setup_workbench.py` (Phase 67 — CROSS-PLATFORM [Windows/mac/Linux, no make/Unix-shell]; builds the
   VENDORED casework venv from the committed wheel) then `python scripts/serve_workbench.py` → http://localhost:8030
   (reads committed `data/workbench/**` + `data/osint/corpus.json`; binds 127.0.0.1; persists nothing). The FULL
-  live arc — CLUTTER→SIGNALS→gating-loop + GATHER + the DECIDE signed-STR finale — runs OFFLINE on the
-  deterministic STUB from a BARE CLONE: `aml-casework` is VENDORED into `vendor/aml-casework/` (its src + a
+  live arc — CLUTTER→SIGNALS→gating-loop + GATHER + DETERMINATION + the DECIDE signed-STR finale — runs OFFLINE
+  on the deterministic STUB from a BARE CLONE. The DETERMINATION beat (Phase 69, companion-only) is the
+  evidence-SUFFICIENCY control: a per-typology `data/workbench/evidence-requirements.json` profile (chosen-not-
+  measured determination-licensing ATOMS) + `scripts/evidence_requirements.py` (load/validate + the pure
+  `determine` verdict); the decision is licensed by sufficiency (mechanism + ≥2 corroborating legs + a NAMED
+  predicate risk + no unrebutted mitigation), NOT combo-FREQUENCY (the Phase-64 gate is DEMOTED to context);
+  GATHER is requirement-TARGETED (seek the unmet closeable atoms — UBO/corroboration — record-sourced); the
+  unmet, non-gatherable atoms become a §12 substrate-signal BRIEF (what to build next); the chain workbench
+  renders the structured STR's COMPLETENESS (the previously-dropped fields surfaced honest-NULL). Doc:
+  `docs/evidence-driven-filing.md`. `aml-casework` is VENDORED into `vendor/aml-casework/` (its src + a
   cross-platform WHEEL under `dist/` + its pinned corpus snapshot under `fixtures/corpus/`); resolution =
   `AML_CASEWORK_DIR` > vendored > `../aml-casework` sibling > GATED; venv python + `SIGNAL_WATCH_CORPUS` are
   resolved CROSS-PLATFORM (`serve_chain.casework_python`/`casework_corpus_env`). The DECIDE consume is still a

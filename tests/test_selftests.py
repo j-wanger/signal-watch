@@ -25,6 +25,7 @@ SCRIPTS = ROOT / "scripts"
 PY_SELFTESTS = [
     "curate_workbench_cases.py",
     "osint_tools.py",
+    "evidence_requirements.py",
     "serve_workbench.py",
     "serve_chain.py",
     "validate_chain_cases.py",

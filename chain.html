@@ -107,6 +107,21 @@
   .claims li{font-size:13px;color:var(--muted);padding:5px 0;display:flex;gap:9px}
   .claims .cite{font-family:var(--mono);font-size:10.5px;color:var(--teal);white-space:nowrap}
 
+  .comp{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  .comp .ch{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--signal);margin-bottom:8px}
+  .comp .cline{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:4px}
+  .comp .cgap{font-family:var(--mono);font-size:11px;color:var(--signal);margin-bottom:6px}
+  .catoms{list-style:none;margin-top:8px;display:grid;gap:4px}
+  .catoms li{display:flex;align-items:baseline;gap:9px;font-size:12.5px;padding:3px 0}
+  .catoms li.gap{color:var(--muted)}
+  .catoms .cmk{font-family:var(--mono);width:1em}
+  .catoms li.has .cmk{color:var(--green)}
+  .catoms li.gap .cmk{color:var(--signal)}
+  .catoms .cid{font-family:var(--mono);font-size:10.5px;color:var(--teal);white-space:nowrap}
+  .catoms .clab{color:var(--ink);flex:1}
+  .catoms li.gap .clab{color:var(--muted)}
+  .catoms .ckind{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+
   .walk{margin-top:18px}
   .wh{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
   .wrow{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:13px 15px;margin-bottom:10px}
@@ -406,13 +421,35 @@ function strRecordHTML(rec){
   const rows = [
     ['Suspected offence', nn((rec.crime_type||'').replace(/_/g,' '), 'not determined')],
     ['Subject', `account ${nn(subj.account_ids,'—')} · customer ${nn(subj.customer_id,'—')} · name ${nn(subj.name,'not available (no-PII record)')}`],
+    ['Subject identity', `aliases ${nn(subj.aliases,'none on record')} · DOB ${nn(subj.date_of_birth,'not available (no-PII record)')}`],
+    ['Beneficial ownership', nn(subj.beneficial_ownership,'not disclosed / not resolvable — GATHER target')],
+    ['Other identifiers', `IP ${nn(subj.ip_addresses,'—')} · VC ${nn(subj.vc_addresses,'—')} · EMT ${nn(subj.emt_details,'—')}`],
     ['Transactions', `${nn(ts.cited_txn_count,'—')} cited · ${money(ts.amount_min_cents)}–${money(ts.amount_max_cents)} · total ${money(ts.total_cited_amount_cents)} · ${nn(ts.currencies,'—')}`],
     ['Period · channels', `${nn(dr.first,'—')} → ${nn(dr.last,'—')} · ${nn(ts.channels,'—')}`],
-    ['Counterparties', `${nn(rel.counterparty_count,'—')} distinct · named: ${nn(rel.named_relationships,'none resolvable from available data')}`],
-    ['Disposition', `txn ${nn(ts.disposition,'not recorded')} · filing ${nn(act.filing_disposition,'pending signer')} · to ${nn(act.filed_to,'—')}`],
+    ['Counterparties', `${nn(rel.counterparty_count,'—')} distinct · ${nn(rel.counterparty_country,'country n/a')} · named: ${nn(rel.named_relationships,'none resolvable from available data')}`],
+    ['Disposition', `txn ${nn(ts.disposition,'not recorded')} · filing ${nn(act.filing_disposition,'pending signer')} · to ${nn(act.filed_to,'—')} · account ${nn(act.account_action,'none recorded')}`],
     ['Reporting entity', `${nn(re_.entity_type,'not supplied by the bundle')}${re_.illustrative?' · illustrative':''}`],
   ];
   return `<table class="strrec">${rows.map(r=>`<tr><th>${esc(r[0])}</th><td>${r[1]}</td></tr>`).join('')}</table>`;
+}
+
+/* completenessHTML — the COMPLETENESS MEASUREMENT (Phase 69): which STR required elements + which
+   determination ATOMS the case carries vs the honest gaps. A determination needs MORE than a fired
+   signal — it needs the supporting evidence; the gaps are what GATHER targets and, unfilled, name the
+   data/signal we'd build. Chosen-not-measured; the always-on badge applies. */
+function completenessHTML(comp){
+  if (!comp || !comp.profiled) return '';
+  const s = comp.str||{}; const reqN=(s.required||[]).length, satN=(s.satisfied||[]).length;
+  const missEl = (s.missing||[]).length ? `<div class="cgap">STR gaps: ${esc((s.missing||[]).map(x=>x.replace(/_/g,' ')).join(', '))}</div>` : '';
+  const atoms = (comp.atoms||[]).map(a =>
+    `<li class="${a.present?'has':'gap'}"><span class="cmk">${a.present?'✓':'○'}</span>`
+    + `<span class="cid">${esc(a.id)}</span><span class="clab">${esc(a.label)}</span>`
+    + `<span class="ckind">${esc(a.kind)}</span></li>`).join('');
+  const present=(comp.present_atom_ids||[]).length, total=(comp.atoms||[]).length;
+  return `<div class="comp"><div class="ch">Completeness · what a determination of ${esc((comp.crime_type||'').replace(/_/g,' '))} requires</div>
+    <div class="cline">STR elements: ${satN}/${reqN} present${missEl?'':' · complete'}</div>${missEl}
+    <div class="cline">Determination evidence: ${present}/${total} atoms present — the gaps below are what GATHER targets (unfilled, they name the signal to build).</div>
+    <ul class="catoms">${atoms}</ul></div>`;
 }
 
 function sarHTML(done){
@@ -423,7 +460,8 @@ function sarHTML(done){
   return `<div class="payoff"><div class="saw"><div class="sl">Signed STR · FINTRAC · Details of suspicion</div>
     ${strRecordHTML(rec)}
     <div class="narr">${esc(rec.narrative)}</div>
-    ${claims?`<ul class="claims">${claims}</ul>`:''}</div></div>`;
+    ${claims?`<ul class="claims">${claims}</ul>`:''}
+    ${completenessHTML(done.completeness)}</div></div>`;
 }
 
 /* stub-vs-neural: cache each backend's gated narrative per case so the presenter can run the

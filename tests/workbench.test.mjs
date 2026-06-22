@@ -37,8 +37,9 @@ const SCRIPT = html.slice(open + '<script>'.length, close)
   + `\n;globalThis.__T={esc,money,gateClass,gateLabel,channelSummary,counterpartySummary,kycPanel,citedTxnIds,`
   + `toggleSignals,selectCase,pickBackend,applyMessage,runDecision,paintSurface,renderQueue,renderPop,loadQueue,backendLabel,`
   + `liveGate,liveFunnel,setGate,renderGate,loadGate,onKnob,resetGating,doAdjudicate,policyThresholds,`
-  + `setState:(s)=>{ if('META'in s)META=s.META; if('QUEUE'in s)QUEUE=s.QUEUE; if('FILTER'in s)FILTER=s.FILTER; if('SEL'in s)SEL=s.SEL; if('DETAIL'in s)DETAIL=s.DETAIL; if('SIGNALS'in s)SIGNALS=s.SIGNALS; if('RUN'in s)RUN=s.RUN; if('GATE'in s)setGate(s.GATE); if('POLICY'in s)POLICY=s.POLICY; if('ADJ'in s)ADJ=s.ADJ; },`
-  + `getState:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ})};`;
+  + `runGather,applyGather,gatherPanelHTML,gatherResultHTML,gatherGraphHTML,liveGraphLayout,toolLabel,kindLabel,`
+  + `setState:(s)=>{ if('META'in s)META=s.META; if('QUEUE'in s)QUEUE=s.QUEUE; if('FILTER'in s)FILTER=s.FILTER; if('SEL'in s)SEL=s.SEL; if('DETAIL'in s)DETAIL=s.DETAIL; if('SIGNALS'in s)SIGNALS=s.SIGNALS; if('RUN'in s)RUN=s.RUN; if('GATE'in s)setGate(s.GATE); if('POLICY'in s)POLICY=s.POLICY; if('ADJ'in s)ADJ=s.ADJ; if('GATHER'in s)GATHER=s.GATHER; },`
+  + `getState:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ,GATHER})};`;
 
 /* ---------- DOM + fetch shim ---------- */
 function makeEl(id){
@@ -59,7 +60,7 @@ function makeEl(id){
 }
 const ELEMENTS = {};
 ['badge','draftChip','popStrip','queue','qcount','filters','surf','masterSwitch','decideBtn','picker',
- 'gatePanel','knobHigh','knobMed','gateReset','adjud','adjudRead'].forEach(id => ELEMENTS[id] = makeEl(id));
+ 'gatePanel','knobHigh','knobMed','gateReset','adjud','adjudRead','gatherBtn'].forEach(id => ELEMENTS[id] = makeEl(id));
 const documentShim = { getElementById(id){ return ELEMENTS[id] || (ELEMENTS[id] = makeEl(id)); } };
 
 function streamResponse(chunks){
@@ -81,8 +82,11 @@ let RUN_CHUNKS = [];
 let LAST_RUN_BODY = null;
 let GATE_RESPONSE = null, ADJ_RESPONSE = null;     // the gating-engine stubs (set per gating test)
 let LAST_GATE_URL = null, LAST_ADJ_BODY = null;
+let GATHER_CHUNKS = [], LAST_GATHER_BODY = null;    // the gather-beat stream stub (Phase 65)
 function fetchShim(url, opts){
   const u = String(url);
+  if (u.includes('/gather')){ try { LAST_GATHER_BODY = JSON.parse((opts&&opts.body)||'{}'); } catch(e){ LAST_GATHER_BODY = null; }
+    return Promise.resolve(streamResponse(GATHER_CHUNKS)); }
   if (u.includes('/cases')) return Promise.resolve({ ok:true, json:()=>Promise.resolve(CASES_RESPONSE) });
   if (u.includes('/case/')) return Promise.resolve({ ok:true, json:()=>Promise.resolve(CASE_RESPONSE) });
   if (u.includes('/gate')){ LAST_GATE_URL = u;
@@ -378,6 +382,88 @@ ok(!/\d+(\.\d+)?\s*%/.test(gateRendered) && !/\d+(\.\d+)?x\b/.test(gateRendered)
    'the gating panel + loop render counts only — NO percentage or "Nx" figure');
 ok(!/\b(lift|precision|recall|catch[\s-]?rate|f1|auroc)\b/i.test(gateRendered),
    'the gating surfaces carry NO detection-performance vocabulary (routing concentrates judgment, it does not score)');
+
+/* ===================== PHASE 65: the GATHER beat (agentic evidence-gathering loop) ===================== */
+/* the panel is always present (the synthetic-provenance string must show BEFORE any gather runs) */
+T.setState({ SEL:'CASE-P-MULE', DETAIL:MULE_DETAIL, SIGNALS:true, GATHER:null, RUN:null }); T.paintSurface();
+const gp0 = ELEMENTS.surf._html;
+ok(/Gather evidence \(synthetic OSINT corpus\)/.test(gp0), 'the GATHER button names the SYNTHETIC corpus substrate (not "external evidence")');
+ok(/Synthetic corpus\./.test(gp0) && /NOT a live web search or a real OFAC list/.test(gp0),
+   'the GATHER beat shows the always-visible synthetic-provenance string (the ambient badge is not sufficient)');
+
+/* the live gather stream: per-tool stages → grounded findings + a gate rejection + the network */
+const GATHER_DONE = {
+  badge:'Illustrative data & outputs', subject:'Zane Zhao',
+  synthetic_note:'Gathered over a COMMITTED SYNTHETIC OSINT corpus — fictional records, NOT a live web search or a real OFAC list.',
+  backend:{ requested:'stub', effective:'stub', note:null },
+  grounded:[
+    { source_kind:'registry', record_id:'rg-zz-01', entity:'Crescent Dunes Trading FZE',
+      quote:'Zane Zhao is recorded as the sole director of Crescent Dunes Trading FZE',
+      synthesis:'Registry ties the subject to an affiliated entity.', link:'Zane Zhao' },
+    { source_kind:'sanctions', record_id:'sx-cd-01', entity:'Crescent Dunes Trading FZE',
+      quote:'Crescent Dunes Trading FZE appears on the OFAC Specially Designated Nationals list',
+      synthesis:'An affiliated entity matches a sanctions listing.', link:null },
+    { source_kind:'adverse_media', record_id:'am-zz-01', entity:'Zane Zhao <not a tag>',
+      quote:'A regional trade outlet named Zane Zhao', synthesis:'Adverse media names the subject.', link:null },
+  ],
+  dropped:[{ source_kind:'registry', record_id:'rg-zz-01', quote:'this exact phrase is not present',
+    reason:'quote did not ground as a real single-sentence substring of the cited record' }],
+  graph:{ entities:[{name:'Zane Zhao'},{name:'Crescent Dunes Trading FZE'}],
+    relationships:[
+      { from:'Zane Zhao', to:'Crescent Dunes Trading FZE', label:'registry link', evidence:'sole director of Crescent Dunes Trading FZE' },
+      { from:'Zane Zhao', to:'Crescent Dunes Trading FZE', label:'sanctions screen', evidence:'appears on the OFAC Specially Designated Nationals list' }],
+    mains:['Zane Zhao'] },
+  tools_called:[{tool:'lookup_registry',query:'Zane Zhao',n_records:1},
+    {tool:'screen_sanctions',query:'Crescent Dunes Trading FZE',n_records:1},
+    {tool:'screen_adverse_media',query:'Zane Zhao',n_records:1}],
+  counts:{ grounded:3, dropped:1, tools:3 },
+};
+const GATHER_MSGS = [
+  { stage:'backend', requested:'stub', effective:'stub', note:null },
+  { stage:'plan', subject:'Zane Zhao', tools:['screen_sanctions','screen_adverse_media','lookup_registry'] },
+  { stage:'tool', tool:'lookup_registry', query:'Zane Zhao', n_records:1 },
+  { stage:'findings', tool:'lookup_registry', grounded:1, dropped:1 },
+  { stage:'tool', tool:'screen_sanctions', query:'Crescent Dunes Trading FZE', n_records:1 },
+  { stage:'findings', tool:'screen_sanctions', grounded:1, dropped:0 },
+  { stage:'tool', tool:'screen_adverse_media', query:'Zane Zhao', n_records:1 },
+  { stage:'findings', tool:'screen_adverse_media', grounded:1, dropped:0 },
+  { done: GATHER_DONE },
+];
+GATHER_CHUNKS = ndjsonChunks(GATHER_MSGS, 45);
+await T.runGather();
+const gg = ELEMENTS.surf._html;
+ok(LAST_GATHER_BODY && LAST_GATHER_BODY.case === 'CASE-P-MULE', 'runGather POSTs the case to /gather (a NAME, never a cred)');
+ok(/registry lookup · 1 record\b/.test(gg) && /sanctions screen · 1 record/.test(gg),
+   'the gather stages reveal per-tool completion (stage-completion, not a token stream)');
+ok((gg.match(/class="gfind"/g)||[]).length === 3, 'three grounded findings render');
+ok(/Evidence · verbatim from a synthetic record/.test(gg), 'each grounded finding labels its quote as verbatim EVIDENCE');
+ok(/Crescent Dunes Trading FZE appears on the OFAC/.test(gg), 'the chained sanctions finding renders its grounded quote (the registry→sanctions chain)');
+ok(/illustrative reading — not verified/.test(gg), 'the synthesis is labeled an illustrative, unverified reading (subordinate to the grounded quote)');
+ok(/rejected by the gate/.test(gg) && /did not ground/.test(gg), 'the ungrounded finding renders WITH its rejection reason (the gate firing is legible)');
+ok(/authored over synthetic records, not discovered/.test(gg), 'the network is labeled authored-not-discovered (the chain is not framed as a real discovery)');
+ok(/class="gnsvg"/.test(gg) && (gg.match(/class="gge"/g)||[]).length >= 1, 'the network graph renders as a deterministic SVG with grounded edges');
+ok(!/Zane Zhao <not a tag>/.test(gg) && gg.includes('&lt;not a tag&gt;'), 'XSS: a malicious gathered entity is esc()-escaped');
+
+/* HONESTY re-check over the gather surface — counts only, NO % / lift / detection vocabulary */
+ok(!/\d+(\.\d+)?\s*%/.test(gg) && !/\d+(\.\d+)?x\b/.test(gg), 'the gather surface renders no % / "Nx" figure');
+ok(!/\b(lift|precision|recall|catch[\s-]?rate|f1|auroc)\b/i.test(gg),
+   'the gather surface carries NO detection-performance vocabulary (gather-and-ground, it does not score)');
+
+/* clicking a network edge reveals its grounded evidence quote */
+const stG = T.getState(); stG.GATHER.gsel = 0; T.setState({ GATHER: stG.GATHER }); T.paintSurface();
+ok(/class="gerow open"/.test(ELEMENTS.surf._html) && /class="gev"/.test(ELEMENTS.surf._html),
+   'selecting a network edge reveals its grounded evidence quote');
+
+/* the false-positive-trap honest negative: a gather that grounds NOTHING reads "no external findings" */
+const EMPTY_DONE = { ...GATHER_DONE, subject:'Liam Jain', grounded:[], dropped:[],
+  graph:{ entities:[{name:'Liam Jain'}], relationships:[], mains:['Liam Jain'] }, counts:{grounded:0,dropped:0,tools:3} };
+T.setState({ GATHER:{ caseId:'CASE-P-MULE', stages:[], done:EMPTY_DONE, error:null, running:false, gsel:null } }); T.paintSurface();
+ok(/No external findings grounded/.test(ELEMENTS.surf._html), 'an honest empty result reads "no external findings" (the false-positive-trap payoff)');
+
+/* a gather transport failure renders a NAMED error, not a crash */
+T.setState({ GATHER:{ caseId:'CASE-P-MULE', stages:[], done:null, error:'could not reach the workbench companion', running:false } }); T.paintSurface();
+ok(/Gather failed/.test(ELEMENTS.surf._html) && !/class="gfind"/.test(ELEMENTS.surf._html),
+   'a gather transport failure renders the named error banner (no findings, not a crash)');
 
 /* ---------- summary ---------- */
 console.log(`\n${pass} passed, ${fails.length} failed`);

@@ -86,6 +86,57 @@ adjudications (sample 45 → 50, the review threshold), the human-gate funnel ti
 knobs move it instantly too — dropping the review threshold folds the rare composed cases out of the
 human queue, live.
 
+## The agentic evidence-gathering loop (Phase 65)
+
+The **GATHER** beat sits between *signals-on* and *decide*: having read the grounded signals, the
+investigator gathers EXTERNAL evidence. A companion **agent loop** — signal-watch's first multi-step
+tool-calling loop (`scripts/osint_tools.py`) — calls a fixed set of deterministic tools over a
+**committed SYNTHETIC OSINT corpus** (`data/osint/corpus.json`: fictional registry / adverse-media /
+sanctions records), and EVERY proposed finding is **grounded-or-stripped** by the shared `news_ground`
+gate before it can render.
+
+**The chained discovery (the payoff).** `lookup_registry(subject)` surfaces an affiliated entity →
+`screen_sanctions(that entity)` returns the OFAC hit the investigator would never have spotted in the
+transaction clutter → `screen_adverse_media`. The agent chooses the hops; the gate disposes each finding;
+the grounded links feed a network view.
+
+**The honesty seam (load-bearing) — CONSISTENCY, not correctness.** The gate proves a finding's quote is
+a **real substring of the cited synthetic record** (`locate_span`, plus a normalized-length floor, a
+single-sentence guard, and a requote to the exact span). It does **NOT** prove the synthesis is a correct
+inference, or that the entity is *really* sanctioned. Two consequences, surfaced everywhere:
+
+- the corpus is **fictional** and the chained path is **authored into it, not discovered** — the UI says
+  so (a beat-local synthetic-provenance line; the network is labelled "authored over synthetic records,
+  not discovered"); the always-on "Illustrative data & outputs" badge stays;
+- each finding shows the **grounded verbatim quote** as EVIDENCE beside a **subordinate, labelled
+  illustrative synthesis** ("illustrative reading — not verified") — the quote never lends its grounded
+  authority to the inference. This mirrors the corpus inverted-extraction doctrine (the verbatim flag
+  beside the natural-AML translation).
+
+The gate also closes the bypasses an adversarial design review surfaced: a trivial / punctuation /
+one-token quote (the normalized-length floor), a quote stitching two clauses across a sentence break (the
+single-sentence guard), an ungrounded **entity or network endpoint** riding a grounded quote (entity and
+link must be the subject or grounded in the same record — mirroring the news relationship gate), and a
+record-id from a different tool call (the id binds to the immediately-preceding tool's records).
+Ungrounded findings DROP **with their reason shown** — the gate firing is the honest moment, not hidden
+behind a count.
+
+**Tools + transport.** Three deterministic tools (`screen_sanctions`, `screen_adverse_media`,
+`lookup_registry`) over an exact-normalized-name index. The loop is **hand-rolled** (propose-tool →
+run-tool → propose-findings → gate → chain), capped at 4 iterations with a no-progress guard; a
+deterministic **stub planner** makes it fully offline + reproducible and exercises a planted-ungrounded
+DROP. The live transport is the **openai `/v1`** path (a local model — Phase-57 §4.5: the browser sends a
+backend NAME only, creds stay server-side; transport errors are sanitized to a class name, never a
+host/url), **fail-closed** on any doubt (it never invents a finding). Session-only — **nothing persists**;
+`build.py` never imports the gather layer (companion-only, no ship target).
+
+**Executed once, live.** Run once over the mule (CASE-P-0002174 "Zane Zhao") against a local
+Qwen3.6-35B: the chain fired end-to-end — registry → discovered *Crescent Dunes Trading FZE* →
+sanctions → the OFAC hit → adverse-media (an honest empty). **2 grounded, 0 dropped, 0 fabricated** — the
+grounding gate held with the real model. The first live run surfaced a real fix: the planner couldn't
+chain until it could *see* the discovered entity (it received only `{tool, n_records}` history); the loop
+now threads discovered-entity context into the planner, and the chain fired.
+
 ## Coverage is MEASURED, not assumed (the cross-pillar finding)
 
 The headline coverage number — **57 of 200 cases ground end-to-end** — is **measured**, not a capability
@@ -128,12 +179,14 @@ python3 scripts/curate_workbench_cases.py --selftest  # the committed slice: sch
 
 ## Deferred to follow-on phases
 
-- The **agentic tool-calling** during investigation/narrative (open-source verification, counterparty
-  gathering, network/entity-resolution) — tool-gathered evidence extending the grounding chain.
 - The substrate **ownership/beneficial-owner graph emission** (a richer network view than the emitted
-  transaction counterparty edges).
+  transaction counterparty edges; would let the GATHER network draw on real emitted ownership rather than
+  the synthetic registry corpus).
 - The **C3/C15 cross-pillar contract alignment** (substrate fan-in vs casework fan-out) — the
   composed-case grounding frontier.
+- A **real OSINT substrate** for the GATHER loop (a real screening list / registry feed) — out of scope
+  here by the no-real-data non-negotiable; the synthetic corpus demonstrates the gather→ground→chain loop
+  without it.
 - **Precedent-confidence as a *governed* control** — Phase 64 made the gating mechanism live; a real
   deployment would add the calibration + monitoring (SR-11-7) that turns the "chosen, not measured" knobs
   into measured thresholds, and would source dispositions from a real adjudication record (not the
@@ -141,3 +194,8 @@ python3 scripts/curate_workbench_cases.py --selftest  # the committed slice: sch
 
 > **Built in Phase 64:** the precedent-confidence **gating engine + the elicitation loop** (above) — the
 > confidence display became a live routing control with an adjudicate→grow-precedent→re-route loop.
+>
+> **Built in Phase 65:** the **agentic evidence-gathering loop** (above) — the GATHER beat: a companion
+> agent loop gathers counterparty/OSINT/sanctions evidence over a committed synthetic corpus, every finding
+> grounded-or-stripped (consistency, not correctness), feeding an authored-not-discovered network. Executed
+> once live; the registry→sanctions chain fired with the local model, 0 fabricated.

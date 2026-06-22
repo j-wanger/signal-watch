@@ -95,6 +95,52 @@ direction]). Grounded against the committed Phase-63 workbench (aml-substrate@f9
 > answers") → scope to display-only batch routing, report don't force (the A0 fallback). Any new ship
 > target / dist drift / a sibling import in build.py / a validator loosened to force a fit → STOP-and-surface.
 
+<!-- phase:phase-65-agentic-tool-calling -->
+<!-- gate-log:phase-65 direction=approved delivery=accepted -->
+<!-- status: T1–T5 ALL [x] — DELIVERED + accepted 2026-06-21 (two adversarial passes, all confirmed findings fixed; live chain fired) -->
+
+## Phase 65 — Agentic tool-calling: the investigator evidence-gathering loop (companion)
+
+Build signal-watch's FIRST multi-step tool-calling agent loop (verified: none exists — every companion is single-shot
+`call_llm`). Add a GATHER beat to the workbench arc (between SIGNALS and DECIDE): on a selected investigator case, a
+companion agent loop (backend by NAME — Phase-57 §4.5; deterministic-STUB fallback so the demo runs model-free)
+proposes a tool → calls a deterministic tool over a COMMITTED SYNTHETIC evidence universe (registry / adverse-media /
+counterparty hits indexed by entity name) → each proposed finding is GROUNDED-OR-STRIPPED by the REUSED `news_ground`
+gate (the finding's claim must be a substring of the tool's OWN returned text; ungrounded findings DROP) → grounded
+tool-evidence extends the case's grounding chain + feeds a `liveGraphLayout` network view. EXECUTE the loop ONCE live
+over a marquee exemplar (grounded + dropped evidence captured as delivery evidence — the measuring→controlling /
+execute-once pattern). THE HONESTY SEAM (load-bearing, A0): tools query COMMITTED SYNTHETIC data, the agent proposes /
+the deterministic gate disposes, the consistency-not-correctness limit is surfaced honestly (badge on; ZERO
+catch-rate/detection-lift number) — it shows tool-evidence EXTENDING the grounding chain the same way every other
+evidence modality does ("grounding is universal, the substrate varies"), NEVER that the synthetic findings are true.
+LITE; companion-only (a `serve_workbench.py` + `workbench.html` extension, NOT a 9th ship target — the chain.html /
+Phase-56 + Phase-64 precedent); the loop is session-only / persists nothing (reuse `liveGraphLayout`, do NOT import the
+DuckDB `news_store`); 8 ship dists byte-frozen; `--check all` 8/8 ZERO dist drift; build.py never imports the siblings.
+Plan: articles/phases/phase-65-agentic-tool-calling.md. Ledger: Phase-65 (direction gate 2026-06-21, all_accept:true —
+A0/A2/A4 positioned explicitly, A1/A3 by precedent; warned + restated per gate protocol). Grounded against the
+committed Phase-64 workbench (signal-watch HEAD 0ee4489; aml-substrate@9d2e65c / aml-casework@81df91c HEADs verified
+live but NOT consumed — companion-only, no sibling import).
+
+- [x] T1 Synthetic evidence corpus + deterministic tool layer + shape validator — DONE: `data/osint/corpus.json` (committed synthetic registry/adverse-media/sanctions, head-of-file disclaimer) + `scripts/osint_tools.py` (the new companion module — stdlib + news_ground only): `validate_osint_corpus` (closed kinds, globally-unique ids, non-empty text, banned-metric-token sweep, note-present) + 3 deterministic tools (`run_tool` exact-normname) + `build_index`. Validated fail-loud at serve_workbench load. `serve_workbench.py --selftest` + `osint_tools.py --selftest` green; `! grep -E 'import (aml_substrate|aml_casework|news_store)'` clean. (Adversary-hardened: validator rejects banned-token text + duplicate ids + missing note.) | scope: data/osint/**, scripts/osint_tools.py, scripts/serve_workbench.py | size: M
+- [x] T2 (L) The multi-step tool-calling agent loop + the grounding seam — DONE: `osint_tools.gather()` — signal-watch's FIRST hand-rolled propose/parse agent loop (StubPlanner offline / LivePlanner over `call_openai`); `gate_finding` is the FULL grounding conjunction (record_id binds to the immediately-preceding tool call · `locate_span` + normalized-quote floor ≥12 + sentence-bridge guard + requote-to-located + synthesis distinct + entity/link subject-or-grounded — every adversary-found bypass closed); capped + no-progress guard; fail-CLOSED transport; `/gather` NDJSON endpoint in serve_workbench (single-flight). `serve_workbench.py --selftest` covers the stubbed loop end-to-end (grounded KEPT + planted-ungrounded DROPPED + chain reaches sanctions + cap + persists-nothing on cases.json AND corpus.json + the §4.5 cred-leak over ALL NDJSON stages). | scope: scripts/osint_tools.py, scripts/serve_workbench.py | size: L
+- [x] T3 The GATHER beat UI (Beat 2.5) — DONE: the gather panel inserted after the audit-walk, before decide; "Gather evidence (synthetic OSINT corpus)" button + an always-visible beat-local SYNTHETIC-provenance string; per-tool stage-completion reveal (never a token stream); each grounded finding shows the GROUNDED quote as EVIDENCE beside a SUBORDINATE illustrative-synthesis (the .illus precedent, labeled "illustrative reading — not verified"); the gate's rejections render WITH reason in a rejected style; the network reuses `liveGraphLayout` (ported verbatim, pure JS) labeled "authored over synthetic records, not discovered", edge-click reveals the grounded evidence; honest-empty payoff for the fp-trap. `node tests/workbench.test.mjs` 100/100 (+17 gather; XSS-escape, NO %/lift vocab re-checked over the gather HTML, both motion modes). | scope: workbench.html, tests/workbench.test.mjs | size: M
+- [x] T4 Execute-once + regression + drift guard — DONE: the loop EXECUTED LIVE ONCE over the mule (CASE-P-0002174 "Zane Zhao") against the local Qwen3.6-35B (/v1 @127.0.0.1:8080). The CHAIN fired live: lookup_registry(Zane Zhao) → discovered Crescent Dunes Trading FZE → screen_sanctions(Crescent Dunes) → the OFAC hit → screen_adverse_media(Crescent Dunes) → honest empty. **2 grounded, 0 dropped, 0 FABRICATED** — the grounding gate held live. A design fix surfaced from the FIRST live run (the model couldn't chain because the planner passed only {tool,n_records} history — it couldn't see the discovered entity): threaded discovered-entity context into LivePlanner; re-ran; the chain fired (transcript `.dev-wiki/tmp/ph65-execute-once-live.json`). `osint_tools.py` added to PY_SELFTESTS. `uv run pytest` 18 passed; `node tests/workbench.test.mjs` 100/0; `build.py --check all` 8/8 ZERO dist drift; build.py imports no sibling/companion. | scope: tests/workbench.test.mjs, tests/test_selftests.py, scripts/osint_tools.py | size: M
+- [x] T5 Docs + honesty boundary + smoke — DONE: `docs/case-workbench.md` gained "The agentic evidence-gathering loop (Phase 65)" (the chained discovery · the CONSISTENCY-not-correctness honesty seam · the closed bypasses · tools/transport · the executed-once live finding) + the deferred-list update + a "Built in Phase 65" footer; `tests/smoke-checklist.md` gained the Phase-65 GATHER section (4 selftest/test/isolation checks + the optional live walk). Greps confirm both. | scope: docs/case-workbench.md, tests/smoke-checklist.md | size: S
+
+> Phase 65 — direction gate 2026-06-21 (all_accept:true): the user picked AGENTIC TOOL-CALLING (the one remaining
+> signal-watch-LOCAL Phase-63 follow-on) at the Step-9 direction question over (B) the sibling-rooted C3/C15 alignment
+> [highest-value but un-drivable from this repo] and (C) a consolidation/pitch-polish phase. A0 [T0 weakest — the
+> honesty seam]: tools query COMMITTED SYNTHETIC data + every finding GROUNDED-OR-STRIPPED via the reused news_ground
+> gate; the consistency-not-correctness limit is bounded (committed corpus, not model-generated) + surfaced honestly →
+> ACCEPT (synthetic tools, grounded-or-stripped) · A1 companion-only (serve_workbench + workbench.html, NOT a 9th ship
+> target) → ACCEPT by precedent · A2 the agent loop is BUILD-NEW but BOUNDED (fixed tools, capped iterations, stub
+> fallback) → ACCEPT (full live loop) · A3 the tool corpus is committed synthetic, shape-validated → ACCEPT by
+> precedent · A4 reuse liveGraphLayout (NOT news_store) + EXECUTE the loop ONCE live → ACCEPT (execute-once).
+> Abort: if the live tool-evidence can't be kept honest over synthetic data (reads as "real OSINT" / a claim can't be
+> grounded to its synthetic source) → fall back to network-ER over the existing committed edges only, report don't
+> force (the A0 fallback). The live loop needs real debugging beyond creds → surface as a FINDING, ship the stub. Any
+> new ship target / dist drift / a sibling import in build.py / a validator loosened to force a fit → STOP-and-surface.
+
 <!-- phase:phase-63-investigator-case-workbench -->
 <!-- gate-log:phase-63 direction=approved delivery=accepted -->
 <!-- status: T1–T5 ALL [x] — DELIVERED + accepted 2026-06-21 (committed a3fde1e; gate-state follows git-state) -->

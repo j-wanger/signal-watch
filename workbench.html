@@ -211,6 +211,52 @@
   .err{border:1px solid var(--rose);border-radius:11px;background:rgba(239,96,121,.07);padding:13px 16px;color:var(--rose);font-size:13px;margin-top:14px}
   .err b{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:5px}
 
+  /* GATHER beat (Phase 65) — the agentic evidence-gathering loop over the SYNTHETIC OSINT corpus */
+  .gather{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .gprov{font-family:var(--mono);font-size:11px;line-height:1.55;color:var(--faint);border:1px dashed var(--line2);border-radius:9px;padding:9px 12px;margin-bottom:11px;background:rgba(176,140,255,.04)}
+  .gprov b{color:var(--violet);font-weight:500}
+  .gbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .gbtn{background:transparent;color:var(--violet);border:1px solid var(--violet)}
+  .gbtn:hover:not(:disabled){background:rgba(176,140,255,.1);filter:none}
+  .gstages{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+  .gchip{font-family:var(--mono);font-size:10px;letter-spacing:.02em;color:var(--muted);border:1px solid var(--line2);border-radius:6px;padding:3px 9px;animation:fade .3s ease}
+  .gchip.skip{color:var(--faint);border-style:dashed}
+  .gnote{font-family:var(--mono);font-size:11px;color:var(--signal);margin-top:8px}
+  .gres{margin-top:13px}
+  .gcount{font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+  .gempty{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:14px 16px;color:var(--muted);font-size:13px}
+  .gfind{border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:0 11px 11px 0;background:var(--panel);padding:11px 14px;margin-bottom:9px}
+  .gfh{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px}
+  .gkind{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;padding:2px 7px;color:var(--muted);border:1px solid var(--line2)}
+  .gkind.sanctions{color:var(--rose);border-color:rgba(239,96,121,.4)}
+  .gkind.adverse_media{color:var(--signal);border-color:rgba(246,166,35,.4)}
+  .gkind.registry{color:var(--blue);border-color:rgba(90,169,255,.4)}
+  .gent{font-family:var(--display);font-size:15px;color:var(--ink);flex:1}
+  .gground{font-family:var(--mono);font-size:10px;color:var(--green)}
+  .gquote{border-left:2px solid var(--teal);padding:4px 0 4px 11px;color:var(--ink);font-size:13px;line-height:1.5;margin-bottom:6px}
+  .gqlabel{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:3px}
+  /* the synthesis is SUBORDINATE — the .illus precedent (mono, italic, faint) — never the quote's authority */
+  .gsyn{font-family:var(--mono);font-size:11px;font-style:italic;color:var(--faint);line-height:1.5}
+  .gsyn b{color:var(--muted);font-style:normal;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;margin-right:6px}
+  .gdrops{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+  .gdh{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--rose);margin-bottom:8px}
+  .gdrop{font-size:12px;color:var(--muted);border:1px dashed rgba(239,96,121,.35);border-radius:8px;padding:8px 11px;margin-bottom:6px;opacity:.85}
+  .gdx{font-family:var(--mono);font-size:10px;color:var(--rose);margin-right:7px}
+  .gdq{font-family:var(--mono);font-size:11px;color:var(--faint);font-style:italic;margin-top:4px;text-decoration:line-through;text-decoration-color:rgba(239,96,121,.5)}
+  .gnet{margin-top:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:13px 15px}
+  .gnh{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:8px;display:flex;align-items:center;gap:9px}
+  .gnl{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:none;color:var(--violet);border:1px solid rgba(176,140,255,.4);border-radius:4px;padding:1px 6px}
+  .gnsvg{width:100%;height:auto;display:block}
+  .gnsvg .gge line{stroke:var(--line2);stroke-width:1.4}
+  .gnsvg .gge text{fill:var(--faint);font-family:var(--mono);font-size:8px;text-anchor:middle}
+  .gnsvg .gge{cursor:pointer}.gnsvg .gge:hover line{stroke:var(--teal)}
+  .gnsvg .ggn circle{fill:var(--panel2);stroke:var(--line2);stroke-width:1.6}
+  .gnsvg .ggn.ggm circle{fill:rgba(246,166,35,.16);stroke:var(--signal)}
+  .gnsvg .ggn text{fill:var(--ink);font-family:var(--mono);font-size:9px;text-anchor:middle}
+  .gerow{font-family:var(--mono);font-size:11px;color:var(--muted);padding:6px 0;border-top:1px solid var(--line);cursor:pointer;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .gerow:hover{color:var(--ink)}.gerow .gw{color:var(--ink)}.gerow .gl{color:var(--faint)}
+  .gev{flex-basis:100%;border-left:2px solid var(--teal);padding:4px 0 2px 10px;color:var(--ink);font-style:italic;margin-top:4px}
+
   footer{border-top:1px solid var(--line);margin-top:28px;padding:16px 0;color:var(--faint);font-size:11.5px;font-family:var(--mono);letter-spacing:.02em}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -254,7 +300,7 @@
 
 <script>
 const CFG = Object.assign(
-  {cases:"/cases", case:"/case", gate:"/gate", adjudicate:"/adjudicate", run:"/run", health:"/health",
+  {cases:"/cases", case:"/case", gate:"/gate", adjudicate:"/adjudicate", gather:"/gather", run:"/run", health:"/health",
    badge:"Illustrative data & outputs",
    policy:{thresholds:{high:500, medium:50}, gate_of_level:{high:"auto-clear", medium:"review", low:"human-gate"}},
    drafter:{default:"stub", available:["stub"], backends:[{name:"stub", available:true}]}},
@@ -277,6 +323,10 @@ let BACKEND=null, RUN=null;
    adjudication result (the loop read). Routing keys on the REAL precedent (§12); the disposition it
    applies stays ILLUSTRATIVE (§14). All session-only — nothing persists. */
 let GATE=null, GATEBYID={}, POLICY=null, ADJ=null;
+/* Phase 65 — the GATHER beat: GATHER = the live evidence-gathering run (NDJSON stages + the grounded/
+   dropped/graph result). The agent PROPOSES over a SYNTHETIC OSINT corpus; the gate DISPOSES; every kept
+   finding shows the GROUNDED quote (evidence) beside a SUBORDINATE illustrative synthesis. Session-only. */
+let GATHER=null;
 
 function defaultPolicy(){ return JSON.parse(JSON.stringify((CFG.policy)||{thresholds:{high:500,medium:50}})); }
 function setGate(g){ GATE=g; GATEBYID={}; ((g&&g.cases)||[]).forEach(r=>{ GATEBYID[r.case_id]=r; }); }
@@ -511,6 +561,131 @@ function walkHTML(){
   return `<div class="walk reveal"><div class="ph" style="margin-bottom:10px">Audit walk · every signal → its public-source indicator</div>${rows}</div>`;
 }
 
+/* ---------- the GATHER beat (Phase 65): the agentic evidence-gathering loop ----------
+   On the selected case the agent loop calls deterministic tools over a SYNTHETIC OSINT corpus; each
+   finding is GROUNDED-OR-STRIPPED server-side (osint_tools + the shared news_ground gate). The UI shows
+   the GROUNDED quote as evidence beside a SUBORDINATE illustrative synthesis, the gate's rejections (the
+   honest moment), and an authored-not-discovered network. NO %/lift number; esc() on every value. */
+const PROV = 'Gathered over a COMMITTED SYNTHETIC OSINT corpus — fictional sanctions / registry / '
+  + 'adverse-media records, NOT a live web search or a real OFAC list. The gate proves each quote is a '
+  + 'real substring of a synthetic record (consistency), never that a finding is true; the chained path '
+  + 'is authored into the corpus, not discovered.';
+function toolLabel(t){return {screen_sanctions:'sanctions screen',screen_adverse_media:'adverse media',lookup_registry:'registry lookup'}[t]||String(t||'tool');}
+function kindLabel(k){return {sanctions:'sanctions',adverse_media:'adverse media',registry:'registry'}[k]||String(k||'');}
+
+/* the pure SVG network layout, ported VERBATIM from news.html (liveGraphLayout) — deterministic, no deps */
+function liveGraphLayout(entities, relationships, mains, W, H){
+  W = W || 720; H = H || 360;
+  const names = (entities || []).map(e => e.name).filter(Boolean);
+  const seen = new Set(names);
+  const edges = [];
+  (relationships || []).forEach(r => {
+    if(!r || !r.from || !r.to || r.from === r.to) return;
+    [r.from, r.to].forEach(n => { if(!seen.has(n)){ seen.add(n); names.push(n); } });
+    edges.push({ from: r.from, to: r.to, label: r.label || '', evidence: r.evidence || '' });
+  });
+  const mainSet = new Set((mains || []).filter(n => seen.has(n)));
+  const inner = names.filter(n => mainSet.has(n));
+  const outer = names.filter(n => !mainSet.has(n));
+  const cx = W/2, cy = H/2, R2 = Math.min(W, H)/2 - 46;
+  const R1 = inner.length > 1 ? R2*0.38 : 0;
+  const pos = {};
+  inner.forEach((n, i) => { pos[n] = { a: -Math.PI/2 + 2*Math.PI*i/Math.max(inner.length, 1), r: R1 }; });
+  outer.forEach((n, i) => { pos[n] = { a: -Math.PI/2 + 2*Math.PI*i/Math.max(outer.length, 1), r: R2 }; });
+  const nbr = {};
+  edges.forEach(e => { (nbr[e.from] = nbr[e.from] || []).push(e.to); (nbr[e.to] = nbr[e.to] || []).push(e.from); });
+  const minGap = 2*Math.PI/Math.max(outer.length, 8) * 0.7;
+  for(let k = 0; k < 24; k++){
+    outer.forEach(n => {
+      const ns = (nbr[n] || []).filter(m => pos[m]); if(!ns.length) return;
+      let sx = 0, sy = 0;
+      ns.forEach(m => { sx += Math.cos(pos[m].a); sy += Math.sin(pos[m].a); });
+      let d = Math.atan2(sy, sx) - pos[n].a;
+      while(d > Math.PI) d -= 2*Math.PI; while(d < -Math.PI) d += 2*Math.PI;
+      pos[n].a += d*0.25;
+    });
+    const sorted = outer.slice().sort((x, y) => pos[x].a - pos[y].a);
+    for(let i = 1; i < sorted.length; i++){
+      if(pos[sorted[i]].a - pos[sorted[i-1]].a < minGap) pos[sorted[i]].a = pos[sorted[i-1]].a + minGap;
+    }
+  }
+  const nodes = names.map(n => ({ name: n, main: mainSet.has(n),
+    x: Math.round((cx + Math.cos(pos[n].a)*pos[n].r)*10)/10,
+    y: Math.round((cy + Math.sin(pos[n].a)*pos[n].r)*10)/10 }));
+  return { w: W, h: H, nodes, edges };
+}
+function gatherGraphHTML(graph){
+  if(!graph||!(graph.relationships&&graph.relationships.length)) return '';
+  const g=liveGraphLayout(graph.entities||[], graph.relationships||[], graph.mains||[]);
+  const P={}; g.nodes.forEach(n=>P[n.name]=n);
+  const sel=(GATHER&&GATHER.gsel);
+  let h='<div class="gnet"><div class="gnh">Network <span class="gnl">illustrative · authored over synthetic records, not discovered</span></div>';
+  h+='<svg class="gnsvg" viewBox="0 0 '+g.w+' '+g.h+'" role="img" aria-label="illustrative entity network over synthetic records">';
+  g.edges.forEach((e,i)=>{const f=P[e.from],t=P[e.to]; if(!f||!t)return;
+    h+='<g class="gge" data-ei="'+i+'"><line x1="'+f.x+'" y1="'+f.y+'" x2="'+t.x+'" y2="'+t.y+'"></line>'
+     +'<text x="'+Math.round((f.x+t.x)/2)+'" y="'+(Math.round((f.y+t.y)/2)-4)+'">'+esc(e.label)+'</text></g>';});
+  g.nodes.forEach(n=>{const lbl=n.name.length>20?n.name.slice(0,19)+'…':n.name;
+    h+='<g class="ggn'+(n.main?' ggm':'')+'"><circle cx="'+n.x+'" cy="'+n.y+'" r="'+(n.main?9:6)+'"></circle>'
+     +'<text x="'+n.x+'" y="'+(n.y-(n.main?13:10))+'">'+esc(lbl)+'</text></g>';});
+  h+='</svg>';
+  g.edges.forEach((e,i)=>{const open=sel===i;
+    h+='<div class="gerow'+(open?' open':'')+'" data-ei="'+i+'"><span class="gw">'+esc(e.from)+'</span><span class="gl">—'+esc(e.label)+'→</span><span class="gw">'+esc(e.to)+'</span>'
+     +(open?'<div class="gev">“'+esc(e.evidence)+'”</div>':'')+'</div>';});
+  h+='</div>';
+  return h;
+}
+function gatherStagesHTML(){
+  const st=(GATHER&&GATHER.stages)||[];
+  const tools=st.filter(s=>s.stage==='tool');
+  if(!tools.length) return GATHER&&GATHER.running?'<div class="gchip">querying the synthetic corpus…</div>':'';
+  const chips=tools.map(s=>`<span class="gchip${s.skipped?' skip':''}">${esc(toolLabel(s.tool))} · ${esc(s.n_records||0)} record${(s.n_records===1)?'':'s'}</span>`).join('');
+  const be=st.find(s=>s.stage==='backend');
+  const note=(be&&be.note)?`<div class="gnote">↳ ${esc(be.note)}</div>`:'';
+  return `<div class="gstages">${chips}</div>${note}`;
+}
+function gatherResultHTML(){
+  if(GATHER&&GATHER.error) return `<div class="err"><b>Gather failed</b>${esc(GATHER.error)}</div>`;
+  const g=GATHER&&GATHER.done; if(!g) return '';
+  const cnt=g.counts||{};
+  const grounded=(g.grounded||[]).map(f=>`<div class="gfind">
+    <div class="gfh"><span class="gkind ${esc(f.source_kind)}">${esc(kindLabel(f.source_kind))}</span><span class="gent">${esc(f.entity)}</span><span class="gground">✓ grounded</span></div>
+    <div class="gquote"><div class="gqlabel">Evidence · verbatim from a synthetic record</div>“${esc(f.quote)}”</div>
+    <div class="gsyn"><b>illustrative reading — not verified</b>${esc(f.synthesis)}</div>
+  </div>`).join('');
+  const dropped=(g.dropped||[]).map(d=>`<div class="gdrop"><span class="gdx">✗ rejected by the gate</span>${esc(d.reason)}${d.quote?`<div class="gdq">“${esc(d.quote)}”</div>`:''}</div>`).join('');
+  const empty=(!(g.grounded||[]).length)?'<div class="gempty">No external findings grounded for this subject — the gathered evidence corroborates nothing adverse (an honest negative).</div>':'';
+  return `<div class="gres">
+    <div class="gcount">${esc(cnt.grounded||0)} grounded · ${esc(cnt.dropped||0)} rejected by the gate · ${esc(cnt.tools||0)} tools, over the synthetic corpus</div>
+    ${empty}${grounded}
+    ${dropped?`<div class="gdrops"><div class="gdh">Rejected — ungrounded (the gate firing)</div>${dropped}</div>`:''}
+    ${gatherGraphHTML(g.graph)}</div>`;
+}
+function gatherPanelHTML(){
+  const running=!!(GATHER&&GATHER.running);
+  const done=GATHER&&(GATHER.done||GATHER.error);
+  const label=running?'Gathering…':(done?'Gather again':'Gather evidence (synthetic OSINT corpus)');
+  return `<div class="gather reveal">
+    <div class="ph" style="margin-bottom:9px">Gather external evidence · agentic tool loop</div>
+    <div class="gprov"><b>Synthetic corpus.</b> ${esc(PROV)}</div>
+    <div class="gbar"><button class="btn gbtn" id="gatherBtn" ${running?'disabled':''}>${esc(label)}</button></div>
+    ${(GATHER&&GATHER.caseId===SEL)?(gatherStagesHTML()+gatherResultHTML()):''}</div>`;
+}
+function runGather(){
+  if(!SEL||(GATHER&&GATHER.running)) return;
+  GATHER={caseId:SEL, stages:[], done:null, error:null, running:true, gsel:null}; paintSurface();
+  return fetch(CFG.gather,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({case:SEL, backend:BACKEND})})
+    .then(resp=>readNDJSON(resp,applyGather))
+    .catch(e=>applyGather({error:'could not reach the workbench companion: '+e}))
+    .then(()=>{ if(GATHER){GATHER.running=false; paintSurface();} });
+}
+function applyGather(obj){
+  if(!GATHER) return;
+  if(obj.error){ GATHER.error=obj.error; paintSurface(); return; }
+  if(obj.done){ GATHER.done=obj.done; paintSurface(); return; }
+  if(obj.stage){ GATHER.stages.push(obj); paintSurface(); }
+}
+
 /* beat 3 — decide (the live finale), reuses the chain ledger pattern */
 const CANON=[{key:'evidence',label:'Evidence',title:'Detection bundle'},
   {key:'consume',label:'Consume',title:'Casework SAR + verifiers'},
@@ -623,8 +798,11 @@ function paintSurface(loading){
         ${txTable(txns)}</div>
     </div>
     ${walkHTML()}
+    ${gatherPanelHTML()}
     ${decideBarHTML()}
     ${ledgerHTML()}`;
+  const gb=document.getElementById('gatherBtn'); if(gb) gb.onclick=runGather;
+  if(surf&&surf.querySelectorAll) (surf.querySelectorAll('[data-ei]')||[]).forEach(x=>{ if(x.dataset&&x.dataset.ei!=null) x.onclick=()=>{ if(GATHER){const i=parseInt(x.dataset.ei,10); GATHER.gsel=(GATHER.gsel===i)?null:i; paintSurface();} }; });
   const db=document.getElementById('decideBtn'); if(db) db.onclick=runDecision;
   const pk=document.getElementById('picker');
   if(pk&&pk.querySelectorAll) (pk.querySelectorAll('[data-backend]')||[]).forEach(x=>{ if(x.dataset) x.onclick=()=>pickBackend(x.dataset.backend); });
@@ -688,8 +866,9 @@ if(typeof module!=='undefined'&&module.exports){ module.exports={
   esc,money,gateClass,gateLabel,channelSummary,counterpartySummary,kycPanel,citedTxnIds,
   toggleSignals,selectCase,pickBackend,
   liveGate,liveFunnel,setGate,renderGate,loadGate,onKnob,resetGating,doAdjudicate,adjudControlHTML,
-  _state:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ}),
-  _set:(s)=>{ if(s.META!==undefined)META=s.META; if(s.QUEUE!==undefined)QUEUE=s.QUEUE; if(s.SEL!==undefined)SEL=s.SEL; if(s.DETAIL!==undefined)DETAIL=s.DETAIL; if(s.SIGNALS!==undefined)SIGNALS=s.SIGNALS; if(s.RUN!==undefined)RUN=s.RUN; if(s.GATE!==undefined)setGate(s.GATE); if(s.POLICY!==undefined)POLICY=s.POLICY; if(s.ADJ!==undefined)ADJ=s.ADJ; },
+  runGather,applyGather,gatherPanelHTML,gatherResultHTML,gatherGraphHTML,liveGraphLayout,toolLabel,kindLabel,
+  _state:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ,GATHER}),
+  _set:(s)=>{ if(s.META!==undefined)META=s.META; if(s.QUEUE!==undefined)QUEUE=s.QUEUE; if(s.SEL!==undefined)SEL=s.SEL; if(s.DETAIL!==undefined)DETAIL=s.DETAIL; if(s.SIGNALS!==undefined)SIGNALS=s.SIGNALS; if(s.RUN!==undefined)RUN=s.RUN; if(s.GATE!==undefined)setGate(s.GATE); if(s.POLICY!==undefined)POLICY=s.POLICY; if(s.ADJ!==undefined)ADJ=s.ADJ; if(s.GATHER!==undefined)GATHER=s.GATHER; },
   paintSurface,renderQueue,renderPop,riskPanel,walkHTML,ledgerHTML,CANON }; }
 </script>
 </body>

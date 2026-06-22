@@ -47,6 +47,12 @@ from serve_chain import (  # noqa: E402
 # The GATING POLICY + the pure router live in curate (the authoring source of truth); the live engine
 # RE-DERIVES routing from the SAME route() so the live funnel can't drift from the baked one.
 from curate_workbench_cases import GATING_POLICY, route  # noqa: E402  (signal-watch's OWN module)
+# Phase 65 — the GATHER beat: the OSINT agent loop + tools (stdlib + news_ground only; NEVER a sibling).
+from osint_tools import (  # noqa: E402  (signal-watch's OWN companion module)
+    CORPUS_PATH as OSINT_CORPUS_PATH, LivePlanner, StubPlanner, build_index as osint_build_index,
+    call_openai, gather as osint_gather, load_corpus as osint_load_corpus, resolve_gather_backend,
+    validate_osint_corpus,
+)
 
 DEFAULT_PORT = 8030          # serve_news 8000, serve_corpus 8010, serve_chain 8020 — all side by side
 WORKBENCH_DIR = ROOT / "data" / "workbench"
@@ -280,10 +286,63 @@ def run_case(case_id: str, *, on_stage, consume=casework_consume_wb, verify=veri
     return payload
 
 
+# ---- the GATHER beat (Phase 65): the OSINT evidence-gathering agent loop ---------------------------
+# On a selected case the agent loop calls deterministic tools over the COMMITTED SYNTHETIC OSINT corpus;
+# each finding is GROUNDED-OR-STRIPPED by the shared news_ground gate (osint_tools), grounded evidence
+# extends the case grounding chain + feeds a network view. Read-only; persists nothing; stateless across
+# requests; the browser sends a backend NAME only — call_openai errors are sanitized in osint_tools (no
+# host/url reaches a stage). build.py never imports osint_tools (companion-only, no ship target).
+_OSINT = {"corpus": None, "index": None}
+
+
+def osint_corpus() -> tuple:
+    """Load + VALIDATE the synthetic OSINT corpus once (fail-loud if the disclaimer/shape is wrong — a
+    synthetic corpus never serves undisclosed). Cached read-only; never mutated."""
+    if _OSINT["corpus"] is None:
+        c = osint_load_corpus()
+        errs = validate_osint_corpus(c)
+        if errs:
+            raise RunError("data/osint/corpus.json failed validation: " + "; ".join(errs[:4]))
+        _OSINT["corpus"], _OSINT["index"] = c, osint_build_index(c)
+    return _OSINT["corpus"], _OSINT["index"]
+
+
+def gather_view(entry: dict, bundle: dict) -> dict:
+    """The investigator context the agent loop reasons over: the SYNTHETIC display identity + kind + the
+    real counterparty refs (context only — the corpus is keyed by named entities, refs honestly miss)."""
+    d = entry.get("display") or {}
+    cps = []
+    for t in (bundle.get("transactions") or []):
+        ref = t.get("counterparty_ref") or t.get("counterparty_account_id")
+        if ref and ref not in cps:
+            cps.append(ref)
+    return {"subject_name": d.get("name") or entry.get("case_id"),
+            "subject_kind": d.get("kind") or "subject", "counterparties": cps[:12],
+            "capabilities": entry.get("capabilities", [])}
+
+
+def run_gather(case_id: str, *, on_stage, backend: str | None = None, env: dict | None = None,
+               planner=None) -> dict:
+    """Drive one case through the GATHER loop, emitting NDJSON stages. Resolves the chat backend SERVER-SIDE
+    (the browser sent a NAME only) and echoes a NAME-only backend stage; the openai path streams nothing and
+    sanitizes transport errors in osint_tools. Pure over the read-only corpus — persists nothing."""
+    index = load_index()
+    entry = _case_entry(index, case_id)
+    bundle = json.loads(_bundle_path(case_id).read_text(encoding="utf-8"))
+    corpus, oidx = osint_corpus()
+    cv = gather_view(entry, bundle)
+    be = resolve_gather_backend(backend, env)
+    on_stage("backend", requested=be.get("requested"), effective=be.get("effective"), note=be.get("note"))
+    if planner is None:
+        planner = (LivePlanner(cv, lambda msgs: call_openai(msgs, env))
+                   if be.get("effective") == "openai" else StubPlanner(cv, oidx))
+    return osint_gather(cv, on_stage=on_stage, corpus=corpus, index=oidx, planner=planner, backend_note=be)
+
+
 # ---- the served page -----------------------------------------------------------------------------
 def live_config(env: dict | None = None) -> dict:
     return {"cases": "/cases", "case": "/case", "gate": "/gate", "adjudicate": "/adjudicate",
-            "run": "/run", "health": "/health", "badge": BADGE,
+            "gather": "/gather", "run": "/run", "health": "/health", "badge": BADGE,
             "policy": GATING_POLICY,              # the routing KNOBS (the live gating panel's defaults)
             "drafter": sc._drafter_config(env)}   # NAMES + booleans only (§4.5), reused verbatim
 
@@ -349,6 +408,8 @@ class Handler(BaseHTTPRequestHandler):
         p = self.path.split("?", 1)[0]
         if p == "/run":
             self._run(); return
+        if p == "/gather":
+            self._gather(); return
         if p == "/adjudicate":
             self._adjudicate(); return
         self._json(404, {"error": f"not found: {self.path}"})
@@ -388,6 +449,36 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(200, out)
             except RunError as ex:
                 self._json(400, {"error": str(ex)})
+
+    def _gather(self):
+        payload, err = self._read_json()
+        if err:
+            self._json(400, {"error": err}); return
+        case_id = (payload.get("case") or payload.get("case_id") or "").strip()
+        if not case_id:
+            self._json(400, {"error": "missing 'case' (the case_id to gather; GET /cases lists them)"}); return
+        backend = (payload.get("backend") or payload.get("drafter") or "").strip() or None
+        # single-flight: a second concurrent gather would split a live model's throughput
+        lock = self.server.__dict__.setdefault("gather_lock", threading.Lock())
+        if not lock.acquire(blocking=False):
+            self._json(409, {"error": "another gather is already running — wait for it to finish"}); return
+        try:
+            self.send_response(200)
+            self.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            try:
+                out = run_gather(case_id, backend=backend,
+                                 on_stage=lambda stage, **kw: self._emit({"stage": stage, **kw}))
+                self._emit({"done": out})
+            except RunError as ex:
+                self._emit({"error": str(ex)})
+            except (OSError, ValueError, KeyError, json.JSONDecodeError) as ex:
+                self._emit({"error": f"gather failed: {ex}"})
+        except (BrokenPipeError, ConnectionResetError):
+            self.log_message("client disconnected mid-gather stream")
+        finally:
+            lock.release()
 
     def _read_json(self):
         try:
@@ -475,6 +566,7 @@ def selftest() -> int:
 
     # ---- the elicitation LOOP (Phase 64 T2): adjudicate -> grow precedent -> re-route; persists NOTHING
     disk_before = (CASES_JSON.read_bytes(), sorted(p.name for p in BUNDLES_DIR.iterdir()))
+    osint_before = OSINT_CORPUS_PATH.read_bytes()
     sess = new_session(index)
     hg = next(c for c in index["cases"] if c["confidence"]["gate"] == "human-gate")
     combo = hg["confidence"]["combo"]
@@ -574,6 +666,39 @@ def selftest() -> int:
                  on_stage=lambda s, **kw: None)
     if seen.get("d") != "stub":     # opencode unavailable in this env -> honest stub fallback
         failures.append(f"unavailable backend should fall back to stub, consume saw {seen.get('d')!r}")
+
+    # ---- the GATHER beat (Phase 65): the OSINT agent loop over the synthetic corpus, OFFLINE (stub) ----
+    gstages = []
+    gout = run_gather(mule_id, on_stage=lambda s, **kw: gstages.append((s, kw)))
+    if gout["counts"]["grounded"] < 2:
+        failures.append(f"gather should KEEP grounded findings on the mule chain, got {gout['counts']}")
+    if gout["counts"]["dropped"] < 1:
+        failures.append("gather should DROP the planted ungrounded finding (the gate firing — the honest moment)")
+    if not gout["graph"]["relationships"] or gout["graph"]["mains"] != [gather_view(_case_entry(index, mule_id), json.loads(_bundle_path(mule_id).read_text()))["subject_name"]]:
+        failures.append("gather should build a grounded network graph with the subject as main")
+    if "SYNTHETIC" not in gout["synthetic_note"]:
+        failures.append("the gather result must carry the beat-local SYNTHETIC-provenance note")
+    if not any(f["source_kind"] == "sanctions" for f in gout["grounded"]):
+        failures.append("the gather CHAIN should reach a sanctions finding on the registry-discovered entity")
+    gseq = [s for s, _ in gstages]
+    for needed in ("backend", "plan", "tool", "findings"):
+        if needed not in gseq:
+            failures.append(f"gather stage '{needed}' missing from {gseq}")
+    # PERSISTS NOTHING: the committed slice + the OSINT corpus are byte-identical after a gather ran
+    if disk_before != (CASES_JSON.read_bytes(), sorted(p.name for p in BUNDLES_DIR.iterdir())):
+        failures.append("a gather run must persist NOTHING — cases.json/bundles changed on disk")
+    if osint_before != OSINT_CORPUS_PATH.read_bytes():
+        failures.append("a gather run must persist NOTHING — data/osint/corpus.json changed on disk")
+
+    # §4.5: NO server-side cred/endpoint reaches the browser via ANY gather NDJSON stage OR the done result
+    gsecret = {"ANTHROPIC_API_KEY": "sk-SECRET-DEAD", "OPENAI_BASE_URL": "http://127.0.0.1:8080/v1"}
+    gsec_stages = []
+    gsec = run_gather(mule_id, backend="claude", env=gsecret,
+                      on_stage=lambda s, **kw: gsec_stages.append({"stage": s, **kw}))
+    gblob = json.dumps(gsec_stages, ensure_ascii=False) + json.dumps(gsec, ensure_ascii=False)
+    for leak in ("sk-SECRET-DEAD", "127.0.0.1:8080"):
+        if leak in gblob:
+            failures.append(f"gather leaked a server-side cred/endpoint into a stage/result: {leak}")
 
     # the served page substitutes the config placeholder iff workbench.html exists
     page = render_page(live_config())

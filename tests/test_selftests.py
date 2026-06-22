@@ -24,6 +24,7 @@ SCRIPTS = ROOT / "scripts"
 # gitignored uv .venv and are run separately, per CLAUDE.md.
 PY_SELFTESTS = [
     "curate_workbench_cases.py",
+    "osint_tools.py",
     "serve_workbench.py",
     "serve_chain.py",
     "validate_chain_cases.py",

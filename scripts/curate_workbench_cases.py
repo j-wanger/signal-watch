@@ -67,8 +67,11 @@ GROUNDABLE_CAPS = frozenset({"C2", "C3", "C4", "C5", "C15", "C7", "C8", "C14"})
 # Slice shape (deterministic): every rich (3+-capability) case + a capped sample of the 1-2 cap noise,
 # so the queue keeps the REAL signal:noise feel (the alert-fatigue pain) with the composed cases buried.
 RICH_CAP_FLOOR = 3
-DEFAULT_NOISE_CAP = 120
-DEFAULT_RICH_CAP = 60
+# Phase 66 — a wider ~320-case slice (more 4+-capability exemplars; a noise-heavy backdrop preserved so the
+# composed cases stay BURIED — the alert-fatigue feel). VISIBLE volume, not detection difficulty (the
+# substrate is single-signal-separable). Deterministic over the same f90bd39-gen population (seed 0).
+DEFAULT_NOISE_CAP = 180
+DEFAULT_RICH_CAP = 120
 
 # Synthetic DISPLAY identity pools (clearly-synthetic labels over the real KYC; deterministic by id).
 _FIRST = ["Avery", "Bao", "Camila", "Dmitri", "Elena", "Farah", "Gabriel", "Hana", "Ibrahim", "Jin",
@@ -240,6 +243,21 @@ def select_slice(pop: list, combo_freq: dict, *, rich_cap: int, noise_cap: int,
 
     selected = sorted(rich4 + band3_sel + noise_sel, key=lambda e: e["case_id"])
 
+    # Phase 66 — combo-coverage pass: guarantee EVERY population fired-signal combo has >=1 representative
+    # in the slice (a WIDER combo spread — VISIBLE variety, not detection difficulty). Deterministic: the
+    # lowest-case_id case of each combo the strided samples missed. Adds only the rare combos (no dupes).
+    present = {e["combo"] for e in selected}
+    seen_ids = {e["case_id"] for e in selected}
+    by_combo: dict = {}
+    for e in enriched:
+        by_combo.setdefault(e["combo"], []).append(e)
+    for combo, cands in sorted(by_combo.items()):
+        if combo not in present:
+            rep = min(cands, key=lambda e: e["case_id"])
+            if rep["case_id"] not in seen_ids:
+                selected.append(rep); seen_ids.add(rep["case_id"]); present.add(combo)
+    selected = sorted(selected, key=lambda e: e["case_id"])
+
     # exemplars (label-blind, by composition × gate) — from the SELECTED slice so they're in the queue
     def pick(pool, key):
         return (sorted(pool, key=key)[0]["case_id"] if pool else None)
@@ -324,8 +342,10 @@ def generate(evidence_dir: Path, *, rich_cap: int = DEFAULT_RICH_CAP,
             "emit_command": EMIT_COMMAND,
             "generated_note": ("synthetic substrate emission; GROUNDED detection (real advisory-grounded "
                                "alerts over real KYC), ILLUSTRATIVE dispositions; display identities synthetic"),
-            "slice_rule": (f"every {RICH_CAP_FLOOR}+-capability case (cap {rich_cap}) + a deterministic "
-                           f"sample of <{RICH_CAP_FLOOR}-cap noise (cap {noise_cap}); sorted by case_id"),
+            "slice_rule": (f"the rare 4+-capability cases (cap {rich_cap}) + a 3-cap-band sample (20) + a "
+                           f"deterministic sample of the 1-2-cap noise (cap {noise_cap}) + a combo-coverage "
+                           "pass (>=1 representative of every population combo); sorted by case_id "
+                           "[VISIBLE volume + full combo spread, not detection difficulty — single-signal-separable]"),
             "population_total": len(pop),
             "slice_total": len(cases),
             "coverage": {

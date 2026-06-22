@@ -398,8 +398,9 @@ const GATHER_DONE = {
   backend:{ requested:'stub', effective:'stub', note:null },
   grounded:[
     { source_kind:'registry', record_id:'rg-zz-01', entity:'Crescent Dunes Trading FZE',
-      quote:'Zane Zhao is recorded as the sole director of Crescent Dunes Trading FZE',
-      synthesis:'Registry ties the subject to an affiliated entity.', link:'Zane Zhao' },
+      quote:'Zane Zhao is recorded as the sole beneficial owner of Crescent Dunes Trading FZE',
+      synthesis:'Registry declares an ownership/control tie.', link:'Zane Zhao',
+      rel_label:'BENEFICIAL_OWNER', ownership_pct:100, jurisdiction:'AE-RAK (Ras Al Khaimah free zone)' },
     { source_kind:'sanctions', record_id:'sx-cd-01', entity:'Crescent Dunes Trading FZE',
       quote:'Crescent Dunes Trading FZE appears on the OFAC Specially Designated Nationals list',
       synthesis:'An affiliated entity matches a sanctions listing.', link:null },
@@ -410,7 +411,7 @@ const GATHER_DONE = {
     reason:'quote did not ground as a real single-sentence substring of the cited record' }],
   graph:{ entities:[{name:'Zane Zhao'},{name:'Crescent Dunes Trading FZE'}],
     relationships:[
-      { from:'Zane Zhao', to:'Crescent Dunes Trading FZE', label:'registry link', evidence:'sole director of Crescent Dunes Trading FZE' },
+      { from:'Zane Zhao', to:'Crescent Dunes Trading FZE', label:'beneficial owner', evidence:'sole beneficial owner of Crescent Dunes Trading FZE', ownership_pct:100 },
       { from:'Zane Zhao', to:'Crescent Dunes Trading FZE', label:'sanctions screen', evidence:'appears on the OFAC Specially Designated Nationals list' }],
     mains:['Zane Zhao'] },
   tools_called:[{tool:'lookup_registry',query:'Zane Zhao',n_records:1},
@@ -442,6 +443,11 @@ ok(/illustrative reading — not verified/.test(gg), 'the synthesis is labeled a
 ok(/rejected by the gate/.test(gg) && /did not ground/.test(gg), 'the ungrounded finding renders WITH its rejection reason (the gate firing is legible)');
 ok(/authored over synthetic records, not discovered/.test(gg), 'the network is labeled authored-not-discovered (the chain is not framed as a real discovery)');
 ok(/class="gnsvg"/.test(gg) && (gg.match(/class="gge"/g)||[]).length >= 1, 'the network graph renders as a deterministic SVG with grounded edges');
+/* Phase 66 — the ownership mirror: the RelationshipEdge label + ownership_pct render (as "N pct", never "N%") */
+ok(/class="grel"/.test(gg) && /beneficial owner/.test(gg) && /100 pct/.test(gg),
+   'an ownership finding renders the RelationshipEdge label + ownership_pct as "N pct" (mirrors the substrate BO graph)');
+ok(/class="gjur"/.test(gg) && /AE-RAK/.test(gg), 'the ownership finding shows its jurisdiction chip');
+ok(/beneficial owner · 100 pct/.test(gg), 'the network edge is labeled by the ownership relationship + the pct');
 ok(!/Zane Zhao <not a tag>/.test(gg) && gg.includes('&lt;not a tag&gt;'), 'XSS: a malicious gathered entity is esc()-escaped');
 
 /* HONESTY re-check over the gather surface — counts only, NO % / lift / detection vocabulary */

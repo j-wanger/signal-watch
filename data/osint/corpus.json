@@ -1,7 +1,7 @@
 {
   "as_of": "illustrative",
   "badge": "Illustrative data & outputs",
-  "note": "Synthetic OSINT corpus for the investigator evidence-gathering loop (Phase 65). FICTIONAL registry / adverse-media / sanctions records, keyed to the SYNTHETIC display identities the workbench lays over the (label-blind) aml-substrate population. NO real persons, companies, sanctions designations, or news. Every record is illustrative demo data. The agent loop may only surface findings whose verbatim quote grounds (locate_span) as a substring of one of THESE records' text — the gate proves a finding is anchored to this synthetic corpus, never that the finding is true. Designed to demonstrate: a chained discovery (a subject's corporate-registry link exposes an affiliated entity, which a sanctions screen then flags) that an investigator would not see in the transaction clutter; an honest empty result (a false-positive-trap subject returns no adverse findings); and the grounded-quote / illustrative-synthesis split.",
+  "note": "Synthetic OSINT corpus for the investigator evidence-gathering loop (Phase 65; deepened Phase 66). FICTIONAL registry / adverse-media / sanctions records, keyed to the SYNTHETIC display identities the workbench lays over the (label-blind) aml-substrate population. NO real persons, companies, sanctions designations, or news. Every record is illustrative demo data. The agent loop may only surface findings whose verbatim quote grounds (locate_span) as a substring of one of THESE records' text — the gate proves a finding is anchored to this synthetic corpus, never that the finding is true. Phase 66: registry records carry `relationships:[{src,dst,label,ownership_pct}]` MIRRORING aml-substrate's RelationshipEdge schema (BENEFICIAL_OWNER / DIRECTOR_OF / OFFICER_OF / CONTROLS / OWNS) so this local network view is the rendering PROTOTYPE for the substrate's emitted beneficial-owner graph (docs/substrate-bo-graph-emission-PLAN-BRIEF.md). Designed to demonstrate: chained discoveries (a subject's ownership link exposes an affiliate a sanctions screen then flags), cross-subject ownership links, and honest-empty results for clean subjects. The relationship label is vocab-checked, ownership_pct range-checked — neither is correctness-checked.",
   "sanctions": {
     "Crescent Dunes Trading FZE": [
       {
@@ -9,6 +9,14 @@
         "entity": "Crescent Dunes Trading FZE",
         "program": "OFAC SDN — counter-narcotics (illustrative)",
         "text": "Sanctions screening extract (illustrative, synthetic): Crescent Dunes Trading FZE appears on the OFAC Specially Designated Nationals list, designated under the counter-narcotics trafficking program, with a registered address in Ras Al Khaimah."
+      }
+    ],
+    "Silk Road Freight DMCC": [
+      {
+        "id": "sx-sr-01",
+        "entity": "Silk Road Freight DMCC",
+        "program": "OFAC SDN — counter-proliferation (illustrative)",
+        "text": "Sanctions screening extract (illustrative, synthetic): Silk Road Freight DMCC is listed on the OFAC Specially Designated Nationals list under the counter-proliferation program, with a Dubai logistics address."
       }
     ]
   },
@@ -39,6 +47,33 @@
         "headline": "Generic-name licensees flagged in re-invoicing study",
         "text": "Adverse media (illustrative, synthetic): Compliance researchers flagged that generic general-trading licensees such as General Trading Co. are frequently used to obscure the underlying counterparties in re-invoicing schemes."
       }
+    ],
+    "Full-Service Imports": [
+      {
+        "id": "am-fs-01",
+        "entity": "Full-Service Imports",
+        "outlet": "Importers Review (synthetic)",
+        "headline": "Brokered consignments under scrutiny",
+        "text": "Adverse media (illustrative, synthetic): Full-Service Imports was named in a trade-press report on under-invoiced consumer-goods consignments moved through intermediary brokers."
+      }
+    ],
+    "Hana Xu": [
+      {
+        "id": "am-hx-01",
+        "entity": "Hana Xu",
+        "outlet": "Financial Lens (synthetic)",
+        "headline": "Serial holding companies draw questions",
+        "text": "Adverse media (illustrative, synthetic): Hana Xu was referenced in a financial-press piece on layering through serially incorporated holding companies with no operating activity."
+      }
+    ],
+    "Elena Lefebvre": [
+      {
+        "id": "am-el-01",
+        "entity": "Elena Lefebvre",
+        "outlet": "Consumer Watch (synthetic)",
+        "headline": "Advance-fee solicitations probed",
+        "text": "Adverse media (illustrative, synthetic): Elena Lefebvre was named in a regional fraud inquiry concerning advance-fee solicitations directed at retail investors."
+      }
     ]
   },
   "registry": {
@@ -48,8 +83,11 @@
         "entity": "Zane Zhao",
         "jurisdiction": "AE-RAK (Ras Al Khaimah free zone)",
         "officers": ["Zane Zhao"],
-        "linked_entities": ["Crescent Dunes Trading FZE", "Meridian Nominee Services Ltd"],
-        "text": "Corporate registry extract (illustrative, synthetic): Zane Zhao is recorded as the sole director of Crescent Dunes Trading FZE, a Ras Al Khaimah free-zone company incorporated in 2021, whose registered agent is Meridian Nominee Services Ltd."
+        "relationships": [
+          {"src": "Zane Zhao", "dst": "Crescent Dunes Trading FZE", "label": "BENEFICIAL_OWNER", "ownership_pct": 100},
+          {"src": "Zane Zhao", "dst": "Meridian Nominee Services Ltd", "label": "DIRECTOR_OF"}
+        ],
+        "text": "Corporate registry extract (illustrative, synthetic): Zane Zhao is recorded as the sole beneficial owner of Crescent Dunes Trading FZE and a director of Meridian Nominee Services Ltd, both Ras Al Khaimah free-zone companies."
       }
     ],
     "Crescent Dunes Trading FZE": [
@@ -58,28 +96,10 @@
         "entity": "Crescent Dunes Trading FZE",
         "jurisdiction": "AE-RAK (Ras Al Khaimah free zone)",
         "officers": ["Zane Zhao"],
-        "linked_entities": ["Meridian Nominee Services Ltd"],
-        "text": "Corporate registry extract (illustrative, synthetic): Crescent Dunes Trading FZE lists Zane Zhao as its director and Meridian Nominee Services Ltd as both registered agent and nominee shareholder."
-      }
-    ],
-    "Liam Jain": [
-      {
-        "id": "rg-lj-01",
-        "entity": "Liam Jain",
-        "jurisdiction": "CA-ON",
-        "officers": ["Liam Jain"],
-        "linked_entities": [],
-        "text": "Corporate registry extract (illustrative, synthetic): Liam Jain is the registered proprietor of a sole-proprietorship retail consultancy in Ontario, in good standing, with no affiliated entities on file."
-      }
-    ],
-    "Rosa Romano": [
-      {
-        "id": "rg-rr-01",
-        "entity": "Rosa Romano",
-        "jurisdiction": "CA-ON",
-        "officers": ["Rosa Romano"],
-        "linked_entities": [],
-        "text": "Corporate registry extract (illustrative, synthetic): Rosa Romano holds no incorporated entities on file; the only record is a personal banking profile with no external corporate affiliations."
+        "relationships": [
+          {"src": "Zane Zhao", "dst": "Crescent Dunes Trading FZE", "label": "BENEFICIAL_OWNER", "ownership_pct": 100}
+        ],
+        "text": "Corporate registry extract (illustrative, synthetic): Crescent Dunes Trading FZE lists Zane Zhao as its sole beneficial owner and Meridian Nominee Services Ltd as its registered agent."
       }
     ],
     "General Trading Co.": [
@@ -88,8 +108,103 @@
         "entity": "General Trading Co.",
         "jurisdiction": "AE-DXB",
         "officers": ["(undisclosed nominee)"],
-        "linked_entities": ["Harbour Crest Logistics FZE"],
-        "text": "Corporate registry extract (illustrative, synthetic): General Trading Co. is a Dubai general-trading licensee with an undisclosed beneficial owner and a single affiliated logistics entity, Harbour Crest Logistics FZE."
+        "relationships": [
+          {"src": "Mara Halloran", "dst": "General Trading Co.", "label": "BENEFICIAL_OWNER", "ownership_pct": 75},
+          {"src": "General Trading Co.", "dst": "Harbour Crest Logistics FZE", "label": "CONTROLS"}
+        ],
+        "text": "Corporate registry extract (illustrative, synthetic): General Trading Co. discloses Mara Halloran as its majority beneficial owner and is recorded as controlling Harbour Crest Logistics FZE, a Dubai logistics affiliate."
+      }
+    ],
+    "Management Trading Co.": [
+      {
+        "id": "rg-mt-01",
+        "entity": "Management Trading Co.",
+        "jurisdiction": "AE-DXB",
+        "officers": ["Talin Voskanyan"],
+        "relationships": [
+          {"src": "Talin Voskanyan", "dst": "Management Trading Co.", "label": "BENEFICIAL_OWNER", "ownership_pct": 60},
+          {"src": "Management Trading Co.", "dst": "Silk Road Freight DMCC", "label": "OWNS", "ownership_pct": 100}
+        ],
+        "text": "Corporate registry extract (illustrative, synthetic): Management Trading Co. discloses Talin Voskanyan as its majority beneficial owner and wholly owns Silk Road Freight DMCC, a Dubai logistics affiliate."
+      }
+    ],
+    "Full-Service Imports": [
+      {
+        "id": "rg-fs-01",
+        "entity": "Full-Service Imports",
+        "jurisdiction": "CA-ON",
+        "officers": ["Dario Okonkwo"],
+        "relationships": [
+          {"src": "Dario Okonkwo", "dst": "Full-Service Imports", "label": "DIRECTOR_OF"}
+        ],
+        "text": "Corporate registry extract (illustrative, synthetic): Full-Service Imports records Dario Okonkwo as its sole director, with no disclosed beneficial owner above the reporting threshold on file."
+      }
+    ],
+    "Hana Xu": [
+      {
+        "id": "rg-hx-01",
+        "entity": "Hana Xu",
+        "jurisdiction": "HK",
+        "officers": ["Hana Xu"],
+        "relationships": [
+          {"src": "Hana Xu", "dst": "Pearl River Holdings Ltd", "label": "BENEFICIAL_OWNER", "ownership_pct": 100}
+        ],
+        "text": "Corporate registry extract (illustrative, synthetic): Hana Xu is recorded as the sole beneficial owner of Pearl River Holdings Ltd, a holding company with no operating history on file."
+      }
+    ],
+    "Retail Services Ltd.": [
+      {
+        "id": "rg-rs-01",
+        "entity": "Retail Services Ltd.",
+        "jurisdiction": "CA-ON",
+        "officers": ["Owen Bracken", "Priya Ueda"],
+        "relationships": [
+          {"src": "Owen Bracken", "dst": "Retail Services Ltd.", "label": "BENEFICIAL_OWNER", "ownership_pct": 55},
+          {"src": "Priya Ueda", "dst": "Retail Services Ltd.", "label": "DIRECTOR_OF"}
+        ],
+        "text": "Corporate registry extract (illustrative, synthetic): Retail Services Ltd. discloses Owen Bracken as its controlling beneficial owner and Priya Ueda as a director."
+      }
+    ],
+    "Priya Ueda": [
+      {
+        "id": "rg-pu-01",
+        "entity": "Priya Ueda",
+        "jurisdiction": "CA-ON",
+        "officers": ["Priya Ueda"],
+        "relationships": [
+          {"src": "Priya Ueda", "dst": "Retail Services Ltd.", "label": "DIRECTOR_OF"}
+        ],
+        "text": "Corporate registry extract (illustrative, synthetic): Priya Ueda is recorded as a director of Retail Services Ltd., a regional retail operator in good standing."
+      }
+    ],
+    "Jin Xu": [
+      {
+        "id": "rg-jx-01",
+        "entity": "Jin Xu",
+        "jurisdiction": "CA-BC",
+        "officers": ["Jin Xu"],
+        "relationships": [],
+        "text": "Corporate registry extract (illustrative, synthetic): Jin Xu is the registered proprietor of a sole-proprietorship consultancy in good standing, with no affiliated entities or controlling interests on file."
+      }
+    ],
+    "Khadija Quirke": [
+      {
+        "id": "rg-kq-01",
+        "entity": "Khadija Quirke",
+        "jurisdiction": "CA-ON",
+        "officers": ["Khadija Quirke"],
+        "relationships": [],
+        "text": "Corporate registry extract (illustrative, synthetic): Khadija Quirke holds no incorporated entities on file; the only record is a personal banking profile with no external corporate affiliations."
+      }
+    ],
+    "Jin Ivanov": [
+      {
+        "id": "rg-ji-01",
+        "entity": "Jin Ivanov",
+        "jurisdiction": "CA-AB",
+        "officers": ["Jin Ivanov"],
+        "relationships": [],
+        "text": "Corporate registry extract (illustrative, synthetic): Jin Ivanov is a salaried individual with no corporate affiliations or directorships on file."
       }
     ]
   }

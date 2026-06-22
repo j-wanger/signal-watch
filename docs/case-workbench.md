@@ -47,8 +47,9 @@ sample = auto-clear; rare composition = small sample = human gate.** The disposi
 vs escalate) stays **illustrative** ("chosen, not measured" — the substrate is label-blind). The sample
 size is real; the disposition is not.
 
-The gate funnel over the vendored slice: **129 auto-clear / 52 review / 19 human-gate** — the firehose
-collapsing to a real human workload.
+The gate funnel over the vendored slice: **189 auto-clear / 66 review / 39 human-gate** (Phase 66
+re-vendored a wider 294-case slice — see *Workbench richness* below) — the firehose collapsing to a real
+human workload.
 
 ## The precedent-confidence gating engine + the elicitation loop (Phase 64)
 
@@ -61,7 +62,7 @@ LFCM elicitation path. The mechanic is unchanged; what moves is that it now *run
 gating panel. `route(n_precedent, policy)` is **one pure function**: `curate_workbench_cases.py` bakes
 the baseline gate with it, and `serve_workbench.py`'s live engine re-derives routing from the *same*
 function, so the live funnel can never drift from the committed one (the selftest asserts the default
-policy reproduces **129 / 52 / 19**). Routing is **monotone** — a larger precedent sample never yields a
+policy reproduces **189 / 66 / 39**). Routing is **monotone** — a larger precedent sample never yields a
 stricter gate.
 
 **The elicitation loop.** A human adjudicates a gated case (`POST /adjudicate`); that disposition becomes
@@ -79,12 +80,12 @@ auto-disposition is correct**. This holds the Phase-62 boundary: route on §12 *
 re-ground §14 from the substrate's label-blind history. The thresholds are presenter knobs, not a
 calibration; the funnel is honest counts, never a precision/lift figure.
 
-**Executed once over the real slice.** The engine ran live over the committed 200-case population: the
-funnel re-derives to the baked **129 / 52 / 19**, and the loop shifts one real decision —
-`CASE-P-0003008` (signal combo `C3+C5`, **45** prior firings, human-gate) crosses to **review** after 5
-adjudications (sample 45 → 50, the review threshold), the human-gate funnel ticking **19 → 18**. The
-knobs move it instantly too — dropping the review threshold folds the rare composed cases out of the
-human queue, live.
+**Executed once over the real slice.** The engine ran live over the committed slice (Phase 64 over the
+then-200-case population; Phase 66 re-vendored it to **294 cases**, funnel re-derived to **189 / 66 / 39**):
+the live funnel reproduces the baked one, and the loop shifts a real decision — a near-threshold human-gate
+case crosses to **review** after a few adjudications grow its combo's precedent past the review threshold,
+the human-gate funnel ticking down by one. The knobs move it instantly too — dropping the review threshold
+folds the rare composed cases out of the human queue, live.
 
 ## The agentic evidence-gathering loop (Phase 65)
 
@@ -137,9 +138,43 @@ grounding gate held with the real model. The first live run surfaced a real fix:
 chain until it could *see* the discovered entity (it received only `{tool, n_records}` history); the loop
 now threads discovered-entity context into the planner, and the chain fired.
 
+## Workbench richness (Phase 66)
+
+Two demo-visible richness wins + a sibling handoff, governed by one honest constraint.
+
+**A wider slice.** The vendored population grew from **200 → 294 cases** (a deterministic re-emit of the
+same `f90bd39`-gen substrate population, then a re-curate with wider caps + a **combo-coverage pass** that
+guarantees ≥1 representative of *every* one of the 23 population fired-signal combos — up from 14 surfaced).
+More 4+-capability exemplars (85 vs 60), coverage re-measured (**99/294**), the gate funnel re-derived
+(**189 / 66 / 39**).
+
+**A deeper OSINT corpus that mirrors the substrate ownership graph.** The GATHER corpus
+(`data/osint/corpus.json`) grew to ~24 records across 14 subjects, and its registry records now carry
+`relationships:[{src, dst, label, ownership_pct}]` **mirroring aml-substrate's `RelationshipEdge`**
+(`BENEFICIAL_OWNER` / `DIRECTOR_OF` / `OFFICER_OF` / `CONTROLS` / `OWNS`). GATHER renders these as a labelled,
+ownership-weighted network — two ownership→sanctions chains (a subject's beneficial owner / affiliate that a
+sanctions screen then flags), cross-subject ownership links, and honest-clean subjects. **The ownership facts
+(label, percent, direction) are read from the synthetic record, never from the model** — the live run
+surfaced a model *fabricating* an ownership percent and flipping the direction, so the gate now resolves the
+relationship from the record's structured data (the model only grounds the quote + names the two parties).
+The percent renders as "N pct" (never "N%" — the no-% honesty rule). This local corpus is the **rendering
+prototype** for the substrate's emitted beneficial-owner graph.
+
+**The handoff.** `docs/substrate-bo-graph-emission-PLAN-BRIEF.md` specifies the aml-substrate work to *emit*
+the real beneficial-owner graph (a `PartyGraphView`, `related_parties[]` in the bundle, a non-tautological
+C14 BO-disclosure detector) — and the emitted shape maps 1:1 onto what GATHER already renders, so the
+workbench needs no rework when it lands.
+
+**The governor (load-bearing) — single-signal-separable.** Every richness here is **demo-visible** (more
+cases, deeper profiles, a richer ownership network) — **never a detection-difficulty or catch-rate claim.**
+The substrate's own measurement work found it *single-signal-separable* (composition is architecturally
+subsumed by network linkage): more cases / typologies / detectors add visible *volume*, not detection
+difficulty. The richness that *compounds* is the network — exactly the BO graph the handoff brief targets.
+ZERO catch-rate / precision / lift / % number anywhere.
+
 ## Coverage is MEASURED, not assumed (the cross-pillar finding)
 
-The headline coverage number — **57 of 200 cases ground end-to-end** — is **measured**, not a capability
+The headline coverage number — **99 of 294 cases ground end-to-end** (Phase 66's wider slice; was 57/200) — is **measured**, not a capability
 proxy: `curate_workbench_cases.py --measure-casework` runs aml-casework's deterministic stub over every
 vendored bundle and records `grounds_e2e` per case.
 
@@ -181,7 +216,8 @@ python3 scripts/curate_workbench_cases.py --selftest  # the committed slice: sch
 
 - The substrate **ownership/beneficial-owner graph emission** (a richer network view than the emitted
   transaction counterparty edges; would let the GATHER network draw on real emitted ownership rather than
-  the synthetic registry corpus).
+  the synthetic registry corpus) — **spec'd in Phase 66** (`docs/substrate-bo-graph-emission-PLAN-BRIEF.md`);
+  the consume side already renders the shape (the synthetic OSINT corpus is its prototype). Sibling-executed.
 - The **C3/C15 cross-pillar contract alignment** (substrate fan-in vs casework fan-out) — the
   composed-case grounding frontier.
 - A **real OSINT substrate** for the GATHER loop (a real screening list / registry feed) — out of scope
@@ -199,3 +235,8 @@ python3 scripts/curate_workbench_cases.py --selftest  # the committed slice: sch
 > agent loop gathers counterparty/OSINT/sanctions evidence over a committed synthetic corpus, every finding
 > grounded-or-stripped (consistency, not correctness), feeding an authored-not-discovered network. Executed
 > once live; the registry→sanctions chain fired with the local model, 0 fabricated.
+>
+> **Added in Phase 66:** a wider **294-case** slice (full 23-combo spread), a deeper GATHER OSINT corpus whose
+> ownership records **mirror the substrate `RelationshipEdge`** (the rendering prototype for the emitted BO
+> graph; ownership read from the record, never the model), and the **aml-substrate BO-graph emission handoff
+> brief**. Governor: demo-visible richness, never detection difficulty (single-signal-separable).

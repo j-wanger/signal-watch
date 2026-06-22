@@ -232,6 +232,8 @@
   .gkind.adverse_media{color:var(--signal);border-color:rgba(246,166,35,.4)}
   .gkind.registry{color:var(--blue);border-color:rgba(90,169,255,.4)}
   .gent{font-family:var(--display);font-size:15px;color:var(--ink);flex:1}
+  .grel{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--violet);border:1px solid rgba(176,140,255,.4);border-radius:5px;padding:2px 7px}
+  .gjur{font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;color:var(--faint);border:1px solid var(--line2);border-radius:5px;padding:2px 6px}
   .gground{font-family:var(--mono);font-size:10px;color:var(--green)}
   .gquote{border-left:2px solid var(--teal);padding:4px 0 4px 11px;color:var(--ink);font-size:13px;line-height:1.5;margin-bottom:6px}
   .gqlabel{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:3px}
@@ -572,6 +574,10 @@ const PROV = 'Gathered over a COMMITTED SYNTHETIC OSINT corpus — fictional san
   + 'is authored into the corpus, not discovered.';
 function toolLabel(t){return {screen_sanctions:'sanctions screen',screen_adverse_media:'adverse media',lookup_registry:'registry lookup'}[t]||String(t||'tool');}
 function kindLabel(k){return {sanctions:'sanctions',adverse_media:'adverse media',registry:'registry'}[k]||String(k||'');}
+/* ownership relationship (mirrors the substrate RelationshipLabel) → display; ownership_pct shows as
+   "N pct" (NEVER "N%" — the no-% honesty rule bans the symbol even for legitimate ownership data) */
+function ownLabel(rel){return {BENEFICIAL_OWNER:'beneficial owner',DIRECTOR_OF:'director of',OFFICER_OF:'officer of',CONTROLS:'controls',OWNS:'owns'}[rel]||String(rel||'').toLowerCase().replace(/_/g,' ');}
+function edgeLabel(e){return esc(e.label)+(e.ownership_pct!=null?' · '+esc(e.ownership_pct)+' pct':'');}
 
 /* the pure SVG network layout, ported VERBATIM from news.html (liveGraphLayout) — deterministic, no deps */
 function liveGraphLayout(entities, relationships, mains, W, H){
@@ -623,13 +629,13 @@ function gatherGraphHTML(graph){
   h+='<svg class="gnsvg" viewBox="0 0 '+g.w+' '+g.h+'" role="img" aria-label="illustrative entity network over synthetic records">';
   g.edges.forEach((e,i)=>{const f=P[e.from],t=P[e.to]; if(!f||!t)return;
     h+='<g class="gge" data-ei="'+i+'"><line x1="'+f.x+'" y1="'+f.y+'" x2="'+t.x+'" y2="'+t.y+'"></line>'
-     +'<text x="'+Math.round((f.x+t.x)/2)+'" y="'+(Math.round((f.y+t.y)/2)-4)+'">'+esc(e.label)+'</text></g>';});
+     +'<text x="'+Math.round((f.x+t.x)/2)+'" y="'+(Math.round((f.y+t.y)/2)-4)+'">'+edgeLabel(e)+'</text></g>';});
   g.nodes.forEach(n=>{const lbl=n.name.length>20?n.name.slice(0,19)+'…':n.name;
     h+='<g class="ggn'+(n.main?' ggm':'')+'"><circle cx="'+n.x+'" cy="'+n.y+'" r="'+(n.main?9:6)+'"></circle>'
      +'<text x="'+n.x+'" y="'+(n.y-(n.main?13:10))+'">'+esc(lbl)+'</text></g>';});
   h+='</svg>';
   g.edges.forEach((e,i)=>{const open=sel===i;
-    h+='<div class="gerow'+(open?' open':'')+'" data-ei="'+i+'"><span class="gw">'+esc(e.from)+'</span><span class="gl">—'+esc(e.label)+'→</span><span class="gw">'+esc(e.to)+'</span>'
+    h+='<div class="gerow'+(open?' open':'')+'" data-ei="'+i+'"><span class="gw">'+esc(e.from)+'</span><span class="gl">—'+edgeLabel(e)+'→</span><span class="gw">'+esc(e.to)+'</span>'
      +(open?'<div class="gev">“'+esc(e.evidence)+'”</div>':'')+'</div>';});
   h+='</div>';
   return h;
@@ -647,11 +653,14 @@ function gatherResultHTML(){
   if(GATHER&&GATHER.error) return `<div class="err"><b>Gather failed</b>${esc(GATHER.error)}</div>`;
   const g=GATHER&&GATHER.done; if(!g) return '';
   const cnt=g.counts||{};
-  const grounded=(g.grounded||[]).map(f=>`<div class="gfind">
-    <div class="gfh"><span class="gkind ${esc(f.source_kind)}">${esc(kindLabel(f.source_kind))}</span><span class="gent">${esc(f.entity)}</span><span class="gground">✓ grounded</span></div>
+  const grounded=(g.grounded||[]).map(f=>{
+    const rel=f.rel_label?`<span class="grel">${esc(ownLabel(f.rel_label))}${f.ownership_pct!=null?' · '+esc(f.ownership_pct)+' pct':''}</span>`:'';
+    const jur=f.jurisdiction?`<span class="gjur">${esc(f.jurisdiction)}</span>`:'';
+    return `<div class="gfind">
+    <div class="gfh"><span class="gkind ${esc(f.source_kind)}">${esc(kindLabel(f.source_kind))}</span><span class="gent">${esc(f.entity)}</span>${rel}${jur}<span class="gground">✓ grounded</span></div>
     <div class="gquote"><div class="gqlabel">Evidence · verbatim from a synthetic record</div>“${esc(f.quote)}”</div>
     <div class="gsyn"><b>illustrative reading — not verified</b>${esc(f.synthesis)}</div>
-  </div>`).join('');
+  </div>`;}).join('');
   const dropped=(g.dropped||[]).map(d=>`<div class="gdrop"><span class="gdx">✗ rejected by the gate</span>${esc(d.reason)}${d.quote?`<div class="gdq">“${esc(d.quote)}”</div>`:''}</div>`).join('');
   const empty=(!(g.grounded||[]).length)?'<div class="gempty">No external findings grounded for this subject — the gathered evidence corroborates nothing adverse (an honest negative).</div>':'';
   return `<div class="gres">

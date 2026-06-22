@@ -47,6 +47,15 @@ _KIND_OF_TOOL = {"screen_sanctions": "sanctions", "screen_adverse_media": "adver
 _LABEL_OF_KIND = {"sanctions": "sanctions screen", "adverse_media": "adverse media",
                   "registry": "registry link"}
 
+# Phase 66 — ownership-graph labels MIRRORING aml-substrate's RelationshipLabel (schema/enums.py): the
+# OSINT registry records carry `relationships:[{src,dst,label,ownership_pct}]` in this exact shape so the
+# local network view is the rendering PROTOTYPE for the substrate's emitted beneficial-owner graph (the
+# BO-graph handoff brief, docs/substrate-bo-graph-emission-PLAN-BRIEF.md). A label is VOCAB-checked, never
+# correctness-checked (the news_ground RELATION_LABELS doctrine); ownership_pct is RANGE-checked [0,100].
+REL_LABELS = ("BENEFICIAL_OWNER", "DIRECTOR_OF", "OFFICER_OF", "CONTROLS", "OWNS")
+_REL_DISPLAY = {"BENEFICIAL_OWNER": "beneficial owner", "DIRECTOR_OF": "director of",
+                "OFFICER_OF": "officer of", "CONTROLS": "controls", "OWNS": "owns"}
+
 # the news red-flag floor, applied to the NORMALIZED quote so punctuation/whitespace/1-token trivial matches
 # cannot ground (a single "the" normalizes to 3 chars < 12 and DROPS).
 MIN_QUOTE_CHARS = 12
@@ -127,6 +136,21 @@ def validate_osint_corpus(corpus: dict) -> list:
                             errors.append(f"record '{rid}' has an empty linked_entity")
                         elif _BANNED.search(str(le)):
                             errors.append(f"record '{rid}' linked_entity {le!r} contains a banned metric token")
+                    # Phase 66 — ownership relationships MIRROR the substrate RelationshipEdge (vocab + range)
+                    for r in (rec.get("relationships") or []):
+                        rl = str((r or {}).get("label") or "").strip().upper()
+                        src = str((r or {}).get("src") or "").strip()
+                        dst = str((r or {}).get("dst") or "").strip()
+                        op = (r or {}).get("ownership_pct")
+                        if rl not in REL_LABELS:
+                            errors.append(f"record '{rid}' relationship label {rl!r} not in {REL_LABELS}")
+                        if not src or not dst:
+                            errors.append(f"record '{rid}' relationship missing src/dst")
+                        for nm in (src, dst):
+                            if nm and _BANNED.search(nm):
+                                errors.append(f"record '{rid}' relationship endpoint {nm!r} has a banned metric token")
+                        if op is not None and not (isinstance(op, int) and 0 <= op <= 100):
+                            errors.append(f"record '{rid}' ownership_pct {op!r} not an int in [0,100]")
     return errors
 
 
@@ -162,10 +186,12 @@ def _span_ok(located) -> bool:
     carries real substance (>= MIN_QUOTE_CHARS normalized, <= MAX_QUOTE_CHARS raw)."""
     if not located:
         return False
-    # reject a span bridging a sentence terminator + ANY whitespace. locate_span collapses the full
-    # [ \t\r\n]+ class, so the guard must match that class — not just '\n' and '. ' (else a '.'+TAB/CR
-    # boundary slips two unrelated clauses through as one "single-sentence" quote).
-    if "\n" in located or re.search(r"[.!?][ \t\r\n]", located):
+    # reject a span bridging a real SENTENCE boundary = a terminator + whitespace + a CAPITAL (a new
+    # sentence starts capitalised). locate_span collapses the full [ \t\r\n]+ class, so the guard matches
+    # that class — but requires the capital so an ABBREVIATION period ("General Trading Co. discloses",
+    # "Retail Services Ltd. discloses" — lowercase continuation) is NOT a false boundary, while the
+    # adversary's two-clause stitch ("company. No sanctions", "company.\tNo sanctions") still DROPs.
+    if "\n" in located or re.search(r"[.!?][ \t\r\n]+[A-Z]", located):
         return False
     return MIN_QUOTE_CHARS <= _norm_len(located) <= MAX_QUOTE_CHARS and len(located) <= MAX_QUOTE_CHARS
 
@@ -176,6 +202,8 @@ def _record_known_names(record: dict) -> list:
     names = [record.get("entity")]
     names.extend(record.get("officers") or [])
     names.extend(record.get("linked_entities") or [])
+    for r in (record.get("relationships") or []):     # Phase 66 — ownership-edge endpoints are declared names
+        names.append((r or {}).get("src")); names.append((r or {}).get("dst"))
     return [str(n) for n in names if str(n or "").strip()]
 
 
@@ -215,6 +243,11 @@ def gate_finding(finding: dict, returned_records: list, subject: str, kind: str)
         return None, "missing synthesis"
     if news_normalize(syn) == news_normalize(located):
         return None, "synthesis is not distinct from the grounded quote"
+    # the synthesis is the ONE model-authored free-text that renders — sweep it for banned metric/percent
+    # tokens like a record field (else a live model could write "owns 51%" in the prose, defeating the no-%
+    # rule + the "model can't fabricate the pct/direction" seam for the prose beside the structured edge)
+    if _BANNED.search(syn):
+        return None, "synthesis carries a banned metric/percent token (the no-% honesty rule)"
     entity = (str(finding.get("entity") or "").strip() or record.get("entity") or subject)
     if not _name_grounded(entity, record, subject):           # entity is REQUIRED — a bad one rejects the finding
         return None, f"entity {entity!r} is neither the subject nor a name the cited record declares"
@@ -222,8 +255,33 @@ def gate_finding(finding: dict, returned_records: list, subject: str, kind: str)
     if link and not _name_grounded(link, record, subject):    # link is OPTIONAL — a bad one is DROPPED, not a
         link = ""                                             # finding-killer (the finding stands on its grounded
                                                               # entity+quote; no ungrounded node enters the graph)
-    return ({"source_kind": kind, "record_id": rid, "entity": entity, "quote": located,
-             "synthesis": syn, "link": link or None}, None)
+    # Phase 66 — the ownership relationship (mirrors RelationshipEdge) is read from the RECORD's structured
+    # `relationships`, NEVER from the model: match the finding's two parties (entity + link, set-equal) to a
+    # record relationship's {src,dst}; the label + ownership_pct + DIRECTION come from the record. So a live
+    # model cannot fabricate the pct or flip the direction — it only grounds the quote + names the parties;
+    # the gate grounds the structured ownership to the synthetic record (consistency, not the model).
+    rel_label = rel_from = rel_to = None
+    pct = None
+    parties = {news_normalize(entity)} | ({news_normalize(link)} if link else set())
+    for r in (record.get("relationships") or []):
+        rs, rd = str((r or {}).get("src") or "").strip(), str((r or {}).get("dst") or "").strip()
+        rl = str((r or {}).get("label") or "").strip().upper()
+        if rl in REL_LABELS and rs and rd and {news_normalize(rs), news_normalize(rd)} == parties:
+            rel_label, rel_from, rel_to = rl, rs, rd          # the record's canonical owner -> owned direction
+            op = (r or {}).get("ownership_pct")
+            pct = op if isinstance(op, int) and 0 <= op <= 100 else None
+            break
+    kept = {"source_kind": kind, "record_id": rid, "entity": entity, "quote": located,
+            "synthesis": syn, "link": link or None}
+    juris = str(record.get("jurisdiction") or "").strip()    # a record attribute (banned-token-swept) — display only
+    if juris:
+        kept["jurisdiction"] = juris
+    if rel_label:
+        kept["rel_label"] = rel_label
+        kept["rel_from"], kept["rel_to"] = rel_from, rel_to
+        if pct is not None:
+            kept["ownership_pct"] = pct
+    return (kept, None)
 
 
 def build_graph(kept: list, subject: str) -> dict:
@@ -234,17 +292,32 @@ def build_graph(kept: list, subject: str) -> dict:
     rels, seen = [], set()
     for f in kept:
         ent, link, ev = f["entity"], f.get("link"), f["quote"]
-        label = _LABEL_OF_KIND.get(f["source_kind"], f["source_kind"])
-        if ent and news_normalize(ent) != news_normalize(subject):
-            entities[ent] = True
-            key = (subject, ent, label)
-            if key not in seen:
-                seen.add(key); rels.append({"from": subject, "to": ent, "label": label, "evidence": ev})
-        if link and news_normalize(link) not in (news_normalize(subject), news_normalize(ent)):
-            entities[link] = True
-            key = (ent or subject, link, label)
-            if key not in seen:
-                seen.add(key); rels.append({"from": ent or subject, "to": link, "label": label, "evidence": ev})
+        # Phase 66 — an ownership finding labels its edge by the RelationshipLabel (+ ownership_pct);
+        # otherwise the generic source-kind label. The pct is carried as a number, rendered "N pct" (NOT
+        # "N%" — the no-% honesty rule bans the symbol even for legitimate ownership data).
+        rel = f.get("rel_label")
+        label = _REL_DISPLAY.get(rel) if rel else _LABEL_OF_KIND.get(f["source_kind"], f["source_kind"])
+        pct = f.get("ownership_pct")
+        if rel:
+            # an ownership edge follows the RECORD's canonical direction (rel_from -> rel_to, owner -> owned)
+            a, b = f.get("rel_from"), f.get("rel_to")
+            edges = [(a, b)] if a and b and news_normalize(a) != news_normalize(b) else []
+        else:
+            edges = []
+            if ent and news_normalize(ent) != news_normalize(subject):
+                edges.append((subject, ent))
+            if link and news_normalize(link) not in (news_normalize(subject), news_normalize(ent)):
+                edges.append((ent or subject, link))
+        for a, b in edges:
+            entities[a] = True; entities[b] = True
+            key = (a, b, label)
+            if key in seen:
+                continue
+            seen.add(key)
+            edge = {"from": a, "to": b, "label": label, "evidence": ev}
+            if pct is not None:
+                edge["ownership_pct"] = pct
+            rels.append(edge)
     return {"entities": [{"name": n} for n in entities], "relationships": rels, "mains": [subject]}
 
 
@@ -257,35 +330,57 @@ class StubPlanner:
     def __init__(self, case_view: dict, index: dict):
         self.subject = case_view.get("subject_name") or ""
         self.index = index
-        self._discovered = []   # linked entities surfaced by a registry call (drives the chain)
+        self._discovered = []   # affiliated entities surfaced by a registry call (drives the chain)
         self._planted = False   # the one deliberately-ungrounded finding (exercises the gate DROP once)
+        self._adverse = False   # whether the subject's adverse-media screen has been issued
 
     def action(self, step: int, history: list) -> dict:
         if step == 0:
             return {"action": "call_tool", "tool": "lookup_registry", "query": self.subject}
-        if step == 1 and self._discovered:
-            return {"action": "call_tool", "tool": "screen_sanctions", "query": self._discovered[0]}
-        if step in (1, 2):
+        # screen EACH discovered affiliate for sanctions (bounded by max_iters), then adverse media on the
+        # subject — so a sanctioned affiliate at any hop is found, not just the first (the cap is the backstop)
+        idx = step - 1
+        if idx < len(self._discovered):
+            return {"action": "call_tool", "tool": "screen_sanctions", "query": self._discovered[idx]}
+        if not self._adverse:
+            self._adverse = True
             return {"action": "call_tool", "tool": "screen_adverse_media", "query": self.subject}
         return {"action": "finish"}
 
     def findings(self, records: list, tool: str) -> list:
         out = []
         for rec in records:
-            text = rec.get("text") or ""
-            quote = _content_span(text)          # a real, single-sentence substring of THIS record
+            quote = _content_span(rec.get("text") or "")   # a real, single-sentence substring of THIS record
             if tool == "lookup_registry":
-                for le in (rec.get("linked_entities") or []):
+                rels = rec.get("relationships") or []
+                if rels:
+                    # Phase 66 — one finding per ownership edge (mirrors RelationshipEdge): entity=dst, link=src,
+                    # rel_label + ownership_pct; the non-subject endpoints feed the chain (screen them next).
+                    for r in rels:
+                        dst, src = (r or {}).get("dst"), (r or {}).get("src")
+                        for nm in (dst, src):
+                            if nm and news_normalize(nm) != news_normalize(self.subject) and nm not in self._discovered:
+                                self._discovered.append(nm)
+                        # name the two parties (entity + link); the gate reads label/pct/direction from the record
+                        out.append({"record_id": rec.get("id"), "quote": quote, "entity": dst, "link_to": src,
+                                    "finding": "Registry declares an ownership/control tie (illustrative reading)."})
+                    continue
+                les = rec.get("linked_entities") or []      # fallback: a registry record with no relationships
+                for le in les:
                     if le not in self._discovered:
                         self._discovered.append(le)
-                ent = (rec.get("linked_entities") or [rec.get("entity")])[0]
-                syn = "Registry ties the subject to an affiliated entity (illustrative reading)."
+                if les:
+                    out.append({"record_id": rec.get("id"), "quote": quote, "entity": les[0], "link_to": self.subject,
+                                "finding": "Registry ties the subject to an affiliated entity (illustrative reading)."})
+                else:                                       # a CLEAN record — no affiliated entities (an honest no-tie)
+                    out.append({"record_id": rec.get("id"), "quote": quote, "entity": self.subject, "link_to": "",
+                                "finding": "Registry record on file; no affiliated entities or controlling interests (illustrative reading)."})
             elif tool == "screen_sanctions":
-                ent = rec.get("entity"); syn = "An affiliated entity matches a sanctions listing (illustrative reading)."
+                out.append({"record_id": rec.get("id"), "quote": quote, "entity": rec.get("entity"), "link_to": "",
+                            "finding": "An affiliated entity matches a sanctions listing (illustrative reading)."})
             else:
-                ent = rec.get("entity"); syn = "Adverse media names the subject (illustrative reading)."
-            out.append({"record_id": rec.get("id"), "quote": quote, "finding": syn,
-                        "entity": ent, "link_to": self.subject if tool == "lookup_registry" else ""})
+                out.append({"record_id": rec.get("id"), "quote": quote, "entity": rec.get("entity"), "link_to": "",
+                            "finding": "Adverse media names the subject (illustrative reading)."})
         if records and not self._planted:        # one ungrounded finding -> the gate DROPs it (the honest moment)
             self._planted = True
             out.append({"record_id": records[0].get("id"),
@@ -338,10 +433,12 @@ class LivePlanner:
         sys_p = ("Propose findings ONLY as JSON {\"findings\":[{\"record_id\":\"..\",\"quote\":\"<copy a "
                  "verbatim substring of THAT record's text>\",\"finding\":\"<one-sentence reading, distinct "
                  "from the quote>\",\"entity\":\"<a named entity the record DECLARES — copy it EXACTLY (its "
-                 "entity, an officer, or a linked entity); not a fragment>\",\"link_to\":\"<the subject or "
-                 "another declared entity name, optional>\"}]}. The quote MUST be copied verbatim from the "
-                 "cited record's text and entity/link_to must be full declared names. Do not invent. If "
-                 "nothing is relevant, return {\"findings\":[]}.")
+                 "entity, an officer, or a relationship src/dst); not a fragment>\",\"link_to\":\"<the "
+                 "subject or another declared entity name; for an ownership/control tie name the OTHER party "
+                 "here so BOTH parties are present>\"}]}. The quote MUST be copied verbatim from the cited "
+                 "record's text and entity/link_to must be full declared names. The system reads any "
+                 "ownership label, percent, and direction FROM THE RECORD itself — do NOT state them. Do not "
+                 "invent. If nothing is relevant, return {\"findings\":[]}.")
         usr = json.dumps({"subject": self.subject, "records": [{"id": r.get("id"), "text": r.get("text")}
                                                                for r in records]})
         txt = self.call_model([{"role": "system", "content": sys_p}, {"role": "user", "content": usr}])
@@ -498,10 +595,14 @@ def _selftest() -> int:
               "registry": {"Y": [{"id": "d1", "entity": "Y", "text": "ok: 50% owned by Z"}],
                            "Acme": [{"id": "d3", "entity": "Acme 50% Holdings",
                                      "text": "Acme 50 Holdings is a firm",          # banned token is in entity, NOT text
-                                     "linked_entities": ["Beta 3x Capital"]}]}}
+                                     "linked_entities": ["Beta 3x Capital"],
+                                     # Phase 66 — a MALFORMED relationship: unknown label, missing src, out-of-range pct
+                                     "relationships": [{"src": "", "dst": "Acme Holdings",
+                                                        "label": "PUPPETMASTER", "ownership_pct": 250}]}]}}
     berr = validate_osint_corpus(broken)
     for need in ("note", "duplicate record id", "missing/empty 'text'", "banned metric token",
-                 ".entity contains a banned", "linked_entity 'Beta 3x Capital' contains a banned"):
+                 ".entity contains a banned", "linked_entity 'Beta 3x Capital' contains a banned",
+                 "relationship label", "relationship missing src/dst", "ownership_pct 250"):
         if not any(need in e for e in berr):
             failures.append(f"broken-corpus validation should flag {need!r}, got {berr}")
 
@@ -518,7 +619,7 @@ def _selftest() -> int:
     if run_tool(index, "bogus_tool", "Zane Zhao") != [] or run_tool(index, "lookup_registry", "") != []:
         failures.append("unknown tool / empty query must return [] (no crash)")
     # fp_trap true negatives: sanctions + adverse on the canonical normname are [] (not a phrasing miss)
-    if run_tool(index, "screen_sanctions", "Liam Jain") != [] or run_tool(index, "screen_adverse_media", "Liam Jain") != []:
+    if run_tool(index, "screen_sanctions", "Jin Xu") != [] or run_tool(index, "screen_adverse_media", "Jin Xu") != []:
         failures.append("the fp_trap subject must be a TRUE negative on sanctions + adverse media")
 
     # (3) the gate predicate: grounded KEEP, and every bypass DROPS
@@ -539,6 +640,8 @@ def _selftest() -> int:
         ({"record_id": reg["id"], "quote": good_quote, "finding": "ok", "entity": "Globex Holdings"}, "wholly-foreign entity"),
         ({"record_id": reg["id"], "quote": good_quote, "finding": "ok", "entity": "FZE"}, "fragment-of-a-real-name entity"),
         ({"record_id": reg["id"], "quote": good_quote, "finding": "ok", "entity": "a"}, "1-char entity (substring artifact)"),
+        ({"record_id": reg["id"], "quote": good_quote, "finding": "owns 51% of the affiliate", "entity": "Zane Zhao"}, "model synthesis with a % token"),
+        ({"record_id": reg["id"], "quote": good_quote, "finding": "controls 3x the throughput", "entity": "Zane Zhao"}, "model synthesis with an Nx token"),
     ]
     for f, label in bypasses:
         k, _r = gate_finding(f, [reg], "Zane Zhao", "registry")
@@ -552,6 +655,22 @@ def _selftest() -> int:
                               "entity": "Crescent Dunes Trading FZE", "link_to": bad_link}, [reg], "Zane Zhao", "registry")
         if k is None or k.get("link") is not None:
             failures.append(f"a bad link_to ({bad_link!r}) must DROP to None with the finding KEPT, got {k}")
+    # Phase 66 — the ownership relationship is READ FROM THE RECORD (matched by the two parties), NEVER
+    # from the model: a model that fabricates the label/pct/direction is IGNORED — the gate uses rg-zz-01's
+    # BENEFICIAL_OWNER @ 100, direction Zane Zhao -> Crescent Dunes. (This is the live-run-surfaced fix:
+    # Qwen output a fabricated 51 pct + a flipped direction; record-sourcing makes it impossible.)
+    own, _ = gate_finding({"record_id": reg["id"], "quote": good_quote, "finding": "an ownership tie",
+                           "entity": "Crescent Dunes Trading FZE", "link_to": "Zane Zhao",
+                           "rel_label": "OWNS", "ownership_pct": 51}, [reg], "Zane Zhao", "registry")
+    if not own or own.get("rel_label") != "BENEFICIAL_OWNER" or own.get("ownership_pct") != 100:
+        failures.append(f"ownership must be READ FROM THE RECORD (BENEFICIAL_OWNER@100), not the model, got {own}")
+    if own.get("rel_from") != "Zane Zhao" or own.get("rel_to") != "Crescent Dunes Trading FZE":
+        failures.append(f"ownership direction must be the record's (Zane Zhao -> Crescent Dunes), got {own}")
+    # parties that DON'T match any record relationship -> NO ownership on the finding (it still stands)
+    norel, _ = gate_finding({"record_id": reg["id"], "quote": good_quote, "finding": "a generic note",
+                             "entity": "Crescent Dunes Trading FZE"}, [reg], "Zane Zhao", "registry")
+    if norel is None or norel.get("rel_label") is not None:
+        failures.append(f"a finding whose parties don't match a record relationship has NO ownership, got {norel}")
     # the sentence-bridge guard: a quote stitching two clauses across '. ' DROPs
     two = {"id": "tb1", "entity": "Z", "text": "Z is a registered company. No sanctions were found on file."}
     kb, _ = gate_finding({"record_id": "tb1", "quote": "registered company. No sanctions",
@@ -563,6 +682,12 @@ def _selftest() -> int:
         failures.append("_span_ok must reject a '.'+TAB/CR bridge (locate_span collapses the full ws class)")
     if not _span_ok("Zane Zhao is recorded as the sole director of Crescent Dunes Trading FZE"):
         failures.append("_span_ok must still PASS a clean single-sentence span")
+    # Phase 66 — an ABBREVIATION period ('Co. discloses', 'Ltd. discloses') is NOT a boundary (lowercase
+    # continuation) — the org-name records must ground; the capital-after rule distinguishes it from a stitch
+    if not _span_ok("General Trading Co. discloses Mara Halloran as its majority beneficial owner"):
+        failures.append("_span_ok must PASS an abbreviation period followed by lowercase ('Co. discloses')")
+    if _span_ok("on file. The company moved funds"):
+        failures.append("_span_ok must still DROP a real boundary (terminator + space + Capital)")
 
     # (4) the STUB loop end-to-end over the mule: grounded KEEP + the planted DROP + the CHAIN + terminates
     stages = []
@@ -586,15 +711,21 @@ def _selftest() -> int:
     for rel in res["graph"]["relationships"]:                  # every edge endpoint is subject-or-grounded
         if news_normalize(rel["to"]) == news_normalize("Zane Zhao"):
             failures.append("a graph edge points back at the subject as a target (should be external)")
+    # Phase 66 — the ownership graph: the mule's registry BENEFICIAL_OWNER edge renders with ownership_pct
+    own_edges = [r for r in res["graph"]["relationships"] if r["label"] == "beneficial owner"]
+    if not own_edges or not any(r.get("ownership_pct") == 100 for r in own_edges):
+        failures.append(f"the graph should carry a 'beneficial owner' edge with ownership_pct=100, got {res['graph']['relationships']}")
     seq = [s for s, _ in stages]
     for need in ("plan", "tool", "findings"):
         if need not in seq:
             failures.append(f"gather stage '{need}' missing from {seq}")
 
-    # (5) the fp_trap honest-empty: a clean registry finding, ZERO sanctions/adverse
-    fp = gather({"subject_name": "Liam Jain", "subject_kind": "person"}, corpus=corpus, index=index)
+    # (5) the fp_trap honest-empty: a CLEAN registry finding (no affiliated entities), ZERO sanctions/adverse
+    fp = gather({"subject_name": "Jin Xu", "subject_kind": "person"}, corpus=corpus, index=index)
     if any(f["source_kind"] in ("sanctions", "adverse_media") for f in fp["grounded"]):
         failures.append("the fp_trap subject must surface NO sanctions/adverse findings (honest negative)")
+    if not any(f["source_kind"] == "registry" for f in fp["grounded"]) or fp["graph"]["relationships"]:
+        failures.append(f"the fp_trap should yield a CLEAN registry finding + an EMPTY ownership graph, got {fp['counts']}")
 
     # (6) determinism + persists-nothing + statelessness
     before = CORPUS_PATH.read_bytes()

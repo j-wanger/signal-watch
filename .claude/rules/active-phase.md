@@ -1,28 +1,29 @@
 # Active Phase Context
 
-**Phase 65 — *Agentic tool-calling: the investigator evidence-gathering loop (companion)*** (signal-watch-local, LITE) — direction gate accepted 2026-06-21 (all_accept:true; A0/A2/A4 positioned explicitly, A1/A3 by precedent). Build signal-watch's FIRST multi-step tool-calling agent loop: on a selected investigator case, the agent proposes a tool → calls a deterministic tool over a COMMITTED SYNTHETIC evidence universe → each finding is GROUNDED-OR-STRIPPED (reusing news_ground) → grounded tool-evidence extends the case's grounding chain + a network view. Executed once live.
+**Phase 66 — *Workbench richness: richer slice + OSINT corpus depth + the substrate BO-graph emission handoff brief*** (signal-watch-local, LITE) — direction gate accepted 2026-06-21 (all_accept:true; A1 coherence + A2 slice-scope positioned at the gate, A0/A3/A4 by precedent). Two signal-watch-LOCAL richness wins (richer vendored slice + a deeper GATHER OSINT corpus that MIRRORS the substrate RelationshipEdge schema) + the aml-substrate beneficial-owner / ownership-graph EMISSION handoff brief — so the repos stay coherent.
 
 ## Objective
-Add a GATHER beat to the workbench arc (between SIGNALS and DECIDE). A companion agent loop (backend by NAME — Phase-57 §4.5; deterministic-STUB fallback so the demo runs model-free) gathers counterparty/OSINT/adverse-media evidence over a committed synthetic corpus; the reused `news_ground` gate disposes (a finding's claim ⊂ the tool's returned text; ungrounded findings DROP); grounded evidence extends the case grounding chain + feeds a `liveGraphLayout` network view. EXECUTE the loop ONCE live over a marquee exemplar (grounded + dropped evidence captured as delivery evidence — the measuring→controlling / execute-once pattern).
+Add demo-VISIBLE richness now (more cases + a deeper synthetic OSINT corpus) and author the durable network lever as a sibling brief. (1) Re-vendor a wider ~320-case slice via a deterministic substrate re-emit + re-curate. (2) Deepen `data/osint/corpus.json` (9→~50 records: named counterparties / jurisdictions / sanctions / ownership), the ownership records shaped to MIRROR the substrate RelationshipEdge (BENEFICIAL_OWNER/DIRECTOR_OF/ownership_pct) so the local win previews the emitted BO graph. (3) Author the aml-substrate BO-graph EMISSION handoff brief. THE GOVERNOR: every richness claim is demo-VISIBLE, ZERO catch-rate/detection-difficulty/lift — the substrate is single-signal-separable (composition subsumed by network linkage, P16), documented not hidden.
 
 ## Scope
-`scripts/serve_workbench.py` · `workbench.html` · `data/osint/**` (new committed synthetic corpus) · `tests/{workbench.test.mjs,test_selftests.py}` · `docs/case-workbench.md` · `tests/smoke-checklist.md`. REUSE `news_ground` (grounding gate) + `liveGraphLayout` (pure-JS network layout) as LIBRARIES; do NOT import `news_store` (companion-doctrine — session-only, persists nothing). build.py NEVER imports aml_substrate/aml_casework; the OSINT corpus is companion data (NOT a build target → validated by a deterministic shape validator at serve_workbench load + `--selftest`, NOT in build.py).
+`scripts/curate_workbench_cases.py` · `data/workbench/**` (re-vendored, re-pinned) · `data/osint/corpus.json` · `scripts/osint_tools.py` · `workbench.html` (richer gather rendering) · `docs/substrate-bo-graph-emission-PLAN-BRIEF.md` (NEW) · `docs/case-workbench.md` · `tests/{workbench.test.mjs,smoke-checklist.md}`. The substrate emit is TOOL-USE (build.py NEVER imports aml_substrate/aml_casework; curate runs the sibling CLI via subprocess — file-contract).
 
 ## Key constraints
-- THE HONESTY SEAM (load-bearing, A0): tools query COMMITTED SYNTHETIC data; the agent proposes, the deterministic gate disposes; ungrounded findings DROP; the consistency-not-correctness limit is surfaced honestly (badge on; ZERO catch-rate/detection-lift number). Fallback: network-ER over the existing committed counterparty edges only.
-- Companion-only / NOT a 9th ship target / LITE holds; the loop is session-only / persists nothing (reuse `liveGraphLayout`, NOT the DuckDB `news_store`).
-- BUILD-NEW agent loop (none exists — verified), BOUNDED: a fixed 2-3 deterministic tool set, capped iterations (the Phase-47 D3 max-iteration mandate), a deterministic-STUB fallback; agent runs server-side, browser sends a backend NAME only.
-- 8 ship dists byte-frozen; `--check all` 8/8 ZERO dist drift; build.py never imports the siblings.
+- THE GOVERNOR (load-bearing, A0): demo-VISIBLE richness only; ZERO catch-rate/detection-difficulty/lift number; GATHER findings stay consistency-not-correctness; the single-signal-separable finding documented.
+- A1 (coherence): the OSINT ownership records MIRROR the substrate RelationshipEdge schema (BENEFICIAL_OWNER/DIRECTOR_OF/ownership_pct) — the local win doubles as the brief's rendering prototype.
+- A2 (slice): deterministic substrate re-emit + re-curate (wider caps, ~320), re-measured coverage, re-vendored + re-pinned; OSINT depth PRIMARY, slice secondary volume.
+- A3 (brief): the BO-graph emission is a PLAN-BRIEF authored here, executed in aml-substrate (the Phase-55–58 pattern) — NOT built here.
+- Companion-only (workbench/osint NOT ship targets); the honesty seam + always-on badge UNCHANGED; `--check all` 8/8 ZERO dist drift; build.py never imports the siblings.
 
 ## Exit criteria
-The 5 tasks' success fields met; the agent loop authored + the grounding seam HELD (grounded KEPT / ungrounded DROPPED, verified in `--selftest`); the GATHER beat in workbench.html (stage-completion reveal — never a token stream — evidence network, badge, both motion modes, XSS-escape); the loop EXECUTED ONCE live over a marquee case; `serve_workbench.py --selftest` + `node tests/workbench.test.mjs` + `uv run pytest` green; `build.py --check all` 8/8 ZERO dist drift; no sibling import; companion-only (NOT a 9th build target).
+The 4 tasks' success fields met; the ~320-case slice re-vendored + `curate --selftest` green; the deepened OSINT corpus validates + renders (ownership edges; GATHER returns findings on >4 subjects) with the honesty seam unchanged; the BO-graph brief authored (named sections, mirrors the T2 OSINT shape); `uv run pytest` + `node tests/workbench.test.mjs` + the `--selftest`s green; `build.py --check all` 8/8 ZERO dist drift; no sibling import; the governor documented.
 
 ## Abort
-If the live tool-evidence can't be kept honest over synthetic data (reads as "real OSINT" / a claim can't be grounded to its synthetic source) → fall back to network-ER over the existing committed edges only, report don't force (the A0 fallback). The live loop needs real debugging beyond creds → surface as a FINDING, ship the deterministic stub (the demo stays robust). Any new ship target / dist drift / a sibling import in build.py / a validator loosened to force a fit → STOP-and-surface.
+If any richness framing reads as a detection-difficulty/catch-rate claim → re-word (the A0 governor; the substrate is single-signal-separable). The substrate re-emit drifts from the f90bd39-pin population → re-pin honestly + accept the new deterministic slice. The OSINT schema-mirror can't match the RelationshipEdge cleanly → the brief documents the delta. Any new ship target / dist drift / a sibling import in build.py / a validator loosened to force a fit → STOP-and-surface.
 
 ## Gates
-- [x] spec — waived under LITE ceremony (dev-plan Step 2 is a Lite skip; the assumption-ledger gate IS the direction gate)
-- [x] Direction confirmed by user (assumption positions taken 2026-06-21; A0/A2/A4 explicit, A1/A3 by precedent; all_accept:true)
-- [x] Delivery accepted (post-implementation report 2026-06-21; two adversarial passes [pre-build design + post-build code], all confirmed findings fixed; framing accepted; committed)
+- [x] spec — waived under LITE ceremony (dev-plan Step 2 Lite skip; the assumption-ledger gate IS the direction gate)
+- [x] Direction confirmed by user (assumption positions taken 2026-06-21; A1/A2 explicit at the gate, A0/A3/A4 by precedent; all_accept:true)
+- [x] Delivery accepted (post-implementation report 2026-06-22; live execute-once + an adversarial pass — 3 honesty flaws caught & fixed [model-fabricated pct → record-sourced ownership; the abbreviation-period guard; the synthesis banned-token sweep], 1 confirmed adversary finding fixed + locked; framing accepted; committed)
 
-Plan [[phases/phase-65-agentic-tool-calling]]; ledger Phase-65.
+Plan [[phases/phase-66-workbench-richness]]; ledger Phase-66.

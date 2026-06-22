@@ -95,6 +95,44 @@ direction]). Grounded against the committed Phase-63 workbench (aml-substrate@f9
 > answers") → scope to display-only batch routing, report don't force (the A0 fallback). Any new ship
 > target / dist drift / a sibling import in build.py / a validator loosened to force a fit → STOP-and-surface.
 
+<!-- phase:phase-66-workbench-richness -->
+<!-- gate-log:phase-66 direction=approved delivery=accepted -->
+<!-- status: T1–T4 ALL [x] — DELIVERED + accepted 2026-06-22 (live execute-once + adversarial pass, 3 honesty flaws caught & fixed) -->
+
+## Phase 66 — Workbench richness: richer slice + OSINT corpus depth + the substrate BO-graph emission handoff brief
+
+Two signal-watch-LOCAL richness wins now + the durable network lever as a sibling brief, so the repos stay
+coherent. Recon (signal-watch consume side + aml-substrate generation side, code-verified @9d2e65c) found: the
+substrate is single-signal-separable (composition subsumed by network linkage — P16) so MORE cases/typologies/
+detectors add visible VOLUME, not detection difficulty; the richness that compounds is the NETWORK (the
+generated-but-unprojected RelationshipEdge BO/director graph — the ranked #1 lever); the workbench slice is a
+deterministic substrate emit (`--clients 40000 --seed 0 …`, re-runnable as TOOL-USE, gen unchanged from the
+f90bd39 pin — VERIFIED). THE GOVERNOR (load-bearing): every richness claim is demo-VISIBLE, ZERO
+catch-rate/detection-difficulty/lift number; GATHER stays consistency-not-correctness; single-signal-separable
+documented not hidden. Companion-only (workbench/osint NOT ship targets); the honesty seam + always-on badge
+UNCHANGED; `--check all` 8/8 ZERO dist drift; build.py NEVER imports aml_substrate/aml_casework (the substrate
+emit + casework coverage-measure run as subprocess TOOL-USE, file-contract). LITE. Plan:
+articles/phases/phase-66-workbench-richness.md. Ledger: Phase-66 (direction gate 2026-06-21, all_accept:true —
+A1 coherence + A2 slice-scope positioned at the gate, A0/A3/A4 by precedent). Grounded against the committed
+Phase-65 workbench (signal-watch HEAD 761a446; aml-substrate@9d2e65c / aml-casework@81df91c).
+
+- [x] T1 Richer vendored slice — DONE: re-ran the deterministic substrate emit (verified src/ byte-identical f90bd39..HEAD → same population, pin holds) + raised the curate caps (rich 60→120 / noise 120→180) + ADDED a combo-coverage pass (guarantee ≥1 of every population combo) → re-vendored **294 cases (was 200), all 23 population combos surfaced (was 14)**, 85 4+-cap rich cases (was 60), coverage re-MEASURED **99/294** (was 57/200), gate funnel **189/66/39** (was 129/52/19); exemplars re-tagged (mule Zane Zhao + ambiguous General Trading Co. STABLE; fp_trap→Jin Xu, thin→Khadija Quirke). `curate --selftest` PASS; bundles clean (294, stale deleted); serve_workbench --selftest PASS over the new slice; build.py imports no sibling. Honest: visible VOLUME + full combo spread, NOT detection difficulty. | scope: scripts/curate_workbench_cases.py, data/workbench/** | size: M
+- [x] T2 (PRIMARY) Deepen the OSINT corpus + MIRROR the substrate ownership schema — DONE: `data/osint/corpus.json` 9→24 records across 14 subjects (named counterparties / jurisdictions / sanctions / adverse-media); the registry ownership records carry `relationships:[{src,dst,label∈{BENEFICIAL_OWNER/DIRECTOR_OF/OFFICER_OF/CONTROLS/OWNS},ownership_pct}]` MIRRORING the substrate RelationshipEdge (verified schema/graph.py:16-24). `osint_tools.py`: REL_LABELS + the gate vocab/range-checks the relationship (drop-to-None on invalid — the link-granularity lesson), `build_graph` draws DIRECTION-aware src→dst ownership edges, jurisdiction threaded, the stub screens EACH discovered affiliate (so a 2nd-hop sanctioned affiliate is found). Two ownership→sanctions chains fire (Zane Zhao→Crescent Dunes; Management Trading Co.→Silk Road Freight), cross-subject links (Priya Ueda↔Retail Services). workbench.html renders the ownership label + `ownership_pct` (as "N pct", NOT "N%" — the no-% rule). ALSO fixed a latent gate bug: the sentence-bridge guard rejected abbreviation periods ("Co. discloses") → refined to terminator+ws+CAPITAL (a real boundary), org-name records ground while the adversary's stitch still DROPs. `osint_tools --selftest` + `serve_workbench --selftest` green; `node tests/workbench.test.mjs` 103/0 (+3 ownership, the no-% re-check passes "100 pct"); GATHER yields findings on 7 subjects; import-clean. The honesty seam UNCHANGED. | scope: data/osint/corpus.json, scripts/osint_tools.py, workbench.html, tests/workbench.test.mjs | size: M
+- [x] T3 The aml-substrate BO-graph EMISSION handoff brief — DONE: `docs/substrate-bo-graph-emission-PLAN-BRIEF.md` (the Phase-55–58 sibling-brief pattern) — the 3-part ask (a `PartyGraphView` projecting the generated-but-unprojected `RelationshipEdge` BENEFICIAL_OWNER/DIRECTOR_OF edges · `related_parties[]` bundle emission with `ownership_pct`, contract v0.2→v0.3 · a NON-tautological C14 BO-disclosure detector) + the contract mapping showing the emitted shape maps 1:1 onto what the Phase-66 OSINT corpus already renders (so the workbench needs no rework when the real graph lands) + the single-signal-separable governor. Pinned @9d2e65c; grep confirms all named sections. Sibling-executed, NOT built here. | scope: docs/substrate-bo-graph-emission-PLAN-BRIEF.md | size: M
+- [x] T4 Suites + drift + docs + the governor — DONE: EXECUTED the loop LIVE once over the deepened corpus (mule + General Trading Co. vs Qwen3.6-35B) — which SURFACED a real honesty flaw (the model fabricated an ownership pct [51 vs the record's 75] + flipped the direction) → fixed by RECORD-SOURCING the ownership (gate reads label/pct/direction from the record, not the model; the live re-run then showed the correct 75 pct / Mara→General direction, 0 fabricated). `uv run pytest` 18/18 · `node tests/workbench.test.mjs` 103/0 · `curate`/`osint_tools`/`serve_workbench --selftest` green · `build.py --check all` 8/8 ZERO dist drift · build.py imports no sibling/companion. `docs/case-workbench.md` gained the *Workbench richness* section + the single-signal-separable GOVERNOR (visible-richness-not-detection-difficulty) + the slice numbers updated (294/99/189-66-39); `tests/smoke-checklist.md` gained the Phase-66 entries. | scope: tests/workbench.test.mjs, tests/smoke-checklist.md, docs/case-workbench.md | size: S
+
+> Phase 66 — direction gate 2026-06-21 (all_accept:true): after a two-repo richness recon the user chose the
+> TWO signal-watch-LOCAL wins (richer slice + deeper OSINT corpus) + the aml-substrate BO-graph emission brief
+> bundled into ONE phase for cross-repo coherence. A0 [T0 weakest — the GOVERNOR]: demo-VISIBLE richness only,
+> ZERO detection-difficulty claim (single-signal-separable) → ACCEPT · A1 [chosen]: the OSINT ownership records
+> MIRROR the substrate RelationshipEdge schema → ACCEPT (the local win previews the emitted BO graph) · A2
+> [chosen]: a deterministic ~320 re-emit + re-curate, OSINT primary → ACCEPT · A3: the BO-graph emission is a
+> sibling-executed brief → ACCEPT · A4: companion-only, honesty seam unchanged → ACCEPT.
+> Abort: any richness framing reading as detection-difficulty → re-word (the A0 governor). The re-emit drifts
+> from the pin population → re-pin honestly. The OSINT schema-mirror can't match RelationshipEdge cleanly → the
+> brief documents the delta. Any new ship target / dist drift / a sibling import in build.py / a validator
+> loosened to force a fit → STOP-and-surface.
+
 <!-- phase:phase-65-agentic-tool-calling -->
 <!-- gate-log:phase-65 direction=approved delivery=accepted -->
 <!-- status: T1–T5 ALL [x] — DELIVERED + accepted 2026-06-21 (two adversarial passes, all confirmed findings fixed; live chain fired) -->

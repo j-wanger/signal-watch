@@ -1,0 +1,425 @@
+{
+  "alerts": [
+    {
+      "account_id": "A-00112237",
+      "alert_id": "AL-b39f4204d24b",
+      "capability": "C3",
+      "detector": "funnel_fan",
+      "grounding": {
+        "advisory_id": "fin-2020-alert001",
+        "capability": "C3",
+        "data_source": "D13",
+        "flag": "Multiple social media accounts communicating the same message soliciting funds for an unknown purpose or to an unknown account.",
+        "indicator_id": "IND-05",
+        "signal_id": "fin-2020-alert001:IND-05"
+      },
+      "rule": "fan-out: 9 distinct counterparties within 7 days",
+      "txn_ids": [
+        "T-01031921",
+        "T-01031923",
+        "T-01031924",
+        "T-01031925",
+        "T-01031926",
+        "T-01031928",
+        "T-01031929",
+        "T-01031930",
+        "T-01031931",
+        "T-01031935"
+      ]
+    },
+    {
+      "account_id": "A-00112237",
+      "alert_id": "AL-6e7d01519389",
+      "capability": "C2",
+      "detector": "pass_through",
+      "grounding": {
+        "advisory_id": "fin-2023-alert001",
+        "capability": "C2",
+        "data_source": "D3",
+        "flag": "Currency deposits into U.S. accounts without explanation, followed by rapid wire transfers to countries with high migrant flows (e.g., Mexico, Central America), in a manner that is inconsistent with expected customer activity.",
+        "indicator_id": "IND-03",
+        "signal_id": "fin-2023-alert001:IND-03"
+      },
+      "rule": "forwarded 799351/920000 cents (>= 80%) within 72h",
+      "txn_ids": [
+        "T-01031921",
+        "T-01031922",
+        "T-01031923",
+        "T-01031924",
+        "T-01031925"
+      ]
+    }
+  ],
+  "case_id": "CASE-P-0030370",
+  "contract_version": "0.2",
+  "dossier": {
+    "account_id": "A-00112237",
+    "alert_ids": [
+      "AL-6e7d01519389",
+      "AL-b39f4204d24b"
+    ],
+    "dossier_id": "DS-5229fa7efea9"
+  },
+  "illustrative": true,
+  "parties": [
+    {
+      "adverse_media_flag": false,
+      "cdd_level": "CDD",
+      "expected_monthly_txn_count": 17,
+      "expected_monthly_volume_cents": 1461896,
+      "is_person": true,
+      "naics_code": null,
+      "nationality": null,
+      "nature_of_business": null,
+      "occupation": "Lab technician",
+      "party_id": "P-0030370",
+      "pep_tier": "NONE",
+      "residency_status": null,
+      "risk_rating": "LOW",
+      "sanctions_flag": false,
+      "source_of_funds": null,
+      "source_of_wealth": null
+    }
+  ],
+  "str_record": {
+    "case_id": "CASE-P-0030370",
+    "cited_signal_ids": [
+      "fin-2020-alert001:IND-05",
+      "fin-2023-alert001:IND-03"
+    ],
+    "cited_txn_ids": [
+      "T-01031921",
+      "T-01031922",
+      "T-01031923",
+      "T-01031924",
+      "T-01031925",
+      "T-01031926",
+      "T-01031928",
+      "T-01031929",
+      "T-01031930",
+      "T-01031931",
+      "T-01031935"
+    ],
+    "completeness": {
+      "account_information": true,
+      "grounds_for_suspicion_narrative": false,
+      "reporting_entity": true,
+      "subject_information": true,
+      "transaction_details": true,
+      "typology_grounds": true
+    },
+    "crime_type": null,
+    "narrative": null,
+    "subject_account_ids": [
+      "A-00112237"
+    ]
+  },
+  "subject": {
+    "account_ids": [
+      "A-00112237"
+    ],
+    "customer_id": "P-0030370"
+  },
+  "transactions": [
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 70434,
+      "channel": "AFT",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-02",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-01-02T19:44:26",
+      "txn_id": "T-01031918"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 4193,
+      "channel": "AFT",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-13",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-01-12T08:04:38",
+      "txn_id": "T-01031919"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 2157,
+      "channel": "CARD",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-05",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-01-14T10:55:02",
+      "txn_id": "T-01031920"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 390050,
+      "channel": "CHEQUE",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-07",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-01-29T17:28:16",
+      "txn_id": "T-01031921"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 920000,
+      "channel": "WIRE",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-12",
+      "currency": "CAD",
+      "direction": "CREDIT",
+      "timestamp": "2024-01-30T11:13:19",
+      "txn_id": "T-01031922"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 146569,
+      "channel": "WIRE",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-02",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-01-30T18:43:47",
+      "txn_id": "T-01031923"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 222117,
+      "channel": "AFT",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-06",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-01-31T14:13:04",
+      "txn_id": "T-01031924"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 40615,
+      "channel": "EMT",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-07",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-02-01T12:35:26",
+      "txn_id": "T-01031925"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 37182,
+      "channel": "CARD",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-01",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-02-01T20:14:47",
+      "txn_id": "T-01031926"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 12737,
+      "channel": "AFT",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-01",
+      "currency": "CAD",
+      "direction": "CREDIT",
+      "timestamp": "2024-02-02T07:46:08",
+      "txn_id": "T-01031927"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 567370,
+      "channel": "AFT",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-11",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-02-02T08:53:47",
+      "txn_id": "T-01031928"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 4008,
+      "channel": "AFT",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-00",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-02-02T14:14:51",
+      "txn_id": "T-01031929"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 71815,
+      "channel": "AFT",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-09",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-02-02T17:56:50",
+      "txn_id": "T-01031930"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 11295,
+      "channel": "CHEQUE",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-04",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-02-03T04:58:36",
+      "txn_id": "T-01031931"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 4000,
+      "channel": "CASH",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": null,
+      "currency": "CAD",
+      "direction": "CREDIT",
+      "timestamp": "2024-02-03T08:16:19",
+      "txn_id": "T-01031932"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 8513,
+      "channel": "CASH",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": null,
+      "currency": "CAD",
+      "direction": "CREDIT",
+      "timestamp": "2024-02-03T18:32:12",
+      "txn_id": "T-01031933"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 251523,
+      "channel": "CHEQUE",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-11",
+      "currency": "CAD",
+      "direction": "CREDIT",
+      "timestamp": "2024-02-03T19:14:48",
+      "txn_id": "T-01031934"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 10162,
+      "channel": "AFT",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-13",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-02-04T03:49:43",
+      "txn_id": "T-01031935"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 76064,
+      "channel": "AFT",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-09",
+      "currency": "CAD",
+      "direction": "CREDIT",
+      "timestamp": "2024-02-07T20:37:06",
+      "txn_id": "T-01031936"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 24573,
+      "channel": "AFT",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-03",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-02-08T19:41:33",
+      "txn_id": "T-01031937"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 30733,
+      "channel": "AFT",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-14",
+      "currency": "CAD",
+      "direction": "CREDIT",
+      "timestamp": "2024-02-28T04:40:48",
+      "txn_id": "T-01031938"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 800000,
+      "channel": "WIRE",
+      "counterparty_account_id": null,
+      "counterparty_country": null,
+      "counterparty_ref": "CP-P-0030370-09",
+      "currency": "CAD",
+      "direction": "CREDIT",
+      "timestamp": "2024-02-28T09:23:07",
+      "txn_id": "T-01031939"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 132538,
+      "channel": "EMT",
+      "counterparty_account_id": "A-00032111",
+      "counterparty_country": null,
+      "counterparty_ref": "CP-A-00112237-it21",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-01-21T12:14:52",
+      "txn_id": "T-01454350"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 11139,
+      "channel": "EMT",
+      "counterparty_account_id": "A-00022829",
+      "counterparty_country": null,
+      "counterparty_ref": "CP-A-00112237-it18",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-02-16T18:38:19",
+      "txn_id": "T-01507974"
+    },
+    {
+      "account_id": "A-00112237",
+      "amount_cents": 26849,
+      "channel": "EMT",
+      "counterparty_account_id": "A-00032111",
+      "counterparty_country": null,
+      "counterparty_ref": "CP-A-00112237-it25",
+      "currency": "CAD",
+      "direction": "DEBIT",
+      "timestamp": "2024-01-02T20:37:15",
+      "txn_id": "T-01510902"
+    }
+  ]
+}

@@ -1,0 +1,242 @@
+{
+ "id": "fin-2026-alert001",
+ "advisory": "FIN-2026-ALERT001",
+ "source_md": "data/fincen-alerts/fin-2026-alert001.md",
+ "extraction_quality": "clean",
+ "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+ "indicators": [
+  {
+   "id": "IND-01",
+   "section": "Red Flag Indicators — Child Nutrition Program Fraud",
+   "flag": "A customer is a company or NPO serving as a sponsor for a government benefit program that suddenly receives and disburses a significant number of reimbursements in a short timeframe inconsistent with the customer profile of other similar entities.",
+   "red_flag": "Sponsor account: burst reimbursement inflow + rapid disbursement out-of-pattern vs peer entities",
+   "src_line": 186,
+   "status": "gap",
+   "data": "available",
+   "capability": "C7",
+   "data_source": "D1",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D1 (Core transaction monitoring (deposit/account ledger)), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-REVENUE-OPERATIONS-MISMATCH",
+    "class": "entity Â· business-account Â· windowed",
+    "features": [
+     "inflow_vs_declared_revenue_ratio",
+     "inflow_per_employee",
+     "payroll_to_revenue_ratio",
+     "operating_expense_share",
+     "industry_peer_revenue_zscore",
+     "transaction_volume_vs_footprint"
+    ],
+    "logic": "Flag a business account whose transaction inflows are disproportionate to its declared revenue, headcount, payroll, or operating-expense footprint relative to industry peers, escalating when revenue appears decoupled from any observable operational activity.",
+    "window": "rolling 90 days vs declared profile and peer cohort",
+    "source": "business deposit ledger joined to KYC business profile + industry peer benchmarks",
+    "route": "Tier-2 alert â AML analyst review gate"
+   }
+  },
+  {
+   "id": "IND-02",
+   "section": "Red Flag Indicators — Child Nutrition Program Fraud",
+   "flag": "A customer is a recently established company or NPO enrolled in a government benefit program that is suddenly receiving a significant amount of Federal payments soon after starting its operations.",
+   "red_flag": "Newly-formed enrollee → outsized Federal payments shortly after inception",
+   "src_line": 190,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C25",
+   "data_source": "D14",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D14 (Government-program enrollment & eligibility data), not currently held → source data first."
+  },
+  {
+   "id": "IND-03",
+   "section": "Red Flag Indicators — Child Nutrition Program Fraud",
+   "flag": "A customer is a recently established company or NPO enrolled in a government benefit program receiving payments to their accounts that are inconsistent with their customer profile.",
+   "red_flag": "Program-payment inflow out-of-pattern vs customer profile",
+   "src_line": 194,
+   "status": "partial",
+   "data": "available",
+   "capability": "C1",
+   "data_source": "D1",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C1 (Customer-profile / out-of-pattern transaction monitoring); data D1."
+  },
+  {
+   "id": "IND-04",
+   "section": "Red Flag Indicators — Child Nutrition Program Fraud",
+   "flag": "A customer is a company or NPO enrolled in a government benefit program but is unable to verify its status to the financial institution or its customer profile is not commensurate with other similar entities.",
+   "red_flag": "Unverifiable enrollment status / profile incommensurate with peer entities",
+   "src_line": 198,
+   "status": "gap",
+   "data": "available",
+   "capability": "C14",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-KYC-INTEGRITY-SCREEN",
+    "class": "entity Â· account-level Â· event+windowed",
+    "features": [
+     "edd_document_overdue_flag",
+     "information_request_refusal_count",
+     "kyc_field_inconsistency_score",
+     "evasive_response_indicator",
+     "beneficial_owner_disclosure_gap",
+     "periodic_review_failure_flag"
+    ],
+    "logic": "Flag a customer whose KYC record shows integrity gaps or non-cooperation â overdue EDD documents, refused or evasive responses to information requests, or unresolved inconsistencies â escalating when cooperation failures persist past defined deadlines.",
+    "window": "event-driven, with rolling 60-day cooperation window",
+    "source": "case-management / KYC remediation system + customer correspondence log",
+    "route": "Tier-1 alert â AML analyst review & EDD gate"
+   }
+  },
+  {
+   "id": "IND-05",
+   "section": "Red Flag Indicators — Child Nutrition Program Fraud",
+   "flag": "A customer is a company or NPO enrolled in a government benefit program that is receiving a significant amount of reimbursements despite limited operations.",
+   "red_flag": "Reimbursement revenue disproportionate to operational footprint",
+   "src_line": 202,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C7",
+   "data_source": "D14",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D14 (Government-program enrollment & eligibility data), not currently held → source data first."
+  },
+  {
+   "id": "IND-06",
+   "section": "Red Flag Indicators — Child Nutrition Program Fraud",
+   "flag": "A customer is a recently established company or NPO enrolled in a government benefit program with a limited online presence.",
+   "red_flag": "Program enrollee with thin/absent web footprint (shell signal)",
+   "src_line": 205,
+   "status": "partial",
+   "data": "available",
+   "capability": "C19",
+   "data_source": "D13",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C19 (Adverse-media / OSINT & web-presence verification); data D13."
+  },
+  {
+   "id": "IND-07",
+   "section": "Red Flag Indicators — Child Nutrition Program Fraud",
+   "flag": "A customer is a company or NPO enrolled in a government benefit program that has minimal to no operating costs other than payments for “consulting fees” and nondescriptive, repetitive invoices (i.e. food supplies).",
+   "red_flag": "No real opex; only consulting-fee outflows + nondescript repetitive food-supply invoices",
+   "src_line": 208,
+   "status": "gap",
+   "data": "partial",
+   "capability": "C10",
+   "data_source": "D5",
+   "build_rec": "BUILD_ENRICH",
+   "rationale": "Gap; requires D5 (Transaction narrative / free-text fields), not currently held → source data first."
+  },
+  {
+   "id": "IND-08",
+   "section": "Red Flag Indicators — Child Nutrition Program Fraud",
+   "flag": "A customer that is a company or NPO enrolled in a government benefit program makes a significant amount of cash withdrawals.",
+   "red_flag": "Program-funded account → high-volume cash withdrawal extraction",
+   "src_line": 212,
+   "status": "partial",
+   "data": "available",
+   "capability": "C5",
+   "data_source": "D2",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C5 (Cash-intensity / cash-placement anomaly detection); data D2."
+  },
+  {
+   "id": "IND-09",
+   "section": "Red Flag Indicators — Child Nutrition Program Fraud",
+   "flag": "A customer with previous fraud convictions is an employee of a company or NPO enrolled in a government benefit program.",
+   "red_flag": "Prior-fraud-conviction principal embedded in program enrollee",
+   "src_line": 215,
+   "status": "partial",
+   "data": "available",
+   "capability": "C19",
+   "data_source": "D13",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C19 (Adverse-media / OSINT & web-presence verification); data D13."
+  },
+  {
+   "id": "IND-10",
+   "section": "Red Flag Indicators — Child Nutrition Program Fraud",
+   "flag": "A customer is an employee of a company or NPO enrolled in a government benefit program that is frequently purchasing or redeeming cashier’s checks for no clear purpose.",
+   "red_flag": "Frequent purposeless cashier's-check purchase/redemption by enrollee employee",
+   "src_line": 218,
+   "status": "gap",
+   "data": "available",
+   "capability": "C11",
+   "data_source": "D2",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D2 (Cash & instrument channel data (ATM/ABM, teller, money orders, prepaid)), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-INSTRUMENT-INTEGRITY-SCREEN",
+    "class": "transaction Â· instrument-level Â· streaming",
+    "features": [
+     "check_image_alteration_score",
+     "serial_number_anomaly_flag",
+     "payee_endorsement_mismatch",
+     "rapid_deposit_then_withdraw_flag",
+     "duplicate_instrument_hash",
+     "issuer_validation_failure"
+    ],
+    "logic": "Flag a negotiable instrument whose image, serial, endorsement, or issuer attributes show signs of counterfeiting or alteration, escalating when funds are made available and rapidly withdrawn before clearing settles.",
+    "window": "per-deposit, with 5-business-day clearing horizon",
+    "source": "check image/deposit capture feed + issuer validation service",
+    "route": "Tier-1 fraud/AML alert â analyst review gate"
+   }
+  },
+  {
+   "id": "IND-11",
+   "section": "Red Flag Indicators — Child Nutrition Program Fraud",
+   "flag": "A customer that is a company or NPO, enrolled in a government benefit program, or the customer’s employee, engages in behavior suggesting efforts to evade the Currency Transaction Report (CTR) reporting requirement (e.g., alters or cancels a transaction when advised a CTR would be filed or engages in structuring with multiple cash transactions for under $10,000), as well as avoiding recordkeeping requirements.",
+   "red_flag": "CTR-trigger evasion: transaction alter/cancel + sub-$10K cash structuring",
+   "src_line": 221,
+   "status": "covered",
+   "data": "available",
+   "capability": "C4",
+   "data_source": "D2",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C4 (Structuring / sub-threshold & reporting-trigger evasion)."
+  },
+  {
+   "id": "IND-12",
+   "section": "Red Flag Indicators — Child Nutrition Program Fraud",
+   "flag": "A customer is a company or NPO enrolled in a government benefit program meant for U.S. citizens and lawful permanent residents that is sending a significant amount of wire transfers to individuals and companies located in foreign jurisdictions.",
+   "red_flag": "Program funds wired out to foreign-jurisdiction individuals/companies",
+   "src_line": 231,
+   "status": "covered",
+   "data": "available",
+   "capability": "C20",
+   "data_source": "D3",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C20 (Cross-border / high-risk-jurisdiction & corridor anomaly detection)."
+  },
+  {
+   "id": "IND-13",
+   "section": "Red Flag Indicators — Child Nutrition Program Fraud",
+   "flag": "A customer is a company or NPO enrolled in a government benefit program that is sending payments abroad for residential and commercial real estate, vehicles, aircraft, airline tickets, and designer clothing.",
+   "red_flag": "Program funds → cross-border luxury/real-estate spend (personal enrichment)",
+   "src_line": 235,
+   "status": "gap",
+   "data": "available",
+   "capability": "C28",
+   "data_source": "D3",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D3 (Wire / ACH / EFT & cross-border payment data (incl. EMT, P2P, remittance)), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-LIFESTYLE-UTILITY-MISMATCH",
+    "class": "entity Â· account-level Â· windowed",
+    "features": [
+     "discretionary_spend_vs_income_ratio",
+     "utility_payment_absence_flag",
+     "sector_spend_anomaly_score",
+     "luxury_spend_share",
+     "multi_property_utility_indicator",
+     "lifestyle_velocity_vs_declared_income"
+    ],
+    "logic": "Flag a customer whose lifestyle, utility, or sector-specific spend is inconsistent with declared income â discretionary or luxury spend exceeding plausible means, or property/utility footprints implying undisclosed assets â escalating when several lifestyle indicators diverge from the income profile.",
+    "window": "rolling 90 days vs declared income profile",
+    "source": "card/account spend ledger + utility/bill-payment feed + KYC income data",
+    "route": "Tier-1 alert â AML analyst review gate"
+   }
+  }
+ ]
+}

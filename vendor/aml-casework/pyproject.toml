@@ -1,0 +1,91 @@
+[project]
+name = "aml-casework"
+version = "0.0.1"
+description = "Pillar 2 — case-investigation -> composition -> SAR/STR-narrative, over Pillar 1 evidence bundles"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.109.2",
+    "pydantic>=2.13.4",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# `tests` is on the path so the shared strata-generation harness (tests/_strata.py — leading underscore
+# so pytest does not collect it) imports as `_strata`. It is the suite's first shared test helper (Phase 5).
+pythonpath = ["src", "tests"]
+# The real-model ClaudeDrafter end-to-end test is marked `integration` and EXCLUDED from the default run
+# (it needs anthropic creds + network + is non-deterministic). The deterministic stub-driven suite is the
+# gate; run the demo with `uv run pytest -m integration`.
+addopts = "-m 'not integration'"
+markers = ["integration: real-model/network test; excluded from the default suite (needs anthropic creds)"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.1.0",
+    "pre-commit>=4.6.0",
+    "pytest>=9.1.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.17",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aml_casework"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+src = ["src"]
+# .claude/ holds vendored kit skill code (not this project's source); data/ is a gitignored cache.
+extend-exclude = [".claude", "data"]
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort
+    "N",     # pep8-naming
+    "UP",    # pyupgrade
+    "B",     # flake8-bugbear
+    "S",     # flake8-bandit (security)
+    "A",     # flake8-builtins
+    "C4",    # flake8-comprehensions
+    "DTZ",   # flake8-datetimez
+    "T20",   # flake8-print (no print())
+    "SIM",   # flake8-simplify
+    "RUF",   # ruff-specific
+]
+ignore = [
+    "S101",  # assert is fine in tests
+]
+
+[tool.ruff.lint.per-file-ignores]
+# S101: assert is the test idiom. T201: the test files double as dependency-free standalone
+# runners (`python3 tests/test_*.py`) whose all-green output is print()-based by design.
+"tests/**" = ["S101", "T201"]
+
+[tool.mypy]
+python_version = "3.11"
+# Explicit target so bare `uv run mypy` has something to check instead of erroring
+# "Missing target module"; also keeps mypy off the vendored .claude/ code.
+files = ["src", "tests"]
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.",
+]
+fail_under = 85

@@ -20,6 +20,9 @@ __pycache__/
 venv/
 .mypy_cache/
 .pytest_cache/
+
+# Phase 67 — the vendored aml-casework venv is BUILT by `make setup`, never committed (the source IS).
+vendor/aml-casework/.venv/
 .ruff_cache/
 
 # Node (not used; guard only)

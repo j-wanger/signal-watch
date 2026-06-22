@@ -44,6 +44,19 @@
 > - Phase 8: Doc true-up + provenance fix (M6 debt) — COMPLETED + accepted
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
+<!-- phase:phase-67-shippable-live-workbench -->
+<!-- gate-log:phase-67 direction=approved delivery=accepted -->
+<!-- status: T1–T4 ALL [x] — DELIVERED + accepted 2026-06-22 (A0 proven in isolation: clone → make setup → signed SAR offline, no sibling) -->
+
+## Phase 67 — Make the LIVE investigator workbench shippable from a bare clone (vendor aml-casework + make setup)
+
+Objective: a recipient who `git clone`s signal-watch runs the FULL live workbench — incl. the DECIDE signed-SAR finale — with NO sibling repo, via `make setup` (model-you-provide for the neural tier). VENDOR a copy of aml-casework into signal-watch + a setup target; the companion still subprocesses it (DISTRIBUTION, not import-coupling). Direction gate accepted 2026-06-22 (all_accept:true); ledger Phase-67; plan [[phases/phase-67-shippable-live-workbench]].
+
+- [x] T1 (the A0 guard) Vendor casework + PROVE the venv builds + an offline stub DECIDE finale runs in TRUE ISOLATION. `scripts/vendor_casework.sh` rsyncs casework's runtime (`src/aml_casework` + `pyproject.toml` + `uv.lock` + README/license; EXCLUDE tests/.venv/.dev-wiki/__pycache__) from `../aml-casework` → `vendor/aml-casework/`; write `vendor/aml-casework/VENDORED_AT` (casework commit 81df91c + local-WIP note + date); `.gitignore` the vendored venv; add a `Makefile` `setup` target (`uv venv` + `uv sync` in `vendor/aml-casework/`). | scope: vendor/aml-casework/**, scripts/vendor_casework.sh, Makefile, .gitignore | success: in an ISOLATED fresh clone (`/tmp`, NO sibling repos), `make setup` builds the casework venv AND a scripted DECIDE consume produces a signed SAR with the STUB drafter — no model, no `../aml-casework`. IF `uv sync` won't build standalone → STOP-and-surface, escalate to a pre-built wheel (the A0 fallback).
+- [x] T2 Wire the companion default to the vendored path (keep the subprocess boundary). `serve_workbench.py` + `serve_chain.py`: default `AML_CASEWORK_DIR` → `vendor/aml-casework` when present, else `../aml-casework`, else GATED; `AML_CASEWORK_PYTHON` → the vendored venv's python when present. NO import of casework. | scope: scripts/serve_workbench.py, scripts/serve_chain.py | success: `serve_workbench.py --selftest` + `serve_chain.py --selftest` green; with `vendor/` present + NO env set the DECIDE finale resolves to the vendored casework; with `vendor/` absent + no sibling → named GATED; `build.py --check all` 8/8 ZERO dist drift; `grep` confirms build.py imports no casework.
+- [x] T3 Docs + the pin/boundary record. README + CLAUDE.md run docs: the live workbench is `git clone && make setup && python3 scripts/serve_workbench.py` (vendored casework, NO sibling); the live-tier prereq (Python ≥3.11 + uv; the offline ship artifacts stay zero-dep); the GATED fallback if `vendor/` is deleted; the vendoring-is-distribution-not-coupling note. Update `docs/case-workbench.md`. | scope: README.md, CLAUDE.md, docs/case-workbench.md, vendor/aml-casework/VENDORED_AT | success: docs state the clone+make-setup live-workbench path + the 3.11/uv prereq + the GATED fallback (grep-able); `VENDORED_AT` records the casework commit.
+- [x] T4 Full regression + the shippability e2e + smoke. Re-run `uv run pytest` + `node tests/*.test.mjs` + all `--selftest`s + `build.py --check all` (8/8 ZERO dist drift, boundary held); re-run the T1 isolation e2e (clone → make setup → offline stub DECIDE → signed SAR) as the shippability proof; add a `tests/smoke-checklist.md` entry for the vendored live-workbench run path. | scope: tests/smoke-checklist.md | success: all suites green; `--check all` 8/8 ZERO drift; the isolation e2e produces a signed SAR offline with no siblings; smoke-checklist updated.
+
 <!-- phase:phase-64-precedent-confidence-gating-engine -->
 <!-- gate-log:phase-64 direction=approved delivery=pending -->
 

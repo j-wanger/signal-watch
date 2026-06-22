@@ -1,0 +1,145 @@
+{
+ "id": "fin-2023-alert001",
+ "advisory": "FIN-2023-ALERT001",
+ "source_md": "data/fincen-alerts/fin-2023-alert001.md",
+ "extraction_quality": "clean",
+ "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+ "indicators": [
+  {
+   "id": "IND-01",
+   "section": "Financial Red Flag Indicators of Human Smuggling",
+   "flag": "Transactions involving multiple wire transfers, cash deposits, or P2P payments from multiple originators from different geographic locations either across (1) the United States, or (2) Mexico and Central America, to one beneficiary located on or around the SW border, with no apparent business purpose.",
+   "red_flag": "Multi-originator geographic funnel-in to one border-area beneficiary (no business purpose)",
+   "src_line": 391,
+   "status": "covered",
+   "data": "available",
+   "capability": "C3",
+   "data_source": "D3",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C3 (Multi-originator funnel-in / fan-out network detection)."
+  },
+  {
+   "id": "IND-02",
+   "section": "Financial Red Flag Indicators of Human Smuggling",
+   "flag": "Deposits made by multiple individuals in multiple locations into a single account, not affiliated with the account holder’s area of residence or work, with no apparent business purpose.",
+   "red_flag": "Multi-individual multi-location deposits into one out-of-area account (funnel-in)",
+   "src_line": 396,
+   "status": "covered",
+   "data": "available",
+   "capability": "C3",
+   "data_source": "D2",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C3 (Multi-originator funnel-in / fan-out network detection)."
+  },
+  {
+   "id": "IND-03",
+   "section": "Financial Red Flag Indicators of Human Smuggling",
+   "flag": "Currency deposits into U.S. accounts without explanation, followed by rapid wire transfers to countries with high migrant flows (e.g., Mexico, Central America), in a manner that is inconsistent with expected customer activity.",
+   "red_flag": "Cash-in → rapid wire-out to high-migrant-flow corridor (pass-through)",
+   "src_line": 400,
+   "status": "covered",
+   "data": "available",
+   "capability": "C2",
+   "data_source": "D3",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C2 (Rapid pass-through / flow-through (receive-and-forward) detection)."
+  },
+  {
+   "id": "IND-04",
+   "section": "Financial Red Flag Indicators of Human Smuggling",
+   "flag": "Frequent exchange of small-denomination for larger-denomination bills by a customer who is not in a cash-intensive industry.",
+   "red_flag": "Small-for-large denomination swaps by non-cash-intensive customer",
+   "src_line": 418,
+   "status": "partial",
+   "data": "available",
+   "capability": "C5",
+   "data_source": "D2",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C5 (Cash-intensity / cash-placement anomaly detection); data D2."
+  },
+  {
+   "id": "IND-05",
+   "section": "Financial Red Flag Indicators of Human Smuggling",
+   "flag": "Multiple customers sending wire transfers to the same beneficiary (who is not a relative, and may be located in the sender’s home country), inconsistent with the customer’s usual business activity and reported occupation.",
+   "red_flag": "Many-senders-to-one-payee wires to non-relative (occupation mismatch)",
+   "src_line": 421,
+   "status": "covered",
+   "data": "available",
+   "capability": "C3",
+   "data_source": "D3",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C3 (Multi-originator funnel-in / fan-out network detection)."
+  },
+  {
+   "id": "IND-06",
+   "section": "Financial Red Flag Indicators of Human Smuggling",
+   "flag": "A customer making significantly greater deposits—including cash deposits—than those of peers in similar professions or lines of business.",
+   "red_flag": "Deposits exceeding professional-peer baseline (peer-revenue anomaly)",
+   "src_line": 425,
+   "status": "gap",
+   "data": "available",
+   "capability": "C7",
+   "data_source": "D1",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D1 (Core transaction monitoring (deposit/account ledger)), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-REVENUE-OPERATIONS-MISMATCH",
+    "class": "entity Â· business-account Â· windowed",
+    "features": [
+     "inflow_vs_declared_revenue_ratio",
+     "inflow_per_employee",
+     "payroll_to_revenue_ratio",
+     "operating_expense_share",
+     "industry_peer_revenue_zscore",
+     "transaction_volume_vs_footprint"
+    ],
+    "logic": "Flag a business account whose transaction inflows are disproportionate to its declared revenue, headcount, payroll, or operating-expense footprint relative to industry peers, escalating when revenue appears decoupled from any observable operational activity.",
+    "window": "rolling 90 days vs declared profile and peer cohort",
+    "source": "business deposit ledger joined to KYC business profile + industry peer benchmarks",
+    "route": "Tier-2 alert â AML analyst review gate"
+   }
+  },
+  {
+   "id": "IND-07",
+   "section": "Financial Red Flag Indicators of Human Smuggling",
+   "flag": "A customer making cash deposits that are inconsistent with the customer’s line of business.",
+   "red_flag": "Cash deposits inconsistent with stated line of business",
+   "src_line": 428,
+   "status": "gap",
+   "data": "available",
+   "capability": "C8",
+   "data_source": "D2",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D2 (Cash & instrument channel data (ATM/ABM, teller, money orders, prepaid)), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-INCOME-ACTIVITY-INCONSISTENCY",
+    "class": "entity Â· account-level Â· windowed",
+    "features": [
+     "inflow_vs_declared_income_ratio",
+     "occupation_expected_volume_deviation",
+     "unexplained_large_credit_count",
+     "source_of_funds_gap_flag",
+     "income_band_peer_zscore",
+     "wealth_velocity_vs_stated_income"
+    ],
+    "logic": "Flag a personal account whose inflow volume or wealth velocity is inconsistent with the customer's declared income, occupation, or stated source of funds, escalating when large credits lack a plausible origin for the customer's profile.",
+    "window": "rolling 90 days vs declared income profile",
+    "source": "personal deposit ledger joined to onboarding income/occupation KYC data",
+    "route": "Tier-1 alert â AML analyst review gate"
+   }
+  },
+  {
+   "id": "IND-08",
+   "section": "Financial Red Flag Indicators of Human Smuggling",
+   "flag": "Extensive use of cash to purchase assets, such as real estate, and to conduct transactions.",
+   "red_flag": "Cash-bought high-value assets / real-estate placement",
+   "src_line": 430,
+   "status": "partial",
+   "data": "available",
+   "capability": "C5",
+   "data_source": "D2",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C5 (Cash-intensity / cash-placement anomaly detection); data D2."
+  }
+ ]
+}

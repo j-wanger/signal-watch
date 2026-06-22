@@ -56,8 +56,20 @@ STATUS_PATH = Path(e2e_chain_check.STATUS_PATH)
 BADGE = "Illustrative data & outputs"
 
 # Where the casework consume CLI lives + how to invoke it. Subprocess only — never imported.
-# Overridable so a non-default checkout still works; the walkthrough documents these.
-CASEWORK_DIR = Path(os.environ.get("AML_CASEWORK_DIR", str(ROOT.parent / "aml-casework")))
+# Resolution (Phase 67 — shippable from a bare clone): $AML_CASEWORK_DIR override > the VENDORED copy
+# (vendor/aml-casework, present after `make setup` — the shippable default) > the ../aml-casework sibling
+# (a dev checkout). Neither present → the GATED message fires honestly. Overridable for any layout.
+def _resolve_casework_dir() -> Path:
+    env = os.environ.get("AML_CASEWORK_DIR")
+    if env:
+        return Path(env)
+    vendored = ROOT / "vendor" / "aml-casework"
+    if (vendored / "src" / "aml_casework").is_dir():
+        return vendored
+    return ROOT.parent / "aml-casework"
+
+
+CASEWORK_DIR = _resolve_casework_dir()
 
 
 class RunError(ValueError):

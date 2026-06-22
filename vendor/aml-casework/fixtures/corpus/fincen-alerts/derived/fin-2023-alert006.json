@@ -1,0 +1,116 @@
+{
+ "id": "fin-2023-alert006",
+ "advisory": "FIN-2023-ALERT006",
+ "source_md": "data/fincen-alerts/fin-2023-alert006.md",
+ "extraction_quality": "clean",
+ "provenance": "LLM-backend-derived (this session, no API key) + deterministic-checked — NOT a ship typology config. build_rec follows the cover×data matrix (build_rec_category); every indicator's flag is quote-grounded (verbatim) in the source md within the red-flag region (Phase 16). Coverage/data values are ILLUSTRATIVE (vision demo). FinCEN Alert, public domain (17 U.S.C. 105).",
+ "indicators": [
+  {
+   "id": "IND-01",
+   "section": "Red flag indicators",
+   "flag": "A customer or a customer’s counterparty conducts transactions with OFAC-designated entities and individuals, or transactions that contain a nexus to identifiers listed for OFAC-designated entities and individuals, to include, email addresses, physical addresses, phone numbers, or passport numbers, or virtual currency addresses.",
+   "red_flag": "Counterparty match to OFAC-designated entity or its identifiers (email / address / phone / passport / VC wallet nexus)",
+   "src_line": 87,
+   "status": "covered",
+   "data": "available",
+   "capability": "C18",
+   "data_source": "D11",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C18 (Sanctions / watchlist screening)."
+  },
+  {
+   "id": "IND-02",
+   "section": "Red flag indicators",
+   "flag": "Information included in a transaction between customers indicates support for terrorist campaigns.",
+   "red_flag": "Transaction memo / narrative signals terrorist-campaign support",
+   "src_line": 92,
+   "status": "gap",
+   "data": "partial",
+   "capability": "C10",
+   "data_source": "D5",
+   "build_rec": "BUILD_ENRICH",
+   "rationale": "Gap; requires D5 (Transaction narrative / free-text fields), not currently held → source data first."
+  },
+  {
+   "id": "IND-03",
+   "section": "Red flag indicators",
+   "flag": "A customer conducts transactions with a Money Services Business (MSB) or other financial institution, including one that offers services in virtual currency, operates in higher-risk jurisdictions tied to Hamas activity, and is reasonably believed or suspected to have lax customer due diligence (CDD) requirements, opaque ownership, or otherwise fails to comply with anti-money laundering/combatting the financing of terrorism (AML/CFT) best practices.",
+   "red_flag": "Flow to weak-AML MSB / VASP in Hamas-linked high-risk jurisdiction",
+   "src_line": 95,
+   "status": "covered",
+   "data": "available",
+   "capability": "C20",
+   "data_source": "D17",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C20 (Cross-border / high-risk-jurisdiction & corridor anomaly detection)."
+  },
+  {
+   "id": "IND-04",
+   "section": "Red flag indicators",
+   "flag": "A customer conducts transactions that originate with, are directed to, or otherwise involve entities that are shell corporations, general “trading companies,” or other companies that have a nexus with Iran or other Iran-supported terrorist groups, such as Hizballah and Palestine Islamic Jihad.",
+   "red_flag": "Shell / generic \"trading company\" counterparty with Iran-proxy nexus",
+   "src_line": 121,
+   "status": "gap",
+   "data": "available",
+   "capability": "C15",
+   "data_source": "D8",
+   "build_rec": "BUILD_NOW",
+   "rationale": "Gap; requires D8 (KYC / CDD & beneficial-ownership data), not currently held → source data first.",
+   "build_logic": {
+    "signal_name": "S-SHELL-NOMINEE-NETWORK",
+    "class": "network Â· ownership-graph Â· windowed",
+    "features": [
+     "shared_address_director_overlap",
+     "ubo_opacity_score",
+     "incorporation_recency_flag",
+     "no_observable_operations_flag",
+     "circular_ownership_indicator",
+     "nominee_director_reuse_count"
+    ],
+    "logic": "Flag an entity exhibiting shell or front-company markers â opaque or circular beneficial ownership, shared registered addresses or directors, recent incorporation with no observable operations â escalating when nominees or addresses recur across a cluster of related entities.",
+    "window": "rolling 90 days over the ownership/address graph",
+    "source": "corporate registry + KYC beneficial-ownership records + entity-resolution graph",
+    "route": "Tier-2 network alert â AML investigations gate"
+   }
+  },
+  {
+   "id": "IND-05",
+   "section": "Red flag indicators",
+   "flag": "A customer that is a charitable organization or nonprofit organization (NPO)9 solicits donations but does not appear to provide any charitable services or openly supports Hamas’s terrorist activity or operations.  In some cases, these organizations may post on social media platforms or encrypted messaging apps to solicit donations, including in virtual currency.",
+   "red_flag": "NPO donation-solicitation with no charitable output / pro-Hamas web presence",
+   "src_line": 126,
+   "status": "partial",
+   "data": "available",
+   "capability": "C19",
+   "data_source": "D13",
+   "build_rec": "ENHANCE",
+   "rationale": "Partially covered by C19 (Adverse-media / OSINT & web-presence verification); data D13."
+  },
+  {
+   "id": "IND-06",
+   "section": "Red flag indicators",
+   "flag": "A customer that is a charitable organization or NPO receives large donations from an unknown source over a short period of time and then sends significant wire transfers or checks to other charitable organizations or NPOs.",
+   "red_flag": "NPO rapid donation-in → wire / check pass-through to other NPOs (charity-layering)",
+   "src_line": 131,
+   "status": "covered",
+   "data": "available",
+   "capability": "C2",
+   "data_source": "D3",
+   "build_rec": "COVERED",
+   "rationale": "Already covered by C2 (Rapid pass-through / flow-through (receive-and-forward) detection)."
+  },
+  {
+   "id": "IND-07",
+   "section": "Red flag indicators",
+   "flag": "A customer conducts transactions with known or suspected virtual currency addresses tied to terrorism or terrorist financing donation campaigns.",
+   "red_flag": "VC transfer to wallet flagged in terror-financing donation campaign",
+   "src_line": 135,
+   "status": "gap",
+   "data": "insufficient",
+   "capability": "C21",
+   "data_source": "D7",
+   "build_rec": "SOURCE_DATA",
+   "rationale": "Gap; requires D7 (Virtual-currency / blockchain analytics), not currently held → source data first."
+  }
+ ]
+}

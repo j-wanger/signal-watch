@@ -36,12 +36,13 @@ the clutter → signals → decide arc over a vendored case population, with an 
 cross-pillar signed-SAR finale.
 
 > **Shippable vs companion — the whole dependency story in one place.** The **five ship artifacts above are
-> the deliverable, and are fully self-contained**: a browser opens them, zero external dependencies (verified
-> by cloning into an isolated dir with no sibling repos present). The **workbench is a companion dev/presenter
-> tool, not a ship target** — and only its final **DECIDE** beat depends on the sibling `../aml-casework` repo;
-> if that's absent, DECIDE fails closed with a named "GATED" message (never a crash) and the rest of the arc
-> still runs. `build.py` never imports a sibling. There is **no other cross-repo dependency** — the case data
-> the workbench reads is committed (`../aml-substrate` is needed only to *regenerate* it, never to run it).
+> the deliverable, fully self-contained**: a browser opens them, zero external dependencies (verified by an
+> isolated clone with no sibling repos present). The **investigator workbench is a companion**, but it too is
+> now shippable from a bare clone — its DECIDE signed-SAR finale runs `aml-casework`, which is **vendored** into
+> `vendor/aml-casework/` and built by `make setup` (no sibling repo; offline; a model is optional, see below).
+> `build.py` never imports a sibling and the offline artifacts are byte-frozen, so vendoring is a *distribution*
+> choice, not coupling. The only remaining sibling touch is `../aml-substrate`, needed solely to *regenerate*
+> the committed case data — never to run the demo.
 
 ## Run it — the offline demos (no build needed)
 
@@ -62,35 +63,39 @@ python3 scripts/build.py all          # or a single target: fentanyl | trade-bas
 python3 scripts/build.py --check all  # drift guard — committed dist == a fresh build (8/8, byte-identical)
 ```
 
-## Run it — the companion servers (dev / authoring-time)
+## Run it — the companion servers (dev / presenter-time)
 
-Each is a thin **stdlib** server on `localhost` that reads committed data and **persists nothing**.
+Each is a thin server on `localhost` that reads committed data and **persists nothing**.
+
+The **investigator workbench** has a one-time setup — its DECIDE signed-SAR finale runs the **vendored**
+`aml-casework` pipeline (`vendor/aml-casework/`), so build that venv once (needs **Python ≥3.11 + uv**, and
+network the first time):
 
 ```sh
-python3 scripts/serve_workbench.py     # → http://localhost:8030   the investigator workbench (what you most likely want)
+make setup                          # builds vendor/aml-casework/.venv (the DECIDE finale) — once
+python3 scripts/serve_workbench.py  # → http://localhost:8030   the investigator workbench
+```
+
+Without `make setup`, the workbench still runs clutter → signals → GATHER on the stdlib stub; only the DECIDE
+finale is GATED (a named message, never a crash). The other three companions are pure **stdlib**, no setup:
+
+```sh
 python3 scripts/serve_chain.py         # → http://localhost:8020   the 3-pillar chain workbench (its precursor)
 python3 scripts/serve_corpus.py        # → http://localhost:8010   live corpus derivation (paste an advisory md)
 .venv/bin/python scripts/serve_news.py # → http://localhost:8000   live news extraction (.venv adds persistence/URL mode)
 ```
 
-The clutter → signals → GATHER beats run on a **deterministic stub with no model**. Two things go beyond plain
-stdlib — both **set server-side** (the browser never sees credentials):
-
-- **LIVE neural mode** *(optional, all companions)* — a local OpenAI-compatible model on `127.0.0.1:8080`:
-  `export OPENAI_BASE_URL=http://127.0.0.1:8080/v1` (e.g. a llama-server with a Qwen ~30B-A3B GGUF). Without
-  it, GATHER / extraction fall back to the deterministic stub with a named note. The offline ship artifacts
-  carry no model code at all.
-- **The workbench DECIDE finale** *(the signed-SAR step)* — subprocesses the sibling **`../aml-casework`** repo
-  (override with `$AML_CASEWORK_DIR`). Required in **both stub and live modes** — the model backend only
-  chooses the SAR *prose*; the shaping/signing/verifying is the sibling's job and has **no local fallback**.
-  Absent → DECIDE returns a named **"GATED"** message; clutter → signals → GATHER are unaffected. *(The slice
-  re-vendor is the only other sibling touch — it needs `../aml-substrate` — but that regenerates committed
-  data; running the demo never needs it.)*
+**LIVE neural mode** *(optional, all companions)* — set a model **server-side** (the browser never sees it):
+`export OPENAI_BASE_URL=http://127.0.0.1:8080/v1` (a local llama-server with a Qwen ~30B-A3B GGUF), or an
+Anthropic key for the DECIDE prose. Without one, GATHER and the SAR narrative fall back to the deterministic
+stub with a named note — and the casework pipeline still shapes / signs / verifies the SAR **offline**. The
+vendored casework copy is pinned in `vendor/aml-casework/VENDORED_AT`; refresh it with `make vendor-refresh`.
 
 Walkthroughs: `docs/case-workbench.md`, `docs/chain-workbench.md`, `docs/corpus-live.md`, `docs/news-live.md`.
 
-> Note: `uv` / a `.venv` is **only** for `markitdown` (the PDF→md authoring pipeline), the DuckDB news
-> store, and the `uv run pytest` test umbrella — never to run a demo.
+> Note: the **offline ship artifacts** need nothing but a browser. `uv` is for `make setup` (the live
+> workbench's vendored casework venv), the DuckDB news store, the `markitdown` PDF→md authoring pipeline, and
+> `uv run pytest` — never to open a ship demo.
 
 ## Test
 

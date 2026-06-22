@@ -259,9 +259,11 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   resolved CROSS-PLATFORM (`serve_chain.casework_python`/`casework_corpus_env`). The DECIDE consume is still a
   SUBPROCESS file-handoff — build.py NEVER imports casework, the 8 dists stay byte-frozen (vendoring is
   DISTRIBUTION, not coupling). Without setup the DECIDE finale is a named GATED stage; the rest of the arc is
-  unaffected. LIVE neural (optional, server-side only, never in the browser §4.5): a model on
-  `127.0.0.1:8080` (`OPENAI_BASE_URL`) / an Anthropic key drives the GATHER loop + DECIDE prose, else the stub
-  (the casework pipeline still shapes/signs/verifies offline). Live tier needs Python ≥3.11 + uv-or-pip (the
+  unaffected. LIVE neural (optional, server-side only, never in the browser §4.5): the `openai` backend
+  ALWAYS-AVAILABLE, DEFAULTING to a local model at `127.0.0.1:8080` (NO env — `OPENAI_BASE_URL` only OVERRIDES
+  the host/port; the auto-default stays stub unless it's set or a claude key) → pick it to drive the GATHER
+  loop + DECIDE prose, else the stub (the casework pipeline still shapes/signs/verifies offline; no model →
+  fast TCP-refuse → stub + a "no model at :8080" note). Live tier needs Python ≥3.11 + uv-or-pip (the
   offline ship artifacts stay zero-dep, stdlib-3.10; `make setup` is a POSIX shortcut for the script). Doc:
   `docs/case-workbench.md`. Precursor the CHAIN workbench: `python3 scripts/serve_chain.py` → http://localhost:8020
   (`docs/chain-workbench.md`). Companion ports: news 8000 · corpus 8010 · chain 8020 · workbench 8030.

@@ -89,9 +89,11 @@ python3 scripts/serve_corpus.py        # → http://localhost:8010   live corpus
 .venv/bin/python scripts/serve_news.py # → http://localhost:8000   live news extraction (.venv adds persistence/URL mode)
 ```
 
-**LIVE neural mode** *(optional, all companions)* — set a model **server-side** (the browser never sees it):
-`export OPENAI_BASE_URL=http://127.0.0.1:8080/v1` (a local llama-server with a Qwen ~30B-A3B GGUF), or an
-Anthropic key for the DECIDE prose. Without one, GATHER and the SAR narrative fall back to the deterministic
+**LIVE neural mode** *(optional, all companions)* — the **openai** backend already targets a local model at
+**`127.0.0.1:8080`** by default, so just start your model there and **pick "openai"** in the workbench — no env
+needed. Set `OPENAI_BASE_URL` **only to override** the host/port (e.g. a different port), or set an Anthropic
+key for the "claude" backend — both **server-side** (the browser never sees them). Without any model, GATHER
+and the SAR narrative fall back to the deterministic
 stub with a named note — and the casework pipeline still shapes / signs / verifies the SAR **offline**. The
 vendored casework copy is pinned in `vendor/aml-casework/VENDORED_AT`; refresh it (POSIX maintainer) with
 `scripts/vendor_casework.sh`, which rebuilds the wheel.

@@ -526,15 +526,14 @@ def resolve_gather_backend(requested: str | None, env: dict | None = None) -> di
     casework drafter subprocess is a different path) -> stub+note. NAME + note only; never an endpoint."""
     e = env if env is not None else os.environ
     req = (requested or "").strip().lower() or None
-    has_openai = bool(e.get("OPENAI_BASE_URL"))
-    if req in (None, "openai") and has_openai:
+    # openai is always usable (it defaults to the local model at 127.0.0.1:8080 — see call_openai; no env
+    # needed). It is the effective transport only when EXPLICITLY picked, or when OPENAI_BASE_URL is set;
+    # an un-named default stays the stub so a no-model box isn't aimed at a dead :8080 every gather.
+    if req == "openai" or (req is None and e.get("OPENAI_BASE_URL")):
         return {"requested": req, "effective": "openai", "note": None}
     if req in ("claude", "opencode"):
         return {"requested": req, "effective": "stub",
                 "note": f"backend '{req}' is not wired for the gather loop — using the deterministic stub"}
-    if req == "openai" and not has_openai:
-        return {"requested": req, "effective": "stub",
-                "note": "openai unavailable server-side (no OPENAI_BASE_URL) — using the deterministic stub"}
     return {"requested": req, "effective": "stub", "note": None}
 
 
@@ -558,9 +557,7 @@ def call_openai(messages: list, env: dict | None = None, timeout: int = 60) -> s
     """Non-streaming POST to {OPENAI_BASE_URL}/chat/completions (each agent turn is small — no streaming/
     idle-gap machinery). Raises a SANITIZED GatherError (class name only) so no host/url can reach a stage."""
     e = env if env is not None else os.environ
-    base = (e.get("OPENAI_BASE_URL") or "").rstrip("/")
-    if not base:
-        raise GatherError("no OPENAI_BASE_URL configured server-side")
+    base = (e.get("OPENAI_BASE_URL") or "http://127.0.0.1:8080/v1").rstrip("/")   # default to the local model
     body = json.dumps({"model": e.get("OPENAI_MODEL", "local"), "messages": messages,
                        "temperature": 0, "stream": False}).encode("utf-8")
     headers = {"Content-Type": "application/json"}

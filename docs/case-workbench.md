@@ -197,8 +197,9 @@ python scripts/serve_workbench.py   # http://localhost:8030 — the FULL arc inc
 #   aml-casework is VENDORED into vendor/aml-casework/ (src + a cross-platform WHEEL under dist/ + its pinned
 #   corpus snapshot under fixtures/corpus/). resolution: AML_CASEWORK_DIR > vendored > ../aml-casework > GATED;
 #   the venv-python + SIGNAL_WATCH_CORPUS are resolved cross-platform (serve_chain.casework_python/_corpus_env).
-#   default drafter = stub (offline). For the neural SAR prose / GATHER, set ANTHROPIC_API_KEY|ANTHROPIC_AUTH_TOKEN
-#   or OPENAI_BASE_URL SERVER-SIDE — the browser sends a backend NAME only, creds never cross the wire (§4.5).
+#   auto-default drafter = stub (offline). For neural: the "openai" backend DEFAULTS to a local model at
+#   127.0.0.1:8080 (just start one + pick openai — NO env; OPENAI_BASE_URL only OVERRIDES host/port), or set
+#   ANTHROPIC_API_KEY|ANTHROPIC_AUTH_TOKEN for "claude" — SERVER-SIDE; the browser sends a NAME only (§4.5).
 #   refresh the vendored copy + rebuild the wheel (POSIX maintainer): scripts/vendor_casework.sh
 ```
 

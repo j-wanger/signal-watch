@@ -217,6 +217,7 @@ def casework_consume_wb(bundle_path: Path, out_path: Path, drafter: str) -> dict
     env = dict(os.environ)
     env["PYTHONPATH"] = str(src) + os.pathsep + env.get("PYTHONPATH", "")
     env.update(sc.casework_corpus_env())
+    env.setdefault("OPENAI_BASE_URL", sc.DEFAULT_OPENAI_BASE)   # the openai drafter defaults to the local model
     cmd = [py, "-m", "aml_casework.ingest", str(bundle_path), "--out", str(out_path), "--drafter", drafter]
     try:
         proc = subprocess.run(cmd, cwd=str(sc.CASEWORK_DIR), env=env, capture_output=True,
@@ -612,10 +613,13 @@ def selftest() -> int:
         except RunError:
             pass
 
-    # NO creds/endpoints reach the browser (§4.5) — the served config carries names + booleans only
-    secret = {"ANTHROPIC_API_KEY": "sk-SECRET-DEAD", "OPENAI_BASE_URL": "http://127.0.0.1:8080/v1"}
+    # NO creds/endpoints reach the browser (§4.5) — the served config carries names + booleans only.
+    # Probe with a DISTINCTIVE configured endpoint (NOT the generic 127.0.0.1:8080 default, which now
+    # legitimately appears in the page's help text) so this tests the real invariant: the operator's
+    # CONFIGURED cred/endpoint never reaches the page.
+    secret = {"ANTHROPIC_API_KEY": "sk-SECRET-DEAD", "OPENAI_BASE_URL": "http://leak-probe.example:59999/v1"}
     blob = json.dumps(live_config(secret)) + render_page(live_config(secret))
-    for leak in ("sk-SECRET-DEAD", "127.0.0.1:8080"):
+    for leak in ("sk-SECRET-DEAD", "leak-probe.example:59999"):
         assert leak not in blob, f"server-side cred/endpoint leaked into the page: {leak}"
 
     # the LIVE finale OFFLINE: casework consume STUBBED, e2e verify REAL (pillar-status snapshot+restored)
@@ -691,12 +695,13 @@ def selftest() -> int:
         failures.append("a gather run must persist NOTHING — data/osint/corpus.json changed on disk")
 
     # §4.5: NO server-side cred/endpoint reaches the browser via ANY gather NDJSON stage OR the done result
-    gsecret = {"ANTHROPIC_API_KEY": "sk-SECRET-DEAD", "OPENAI_BASE_URL": "http://127.0.0.1:8080/v1"}
+    # (distinctive endpoint, not the generic 127.0.0.1:8080 default — see the §4.5 page-leak note above)
+    gsecret = {"ANTHROPIC_API_KEY": "sk-SECRET-DEAD", "OPENAI_BASE_URL": "http://leak-probe.example:59999/v1"}
     gsec_stages = []
     gsec = run_gather(mule_id, backend="claude", env=gsecret,
                       on_stage=lambda s, **kw: gsec_stages.append({"stage": s, **kw}))
     gblob = json.dumps(gsec_stages, ensure_ascii=False) + json.dumps(gsec, ensure_ascii=False)
-    for leak in ("sk-SECRET-DEAD", "127.0.0.1:8080"):
+    for leak in ("sk-SECRET-DEAD", "leak-probe.example:59999"):
         if leak in gblob:
             failures.append(f"gather leaked a server-side cred/endpoint into a stage/result: {leak}")
 
@@ -730,8 +735,9 @@ def main() -> int:
     drafter = default_backend()
     print(f"[serve_workbench] investigator workbench on http://localhost:{args.port}/  "  # noqa: T201
           f"(drafter={drafter}, {len(load_index().get('cases', []))} cases)")
-    print(f"[serve_workbench] {'LIVE neural SAR draft available' if drafter != 'stub' else 'no key — deterministic stub draft'}; "  # noqa: T201
-          "nothing is persisted; the offline dists stay byte-frozen. Ctrl-C to stop.")
+    print(f"[serve_workbench] backends: {', '.join(available_backends())} "  # noqa: T201
+          f"(openai → 127.0.0.1:8080 by default — pick it; set OPENAI_BASE_URL to override, or a claude key; "
+          f"auto-default={drafter}). Nothing persisted; offline dists byte-frozen. Ctrl-C to stop.")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

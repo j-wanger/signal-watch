@@ -194,12 +194,19 @@ _BACKEND_ENV = {
     "opencode": ("OPENCODE_SERVE_URL", "OPENCODE_BASE_URL"),
 }
 
+# A local OpenAI-compatible model is conventionally on this port, so `openai` needs NO env to be usable —
+# OPENAI_BASE_URL only OVERRIDES the host/port. (A localhost URL is not a secret; §4.5 still holds — the
+# browser never sees it.) If no model is actually listening, the run fails fast (TCP refused) and the stub
+# takes over with a clear "no model at <this>" note — never a silent stub-as-neural.
+DEFAULT_OPENAI_BASE = "http://127.0.0.1:8080/v1"
+
 
 def backend_available(name: str, env: dict | None = None) -> bool:
-    """Is `name` usable given the SERVER-SIDE env? stub always; a neural backend iff its endpoint/cred
-    env is present (only this boolean ever leaves the server — never the value)."""
+    """Is `name` usable given the SERVER-SIDE env? stub always; openai always (it has a built-in default
+    localhost endpoint — no env required); claude/opencode iff their endpoint/cred env is present (only
+    this boolean ever leaves the server — never the value)."""
     e = env if env is not None else os.environ
-    if name == "stub":
+    if name in ("stub", "openai"):
         return True
     return any(e.get(k) for k in _BACKEND_ENV.get(name, ()))
 
@@ -210,11 +217,17 @@ def available_backends(env: dict | None = None) -> list:
 
 
 def default_backend(env: dict | None = None) -> str:
-    """The auto-default when the browser names none: the first AVAILABLE neural backend (claude →
-    openai → opencode), else stub. Preserves Phase-56 behaviour (claude iff a key/token, else stub)."""
-    for b in ("claude", "openai", "opencode"):
-        if backend_available(b, env):
-            return b
+    """The auto-default when the browser names none: claude (if a key/token), else openai ONLY IF
+    OPENAI_BASE_URL is EXPLICITLY set, else opencode (if wired), else stub. openai is always one-CLICK
+    available (backend_available), but it is NOT the silent auto-default unless the operator pointed at a
+    model — so a box with no model isn't auto-aimed at a dead :8080 on every action (it stays clean stub)."""
+    e = env if env is not None else os.environ
+    if backend_available("claude", e):
+        return "claude"
+    if e.get("OPENAI_BASE_URL"):
+        return "openai"
+    if backend_available("opencode", e):
+        return "opencode"
     return "stub"
 
 
@@ -258,6 +271,7 @@ def casework_consume(bundle_path: Path, out_path: Path, drafter: str) -> dict:
     env = dict(os.environ)
     env["PYTHONPATH"] = str(src) + os.pathsep + env.get("PYTHONPATH", "")
     env.update(casework_corpus_env())
+    env.setdefault("OPENAI_BASE_URL", DEFAULT_OPENAI_BASE)   # the openai drafter defaults to the local model
     cmd = [py, "-m", "aml_casework.ingest", str(bundle_path),
            "--out", str(out_path), "--drafter", drafter]
     try:
@@ -537,16 +551,18 @@ def selftest() -> int:
     assert backend_available("claude", {"ANTHROPIC_API_KEY": "sk-x"})         # or an API key
     assert not backend_available("claude", {})
     assert backend_available("openai", {"OPENAI_BASE_URL": "http://127.0.0.1:8080/v1"})
-    assert not backend_available("openai", {})
+    assert backend_available("openai", {})         # openai ALWAYS usable — it defaults to 127.0.0.1:8080 (no env)
     assert backend_available("opencode", {"OPENCODE_SERVE_URL": "http://127.0.0.1:4096"})
     assert not backend_available("opencode", {})
-    assert available_backends({}) == ["stub"]
+    assert available_backends({}) == ["stub", "openai"]    # openai always selectable; claude/opencode need their env
     assert available_backends({"OPENAI_BASE_URL": "http://x/v1"}) == ["stub", "openai"]
 
     # back-compat auto-default (Phase-56): key present -> claude, absent -> stub
     assert drafter_for_env({"ANTHROPIC_API_KEY": "sk-x"}) == "claude"
-    assert drafter_for_env({}) == "stub"
-    assert default_backend({"OPENAI_BASE_URL": "http://x/v1"}) == "openai"   # first available neural
+    assert drafter_for_env({}) == "stub"                                    # openai is one-click, NOT the silent
+    assert default_backend({}) == "stub"                                    #   auto-default without an explicit URL
+    assert default_backend({"OPENAI_BASE_URL": "http://x/v1"}) == "openai"   # explicit URL -> auto-default openai
+    assert resolve_backend("openai", {})["effective"] == "openai"           # picked openai w/ no env still runs (defaults :8080)
 
     # name pass-through + HONEST fallback (never a crash, never a silent neural->neural switch)
     full = {"ANTHROPIC_API_KEY": "sk-x", "OPENAI_BASE_URL": "http://x/v1"}

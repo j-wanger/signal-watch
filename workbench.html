@@ -740,7 +740,9 @@ function stageBody(key){
     const fellBack=(BACKEND&&BACKEND!=='stub'&&eff==='stub');   // a model was picked but the stub ran
     const why=avail.indexOf(BACKEND)<0
       ? `is not configured on this server — set ${esc(envHint)} server-side and relaunch to enable it`
-      : 'did not run (the live draft failed server-side) — see the note below';
+      : (BACKEND==='openai'
+          ? 'did not run — is a model serving at 127.0.0.1:8080? (set OPENAI_BASE_URL to point elsewhere)'
+          : 'did not run (the live draft failed server-side) — see the note below');
     const unavail=fellBack?`<div class="srvna">⚠ <b>${esc(backendLabel(BACKEND))}</b> ${why}. Ran the deterministic stub instead.</div>`:'';
     const note=d.note?`<div style="color:var(--signal);font-family:var(--mono);font-size:11px;margin-top:6px">↳ ${esc(d.note)}</div>`:'';
     const viols=(d.blocking_violations||[]);

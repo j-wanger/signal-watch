@@ -413,7 +413,7 @@ function visibleQueue(){
 }
 function groundsTag(c){
   if(c.grounds_e2e===true) return '<span style="color:var(--green)" title="casework signs end-to-end">✓ grounds</span>';
-  if(c.grounds_e2e===false) return '<span style="color:var(--rose)" title="casework refuses — fails closed">⊘ won\'t sign</span>';
+  if(c.grounds_e2e===false) return `<span style="color:var(--rose)" title="${esc(c.e2e_note||'casework refuses — fails closed')}">⊘ won't sign</span>`;
   return '';
 }
 function qcardHTML(c){
@@ -811,7 +811,12 @@ function determinePanelHTML(){
   let verdict='';
   if(det&&det.error){ verdict=`<div class="err"><b>Determination failed</b>${esc(det.error)}</div>`; }
   else if(d){
-    if(d.verdict==='determination') verdict=`<div class="detv yes">DETERMINATION · ${esc(res.named_risk||'risk named')} — the evidence is sufficient (mechanism + corroborating legs + named risk + no unrebutted mitigation).</div>`;
+    if(d.verdict==='determination'){
+      const basis=d.crime_type==='kyc_integrity'
+        ? 'the KYC-integrity mechanism + a named predicate risk'
+        : 'mechanism + corroborating legs + named risk + no unrebutted mitigation';
+      verdict=`<div class="detv yes">DETERMINATION · ${esc(res.named_risk||'risk named')} — the evidence is sufficient (${esc(basis)}).</div>`;
+    }
     else verdict=`<div class="detv no">NEEDS MORE INFO — a determination is not yet licensed. Gaps that name what to gather, or what signal to build (the §12 loop):<ul class="dgaps">${(d.missing||[]).map(m=>`<li>${esc(m)}</li>`).join('')}</ul></div>`;
   }
   // the §12 DISCOVERY-LOOP brief: the unmet, NON-gatherable atoms → signals/data to BUILD in aml-substrate

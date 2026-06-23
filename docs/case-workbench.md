@@ -175,18 +175,19 @@ ZERO catch-rate / precision / lift / % number anywhere.
 
 ## Coverage is MEASURED, not assumed (the cross-pillar finding)
 
-The headline coverage number — **107 of 342 cases ground end-to-end** (Phase 71's merged v0.3 slice;
-was 99/294 in Phase 66, 57/200 in Phase 63) — is **measured**, not a capability
+The headline coverage number — **128 of 355 cases ground end-to-end** (Phase 72's C14/kyc consume; was
+107/342 in Phase 71, 99/294 in Phase 66, 57/200 in Phase 63) — is **measured**, not a capability
 proxy: `curate_workbench_cases.py --measure-casework` runs aml-casework's deterministic stub over every
 vendored bundle and records `grounds_e2e` per case.
 
-The gradient is the finding: **1-cap 16/17 sign, but 4-cap 5/56 and 5-cap 0/4.** The more composed the
-case, the more likely casework **refuses**. The cause is a real **substrate↔casework C3/C15 replay
-divergence**: the substrate's C3 is fan-**in** (funnel receipts) but casework's C3 replay checks
-fan-**out**; the C15 shell thresholds disagree. casework@c6d8401 is the oracle — **the verifier is never
-loosened**; the refusal is surfaced honestly as the `e2e_note` and demoed as the fail-closed climax. The
-composed-case frontier is real cross-pillar engineering (a C3/C15 contract alignment), deferred to a
-sibling-repo phase.
+The gradient is the finding: **1-cap 42/48 sign, but 6-cap 0/6.** The more composed the case, the more
+likely casework **refuses** — a real **substrate↔casework C3/C15 replay divergence**: the substrate's C3
+is fan-**in** (funnel receipts) but casework's C3 replay checks fan-**out**; the C15 shell thresholds
+disagree. (Phase 72 adds a second, distinct fail-closed class inside the 1-cap band: a purely **txn-less
+C14 party-leaf** refused at casework's no-transactions contract — the kyc sign frontier above.)
+casework@bf15535 is the oracle — **the verifier is never loosened**; each refusal is surfaced honestly as
+the `e2e_note` and demoed as the fail-closed climax. The composed-case frontier is real cross-pillar
+engineering (a C3/C15 contract alignment), deferred to a sibling-repo phase.
 
 ## Run it
 
@@ -259,29 +260,61 @@ signal-watch adopts aml-substrate's **contract v0.3** slice (the substrate's Pha
   ownership-weighted network on the case page (`boGraphHTML`, reusing `liveGraphLayout`; ownership as **"N
   pct"**, never "%"). This is the **real** emitted network the synthetic GATHER OSINT corpus stood in for.
 
-**Deferred (still substrate-emission gaps).** `kyc_integrity` end-to-end is **not** reachable here: the
-substrate **deliberately non-emits C14** (`cli.py` — "C8-ONLY (C26/C14 deliberate non-emission)"), so no kyc
-case reaches the consume path; likewise **C1** (anticipated-activity, a measured null at the substrate) and
-broader **C7**. Those stay named in the determination's `signal_brief` — a substrate-emission + casework-C14-
-verifier follow-on, not signal-watch-local (the A5 deferred-verifier boundary). Governor unchanged: this is
-determination-evidence **breadth** + network richness, **never** a catch-rate / detection-lift claim.
+## The C14 kyc consume + the §12 KYC loop closes (Phase 72)
+
+signal-watch CONSUMES aml-substrate's **Phase-26 C14 KYC-integrity emission** (re-pinned `aml-substrate@f15c241`;
+the vendored casework moves to `aml-casework@bf15535` — its Phase-14 broadened C14 grounding; the casework pin is
+now READ from `vendor/aml-casework/VENDORED_AT`, never hardcoded). What landed:
+
+- **The §12 KYC loop closes from a real signal.** A **C14-PURE** customer (fires C14 with no ML capability
+  co-firing) classifies `kyc_integrity` and reaches a determination from **KYC-A1 — the C14 mechanism ALONE**
+  (the kyc profile needs mechanism + **0** corroborating legs; the human still names the predicate risk). The
+  committed slice carries **6** kyc cases; all determine. The emitted population holds **727** C14-pure customers.
+- **The dual-map is correct, not a firewall.** A customer with laundering signals **and** a source-of-funds gap
+  classifies `money_laundering` (C14 lights ML-A7, the source-of-funds leg) — the SoF gap corroborates the ML
+  case, it is not a separate kyc filing. So the per-customer merge folding C14 into an ML customer is **right**;
+  no curate firewall was needed (the planned curate-firewall task was a **measured no-op**). The C14 population
+  splits cleanly: C14-PURE (727) → kyc, C14-mixed (926) → ML.
+- **kyc SIGNING is the honest cross-pillar FRONTIER.** A txn-bearing C14 case **signs** end-to-end through the
+  re-vendored casework (bf15535's broadened C14 grounding — it fails at the stale 157554b). A purely **txn-less**
+  C14 party-leaf **fails-CLOSED at casework's no-transactions CONTRACT** (`bundle: no transactions` — a
+  foundational casework rule from its first scaffold, before the C14 verifier even runs), surfaced via the honest
+  `e2e_note`, **never** loosened. In the slice **2 of 6** kyc cases sign (txn-bearing); the rest fail-closed
+  honestly. Making txn-less party-leaf bundles signable (relax the casework contract for a kyc_integrity filing,
+  or drop `transaction_details` from the kyc STR profile) is a **named casework follow-on** — the same
+  fail-closed-frontier discipline as the C3/C15 divergence, never a number we loosen to hit.
+- **Re-vendor preserves the ML signings.** Measured: the existing ML signings hold through the bump (**0
+  regressions** re-signing the committed bundles at bf15535). The slice grew 342 → **355**, coverage
+  107/342 → **128/355**, funnel (auto/human/review) **183/110/62**.
+- **The gather/finale demo is re-curate-robust.** The scripted OSINT chain is tailored to one subject; the demo
+  case now resolves **from the corpus** (`gather_demo_case_id` — the lowest-id slice case whose synthetic display
+  name chains to a sanctions hit), not the volatile `mule` exemplar a re-curate moves.
+
+**Still deferred (substrate-emission gaps).** **C1** anticipated-activity is a **principled measured null** (the
+substrate refuses it as a C8/C6 double-count — it will not be built); broader **C7** stays screening-only; a
+**TF** slice has no live path in any of the three pillars. Those stay named in the determination's `signal_brief`.
+Governor unchanged: determination-evidence **breadth** + network richness, **never** a catch-rate / detection-lift
+claim.
 
 ## Tests
 
 ```bash
-node tests/workbench.test.mjs                 # the full arc: clutter, signals-on, the declared BO-graph (related_parties[] · "N pct" · XSS), finale (signed + fail-closed), the GATING panel + knobs + the adjudication LOOP, XSS, both motion modes, no catch-rate/% vocabulary
-python3 scripts/serve_workbench.py --selftest # the companion: queue/detail, grounded walk, the §12 closure (a case reaches the ≥2-leg determination from REAL signals — C8 ML-A3 + C15 ML-A4, no gather), the live finale (stubbed) + the fail-closed disposition, the live GATE engine (funnel reproduced + monotone) + the elicitation LOOP (re-route + persists-nothing), §4.5 no-leak, pillar-status byte-stable
+node tests/workbench.test.mjs                 # the full arc: clutter, signals-on, the declared BO-graph (related_parties[] · "N pct" · XSS), finale (signed + fail-closed), the GATING panel + knobs + the adjudication LOOP, the kyc determination (KYC-A1 from C14) + the txn-less sign FRONTIER (the honest casework-contract reason), XSS, both motion modes, no catch-rate/% vocabulary
+python3 scripts/serve_workbench.py --selftest # the companion: queue/detail, grounded walk, the §12 ML closure (≥2-leg from REAL signals — C8 ML-A3 + C15 ML-A4, no gather), the §12 KYC closure (a C14-pure case determines from KYC-A1; txn-bearing kyc signs, txn-less fails-closed at casework's txn contract), the live finale (stubbed) + the fail-closed disposition, the live GATE engine (funnel reproduced + monotone) + the elicitation LOOP (re-route + persists-nothing), §4.5 no-leak, pillar-status byte-stable
 python3 scripts/curate_workbench_cases.py --selftest  # the committed slice: schema, exemplars span the gates, MEASURED coverage matches per-case grounds_e2e, route() faithful to the baked gate
 ```
 
 ## Deferred to follow-on phases
 
-- The substrate **determination-signal emission queue** — **executed** (substrate Phase 25) **+ consumed**
-  (signal-watch Phase 71): the real ownership graph (`related_parties[]`) and the profile-inconsistency +
-  network legs (C8 + C15) now drive determinations from real signals. **Still open** (substrate-emission +
-  casework-verifier gaps): **C14** source-of-funds / KYC-integrity (deliberately non-emitted), **C1**
-  anticipated-activity (a measured null), broader **C7**, and a **TF** case slice — named in the
-  `signal_brief`; see `docs/substrate-determination-signals-PLAN-BRIEF.md`. Sibling-executed.
+- The substrate **determination-signal emission queue** — **executed + consumed** across the §12 legs: the
+  ownership graph + profile-inconsistency/network legs (C8 + C15, substrate Phase 25 / signal-watch Phase 71)
+  drive ML determinations from real signals; **C14 source-of-funds / KYC-integrity** (substrate Phase 26 /
+  casework Phase 14 / signal-watch Phase 72) now closes the §12 KYC loop and signs txn-bearing cases. **Still
+  open:** the **txn-less C14 party-leaf** signing path (a casework no-transactions-contract follow-on — relax
+  the contract for a kyc_integrity filing, or drop `transaction_details` from the kyc STR profile); **C1**
+  anticipated-activity (a **principled measured null** — will not be built); broader **C7**; and a **TF** case
+  slice (no live path in any pillar) — named in the `signal_brief`; see
+  `docs/substrate-determination-signals-PLAN-BRIEF.md`. Sibling-rooted.
 - The **C3/C15 cross-pillar contract alignment** (substrate fan-in vs casework fan-out) — the
   composed-case grounding frontier.
 - A **real OSINT substrate** for the GATHER loop (a real screening list / registry feed) — out of scope
@@ -310,3 +343,11 @@ python3 scripts/curate_workbench_cases.py --selftest  # the committed slice: sch
 > **≥2-leg determination bar from REAL signals** (C8 ML-A3 + C15 ML-A4) — the **§12 loop closes** for the ML
 > cases (**81/342**; slice 294→342, funnel **181/79/82**, coverage **107/342**). kyc/C14/C1/C7 stay deferred
 > substrate-emission gaps. Casework moved to `@157554b` (accepts v0.3 + covers `fin-2025-a003`).
+>
+> **Adopted in Phase 72:** aml-substrate's **Phase-26 C14 KYC-integrity emission** (re-pin `@f15c241`; casework
+> re-vendored `@bf15535` — broadened C14 grounding; pin now read from `VENDORED_AT`). The **§12 KYC loop closes**
+> — a C14-PURE customer determines from **KYC-A1** (C14 alone); txn-bearing kyc cases **sign**, txn-less
+> party-leaf cases **fail-closed** at casework's no-transactions contract (the honest sign frontier). Slice
+> 342→**355**, coverage 107/342→**128/355**. **Now deferred:** the txn-less signing path (casework follow-on),
+> **C1** (a principled measured null), broader **C7**, a **TF** slice. The dual-map (C14-pure→kyc, C14+ML→ML)
+> is correct, not a firewall — the planned curate firewall was a measured no-op.

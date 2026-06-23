@@ -74,7 +74,10 @@ def check() -> int:
         return 1
     fx = json.loads(FIXTURE.read_text(encoding="utf-8"))
     idx = sw.load_index()
-    mule_id = idx["meta"]["exemplars"]["mule"]
+    # the scripted gather DEMO case, resolved from the OSINT corpus (Phase 72) — NOT the volatile 'mule'
+    # exemplar, which a population re-curate moves off the corpus-tailored chain subject (the fixture is
+    # pinned to that subject; using the exemplar would fail loudly on every re-curate).
+    mule_id = sw.gather_demo_case_id(idx)
     # the planner reasons over the FIXTURE subject while run_gather grounds against the live case subject —
     # assert they agree so a re-pointed exemplar / hand-edited fixture fails loudly, never grounds silently
     # against a different subject.

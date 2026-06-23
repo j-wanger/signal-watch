@@ -260,16 +260,20 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   predicate risk + no unrebutted mitigation), NOT combo-FREQUENCY (the Phase-64 gate is DEMOTED to context);
   GATHER is requirement-TARGETED (seek the unmet closeable atoms — UBO/corroboration — record-sourced) + Phase-70
   MEASURED: a `coverage` block measures the LIVE extraction vs the deterministic StubPlanner REFERENCE
-  (consistency-not-correctness; pinned via `tests/gather_quality_harness.py --check`, no model). Phase 71 ADOPTS
-  the substrate's contract-v0.3 slice (`aml-substrate@443e4a6`; vendored `aml-casework@157554b` accepts v0.3 +
-  covers `fin-2025-a003`): `curate_workbench_cases` MERGES each customer's monitoring + C8-screening bundles (a
-  case = a customer) so C8 (ML-A3 profile-inconsistency) co-occurs with C15/`related_parties[]` (ML-A4 network),
-  and the **§12 loop CLOSES from REAL signals** — a case reaches the ≥2-leg determination bar without GATHER
-  (81/342; slice 294→342, funnel 181/79/82, coverage 107/342). The bundle's `related_parties[]` BO graph renders
-  as the case network (`boGraphHTML`; "N pct"). Still-deferred substrate-emission gaps (named in `signal_brief`):
-  C14 source-of-funds / `kyc_integrity` (substrate non-emits C14), C1 anticipated-activity (a measured null),
-  broader C7, a TF slice — the consolidated §12 BRIEF (`docs/substrate-determination-signals-PLAN-BRIEF.md`,
-  supersedes the BO-graph brief). The chain workbench
+  (consistency-not-correctness; pinned via `tests/gather_quality_harness.py --check`, no model). Phase 71/72 ADOPT
+  the substrate v0.3 slice + Phase-26 C14 kyc emission (`aml-substrate@f15c241`; vendored `aml-casework@bf15535`
+  accepts v0.3 + grounds C14; the casework pin is READ from `VENDORED_AT`, not hardcoded): `curate_workbench_cases`
+  MERGES each customer's monitoring + C8/C14-screening bundles (a case = a customer) so C8 (ML-A3) co-occurs with
+  C15/`related_parties[]` (ML-A4) — the **§12 ML loop CLOSES from REAL signals** (≥2-leg, no GATHER). The **§12 KYC
+  loop CLOSES too** (Phase 72): a C14-PURE customer (no ML co-firing → classifies `kyc_integrity` via the dual-map,
+  correct-not-bug) determines from KYC-A1 — C14 ALONE (kyc = mechanism + 0 legs); kyc SIGNING is the honest
+  cross-pillar FRONTIER — txn-bearing C14 cases SIGN through casework, txn-LESS party-leaf cases fail-CLOSED at
+  casework's no-transactions CONTRACT (surfaced via `e2e_note`, never loosened — a named casework follow-on).
+  Slice **355**, coverage **128/355**, funnel (auto/human/review) 183/110/62; 6 kyc cases (2 sign). The bundle's
+  `related_parties[]` BO graph renders as the case network (`boGraphHTML`; "N pct"); the gather/finale DEMO case
+  resolves from the OSINT corpus (`gather_demo_case_id`), re-curate-robust. Still-deferred substrate-emission gaps
+  (named in `signal_brief`): C1 anticipated-activity (a PRINCIPLED measured null), broader C7, a TF slice — the
+  consolidated §12 BRIEF (`docs/substrate-determination-signals-PLAN-BRIEF.md`). The chain workbench
   renders the structured STR's COMPLETENESS (the previously-dropped fields surfaced honest-NULL). Doc:
   `docs/evidence-driven-filing.md`. `aml-casework` is VENDORED into `vendor/aml-casework/` (its src + a
   cross-platform WHEEL under `dist/` + its pinned corpus snapshot under `fixtures/corpus/`); resolution =

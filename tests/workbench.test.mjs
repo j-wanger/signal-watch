@@ -584,6 +584,40 @@ await T.runDetermine();
 ok(ELEMENTS.surf._html.includes(escH('<img src=x>')) && !/DETERMINATION · <img src=x>/.test(ELEMENTS.surf._html),
    'XSS: a model/operator-supplied named risk is esc()-escaped in the determination verdict');
 
+/* ---------- Phase 72: the kyc/C14 consume — determination from C14 + the honest sign frontier ---------- */
+// a txn-less C14 party-leaf: the queue badge surfaces the casework no-transactions CONTRACT reason (the frontier)
+const KYC_CASE = { case_id:'CASE-P-KYC', display:{ name:'Noor Okafor', synthetic_label:true },
+  capabilities:['C14'], n_alerts:3, n_txns:0, advisories:[], exemplar:null, grounds_e2e:false,
+  e2e_note:'casework refused at the contract boundary: bundle: no transactions (the data rows alerts must cite)',
+  confidence:{ combo:'C14', n_precedent:5, level:'low', gate:'human-gate',
+    disposition_illustrative:{ cleared_pct:28, escalated_pct:72 }, disposition_basis:'ILLUSTRATIVE — chosen, not measured' },
+  kyc:{ is_person:true, risk_rating:'MEDIUM', cdd_level:'CDD', source_of_funds:null } };
+T.setState({ QUEUE:[KYC_CASE], FILTER:'all', SEL:null, DETAIL:null, DET:null, GATHER:null, RUN:null }); T.renderQueue();
+const qkyc = ELEMENTS.queue._html;
+ok(/no transactions/.test(qkyc) && /won.{0,2}t sign/.test(qkyc),
+   'a txn-less kyc case surfaces the honest casework no-transactions contract reason (the sign frontier, not "fails closed")');
+
+// the determination beat reaches a kyc_integrity determination from KYC-A1 (the C14 mechanism ALONE — no extra legs)
+const KYC_DETAIL = { case:KYC_CASE, bundle:{ subject:{ customer_id:'P-KYC', account_ids:['A-1'] },
+  parties:[{ is_person:true, risk_rating:'MEDIUM', cdd_level:'CDD', source_of_funds:null }],
+  transactions:[], alerts:[{ capability:'C14' }] }, signals:[] };
+T.setState({ SEL:'CASE-P-KYC', DETAIL:KYC_DETAIL, DET:null, GATHER:null, RUN:null }); T.paintSurface();
+DETERMINE_RESPONSE = { badge:'Illustrative data & outputs', case_id:'CASE-P-KYC', crime_type:'kyc_integrity',
+  named_risk:'source of funds not established', frequency_context:{ combo:'C14', n_precedent:5, gate:'human-gate' },
+  determination:{ crime_type:'kyc_integrity', verdict:'determination', sufficient:true, missing:[],
+    evidence:{ mechanism_present:['KYC-A1'], legs_present:[], named_predicate_risk:true, mitigation_rebutted:true },
+    completeness:{ str:{ required:[], satisfied:[], missing:[] }, present_atom_ids:['KYC-A1'],
+      atoms:[ { id:'KYC-A1', label:'Customer-cooperation / KYC-integrity failure', kind:'mechanism', present:true } ] },
+    signal_brief:[] } };
+ELEMENTS.detRisk.value = 'source of funds not established'; ELEMENTS.detMit.checked = true;
+await T.runDetermine();
+const dkyc = ELEMENTS.surf._html;
+ok(/DETERMINATION · source of funds not established — the evidence is sufficient/.test(dkyc) && /KYC-A1/.test(dkyc),
+   'a C14-pure kyc case reaches a kyc_integrity determination from KYC-A1 (the consumed substrate Phase-26 C14 emission)');
+ok(/the KYC-integrity mechanism \+ a named predicate risk/.test(dkyc)
+   && !/corroborating legs \+ named risk \+ no unrebutted mitigation/.test(dkyc),
+   'the kyc determination states its OWN sufficiency basis, not the ML legs/mitigation checklist (honest per crime_type)');
+
 /* ---------- summary ---------- */
 console.log(`\n${pass} passed, ${fails.length} failed`);
 if (fails.length){ console.error('FAILURES:\n  - ' + fails.join('\n  - ')); process.exit(1); }

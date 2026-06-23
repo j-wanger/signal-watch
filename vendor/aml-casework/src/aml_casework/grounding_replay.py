@@ -134,10 +134,22 @@ _MISMATCH_MONTHLY_MULTIPLE = 12  # inflow must exceed 12x the declared monthly v
 #     txn_ids=() by design (its lineage is the KYC record, the party leaf). So there is no transaction to
 #     replay: the grounding walk roots at the resolved party and re-derives the screened DEFECT over the
 #     recorded PartyView state. COPIED from substrate kyc_integrity.py `_kyc_defect` (the screened condition,
-#     signal fin-2026-alert001:IND-04); no sibling import (DESIGN / assumption A3). The CDDLevel/RiskRating
-#     enum VALUES serialize as plain strings into the v0.2 `parties` block. ---
+#     signal fin-2025-a003:IND-09); no sibling import (DESIGN / assumption A3). The CDDLevel/RiskRating/PEPTier
+#     enum VALUES serialize as plain strings into the v0.2+ `parties` block.
+#     RECONCILED @ substrate 01ddeaf (Phase 14): substrate Phase 25 RE-KEYED `_kyc_defect`'s primary branch off
+#     the old EDD-only tautology (`cdd_level == EDD and not source_of_funds` — which fired on every EDD party and
+#     MISSED every elevated-non-EDD subject) onto `elevated_obligation and source_of_funds is None`. The copied
+#     rule below is broadened to match, AND switches the old `not source_of_funds` to `source_of_funds is None`
+#     to mirror substrate EXACTLY. Over the substrate data domain (source_of_funds is a documented string OR
+#     None — the projection never emits "") this is a STRICT SUPERSET of the old EDD-only branch: every party the
+#     old rule grounded still grounds, so it only REDUCES false-blocks. (The lone non-superset edge — an
+#     empty-string source_of_funds under EDD — cannot arise from a substrate projection and correctly no longer
+#     grounds: substrate's own `is None` predicate would not fire on it either.) Behavioral reconciliation against
+#     a REAL C14 emission stays the deferred true gate (substrate emits no C14 today; ledger A0, revisit: open). ---
 _CDD_EDD = "EDD"  # CDDLevel.EDD — enhanced due diligence (the escalation level every defect branch pivots on)
 _RISK_HIGH = "HIGH"  # RiskRating.HIGH — the risk tier that must be escalated to EDD
+_RISK_LOW = "LOW"  # RiskRating.LOW — the ONLY tier that is not, by itself, an elevated KYC obligation
+_PEP_NONE = "NONE"  # PEPTier.NONE — no politically-exposed-person status (any other tier is elevated)
 
 # A replay assertion grounds a signal over the cited transactions alone. A screening assertion additionally
 # receives the alert's resolved PartyView (or None) — mirroring Pillar 1's Detector(txns) vs
@@ -321,12 +333,18 @@ def _screen_c14_kyc_integrity(
 ) -> list[str]:
     """Screening-grounding for C14: re-derive the static KYC-integrity DEFECT over the resolved party's
     recorded state (the party leaf — this alert cites no transaction). The screened condition is COPIED from
-    substrate kyc_integrity._kyc_defect (no sibling import): a defect is (a) an EDD-classified party with no
-    documented source_of_funds, (b) a HIGH risk_rating not escalated to EDD, or (c) a sanctions/adverse-media
-    flag without EDD. A clean state grounds NOTHING (the alert claims a defect the record does not show ->
-    violation). Fail-closed: no resolved party (a non-resolving party_ref), or a party missing the cdd_level
-    pivot the screen reads, means the KYC state is not re-derivable — a violation, never a silent pass.
-    ``cited_txns`` is part of the uniform screening signature but unread: C14 grounds on party state alone."""
+    substrate kyc_integrity._kyc_defect (no sibling import): a defect is (a) the SOURCE-OF-FUNDS DISCLOSURE GAP —
+    an ELEVATED-OBLIGATION party (risk_rating != LOW, OR EDD, OR a PEP, OR sanctions/adverse-flagged) whose
+    ``source_of_funds`` is absent; (b) a HIGH risk_rating not escalated to EDD; or (c) a sanctions/adverse-media
+    flag without EDD. Branch (a) RECONCILED @ substrate 01ddeaf (Phase 14): substrate Phase 25 broadened it off
+    the old EDD-only rule onto elevated-obligation; over the substrate data domain (source_of_funds is a
+    documented string OR None) this is a strict superset of the old branch — it only REDUCES false-blocks on the
+    elevated-non-EDD subjects the old copy missed, and matches substrate's exact `is None` predicate. A clean
+    state grounds
+    NOTHING (the alert claims a defect the record does not show -> violation). Fail-closed: no resolved party (a
+    non-resolving party_ref), or a party missing the cdd_level pivot the screen reads, means the KYC state is not
+    re-derivable — a violation, never a silent pass. ``cited_txns`` is part of the uniform screening signature but
+    unread: C14 grounds on party state alone."""
     _ = cited_txns  # uniform screening signature; C14 is txn-less — its leaf is the party, not transactions
     where = f"alerts[{alert.get('alert_id')}].screen(C14)"
     if party is None:
@@ -335,9 +353,13 @@ def _screen_c14_kyc_integrity(
     if cdd is None:
         return [f"{where}: party has no cdd_level; the KYC-integrity state is not re-derivable (fail-closed)"]
     risk = party.get("risk_rating")
+    pep = party.get("pep_tier")
     flagged = bool(party.get("sanctions_flag")) or bool(party.get("adverse_media_flag"))
+    # An ELEVATED KYC obligation: anything above low risk, or EDD-classified, or a PEP, or already flagged.
+    # COPIED from substrate kyc_integrity._kyc_defect's elevated_obligation predicate (@01ddeaf, Phase 25).
+    elevated_obligation = risk != _RISK_LOW or cdd == _CDD_EDD or (pep is not None and pep != _PEP_NONE) or flagged
     # the copied screened condition (any defect branch -> the C14 screen grounds)
-    if cdd == _CDD_EDD and not party.get("source_of_funds"):
+    if elevated_obligation and party.get("source_of_funds") is None:
         return []
     if risk == _RISK_HIGH and cdd != _CDD_EDD:
         return []

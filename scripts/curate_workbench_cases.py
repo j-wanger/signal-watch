@@ -54,7 +54,7 @@ CASES_JSON = OUT_DIR / "cases.json"
 
 BADGE = "Illustrative data & outputs"
 SUBSTRATE_REPO = "aml-substrate"
-SUBSTRATE_HEAD = "443e4a6"   # Phase 71: the v0.3 emission (contract v0.3 — related_parties[] + SoF; Phase 25)
+SUBSTRATE_HEAD = "f15c241"   # Phase 72: substrate Phase 26 — C14 KYC-integrity emission (txn-less party-leaf) on the v0.3 contract
 RUN_ID = "seed0-n40000-m2"
 EMIT_COMMAND = ("PYTHONPATH=<substrate>/src <substrate>/.venv/bin/python -m aml_substrate.cli "
                 "--clients 40000 --months 2 --seed 0 --emergence --monitor --emit-evidence "
@@ -82,6 +82,19 @@ _LAST = ["Adeyemi", "Boucher", "Chen", "Dubois", "Ennis", "Ferreira", "Gagnon", 
          "Romano", "Singh", "Tremblay", "Ueda", "Volkov", "Wong", "Xu", "Yusuf", "Zhao"]
 _ORG_SUFFIX = ["Holdings", "Trading Co.", "Group", "Logistics", "Ventures", "Services Ltd.",
                "Imports", "Capital", "Enterprises", "Partners"]
+
+
+def _casework_pin() -> str:
+    """The vendored casework commit, read from vendor/aml-casework/VENDORED_AT — NOT hardcoded (the
+    Phase-71 stale-pin lesson: a hardcoded pin string drifts silently on re-vendor). Falls back to a
+    generic label if the marker is absent."""
+    try:
+        for line in (ROOT / "vendor" / "aml-casework" / "VENDORED_AT").read_text(encoding="utf-8").splitlines():
+            if line.startswith("commit:"):
+                return f"aml-casework@{line.split(':', 1)[1].strip()}"
+    except OSError:
+        pass
+    return "aml-casework@vendored"
 
 
 def _h(s: str) -> int:
@@ -188,10 +201,20 @@ def _measure_grounding(bundle_paths: dict, casework_dir: Path) -> dict:
         viols = summ.get("blocking_violations", []) if not signs else []
         # the dominant refused-capability(ies), human-readable (the C3/C15 cross-pillar divergence)
         caps = sorted({v.split("replay(")[1].split(")")[0] for v in viols if "replay(" in v})
-        note = ("signed end-to-end" if signs else
-                (f"casework refused — independent replay couldn't reproduce {', '.join(caps)} from the "
-                 f"cited evidence ({len(viols)} violation(s))" if caps else
-                 f"casework refused ({len(viols)} violation(s))"))
+        if signs:
+            note = "signed end-to-end"
+        elif viols:
+            note = (f"casework refused — independent replay couldn't reproduce {', '.join(caps)} from the "
+                    f"cited evidence ({len(viols)} violation(s))" if caps else
+                    f"casework refused ({len(viols)} violation(s))")
+        else:
+            # NO drafter summary — casework rejected the bundle at the CONTRACT boundary, before drafting
+            # (Phase 72: a txn-LESS C14 party-leaf bundle fails casework's no-transactions contract — the
+            # kyc sign FRONTIER). Surface the honest contract reason, never a bare "0 violations".
+            detail = [ln.strip().lstrip("- ").strip()
+                      for ln in (proc.stdout + "\n" + proc.stderr).splitlines() if ln.strip().startswith("-")]
+            reason = "; ".join(detail) if detail else "casework produced no signable record"
+            note = f"casework refused at the contract boundary: {reason}"
         out[cid] = {"signs": signs, "note": note}
     return out
 
@@ -385,8 +408,12 @@ def generate(evidence_dir: Path, *, rich_cap: int = DEFAULT_RICH_CAP,
             "generated_note": ("synthetic substrate emission; GROUNDED detection (real advisory-grounded "
                                "alerts over real KYC), ILLUSTRATIVE dispositions; display identities synthetic. "
                                "Phase 71: contract v0.3 (related_parties[] BO-graph + SoF); a case = a CUSTOMER "
-                               "(monitoring + C8-screening bundles MERGED) so the profile-inconsistency leg "
-                               "co-occurs with the network leg — the ≥2-leg determination becomes reachable"),
+                               "(monitoring + C8/C14-screening bundles MERGED) so the profile-inconsistency leg "
+                               "co-occurs with the network leg — the >=2-leg determination becomes reachable. "
+                               "Phase 72: substrate Phase-26 C14 KYC-integrity emission CONSUMED — C14-PURE "
+                               "customers (no ML co-firing) classify kyc_integrity + close the kyc determination "
+                               "from C14 alone (KYC-A1); txn-bearing kyc cases SIGN, txn-less party-leaf cases "
+                               "fail-closed honestly at casework's no-transactions contract (the kyc sign frontier)"),
             "slice_rule": (f"the rare 4+-capability cases (cap {rich_cap}) + a 3-cap-band sample (20) + a "
                            f"deterministic sample of the 1-2-cap noise (cap {noise_cap}) + a combo-coverage "
                            "pass (>=1 representative of every population combo); sorted by case_id "
@@ -397,7 +424,7 @@ def generate(evidence_dir: Path, *, rich_cap: int = DEFAULT_RICH_CAP,
                 "groundable": n_groundable,
                 "total": len(cases),
                 "measured": measured,
-                "casework_pin": ("aml-casework@157554b" if measured else None),
+                "casework_pin": (_casework_pin() if measured else None),
                 "basis": ("MEASURED: cases aml-casework actually SIGNS end-to-end (drafter=stub; the six "
                           "Class-G verifiers independently re-derive each signal). Composed cases that "
                           "fail are a real substrate↔casework C3/C15 replay divergence — the gate "

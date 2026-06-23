@@ -1,5 +1,15 @@
 # PLAN-BRIEF — aml-casework: the C14 KYC-integrity grounding verifier (so v0.3 kyc cases SIGN)
 
+> **STATUS (2026-06-23 — the GROUND half LANDED).** aml-casework Phase 14 @**bf15535** broadened
+> `_screen_c14_kyc_integrity` to the full `elevated_obligation` predicate (and fixed a stale
+> `_kyc_defect`) so C14 cases SIGN. CONSUMED by signal-watch Phase 72 (re-vendored 157554b→bf15535;
+> the pin is now READ from `vendor/aml-casework/VENDORED_AT`). **NEW open remainder — the txn-less
+> party-leaf signing path:** casework's foundational no-transactions contract (`bundle: no
+> transactions`, fires before the C14 verifier) blocks a *purely* txn-less C14 party-leaf bundle from
+> signing — it fails-CLOSED with that honest reason (surfaced via the e2e_note, never loosened).
+> Txn-BEARING C14 cases sign. The follow-on: relax the casework contract for a `kyc_integrity` filing,
+> OR drop `transaction_details` from the kyc STR profile.
+>
 > **A signal-watch → aml-casework handoff brief** (the sibling-brief pattern; cf.
 > `docs/substrate-determination-signals-PLAN-BRIEF.md`). Authored in signal-watch; **executed in an
 > aml-casework session**. signal-watch defines the *contract* it consumes; casework owns the grounding.

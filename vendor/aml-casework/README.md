@@ -416,4 +416,41 @@ fixture **defines** the shape (framing A: `txn_ids=()` + a `party_ref`). The sub
 brief (Increment 3) then emits a **real composed C14 bundle to match**. That real bundle — through the
 chain to a signed STR — is the shared **cross-pillar acceptance gate** (it lands after casework ships).
 
+## Phase 14 — reconcile copied detectors against the live source + vendor the real C8 bundle
+
+casework grounds screening capabilities by **re-deriving the detector's screened condition** over the cited
+evidence — **copied from the substrate detector with provenance, never imported** (the no-sibling-import
+doctrine). A copy **drifts** when the substrate detector changes; a self-authored synthetic fixture (where
+casework writes *both* the emission and its grounding) cannot expose that drift — only reconciliation against
+the live source / a real emission can (the Phase-6 lesson). Phase 14 reconciles on two threads:
+
+- **C14 `_kyc_defect` drift fix.** The substrate **re-keyed** `kyc_integrity._kyc_defect` (Phase 25): its
+  primary defect branch moved off the old **EDD-only tautology** (`cdd_level == EDD and not source_of_funds`,
+  which fired on every EDD party and *missed every elevated-non-EDD subject*) onto the broader
+  **elevated-obligation** rule — `elevated_obligation and source_of_funds is None`, where *elevated* =
+  `risk_rating != LOW` **or** EDD **or** a PEP **or** sanctions/adverse-flagged. casework had copied the OLD
+  rule (Phase 12), so it would **false-block** a real C14 alert on an elevated-non-EDD subject (a MEDIUM-risk
+  or PEP customer with no documented source of funds). The fix broadens the copied branch to match
+  (`grounding_replay.py`, provenance-stamped to `aml-substrate@01ddeaf`) and switches `not source_of_funds` →
+  `source_of_funds is None` to mirror substrate exactly. Over the substrate data domain (`source_of_funds` is a
+  documented string or `None`, never empty) it is a **strict superset** of the old branch — every party the old
+  rule grounded still grounds, so it only *reduces* false-blocks. The
+  behavioral reconciliation against a **real C14 emission** stays **deferred** (the substrate emits no C14
+  yet — an open item, not a coverage claim).
+
+- **Vendor the real C8 bundle + reconcile.** `CASE-P-0000251` (the substrate's real `income_mismatch`
+  emission, **contract v0.3**) is vendored under `fixtures/evidence/real/` and reaches a **signed STR**
+  through all six verifiers — closing the long-deferred *real composed C8 demo* (Phase 11's deferred T4),
+  now over a **real emission** rather than a synthetic fixture. The party resolves via the account join
+  (`party_ref` is null → `subject.customer_id == party_id`). The **C8 reconciliation** then *establishes*
+  (does not assume) that casework's `_screen_c8` re-derivation **agrees** with the substrate detector's
+  firing: casework sums the **cited** credits while the detector sums **all account** credits, and a guard
+  test pins that the alert cites the account's *full* credit set (`cited == account == the inflow the
+  detector recorded in `alert.rule``). A future emission that cited a credit *subset* would make casework
+  under-count and is surfaced by the guard for a fail-closed fix — **never** a loosened floor.
+
+**Contract v0.3 (`related_parties[]`).** The vendored bundle carries the additive v0.3 `related_parties[]`
+beneficial-ownership graph block; casework **validates it to the v0.2 bar** (its determination/network consume
+is signal-watch-side) — vendoring the v0.3 bundle incidentally proves that acceptance end-to-end.
+
 See `.dev-wiki/` for phase/task state and `DESIGN.md` for full doctrine.

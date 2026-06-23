@@ -100,6 +100,11 @@ Measured over the committed 294-case workbench population:
   nothing fires C1 over it), so A6 / A7 are honest gaps for every case → the §12 brief
   names a SoF field + a C1 detector + broader C7 coverage to build.
 
+> **Superseded for C14 / source-of-funds (Phase 72).** The substrate now emits C14 (Phase 26), so
+> `kyc_integrity` is **exercised** — 727 C14-pure customers, the §12 KYC loop closes from KYC-A1 (see *The
+> §12 KYC loop closes — C14 consumed* below). C1 stays a **principled measured null**; broader C7 + a TF
+> slice stay gaps. The findings above are the Phase-69 baseline (the 294-case population).
+
 ## Gather extraction quality (Phase 70 — measured)
 
 The §12 loop's value depends on GATHER actually *closing* the gaps it targets. Phase
@@ -160,25 +165,44 @@ slice (substrate Phase 25, pinned `@443e4a6`):
 - The bundle's **`related_parties[]`** (the real emitted BO graph) renders as the case
   network (`boGraphHTML`; "N pct", never "%").
 
-**Still gaps (named in every `signal_brief`).** `source_of_funds` / **C14** KYC-integrity
-(the substrate *deliberately non-emits* C14), **C1** anticipated-activity (a substrate
-measured null), broader **C7**, and a **kyc/TF** case slice — substrate-emission + a
-casework C14-verifier follow-on, not signal-watch-local. The honesty governor holds: this
-is determination-evidence **breadth**, never a catch-rate / detection-lift claim.
+## The §12 KYC loop closes — C14 consumed (Phase 72)
 
-## Deferred — Phase 71+
+Phase 72 consumes aml-substrate's **Phase-26 C14 KYC-integrity emission** (re-pinned `@f15c241`; vendored
+casework moves to `@bf15535` — its Phase-14 broadened C14 grounding; the casework pin is now READ from
+`vendor/aml-casework/VENDORED_AT`, not hardcoded):
+
+- A **C14-PURE** customer (fires C14 with no ML capability co-firing) classifies `kyc_integrity` and reaches a
+  determination from **KYC-A1 — the C14 mechanism ALONE** (the kyc profile needs mechanism + **0** legs; the
+  human still names the predicate risk). The emitted population holds **727** C14-pure customers; the committed
+  slice carries **6** kyc cases (all determine). The §12 KYC loop closes.
+- The **dual-map is correct, not a firewall.** A customer with laundering signals **and** a source-of-funds gap
+  classifies `money_laundering` (C14 → ML-A7, the SoF leg corroborating the ML case). So the merge folding C14
+  into an ML customer is right — the planned curate firewall was a **measured no-op** (727 pure → kyc, 926
+  mixed → ML, cleanly).
+- **kyc SIGNING is the honest cross-pillar FRONTIER.** A txn-bearing C14 case **signs** end-to-end through the
+  re-vendored casework; a purely **txn-less** C14 party-leaf **fails-CLOSED at casework's no-transactions
+  CONTRACT** (`bundle: no transactions`, surfaced via the honest `e2e_note`, never loosened). In the slice **2
+  of 6** kyc cases sign; the rest fail-closed honestly. The re-vendor preserved the ML signings (**0**
+  regressions). Slice **355**, coverage **128/355**, funnel **183/110/62**.
+
+**Still gaps (named in every `signal_brief`).** **C1** anticipated-activity is a **principled measured null**
+(the substrate refuses it as a C8/C6 double-count — it will not be built), broader **C7** (screening-only), and
+a **TF** case slice (no live path in any pillar). The honesty governor holds: this is determination-evidence
+**breadth**, never a catch-rate / detection-lift claim.
+
+## Deferred — Phase 72+
 
 - **Roll the sufficiency model across the triage + gate consoles** (`triage.html`,
   `console.html`) — the determination grammar there is still disposition-only.
-- **The substrate determination-signal build queue — partially closed.** Phase 71
-  consumed the BO graph (`related_parties[]`) + the profile-inconsistency/network legs
-  (C8 + C15), so the §12 ML loop closes from real signals (above). **Still open:**
-  **C14** source-of-funds / KYC-integrity (deliberately non-emitted by the substrate),
-  **C1** anticipated-activity (a substrate measured null), broader **C7**, and a
-  **kyc_integrity / TF case slice** — plus the casework **C14-grounding verifier** needed
-  for those v0.3 cases to *sign* (not just determine). Consolidated handoff:
-  **`docs/substrate-determination-signals-PLAN-BRIEF.md`** (supersedes the Phase-66
-  BO-graph brief). Sibling-executed; build.py untouched.
+- **The substrate determination-signal build queue — further closed.** The BO graph +
+  profile-inconsistency/network legs (C8 + C15) close the §12 ML loop (Phase 71); **C14
+  source-of-funds / KYC-integrity** closes the §12 KYC loop and signs txn-bearing cases
+  (substrate Phase 26 / casework Phase 14 / signal-watch Phase 72). **Still open:** the
+  **txn-less C14 party-leaf** signing path (a casework no-transactions-contract follow-on
+  — relax the contract for a `kyc_integrity` filing, or drop `transaction_details` from the
+  kyc STR profile); **C1** anticipated-activity (a principled measured null); broader
+  **C7**; and a **TF** case slice. Consolidated handoff:
+  **`docs/substrate-determination-signals-PLAN-BRIEF.md`**. Sibling-rooted; build.py untouched.
 
 See also `docs/case-workbench.md`, `docs/chain-workbench.md`, and the program
 blueprint §12 (history-as-evidence) / §14 (the continuous adjudication loop).

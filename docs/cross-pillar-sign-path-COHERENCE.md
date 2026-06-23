@@ -6,9 +6,19 @@
 > already bitten once (see "The ONE shared C14 condition" below). When the two briefs disagree, the
 > arbiter is the **substrate CODE @443e4a6**, never either brief's prose.
 >
-> **Pins (verified live this session).** aml-substrate **@443e4a6** (Phase 25 close) · aml-casework
-> **@157554b** (`feat/phase-1a-deterministic-verifiers`; vendored into signal-watch at this same
-> commit) · signal-watch **@59a7417**.
+> **STATUS (2026-06-23 — EMIT · GROUND · CONSUME all DONE).** **EMIT** — aml-substrate Phase 26
+> @**f15c241** (C14 in `SCREENING_EMISSION_DETECTORS`; txn-less party-leaf via `Alert.party_ref`).
+> **GROUND** — aml-casework Phase 14 @**bf15535** (`_screen_c14_kyc_integrity` broadened to the full
+> `elevated_obligation` predicate; C14 cases SIGN). **CONSUME** — signal-watch Phase 72 (re-pin +
+> re-vendor; the §12 KYC loop closes from a real signal — KYC-A1 = C14 alone). **DISCOVERED CROSS-PILLAR
+> FRONTIER (the named follow-on):** casework's foundational no-transactions contract blocks a *purely*
+> txn-LESS C14 party-leaf bundle from SIGNING — the determination closes, the signature is
+> contract-blocked (fails-CLOSED with the honest `bundle: no transactions` reason; txn-BEARING C14
+> cases sign). The fix is a casework follow-on: relax the contract for a `kyc_integrity` filing, OR drop
+> `transaction_details` from the kyc STR profile.
+>
+> **Pins (current as of Phase 72).** aml-substrate **@f15c241** (Phase 26) · aml-casework **@bf15535**
+> (Phase 14; vendored into signal-watch at this commit) · signal-watch **Phase 72**.
 >
 > **The two briefs this consolidates (both authored in `signal-watch/docs/` this session):**
 > - SUBSTRATE / EMIT ask → [`substrate-determination-signals-kyc-c14-PLAN-BRIEF.md`](./substrate-determination-signals-kyc-c14-PLAN-BRIEF.md)
@@ -27,14 +37,17 @@ The §12 determination loop is **EMIT → GROUND → DETERMINE → SIGN**. For k
   and reachable: a single fired C14 alert lights `KYC-A1` (mechanism), and with a human-named
   predicate risk the sufficiency rule (`mechanism_required=1, additional_legs_required=0,
   named_predicate_risk_required=true`) licenses the determination. **No consume-side code remains.**
-- **SIGN — the open remainder (this seam).** A determined case only *signs* when casework's
-  `replay_bundle` returns zero blocking violations for every cited alert. Today casework would
-  **fail-closed** on the broad-predicate C14 alerts the substrate is about to emit, because casework's
-  copied branch (a) is still the OLD narrow EDD-only check. SIGN unlocks when **(1)** casework
-  broadens branch (a) AND **(2)** the substrate emits C14 + mints a kyc slice — vendored TOGETHER.
+- **SIGN — DONE (Phase 72), with one residual frontier.** casework Phase 14 @bf15535 broadened
+  branch (a) to the live `elevated_obligation` predicate AND the substrate Phase 26 @f15c241 emitted
+  C14 + minted a kyc slice — vendored TOGETHER (re-vendor preserved the ML signings; 0 regressions).
+  **txn-BEARING C14 cases now SIGN.** The RESIDUAL: a *purely* txn-LESS C14 party-leaf bundle still
+  fails-CLOSED at casework's foundational no-transactions contract (`bundle: no transactions`, fires
+  before the C14 verifier) — surfaced via the honest e2e_note, never loosened. In the slice 2 of 6
+  kyc cases sign. The named follow-on (casework): relax the contract for a `kyc_integrity` filing, OR
+  drop `transaction_details` from the kyc STR profile.
 
-So: Phase-71 closes "determine"; the remainder is "sign", and "sign" is gated by the one shared C14
-condition below. **TF is deferred** — closed-vocab-reachable but no live path in any pillar (no
+So: Phase-71 closed "determine"; Phase-72 closed "sign" for txn-bearing C14 (the residual txn-less
+signing path is the one open frontier). **TF is deferred** — closed-vocab-reachable but no live path in any pillar (no
 substrate detector, no casework cap-map, signal-watch `_CRIME_BY_CAPABILITY` leaves it unmapped). Do
 kyc first; TF is a strictly later, fully serial 3-pillar follow-on.
 

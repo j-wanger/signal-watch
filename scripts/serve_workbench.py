@@ -320,6 +320,25 @@ def osint_corpus() -> tuple:
     return _OSINT["corpus"], _OSINT["index"]
 
 
+def gather_demo_case_id(index: dict, corpus: dict | None = None) -> str:
+    """The scripted gather/finale DEMO case, resolved DETERMINISTICALLY from the OSINT corpus — NOT the
+    volatile 'mule' exemplar. Phase 72: a population re-curate moves the richest-composition exemplar
+    (the C14 emission inflated some cases' alert counts), but the hand-crafted chained-discovery corpus
+    is tailored to ONE subject (owner -> affiliate -> sanctions hit). Returns the lowest-case_id slice
+    case whose synthetic display name keys an OSINT registry record with a relationship to a SANCTIONS-
+    listed entity (the designed chain). Falls back to the mule exemplar if the corpus has no such chain,
+    so the demo never crashes — it just loses the scripted narrative."""
+    corpus = corpus or osint_corpus()[0]
+    sanctioned = set(corpus.get("sanctions", {}))
+    chain_subjects = {subj for subj, recs in corpus.get("registry", {}).items()
+                      for r in recs for rel in r.get("relationships", [])
+                      if rel.get("dst") in sanctioned}
+    cands = [c for c in index["cases"] if c["display"]["name"] in chain_subjects]
+    if not cands:
+        return index["meta"]["exemplars"]["mule"]
+    return min(cands, key=lambda c: c["case_id"])["case_id"]
+
+
 def gather_view(entry: dict, bundle: dict) -> dict:
     """The investigator context the agent loop reasons over: the SYNTHETIC display identity + kind + the
     real counterparty refs (context only — the corpus is keyed by named entities, refs honestly miss)."""
@@ -690,8 +709,10 @@ def selftest() -> int:
     if disk_before != disk_after:
         failures.append("the elicitation loop must persist NOTHING — cases.json/bundles changed on disk")
 
-    # an exemplar case detail carries the full clutter + the GROUNDED signal walk (model-free)
-    mule_id = index["meta"]["exemplars"]["mule"]
+    # the scripted gather/finale DEMO case — resolved from the OSINT corpus (the hand-crafted sanctions
+    # chain), NOT the volatile 'mule' exemplar (Phase 72: a re-curate moves the exemplar off the corpus
+    # subject). Still a rich human-gate mule by construction; the assertions below hold on it.
+    mule_id = gather_demo_case_id(index)
     detail = case_detail(mule_id, index)
     b = detail["bundle"]
     assert b.get("parties") and b.get("transactions") and b.get("alerts"), "clutter bundle incomplete"
@@ -864,6 +885,42 @@ def selftest() -> int:
         if not det.get("signal_brief"):
             failures.append("§12: the determination should still carry a signal_brief naming the deferred "
                             "substrate gaps (C1 anticipated-activity / C14 source-of-funds)")
+
+    # ---- Phase 72: the §12 KYC loop CLOSES from a REAL C14 signal (the consumed substrate Phase-26 emission) ----
+    # A C14-PURE customer (no ML co-firing) classifies kyc_integrity and reaches a determination from the C14
+    # MECHANISM ALONE (KYC-A1; the kyc profile needs mechanism + 0 extra legs) — the human still NAMES the risk.
+    # SIGNING is the honest cross-pillar FRONTIER: a txn-bearing C14 case SIGNS end-to-end through the
+    # re-vendored casework (bf15535's broadened C14 grounding); a txn-LESS C14 party-leaf fails-CLOSED at
+    # casework's no-transactions CONTRACT (surfaced via e2e_note, never loosened) — a named casework follow-on.
+    kyc_cases = [c for c in index["cases"]
+                 if crime_type_for_capabilities(_entry_caps(c), prof_st) == "kyc_integrity"]
+    if not kyc_cases:
+        failures.append("§12 kyc: NO kyc_integrity case in the slice — the substrate Phase-26 C14 emission "
+                        "was not consumed (expected C14-pure cases classifying kyc_integrity)")
+    else:
+        kc = kyc_cases[0]
+        d_kyc = determine_case(kc["case_id"], named_risk="source of funds not established")
+        dk = d_kyc["determination"]
+        if d_kyc["crime_type"] != "kyc_integrity":
+            failures.append(f"§12 kyc: a C14-pure case should classify kyc_integrity, got {d_kyc['crime_type']}")
+        if dk["verdict"] != "determination" or "KYC-A1" not in dk["completeness"]["present_atom_ids"]:
+            failures.append(f"§12 kyc: a C14-pure case + named risk should reach a kyc determination on "
+                            f"KYC-A1 from the C14 signal ALONE (no gather, no extra legs), got {dk}")
+        # the gate is REAL — without a named predicate risk the kyc determination is WITHHELD
+        if determine_case(kc["case_id"])["determination"]["verdict"] == "determination":
+            failures.append("§12 kyc: a kyc case must WITHHOLD without a named predicate risk (the gate is real)")
+        # the SIGN frontier, asserted by RULE (not a count): a kyc case SIGNS iff it carries transactions;
+        # a txn-less one fails-CLOSED with the honest casework no-transactions contract reason.
+        for c in kyc_cases:
+            if c.get("grounds_e2e") is True and c.get("n_txns", 0) == 0:
+                failures.append(f"§12 kyc: {c['case_id']} signed with no transactions — casework requires txns")
+            if c.get("grounds_e2e") is False and "no transactions" not in (c.get("e2e_note") or ""):
+                failures.append(f"§12 kyc: a fail-closed kyc case must surface the honest casework-contract "
+                                f"reason (no transactions), got {c.get('e2e_note')!r}")
+        if not any(c.get("grounds_e2e") is True for c in kyc_cases):
+            failures.append("§12 kyc: expected >=1 txn-bearing kyc case to SIGN end-to-end through the "
+                            "re-vendored casework (the consume payoff — none signed in the committed slice)")
+
     # an unknown case is a NAMED error, not a crash
     try:
         determine_case("CASE-DOES-NOT-EXIST"); failures.append("determine_case on an unknown case should raise")
@@ -914,6 +971,9 @@ def selftest() -> int:
           f"mule detail grounds {len(detail['signals'])}/{len(detail['signals'])} signals; "
           f"§12 closure: {twoleg['case_id'] if twoleg else 'NONE'} reaches a determination from REAL signals "
           f"(C8 ML-A3 + C15 ML-A4, no gather); "
+          f"§12 kyc: {len(kyc_cases)} C14-pure kyc case(s) determine from KYC-A1, "
+          f"{sum(1 for c in kyc_cases if c.get('grounds_e2e') is True)} SIGN / "
+          f"{sum(1 for c in kyc_cases if c.get('grounds_e2e') is False)} fail-closed at casework's txn contract; "
           f"stubbed finale {seq} -> CONNECTED; pillar-status byte-stable)")
     return 0
 

@@ -1,5 +1,15 @@
 # PLAN-BRIEF — aml-substrate: the determination-signal SIGN-PATH remainder (kyc → C14 emission)
 
+> **STATUS (2026-06-23 — the EMIT half LANDED).** aml-substrate Phase 26 @**f15c241** flipped the
+> `KycIntegrityDetector` into `SCREENING_EMISSION_DETECTORS` — a person-scoped, txn-less party-leaf
+> alert (`Alert.party_ref`) firing on `elevated_obligation and source_of_funds is None`. CONSUMED by
+> signal-watch Phase 72 (re-pinned 443e4a6→f15c241): **the §12 KYC loop CLOSES from a real signal** —
+> a C14-pure customer classifies `kyc_integrity` and reaches a determination from **KYC-A1 = the C14
+> mechanism ALONE** (the kyc profile = mechanism + 0 corroborating legs). 727 C14-pure customers
+> emitted; 6 kyc cases committed (all determine). **NEW open remainder — txn-less party-leaf SIGNING:**
+> casework's no-transactions contract blocks a purely txn-less C14 bundle from signing (a casework
+> follow-on; see the GROUND companion brief).
+>
 > **A signal-watch → aml-substrate handoff brief** (the Phase-55–58 sibling-brief pattern). Authored in
 > signal-watch; **executed in an aml-substrate session** (tightly coordinated with an aml-casework reconcile —
 > see Sequencing). signal-watch defines the *contract* it consumes; the substrate owns the build/emit.

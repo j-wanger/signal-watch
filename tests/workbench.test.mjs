@@ -191,6 +191,14 @@ const MULE_DETAIL = {
       { txn_id:'T-2', timestamp:'2024-01-02T09:00:00', channel:'EMT', direction:'DEBIT', amount_cents:120000, counterparty_ref:'CP-2' },
       { txn_id:'T-3', timestamp:'2024-01-03T10:00:00', channel:'CASH', direction:'CREDIT', amount_cents:880000, counterparty_ref:'CP-1' },
     ],
+    related_parties:[
+      { party_id:'P-OWNER-1', label:'BENEFICIAL_OWNER', ownership_pct:55, is_person:true, risk_rating:'HIGH',
+        cdd_level:'EDD', pep_tier:'NONE', sanctions_flag:true, adverse_media_flag:false },
+      { party_id:'O-SHELL-9', label:'CONTROLS', ownership_pct:null, is_person:false, risk_rating:'MEDIUM',
+        cdd_level:'CDD', pep_tier:'NONE', sanctions_flag:false, adverse_media_flag:false },
+      { party_id:'<img src=x onerror=alert(1)>', label:'OWNS', ownership_pct:30, is_person:true, risk_rating:'LOW',
+        cdd_level:'CDD', pep_tier:'NONE', sanctions_flag:false, adverse_media_flag:false },
+    ],
   },
   signals: [
     { capability:'C4', detector:'structuring', signal_id:'fin-2020-alert001:IND-05', source:'fincen',
@@ -206,6 +214,15 @@ ok(/A-1/.test(s) && /A-2/.test(s), 'accounts panel lists the subject accounts');
 ok(/CASH · 2 ·/.test(s), 'channel summary aggregates by channel (count + total)');
 ok(/class="tx"/.test(s) && (s.match(/data-tx=/g)||[]).length === 3, 'transaction table renders every transaction (the clutter)');
 ok(!/signals-on/.test(ELEMENTS.surf._class), 'with signals OFF the surface is NOT in signals-on mode');
+
+/* ---------- T3: the declared beneficial-ownership network (related_parties[], contract v0.3) ---------- */
+ok(/Beneficial-ownership network/.test(s), 'T3: the declared BO-graph panel renders from related_parties[]');
+ok(/beneficial owner · 55 pct/.test(s), 'T3: an ownership edge shows the relationship label + "N pct"');
+ok(/declared beneficial-ownership graph from the case KYC/.test(s), 'T3: the BO graph is framed declared-not-gathered (real emitted edges)');
+ok(/controls/.test(s), 'T3: a null-ownership control edge still renders its relationship label');
+ok(/sanctions/.test(s), 'T3: an owner KYC posture (sanctions on the beneficial owner) surfaces on the edge row');
+ok(!/55%/.test(s) && !/30%/.test(s), 'T3: ownership renders as "N pct", never the % symbol (the honesty rule)');
+ok(!/<img src=x onerror/.test(s) && s.includes(escH('<img src=x onerror=alert(1)>')), 'T3: XSS — a malicious party_id is esc()-escaped in the BO graph');
 
 /* ---------- BEAT 2: turn signals ON ---------- */
 T.toggleSignals(); s = ELEMENTS.surf._html;

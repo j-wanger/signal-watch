@@ -42,10 +42,15 @@ CLAIM_STANCES = ("inculpatory", "exculpatory")
 
 # Contract versions casework has validated its verifiers against. 0.1 is the original
 # cross-pillar contract; 0.2 (aml-substrate Phase 17, evidence.py CONTRACT_VERSION) adds the
-# optional, additive `parties` block. The set is enumerated deliberately: a bundle declaring an
-# UNVALIDATED version is a violation, not a silent pass -- you cannot consume a contract bump you
-# have not validated against (grounded-or-dropped applied to the contract itself).
-KNOWN_CONTRACT_VERSIONS = ("0.1", "0.2")
+# optional, additive `parties` block; 0.3 (aml-substrate Phase 25) adds the optional, additive
+# `related_parties` block (a label-stripped beneficial-ownership graph) — additive/back-compat, so a
+# v0.2 verifier ignores it (validate_bundle reads only known keys; _validate_parties tolerates extras).
+# casework validates v0.3 to the SAME bar as v0.2: the new block is read by no verifier yet (the
+# determination/network consume is signal-watch-side), so accepting it is sound. The set is enumerated
+# deliberately: a bundle declaring an UNVALIDATED version is a violation, not a silent pass -- you
+# cannot consume a contract bump you have not validated against (grounded-or-dropped applied to the
+# contract itself).
+KNOWN_CONTRACT_VERSIONS = ("0.1", "0.2", "0.3")
 
 # The 16-field PartyView allow-list the substrate projects into the v0.2 `parties` block (mirrors
 # aml_substrate.monitor.detectors.views.PartyView, serialized via to_dict). The projection TYPE is the

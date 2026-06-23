@@ -175,7 +175,8 @@ ZERO catch-rate / precision / lift / % number anywhere.
 
 ## Coverage is MEASURED, not assumed (the cross-pillar finding)
 
-The headline coverage number — **99 of 294 cases ground end-to-end** (Phase 66's wider slice; was 57/200) — is **measured**, not a capability
+The headline coverage number — **107 of 342 cases ground end-to-end** (Phase 71's merged v0.3 slice;
+was 99/294 in Phase 66, 57/200 in Phase 63) — is **measured**, not a capability
 proxy: `curate_workbench_cases.py --measure-casework` runs aml-casework's deterministic stub over every
 vendored bundle and records `grounds_e2e` per case.
 
@@ -232,26 +233,55 @@ combo-frequency gate is **demoted to context** — it decides *where* to spend j
 determination holds. `POST /determine` (pure; `scripts/evidence_requirements.py` `determine` / `serve_workbench
 determine_case`) returns the verdict; `named_risk` + `mitigation_rebutted` are the **human elicitation**.
 Insufficiency is a legitimate non-decision whose gaps NAME what to gather; the unmet, **non-gatherable** atoms
-become a **§12 substrate-signal brief** (what to build next). Measured over the population: every auto-clear
-case is `needs_more_info` from signals alone (no case reaches the ≥2-leg bar) — the defensive-filing exposure,
-concrete. The live execute-once held the honesty seam (zero structured-fact fabrication; the determination
-withholds honestly when the live gather under-closes). Full design: `docs/evidence-driven-filing.md`.
+become a **§12 substrate-signal brief** (what to build next). At Phase 69 the population was all-ML and
+**no case reached the ≥2-leg bar from signals alone** — the defensive-filing exposure, concrete. **Phase 71
+closes that loop** for the ML cases (see below). The live execute-once held the honesty seam (zero
+structured-fact fabrication; the determination withholds honestly when the live gather under-closes). Full
+design: `docs/evidence-driven-filing.md`.
+
+## The substrate v0.3 slice + the §12 loop closes (Phase 71)
+
+signal-watch adopts aml-substrate's **contract v0.3** slice (the substrate's Phase-25 emission, pinned
+`aml-substrate@443e4a6`; the vendored casework moves to `aml-casework@157554b` to accept v0.3 + cover the
+`fin-2025-a003` advisory). What changed on the consume side:
+
+- **The §12 loop closes from REAL signals.** A case now carries a mechanism **+ two corroborating legs from
+  real capabilities alone** — **C8** (ML-A3 profile-inconsistency) beside **C15 / `related_parties[]`** (ML-A4
+  network) — so a determination is **reachable from signals** (the human still names the predicate risk +
+  rebuts mitigation, the legitimate gate), **without** the GATHER corroboration the pre-v0.3 slice required.
+  Measured on the committed slice: **81 of 342 cases reach the ≥2-leg bar from real signals** (was 0).
+- **A case = a CUSTOMER (the merge).** The substrate emits the Class-G monitoring signals (C2-C5/C15) and the
+  C8 income-mismatch SCREEN to **separate** bundles under one case_id; `curate_workbench_cases` now **merges**
+  them (the prior dedup-keep-richer dropped the C8 screening leg, collapsing every ≥2-leg case). The slice
+  grew 294 → **342**; the gate funnel re-derived to **181 / 79 / 82**; coverage **107/342**.
+- **The declared beneficial-ownership network renders.** The bundle's `related_parties[]` (the real emitted BO
+  graph, contract v0.3 — `{party_id, label, ownership_pct, + KYC fields}`) renders as a labelled,
+  ownership-weighted network on the case page (`boGraphHTML`, reusing `liveGraphLayout`; ownership as **"N
+  pct"**, never "%"). This is the **real** emitted network the synthetic GATHER OSINT corpus stood in for.
+
+**Deferred (still substrate-emission gaps).** `kyc_integrity` end-to-end is **not** reachable here: the
+substrate **deliberately non-emits C14** (`cli.py` — "C8-ONLY (C26/C14 deliberate non-emission)"), so no kyc
+case reaches the consume path; likewise **C1** (anticipated-activity, a measured null at the substrate) and
+broader **C7**. Those stay named in the determination's `signal_brief` — a substrate-emission + casework-C14-
+verifier follow-on, not signal-watch-local (the A5 deferred-verifier boundary). Governor unchanged: this is
+determination-evidence **breadth** + network richness, **never** a catch-rate / detection-lift claim.
 
 ## Tests
 
 ```bash
-node tests/workbench.test.mjs                 # the full arc: clutter, signals-on, finale (signed + fail-closed), the GATING panel + knobs + the adjudication LOOP, XSS, both motion modes, no catch-rate/% vocabulary
-python3 scripts/serve_workbench.py --selftest # the companion: queue/detail, grounded walk, the live finale (stubbed) + the fail-closed disposition, the live GATE engine (funnel reproduced + monotone) + the elicitation LOOP (re-route + persists-nothing), §4.5 no-leak, pillar-status byte-stable
+node tests/workbench.test.mjs                 # the full arc: clutter, signals-on, the declared BO-graph (related_parties[] · "N pct" · XSS), finale (signed + fail-closed), the GATING panel + knobs + the adjudication LOOP, XSS, both motion modes, no catch-rate/% vocabulary
+python3 scripts/serve_workbench.py --selftest # the companion: queue/detail, grounded walk, the §12 closure (a case reaches the ≥2-leg determination from REAL signals — C8 ML-A3 + C15 ML-A4, no gather), the live finale (stubbed) + the fail-closed disposition, the live GATE engine (funnel reproduced + monotone) + the elicitation LOOP (re-route + persists-nothing), §4.5 no-leak, pillar-status byte-stable
 python3 scripts/curate_workbench_cases.py --selftest  # the committed slice: schema, exemplars span the gates, MEASURED coverage matches per-case grounds_e2e, route() faithful to the baked gate
 ```
 
 ## Deferred to follow-on phases
 
-- The substrate **determination-signal emission queue** (the real ownership graph + the internal legs —
-  anticipated-activity, source-of-funds, profile inconsistency — and a kyc/TF case slice; would let the
-  GATHER network + the determination atoms draw on real emitted signals rather than the synthetic corpus) —
-  **consolidated in Phase 70** (`docs/substrate-determination-signals-PLAN-BRIEF.md`, superseding the Phase-66
-  BO-graph brief); the consume side already renders the ownership shape. Sibling-executed.
+- The substrate **determination-signal emission queue** — **executed** (substrate Phase 25) **+ consumed**
+  (signal-watch Phase 71): the real ownership graph (`related_parties[]`) and the profile-inconsistency +
+  network legs (C8 + C15) now drive determinations from real signals. **Still open** (substrate-emission +
+  casework-verifier gaps): **C14** source-of-funds / KYC-integrity (deliberately non-emitted), **C1**
+  anticipated-activity (a measured null), broader **C7**, and a **TF** case slice — named in the
+  `signal_brief`; see `docs/substrate-determination-signals-PLAN-BRIEF.md`. Sibling-executed.
 - The **C3/C15 cross-pillar contract alignment** (substrate fan-in vs casework fan-out) — the
   composed-case grounding frontier.
 - A **real OSINT substrate** for the GATHER loop (a real screening list / registry feed) — out of scope
@@ -274,3 +304,9 @@ python3 scripts/curate_workbench_cases.py --selftest  # the committed slice: sch
 > ownership records **mirror the substrate `RelationshipEdge`** (the rendering prototype for the emitted BO
 > graph; ownership read from the record, never the model), and the **aml-substrate BO-graph emission handoff
 > brief**. Governor: demo-visible richness, never detection difficulty (single-signal-separable).
+>
+> **Adopted in Phase 71:** aml-substrate's **contract v0.3** slice — the `related_parties[]` BO graph renders
+> as the case network; a per-customer **merge** (monitoring + C8-screening bundles) lets a case reach the
+> **≥2-leg determination bar from REAL signals** (C8 ML-A3 + C15 ML-A4) — the **§12 loop closes** for the ML
+> cases (**81/342**; slice 294→342, funnel **181/79/82**, coverage **107/342**). kyc/C14/C1/C7 stay deferred
+> substrate-emission gaps. Casework moved to `@157554b` (accepts v0.3 + covers `fin-2025-a003`).

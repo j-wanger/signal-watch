@@ -7,6 +7,16 @@
 > **This brief SUPERSEDES & ABSORBS `docs/substrate-bo-graph-emission-PLAN-BRIEF.md`** (Phase 66). That brief
 > covered ONE determination leg (network/UBO); Phase 69–70 measured the *full* determination-evidence gap and
 > consolidates the asks into a single handoff so the sibling session has one queue, not a brief-per-gap.
+>
+> **STATUS (signal-watch Phase 71 — partially DELIVERED end-to-end).** The substrate **executed** the contract
+> half (Phase 25 @443e4a6 — `related_parties[]` v0.3 BO graph + a generated `source_of_funds` field + a
+> re-keyed C14) and signal-watch has now **consumed** it: a per-customer **merge** lets a case reach the
+> **≥2-leg determination bar from REAL signals** (C8 ML-A3 + C15 ML-A4 — 81/342 cases), and `related_parties[]`
+> renders as the case network. **STILL OPEN** (the remaining queue): the substrate **emits no C14** to bundles
+> (deliberate non-emission) → `kyc_integrity` / ML-A7 unreachable; **C1** anticipated-activity is a measured
+> null → ML-A6 unreachable; broader **C7**; a **TF** case slice; and the **casework C14-grounding verifier**
+> those v0.3 cases need to *sign* (not just determine). Parts 1–3 below are largely satisfied; part 4 (kyc/TF
+> emission) + the C1/C7/C14 detectors are the live remainder.
 
 ## Why this is the handoff (the §12 measurement)
 

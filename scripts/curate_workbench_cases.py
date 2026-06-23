@@ -54,7 +54,7 @@ CASES_JSON = OUT_DIR / "cases.json"
 
 BADGE = "Illustrative data & outputs"
 SUBSTRATE_REPO = "aml-substrate"
-SUBSTRATE_HEAD = "f90bd39"
+SUBSTRATE_HEAD = "443e4a6"   # Phase 71: the v0.3 emission (contract v0.3 — related_parties[] + SoF; Phase 25)
 RUN_ID = "seed0-n40000-m2"
 EMIT_COMMAND = ("PYTHONPATH=<substrate>/src <substrate>/.venv/bin/python -m aml_substrate.cli "
                 "--clients 40000 --months 2 --seed 0 --emergence --monitor --emit-evidence "
@@ -196,27 +196,69 @@ def _measure_grounding(bundle_paths: dict, casework_dir: Path) -> dict:
     return out
 
 
+def _merge_bundles(bundles: list) -> dict:
+    """Union a customer's monitoring + screening bundles into ONE case bundle (a case = a customer).
+    The substrate emits the Class-G monitoring signals (C2-C5/C15) and the C8 income-mismatch SCREEN to
+    SEPARATE bundles under the SAME case_id (same subject/account/txn universe); an investigator works the
+    customer whole. Base = the most-alert bundle (its str_record/dossier/parties/related_parties are
+    canonical); union the others' alerts (by alert_id) + transactions (by txn_id), preserving base order
+    then deterministic encounter order. Phase 71: the prior dedup-keep-richer DROPPED the C8 screening leg
+    whenever a monitoring mechanism co-existed, collapsing every ≥2-leg determination (the T1 probe — C8
+    is ML-A3 profile-inconsistency, the second leg beside C15/related_parties ML-A4 network)."""
+    base = max(bundles, key=lambda b: (len(b.get("alerts", [])), len(b.get("transactions", [])),
+                                       tuple(sorted(a.get("alert_id", "") for a in b.get("alerts", [])))))
+    ordered = [base] + [b for b in bundles if b is not base]
+    merged = dict(base)
+    seen_a, alerts = set(), []
+    seen_t, txns = set(), []
+    seen_p, rps = set(), []
+    for b in ordered:
+        for a in b.get("alerts", []):
+            aid = a.get("alert_id")
+            if aid and aid not in seen_a:
+                seen_a.add(aid); alerts.append(a)
+        for t in b.get("transactions", []):
+            tid = t.get("txn_id")
+            if tid and tid not in seen_t:
+                seen_t.add(tid); txns.append(t)
+        for rp in (b.get("related_parties") or []):
+            pid = rp.get("party_id")
+            if pid and pid not in seen_p:
+                seen_p.add(pid); rps.append(rp)
+    merged["alerts"] = alerts
+    merged["transactions"] = txns
+    merged["related_parties"] = rps
+    return merged
+
+
+_MERGE_TMP: list = []  # holds the per-run tempdir reference so it outlives the call (OS cleans /tmp)
+
+
 def _read_population(evidence_dir: Path) -> list:
-    """Read every emitted bundle (monitoring + screening run dirs) under <evidence_dir>. Returns a
-    sorted-by-case_id list of (path, bundle) — deterministic regardless of filesystem order."""
-    files = []
+    """Read every emitted bundle (monitoring + screening run dirs) under <evidence_dir> and MERGE per
+    customer (a case = a customer — see _merge_bundles). Returns a sorted-by-case_id list of
+    (merged_bundle_path, merged_bundle); each merged bundle is written to a process-temp file so the rest
+    of the pipeline (copyfile into bundles/, --measure-casework subprocess) is unchanged. Deterministic
+    regardless of filesystem order."""
+    by_id: dict = {}
     for sub in sorted(p.name for p in evidence_dir.iterdir() if p.is_dir()):
-        files += glob.glob(str(evidence_dir / sub / "*.json"))
-    pop = []
-    for f in sorted(set(files)):
-        try:
-            b = json.loads(Path(f).read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            continue
-        if b.get("case_id"):
-            pop.append((f, b))
-    # de-dup by case_id (a customer can appear in both monitoring + screening dirs): keep the richer one
-    by_id = {}
-    for f, b in pop:
-        cid = b["case_id"]
-        if cid not in by_id or len(b.get("alerts", [])) > len(by_id[cid][1].get("alerts", [])):
-            by_id[cid] = (f, b)
-    return [by_id[k] for k in sorted(by_id)]
+        for f in sorted(glob.glob(str(evidence_dir / sub / "*.json"))):
+            try:
+                b = json.loads(Path(f).read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            cid = b.get("case_id")
+            if cid:
+                by_id.setdefault(cid, []).append(b)
+    merge_dir = Path(tempfile.mkdtemp(prefix="sw-wb-merged-"))
+    _MERGE_TMP.append(merge_dir)
+    out = []
+    for cid in sorted(by_id):
+        merged = _merge_bundles(by_id[cid])
+        mp = merge_dir / f"{cid}.json"
+        mp.write_text(json.dumps(merged, ensure_ascii=False), encoding="utf-8")
+        out.append((str(mp), merged))
+    return out
 
 
 def select_slice(pop: list, combo_freq: dict, *, rich_cap: int, noise_cap: int,
@@ -341,7 +383,10 @@ def generate(evidence_dir: Path, *, rich_cap: int = DEFAULT_RICH_CAP,
             "run_id": RUN_ID,
             "emit_command": EMIT_COMMAND,
             "generated_note": ("synthetic substrate emission; GROUNDED detection (real advisory-grounded "
-                               "alerts over real KYC), ILLUSTRATIVE dispositions; display identities synthetic"),
+                               "alerts over real KYC), ILLUSTRATIVE dispositions; display identities synthetic. "
+                               "Phase 71: contract v0.3 (related_parties[] BO-graph + SoF); a case = a CUSTOMER "
+                               "(monitoring + C8-screening bundles MERGED) so the profile-inconsistency leg "
+                               "co-occurs with the network leg — the ≥2-leg determination becomes reachable"),
             "slice_rule": (f"the rare 4+-capability cases (cap {rich_cap}) + a 3-cap-band sample (20) + a "
                            f"deterministic sample of the 1-2-cap noise (cap {noise_cap}) + a combo-coverage "
                            "pass (>=1 representative of every population combo); sorted by case_id "
@@ -352,7 +397,7 @@ def generate(evidence_dir: Path, *, rich_cap: int = DEFAULT_RICH_CAP,
                 "groundable": n_groundable,
                 "total": len(cases),
                 "measured": measured,
-                "casework_pin": ("aml-casework@c6d8401" if measured else None),
+                "casework_pin": ("aml-casework@157554b" if measured else None),
                 "basis": ("MEASURED: cases aml-casework actually SIGNS end-to-end (drafter=stub; the six "
                           "Class-G verifiers independently re-derive each signal). Composed cases that "
                           "fail are a real substrate↔casework C3/C15 replay divergence — the gate "
@@ -464,6 +509,28 @@ def selftest() -> int:
     bad_disp["cases"][0]["confidence"].pop("disposition_basis", None)
     if not any("ILLUSTRATIVE" in p for p in validate(bad_disp)):
         failures.append("validate() failed to catch a disposition not labeled ILLUSTRATIVE (honesty gate)")
+
+    # _merge_bundles behaviour (the Phase-71 §12-closure mechanism — a case = a customer): union caps +
+    # alerts, DEDUPE shared txns, related_parties from the bundle that has them, base = the most-alert bundle.
+    _mon = {"case_id": "C-X", "contract_version": "0.3", "subject": {"customer_id": "X"},
+            "parties": [{"party_id": "X"}], "related_parties": [{"party_id": "O-1", "label": "OWNS"}],
+            "alerts": [{"alert_id": "a1", "capability": "C2"}, {"alert_id": "a2", "capability": "C15"}],
+            "transactions": [{"txn_id": "t1"}, {"txn_id": "t2"}]}
+    _scr = {"case_id": "C-X", "contract_version": "0.3", "subject": {"customer_id": "X"},
+            "parties": [{"party_id": "X"}], "related_parties": [],
+            "alerts": [{"alert_id": "a3", "capability": "C8"}],
+            "transactions": [{"txn_id": "t2"}, {"txn_id": "t3"}]}   # t2 overlaps -> must dedupe
+    _mg = _merge_bundles([_scr, _mon])   # order-independent: base = the most-alert bundle (_mon)
+    if _caps(_mg) != ["C15", "C2", "C8"]:
+        failures.append(f"_merge_bundles should union caps to C2+C8+C15, got {_caps(_mg)}")
+    if sorted(t["txn_id"] for t in _mg["transactions"]) != ["t1", "t2", "t3"]:
+        failures.append(f"_merge_bundles should DEDUPE the shared txn t2, got {[t['txn_id'] for t in _mg['transactions']]}")
+    if [r["party_id"] for r in _mg["related_parties"]] != ["O-1"]:
+        failures.append(f"_merge_bundles should carry related_parties from the bundle that has them, got {_mg['related_parties']}")
+    if len(_mg["alerts"]) != 3:
+        failures.append(f"_merge_bundles should union all 3 alerts, got {len(_mg['alerts'])}")
+    if _caps(_merge_bundles([_mon])) != ["C15", "C2"]:   # a single-bundle merge is idempotent on caps
+        failures.append("_merge_bundles of one bundle should equal that bundle's caps")
 
     # confidence mechanic monotonicity: a larger precedent sample never yields a STRICTER gate
     order = {"auto-clear": 0, "review": 1, "human-gate": 2}

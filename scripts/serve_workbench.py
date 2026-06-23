@@ -822,7 +822,8 @@ def selftest() -> int:
                             mitigation_rebutted=True)
     if d_full["determination"]["verdict"] != "determination" or not d_full["determination"]["sufficient"]:
         failures.append(f"the mule with gather+risk+mitigation should reach a determination, got {d_full['determination']}")
-    # the contrast is real: at least one auto-clear case is NOT a determination from signals (defensive filing)
+    # the contrast is real: an auto-clear case is NOT an auto-determination from signals alone — the
+    # named-risk + mitigation gate (the human's job) is unmet, so frequency never substitutes for it.
     auto_clear = next((c for c in index["cases"] if c["confidence"]["gate"] == "auto-clear"), None)
     if auto_clear:
         dc = determine_case(auto_clear["case_id"])
@@ -830,7 +831,39 @@ def selftest() -> int:
             failures.append("an auto-clear case's frequency context should read auto-clear")
         if dc["determination"]["verdict"] == "determination":
             failures.append("an auto-clear case should NOT be an auto-determination from signals alone "
-                            "(no case reaches the >=2-leg bar without corroboration — the thesis)")
+                            "(the named-risk + mitigation gate is unmet — frequency never substitutes)")
+
+    # ---- Phase 71: the §12 LOOP CLOSES from REAL signals (the substrate v0.3 internal legs) ----
+    # The merged v0.3 slice lets a case carry a mechanism + TWO corroborating legs from REAL capabilities
+    # ALONE — C8 (ML-A3 profile-inconsistency) beside C15/related_parties (ML-A4 network) — so a
+    # determination is REACHABLE from signals (the human still NAMES the risk + rebuts mitigation, the
+    # legitimate gate), WITHOUT the GATHER corroboration the pre-v0.3 slice required. kyc_integrity / C1 /
+    # C7 stay substrate-emission gaps (deferred — surfaced honestly via signal_brief).
+    _LEG_IDS = ("ML-A3", "ML-A4", "ML-A5", "ML-A6", "ML-A7")
+    prof_st = _requirements()
+    twoleg = next((c for c in index["cases"]
+                   if crime_type_for_capabilities(_entry_caps(c), prof_st) == "money_laundering"
+                   and len(set(present_atoms("money_laundering", _entry_caps(c), prof_st)) & set(_LEG_IDS)) >= 2),
+                  None)
+    if not twoleg:
+        failures.append("§12 closure: NO case reaches >=2 legs from REAL signals (the v0.3/merge adoption "
+                        "regressed — expected C8 ML-A3 + C15 ML-A4 cases from the merged slice)")
+    else:
+        d_real = determine_case(twoleg["case_id"], named_risk="drug trafficking", mitigation_rebutted=True)
+        det = d_real["determination"]
+        if det["verdict"] != "determination" or not det["sufficient"]:
+            failures.append(f"§12 closure: a >=2-leg case + named risk + mitigation should reach a "
+                            f"determination from REAL signals (no gather), got {det}")
+        legs_present = [a for a in det["completeness"]["present_atom_ids"] if a in _LEG_IDS]
+        if len(legs_present) < 2:
+            failures.append(f"§12 closure: the determination should rest on >=2 REAL-signal legs, got {legs_present}")
+        # the SAME case WITHOUT the human inputs is WITHHELD — the gate is real, not auto from frequency/legs
+        if determine_case(twoleg["case_id"])["determination"]["verdict"] == "determination":
+            failures.append("§12: a >=2-leg case must still WITHHOLD without a named risk + rebutted mitigation")
+        # the deferred gaps surface honestly (the §12 substrate brief is still named — C1/C14 etc. unmet)
+        if not det.get("signal_brief"):
+            failures.append("§12: the determination should still carry a signal_brief naming the deferred "
+                            "substrate gaps (C1 anticipated-activity / C14 source-of-funds)")
     # an unknown case is a NAMED error, not a crash
     try:
         determine_case("CASE-DOES-NOT-EXIST"); failures.append("determine_case on an unknown case should raise")
@@ -879,6 +912,8 @@ def selftest() -> int:
           f"live route() reproduces it + monotone; coverage "
           f"{cases['meta']['coverage']['groundable']}/{cases['meta']['coverage']['total']}; "
           f"mule detail grounds {len(detail['signals'])}/{len(detail['signals'])} signals; "
+          f"§12 closure: {twoleg['case_id'] if twoleg else 'NONE'} reaches a determination from REAL signals "
+          f"(C8 ML-A3 + C15 ML-A4, no gather); "
           f"stubbed finale {seq} -> CONNECTED; pillar-status byte-stable)")
     return 0
 

@@ -624,7 +624,7 @@ function liveGraphLayout(entities, relationships, mains, W, H){
   (relationships || []).forEach(r => {
     if(!r || !r.from || !r.to || r.from === r.to) return;
     [r.from, r.to].forEach(n => { if(!seen.has(n)){ seen.add(n); names.push(n); } });
-    edges.push({ from: r.from, to: r.to, label: r.label || '', evidence: r.evidence || '' });
+    edges.push({ from: r.from, to: r.to, label: r.label || '', ownership_pct: (r.ownership_pct!=null?r.ownership_pct:null), evidence: r.evidence || '' });
   });
   const mainSet = new Set((mains || []).filter(n => seen.has(n)));
   const inner = names.filter(n => mainSet.has(n));
@@ -674,6 +674,46 @@ function gatherGraphHTML(graph){
     h+='<div class="gerow'+(open?' open':'')+'" data-ei="'+i+'"><span class="gw">'+esc(e.from)+'</span><span class="gl">—'+edgeLabel(e)+'→</span><span class="gw">'+esc(e.to)+'</span>'
      +(open?'<div class="gev">“'+esc(e.evidence)+'”</div>':'')+'</div>';});
   h+='</div>';
+  return h;
+}
+/* the DECLARED beneficial-ownership graph from the case bundle (related_parties[], contract v0.3 — the
+   REAL emitted network the GATHER OSINT corpus stood in for). Synthetic KYC; ownership_pct → "N pct"
+   (never "%"); NO catch-rate/lift — demo-visible network richness + KYC-control depth, not detection
+   difficulty. esc() on every value. Renders only when the bundle carries related parties. */
+function boRiskTag(p){
+  const t=[];
+  if(p.sanctions_flag) t.push('sanctions');
+  if(p.adverse_media_flag) t.push('adverse media');
+  if(p.pep_tier&&p.pep_tier!=='NONE') t.push('PEP');
+  if(p.risk_rating) t.push(esc(String(p.risk_rating).toLowerCase())+' risk');
+  return t.join(' · ');
+}
+function boGraphHTML(bundle){
+  const rps=(bundle&&bundle.related_parties)||[];
+  if(!rps.length) return '';
+  const subj=((bundle.parties||[{}])[0]||{}).party_id || (bundle.subject||{}).customer_id || 'subject';
+  const entities=[{name:subj}].concat(rps.map(p=>({name:String(p.party_id||'')})));
+  const rels=rps.map(p=>({from:subj,to:String(p.party_id||''),label:ownLabel(p.label),
+    ownership_pct:(p.ownership_pct!=null?p.ownership_pct:null),
+    evidence:(p.is_person?'person':'entity')+(boRiskTag(p)?' · '+boRiskTag(p):'')+' · CDD '+esc(p.cdd_level||'?')}));
+  const g=liveGraphLayout(entities,rels,[subj]);
+  const P={}; g.nodes.forEach(n=>P[n.name]=n);
+  let h='<div class="pnl span"><div class="ph">Beneficial-ownership network '
+    +'<span style="color:var(--faint)">declared KYC ownership · '+esc(rps.length)+' related part'+(rps.length===1?'y':'ies')+'</span></div>';
+  h+='<div class="gnet"><div class="gnh">Network <span class="gnl">declared beneficial-ownership graph from the case KYC (synthetic) — real emitted edges, not gathered</span></div>';
+  h+='<svg class="gnsvg" viewBox="0 0 '+g.w+' '+g.h+'" role="img" aria-label="declared beneficial-ownership network (synthetic KYC)">';
+  g.edges.forEach(e=>{const f=P[e.from],t=P[e.to]; if(!f||!t)return;
+    h+='<g class="gge"><line x1="'+f.x+'" y1="'+f.y+'" x2="'+t.x+'" y2="'+t.y+'"></line>'
+     +'<text x="'+Math.round((f.x+t.x)/2)+'" y="'+(Math.round((f.y+t.y)/2)-4)+'">'+edgeLabel(e)+'</text></g>';});
+  g.nodes.forEach(n=>{const lbl=n.name.length>20?n.name.slice(0,19)+'…':n.name;
+    h+='<g class="ggn'+(n.main?' ggm':'')+'"><circle cx="'+n.x+'" cy="'+n.y+'" r="'+(n.main?9:6)+'"></circle>'
+     +'<text x="'+n.x+'" y="'+(n.y-(n.main?13:10))+'">'+esc(lbl)+'</text></g>';});
+  h+='</svg>';
+  rps.forEach(p=>{const tag=boRiskTag(p);
+    h+='<div class="gerow"><span class="gw">'+esc(subj)+'</span><span class="gl">—'+esc(ownLabel(p.label))
+     +(p.ownership_pct!=null?' · '+esc(p.ownership_pct)+' pct':'')+'→</span><span class="gw">'+esc(String(p.party_id||''))+'</span>'
+     +(tag?'<div class="gev">'+tag+'</div>':'')+'</div>';});
+  h+='</div></div>';
   return h;
 }
 function gatherStagesHTML(){
@@ -901,6 +941,7 @@ function paintSurface(loading){
       <div class="pnl span"><div class="ph">Counterparties <span style="color:var(--faint)">${esc(txns.length)} transactions</span></div>
         <div class="chips" style="margin-bottom:10px">${counterpartySummary(txns)}</div>
         ${txTable(txns)}</div>
+      ${boGraphHTML(b)}
     </div>
     ${walkHTML()}
     ${gatherPanelHTML()}
@@ -974,6 +1015,7 @@ if(typeof module!=='undefined'&&module.exports){ module.exports={
   toggleSignals,selectCase,pickBackend,
   liveGate,liveFunnel,setGate,renderGate,loadGate,onKnob,resetGating,doAdjudicate,adjudControlHTML,
   runGather,applyGather,gatherPanelHTML,gatherResultHTML,gatherGraphHTML,liveGraphLayout,toolLabel,kindLabel,
+  boGraphHTML,boRiskTag,ownLabel,edgeLabel,
   _state:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ,GATHER}),
   _set:(s)=>{ if(s.META!==undefined)META=s.META; if(s.QUEUE!==undefined)QUEUE=s.QUEUE; if(s.SEL!==undefined)SEL=s.SEL; if(s.DETAIL!==undefined)DETAIL=s.DETAIL; if(s.SIGNALS!==undefined)SIGNALS=s.SIGNALS; if(s.RUN!==undefined)RUN=s.RUN; if(s.GATE!==undefined)setGate(s.GATE); if(s.POLICY!==undefined)POLICY=s.POLICY; if(s.ADJ!==undefined)ADJ=s.ADJ; if(s.GATHER!==undefined)GATHER=s.GATHER; },
   paintSurface,renderQueue,renderPop,riskPanel,walkHTML,ledgerHTML,CANON }; }

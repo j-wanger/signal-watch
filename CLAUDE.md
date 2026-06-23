@@ -260,11 +260,16 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   predicate risk + no unrebutted mitigation), NOT combo-FREQUENCY (the Phase-64 gate is DEMOTED to context);
   GATHER is requirement-TARGETED (seek the unmet closeable atoms — UBO/corroboration — record-sourced) + Phase-70
   MEASURED: a `coverage` block measures the LIVE extraction vs the deterministic StubPlanner REFERENCE
-  (consistency-not-correctness; the fix = the live `findings()` prompt seeing each record's declared entities +
-  extracting a finding per record; pinned via `tests/gather_quality_harness.py --check`, no model); the
-  unmet, non-gatherable atoms become the §12 substrate-signal BRIEF
-  (`docs/substrate-determination-signals-PLAN-BRIEF.md` — the consolidated build queue, supersedes the BO-graph
-  brief); the chain workbench
+  (consistency-not-correctness; pinned via `tests/gather_quality_harness.py --check`, no model). Phase 71 ADOPTS
+  the substrate's contract-v0.3 slice (`aml-substrate@443e4a6`; vendored `aml-casework@157554b` accepts v0.3 +
+  covers `fin-2025-a003`): `curate_workbench_cases` MERGES each customer's monitoring + C8-screening bundles (a
+  case = a customer) so C8 (ML-A3 profile-inconsistency) co-occurs with C15/`related_parties[]` (ML-A4 network),
+  and the **§12 loop CLOSES from REAL signals** — a case reaches the ≥2-leg determination bar without GATHER
+  (81/342; slice 294→342, funnel 181/79/82, coverage 107/342). The bundle's `related_parties[]` BO graph renders
+  as the case network (`boGraphHTML`; "N pct"). Still-deferred substrate-emission gaps (named in `signal_brief`):
+  C14 source-of-funds / `kyc_integrity` (substrate non-emits C14), C1 anticipated-activity (a measured null),
+  broader C7, a TF slice — the consolidated §12 BRIEF (`docs/substrate-determination-signals-PLAN-BRIEF.md`,
+  supersedes the BO-graph brief). The chain workbench
   renders the structured STR's COMPLETENESS (the previously-dropped fields surfaced honest-NULL). Doc:
   `docs/evidence-driven-filing.md`. `aml-casework` is VENDORED into `vendor/aml-casework/` (its src + a
   cross-platform WHEEL under `dist/` + its pinned corpus snapshot under `fixtures/corpus/`); resolution =

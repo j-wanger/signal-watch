@@ -143,17 +143,41 @@ model** and asserts the outcome still matches the baseline *and* the stub refere
 `--freeze` re-captures from a live model (synthetic corpus → no compliance gate) and
 refuses to baseline a capture that falls under the reference.
 
+## The §12 loop closes — from REAL signals (Phase 71)
+
+Phase 69 measured **zero** cases reaching the ≥2-leg bar from signals alone (the
+defensive-filing exposure); Phase 70 made GATHER close the *external* legs. Phase 71
+closes the loop from **internal** signals by adopting aml-substrate's **contract v0.3**
+slice (substrate Phase 25, pinned `@443e4a6`):
+
+- A case = a **customer**: `curate_workbench_cases` now **merges** the substrate's separate
+  monitoring (C2-C5/C15) and C8-screening bundles, so the **profile-inconsistency** leg
+  (C8 → ML-A3) co-occurs with the **network** leg (C15 / `related_parties[]` → ML-A4).
+- Result (committed merged v0.3 slice, **342 cases**): **81 cases reach the ≥2-leg bar
+  from REAL signals** — a mechanism + ML-A3 + ML-A4 — so with a named predicate risk + a
+  rebutted mitigation they reach a **determination** *without* GATHER. The §12 ML loop
+  closes. (Funnel re-derived **181/79/82**; end-to-end coverage **107/342**.)
+- The bundle's **`related_parties[]`** (the real emitted BO graph) renders as the case
+  network (`boGraphHTML`; "N pct", never "%").
+
+**Still gaps (named in every `signal_brief`).** `source_of_funds` / **C14** KYC-integrity
+(the substrate *deliberately non-emits* C14), **C1** anticipated-activity (a substrate
+measured null), broader **C7**, and a **kyc/TF** case slice — substrate-emission + a
+casework C14-verifier follow-on, not signal-watch-local. The honesty governor holds: this
+is determination-evidence **breadth**, never a catch-rate / detection-lift claim.
+
 ## Deferred — Phase 71+
 
 - **Roll the sufficiency model across the triage + gate consoles** (`triage.html`,
   `console.html`) — the determination grammar there is still disposition-only.
-- **The substrate determination-signal build queue.** The demo resolves a *synthetic*
-  display identity and gathers a *synthetic* OSINT corpus; the **internal** determination
-  legs (anticipated-activity, source-of-funds, profile inconsistency), the **real**
-  ownership graph at source, and a **kyc_integrity / TF case slice** must be built in
-  aml-substrate. Phase 70 consolidated every §12 ask — derived from the population's
-  non-gatherable gap — into ONE handoff:
-  **`docs/substrate-determination-signals-PLAN-BRIEF.md`** (it supersedes the Phase-66
+- **The substrate determination-signal build queue — partially closed.** Phase 71
+  consumed the BO graph (`related_parties[]`) + the profile-inconsistency/network legs
+  (C8 + C15), so the §12 ML loop closes from real signals (above). **Still open:**
+  **C14** source-of-funds / KYC-integrity (deliberately non-emitted by the substrate),
+  **C1** anticipated-activity (a substrate measured null), broader **C7**, and a
+  **kyc_integrity / TF case slice** — plus the casework **C14-grounding verifier** needed
+  for those v0.3 cases to *sign* (not just determine). Consolidated handoff:
+  **`docs/substrate-determination-signals-PLAN-BRIEF.md`** (supersedes the Phase-66
   BO-graph brief). Sibling-executed; build.py untouched.
 
 See also `docs/case-workbench.md`, `docs/chain-workbench.md`, and the program

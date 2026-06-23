@@ -1,16 +1,16 @@
 # Active Phase Context
 
-**Phase 70 — *Gather extraction quality (measured) + the consolidated §12 substrate handoff*** (signal-watch-local, LITE) — DELIVERED + accepted 2026-06-22. **No active signal-watch-local phase now — run `/dev-plan` for the next.**
+**Phase 71 — *Adopt the substrate v0.3 slice; close the §12 determination loop in the workbench*** (signal-watch-local, LITE) — DELIVERED 2026-06-23; READY FOR COMPLETION (delivery accepted by the user via /dev-debrief). **No active signal-watch-local phase now — run `/dev-plan` for the next.**
 
 ## Status
-**COMPLETE — T1–T5 ALL [x]; delivery accepted by the user 2026-06-22 (LITE).** The orchestrator flips the delivery gate after the commit verifies. The named Phase-69 follow-on RESOLVED: measured the live GATHER's recall vs the deterministic StubPlanner reference (consistency-not-correctness, NOT model-tuning), diagnosed the surface (the `LivePlanner.findings()` prompt — A1 down-scope), fixed both LivePlanner prompts → **coverage 0.5→1.0, ML-A5 closes, the determination becomes reachable.** Pinned a deterministic replay fixture + a coverage-regression gate (`tests/gather_quality_harness.py`) + an honest-truncation backstop. The consolidated `docs/substrate-determination-signals-PLAN-BRIEF.md` absorbs/supersedes the BO-graph brief (now a redirect stub), pinned aml-substrate@b53855c. Two adversarial review workflows ran (3 metric issues + 2 brief factual errors + 4 harness/honesty refinements fixed). Companion-only; `--check all` 8/8 ZERO dist drift; build.py imports none of it; `uv run pytest` 19→20.
+**COMPLETE — T1–T5 ALL [x]; delivery accepted by the user 2026-06-23 (LITE).** The orchestrator flips the delivery gate after the commit verifies. **The §12 loop CLOSES: 0→81 cases reach the ≥2-leg ML determination bar from REAL signals** via `evidence_requirements.determine` (pure signal-watch). The T1 measure-first PROBE bent the plan productively (user gate at the STOP+REPORT): (1) the substrate DELIBERATELY non-emits C14 → **kyc DEFERRED** (a §12 substrate-emission gap); (2) the closure needed a **per-customer MERGE** (`_merge_bundles`) — the closure leg pair is **C8 (ML-A3) + C15/related_parties (ML-A4)**, NOT the brief's C1/C7/C14. Full E2E: casework v0.3 acceptance bump + a `fin-2025-a003` corpus file + re-vendor (VENDORED_AT 021fb80→**157554b**); the 11 T1 regressions were all corpus-pin (SOURCE-COVERAGE, not pin-staleness). `boGraphHTML` renders the real BO network. Slice 294→342, coverage 99/294→107/342, funnel 189/66/39→181/79/82. Companion-only; `--check all` 8/8 ZERO drift; build.py imports none of it; workbench.test.mjs 117→124; `uv run pytest` 20.
 
-## Phase 71+ candidates
-The substrate determination-signal build queue (the consolidated brief: SoF data + C1/C7/C14 detectors + BO-graph emission + a kyc/TF case slice — sibling aml-substrate) · roll the sufficiency model across the triage + gate consoles (still disposition-only) · the MAX_ITERS=4 / live-vs-stub order divergence is a latent gather-robustness follow-on (the honest-truncation backstop handles it; a deeper-chain corpus would want the cap scaled).
+## Phase 72+ candidates
+SIBLING (substrate + casework): the casework C14-grounding verifier + the substrate C14/C1/C7/TF emission → make v0.3 cases SIGN (not just determine) + exercise kyc/TF end-to-end (the §12 brief's open remainder) · roll the determination/sufficiency model across the triage + gate consoles (still disposition-only) · gather robustness (MAX_ITERS / live-vs-stub order; a deeper-chain corpus for the cap) — carried from Phase 70.
 
 ## Gates
-- [x] spec — waived under LITE ceremony (the assumption-ledger gate IS the direction gate, Phase-67/68/69 precedent)
-- [x] Direction confirmed by user (assumption positions taken 2026-06-22; A0 accept, A1 don't-know→down-scope, A2/A3 accept, A4 reject→consolidate)
-- [x] Delivery accepted (post-implementation report 2026-06-22; user ran /dev-debrief accept)
+- [x] spec — waived under LITE ceremony (the assumption-ledger gate IS the direction gate, Phase-67/68/69/70 precedent)
+- [x] Direction confirmed by user (assumption positions taken 2026-06-23; A0 accept, A1/A2 don't-know→T1 probe, A3/A4/A5/A6 accept; all_accept:false)
+- [ ] Delivery accepted
 
-Plan [[phases/phase-70-gather-quality-substrate-handoff]]; ledger Phase-70.
+Plan [[phases/phase-71-substrate-v03-slice-determination-loop]]; ledger Phase-71.

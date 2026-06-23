@@ -1,9 +1,9 @@
 aml-casework vendored into signal-watch — Phase 67 (make the live workbench shippable from a bare clone).
 
-commit:      021fb80
+commit:      157554b
 branch:      feat/phase-1a-deterministic-verifiers
 uncommitted-in-sibling-at-vendor-time: 4 file(s)
-vendored-at: 2026-06-22T19:51:23Z
+vendored-at: 2026-06-23T15:18:49Z
 source:      /Users/jwang/signal-watch/../aml-casework  (a sibling repo; local-only / no git remote at vendor time — hence a vendored copy,
                     not a git submodule)
 

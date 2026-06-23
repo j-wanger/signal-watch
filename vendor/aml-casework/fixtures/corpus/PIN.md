@@ -1,7 +1,9 @@
 # Vendored corpus snapshot — pinned
 
 **Pin:** `signal-watch@a75a136`
-**Source:** `signal-watch:data/fincen-alerts/derived/`
+**Source:** `signal-watch:data/fincen-alerts/derived/` + `signal-watch:data/fincen/derived/` (the fincen
+ADVISORY series — added when the substrate began grounding alerts to `fin-2025-a003`; all blobs from the
+SAME pin, so the pin stays honest)
 **Vendored via:** `git show a75a136:<path>` (the pinned blob, not a working-tree copy)
 
 These are read-only, pinned copies of the FROZEN signal-watch corpus indicators that the casework
@@ -25,6 +27,9 @@ reads them as DATA — it never imports signal-watch engine code, and it never w
 - `fincen-alerts/derived/fin-2020-alert001.json` — carries `IND-05` (capability C3 funnel/fan) — added Phase 6
 - `fincen-alerts/derived/fin-2023-alert001.json` — carries `IND-03` (capability C2 pass-through) — added Phase 6
 - `fincen-alerts/derived/fin-2022-alert002.json` — carries `IND-08` (capability C5 cash-placement) — added Phase 6
+- `fincen-alerts/derived/fin-2025-a003.json` — the fincen ADVISORY (18 indicators; grounds the substrate's
+  C15 escrow/shell flag `IND-10` et al.) — added for the signal-watch Phase-71 v0.3 adoption (the substrate
+  @443e4a6 grounds some alerts to this advisory; it lives in `data/fincen/derived/`, not `fincen-alerts/`)
 
 The Phase-6 trio grounds the C2/C3/C5 alerts of the first REAL consumed bundle (CASE-P-0010361, a
 5-typology mule). Each record's indicator flag was confirmed at vendor time to CONTAIN the bundle's

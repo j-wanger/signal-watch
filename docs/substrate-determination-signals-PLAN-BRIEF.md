@@ -17,6 +17,14 @@
 > null → ML-A6 unreachable; broader **C7**; a **TF** case slice; and the **casework C14-grounding verifier**
 > those v0.3 cases need to *sign* (not just determine). Parts 1–3 below are largely satisfied; part 4 (kyc/TF
 > emission) + the C1/C7/C14 detectors are the live remainder.
+>
+> **→ THE LIVE REMAINDER IS NOW A COHERENT 3-REPO HANDOFF SET (drafted signal-watch Phase 71+, pins
+> aml-substrate@443e4a6 · aml-casework@157554b · signal-watch@59a7417):**
+> [`substrate-determination-signals-kyc-c14-PLAN-BRIEF.md`](substrate-determination-signals-kyc-c14-PLAN-BRIEF.md)
+> (EMIT the C14 kyc slice) + [`casework-c14-kyc-grounding-PLAN-BRIEF.md`](casework-c14-kyc-grounding-PLAN-BRIEF.md)
+> (GROUND it so it SIGNs) + [`cross-pillar-sign-path-COHERENCE.md`](cross-pillar-sign-path-COHERENCE.md) (the
+> single shared C14 predicate + the EMIT｜GROUND｜CONSUME table — the anti-drift guard). The `@b53855c` pin in
+> this brief's header is the Phase-24 authoring pin; the work landed at `@443e4a6` (see the remainder briefs).
 
 ## Why this is the handoff (the §12 measurement)
 

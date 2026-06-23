@@ -258,8 +258,13 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   measured determination-licensing ATOMS) + `scripts/evidence_requirements.py` (load/validate + the pure
   `determine` verdict); the decision is licensed by sufficiency (mechanism + ≥2 corroborating legs + a NAMED
   predicate risk + no unrebutted mitigation), NOT combo-FREQUENCY (the Phase-64 gate is DEMOTED to context);
-  GATHER is requirement-TARGETED (seek the unmet closeable atoms — UBO/corroboration — record-sourced); the
-  unmet, non-gatherable atoms become a §12 substrate-signal BRIEF (what to build next); the chain workbench
+  GATHER is requirement-TARGETED (seek the unmet closeable atoms — UBO/corroboration — record-sourced) + Phase-70
+  MEASURED: a `coverage` block measures the LIVE extraction vs the deterministic StubPlanner REFERENCE
+  (consistency-not-correctness; the fix = the live `findings()` prompt seeing each record's declared entities +
+  extracting a finding per record; pinned via `tests/gather_quality_harness.py --check`, no model); the
+  unmet, non-gatherable atoms become the §12 substrate-signal BRIEF
+  (`docs/substrate-determination-signals-PLAN-BRIEF.md` — the consolidated build queue, supersedes the BO-graph
+  brief); the chain workbench
   renders the structured STR's COMPLETENESS (the previously-dropped fields surfaced honest-NULL). Doc:
   `docs/evidence-driven-filing.md`. `aml-casework` is VENDORED into `vendor/aml-casework/` (its src + a
   cross-platform WHEEL under `dist/` + its pinned corpus snapshot under `fixtures/corpus/`); resolution =
@@ -303,6 +308,9 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
     [pure liveProcBody/liveProcKeyAction: key guard, Esc arm/abandon]) + the offline strip assertion.
   - `python3 tests/news_quality_harness.py --check` — the extraction-quality REGRESSION GATE
     (deterministic replay of all pinned captures + committed records vs the committed baseline).
+  - `python3 tests/gather_quality_harness.py --check` — the GATHER extraction-coverage REGRESSION GATE
+    (Phase 70: replay the pinned live capture with NO model; assert finding_coverage/target-closure still
+    match the baseline + the deterministic StubPlanner reference; `--freeze` re-captures from a live model).
   - `python3 scripts/derive_signals.py --selftest` — the derivation GATE checks + anchor fixtures.
   - `python3 tests/news_live_test.py` — the live pipeline: build_record + grounding, the 13-fixture
     REPLAY (goldens, no model; US-federal FIXTURE_META allowlist asserted), the second-pass verify,

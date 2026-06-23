@@ -377,6 +377,10 @@ def run_gather(case_id: str, *, on_stage, backend: str | None = None, env: dict 
                    for tid in closed_ids if tid in target_ids],
         "still_open": [{"id": t["id"], "label": t["label"]} for t in targets if t["id"] not in closed_ids],
     }
+    # Phase 70 — the requirement-targeted CLOSURE rate (the second coverage dimension: of the unmet atoms a
+    # gather COULD close, how many it did). 1.0 == the gather closed every closeable gap (the stub reference).
+    req = result["requirement"]
+    req["target_closure"] = round(len(req["closed"]) / len(targets), 3) if targets else None
     return result
 
 
@@ -787,6 +791,18 @@ def selftest() -> int:
         failures.append(f"gather should TARGET the unmet corroboration atom ML-A5, got {req.get('targets')}")
     if "ML-A5" not in [c["id"] for c in req.get("closed", [])]:
         failures.append(f"gather should CLOSE ML-A5 from the record-sourced sanctions/adverse findings, got {req.get('closed')}")
+    # Phase 70 — the COVERAGE measuring stick: the stub is the deterministic REFERENCE. It grounds a finding
+    # from EVERY record its tools surface (coverage complete) and CLOSES every targeted atom (closure complete)
+    # — the bar a live gather's coverage is measured against (consistency, not a catch-rate).
+    cov = gout.get("coverage") or {}
+    if cov.get("records_returned", 0) < 3 or cov.get("finding_coverage") != 1.0 or cov.get("complete") is not True:
+        failures.append(f"the stub reference should achieve complete extraction coverage, got {cov}")
+    if set(cov.get("grounded_record_ids", [])) - set(cov.get("returned_record_ids", [])):
+        failures.append("grounded_record_ids must be a subset of returned_record_ids (the coverage invariant)")
+    if req.get("target_closure") != 1.0:
+        failures.append(f"the stub should CLOSE every targeted atom (full reference closure), got {req.get('target_closure')}")
+    if "coverage" not in gseq:
+        failures.append(f"gather should emit a 'coverage' stage for the live processing page, got {gseq}")
     # PERSISTS NOTHING: the committed slice + the OSINT corpus are byte-identical after a gather ran
     if disk_before != (CASES_JSON.read_bytes(), sorted(p.name for p in BUNDLES_DIR.iterdir())):
         failures.append("a gather run must persist NOTHING — cases.json/bundles changed on disk")

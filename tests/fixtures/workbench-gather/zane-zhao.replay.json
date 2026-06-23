@@ -1,0 +1,41 @@
+{
+  "note": "Phase 70 — pinned LIVE gather capture (a local model), replayed deterministically with NO model in --check. The corpus is SYNTHETIC, so re-capture carries no compliance gate. The 'expected' block is the coverage-regression baseline; --freeze is the conscious re-baseline.",
+  "model": "local",
+  "subject": "Zane Zhao",
+  "counterparties": [
+    "CP-A-00007959-r02",
+    "CP-A-00007959-r04",
+    "CP-A-00007959-r06",
+    "CP-A-00007959-r08",
+    "CP-A-00007959-r10",
+    "CP-A-00007959-r12",
+    "CP-A-00007959-r14",
+    "CP-A-00007959-r16",
+    "CP-A-00007959-r18",
+    "CP-A-00007959-r20",
+    "CP-A-00007959-r22",
+    "CP-A-00007959-r01"
+  ],
+  "responses": [
+    "{\"action\":\"call_tool\",\"tool\":\"lookup_registry\",\"query\":\"Zane Zhao\"}",
+    "{\n  \"findings\": [\n    {\n      \"record_id\": \"rg-zz-01\",\n      \"quote\": \"Zane Zhao is recorded as the sole beneficial owner of Crescent Dunes Trading FZE and a director of Meridian Nominee Services Ltd, both Ras Al Khaimah free-zone companies.\",\n      \"finding\": \"Zane Zhao holds sole beneficial ownership of Crescent Dunes Trading FZE.\",\n      \"entity\": \"Zane Zhao\",\n      \"link_to\": \"Crescent Dunes Trading FZE\"\n    }\n  ]\n}",
+    "{\"action\":\"call_tool\",\"tool\":\"screen_adverse_media\",\"query\":\"Zane Zhao\"}",
+    "{\"findings\":[{\"record_id\":\"am-zz-01\",\"quote\":\"A regional trade outlet named Zane Zhao in connection with a trade-based money laundering inquiry involving undervalued electronics shipments routed through free-zone intermediaries.\",\"finding\":\"Zane Zhao is the subject of an adverse media report linking him to a trade-based money laundering investigation concerning undervalued electronics.\",\"entity\":\"Zane Zhao\",\"link_to\":\"\"}]}",
+    "{\"action\":\"call_tool\",\"tool\":\"screen_sanctions\",\"query\":\"Crescent Dunes Trading FZE\"}",
+    "{\n  \"findings\": [\n    {\n      \"record_id\": \"sx-cd-01\",\n      \"quote\": \"Crescent Dunes Trading FZE appears on the OFAC Specially Designated Nationals list, designated under the counter-narcotics trafficking program, with a registered address in Ras Al Khaimah.\",\n      \"finding\": \"The entity Crescent Dunes Trading FZE is listed on the OFAC SDN list for counter-narcotics trafficking.\",\n      \"entity\": \"Crescent Dunes Trading FZE\",\n      \"link_to\": \"\"\n    }\n  ]\n}",
+    "{\"action\":\"finish\"}"
+  ],
+  "expected": {
+    "finding_coverage": 1.0,
+    "complete": true,
+    "grounded_record_ids": [
+      "am-zz-01",
+      "rg-zz-01",
+      "sx-cd-01"
+    ],
+    "target_closure": 1.0,
+    "closed": [
+      "ML-A5"
+    ]
+  }
+}

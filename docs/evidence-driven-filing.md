@@ -91,25 +91,70 @@ Measured over the committed 294-case workbench population:
 - **All 294 cases are money_laundering.** C14 / C7 are absent, so `kyc_integrity` is
   profile-ready but unexercised (the same honest "no case" state as TF). "All
   typologies" lands at the profile + control level, single-typology at the case level.
-- **Zero cases reach the ≥2-leg bar from signals alone** — 181 carry a mechanism + 0
-  legs, 103 carry a mechanism + 1 leg. The frequency gate would auto-clear 189; the
-  determination withholds all of them pending corroboration. That gap *is* the
-  "defensive filing" exposure, made concrete.
-- **`source_of_funds` and `expected_monthly_*` are null in the population**, so A6 /
-  A7 are honest gaps for every case → the §12 brief consistently names a SoF /
-  anticipated-activity / income-inconsistency capability to build.
+- **Zero cases reach the ≥2-leg bar from signals alone** — 182 carry a mechanism + 0
+  legs, 104 a mechanism + 1 leg, and 8 carry no mechanism at all. The frequency gate
+  would auto-clear 189; the determination withholds them pending corroboration. That
+  gap *is* the "defensive filing" exposure, made concrete.
+- **`source_of_funds` is null and no C1 anticipated-activity detector exists** (the
+  expected-activity baseline IS generated in the substrate — `ExpectedActivity` — but
+  nothing fires C1 over it), so A6 / A7 are honest gaps for every case → the §12 brief
+  names a SoF field + a C1 detector + broader C7 coverage to build.
 
-## Deferred — Phase 70+
+## Gather extraction quality (Phase 70 — measured)
+
+The §12 loop's value depends on GATHER actually *closing* the gaps it targets. Phase
+69's live-once found the opposite — the model fetched the sanctions record but extracted
+**no** finding from it, so corroboration (ML-A5) stayed open and the determination
+withheld. Phase 70 measures, fixes, and regression-guards that.
+
+**The measuring stick (consistency, not a catch-rate).** The deterministic `StubPlanner`
+grounds a finding from *every* record it surfaces, so it is the **reference**: live
+gather quality = how much of that reference the live model recovers. The gather result
+now carries a `coverage` block — `finding_coverage` (grounded ÷ records surfaced),
+per-tool `grounded`, and `target_closure` (closeable atoms closed ÷ targeted) — emitted
+in-stream and rendered as counts ("evidence extracted from N of M surfaced records").
+`osint_tools --selftest` asserts the stub reaches `finding_coverage == 1.0` for *every*
+corpus subject (the reference is a checked property, not an emergent one); an aborted /
+no-record run is marked `complete: false` and shows no figure (a transport failure is
+not an extraction miss).
+
+**Diagnosis → fix (local Qwen at 127.0.0.1:8080).** The baseline confirmed the surface
+was the live `findings()` prompt, not the tool surface / corpus / leg-mapping: the record
+was reachable and returned; the stub proves a sanctions finding closes ML-A5. The fix
+(both `LivePlanner` prompts): `findings()` now sees each record's **declared entities**
+and is told to extract a finding from *every* record — a sanctions/adverse hit is itself
+a finding, no ownership tie required; `action()` screens the **subject** for adverse media
+plus each affiliate for sanctions (the efficient path within the step cap). Structured
+facts stay record-sourced (the Phase-66 guard: the model never authors an ownership
+label / percent / direction).
+
+| metric (mule case) | baseline | after fix | stub reference |
+|---|---|---|---|
+| `finding_coverage` | 0.5 | **1.0** | 1.0 |
+| `target_closure` (ML-A5) | 0.0 — open | **1.0 — closed** | 1.0 |
+| grounded records | rg-zz-01 | rg-zz-01 · am-zz-01 · sx-cd-01 | same 3 |
+| fabricated structured facts | — | 0 | — |
+
+With ML-A5 closed (corroboration), the case clears the ≥2-leg bar and — with a named
+predicate risk + rebutted mitigation — reaches a **determination** (the payoff the §12
+loop needs). The capture is pinned in `tests/gather_quality_harness.py` (the
+`news_quality_harness` pattern): `--check` replays the model's responses with **no
+model** and asserts the outcome still matches the baseline *and* the stub reference;
+`--freeze` re-captures from a live model (synthetic corpus → no compliance gate) and
+refuses to baseline a capture that falls under the reference.
+
+## Deferred — Phase 71+
 
 - **Roll the sufficiency model across the triage + gate consoles** (`triage.html`,
   `console.html`) — the determination grammar there is still disposition-only.
-- **Substrate names / UBO at source.** The demo resolves a *synthetic* display
-  identity and gathers a *synthetic* OSINT corpus. The real names + ownership graph
-  come from an aml-substrate party/UBO emission (the brief in
-  `docs/substrate-bo-graph-emission-PLAN-BRIEF.md`) + the new SoF / anticipated /
-  income capabilities the §12 briefs above name. Sibling-executed; build.py untouched.
-- **A kyc_integrity / TF case** needs a substrate slice that emits C14 / TF detectors —
-  the profile is already authored and will exercise the moment such a case lands.
+- **The substrate determination-signal build queue.** The demo resolves a *synthetic*
+  display identity and gathers a *synthetic* OSINT corpus; the **internal** determination
+  legs (anticipated-activity, source-of-funds, profile inconsistency), the **real**
+  ownership graph at source, and a **kyc_integrity / TF case slice** must be built in
+  aml-substrate. Phase 70 consolidated every §12 ask — derived from the population's
+  non-gatherable gap — into ONE handoff:
+  **`docs/substrate-determination-signals-PLAN-BRIEF.md`** (it supersedes the Phase-66
+  BO-graph brief). Sibling-executed; build.py untouched.
 
 See also `docs/case-workbench.md`, `docs/chain-workbench.md`, and the program
 blueprint §12 (history-as-evidence) / §14 (the continuous adjudication loop).

@@ -50,7 +50,7 @@ _LABEL_OF_KIND = {"sanctions": "sanctions screen", "adverse_media": "adverse med
 # Phase 66 — ownership-graph labels MIRRORING aml-substrate's RelationshipLabel (schema/enums.py): the
 # OSINT registry records carry `relationships:[{src,dst,label,ownership_pct}]` in this exact shape so the
 # local network view is the rendering PROTOTYPE for the substrate's emitted beneficial-owner graph (the
-# BO-graph handoff brief, docs/substrate-bo-graph-emission-PLAN-BRIEF.md). A label is VOCAB-checked, never
+# determination-signal handoff brief, docs/substrate-determination-signals-PLAN-BRIEF.md). A label is VOCAB-checked, never
 # correctness-checked (the news_ground RELATION_LABELS doctrine); ownership_pct is RANGE-checked [0,100].
 REL_LABELS = ("BENEFICIAL_OWNER", "DIRECTOR_OF", "OFFICER_OF", "CONTROLS", "OWNS")
 _REL_DISPLAY = {"BENEFICIAL_OWNER": "beneficial owner", "DIRECTOR_OF": "director of",
@@ -117,6 +117,8 @@ def validate_osint_corpus(corpus: dict) -> list:
                 seen_ids[rid] = f"{kind}['{name}']"
                 if not ent:
                     errors.append(f"record '{rid}' missing 'entity'")
+                elif not news_normalize(ent):                  # surfaces but never grounds (collapses to empty)
+                    errors.append(f"record '{rid}' entity {ent!r} normalizes to empty — it would surface but never ground")
                 if not txt:
                     errors.append(f"record '{rid}' missing/empty 'text'")
                 # the honesty sweep over EVERY human-authored field the UI can render (a finding's entity
@@ -134,6 +136,8 @@ def validate_osint_corpus(corpus: dict) -> list:
                     for le in (rec.get("linked_entities") or []):
                         if not str(le).strip():
                             errors.append(f"record '{rid}' has an empty linked_entity")
+                        elif not news_normalize(str(le)):
+                            errors.append(f"record '{rid}' linked_entity {le!r} normalizes to empty — would surface but never ground")
                         elif _BANNED.search(str(le)):
                             errors.append(f"record '{rid}' linked_entity {le!r} contains a banned metric token")
                     # Phase 66 — ownership relationships MIRROR the substrate RelationshipEdge (vocab + range)
@@ -149,6 +153,8 @@ def validate_osint_corpus(corpus: dict) -> list:
                         for nm in (src, dst):
                             if nm and _BANNED.search(nm):
                                 errors.append(f"record '{rid}' relationship endpoint {nm!r} has a banned metric token")
+                            elif nm and not news_normalize(nm):
+                                errors.append(f"record '{rid}' relationship endpoint {nm!r} normalizes to empty — would surface but never ground")
                         if op is not None and not (isinstance(op, int) and 0 <= op <= 100):
                             errors.append(f"record '{rid}' ownership_pct {op!r} not an int in [0,100]")
     return errors
@@ -416,10 +422,11 @@ class LivePlanner:
         sys_p = ("You are an AML investigator gathering external evidence on a subject using a FIXED set of "
                  "tools over a synthetic corpus. Respond with STRICT JSON only, no prose. To call a tool: "
                  '{"action":"call_tool","tool":"<screen_sanctions|screen_adverse_media|lookup_registry>",'
-                 '"query":"<an entity name>"}. To stop: {"action":"finish"}. Start with lookup_registry on '
-                 "the subject. When a lookup reveals an affiliated entity (see discovered_entities), CHAIN: "
-                 "screen THAT affiliated entity for sanctions and adverse media before finishing. Query named "
-                 "entities, not account/counterparty reference codes.")
+                 '"query":"<an entity name>"}. To stop: {"action":"finish"}. You have only a few steps — spend '
+                 "them well and DO NOT repeat a call: (1) lookup_registry on the SUBJECT; (2) screen the "
+                 "SUBJECT for adverse media; (3) for EACH affiliated entity a registry lookup revealed (see "
+                 "discovered_entities), screen THAT entity for sanctions. Then finish. Query named entities, "
+                 "not account/counterparty reference codes.")
         usr = json.dumps({"subject": self.subject, "subject_kind": self.kind,
                           "counterparties": self.counterparties[:12], "discovered_entities": discovered,
                           "history": history})
@@ -430,17 +437,22 @@ class LivePlanner:
     def findings(self, records: list, tool: str) -> list:
         if not records:
             return []
-        sys_p = ("Propose findings ONLY as JSON {\"findings\":[{\"record_id\":\"..\",\"quote\":\"<copy a "
-                 "verbatim substring of THAT record's text>\",\"finding\":\"<one-sentence reading, distinct "
-                 "from the quote>\",\"entity\":\"<a named entity the record DECLARES — copy it EXACTLY (its "
-                 "entity, an officer, or a relationship src/dst); not a fragment>\",\"link_to\":\"<the "
-                 "subject or another declared entity name; for an ownership/control tie name the OTHER party "
-                 "here so BOTH parties are present>\"}]}. The quote MUST be copied verbatim from the cited "
-                 "record's text and entity/link_to must be full declared names. The system reads any "
-                 "ownership label, percent, and direction FROM THE RECORD itself — do NOT state them. Do not "
-                 "invent. If nothing is relevant, return {\"findings\":[]}.")
-        usr = json.dumps({"subject": self.subject, "records": [{"id": r.get("id"), "text": r.get("text")}
-                                                               for r in records]})
+        sys_p = ("Extract findings from the external records a tool returned about an investigation subject. "
+                 "Return STRICT JSON {\"findings\":[...]} only, no prose. Produce a finding for EVERY record "
+                 "that names the subject or a party relevant to the case — a sanctions listing or an adverse-"
+                 "media mention is ITSELF a finding; an ownership/control tie is NOT required. Each finding: "
+                 "{\"record_id\":\"<that record's id>\",\"quote\":\"<copy ONE verbatim sentence from THAT "
+                 "record's text>\",\"finding\":\"<a one-sentence reading, distinct from the quote>\","
+                 "\"entity\":\"<copy EXACTLY one name from THAT record's declared_entities>\",\"link_to\":"
+                 "\"<ONLY for a registry ownership/control tie: the OTHER declared party so BOTH are present; "
+                 "leave \\\"\\\" for a sanctions or adverse-media hit>\"}. The quote MUST be a verbatim "
+                 "substring of the cited record's text; entity and link_to MUST be copied verbatim from that "
+                 "record's declared_entities. The system reads any ownership label, percent, and direction "
+                 "FROM THE RECORD itself — do NOT state them. Do not invent; omit only a record that names no "
+                 "relevant party.")
+        usr = json.dumps({"subject": self.subject,
+                          "records": [{"id": r.get("id"), "text": r.get("text"),
+                                       "declared_entities": _record_known_names(r)} for r in records]})
         txt = self.call_model([{"role": "system", "content": sys_p}, {"role": "user", "content": usr}])
         obj = parse_llm_json(txt) or {}
         fs = obj.get("findings") if isinstance(obj, dict) else None
@@ -459,7 +471,7 @@ def gather(case_view: dict, *, on_stage=lambda *a, **k: None, corpus: dict | Non
     subject = case_view.get("subject_name") or ""
     planner = planner or StubPlanner(case_view, index)
     kept, dropped, tools_called, history = [], [], [], []
-    seen_calls, note = set(), None
+    seen_calls, note, returned_ids = set(), None, []
     on_stage("plan", subject=subject, tools=list(TOOL_NAMES))
     for step in range(max_iters):
         try:
@@ -482,7 +494,11 @@ def gather(case_view: dict, *, on_stage=lambda *a, **k: None, corpus: dict | Non
             continue
         records = run_tool(index, tool, query)
         kind = _KIND_OF_TOOL[tool]
-        tools_called.append({"tool": tool, "query": query, "n_records": len(records)})
+        for r in records:                                        # the distinct records the tools SURFACED — the
+            rid = r.get("id")                                    # coverage denominator: a perfect extractor grounds a
+            if rid and rid not in returned_ids:                  # finding from each (the stub does, by construction)
+                returned_ids.append(rid)
+        tools_called.append({"tool": tool, "query": query, "n_records": len(records), "grounded": 0})
         hist_entry = {"tool": tool, "query": query, "n_records": len(records), "found": []}
         history.append(hist_entry)
         on_stage("tool", tool=tool, query=query, n_records=len(records))
@@ -501,6 +517,7 @@ def gather(case_view: dict, *, on_stage=lambda *a, **k: None, corpus: dict | Non
                 d = {"source_kind": kind, "record_id": str((f or {}).get("record_id") or ""),
                      "quote": str((f or {}).get("quote") or "")[:160], "reason": reason}
                 dropped.append(d); d_step.append(d)
+        tools_called[-1]["grounded"] = len(g_step)               # per-tool grounded — diagnoses WHICH tool under-extracts
         # surface newly-discovered entities so the planner can CHAIN (screen what registry just revealed) —
         # without this the model can't see which affiliate a lookup exposed and can't make the multi-hop leap
         for kf in g_step:
@@ -509,10 +526,34 @@ def gather(case_view: dict, *, on_stage=lambda *a, **k: None, corpus: dict | Non
                     hist_entry["found"].append(nm)
         on_stage("findings", tool=tool, grounded=len(g_step), dropped=len(d_step),
                  kept=g_step, rejected=d_step)
+    else:
+        # the loop EXHAUSTED the step cap without the planner finishing. Honest-truncation guard (Phase 70):
+        # this is only a partial run if a DISCOVERED affiliate was left unscreened — else every step was used
+        # productively (e.g. the 2-affiliate mule fills the cap and screens everything). A `note` makes the
+        # coverage block `complete: False`, so a cap-truncated run can never read as complete coverage.
+        found = {news_normalize(n) for h in history for n in (h.get("found") or [])}
+        queried = {news_normalize(h.get("query") or "") for h in history}
+        if found - queried:
+            note = note or (f"stopped: reached the step cap ({max_iters}) with discovered entities left "
+                            f"unscreened — coverage may be partial")
+    # Phase 70 — the EXTRACTION-COVERAGE measuring stick (consistency, NOT a catch-rate): of the distinct
+    # records the tools surfaced, how many yielded a grounded finding. The deterministic StubPlanner grounds
+    # one per record (coverage complete by construction) → it is the REFERENCE a live gather is measured
+    # against; a live model that under-extracts shows coverage below complete. grounded_record_ids is the
+    # reference SET for the live-vs-stub comparison (T3 pins + regression-asserts it).
+    covered_ids = sorted({kf.get("record_id") for kf in kept if kf.get("record_id")})
+    coverage = {"records_returned": len(returned_ids), "records_covered": len(covered_ids),
+                "finding_coverage": round(len(covered_ids) / len(returned_ids), 3) if returned_ids else None,
+                # a transport-abort / no-progress-guard stop is NOT a measured coverage — its denominator holds
+                # records the loop never gave a fair extraction pass; consumers must not read its ratio as quality.
+                "complete": note is None,
+                "returned_record_ids": returned_ids, "grounded_record_ids": covered_ids}
+    on_stage("coverage", **coverage)
     graph = build_graph(kept, subject)
     result = {"badge": BADGE, "subject": subject, "synthetic_note": SYNTHETIC_NOTE,
               "backend": backend_note or {"effective": "stub", "requested": None, "note": None},
               "grounded": kept, "dropped": dropped, "graph": graph, "tools_called": tools_called,
+              "coverage": coverage,
               "counts": {"grounded": len(kept), "dropped": len(dropped), "tools": len(tools_called)}}
     if note:
         result["note"] = note
@@ -588,7 +629,8 @@ def _selftest() -> int:
     errs = validate_osint_corpus(corpus)
     if errs:
         failures.append(f"committed corpus should validate clean, got: {errs}")
-    broken = {"note": "", "sanctions": {"X": [{"id": "d1", "entity": "X", "text": ""}]},
+    broken = {"note": "", "sanctions": {"X": [{"id": "d1", "entity": "X", "text": ""}],
+                                        "!!!": [{"id": "d4", "entity": "!!!", "text": "punctuation-only entity name"}]},
               "registry": {"Y": [{"id": "d1", "entity": "Y", "text": "ok: 50% owned by Z"}],
                            "Acme": [{"id": "d3", "entity": "Acme 50% Holdings",
                                      "text": "Acme 50 Holdings is a firm",          # banned token is in entity, NOT text
@@ -599,7 +641,8 @@ def _selftest() -> int:
     berr = validate_osint_corpus(broken)
     for need in ("note", "duplicate record id", "missing/empty 'text'", "banned metric token",
                  ".entity contains a banned", "linked_entity 'Beta 3x Capital' contains a banned",
-                 "relationship label", "relationship missing src/dst", "ownership_pct 250"):
+                 "relationship label", "relationship missing src/dst", "ownership_pct 250",
+                 "entity '!!!' normalizes to empty"):     # surface-but-never-ground guard (Phase 70)
         if not any(need in e for e in berr):
             failures.append(f"broken-corpus validation should flag {need!r}, got {berr}")
 
@@ -697,6 +740,31 @@ def _selftest() -> int:
         failures.append(f"the stub loop should DROP the planted ungrounded finding, got {res['dropped']}")
     if not any(f["source_kind"] == "sanctions" for f in res["grounded"]):
         failures.append("the CHAIN should reach a sanctions finding on the registry-discovered entity")
+    # Phase 70 — the COMPLETE-REFERENCE guard (the measure-first foundation, not just the mule): the stub must
+    # ground a finding from EVERY record it surfaces, for EVERY corpus subject — so finding_coverage==1.0 is a
+    # CHECKED property of the committed data, not an emergent one (a future record whose post-colon body spans a
+    # sentence would silently drop the reference below 1.0; this catches it). Subjects the stub surfaces nothing
+    # for (a sanctions-only entity it never self-screens) carry no records → skipped, nothing to cover.
+    for subj in sorted({n for k in KINDS for n in (corpus.get(k) or {})}):
+        rcov = (gather({"subject_name": subj, "subject_kind": "subject", "counterparties": []},
+                       corpus=corpus, index=index).get("coverage") or {})
+        if rcov.get("records_returned", 0) > 0 and not (rcov.get("complete") and rcov.get("finding_coverage") == 1.0):
+            failures.append(f"the stub is the COMPLETE REFERENCE: subject {subj!r} should reach finding_coverage==1.0, got {rcov}")
+    # Phase 70 — the honest-truncation backstop: a run that EXHAUSTS the step cap with a DISCOVERED affiliate
+    # left UNSCREENED reports complete:False (so a cap-truncated run can never read as complete coverage). A
+    # 4-affiliate subject forces it — the stub screens 3 sanctions within MAX_ITERS, leaving the 4th unscreened.
+    trunc = {"note": "synthetic truncation fixture (selftest only)", "badge": BADGE, "sanctions": {}, "adverse_media": {},
+             "registry": {"Quad Subj": [{"id": "rg-q", "entity": "Quad Subj",
+                 "text": "Registry extract (illustrative, synthetic): Quad Subj owns four free-zone firms.",
+                 "relationships": [{"src": "Quad Subj", "dst": f"Quad Affiliate {i}",
+                                    "label": "BENEFICIAL_OWNER", "ownership_pct": 25} for i in range(1, 5)]}]}}
+    if validate_osint_corpus(trunc):
+        failures.append("the truncation fixture should validate clean")
+    tout = gather({"subject_name": "Quad Subj", "subject_kind": "subject", "counterparties": []},
+                  corpus=trunc, index=build_index(trunc))
+    if (tout.get("coverage") or {}).get("complete") is not False or not tout.get("note"):
+        failures.append(f"a cap-truncated run (a discovered affiliate left unscreened) must report complete:False "
+                        f"with an honest note, got coverage={tout.get('coverage')} note={tout.get('note')!r}")
     for f in res["grounded"]:                                  # every kept quote is a RAW substring (Phase-44)
         recs = run_tool(index, {"sanctions": "screen_sanctions", "adverse_media": "screen_adverse_media",
                                 "registry": "lookup_registry"}[f["source_kind"]],

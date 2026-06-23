@@ -160,10 +160,11 @@ relationship from the record's structured data (the model only grounds the quote
 The percent renders as "N pct" (never "N%" — the no-% honesty rule). This local corpus is the **rendering
 prototype** for the substrate's emitted beneficial-owner graph.
 
-**The handoff.** `docs/substrate-bo-graph-emission-PLAN-BRIEF.md` specifies the aml-substrate work to *emit*
-the real beneficial-owner graph (a `PartyGraphView`, `related_parties[]` in the bundle, a non-tautological
-C14 BO-disclosure detector) — and the emitted shape maps 1:1 onto what GATHER already renders, so the
-workbench needs no rework when it lands.
+**The handoff.** `docs/substrate-determination-signals-PLAN-BRIEF.md` (Phase 70 — supersedes the Phase-66
+BO-graph brief) specifies the aml-substrate work to *emit* the real beneficial-owner graph (a `PartyGraphView`,
+`related_parties[]` in the bundle, a non-tautological C14 detector) **plus** the internal determination-signal
+data + detectors (anticipated-activity, source-of-funds, profile inconsistency) the §12 loop named — and the
+emitted ownership shape maps 1:1 onto what GATHER already renders, so the workbench needs no rework when it lands.
 
 **The governor (load-bearing) — single-signal-separable.** Every richness here is **demo-visible** (more
 cases, deeper profiles, a richer ownership network) — **never a detection-difficulty or catch-rate claim.**
@@ -246,10 +247,11 @@ python3 scripts/curate_workbench_cases.py --selftest  # the committed slice: sch
 
 ## Deferred to follow-on phases
 
-- The substrate **ownership/beneficial-owner graph emission** (a richer network view than the emitted
-  transaction counterparty edges; would let the GATHER network draw on real emitted ownership rather than
-  the synthetic registry corpus) — **spec'd in Phase 66** (`docs/substrate-bo-graph-emission-PLAN-BRIEF.md`);
-  the consume side already renders the shape (the synthetic OSINT corpus is its prototype). Sibling-executed.
+- The substrate **determination-signal emission queue** (the real ownership graph + the internal legs —
+  anticipated-activity, source-of-funds, profile inconsistency — and a kyc/TF case slice; would let the
+  GATHER network + the determination atoms draw on real emitted signals rather than the synthetic corpus) —
+  **consolidated in Phase 70** (`docs/substrate-determination-signals-PLAN-BRIEF.md`, superseding the Phase-66
+  BO-graph brief); the consume side already renders the ownership shape. Sibling-executed.
 - The **C3/C15 cross-pillar contract alignment** (substrate fan-in vs casework fan-out) — the
   composed-case grounding frontier.
 - A **real OSINT substrate** for the GATHER loop (a real screening list / registry feed) — out of scope

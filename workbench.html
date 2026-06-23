@@ -690,6 +690,9 @@ function gatherResultHTML(){
   if(GATHER&&GATHER.error) return `<div class="err"><b>Gather failed</b>${esc(GATHER.error)}</div>`;
   const g=GATHER&&GATHER.done; if(!g) return '';
   const cnt=g.counts||{};
+  const cov=g.coverage||{};
+  // only a COMPLETE run that surfaced records carries a measured coverage (a transport-abort / 0-record run does not)
+  const covline=(cov.complete && cov.records_returned>0)?` · evidence extracted from ${esc(cov.records_covered||0)} of ${esc(cov.records_returned)} surfaced records`:'';
   const grounded=(g.grounded||[]).map(f=>{
     const rel=f.rel_label?`<span class="grel">${esc(ownLabel(f.rel_label))}${f.ownership_pct!=null?' · '+esc(f.ownership_pct)+' pct':''}</span>`:'';
     const jur=f.jurisdiction?`<span class="gjur">${esc(f.jurisdiction)}</span>`:'';
@@ -701,7 +704,7 @@ function gatherResultHTML(){
   const dropped=(g.dropped||[]).map(d=>`<div class="gdrop"><span class="gdx">✗ rejected by the gate</span>${esc(d.reason)}${d.quote?`<div class="gdq">“${esc(d.quote)}”</div>`:''}</div>`).join('');
   const empty=(!(g.grounded||[]).length)?'<div class="gempty">No external findings grounded for this subject — the gathered evidence corroborates nothing adverse (an honest negative).</div>':'';
   return `<div class="gres">
-    <div class="gcount">${esc(cnt.grounded||0)} grounded · ${esc(cnt.dropped||0)} rejected by the gate · ${esc(cnt.tools||0)} tools, over the synthetic corpus</div>
+    <div class="gcount">${esc(cnt.grounded||0)} grounded · ${esc(cnt.dropped||0)} rejected by the gate · ${esc(cnt.tools||0)} tools, over the synthetic corpus${covline}</div>
     ${empty}${grounded}
     ${dropped?`<div class="gdrops"><div class="gdh">Rejected — ungrounded (the gate firing)</div>${dropped}</div>`:''}
     ${gatherGraphHTML(g.graph)}</div>`;

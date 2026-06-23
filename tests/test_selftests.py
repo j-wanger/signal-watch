@@ -57,6 +57,16 @@ def test_python_selftest(script: str) -> None:
     assert r.returncode == 0, f"{script} --selftest FAILED:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
 
 
+def test_gather_quality_harness() -> None:
+    """Phase 70 — the GATHER extraction-coverage REGRESSION GATE: replay the pinned live capture with NO
+    model and assert the outcome still matches the baseline + the deterministic stub reference."""
+    path = ROOT / "tests" / "gather_quality_harness.py"
+    assert path.exists(), "missing tests/gather_quality_harness.py"
+    r = subprocess.run([sys.executable, str(path), "--check"], cwd=str(ROOT),
+                       capture_output=True, text=True, timeout=120)
+    assert r.returncode == 0, f"gather_quality_harness --check FAILED:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
+
+
 @pytest.mark.skipif(shutil.which("node") is None, reason="node not installed — .mjs arc tests skipped")
 @pytest.mark.parametrize("mjs", MJS_TESTS)
 def test_mjs_arc(mjs: str) -> None:

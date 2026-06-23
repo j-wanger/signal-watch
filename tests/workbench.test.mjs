@@ -444,6 +444,8 @@ const GATHER_DONE = {
     {tool:'screen_sanctions',query:'Crescent Dunes Trading FZE',n_records:1},
     {tool:'screen_adverse_media',query:'Zane Zhao',n_records:1}],
   counts:{ grounded:3, dropped:1, tools:3 },
+  coverage:{ records_returned:3, records_covered:3, finding_coverage:1.0, complete:true,
+    returned_record_ids:['rg-zz-01','sx-cd-01','am-zz-01'], grounded_record_ids:['am-zz-01','rg-zz-01','sx-cd-01'] },
 };
 const GATHER_MSGS = [
   { stage:'backend', requested:'stub', effective:'stub', note:null },
@@ -454,6 +456,7 @@ const GATHER_MSGS = [
   { stage:'findings', tool:'screen_sanctions', grounded:1, dropped:0 },
   { stage:'tool', tool:'screen_adverse_media', query:'Zane Zhao', n_records:1 },
   { stage:'findings', tool:'screen_adverse_media', grounded:1, dropped:0 },
+  { stage:'coverage', records_returned:3, records_covered:3, finding_coverage:1.0 },
   { done: GATHER_DONE },
 ];
 GATHER_CHUNKS = ndjsonChunks(GATHER_MSGS, 45);
@@ -463,6 +466,7 @@ ok(LAST_GATHER_BODY && LAST_GATHER_BODY.case === 'CASE-P-MULE', 'runGather POSTs
 ok(/registry lookup · 1 record\b/.test(gg) && /sanctions screen · 1 record/.test(gg),
    'the gather stages reveal per-tool completion (stage-completion, not a token stream)');
 ok((gg.match(/class="gfind"/g)||[]).length === 3, 'three grounded findings render');
+ok(/extracted from 3 of 3 surfaced records/.test(gg), 'the gather result renders the extraction-coverage measuring stick (counts only, no catch-rate)');
 ok(/Evidence · verbatim from a synthetic record/.test(gg), 'each grounded finding labels its quote as verbatim EVIDENCE');
 ok(/Crescent Dunes Trading FZE appears on the OFAC/.test(gg), 'the chained sanctions finding renders its grounded quote (the registry→sanctions chain)');
 ok(/illustrative reading — not verified/.test(gg), 'the synthesis is labeled an illustrative, unverified reading (subordinate to the grounded quote)');

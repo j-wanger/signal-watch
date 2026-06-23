@@ -11,6 +11,6 @@ SIBLING (substrate + casework): the casework C14-grounding verifier + the substr
 ## Gates
 - [x] spec — waived under LITE ceremony (the assumption-ledger gate IS the direction gate, Phase-67/68/69/70 precedent)
 - [x] Direction confirmed by user (assumption positions taken 2026-06-23; A0 accept, A1/A2 don't-know→T1 probe, A3/A4/A5/A6 accept; all_accept:false)
-- [ ] Delivery accepted
+- [x] Delivery accepted (post-implementation report 2026-06-23; user ran /dev-debrief accept; committed d8f667b + pushed to main; casework sibling 157554b)
 
 Plan [[phases/phase-71-substrate-v03-slice-determination-loop]]; ledger Phase-71.

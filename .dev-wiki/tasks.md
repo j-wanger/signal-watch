@@ -45,8 +45,8 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-71-substrate-v03-slice-determination-loop -->
-<!-- gate-log:phase-71 direction=approved delivery=pending -->
-<!-- status: ACTIVE — PLANNED 2026-06-23 (LITE). Direction gate NOT all-accept — A1/A2 don't-know → T1 probe (measure-first); A0/A3/A4/A5/A6 accept. Adopt aml-substrate's just-shipped Phase-25 v0.3 slice (related_parties[] — the real BO graph) + close the §12 determination loop in the workbench (≥2-leg from REAL signals, NOT gathered corroboration; pure signal-watch, NOT casework). The signed DECIDE finale is a separate later beat; the casework v0.3 bump here only keeps it signing on v0.3 cases. -->
+<!-- gate-log:phase-71 direction=approved delivery=accepted -->
+<!-- status: DELIVERED + accepted 2026-06-23 (LITE; committed d8f667b, pushed to main; casework sibling 157554b). The §12 loop closes from REAL signals (0→81/342 via the per-customer merge); related_parties[] renders; casework accepts v0.3. kyc/C14/C1/C7 deferred (substrate non-emits C14). PLANNED 2026-06-23 (LITE). Direction gate NOT all-accept — A1/A2 don't-know → T1 probe (measure-first); A0/A3/A4/A5/A6 accept. Adopt aml-substrate's just-shipped Phase-25 v0.3 slice (related_parties[] — the real BO graph) + close the §12 determination loop in the workbench (≥2-leg from REAL signals, NOT gathered corroboration; pure signal-watch, NOT casework). The signed DECIDE finale is a separate later beat; the casework v0.3 bump here only keeps it signing on v0.3 cases. -->
 
 ## Phase 71 — Adopt the substrate v0.3 slice; close the §12 determination loop in the workbench
 

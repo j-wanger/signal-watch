@@ -11,6 +11,6 @@ The cross-pillar contract doc `docs/rich-case-target-contract.md` (the DEFERRED 
 ## Gates
 - [x] spec — generated this phase (STANDARD ceremony; `specs/phase-73-rich-investigation-case-live-workbench.md`)
 - [x] Direction confirmed by user (assumption positions 2026-06-23; A0–A6 accept, A1 accept-with-guard; all_accept:true, warned + restated)
-- [ ] Delivery accepted (post-implementation report 2026-06-23)
+- [x] Delivery accepted (post-implementation report 2026-06-23; user "Accept /dev-debrief"; committed f804722)
 
 Plan [[phases/phase-73-rich-investigation-case-live-workbench]]; ledger Phase-73.

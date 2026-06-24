@@ -45,7 +45,7 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-73-rich-investigation-case-live-workbench -->
-<!-- gate-log:phase-73 direction=approved delivery=pending -->
+<!-- gate-log:phase-73 direction=approved delivery=accepted -->
 <!-- status: PLANNED 2026-06-23 (STANDARD — user override of the project LITE default). Direction gate all_accept:true (warned + restated; the load-bearing risk is A1 the affirmative-clear-vs-file-bar guard, defended by a hard STOP). The user's REFRAME (verified against the live workbench/data/engine): the curated substrate cases are "not it" (all C2/C3, synthetic ids, raw codes, no network) → INVERT the pillar dependency: signal-watch AUTHORS the north-star rich case FIRST (the artifact is the spec), substrate/casework PARKED. Author ONE matched pair — CASE-A Northgate (files) & CASE-B Lakeshore (clears) — firing the SAME grounded signals (identical indicator ids: C2 fin-2023-alert001:IND-03 + C3 fin-2020-alert001:IND-05 + C14 fin-2025-a003:IND-09) but resolving OPPOSITELY on an authored identity/network layer; the determination is COMPUTED BY THE LIVE ENGINE over authored evidence (NOT a precomputed dist — the user chose "extend the companion workbench"). THE THESIS: same grounded signal, opposite outcome — the network + the source of funds is the difference. Companion-only; build.py imports none of it; 8 dists byte-frozen. -->
 
 ## Phase 73 — Rich investigation case in the LIVE workbench: the matched FILE/DISMISS pair, rail-aware counterparty network, entity resolution, and the affirmative-clear verdict

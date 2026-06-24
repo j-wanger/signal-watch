@@ -109,13 +109,17 @@ def list_cases(index: dict | None = None) -> dict:
                       "advisories", "confidence", "exemplar", "grounds_e2e", "e2e_note")})
     meta = dict(idx.get("meta", {}))
     meta["gate_funnel"] = funnel
-    return {"badge": BADGE, "meta": meta, "cases": rows}
+    showcase = casefile_list()                       # Phase 73 — the authored north-star pair LEADS the queue
+    meta["showcase_ids"] = [r["case_id"] for r in showcase]
+    return {"badge": BADGE, "meta": meta, "cases": showcase + rows}
 
 
 def case_detail(case_id: str, index: dict | None = None) -> dict:
     """The per-case CLUTTER payload: the full vendored bundle (KYC, accounts, every txn, alerts,
     counterparty edges) + the GROUNDED signal walk (flag->corpus, server-computed, model-free) + the
     curated entry (confidence/exemplar/gate). Beats 1+2 render entirely from this — no model call."""
+    if is_casefile_id(case_id):                      # Phase 73 — the authored showcase pair (its own rich shape)
+        return casefile_detail(case_id)
     idx = index or load_index()
     entry = _case_entry(idx, case_id)
     bundle = json.loads(_bundle_path(case_id).read_text(encoding="utf-8"))
@@ -413,6 +417,8 @@ def determine_case(case_id: str, *, gathered=(), named_risk: str | None = None,
     determination holds. Insufficiency is a legitimate non-decision whose `missing` NAMES the gap. Pure;
     persists nothing. named_risk + mitigation_rebutted are the HUMAN elicitation inputs (the gate where a
     person fills what the data cannot)."""
+    if is_casefile_id(case_id):                      # Phase 73 — the authored pair computes via the SAME engine
+        return casefile_determination(case_id)
     index = index or load_index()
     entry = _case_entry(index, case_id)
     prof = _requirements()
@@ -431,6 +437,170 @@ def determine_case(case_id: str, *, gathered=(), named_risk: str | None = None,
                                           "never the determination trigger"},
             "supersedes": ("the determination is licensed by evidence-sufficiency; the Phase-64 frequency "
                            "gate is context only — seeing a combo more often is not a determination")}
+
+
+# ---- the authored NORTH-STAR case file (Phase 73) — the rich matched pair, COMPUTED by the live engine
+# A SEPARATE source from the vendored population: two AUTHORED cases (data/casefile/case.json) whose verdict
+# is COMPUTED live by the same evidence_requirements engine. The engine inputs are DERIVED FROM THE EVIDENCE
+# (the fired alerts, the source-of-funds finding read from the file, the resolved network, the caution-list /
+# prior-STR record hits) — never from the authored expected verdict. The file/determination bar is unchanged;
+# the affirmative-clear branch supplies the documented-dismissal when the benign explanation is established.
+CASEFILE_JSON = ROOT / "data" / "casefile" / "case.json"
+_CASEFILE_CACHE: dict = {}
+
+
+def load_casefile() -> dict:
+    """The committed authored matched pair, cached read-only. Companion-only; build.py never reads it."""
+    if "d" not in _CASEFILE_CACHE:
+        _CASEFILE_CACHE["d"] = json.loads(CASEFILE_JSON.read_text(encoding="utf-8"))
+    return _CASEFILE_CACHE["d"]
+
+
+def casefile_case(case_id: str):
+    for c in load_casefile().get("cases", []):
+        if c.get("case_id") == case_id:
+            return c
+    return None
+
+
+def is_casefile_id(case_id: str) -> bool:
+    return casefile_case(case_id) is not None
+
+
+def _cf_entities(case: dict) -> dict:
+    return {e["entity_id"]: e for e in case.get("entities", [])}
+
+
+def _cf_caution_hit(case: dict, ents: dict, ref: dict):
+    """A caution-list ADDRESS hit reached THROUGH the ownership chain (a beneficial owner registered at a
+    caution-listed address). Record-sourced from reference.caution_list — never model-authored."""
+    cl_by = {c["address"]["normalized"]: c for c in ref.get("caution_list", [])
+             if c.get("kind") == "address" and (c.get("address") or {}).get("normalized")}
+    for o in case.get("ownership_edges", []):
+        addr = ((ents.get(o.get("src"), {}).get("identity") or {}).get("address") or {}).get("normalized")
+        if addr in cl_by:
+            return {"caution": cl_by[addr], "owner": o.get("src"), "chain": [o.get("dst"), o.get("src")]}
+    return None
+
+
+def _norm_email(e) -> str:
+    """The casefile email-normalization convention (lowercase, drop dots in the local part) — mirrors the
+    `normalized` form stored on entity identifiers, so a register entry carrying only a raw `email` still matches."""
+    e = str(e or "").strip().lower()
+    if "@" not in e:
+        return e
+    loc, dom = e.split("@", 1)
+    return loc.replace(".", "") + "@" + dom
+
+
+def _cf_prior_str_hit(case: dict, ents: dict, ref: dict):
+    """A prior-STR match on an INBOUND source counterparty (exact on the normalized email). Record-sourced
+    from reference.prior_str_register — supplies the named predicate risk (read, not analyst-typed)."""
+    reg = {}
+    for r in ref.get("prior_str_register", []):
+        ids = r.get("identifiers") or {}
+        for v in (ids.get("normalized_email"), _norm_email(ids.get("email"))):   # both keyed to the normalized form
+            if v:
+                reg[v] = r
+    for t in case.get("transactions", []):
+        if t.get("direction") != "CREDIT":
+            continue
+        ent = ents.get((t.get("counterparty") or {}).get("entity_ref"), {})
+        for i in ent.get("identifiers", []):
+            if i.get("normalized") in reg:
+                return {"prior_str": reg[i["normalized"]], "source": ent.get("entity_id"), "txn": t.get("txn_id")}
+    return None
+
+
+def casefile_determination(case_id: str) -> dict:
+    """COMPUTE the determination for an authored case by DERIVING the engine inputs from its EVIDENCE and
+    running the LIVE engine — the verdict is engine OUTPUT, never the authored expected_*. The honest seam:
+    BOTH cases fire C14 (source-of-funds question), but `kyc.source_of_funds` read from the file flips the
+    leg — Northgate null (ML-A7 lights, the benign explanation is rebutted by adverse corroboration) vs
+    Lakeshore established (ML-A7 mitigated away, mitigation AFFIRMATIVELY established → the clear branch)."""
+    cf = load_casefile()
+    case = casefile_case(case_id)
+    if case is None:
+        raise RunError(f"unknown case '{case_id}' — not in the authored case file (data/casefile/case.json)")
+    ref = cf.get("reference", {})
+    prof = _requirements()
+    ents = _cf_entities(case)
+    subj = ents.get((case.get("subject") or {}).get("entity_ref"), {})
+    sof = (subj.get("kyc") or {}).get("source_of_funds")
+    source_established = bool(sof and str(sof).strip())
+
+    caution = _cf_caution_hit(case, ents, ref)
+    prior = _cf_prior_str_hit(case, ents, ref)
+    gathered = ["corroboration"] if (caution or prior) else []
+    suspicious_link = any(r.get("status") in ("resolved", "flagged") for r in case.get("resolution_edges", []))
+    read = ["ML-A4"] if suspicious_link else []
+    named_risk = ((prior or {}).get("prior_str") or {}).get("predicate")
+    mitigation_established = source_established
+    mitigation_rebutted = (not source_established) and bool(gathered)
+    suppress = {"ML-A6", "ML-A7"} if source_established else set()
+
+    caps = sorted({a.get("capability") for a in case.get("alerts", []) if a.get("capability")})
+    ctype = crime_type_for_capabilities(caps, prof) or "money_laundering"
+    present = [a for a in present_atoms(ctype, caps, prof, gathered=gathered, read=read) if a not in suppress]
+    suff = evaluate_sufficiency(ctype, present, named_predicate_risk=bool(named_risk),
+                                mitigation_rebutted=mitigation_rebutted, profile=prof,
+                                required_elements_satisfied=True, mitigation_established=mitigation_established)
+    verdict = suff["verdict"]
+    disposition = {"determination": "escalated", "cleared": "cleared"}.get(verdict, "needs_more_info")
+    label = {"determination": "file", "cleared": "documented_dismissal"}.get(verdict, "needs_more_info")
+
+    spec_atoms = {a["id"]: a for a in prof["crime_types"].get(ctype, {}).get("atoms", [])}
+
+    def _via(aid: str) -> str:
+        atom = spec_atoms.get(aid, {})
+        if set(atom.get("evidence", [])) & set(caps):
+            return "fired"
+        if aid in read:
+            return "read"
+        if atom.get("gather_signal") in gathered:
+            return "gathered"
+        return "present"   # neutral — never claim a provenance (fired/read/gathered) the atom didn't earn
+
+    atoms_view = [{"atom": aid, "name": spec_atoms.get(aid, {}).get("label"),
+                   "kind": spec_atoms.get(aid, {}).get("kind"), "via": _via(aid)} for aid in present]
+    det = case.get("determination", {})
+    return {"badge": BADGE, "case_id": case_id, "showcase": True, "crime_type": ctype, "verdict": verdict,
+            "disposition": disposition, "presentation_label": label, "named_risk": named_risk,
+            "mitigation_established": mitigation_established, "mitigation_rebutted": mitigation_rebutted,
+            "present_atoms": atoms_view, "missing": suff["missing"], "sufficiency_line": det.get("sufficiency_line"),
+            "evidence_hits": {"caution_list": caution, "prior_str": prior, "source_established": source_established},
+            "str_record": det.get("str_record"), "clearance_record": det.get("clearance_record"),
+            # the authored expectation is a REGRESSION ORACLE only — never the served verdict (that is computed above)
+            "expected": {"verdict": det.get("expected_verdict"), "label": det.get("presentation_label")},
+            "expectation_match": verdict == det.get("expected_verdict")}
+
+
+def casefile_list() -> list:
+    """The showcase queue rows (the authored pair), surfaced at the TOP of the queue. Each carries the
+    COMPUTED presentation label + a showcase marker; the rich detail is fetched via GET /case/<id>."""
+    rows = []
+    for case in load_casefile().get("cases", []):
+        ents = _cf_entities(case)
+        subj = ents.get((case.get("subject") or {}).get("entity_ref"), {})
+        det = casefile_determination(case["case_id"])
+        rows.append({"case_id": case["case_id"], "showcase": True,
+                     "display": {"name": case.get("display_name"), "kind": subj.get("kind"), "synthetic_label": True},
+                     "kyc": subj.get("kyc"),
+                     "capabilities": sorted({a.get("capability") for a in case.get("alerts", []) if a.get("capability")}),
+                     "n_alerts": len(case.get("alerts", [])), "n_txns": len(case.get("transactions", [])),
+                     "presentation_label": det["presentation_label"], "verdict": det["verdict"],
+                     "predicate": det.get("named_risk")})
+    return rows
+
+
+def casefile_detail(case_id: str) -> dict:
+    """The full authored case evidence + the COMPUTED determination — everything the rich-case render needs."""
+    cf = load_casefile()
+    case = casefile_case(case_id)
+    if case is None:
+        raise RunError(f"unknown case '{case_id}' — not in the authored case file")
+    return {"badge": BADGE, "showcase": True, "case": case, "reference": cf.get("reference", {}),
+            "meta": cf.get("meta", {}), "determination": casefile_determination(case_id)}
 
 
 # ---- the served page -----------------------------------------------------------------------------
@@ -647,9 +817,12 @@ def selftest() -> int:
     cases = list_cases(index)
     assert cases["cases"] and all("case_id" in c for c in cases["cases"]), "queue empty/malformed"
     assert all("bundle" not in c for c in cases["cases"]), "queue rows must not carry the raw bundle"
+    # Phase 73 — the authored showcase pair leads the queue but is NOT part of the population funnel/coverage
+    # (it has its own computed determination, not a combo-frequency gate); scope these metrics to the population.
+    pop_rows = [c for c in cases["cases"] if not c.get("showcase")]
     funnel = cases["meta"]["gate_funnel"]
-    assert sum(funnel.values()) == len(cases["cases"]), "gate funnel must cover every case"
-    assert cases["meta"]["coverage"]["total"] == len(cases["cases"]), "coverage total mismatch"
+    assert sum(funnel.values()) == len(pop_rows), "gate funnel must cover every population case"
+    assert cases["meta"]["coverage"]["total"] == len(pop_rows), "coverage total mismatch"
 
     # ---- the LIVE gating engine (Phase 64) re-derives the baked funnel under the default policy ----
     live = gate_cases(index)
@@ -921,6 +1094,67 @@ def selftest() -> int:
             failures.append("§12 kyc: expected >=1 txn-bearing kyc case to SIGN end-to-end through the "
                             "re-vendored casework (the consume payoff — none signed in the committed slice)")
 
+    # ---- Phase 73: the authored NORTH-STAR pair COMPUTES file vs cleared via the LIVE engine ----
+    # The matched pair fires the IDENTICAL grounded signals but resolves OPPOSITELY — the verdict is engine
+    # OUTPUT over the AUTHORED evidence (the source-of-funds finding read from the file, the resolved network,
+    # the caution-list / prior-STR record hits), NEVER the authored expected string. The file bar is unchanged;
+    # the affirmative-clear branch gives Lakeshore its documented dismissal.
+    q = list_cases()
+    sc_ids = q["meta"].get("showcase_ids", [])
+    if sc_ids != ["CASE-A", "CASE-B"]:
+        failures.append(f"the authored pair should be the showcase ids, got {sc_ids}")
+    if [c["case_id"] for c in q["cases"][:2]] != ["CASE-A", "CASE-B"]:
+        failures.append("the authored pair must LEAD the queue (the top two rows)")
+    da = casefile_determination("CASE-A")
+    if not (da["verdict"] == "determination" and da["disposition"] == "escalated" and da["presentation_label"] == "file"):
+        failures.append(f"CASE-A (Northgate) should COMPUTE determination/escalated/file, got {da['verdict']}/{da['disposition']}")
+    if da["named_risk"] != "human trafficking":
+        failures.append(f"CASE-A should READ the predicate from the prior-STR record, got {da['named_risk']!r}")
+    if not da["expectation_match"]:
+        failures.append("CASE-A computed verdict must match its authored oracle (the regression check)")
+    a_legs = {a["atom"] for a in da["present_atoms"] if a["kind"] == "leg"}
+    if not ({"ML-A4", "ML-A5", "ML-A7"} <= a_legs):
+        failures.append(f"CASE-A should rest on the read-network + gathered-corroboration + source legs, got {sorted(a_legs)}")
+    a_via = {a["atom"]: a["via"] for a in da["present_atoms"]}
+    if not (a_via.get("ML-A4") == "read" and a_via.get("ML-A5") == "gathered" and a_via.get("ML-A1") == "fired"):
+        failures.append(f"CASE-A per-leg provenance (via) should be grounded fired/read/gathered, got {a_via}")
+    db = casefile_determination("CASE-B")
+    if not (db["verdict"] == "cleared" and db["presentation_label"] == "documented_dismissal"):
+        failures.append(f"CASE-B (Lakeshore) should COMPUTE the affirmative cleared/documented_dismissal, got {db['verdict']}")
+    if not db["mitigation_established"] or db["named_risk"]:
+        failures.append("CASE-B should clear on AFFIRMATIVELY established mitigation with no named predicate")
+    if [a for a in db["present_atoms"] if a["kind"] == "leg"]:
+        failures.append("CASE-B should carry NO corroborating leg (the clear rests on absent legs + positive mitigation)")
+    if not db["expectation_match"]:
+        failures.append("CASE-B computed verdict must match its authored oracle")
+    # the SAME fired signals on both, opposite outcome — the thesis, asserted from the data
+    if {a.get("capability") for a in casefile_case("CASE-A")["alerts"]} != {a.get("capability") for a in casefile_case("CASE-B")["alerts"]}:
+        failures.append("the pair must fire the IDENTICAL signal set (same grounded signal, opposite outcome)")
+    # the detail carries the full evidence for the render, and the routes DISPATCH the authored ids
+    da_det = casefile_detail("CASE-A")
+    if da_det["case"]["display_name"] != "Northgate Hospitality Group Inc." or not da_det["case"]["transactions"]:
+        failures.append("the casefile detail must carry the full authored case for the render")
+    if case_detail("CASE-B").get("showcase") is not True:
+        failures.append("case_detail must DISPATCH an authored id to the casefile path")
+    if determine_case("CASE-B")["verdict"] != "cleared":
+        failures.append("determine_case must DISPATCH an authored id to the casefile path (cleared)")
+    # the committed RENDER fixtures (tests/fixtures/casefile/*) must EQUAL the live computation — the .mjs test
+    # replays them, so this is the bridge: an engine/data edit that forgets a fixture regen fails LOUD here.
+    _fixdir = ROOT / "tests" / "fixtures" / "casefile"
+    for _cid in ("CASE-A", "CASE-B"):
+        try:
+            _committed = json.loads((_fixdir / f"{_cid}.detail.json").read_text(encoding="utf-8"))
+        except OSError:
+            failures.append(f"Phase-73 render fixture missing: tests/fixtures/casefile/{_cid}.detail.json"); continue
+        if casefile_detail(_cid) != _committed:
+            failures.append(f"Phase-73 fixture DRIFT: tests/fixtures/casefile/{_cid}.detail.json != live casefile_detail('{_cid}') — regenerate it")
+    try:
+        _qfix = json.loads((_fixdir / "queue.json").read_text(encoding="utf-8")).get("cases", [])
+        if [c for c in list_cases()["cases"] if c.get("showcase")] != _qfix:
+            failures.append("Phase-73 fixture DRIFT: tests/fixtures/casefile/queue.json showcase rows != live list_cases() — regenerate it")
+    except OSError:
+        failures.append("Phase-73 render fixture missing: tests/fixtures/casefile/queue.json")
+
     # an unknown case is a NAMED error, not a crash
     try:
         determine_case("CASE-DOES-NOT-EXIST"); failures.append("determine_case on an unknown case should raise")
@@ -974,6 +1208,9 @@ def selftest() -> int:
           f"§12 kyc: {len(kyc_cases)} C14-pure kyc case(s) determine from KYC-A1, "
           f"{sum(1 for c in kyc_cases if c.get('grounds_e2e') is True)} SIGN / "
           f"{sum(1 for c in kyc_cases if c.get('grounds_e2e') is False)} fail-closed at casework's txn contract; "
+          f"Phase-73 north-star pair LEADS the queue + COMPUTES live: "
+          f"CASE-A {da['verdict']}/{da['presentation_label']} (predicate {da['named_risk']!r}) vs "
+          f"CASE-B {db['verdict']}/{db['presentation_label']} (affirmative mitigation) — same signals, opposite outcome; "
           f"stubbed finale {seq} -> CONNECTED; pillar-status byte-stable)")
     return 0
 

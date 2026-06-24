@@ -80,7 +80,11 @@
         "no_unrebutted_mitigation_required": true
       },
       "mitigation_atoms": ["ML-A6", "ML-A7"],
-      "guidance": "the named predicate risk grounds back to the corpus specific-risk guidance — the typology of the case's cited signals (data/indicator-typology-map.json / data/typology-map.json). A program becomes effective by naming the specific risk it files for (e.g. human trafficking, fentanyl), not the generic offence."
+      "guidance": "the named predicate risk grounds back to the corpus specific-risk guidance — the typology of the case's cited signals (data/indicator-typology-map.json / data/typology-map.json). A program becomes effective by naming the specific risk it files for (e.g. human trafficking, fentanyl), not the generic offence.",
+      "affirmative_clear": {
+        "label": "Affirmatively explained — documented dismissal",
+        "rationale": "the mechanism fired but the corroborating legs are absent and the benign explanation is affirmatively established (an established legitimate source of funds, activity reconciling to the stated business and consistent with the anticipated profile) — a documented dismissal, not a determination, and never the absence of a negative hit. Earned by positive evidence; it never licenses a filing and never loosens the determination bar."
+      }
     },
     "kyc_integrity": {
       "label": "KYC integrity",

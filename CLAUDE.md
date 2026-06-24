@@ -262,16 +262,26 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   MEASURED: a `coverage` block measures the LIVE extraction vs the deterministic StubPlanner REFERENCE
   (consistency-not-correctness; pinned via `tests/gather_quality_harness.py --check`, no model). Phase 71/72 ADOPT
   the substrate v0.3 slice + Phase-26 C14 kyc emission (`aml-substrate@f15c241`; vendored `aml-casework@bf15535`
-  accepts v0.3 + grounds C14; the casework pin is READ from `VENDORED_AT`, not hardcoded): `curate_workbench_cases`
-  MERGES each customer's monitoring + C8/C14-screening bundles (a case = a customer) so C8 (ML-A3) co-occurs with
+  accepts v0.3 + grounds C14; the casework pin is READ from `VENDORED_AT`): `curate_workbench_cases` MERGES each
+  customer's monitoring + C8/C14-screening bundles (a case = a customer) so C8 (ML-A3) co-occurs with
   C15/`related_parties[]` (ML-A4) — the **§12 ML loop CLOSES from REAL signals** (≥2-leg, no GATHER). The **§12 KYC
-  loop CLOSES too** (Phase 72): a C14-PURE customer (no ML co-firing → classifies `kyc_integrity` via the dual-map,
+  loop CLOSES too** (Phase 72): a C14-PURE customer (no ML co-firing → `kyc_integrity` via the dual-map,
   correct-not-bug) determines from KYC-A1 — C14 ALONE (kyc = mechanism + 0 legs); kyc SIGNING is the honest
-  cross-pillar FRONTIER — txn-bearing C14 cases SIGN through casework, txn-LESS party-leaf cases fail-CLOSED at
-  casework's no-transactions CONTRACT (surfaced via `e2e_note`, never loosened — a named casework follow-on).
+  cross-pillar FRONTIER — txn-bearing C14 cases SIGN, txn-LESS party-leaf cases fail-CLOSED at casework's
+  no-transactions CONTRACT (`e2e_note`, never loosened — a named casework follow-on).
   Slice **355**, coverage **128/355**, funnel (auto/human/review) 183/110/62; 6 kyc cases (2 sign). The bundle's
   `related_parties[]` BO graph renders as the case network (`boGraphHTML`; "N pct"); the gather/finale DEMO case
-  resolves from the OSINT corpus (`gather_demo_case_id`), re-curate-robust. Still-deferred substrate-emission gaps
+  resolves from the OSINT corpus (`gather_demo_case_id`), re-curate-robust. **Phase 73** AUTHORS the north-star
+  rich case — a SEPARATE companion source `data/casefile/{case.json,schema.md}` (substrate/casework PARKED, the
+  artifact-is-the-spec): the matched FILE/DISMISS pair (CASE-A Northgate files / CASE-B Lakeshore clears) firing
+  the SAME grounded signals yet resolving OPPOSITELY on an authored network + source-of-funds layer. The pair
+  LEADS the queue; the two verdicts are LIVE-ENGINE OUTPUT (`serve_workbench` casefile path DERIVES the engine
+  inputs from the evidence; the authored `expected_*` a regression oracle via a fixture-drift bridge). The engine
+  gained the affirmative-`cleared` verdict (mechanism + 0 legs + affirmative mitigation established — a SEPARATE
+  clear path; **the file/determination bar BYTE-UNCHANGED**, the A1 guard) + a `read`-from-file evidence source +
+  predicate-from-register. `workbench.html` `showcaseSurface` renders names-not-codes + 3 graphs
+  (`scMoneyFlowGraph`/`scResolutionGraph`/`scBOGraph`). The cross-pillar contract `docs/rich-case-target-contract.md`
+  is a DEFERRED follow-on. Still-deferred substrate-emission gaps
   (named in `signal_brief`): C1 anticipated-activity (a PRINCIPLED measured null), broader C7, a TF slice — the
   consolidated §12 BRIEF (`docs/substrate-determination-signals-PLAN-BRIEF.md`). The chain workbench
   renders the structured STR's COMPLETENESS (the previously-dropped fields surfaced honest-NULL). Doc:

@@ -200,6 +200,18 @@ def validate_requirements(profile: dict) -> list:
             errors.append(f"{where} missing 'guidance'")
         elif _BANNED.search(guide):
             errors.append(f"{where}.guidance carries a banned metric token")
+
+        ac = spec.get("affirmative_clear")     # Phase-73 — OPTIONAL; licenses the documented-dismissal `cleared` verdict
+        if ac is not None:
+            if not isinstance(ac, dict):
+                errors.append(f"{where}.affirmative_clear must be an object")
+            else:
+                for f in ("label", "rationale"):
+                    val = str(ac.get(f) or "").strip()
+                    if not val:
+                        errors.append(f"{where}.affirmative_clear missing '{f}'")
+                    elif _BANNED.search(val):
+                        errors.append(f"{where}.affirmative_clear.{f} carries a banned metric token")
     return errors
 
 
@@ -217,15 +229,21 @@ def crime_type_for_capabilities(capabilities, profile: dict | None = None) -> st
     return max(counts, key=lambda k: (counts[k], k != "kyc_integrity"))
 
 
-def present_atoms(crime_type: str, capabilities, profile: dict, *, gathered=()) -> list:
+def present_atoms(crime_type: str, capabilities, profile: dict, *, gathered=(), read=()) -> list:
     """The determination atoms a case CARRIES: an atom is present if any of its `evidence` capabilities
-    fired, OR (Phase-69 T3) its `gather_signal` was returned by the GATHER loop (record-sourced). Order
+    fired, OR (Phase-69 T3) its `gather_signal` was returned by the GATHER loop (record-sourced), OR
+    (Phase-73) the atom id is in `read` — evidence the investigator READS from the case file (a resolved
+    counterparty/ownership network, a source-of-funds finding) rather than a fired detector. `read` is the
+    caller's responsibility: serve_workbench grounds each read atom against present entities/edges before
+    asserting it (an investigator reads the file; this is evidence-presence, not a claimed detector). Order
     follows the profile's atom order (stable)."""
     spec = (profile.get("crime_types") or {}).get(crime_type) or {}
-    caps, gat = set(capabilities or []), set(gathered or [])
+    caps, gat, rd = set(capabilities or []), set(gathered or []), set(read or [])
     out = []
     for atom in spec.get("atoms", []):
-        if set(atom.get("evidence", [])) & caps or (atom.get("gather_signal") and atom["gather_signal"] in gat):
+        if (set(atom.get("evidence", [])) & caps
+                or (atom.get("gather_signal") and atom["gather_signal"] in gat)
+                or atom["id"] in rd):
             out.append(atom["id"])
     return out
 
@@ -254,7 +272,7 @@ def gather_targets(crime_type: str, present_atom_ids, profile: dict) -> list:
 
 
 def assess_completeness(crime_type: str, capabilities, profile: dict, *,
-                        str_completeness: dict | None = None, gathered=()) -> dict:
+                        str_completeness: dict | None = None, gathered=(), read=()) -> dict:
     """The COMPLETENESS measurement (Phase 69 T2) — required vs have vs gap, for one case. Pure; no verdict
     (the sufficiency DECISION is evaluate_sufficiency, wired in T4). Returns the STR-element completeness
     (from the casework `completeness` dict) + per-atom presence (the determination evidence we have vs the
@@ -267,7 +285,7 @@ def assess_completeness(crime_type: str, capabilities, profile: dict, *,
     required = list(spec.get("required_elements", []))
     satisfied = [el for el in required if comp.get(el) is True]
     missing = [el for el in required if comp.get(el) is not True]
-    present = set(present_atoms(crime_type, capabilities, profile, gathered=gathered))
+    present = set(present_atoms(crime_type, capabilities, profile, gathered=gathered, read=read))
     atoms = [{"id": a["id"], "label": a.get("label", ""), "kind": a.get("kind"),
               "evidence": a.get("evidence", []), "data": a.get("data", []),
               "present": a["id"] in present} for a in spec.get("atoms", [])]
@@ -289,18 +307,23 @@ def signal_brief(crime_type: str, present_atom_ids, profile: dict) -> list:
             if a["id"] not in have and not a.get("gather_signal")]
 
 
-def determine(crime_type: str, capabilities, profile: dict, *, gathered=(), str_completeness: dict | None = None,
-              named_predicate_risk: bool = False, mitigation_rebutted: bool = False) -> dict:
+def determine(crime_type: str, capabilities, profile: dict, *, gathered=(), read=(), str_completeness: dict | None = None,
+              named_predicate_risk: bool = False, mitigation_rebutted: bool = False,
+              mitigation_established: bool = False) -> dict:
     """The full determination verdict (Phase 69 T4) — completeness MEASUREMENT + the sufficiency DECISION,
     over one case. A determination is licensed by evidence-SUFFICIENCY (mechanism + corroborating legs + a
     NAMED predicate risk + no unrebutted mitigation), NEVER by combo-frequency. Insufficiency is a
-    legitimate non-decision whose `missing` NAMES the gap (gather it, or build the signal — the §12 loop)."""
+    legitimate non-decision whose `missing` NAMES the gap (gather it, or build the signal — the §12 loop).
+    Phase-73: `read` adds investigator-read atoms; `mitigation_established` lets a not-sufficient case with
+    AFFIRMATIVELY established mitigation resolve to the `cleared` verdict (a documented dismissal) — the
+    file/determination bar is untouched."""
     assess = assess_completeness(crime_type, capabilities, profile,
-                                 str_completeness=str_completeness, gathered=gathered)
+                                 str_completeness=str_completeness, gathered=gathered, read=read)
     str_ok = None if str_completeness is None else (not assess["str"]["missing"])
     suff = evaluate_sufficiency(crime_type, assess["present_atom_ids"],
                                 named_predicate_risk=named_predicate_risk, mitigation_rebutted=mitigation_rebutted,
-                                profile=profile, required_elements_satisfied=str_ok)
+                                profile=profile, required_elements_satisfied=str_ok,
+                                mitigation_established=mitigation_established)
     return {"crime_type": crime_type, "completeness": assess, "verdict": suff["verdict"],
             "sufficient": suff["sufficient"], "missing": suff["missing"], "evidence": suff["evidence"],
             "signal_brief": signal_brief(crime_type, assess["present_atom_ids"], profile)}
@@ -308,13 +331,23 @@ def determine(crime_type: str, capabilities, profile: dict, *, gathered=(), str_
 
 def evaluate_sufficiency(crime_type: str, present_atom_ids, *, named_predicate_risk: bool,
                          mitigation_rebutted: bool, profile: dict,
-                         required_elements_satisfied: bool | None = None) -> dict:
+                         required_elements_satisfied: bool | None = None,
+                         mitigation_established: bool = False) -> dict:
     """The pure determination verdict over an EXPLICIT atom-presence input (Phase 69's core control;
     the case→atom derivation + the UI are wired in T4). Returns:
-      {sufficient, verdict('determination'|'needs_more_info'), missing[<reason>], evidence{...}}.
+      {sufficient, verdict('determination'|'needs_more_info'|'cleared'), missing[<reason>], evidence{...}}.
     `missing` is load-bearing — each reason NAMES a gap (what to gather, or what signal to build in the
     substrate — the §12 loop). Sufficiency licenses a DETERMINATION; insufficiency is a legitimate
-    non-decision, never a defensive auto-file."""
+    non-decision, never a defensive auto-file.
+
+    Phase-73 — the AFFIRMATIVE-CLEAR verdict (A1-guarded). When a crime_type defines an `affirmative_clear`
+    block, a case that is NOT sufficient for a determination but carries the mechanism, NO corroborating
+    legs, NO nameable predicate, and AFFIRMATIVELY ESTABLISHED mitigation (`mitigation_established`) resolves
+    to `cleared` — a documented dismissal earned by POSITIVE evidence (an established source of funds /
+    activity reconciling to the stated business), never the absence of a negative hit. This is an ADDITIVE
+    branch on the not-sufficient path: it relabels what would be `needs_more_info`, and the determination/
+    FILE bar (the `missing` computation below) is BYTE-UNCHANGED — the clear path can never produce a
+    `determination`."""
     spec = (profile.get("crime_types") or {}).get(crime_type)
     if not isinstance(spec, dict):
         return {"sufficient": False, "verdict": "needs_more_info",
@@ -343,13 +376,30 @@ def evaluate_sufficiency(crime_type: str, present_atom_ids, *, named_predicate_r
                        "(establish source of funds / anticipated-activity consistency, or rule it out)")
 
     sufficient = not missing
+    verdict = "determination" if sufficient else "needs_more_info"
+
+    # Phase-73 — the AFFIRMATIVE-CLEAR branch. ADDITIVE, on the NOT-sufficient path ONLY; it relabels a
+    # `needs_more_info` to `cleared` when the benign explanation is affirmatively established. The file bar
+    # (the `missing`/`sufficient` computation above) is untouched — `cleared` can never become a determination.
+    clear_spec = spec.get("affirmative_clear") if isinstance(spec, dict) else None
+    cleared = bool(
+        not sufficient and clear_spec and mitigation_established
+        and len(mech) >= int(rule.get("mechanism_required", 0))   # the mechanism IS present (there's a pattern to explain)
+        and not legs                                              # NO corroborating leg of laundering
+        and not named_predicate_risk                              # nothing nameable to investigate
+    )
+    if cleared:
+        verdict = "cleared"
+
     return {
         "sufficient": sufficient,
-        "verdict": "determination" if sufficient else "needs_more_info",
+        "verdict": verdict,
         "missing": missing,
         "evidence": {"mechanism_present": mech, "legs_present": legs,
                      "named_predicate_risk": bool(named_predicate_risk),
-                     "mitigation_rebutted": bool(mitigation_rebutted)},
+                     "mitigation_rebutted": bool(mitigation_rebutted),
+                     "mitigation_established": bool(mitigation_established),
+                     "affirmative_clear": cleared},
     }
 
 
@@ -428,6 +478,50 @@ def selftest() -> int:
                                mitigation_rebutted=True, profile=prof, required_elements_satisfied=True)
     assert kyc["sufficient"] and kyc["verdict"] == "determination", kyc
 
+    # --- Phase-73: the AFFIRMATIVE-CLEAR verdict (ADDITIVE; the FILE BAR is byte-unchanged) ---
+    # Lakeshore shape: mechanism present, NO legs, mitigation AFFIRMATIVELY established, no named predicate -> cleared
+    clr = evaluate_sufficiency("money_laundering", ["ML-A1"], named_predicate_risk=False,
+                               mitigation_rebutted=False, profile=prof, required_elements_satisfied=True,
+                               mitigation_established=True)
+    assert clr["verdict"] == "cleared" and not clr["sufficient"], clr
+    # the clear is EARNED by positive evidence: the SAME shape WITHOUT established mitigation -> needs_more_info
+    nmi = evaluate_sufficiency("money_laundering", ["ML-A1"], named_predicate_risk=False,
+                               mitigation_rebutted=False, profile=prof, required_elements_satisfied=True,
+                               mitigation_established=False)
+    assert nmi["verdict"] == "needs_more_info", nmi
+    # a nameable predicate blocks the clear (there IS something to investigate) -> needs_more_info
+    clr_pred = evaluate_sufficiency("money_laundering", ["ML-A1"], named_predicate_risk=True,
+                                    mitigation_rebutted=False, profile=prof, required_elements_satisfied=True,
+                                    mitigation_established=True)
+    assert clr_pred["verdict"] == "needs_more_info", clr_pred
+    # a present corroborating leg blocks the clear (evidence of laundering survives) -> needs_more_info
+    clr_leg = evaluate_sufficiency("money_laundering", ["ML-A1", "ML-A4"], named_predicate_risk=False,
+                                   mitigation_rebutted=False, profile=prof, required_elements_satisfied=True,
+                                   mitigation_established=True)
+    assert clr_leg["verdict"] == "needs_more_info", clr_leg
+    # THE FILE-BAR INVARIANT: the clear path NEVER manufactures a determination — the full ML bar still
+    # determines, and mitigation_established does NOT turn a determination into anything else
+    full_clr = evaluate_sufficiency("money_laundering", ["ML-A1", "ML-A3", "ML-A4"],
+                                    named_predicate_risk=True, mitigation_rebutted=True, profile=prof,
+                                    required_elements_satisfied=True, mitigation_established=True)
+    assert full_clr["verdict"] == "determination" and full_clr["sufficient"], full_clr
+    # the clear path is gated on the profile block: kyc_integrity has NO affirmative_clear -> unavailable (stays NMI)
+    kyc_clr = evaluate_sufficiency("kyc_integrity", [], named_predicate_risk=False, mitigation_rebutted=False,
+                                   profile=prof, required_elements_satisfied=True, mitigation_established=True)
+    assert kyc_clr["verdict"] == "needs_more_info", kyc_clr
+    # a banned metric token in affirmative_clear is rejected by the validator
+    assert broke(lambda p: p["crime_types"]["money_laundering"]["affirmative_clear"].__setitem__("rationale", "clears 80% of alerts"))
+    # read-from-file: an atom marked read-present lights WITHOUT a fired capability (ML-A4 network read from the file)
+    pr = present_atoms("money_laundering", ["C2", "C3"], prof, read=["ML-A4"])
+    assert "ML-A1" in pr and "ML-A4" in pr, pr
+    # determine() over casefile-shaped inputs: the Lakeshore CLEAR and the Northgate DETERMINATION
+    d_clear = determine("money_laundering", ["C2", "C3"], prof, named_predicate_risk=False,
+                        mitigation_rebutted=False, mitigation_established=True)
+    assert d_clear["verdict"] == "cleared", d_clear
+    d_file = determine("money_laundering", ["C2", "C3"], prof, read=["ML-A7", "ML-A4"], gathered=["corroboration"],
+                       named_predicate_risk=True, mitigation_rebutted=True)
+    assert d_file["verdict"] == "determination" and d_file["sufficient"], d_file
+
     # --- crime_type_for_capabilities + present_atoms + assess_completeness (T2 case-assessment) ---
     assert crime_type_for_capabilities(["C2", "C3", "C4"], prof) == "money_laundering"
     assert crime_type_for_capabilities(["C14"], prof) == "kyc_integrity"
@@ -498,7 +592,8 @@ def selftest() -> int:
 
     print("evidence_requirements --selftest: PASS "  # noqa: T201
           "(profile validates; 10 tampers rejected; ML stricter bar + kyc bar evaluate correctly; "
-          "crime_type/present_atoms/assess_completeness over a mule profile)")
+          "crime_type/present_atoms/assess_completeness over a mule profile; Phase-73 affirmative-clear "
+          "verdict additive + read-from-file source — the FILE BAR byte-unchanged)")
     return 0
 
 

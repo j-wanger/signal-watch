@@ -417,7 +417,18 @@ function groundsTag(c){
   return '';
 }
 function qcardHTML(c){
-  const g=liveGate(c).gate, d=c.display||{};
+  const d=c.display||{};
+  if(c.showcase){   // Phase 73 — the authored pair leads the queue: a north-star tag + the computed outcome + names-not-codes
+    const file=c.presentation_label==='file';
+    const caps=(c.capabilities||[]).map(x=>`<span class="qcap" title="${esc(x)}">${esc(capName(x))}</span>`).join('');
+    const oc=file?'background:rgba(225,80,90,.14);color:var(--rose)':'background:rgba(90,190,140,.14);color:#7fd6a6';
+    return `<button class="qcard${SEL===c.case_id?' sel':''}" data-case="${esc(c.case_id)}" style="border-left:2px solid var(--signal)">
+      <div class="qtop"><span style="color:var(--signal);font-size:13px">★</span><span class="qnm">${esc(d.name||c.case_id)}</span><span style="margin-left:auto;font:600 10px/1 var(--mono);padding:3px 7px;border-radius:4px;text-transform:uppercase;${oc}">${file?'file':'clear'}</span></div>
+      <div class="qsub"><span>north-star case</span><span>·</span><span>${esc(c.n_alerts||0)} signals</span><span>·</span><span>${esc(c.n_txns||0)} txns</span></div>
+      <div class="qcaps${SIGNALS?' on':''}">${caps}</div>
+    </button>`;
+  }
+  const g=liveGate(c).gate;
   const caps=(c.capabilities||[]).map(x=>`<span class="qcap">${esc(x)}</span>`).join('');
   const xt=c.exemplar?`<span class="xtag">${esc(c.exemplar)}</span>`:'';
   return `<button class="qcard${SEL===c.case_id?' sel':''}" data-case="${esc(c.case_id)}">
@@ -921,12 +932,261 @@ function dispositionHTML(){
   return `<div class="saw"><div class="sl">Signed STR · grounds for suspicion · disposition: file</div><div class="narr">${esc(rec.narrative)}</div>${claims?`<ul class="claims">${claims}</ul>`:''}</div>`;
 }
 
+/* ================= Phase 73 — the authored NORTH-STAR rich case (showcase render) =================
+   The matched pair renders as a full investigation: rail-aware counterparty identity, three networks
+   (money-flow, entity-resolution, beneficial-ownership), the caution-list chain + the inbound prior-STR
+   linkage, and the COMPUTED determination (file) or clearance (documented dismissal). NAMES-NOT-CODES:
+   capability codes resolve to plain names; a bare code survives only in a title tooltip. All synthetic. */
+const CAP_NAMES={C2:'Rapid pass-through detection',C3:'Multi-originator funnel-in detection',C4:'Structuring / evasion-intent detection',C5:'Cash-intensity anomaly detection',C7:'Peer-profile inconsistency',C8:'Income / occupation profile inconsistency',C14:'Source-of-funds / KYC-cooperation screening',C15:'Beneficial-ownership / shell-network analysis'};
+function capName(code){return CAP_NAMES[code]||String(code||'');}
+function scMoney(v){return '$'+(Number(v||0)).toLocaleString('en-CA');}
+function scEntMap(detail){const m={};((detail.case||{}).entities||[]).forEach(e=>{m[e.entity_id]=e;});return m;}
+function scNameOf(ents,id){return (ents[id]||{}).display_name||id;}
+function viaLabel(v){return {fired:'detector fired',read:'read from the file',gathered:'gathered'}[v]||String(v||'');}
+
+/* a generic SVG network from liveGraphLayout (reused for all three showcase graphs; edges use .from/.to) */
+function scGraphSVG(entities,rels,mains,ariaLabel){
+  const g=liveGraphLayout(entities,rels,mains,720,320);
+  const P={}; g.nodes.forEach(n=>{P[n.name]=n;});
+  let s='<svg class="gnsvg" viewBox="0 0 '+g.w+' '+g.h+'" role="img" aria-label="'+esc(ariaLabel)+'">';
+  g.edges.forEach(e=>{const f=P[e.from],t=P[e.to]; if(!f||!t)return;
+    s+='<g class="gge'+(e.dim?' scdim':'')+'"><line x1="'+f.x+'" y1="'+f.y+'" x2="'+t.x+'" y2="'+t.y+'"'+(e.dim?' stroke-dasharray="5 4"':'')+'></line>'
+      +'<text x="'+Math.round((f.x+t.x)/2)+'" y="'+(Math.round((f.y+t.y)/2)-4)+'">'+esc(e.label||'')+'</text></g>';});
+  g.nodes.forEach(n=>{const lbl=n.name.length>24?n.name.slice(0,23)+'…':n.name;
+    s+='<g class="ggn'+(n.main?' ggm':'')+'"><circle cx="'+n.x+'" cy="'+n.y+'" r="'+(n.main?9:6)+'"></circle>'
+      +'<text x="'+n.x+'" y="'+(n.y-(n.main?13:10))+'">'+esc(lbl)+'</text></g>';});
+  return s+'</svg>';
+}
+function scGraphPanel(title,note,svg,rows){
+  if(!svg) return '';
+  return `<div class="pnl span"><div class="ph">${esc(title)} <span style="color:var(--faint)">${esc(note)}</span></div>
+    <div class="gnet"><div class="gnh">Network <span class="gnl">illustrative · authored over synthetic records</span></div>${svg}${rows||''}</div></div>`;
+}
+
+/* Graph 1 — the money-flow network (funnel-in → subject → out); flows aggregated per counterparty+direction */
+function scMoneyFlowGraph(detail){
+  const c=detail.case||{}, ents=scEntMap(detail), subj=scNameOf(ents,(c.subject||{}).entity_ref);
+  const agg={};
+  (c.transactions||[]).forEach(t=>{const cp=t.counterparty||{};
+    const nm=cp.entity_ref?scNameOf(ents,cp.entity_ref):cp.name; if(!nm)return;
+    const key=(cp.entity_ref||cp.name)+'|'+t.direction;
+    const a=agg[key]||(agg[key]={name:nm,dir:t.direction,amt:0,n:0,ch:{}});
+    a.amt+=(t.amount||{}).value||0; a.n++; a.ch[t.channel]=1;});
+  const nodes=[{name:subj}], rels=[];
+  Object.values(agg).forEach(a=>{ nodes.push({name:a.name}); const ch=Object.keys(a.ch).join('/');
+    if(a.dir==='CREDIT') rels.push({from:a.name,to:subj,label:ch+' · '+scMoney(a.amt)});
+    else rels.push({from:subj,to:a.name,label:ch+' · '+scMoney(a.amt)});});
+  return scGraphPanel('Money-flow network','trace the funds · rail-typed edges',
+    scGraphSVG(nodes,rels,[subj],'money-flow network (synthetic)'),'');
+}
+
+/* Graph 2 — entity resolution: resolved (strong) / flagged (prior-STR) / excluded (name-only) edges */
+function scResolutionGraph(detail){
+  const c=detail.case||{}, ents=scEntMap(detail), ref=detail.reference||{};
+  const edges=c.resolution_edges||[]; if(!edges.length) return '';
+  const nodes=[], rels=[], rows=[];
+  const ctx=e=>e.role==='related_party'?'our records':(e.role==='counterparty'?'counterparty':String(e.role||''));
+  edges.forEach(r=>{const ids=r.between||[], sh=(r.shared||[])[0]||{};
+    if(r.status==='resolved'&&ids.length>=2){const a=ents[ids[0]]||{}, b=ents[ids[1]]||{};
+      const an=(a.display_name||ids[0])+' · '+ctx(a), bn=(b.display_name||ids[1])+' · other institution';
+      nodes.push({name:an},{name:bn}); rels.push({from:an,to:bn,label:'same '+(sh.kind||'id')+' ('+(sh.strength||'')+')'});
+      rows.push({cls:'res',t:'resolved',r:r.reading});
+    } else if(r.status==='flagged'){const a=ents[ids[0]]||{};
+      const rec=(ref.prior_str_register||[]).find(x=>x.id===r.matched_register)||{};
+      const an=(a.display_name||ids[0])+' · inbound source', rn=(rec.subject_name||'prior-STR subject')+' · prior STR';
+      nodes.push({name:an},{name:rn}); rels.push({from:an,to:rn,label:'same '+(sh.kind||'id')+' — flagged'});
+      rows.push({cls:'flag',t:'flagged',r:r.reading});
+    } else if(r.status==='excluded'){const a=ents[ids[0]]||{};
+      const an=(a.display_name||ids[0])+' · counterparty', cn=(r.candidate_name||'watchlist near-match')+' · watchlist';
+      nodes.push({name:an},{name:cn}); rels.push({from:an,to:cn,label:'name-only — excluded',dim:true});
+      rows.push({cls:'excl',t:'excluded',r:r.reading});
+    }});
+  const rowHTML=rows.map(x=>`<div class="screz ${x.cls}"><span class="screz-s">${esc(x.t)}</span><span class="screz-r">${esc(x.r||'')}</span></div>`).join('');
+  return scGraphPanel('Entity resolution','exact-on-identifier · name-only collisions excluded',
+    scGraphSVG(nodes,rels,[],'entity-resolution network (synthetic)'),rowHTML);
+}
+
+/* Graph 3 — the named beneficial-ownership graph (display names, multi-hop; the caution-listed address) */
+function scBOGraph(detail){
+  const c=detail.case||{}, ents=scEntMap(detail), subj=scNameOf(ents,(c.subject||{}).entity_ref);
+  const oe=c.ownership_edges||[]; if(!oe.length) return '';
+  const hit=((detail.determination||{}).evidence_hits||{}).caution_list;
+  const nodes=[{name:subj}], rels=[], rows=[];
+  oe.forEach(o=>{const ownerNm=scNameOf(ents,o.src), tgtNm=scNameOf(ents,o.dst);
+    nodes.push({name:ownerNm});
+    rels.push({from:ownerNm,to:tgtNm,label:ownLabel(o.label)+(o.ownership_pct!=null?' · '+esc(o.ownership_pct)+' pct':'')});
+    rows.push({w:ownerNm,l:ownLabel(o.label)+(o.ownership_pct!=null?' · '+esc(o.ownership_pct)+' pct':''),x:tgtNm});});
+  if(hit&&hit.owner){const ownerNm=scNameOf(ents,hit.owner), addr=(hit.caution||{}).address||{};
+    const an=(addr.line||'caution-listed address')+' · CAUTION LIST'; nodes.push({name:an});
+    rels.push({from:ownerNm,to:an,label:'registered at — flagged'});
+    rows.push({w:ownerNm,l:'registered at',x:an});}
+  const rowHTML=rows.map(x=>`<div class="gerow"><span class="gw">${esc(x.w)}</span><span class="gl">— ${esc(x.l)} →</span><span class="gw">${esc(x.x)}</span></div>`).join('');
+  return scGraphPanel('Beneficial ownership','declared ownership chain · real names',
+    scGraphSVG(nodes,rels,[subj],'beneficial-ownership network (synthetic)'),rowHTML);
+}
+
+function scSignalWalk(detail){
+  const alerts=(detail.case||{}).alerts||[];
+  const rows=alerts.map(a=>{const g=a.grounding||{};
+    return `<div class="scsig"><div class="scsig-h"><span class="scsig-name">${esc(g.red_flag||capName(a.capability))}</span>
+      <span class="scsig-cap" title="capability ${esc(a.capability)} · ${esc(g.signal_id||'')}">${esc(capName(a.capability))}</span></div>
+      <div class="scsig-flag"><span class="scsig-vl">Source indicator · verbatim</span>“${esc(g.flag||'')}” <span class="scsig-src">${esc(g.advisory_id||'')}</span></div></div>`;}).join('');
+  return `<div class="pnl span"><div class="ph">Signals fired <span style="color:var(--faint)">grounded to public advisories · the identical set fires on both cases</span></div>${rows}</div>`;
+}
+
+function railFields(t){const cp=t.counterparty||{}, out=[];
+  if(cp.name) out.push('<b>'+esc(cp.name)+'</b>');
+  if(cp.email) out.push('✉ '+esc(cp.email));
+  if(cp.phone) out.push('☎ '+esc(cp.phone));
+  if(cp.address) out.push('⌂ '+esc(cp.address));
+  if(cp.country) out.push(esc(cp.country));
+  if(cp.observed_at) out.push('<span class="scobs">'+esc(cp.observed_at)+'</span>');
+  return out.join(' · ');}
+function scLedger(detail){
+  const txns=(detail.case||{}).transactions||[];
+  const rows=txns.map(t=>{const inn=t.direction==='CREDIT';
+    return `<tr class="sctx ${inn?'in':'out'}"><td class="scch">${esc(t.channel)}</td><td class="scdir ${inn?'in':'out'}">${inn?'▼ in':'▲ out'}</td>
+      <td class="scamt">${scMoney((t.amount||{}).value)}</td><td class="sccp">${railFields(t)}</td><td class="scts">${esc((t.timestamp||'').slice(0,10))}</td></tr>`;}).join('');
+  return `<div class="pnl span"><div class="ph">Transactions &amp; counterparties <span style="color:var(--faint)">${esc(txns.length)} · rail-aware identity (wire→address · e-transfer→email · ACH→country)</span></div>
+    <table class="sctxt"><thead><tr><th>Rail</th><th>Dir</th><th>Amount</th><th>Counterparty</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function scFlags(detail){
+  const hits=(detail.determination||{}).evidence_hits||{}, ents=scEntMap(detail); let h='';
+  if(hits.caution_list){const cl=hits.caution_list.caution||{}, chain=(hits.caution_list.chain||[]).map(id=>scNameOf(ents,id)), addr=cl.address||{};
+    h+=`<div class="pnl scflag caution"><div class="ph">Internal caution list · hit</div>
+      <div class="scchain">${chain.map(esc).join(' <span class="scarr">→</span> ')} <span class="scarr">→</span> <b>${esc((addr.line||'')+', '+(addr.city||'')+' '+(addr.region||''))}</b></div>
+      <div class="scflag-t">${esc(cl.text||'')}</div></div>`;}
+  if(hits.prior_str){const ps=hits.prior_str.prior_str||{}, src=scNameOf(ents,hits.prior_str.source);
+    h+=`<div class="pnl scflag prior"><div class="ph">Prior-STR linkage · inbound source <span class="scsyn">illustrative · synthetic record</span></div>
+      <div class="scprior"><b>${esc(src)}</b> matches <b>${esc(ps.subject_name)}</b> — prior STR, predicate <b>${esc(ps.predicate)}</b></div>
+      <div class="scflag-t">${esc(ps.text||'')}</div></div>`;}
+  return h?`<div class="grid2">${h}</div>`:'';
+}
+
+function scDetermination(detail){
+  const det=detail.determination||{};
+  const atoms=(det.present_atoms||[]).map(a=>`<div class="scatom"><span class="scatom-k ${esc(a.kind)}">${a.kind==='mechanism'?'mechanism':'leg'}</span><span class="scatom-n" title="${esc(a.atom)}">${esc(a.name||'')}</span><span class="scvia ${esc(a.via)}">${esc(viaLabel(a.via))}</span></div>`).join('');
+  const pred=det.named_risk?`<div class="scpred"><span class="scpl">Predicate risk</span><b>${esc(det.named_risk)}</b><span class="scsrc">read from the prior-STR record</span></div>`:`<div class="scpred none"><span class="scpl">Predicate risk</span>none nameable</div>`;
+  const mit=det.mitigation_established
+    ?`<div class="scmit ok"><span class="scpl">Mitigation</span>benign explanation <b>affirmatively established</b> — source of funds established, activity reconciles to the business</div>`
+    :`<div class="scmit no"><span class="scpl">Mitigation</span>no surviving benign explanation — source of funds not established</div>`;
+  return `<div class="pnl span scdet"><div class="ph">Determination <span style="color:var(--faint)">computed live by the sufficiency engine · the file bar is unchanged</span></div>
+    <div class="scatoms">${atoms}</div><div class="scgate">${pred}${mit}</div>
+    <div class="scsuff">${esc(det.sufficiency_line||'')}</div></div>`;
+}
+
+function scOutcome(detail){
+  const det=detail.determination||{}, ents=scEntMap(detail);
+  // resolve internal ENTITY ids in the claim citations to display names (names-not-codes); leave the advisory
+  // signal ids (fin-*:IND-*) and the no-name record/txn refs (T-NG-11, PSR-0001, CL-ADDR-0001) as provenance.
+  const citeOf=id=>esc(ents[id]?ents[id].display_name:id);
+  if(det.presentation_label==='file'){const rec=det.str_record||{};
+    const claims=(rec.narrative_claims||[]).map(c=>`<li><span>${esc(c.text)}</span><span class="cite">${(c.cites||[]).map(citeOf).join(' · ')}</span></li>`).join('');
+    return `<div class="saw"><div class="sl">${esc(rec.label||'Suspicious transaction report')} · grounds for suspicion · disposition: file</div><div class="narr">${esc(rec.narrative||'')}</div>${claims?`<ul class="claims">${claims}</ul>`:''}</div>`;}
+  const cr=det.clearance_record||{};
+  const cor=(cr.corroborators||[]).map(x=>`<li><span>${esc(x)}</span></li>`).join('');
+  const outc=(cr.outcome||'alert cleared with rationale').replace(/_/g,' ');
+  return `<div class="saw scclear"><div class="sl">${esc(cr.label||'Clearance record')} · ${esc(outc)} · retained for audit</div><div class="narr">${esc(cr.rationale||'')}</div>${cor?`<ul class="claims">${cor}</ul>`:''}</div>`;
+}
+
+const SHOWCASE_CSS=`<style>
+.scout{display:inline-block;font:600 12px/1 var(--mono);padding:5px 10px;border-radius:5px;letter-spacing:.04em;text-transform:uppercase}
+.scout.file{background:rgba(225,80,90,.14);color:var(--rose);border:1px solid rgba(225,80,90,.4)}
+.scout.clear{background:rgba(90,190,140,.14);color:#7fd6a6;border:1px solid rgba(90,190,140,.4)}
+.scthesis{font:13px/1.5 var(--body);color:var(--faint);margin:8px 0 2px}
+.scsig{border-left:2px solid var(--line);padding:8px 0 8px 12px;margin:8px 0}
+.scsig-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.scsig-name{font:600 14px/1.3 var(--body);color:var(--ink)}
+.scsig-cap{font:11px/1 var(--mono);color:var(--signal);white-space:nowrap}
+.scsig-flag{font:13px/1.5 var(--body);color:var(--dim);margin-top:4px}
+.scsig-vl{display:block;font:10px/1 var(--mono);color:var(--faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.scsig-src{font:10px/1 var(--mono);color:var(--faint)}
+.sctxt{width:100%;border-collapse:collapse;font:12px/1.4 var(--mono)}
+.sctxt th{text-align:left;color:var(--faint);font-weight:500;padding:5px 8px;border-bottom:1px solid var(--line);font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+.sctxt td{padding:6px 8px;border-bottom:1px solid var(--line2,rgba(255,255,255,.05));vertical-align:top}
+.sctx.in .scdir{color:#7fd6a6}.sctx.out .scdir{color:var(--rose)}
+.scch{color:var(--signal);font-weight:600}.scamt{text-align:right;white-space:nowrap;color:var(--ink)}
+.sccp{font-family:var(--body);color:var(--dim)}.scts{color:var(--faint);white-space:nowrap}
+.scobs{color:var(--signal)}
+.screz{display:flex;gap:10px;padding:7px 0;border-top:1px solid var(--line);font:12px/1.5 var(--body)}
+.screz-s{font:10px/1 var(--mono);text-transform:uppercase;letter-spacing:.04em;padding:3px 7px;border-radius:4px;white-space:nowrap;height:fit-content}
+.screz.res .screz-s{background:rgba(225,80,90,.14);color:var(--rose)}
+.screz.flag .screz-s{background:rgba(246,166,35,.16);color:var(--signal)}
+.screz.excl .screz-s{background:rgba(255,255,255,.06);color:var(--faint)}
+.screz-r{color:var(--dim)}
+.scdim line{stroke:var(--faint);opacity:.5}.scdim text{fill:var(--faint)}
+.scflag{margin:0}.scflag.caution{border-left:3px solid var(--signal)}.scflag.prior{border-left:3px solid var(--rose)}
+.scchain{font:13px/1.6 var(--mono);color:var(--ink);margin-bottom:8px}.scarr{color:var(--signal)}
+.scflag-t{font:12px/1.5 var(--body);color:var(--faint)}
+.scsyn{font:10px/1 var(--mono);color:var(--rose);margin-left:8px}
+.scprior{font:13px/1.5 var(--body);color:var(--ink);margin-bottom:8px}
+.scatoms{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.scatom{display:flex;align-items:center;gap:10px}
+.scatom-k{font:9px/1 var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--faint);width:74px}
+.scatom-k.mechanism{color:var(--signal)}
+.scatom-n{flex:1;font:13px/1.4 var(--body);color:var(--ink)}
+.scvia{font:10px/1 var(--mono);padding:3px 7px;border-radius:4px;white-space:nowrap}
+.scvia.fired{background:rgba(246,166,35,.16);color:var(--signal)}
+.scvia.read{background:rgba(120,160,230,.16);color:#9bbcf0}
+.scvia.gathered{background:rgba(150,120,220,.16);color:#b69ae6}
+.scgate{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.scpred,.scmit{flex:1;min-width:240px;font:12px/1.5 var(--body);color:var(--dim);padding:9px 12px;border-radius:6px;background:var(--card2,rgba(255,255,255,.03))}
+.scpl{display:block;font:9px/1 var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--faint);margin-bottom:4px}
+.scmit.ok{border-left:3px solid #7fd6a6}.scmit.no{border-left:3px solid var(--rose)}
+.scpred .scsrc{color:var(--faint);font-size:11px;margin-left:6px}
+.scsuff{font:14px/1.6 var(--body);color:var(--ink);border-top:1px solid var(--line);padding-top:12px}
+.saw.scclear{border-left-color:#7fd6a6}.saw.scclear .sl{color:#7fd6a6}
+</style>`;
+
+function showcaseSurface(detail){
+  const c=detail.case||{}, det=detail.determination||{}, ents=scEntMap(detail);
+  const subj=ents[(c.subject||{}).entity_ref]||{}, kyc=subj.kyc||{};
+  const isFile=det.presentation_label==='file';
+  const outChip=isFile?'<span class="scout file">Determination · escalate · file</span>'
+                      :'<span class="scout clear">Documented dismissal · cleared</span>';
+  const addr=(subj.identity||{}).address||{};
+  const subline=(subj.kind||'subject')+' · '+(kyc.nature_of_business||'')+' · '+(addr.city?addr.city+' '+(addr.region||''):'')
+    +' · '+(c.alerts||[]).length+' signals · '+(c.transactions||[]).length+' transactions';
+  const sof=kyc.source_of_funds;
+  const kycPnl=`<div class="pnl"><div class="ph">Subject &amp; KYC</div><div class="kv2">
+    <div class="k">Name</div><div class="v">${esc(subj.display_name||'')}</div>
+    <div class="k">Address</div><div class="v">${esc((addr.line||'')+', '+(addr.city||'')+' '+(addr.region||'')+' '+(addr.country||''))}</div>
+    <div class="k">Risk · CDD</div><div class="v">${esc(kyc.risk_rating||'?')} · ${esc(kyc.cdd_level||'?')}</div>
+    <div class="k">Business</div><div class="v">${esc(kyc.nature_of_business||'')}</div>
+    <div class="k">Source of funds</div><div class="v ${sof?'sok':'sno'}">${sof?esc(sof):'<b>not established</b>'}</div>
+    <div class="k">Expected / month</div><div class="v">${esc(scMoney((kyc.expected_monthly||{}).amount))}</div>
+  </div></div>`;
+  return SHOWCASE_CSS+`
+    <div class="casehead"><div><div class="eyebrow" style="margin-top:0">${esc(c.case_id||'')} · north-star case (authored, synthetic)</div>
+      <h2 style="font-size:23px">${esc(c.display_name||'')}</h2>
+      <div class="synthnote">${esc(subline)}</div>
+      <div style="margin-top:10px">${outChip}</div>
+      <div class="scthesis">Same grounded signal, opposite outcome — the network and the source of funds is the difference.</div>
+    </div></div>
+    ${scSignalWalk(detail)}
+    <div class="grid2">${kycPnl}
+      <div class="pnl"><div class="ph">Outcome</div><div class="kv2">
+        <div class="k">Verdict</div><div class="v">${esc(det.verdict||'')}</div>
+        <div class="k">Disposition</div><div class="v">${esc(det.disposition||'')}</div>
+        <div class="k">Predicate</div><div class="v">${esc(det.named_risk||'none nameable')}</div>
+      </div></div></div>
+    ${scLedger(detail)}
+    ${scMoneyFlowGraph(detail)}
+    ${scResolutionGraph(detail)}
+    ${scBOGraph(detail)}
+    ${scFlags(detail)}
+    ${scDetermination(detail)}
+    ${scOutcome(detail)}`;
+}
+
 function paintSurface(loading){
   const surf=document.getElementById('surf');
   if(!SEL){ surf.innerHTML='<div class="empty">Select a case from the queue.</div>'; return; }
   if(loading&&!DETAIL){ surf.innerHTML='<div class="empty">Opening the case file…</div>'; return; }
   if(DETAIL&&DETAIL.error){ surf.innerHTML=`<div class="err"><b>Cannot open case</b>${esc(DETAIL.error)}</div>`; return; }
   if(!DETAIL){ return; }
+  if(DETAIL.showcase){ surf.className='surf'; surf.innerHTML=showcaseSurface(DETAIL); return; }   // Phase 73 — the rich pair
   const c=DETAIL.case||{}, b=DETAIL.bundle||{}, d=c.display||{}, kyc=c.kyc||{};
   const txns=b.transactions||[];
   surf.className='surf'+(SIGNALS?' signals-on':'');
@@ -1021,6 +1281,7 @@ if(typeof module!=='undefined'&&module.exports){ module.exports={
   liveGate,liveFunnel,setGate,renderGate,loadGate,onKnob,resetGating,doAdjudicate,adjudControlHTML,
   runGather,applyGather,gatherPanelHTML,gatherResultHTML,gatherGraphHTML,liveGraphLayout,toolLabel,kindLabel,
   boGraphHTML,boRiskTag,ownLabel,edgeLabel,
+  capName,qcardHTML,showcaseSurface,scMoneyFlowGraph,scResolutionGraph,scBOGraph,scSignalWalk,scLedger,scDetermination,scOutcome,scFlags,
   _state:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ,GATHER}),
   _set:(s)=>{ if(s.META!==undefined)META=s.META; if(s.QUEUE!==undefined)QUEUE=s.QUEUE; if(s.SEL!==undefined)SEL=s.SEL; if(s.DETAIL!==undefined)DETAIL=s.DETAIL; if(s.SIGNALS!==undefined)SIGNALS=s.SIGNALS; if(s.RUN!==undefined)RUN=s.RUN; if(s.GATE!==undefined)setGate(s.GATE); if(s.POLICY!==undefined)POLICY=s.POLICY; if(s.ADJ!==undefined)ADJ=s.ADJ; if(s.GATHER!==undefined)GATHER=s.GATHER; },
   paintSurface,renderQueue,renderPop,riskPanel,walkHTML,ledgerHTML,CANON }; }

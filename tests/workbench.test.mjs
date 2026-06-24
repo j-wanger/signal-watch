@@ -618,6 +618,57 @@ ok(/the KYC-integrity mechanism \+ a named predicate risk/.test(dkyc)
    && !/corroborating legs \+ named risk \+ no unrebutted mitigation/.test(dkyc),
    'the kyc determination states its OWN sufficiency basis, not the ML legs/mitigation checklist (honest per crime_type)');
 
+/* ---------- Phase 73: the authored NORTH-STAR pair renders as a full investigation ---------- */
+// Replay the committed casefile_detail fixtures (the COMPUTED engine output; the live computation is
+// verified by serve_workbench --selftest). Assert: 3 graphs, names-not-codes, the file/clear fork, the
+// caution chain + inbound prior-STR, per-leg provenance, "N pct" not "%", self-containment, XSS-escape.
+const cfDir = new URL('./fixtures/casefile/', import.meta.url);
+const CF_A = JSON.parse(readFileSync(new URL('CASE-A.detail.json', cfDir), 'utf8'));
+const CF_B = JSON.parse(readFileSync(new URL('CASE-B.detail.json', cfDir), 'utf8'));
+const CF_Q = JSON.parse(readFileSync(new URL('queue.json', cfDir), 'utf8'));
+const stripTC = h => h.replace(/<style[\s\S]*?<\/style>/g, '').replace(/<[^>]*>/g, ' ');
+
+CASE_RESPONSE = CF_A;
+await T.selectCase('CASE-A');
+const sa = ELEMENTS.surf._html, ta = stripTC(sa);
+ok(/Northgate Hospitality/.test(sa), 'showcase: the rich case renders the named subject');
+ok(/Determination · escalate · file/.test(sa), 'showcase: CASE-A renders the computed FILE outcome');
+ok((sa.match(/<svg class="gnsvg"/g) || []).length === 3, 'showcase: all THREE graphs render (money-flow + entity-resolution + beneficial-ownership)');
+ok(/44 Holloway Court/.test(sa) && /CAUTION LIST/.test(sa), 'showcase: the caution-list ownership chain renders');
+ok(/Vesna Maric/.test(sa) && /human trafficking/.test(sa) && /synthetic record/.test(sa), 'showcase: the inbound prior-STR linkage renders with a panel-local synthetic marker');
+ok(/detector fired/.test(sa) && /read from the file/.test(sa) && /gathered/.test(sa), 'showcase: the determination walk shows per-leg provenance (fired / read / gathered)');
+ok(/human-trafficking proceeds funnel/.test(sa), 'showcase: the STR narrative renders');
+ok(/Rapid pass-through detection/.test(sa) || /funnel-in detection/.test(sa), 'showcase: capability codes render as plain NAMES');
+ok(!/\b(C[0-9]+|D[0-9]+|ML-A[0-9]+|KYC-A[0-9]+)\b/.test(ta), 'showcase: NAMES-NOT-CODES — no bare C#/D#/ML-A#/KYC-A# in the rendered text');
+ok(!/\bE-(CALDER|1187442|MARIC|NORTHGATE)\b/.test(ta), 'showcase: internal ENTITY ids resolve to names in the STR claim provenance (no bare E-* in rendered text)');
+ok(!/\d\s*%/.test(ta) && /pct/.test(ta), 'showcase: ownership renders "N pct", never a bare %');
+ok(/authored, synthetic/.test(sa), 'showcase: the always-on synthetic framing is present');
+
+CASE_RESPONSE = CF_B;
+await T.selectCase('CASE-B');
+const sb = ELEMENTS.surf._html, tb = stripTC(sb);
+ok(/Lakeshore Catering/.test(sb), 'showcase: CASE-B renders the named subject');
+ok(/Documented dismissal · cleared/.test(sb), 'showcase: CASE-B renders the computed CLEAR outcome');
+ok(/alert cleared with rationale/.test(sb) && /retained for audit/.test(sb), 'showcase: the clearance record renders by substance');
+ok(!/defensive/.test(tb), 'showcase: the dismissal is never branded a "defensive filing"');
+ok(/excluded/.test(sb) && /Jon A\. Calder/.test(sb), 'showcase: the excluded watchlist near-match renders (exact-on-identifier, not fuzzy-on-name)');
+ok(!/Northgate/.test(sb) && !/James Calder/.test(sb), 'showcase: CASE-B is SELF-CONTAINED — no reference to the other case');
+ok(!/\b(C[0-9]+|D[0-9]+|ML-A[0-9]+|KYC-A[0-9]+)\b/.test(tb), 'showcase: CASE-B names-not-codes in the rendered text');
+ok((sb.match(/<svg class="gnsvg"/g) || []).length === 3, 'showcase: CASE-B also renders three graphs');
+
+// the queue distinguishes the authored pair: a north-star tag + capability NAMES (no bare code)
+CASES_RESPONSE = { badge:'Illustrative data & outputs', meta:CF_Q.meta || {}, cases:CF_Q.cases };
+await T.loadQueue();
+const scqh = ELEMENTS.queue._html, scqt = stripTC(scqh);
+ok(/north-star case/.test(scqh), 'showcase: the queue marks the authored pair as north-star cases');
+ok(/Northgate Hospitality/.test(scqh) && /Lakeshore Catering/.test(scqh), 'showcase: the queue lists both authored subjects by name');
+ok(!/\b(C[0-9]+|ML-A[0-9]+)\b/.test(scqt), 'showcase: queue cards carry no bare capability code in rendered text');
+
+// XSS-escape holds in the showcase render (raw records; esc() is the sole escaper)
+CASE_RESPONSE = JSON.parse(JSON.stringify(CF_A)); CASE_RESPONSE.case.display_name = '<img src=x onerror=alert(1)>';
+await T.selectCase('CASE-A');
+ok(ELEMENTS.surf._html.includes('&lt;img src=x') && !/<img src=x onerror/.test(ELEMENTS.surf._html), 'showcase: XSS-escaped via esc()');
+
 /* ---------- summary ---------- */
 console.log(`\n${pass} passed, ${fails.length} failed`);
 if (fails.length){ console.error('FAILURES:\n  - ' + fails.join('\n  - ')); process.exit(1); }

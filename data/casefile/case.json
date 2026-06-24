@@ -1,0 +1,372 @@
+{
+  "meta": {
+    "title": "Rich investigation case file — the matched pair",
+    "badge": "Illustrative data & outputs",
+    "synthetic_notice": "FULLY SYNTHETIC, illustrative. No real customer, transaction, entity, or report. Every name, address, email, and phone is fabricated (emails on .test/.example, phones in the 555-01XX reserved range, addresses from an authored fictional pool) — a shared-identifier match can only ever resolve two synthetic parties. Grounded signals reference real US-federal (FinCEN, public-domain) advisory indicators; the identity/network layer over them is authored.",
+    "jurisdiction": "Canada",
+    "predicate_focus": "human trafficking",
+    "schema_version": "1",
+    "generated_note": "Authored north-star case for the live investigator workbench (Phase 73). The two cases fire the IDENTICAL grounded signal set and resolve OPPOSITELY — the network and the source of funds is the difference. Verdicts are COMPUTED by the live determination engine over this evidence; the determination.expected_* fields are a TEST ORACLE only.",
+    "thesis": "Same grounded signal, opposite outcome — the network and the source of funds is the difference."
+  },
+  "reference": {
+    "caution_list": [
+      {
+        "id": "CL-ADDR-0001",
+        "kind": "address",
+        "address": {
+          "line": "44 Holloway Court",
+          "city": "Brampton",
+          "region": "ON",
+          "country": "CA",
+          "normalized": "44hollowaycourtbramptononca"
+        },
+        "reason": "Address previously associated with a cluster of dissolved numbered companies in an internal structuring review.",
+        "text": "Internal caution list (illustrative, synthetic): 44 Holloway Court, Brampton ON is flagged in connection with a prior review of nominee-held numbered companies. Treat any beneficial-ownership chain reaching this address as elevated risk.",
+        "badge": "Illustrative data & outputs"
+      }
+    ],
+    "prior_str_register": [
+      {
+        "id": "PSR-0001",
+        "subject_name": "Vesna Maric",
+        "identifiers": {
+          "email": "v.maric@quickmail.test",
+          "normalized_email": "vmaric@quickmail.test"
+        },
+        "predicate": "human trafficking",
+        "prior_str_id": "STR-2023-004471",
+        "text": "Prior STR register (illustrative, synthetic): an earlier suspicious transaction report named Vesna Maric in connection with a human-trafficking financial investigation. Held for cross-referencing inbound counterparties; itself an authored synthetic record.",
+        "badge": "Illustrative data & outputs"
+      }
+    ],
+    "watchlist": [
+      {
+        "id": "WL-0001",
+        "name": "Jon A. Calderón",
+        "kind": "sanctions",
+        "identifiers": { "note": "name-screening reference only; the identifiers on file do not match the inbound counterparty" },
+        "text": "Sanctions / watchlist screening reference (illustrative, synthetic): Jon A. Calderón is a designated individual held for name screening. A name-only collision without a matching identifier is not a hit.",
+        "badge": "Illustrative data & outputs"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "case_id": "CASE-A",
+      "display_name": "Northgate Hospitality Group Inc.",
+      "subject": { "entity_ref": "E-NORTHGATE", "account_ids": ["A-NG-0001"] },
+      "alerts": [
+        {
+          "alert_id": "AL-NG-C3",
+          "capability": "C3",
+          "detector": "multi_originator_funnel_in",
+          "account_id": "A-NG-0001",
+          "txn_ids": ["T-NG-01", "T-NG-02", "T-NG-03", "T-NG-05", "T-NG-07", "T-NG-08", "T-NG-09"],
+          "grounding": {
+            "signal_id": "fin-2020-alert001:IND-05",
+            "advisory_id": "fin-2020-alert001",
+            "flag": "Multiple social media accounts communicating the same message soliciting funds for an unknown purpose or to an unknown account.",
+            "red_flag": "Coordinated multi-account same-message fund solicitation (amplification ring)"
+          }
+        },
+        {
+          "alert_id": "AL-NG-C2",
+          "capability": "C2",
+          "detector": "rapid_pass_through",
+          "account_id": "A-NG-0001",
+          "txn_ids": ["T-NG-04", "T-NG-11", "T-NG-12", "T-NG-13", "T-NG-14", "T-NG-15"],
+          "grounding": {
+            "signal_id": "fin-2023-alert001:IND-03",
+            "advisory_id": "fin-2023-alert001",
+            "flag": "Currency deposits into U.S. accounts without explanation, followed by rapid wire transfers to countries with high migrant flows (e.g., Mexico, Central America), in a manner that is",
+            "red_flag": "Cash-in then rapid transfer-out to a high-migrant-flow corridor (pass-through)"
+          }
+        },
+        {
+          "alert_id": "AL-NG-C14",
+          "capability": "C14",
+          "detector": "source_of_funds_not_established",
+          "account_id": "A-NG-0001",
+          "party_ref": "E-NORTHGATE",
+          "txn_ids": [],
+          "grounding": {
+            "signal_id": "fin-2025-a003:IND-09",
+            "advisory_id": "fin-2025-a003",
+            "flag": "A customer, especially a Chinese national, is reluctant or refuses to provide information regarding the source of funds deposited or transferred into their account or acts evasive ",
+            "red_flag": "Customer evasive on source-of-funds (KYC non-cooperation)"
+          }
+        }
+      ],
+      "entities": [
+        {
+          "entity_id": "E-NORTHGATE",
+          "kind": "org",
+          "display_name": "Northgate Hospitality Group Inc.",
+          "synthetic_label": true,
+          "role": "subject",
+          "identity": {
+            "address": { "line": "318 Barton Street East", "city": "Hamilton", "region": "ON", "country": "CA", "normalized": "318bartonstreeteasthamiltononca" }
+          },
+          "identifiers": [
+            { "kind": "address", "value": "318 Barton Street East, Hamilton ON", "normalized": "318bartonstreeteasthamiltononca", "strength": "weak" }
+          ],
+          "kyc": {
+            "risk_rating": "HIGH",
+            "cdd_level": "EDD",
+            "nature_of_business": "Short-stay accommodation",
+            "source_of_funds": null,
+            "expected_monthly": { "amount": 18000, "currency": "CAD", "txn_count": 40 }
+          }
+        },
+        { "entity_id": "E-MARIC", "kind": "person", "display_name": "Vesna Maric", "synthetic_label": true, "role": "counterparty",
+          "identity": { "email": "v.maric@quickmail.test" },
+          "identifiers": [ { "kind": "email", "value": "v.maric@quickmail.test", "normalized": "vmaric@quickmail.test", "strength": "strong" } ] },
+        { "entity_id": "E-PETROV", "kind": "person", "display_name": "Dragana Petrov", "synthetic_label": true, "role": "counterparty",
+          "identity": { "email": "d.petrov88@quickmail.test" },
+          "identifiers": [ { "kind": "email", "value": "d.petrov88@quickmail.test", "normalized": "dpetrov88@quickmail.test", "strength": "strong" } ] },
+        { "entity_id": "E-OKONKWO", "kind": "person", "display_name": "Marcus Okonkwo", "synthetic_label": true, "role": "counterparty",
+          "identity": { "phone": "+1-555-0142" },
+          "identifiers": [ { "kind": "phone", "value": "+1-555-0142", "normalized": "15550142", "strength": "strong" } ] },
+        { "entity_id": "E-ANAND", "kind": "person", "display_name": "Priya Anand", "synthetic_label": true, "role": "counterparty",
+          "identity": { "email": "p.anand@quickmail.test" },
+          "identifiers": [ { "kind": "email", "value": "p.anand@quickmail.test", "normalized": "panand@quickmail.test", "strength": "strong" } ] },
+        { "entity_id": "E-WU", "kind": "person", "display_name": "Liang Wu", "synthetic_label": true, "role": "counterparty",
+          "identity": { "email": "l.wu@quickmail.test" },
+          "identifiers": [ { "kind": "email", "value": "l.wu@quickmail.test", "normalized": "lwu@quickmail.test", "strength": "strong" } ] },
+        { "entity_id": "E-SALEH", "kind": "person", "display_name": "Noor Saleh", "synthetic_label": true, "role": "counterparty",
+          "identity": { "email": "n.saleh@quickmail.test" },
+          "identifiers": [ { "kind": "email", "value": "n.saleh@quickmail.test", "normalized": "nsaleh@quickmail.test", "strength": "strong" } ] },
+        { "entity_id": "E-TOURE", "kind": "person", "display_name": "Sami Toure", "synthetic_label": true, "role": "counterparty",
+          "identity": { "email": "s.toure@quickmail.test" },
+          "identifiers": [ { "kind": "email", "value": "s.toure@quickmail.test", "normalized": "stoure@quickmail.test", "strength": "strong" } ] },
+        { "entity_id": "E-HASSAN", "kind": "person", "display_name": "Tarek Hassan", "synthetic_label": true, "role": "counterparty",
+          "identity": {}, "identifiers": [] },
+        {
+          "entity_id": "E-CALDER-INT", "kind": "person", "display_name": "James Calder", "synthetic_label": true, "role": "related_party",
+          "identity": { "email": "jcalder.mgmt@swiftmail.test" },
+          "identifiers": [ { "kind": "email", "value": "jcalder.mgmt@swiftmail.test", "normalized": "jcaldermgmt@swiftmail.test", "strength": "strong" } ]
+        },
+        {
+          "entity_id": "E-CALDER-EXT", "kind": "person", "display_name": "James Calder", "synthetic_label": true, "role": "counterparty",
+          "identity": { "email": "jcalder.mgmt@swiftmail.test" },
+          "identifiers": [ { "kind": "email", "value": "jcalder.mgmt@swiftmail.test", "normalized": "jcaldermgmt@swiftmail.test", "strength": "strong" } ],
+          "observed_at": "Receiving institution (another reporting entity)"
+        },
+        {
+          "entity_id": "E-1187442", "kind": "org", "display_name": "1187442 Ontario Inc.", "synthetic_label": true, "role": "related_party",
+          "identity": { "address": { "line": "44 Holloway Court", "city": "Brampton", "region": "ON", "country": "CA", "normalized": "44hollowaycourtbramptononca" } },
+          "identifiers": [ { "kind": "address", "value": "44 Holloway Court, Brampton ON", "normalized": "44hollowaycourtbramptononca", "strength": "weak" } ]
+        }
+      ],
+      "transactions": [
+        { "txn_id": "T-NG-01", "account_ref": "A-NG-0001", "direction": "CREDIT", "channel": "EMT", "amount": { "value": 5400, "currency": "CAD" }, "timestamp": "2026-04-02T10:14:00Z", "counterparty": { "entity_ref": "E-MARIC", "name": "Vesna Maric", "email": "v.maric@quickmail.test", "country": "CA", "role": "originator", "memo": "rent" } },
+        { "txn_id": "T-NG-02", "account_ref": "A-NG-0001", "direction": "CREDIT", "channel": "EMT", "amount": { "value": 5100, "currency": "CAD" }, "timestamp": "2026-04-03T09:41:00Z", "counterparty": { "entity_ref": "E-PETROV", "name": "Dragana Petrov", "email": "d.petrov88@quickmail.test", "country": "CA", "role": "originator", "memo": "booking" } },
+        { "txn_id": "T-NG-03", "account_ref": "A-NG-0001", "direction": "CREDIT", "channel": "EMT", "amount": { "value": 4800, "currency": "CAD" }, "timestamp": "2026-04-05T18:22:00Z", "counterparty": { "entity_ref": "E-OKONKWO", "name": "Marcus Okonkwo", "phone": "+1-555-0142", "country": "CA", "role": "originator", "memo": "" } },
+        { "txn_id": "T-NG-04", "account_ref": "A-NG-0001", "direction": "CREDIT", "channel": "CASH", "amount": { "value": 9600, "currency": "CAD" }, "timestamp": "2026-04-06T15:03:00Z", "counterparty": { "name": "Cash deposit (branch)", "country": "CA", "role": "originator", "memo": "cash deposit" } },
+        { "txn_id": "T-NG-05", "account_ref": "A-NG-0001", "direction": "CREDIT", "channel": "EMT", "amount": { "value": 4200, "currency": "CAD" }, "timestamp": "2026-04-08T11:55:00Z", "counterparty": { "entity_ref": "E-ANAND", "name": "Priya Anand", "email": "p.anand@quickmail.test", "country": "CA", "role": "originator", "memo": "" } },
+        { "txn_id": "T-NG-06", "account_ref": "A-NG-0001", "direction": "CREDIT", "channel": "CARD", "amount": { "value": 3900, "currency": "CAD" }, "timestamp": "2026-04-09T13:30:00Z", "counterparty": { "entity_ref": "E-HASSAN", "name": "Tarek Hassan", "country": "CA", "role": "originator", "memo": "card settlement" } },
+        { "txn_id": "T-NG-07", "account_ref": "A-NG-0001", "direction": "CREDIT", "channel": "EMT", "amount": { "value": 4700, "currency": "CAD" }, "timestamp": "2026-04-11T08:47:00Z", "counterparty": { "entity_ref": "E-WU", "name": "Liang Wu", "email": "l.wu@quickmail.test", "country": "CA", "role": "originator", "memo": "" } },
+        { "txn_id": "T-NG-08", "account_ref": "A-NG-0001", "direction": "CREDIT", "channel": "EMT", "amount": { "value": 3600, "currency": "CAD" }, "timestamp": "2026-04-12T20:09:00Z", "counterparty": { "entity_ref": "E-SALEH", "name": "Noor Saleh", "email": "n.saleh@quickmail.test", "country": "CA", "role": "originator", "memo": "" } },
+        { "txn_id": "T-NG-09", "account_ref": "A-NG-0001", "direction": "CREDIT", "channel": "EMT", "amount": { "value": 5000, "currency": "CAD" }, "timestamp": "2026-04-14T16:18:00Z", "counterparty": { "entity_ref": "E-TOURE", "name": "Sami Toure", "email": "s.toure@quickmail.test", "country": "CA", "role": "originator", "memo": "" } },
+        { "txn_id": "T-NG-11", "account_ref": "A-NG-0001", "direction": "DEBIT", "channel": "EMT", "amount": { "value": 8400, "currency": "CAD" }, "timestamp": "2026-04-15T09:02:00Z", "counterparty": { "entity_ref": "E-CALDER-EXT", "name": "James Calder", "email": "jcalder.mgmt@swiftmail.test", "country": "CA", "role": "beneficiary", "observed_at": "Receiving institution (another reporting entity)", "memo": "transfer" } },
+        { "txn_id": "T-NG-12", "account_ref": "A-NG-0001", "direction": "DEBIT", "channel": "EMT", "amount": { "value": 8400, "currency": "CAD" }, "timestamp": "2026-04-16T09:05:00Z", "counterparty": { "entity_ref": "E-CALDER-EXT", "name": "James Calder", "email": "jcalder.mgmt@swiftmail.test", "country": "CA", "role": "beneficiary", "observed_at": "Receiving institution (another reporting entity)", "memo": "transfer" } },
+        { "txn_id": "T-NG-13", "account_ref": "A-NG-0001", "direction": "DEBIT", "channel": "EMT", "amount": { "value": 8400, "currency": "CAD" }, "timestamp": "2026-04-17T09:11:00Z", "counterparty": { "entity_ref": "E-CALDER-EXT", "name": "James Calder", "email": "jcalder.mgmt@swiftmail.test", "country": "CA", "role": "beneficiary", "observed_at": "Receiving institution (another reporting entity)", "memo": "transfer" } },
+        { "txn_id": "T-NG-14", "account_ref": "A-NG-0001", "direction": "DEBIT", "channel": "EMT", "amount": { "value": 8400, "currency": "CAD" }, "timestamp": "2026-04-18T09:08:00Z", "counterparty": { "entity_ref": "E-CALDER-EXT", "name": "James Calder", "email": "jcalder.mgmt@swiftmail.test", "country": "CA", "role": "beneficiary", "observed_at": "Receiving institution (another reporting entity)", "memo": "transfer" } },
+        { "txn_id": "T-NG-15", "account_ref": "A-NG-0001", "direction": "DEBIT", "channel": "EMT", "amount": { "value": 8400, "currency": "CAD" }, "timestamp": "2026-04-19T09:14:00Z", "counterparty": { "entity_ref": "E-CALDER-EXT", "name": "James Calder", "email": "jcalder.mgmt@swiftmail.test", "country": "CA", "role": "beneficiary", "observed_at": "Receiving institution (another reporting entity)", "memo": "transfer" } }
+      ],
+      "related_parties": [
+        { "party_id": "E-1187442", "entity_ref": "E-1187442", "display_name": "1187442 Ontario Inc.", "label": "BENEFICIAL_OWNER", "ownership_pct": 100, "is_person": false },
+        { "party_id": "E-CALDER-INT", "entity_ref": "E-CALDER-INT", "display_name": "James Calder", "label": "DIRECTOR_OF", "is_person": true }
+      ],
+      "ownership_edges": [
+        { "src": "E-1187442", "dst": "E-NORTHGATE", "label": "BENEFICIAL_OWNER", "ownership_pct": 100 },
+        { "src": "E-CALDER-INT", "dst": "E-NORTHGATE", "label": "DIRECTOR_OF" }
+      ],
+      "resolution_edges": [
+        {
+          "between": ["E-CALDER-INT", "E-CALDER-EXT"],
+          "status": "resolved",
+          "shared": [ { "kind": "email", "value": "jcalder.mgmt@swiftmail.test", "normalized": "jcaldermgmt@swiftmail.test", "strength": "strong" } ],
+          "reading": "James Calder, the director on file at our institution, shares an email with the party receiving the structured drain at another reporting entity — the same person across institutions. Asserted from the identifier on our own rail leg, not a lookup into the other institution.",
+          "cross_institution": true
+        },
+        {
+          "between": ["E-MARIC"],
+          "matched_register": "PSR-0001",
+          "status": "flagged",
+          "shared": [ { "kind": "email", "value": "v.maric@quickmail.test", "normalized": "vmaric@quickmail.test", "strength": "strong" } ],
+          "reading": "Vesna Maric, an inbound source of the funnel's funds, matches by email to the subject of a prior human-trafficking STR — a source of the funds is linked to a prior-trafficking subject."
+        }
+      ],
+      "determination": {
+        "crime_type": "money_laundering",
+        "mechanism": { "atom": "ML-A1", "name": "Placement / layering mechanism", "present": true, "via": "fired", "evidence": ["AL-NG-C2", "AL-NG-C3"] },
+        "legs": [
+          { "atom": "ML-A7", "name": "Source of funds not established", "present": true, "via": "fired", "evidence": ["AL-NG-C14", "kyc.source_of_funds=null"] },
+          { "atom": "ML-A4", "name": "Network / beneficial-ownership linkage", "present": true, "via": "read", "evidence": ["resolution: structured drain recipient resolves to the director (E-CALDER cross-institution)", "ownership: 1187442 Ontario Inc. is the beneficial owner of Northgate"] },
+          { "atom": "ML-A5", "name": "External corroboration", "present": true, "via": "gathered", "evidence": ["caution_list CL-ADDR-0001 reached via the 1187442 Ontario Inc. ownership chain (44 Holloway Court)", "prior_str PSR-0001 matched on the inbound source Vesna Maric"] }
+        ],
+        "named_predicate_risk": { "named": true, "value": "human trafficking", "source": "PSR-0001" },
+        "mitigation": { "established": false, "basis": "Source of funds unestablished on an EDD subject; the beneficial-ownership chain reaches a caution-listed address; a source of the inbound funds is linked to a prior human-trafficking STR — no benign explanation survives." },
+        "expected_verdict": "determination",
+        "expected_disposition": "escalated",
+        "presentation_label": "file",
+        "sufficiency_line": "A laundering mechanism (cash and dispersed inbound, then a rapid structured drain) plus three independent corroborating legs — source of funds not established, a beneficial-ownership network reaching a caution-listed address, and a prior-trafficking-linked inbound source — with human trafficking named as the predicate risk and no surviving benign explanation: a determination is licensed.",
+        "str_record": {
+          "crime_type": "money_laundering",
+          "cited_signal_ids": ["fin-2020-alert001:IND-05", "fin-2023-alert001:IND-03", "fin-2025-a003:IND-09"],
+          "cited_txn_ids": ["T-NG-01", "T-NG-04", "T-NG-11", "T-NG-12", "T-NG-13", "T-NG-14", "T-NG-15"],
+          "completeness": { "reporting_entity": true, "transaction_details": true, "account_information": true, "subject_information": true, "typology_grounds": true, "grounds_for_suspicion_narrative": true },
+          "narrative": "Between 2 April and 19 April 2026, the account of Northgate Hospitality Group Inc. (short-stay accommodation, declared expected turnover roughly 18,000 dollars per month) received nine dispersed small inbound credits — e-transfers and cash deposits — from unrelated originators totalling roughly 46,300 dollars, with near-zero net retention. Over the four days from 15 to 19 April the proceeds were forwarded out as a series of five structured sub-limit e-transfers of 8,400 dollars each to a single beneficiary at another reporting entity. That beneficiary resolves by shared email to the company's own director, James Calder. The beneficial owner of record, 1187442 Ontario Inc., is registered at an address on the internal caution list. One inbound source, Vesna Maric, matches by email to the subject of a prior human-trafficking suspicious transaction report. Gross throughput across the period was roughly five times the onboarded expected monthly turnover with near-zero net retention. The source of funds is not established. On these grounds the activity is consistent with a human-trafficking proceeds funnel.",
+          "narrative_claims": [
+            { "text": "Dispersed inbound from unrelated originators with near-zero net retention, then a rapid structured drain — a placement-and-layering pass-through.", "cites": ["fin-2020-alert001:IND-05", "fin-2023-alert001:IND-03", "T-NG-01", "T-NG-04", "T-NG-11"] },
+            { "text": "The structured-drain beneficiary resolves by shared email to the subject's own director.", "cites": ["E-CALDER-INT", "E-CALDER-EXT", "T-NG-11"] },
+            { "text": "The beneficial-ownership chain reaches a caution-listed address.", "cites": ["E-1187442", "CL-ADDR-0001"] },
+            { "text": "An inbound source of the funds is linked to a prior human-trafficking STR.", "cites": ["E-MARIC", "PSR-0001"] },
+            { "text": "The source of funds is not established for an enhanced-due-diligence subject.", "cites": ["fin-2025-a003:IND-09"] }
+          ],
+          "label": "ILLUSTRATIVE STR — synthetic case, not a filed report"
+        }
+      }
+    },
+    {
+      "case_id": "CASE-B",
+      "display_name": "Lakeshore Catering Group Inc.",
+      "subject": { "entity_ref": "E-LAKESHORE", "account_ids": ["A-LS-0001"] },
+      "alerts": [
+        {
+          "alert_id": "AL-LS-C3",
+          "capability": "C3",
+          "detector": "multi_originator_funnel_in",
+          "account_id": "A-LS-0001",
+          "txn_ids": ["T-LS-01", "T-LS-02", "T-LS-03", "T-LS-04", "T-LS-05", "T-LS-06", "T-LS-07", "T-LS-08"],
+          "grounding": {
+            "signal_id": "fin-2020-alert001:IND-05",
+            "advisory_id": "fin-2020-alert001",
+            "flag": "Multiple social media accounts communicating the same message soliciting funds for an unknown purpose or to an unknown account.",
+            "red_flag": "Coordinated multi-account same-message fund solicitation (amplification ring)"
+          }
+        },
+        {
+          "alert_id": "AL-LS-C2",
+          "capability": "C2",
+          "detector": "rapid_pass_through",
+          "account_id": "A-LS-0001",
+          "txn_ids": ["T-LS-09", "T-LS-10"],
+          "grounding": {
+            "signal_id": "fin-2023-alert001:IND-03",
+            "advisory_id": "fin-2023-alert001",
+            "flag": "Currency deposits into U.S. accounts without explanation, followed by rapid wire transfers to countries with high migrant flows (e.g., Mexico, Central America), in a manner that is",
+            "red_flag": "Cash-in then rapid transfer-out to a high-migrant-flow corridor (pass-through)"
+          }
+        },
+        {
+          "alert_id": "AL-LS-C14",
+          "capability": "C14",
+          "detector": "source_of_funds_not_established",
+          "account_id": "A-LS-0001",
+          "party_ref": "E-LAKESHORE",
+          "txn_ids": [],
+          "grounding": {
+            "signal_id": "fin-2025-a003:IND-09",
+            "advisory_id": "fin-2025-a003",
+            "flag": "A customer, especially a Chinese national, is reluctant or refuses to provide information regarding the source of funds deposited or transferred into their account or acts evasive ",
+            "red_flag": "Customer evasive on source-of-funds (KYC non-cooperation)"
+          }
+        }
+      ],
+      "entities": [
+        {
+          "entity_id": "E-LAKESHORE",
+          "kind": "org",
+          "display_name": "Lakeshore Catering Group Inc.",
+          "synthetic_label": true,
+          "role": "subject",
+          "identity": { "address": { "line": "85 Lakeshore Road West", "city": "Oakville", "region": "ON", "country": "CA", "normalized": "85lakeshoreroadwestoakvilleonca" } },
+          "identifiers": [ { "kind": "address", "value": "85 Lakeshore Road West, Oakville ON", "normalized": "85lakeshoreroadwestoakvilleonca", "strength": "weak" } ],
+          "kyc": {
+            "risk_rating": "MEDIUM",
+            "cdd_level": "CDD",
+            "nature_of_business": "Event catering",
+            "source_of_funds": "Catering revenue (event deposits and corporate accounts)",
+            "expected_monthly": { "amount": 44000, "currency": "CAD", "txn_count": 40 }
+          }
+        },
+        { "entity_id": "E-HALTON", "kind": "org", "display_name": "Halton Conference Centre Ltd.", "synthetic_label": true, "role": "counterparty", "identity": {}, "identifiers": [] },
+        { "entity_id": "E-RAMAN", "kind": "person", "display_name": "Priya Raman", "synthetic_label": true, "role": "counterparty",
+          "identity": { "email": "priya.raman@example.test" },
+          "identifiers": [ { "kind": "email", "value": "priya.raman@example.test", "normalized": "priyaraman@example.test", "strength": "strong" } ] },
+        { "entity_id": "E-CALDERON", "kind": "person", "display_name": "John Calderon", "synthetic_label": true, "role": "counterparty",
+          "identity": { "email": "jcalderon.events@example.test" },
+          "identifiers": [ { "kind": "email", "value": "jcalderon.events@example.test", "normalized": "jcalderonevents@example.test", "strength": "strong" } ] },
+        { "entity_id": "E-OAKVILLE-SPORTS", "kind": "org", "display_name": "Oakville Sports & Events Ltd.", "synthetic_label": true, "role": "counterparty", "identity": {}, "identifiers": [] },
+        { "entity_id": "E-BRUNELLE", "kind": "person", "display_name": "David Brunelle", "synthetic_label": true, "role": "counterparty",
+          "identity": { "email": "d.brunelle@example.test" },
+          "identifiers": [ { "kind": "email", "value": "d.brunelle@example.test", "normalized": "dbrunelle@example.test", "strength": "strong" } ] },
+        { "entity_id": "E-YACHT", "kind": "org", "display_name": "Lakeshore Yacht Club", "synthetic_label": true, "role": "counterparty", "identity": {}, "identifiers": [] },
+        { "entity_id": "E-MEILIN", "kind": "org", "display_name": "Mei Lin Events", "synthetic_label": true, "role": "counterparty",
+          "identity": { "email": "m.lin@example.test" },
+          "identifiers": [ { "kind": "email", "value": "m.lin@example.test", "normalized": "mlin@example.test", "strength": "strong" } ] },
+        { "entity_id": "E-CORP-CATERING", "kind": "org", "display_name": "Corporate Catering Solutions Inc.", "synthetic_label": true, "role": "counterparty",
+          "identity": { "email": "events@example.test" },
+          "identifiers": [ { "kind": "email", "value": "events@example.test", "normalized": "events@example.test", "strength": "strong" } ] },
+        { "entity_id": "E-RIVERSIDE", "kind": "org", "display_name": "Riverside Linen Supply Ltd.", "synthetic_label": true, "role": "counterparty",
+          "identity": { "address": { "line": "120 Maple Avenue", "city": "Mississauga", "region": "ON", "country": "CA", "normalized": "120mapleavenuemississaugaonca" } },
+          "identifiers": [ { "kind": "address", "value": "120 Maple Avenue, Mississauga ON", "normalized": "120mapleavenuemississaugaonca", "strength": "weak" } ] },
+        { "entity_id": "E-STAFFING", "kind": "org", "display_name": "Lakeshore Staffing Co.", "synthetic_label": true, "role": "counterparty",
+          "identity": { "email": "payroll@example.test" },
+          "identifiers": [ { "kind": "email", "value": "payroll@example.test", "normalized": "payroll@example.test", "strength": "strong" } ] },
+        { "entity_id": "E-MARCHETTI", "kind": "person", "display_name": "Elena Marchetti", "synthetic_label": true, "role": "related_party",
+          "identity": { "email": "e.marchetti@example.test" },
+          "identifiers": [ { "kind": "email", "value": "e.marchetti@example.test", "normalized": "emarchetti@example.test", "strength": "strong" } ] }
+      ],
+      "transactions": [
+        { "txn_id": "T-LS-01", "account_ref": "A-LS-0001", "direction": "CREDIT", "channel": "AFT", "amount": { "value": 9200, "currency": "CAD" }, "timestamp": "2026-04-02T11:00:00Z", "counterparty": { "entity_ref": "E-HALTON", "name": "Halton Conference Centre Ltd.", "country": "CA", "role": "originator", "memo": "event catering invoice 4471" } },
+        { "txn_id": "T-LS-02", "account_ref": "A-LS-0001", "direction": "CREDIT", "channel": "EMT", "amount": { "value": 4500, "currency": "CAD" }, "timestamp": "2026-04-04T14:21:00Z", "counterparty": { "entity_ref": "E-RAMAN", "name": "Priya Raman", "email": "priya.raman@example.test", "country": "CA", "role": "originator", "memo": "wedding deposit" } },
+        { "txn_id": "T-LS-03", "account_ref": "A-LS-0001", "direction": "CREDIT", "channel": "EMT", "amount": { "value": 3800, "currency": "CAD" }, "timestamp": "2026-04-06T09:33:00Z", "counterparty": { "entity_ref": "E-CALDERON", "name": "John Calderon", "email": "jcalderon.events@example.test", "country": "CA", "role": "originator", "memo": "corporate lunch" } },
+        { "txn_id": "T-LS-04", "account_ref": "A-LS-0001", "direction": "CREDIT", "channel": "AFT", "amount": { "value": 7600, "currency": "CAD" }, "timestamp": "2026-04-08T10:05:00Z", "counterparty": { "entity_ref": "E-OAKVILLE-SPORTS", "name": "Oakville Sports & Events Ltd.", "country": "CA", "role": "originator", "memo": "gala catering" } },
+        { "txn_id": "T-LS-05", "account_ref": "A-LS-0001", "direction": "CREDIT", "channel": "EMT", "amount": { "value": 4200, "currency": "CAD" }, "timestamp": "2026-04-10T16:42:00Z", "counterparty": { "entity_ref": "E-BRUNELLE", "name": "David Brunelle", "email": "d.brunelle@example.test", "country": "CA", "role": "originator", "memo": "private event" } },
+        { "txn_id": "T-LS-06", "account_ref": "A-LS-0001", "direction": "CREDIT", "channel": "AFT", "amount": { "value": 6100, "currency": "CAD" }, "timestamp": "2026-04-12T12:18:00Z", "counterparty": { "entity_ref": "E-YACHT", "name": "Lakeshore Yacht Club", "country": "CA", "role": "originator", "memo": "member event" } },
+        { "txn_id": "T-LS-07", "account_ref": "A-LS-0001", "direction": "CREDIT", "channel": "EMT", "amount": { "value": 3900, "currency": "CAD" }, "timestamp": "2026-04-14T15:50:00Z", "counterparty": { "entity_ref": "E-MEILIN", "name": "Mei Lin Events", "email": "m.lin@example.test", "country": "CA", "role": "originator", "memo": "co-host event" } },
+        { "txn_id": "T-LS-08", "account_ref": "A-LS-0001", "direction": "CREDIT", "channel": "EMT", "amount": { "value": 4200, "currency": "CAD" }, "timestamp": "2026-04-16T13:27:00Z", "counterparty": { "entity_ref": "E-CORP-CATERING", "name": "Corporate Catering Solutions Inc.", "email": "events@example.test", "country": "CA", "role": "originator", "memo": "quarterly retainer" } },
+        { "txn_id": "T-LS-09", "account_ref": "A-LS-0001", "direction": "DEBIT", "channel": "WIRE", "amount": { "value": 39200, "currency": "CAD" }, "timestamp": "2026-04-20T10:00:00Z", "counterparty": { "entity_ref": "E-RIVERSIDE", "name": "Riverside Linen Supply Ltd.", "address": "120 Maple Avenue, Mississauga ON", "country": "CA", "role": "beneficiary", "memo": "monthly linen and equipment supply" } },
+        { "txn_id": "T-LS-10", "account_ref": "A-LS-0001", "direction": "DEBIT", "channel": "EMT", "amount": { "value": 2100, "currency": "CAD" }, "timestamp": "2026-04-21T09:30:00Z", "counterparty": { "entity_ref": "E-STAFFING", "name": "Lakeshore Staffing Co.", "email": "payroll@example.test", "country": "CA", "role": "beneficiary", "memo": "event staff payroll" } }
+      ],
+      "related_parties": [
+        { "party_id": "E-MARCHETTI", "entity_ref": "E-MARCHETTI", "display_name": "Elena Marchetti", "label": "BENEFICIAL_OWNER", "ownership_pct": 100, "is_person": true }
+      ],
+      "ownership_edges": [
+        { "src": "E-MARCHETTI", "dst": "E-LAKESHORE", "label": "BENEFICIAL_OWNER", "ownership_pct": 100 }
+      ],
+      "resolution_edges": [
+        {
+          "between": ["E-CALDERON"],
+          "status": "excluded",
+          "candidate_register": "WL-0001",
+          "candidate_name": "Jon A. Calderón",
+          "shared": [],
+          "reading": "John Calderon, an inbound catering client, is a common-name near-match to a sanctions-screening watchlist entry (Jon A. Calderón), but resolves on no shared identifier — a different full name and a different email. Considered and excluded: resolution is exact-on-identifier, never fuzzy-on-name."
+        }
+      ],
+      "determination": {
+        "crime_type": "money_laundering",
+        "mechanism": { "atom": "ML-A1", "name": "Placement / layering mechanism", "present": true, "via": "fired", "evidence": ["AL-LS-C2", "AL-LS-C3"] },
+        "legs": [],
+        "named_predicate_risk": { "named": false, "value": null, "source": null },
+        "mitigation": { "established": true, "basis": "The inbound legs reconcile to the stated catering business (named corporate and event clients consistent with the declared profile); the recurring outbound is an identifiable monthly supplier consistent with history; the source of funds is established; volume fits the anticipated profile (roughly 43,500 dollars against roughly 44,000 dollars expected). The clean sanctions and caution-list screen and the excluded near-match corroborate." },
+        "expected_verdict": "cleared",
+        "expected_disposition": "cleared",
+        "presentation_label": "documented_dismissal",
+        "sufficiency_line": "A funnel-in mechanism fired, but the corroborating legs are absent and the activity is affirmatively explained — flows reconcile to the established catering business, the recurring supplier is consistent with history, and the source of funds is established. The benign explanation holds: a documented dismissal, not a determination.",
+        "clearance_record": {
+          "outcome": "alert_cleared_with_rationale",
+          "rationale": "Between 2 April and 21 April 2026 the account received eight inbound credits from named corporate and event catering clients totalling roughly 43,500 dollars, alongside recurring outbound payments to identifiable suppliers. Multi-originator funnel-in and pass-through signals fired, but the activity is affirmatively explained: the inbound legs reconcile to the declared catering business; the recurring outbound to Riverside Linen Supply Ltd. is consistent with history; the source of funds is established; and the period volume fits the anticipated profile (roughly 43,500 dollars against roughly 44,000 dollars expected). The sanctions and internal caution-list screen is clean, and a common-name inbound counterparty, John Calderon, was a near-match to a watchlist entry but was considered and excluded on the absence of any shared identifier. No predicate risk is nameable.",
+          "corroborators": ["clean sanctions and caution-list screen", "excluded near-match: John Calderon is not the watchlisted Jon A. Calderón (no shared identifier)"],
+          "retained_for_audit": true,
+          "label": "ILLUSTRATIVE clearance record — synthetic case"
+        }
+      }
+    }
+  ]
+}

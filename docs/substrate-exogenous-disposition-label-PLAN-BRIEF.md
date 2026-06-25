@@ -57,10 +57,32 @@ Per emitted case/entity, a single exogenous label on the **evaluation-only chann
 - `intended_disposition` is a **two-value closed vocab**: `file` (the latent process placed a real
   predicate behind this flow) | `clear` (the flow is a generated legitimate / explained pattern — the
   affirmative-clear analogue, e.g. a household co-resident pattern or an explained source-of-funds).
-- `intended_basis` names the **latent cause** drawn from the generating process's own vocabulary
-  (`predicate_established`, `legitimate_pattern`, `explained_source_of_funds`, `coincidental_collision`,
-  …) — it is the *why* the generator knows, **not** a restatement of the engine's sufficiency atoms
-  (mechanism / ≥2 legs / named predicate). The two must be **independently authored** so agreement is
+- `intended_basis` names the **latent cause** the generator knows — it is the *why*, **not** a restatement
+  of the engine's sufficiency atoms (mechanism / ≥2 legs / named predicate). It is a **CLOSED vocabulary**
+  (a contract test rejects an unknown value), and each value maps to **exactly one** `intended_disposition`:
+
+  **`file` bases** (the latent process placed real illicit intent behind the flow):
+  | value | latent cause |
+  |---|---|
+  | `predicate_established` | a named predicate offence sits behind the flow (the generator minted it) |
+  | `illicit_proceeds_placement` | proceeds entering the system (placement stage) |
+  | `layering_no_economic_purpose` | movement structured to obscure origin, no economic rationale |
+  | `structuring_below_threshold` | deliberate sub-threshold structuring to evade reporting |
+  | `sanctioned_or_designated_nexus` | a designated party / jurisdiction in the chain |
+
+  **`clear` bases** (the latent process generated a legitimate / explained pattern):
+  | value | latent cause |
+  |---|---|
+  | `legitimate_business_pattern` | flows reconcile to a generated bona-fide business |
+  | `explained_source_of_funds` | source of funds is established / documented |
+  | `anticipated_activity_fit` | volume / pattern fits the onboarded expected profile |
+  | `coincidental_collision` | a benign look-alike (e.g. a common-name near-match with no shared identifier) |
+
+  **The substrate finalizes this set by reconciling each value 1:1 with its existing latent enums**
+  (`Party.latent_role` / `illicit_income_type` / `Transaction.laundering_label`) — the basis is **READ from
+  the generator's truth, never computed from the sufficiency rule.** A value not derivable from a latent
+  field is not a valid basis (it would be the engine's logic in disguise). `intended_disposition` and
+  `intended_basis` must be **independently authored** from that latent truth so agreement with the engine is
   *evidence*, not a tautology.
 
 ### Two hard constraints (these are what make it a valid oracle)
@@ -122,3 +144,41 @@ determination engine is unfalsifiable — it can only replay its author's intent
 **measurable against the latent generating process**, the resolved entity spine becomes the substrate the
 measured decision stands on, and the rich case stops being *authored-and-self-graded* and becomes
 *emitted, resolved, and validated end-to-end* against an independent oracle.
+
+---
+
+## /dev-plan kickoff (paste into the aml-substrate session's `/dev-plan`)
+
+**Round 1** (independent — the standards + scorer contract are authored) · **Size: large / greenfield**
+(a new derived emission + the firewall contract test) · **Pin: `a3fb02b`** · **Unblocks:** the consumer's
+determination-engine validation (the circularity exit — the highest *strategic* value).
+
+> **Objective.** Emit an **exogenous disposition label** — `intended_disposition` (`file`|`clear`) +
+> `intended_basis` (the closed vocab above) — on the **evaluation-only channel** (alongside `illicit_flow`/
+> `latent_role`, never on the evidence bundle), **authored BLIND** to the sufficiency rule (a consequence
+> of the latent generating process), so signal-watch's determination engine can be validated against a
+> label it did not author.
+>
+> **Scope (this repo):** a new derived label on the eval-only channel that `monitor/measure.py` reads (the
+> sole reader of label fields) · the `intended_basis` ↔ latent-enum (`Party.latent_role` /
+> `illicit_income_type` / `Transaction.laundering_label`) 1:1 reconciliation · a contract test that the
+> label never appears on any `monitor/evidence.py` engine-input field · tests.
+> **Out of scope:** the consumer's evaluation harness (signal-watch builds it); ANY engine tuning toward
+> the label.
+>
+> **Load-bearing assumptions (surface at the direction gate):** (A) every `intended_basis` value is
+> **READ from a latent field**, none computed from the sufficiency rule (a basis not derivable from the
+> generator's truth is the engine's logic in disguise); (B) the label rides the **same firewall** as
+> `illicit_flow`/`true_entities` (the engine never reads it); (C) the latent process is rich enough to
+> distinguish `file`-bases from `clear`-bases — in particular it generates **affirmative-clear** patterns
+> (a legitimate / explained-source flow) to label `clear`, not just absence-of-predicate.
+>
+> **Exit criteria (testable):** a slice emits `intended_disposition` + `intended_basis` on the eval
+> channel; a contract test **fails the build** if either appears on an engine-consumed field; an
+> **agreement-rate** report (engine-derived file/clear vs `intended_disposition`) qualified "synthetic
+> clusters; production has no ground truth" — **never** a precision/lift number; `evaluate_sufficiency`
+> is **byte-identical** with or without the label present (the self-confirming-loop guard).
+>
+> **The guard that must not break:** the label is **authored blind** (never computed from the sufficiency
+> rule) **and never reaches the engine-input surface** — violating either reopens the exact circularity
+> this exits.

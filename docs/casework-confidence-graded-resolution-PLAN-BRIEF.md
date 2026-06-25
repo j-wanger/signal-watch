@@ -159,3 +159,43 @@ over-trust a name-only merge (the >90%-FP tsunami) or fail-close a legitimately 
 Graded consume is what lets casework **propagate the grade as provenance** all the way to the analyst-
 visible disposition, so the file/clear is auditable down to the identity link behind each leg — the LFCM
 grounding chain, made defensible end-to-end.
+
+---
+
+## /dev-plan kickoff (paste into the aml-casework session's `/dev-plan`)
+
+> **Two phases — split by dependency.** **CW-4 is Round 1** (independent, exercisable today). **§1 graded
+> consume + CW-2 ER-verification are Round 2** — they need the substrate's
+> [graded-counterparty-identifiers emission](substrate-graded-counterparty-identifiers-PLAN-BRIEF.md) to
+> land first (you cannot verify a grade that is not emitted). Kick off **CW-4 now**; queue §1/CW-2 behind
+> the substrate phase.
+
+**Round 1 — CW-4 only** (independent — exercisable today via the existing subprocess file-handoff with the
+authored Lakeshore bundle) · **Size: large / greenfield** · **Pin: `cfd989f`** · **Unblocks:** the live
+cleared verdict end-to-end (open since Phase 73).
+
+> **Objective.** Add the **`cleared`** disposition — the documented affirmative dismissal casework cannot
+> currently express — as a **SEPARATE clear path**, the **`file` bar BYTE-UNCHANGED** (the A1 guard).
+> Adopt signal-watch's proven shape: **mechanism + 0 corroborating legs + affirmative mitigation
+> established + no named predicate → `cleared`**.
+>
+> **Scope (this repo):** `signoff.py` (add `cleared` to the disposition vocab; classify the affirmative
+> clear **AFTER** the verifier chain, never inside it; require a grounded `affirmative_clear` block on the
+> clear stance — the mirror of `file`'s grounded inculpatory suspicion at `signoff.py:49-56`) · tests
+> (the regression invariant). **Out of scope (Round 2):** the §1 graded-resolution consume + CW-2
+> ER-verification (gated on the substrate emission); do **not** loosen the fail-closed verifier core.
+>
+> **Load-bearing assumptions (surface at the direction gate):** (A) the affirmative-clear shape ports
+> from signal-watch's `evidence_requirements.py` branch unchanged; (B) adding `cleared` is **additive** —
+> no existing bundle's verdict moves; (C) the authored Lakeshore bundle carries a **groundable** mitigation
+> block (an explained source-of-funds) for casework to ground the clear against.
+>
+> **Exit criteria (testable):** hand casework the authored Lakeshore bundle → returns **`cleared`** with a
+> grounded `affirmative_clear` basis; hand it Northgate → still signs **`file`**; a regression test proves
+> **byte-identical** `file`/`both_defensible`/`blocked`/`needs_more_info` verdicts for **every existing
+> bundle** (the file bar unchanged, mirror signal-watch's `--selftest` proof); **empty mitigation → no
+> clear**.
+>
+> **The guard that must not break:** `cleared` is **additive** — the `file` bar and every existing verdict
+> stay **byte-unchanged**; the clear is evaluated **after** the verifier chain, never inside it; empty
+> mitigation yields no clear (the `file`-side discipline, mirrored).

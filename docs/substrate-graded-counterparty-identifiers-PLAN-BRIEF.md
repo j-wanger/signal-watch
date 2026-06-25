@@ -173,3 +173,41 @@ source-of-funds, not the transaction stream) has no spine to stand on. Strength-
 counterparty leg are the record-sourced `basis[]` that lets the consumer's deterministic linkage grade a
 link **auditable, not asserted** — and turns the rich case from *authored* into *emitted, resolved,
 verifier-defensible end-to-end*.
+
+---
+
+## /dev-plan kickoff (paste into the aml-substrate session's `/dev-plan`)
+
+**Round 1** (no cross-pillar dependency — the standards are authored) · **Size: medium** (counterparty
+identifiers + populate hooks are medium; the `attrs` widen is small; tightly coupled — one phase) ·
+**Pin: `a3fb02b`** · **Unblocks:** the casework graded-resolution consume (Round 2) + the consumer's
+real counterparty resolution.
+
+> **Objective.** Make a transaction counterparty an *identity*: emit `identifiers[]` (email/phone/address/
+> account + `strength`) on the counterparty leg, propagate the already-built `gen/identity.py` hooks +
+> `SHARES_*` graph onto the counterparty surface, and tag `SHARES_*` / beneficial-ownership edges with
+> `strength` — so signal-watch's spine resolves counterparties record-sourced, exact-on-identifier.
+>
+> **Scope (this repo):** `schema/transaction.py` (counterparty `identifiers[]`) · `schema/graph.py`
+> (`RelationshipEdge.attrs` → `dict[str,int|str]`, additive) · `gen/activity.py` + `gen/flows.py`
+> (rail-aware identifier population) · `gen/identity.py` (propagate hooks onto counterparties) ·
+> `monitor/views.py` (`TxnView` carries `counterparty_name` + `identifiers[]`, label-blind) ·
+> `resolve/measure.py` (extend to score counterparty-leg resolution) · tests.
+> **Out of scope:** probabilistic ER; the consumer wiring (signal-watch re-vendors after).
+>
+> **Load-bearing assumptions (surface at the direction gate):** (A) the counterparty leg can carry
+> `identifiers[]` through `TxnView` **without leaking a label** field; (B) widening `attrs` to
+> `dict[str,int|str]` is additive — no downstream type break; (C) `strength == grade_of(kind)`
+> deterministically (the generator never authors strength independently); (D) the cluster-id firewall
+> holds on the new counterparty surface.
+>
+> **Exit criteria (testable):** ≥1 **strong** cross-party identifier collision seeded, strength-tagged,
+> **surfaced on a counterparty leg** + address collisions tagged `weak`; a contract test asserts
+> `strength == grade_of(kind)` AND **no resolver-input field correlates with the cluster partition**
+> (correlation, not field name); `resolve/measure.py` scores counterparty-leg resolution and reports only
+> the grade-distribution + human-adjudication rate, qualified "synthetic clusters; production has no
+> ground truth."
+>
+> **The guard that must not break:** **name is never an identifier** (stays a separate field, grade
+> `reject`); **address is never `strong`** (co-residents share an address); the **cluster id never reaches
+> the resolver-input surface**.

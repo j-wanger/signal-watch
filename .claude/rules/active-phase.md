@@ -11,6 +11,6 @@ Render the memory short-circuit in `workbench.html` (proven by a number, not yet
 ## Gates
 - [x] spec — generated this phase (STANDARD ceremony; `specs/phase-74-entity-intelligence-spine.md`)
 - [x] Direction confirmed by user (2026-06-25; NOT all-accept — A1/A5 don't-know→DOWN-SCOPED, A2/A3/A4 accept)
-- [ ] Delivery accepted (orchestrator flips to [x] after the delivery-flow commit verifiably lands)
+- [x] Delivery accepted (post-implementation report 2026-06-25; user "Accept"; committed e18eba9)
 
 Plan [[phases/phase-74-entity-intelligence-spine]]; ledger Phase-74.

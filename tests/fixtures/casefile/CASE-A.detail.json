@@ -854,6 +854,33 @@
   ],
   "missing": [],
   "sufficiency_line": "A laundering mechanism (cash and dispersed inbound, then a rapid structured drain) plus three independent corroborating legs — source of funds not established, a beneficial-ownership network reaching a caution-listed address, and a prior-trafficking-linked inbound source — with human trafficking named as the predicate risk and no surviving benign explanation: a determination is licensed.",
+  "read_manifest": [
+   {
+    "atom": "ML-A4",
+    "via": "resolution-edge",
+    "between": [
+     "E-CALDER-INT",
+     "E-CALDER-EXT"
+    ],
+    "grade": "strong",
+    "basis": [
+     "email"
+    ],
+    "status": "admitted"
+   },
+   {
+    "atom": "ML-A4",
+    "via": "resolution-edge",
+    "between": [
+     "E-MARIC"
+    ],
+    "grade": "strong",
+    "basis": [
+     "email"
+    ],
+    "status": "admitted"
+   }
+  ],
   "evidence_hits": {
    "caution_list": {
     "caution": {

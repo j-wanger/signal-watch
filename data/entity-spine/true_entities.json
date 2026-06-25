@@ -1,0 +1,30 @@
+{
+  "note": "FULLY SYNTHETIC ground-truth identity clusters for the resolution-correctness scorer (Phase 74). The `cluster` field is the LATENT TRUTH, kept ONLY in this evaluation-only channel — the resolver NEVER reads it (the resolver-input firewall, docs/true-entities-scorer-contract.md). Illustrative; production has no ground truth. Emails on .test, phones in the 555-01XX reserved range.",
+  "badge": "Illustrative data & outputs",
+  "observations": [
+    { "obs_id": "o1", "record_id": "R-CALDER-A", "name": "James Calder", "kind": "person", "role": "related_party",
+      "identifiers": [ { "kind": "email", "value": "jcalder.mgmt@swiftmail.test", "normalized": "jcaldermgmt@swiftmail.test", "strength": "strong" } ],
+      "cluster": "C-CALDER" },
+    { "obs_id": "o2", "record_id": "R-CALDER-B", "name": "James Calder", "kind": "person", "role": "counterparty",
+      "identifiers": [ { "kind": "email", "value": "jcalder.mgmt@swiftmail.test", "normalized": "jcaldermgmt@swiftmail.test", "strength": "strong" } ],
+      "cluster": "C-CALDER" },
+    { "obs_id": "o3", "record_id": "R-CALDERON", "name": "John Calderon", "kind": "person", "role": "counterparty",
+      "identifiers": [ { "kind": "email", "value": "jcalderon.events@example.test", "normalized": "jcalderonevents@example.test", "strength": "strong" } ],
+      "cluster": "C-CALDERON" },
+    { "obs_id": "o4", "record_id": "R-WATCHLIST", "name": "Jon A. Calderón", "kind": "person", "role": "watchlist",
+      "identifiers": [ { "kind": "email", "value": "jacalderon@listmail.test", "normalized": "jacalderon@listmail.test", "strength": "strong" } ],
+      "cluster": "C-WATCHLIST" },
+    { "obs_id": "o5", "record_id": "R-MARIC-A", "name": "Vesna Maric", "kind": "person", "role": "counterparty",
+      "identifiers": [ { "kind": "email", "value": "v.maric@quickmail.test", "normalized": "vmaric@quickmail.test", "strength": "strong" } ],
+      "cluster": "C-MARIC" },
+    { "obs_id": "o6", "record_id": "R-MARIC-B", "name": "Vesna Maric", "kind": "person", "role": "subject",
+      "identifiers": [ { "kind": "email", "value": "v.maric@quickmail.test", "normalized": "vmaric@quickmail.test", "strength": "strong" } ],
+      "cluster": "C-MARIC" },
+    { "obs_id": "o7", "record_id": "R-OKAFOR-A", "name": "Sam Okafor", "kind": "person", "role": "counterparty",
+      "identifiers": [ { "kind": "phone", "value": "+1-555-0173", "normalized": "15550173", "strength": "strong" } ],
+      "cluster": "C-OKAFOR" },
+    { "obs_id": "o8", "record_id": "R-OKAFOR-B", "name": "Sam Okafor", "kind": "person", "role": "counterparty",
+      "identifiers": [],
+      "cluster": "C-OKAFOR" }
+  ]
+}

@@ -368,5 +368,36 @@
         }
       }
     }
-  ]
+  ],
+  "resurfacing": {
+    "note": "The Phase-74 MEMORY demo (illustrative, synthetic). Vesna Maric is an inbound counterparty in CASE-A whose email (v.maric@quickmail.test) matches the INDEPENDENT-provenance prior-STR register record PSR-0001 — a prior human-trafficking STR authored as a separate register entry, NOT to steer this verdict. She RE-SURFACES here as the subject of a new alert. The persistent entity spine resolves her by the shared STRONG email across CASE-A + PSR-0001 + this case and surfaces her accumulated prior, so the gather targets-to-close SHRINK (memory, not re-gather) and the predicate is already named. The cross-reference is a REAL identifier link, never a fabricated coincidence.",
+    "badge": "Illustrative data & outputs",
+    "case_id": "CASE-C",
+    "display_name": "Vesna Maric",
+    "subject": { "entity_ref": "E-MARIC-SUBJ" },
+    "alerts": [
+      { "alert_id": "AL-VM-C3", "capability": "C3", "detector": "multi_originator_funnel_in",
+        "grounding": { "signal_id": "fin-2020-alert001:IND-05", "advisory_id": "fin-2020-alert001",
+          "flag": "Multiple social media accounts communicating the same message soliciting funds for an unknown purpose or to an unknown account.",
+          "red_flag": "Coordinated multi-account same-message fund solicitation (amplification ring)" } },
+      { "alert_id": "AL-VM-C2", "capability": "C2", "detector": "rapid_pass_through",
+        "grounding": { "signal_id": "fin-2023-alert001:IND-03", "advisory_id": "fin-2023-alert001",
+          "flag": "Currency deposits into U.S. accounts without explanation, followed by rapid wire transfers to countries with high migrant flows (e.g., Mexico, Central America), in a manner that is",
+          "red_flag": "Cash-in then rapid transfer-out to a high-migrant-flow corridor (pass-through)" } }
+    ],
+    "entities": [
+      { "entity_id": "E-MARIC-SUBJ", "kind": "person", "display_name": "Vesna Maric", "synthetic_label": true, "role": "subject",
+        "identity": { "email": "v.maric@quickmail.test" },
+        "identifiers": [ { "kind": "email", "value": "v.maric@quickmail.test", "normalized": "vmaric@quickmail.test", "strength": "strong" } ] }
+    ],
+    "expected_memory": {
+      "resolves_via": "email v.maric@quickmail.test (strong)",
+      "prior_source": "PSR-0001",
+      "prior_predicate": "human trafficking",
+      "prior_str_id": "STR-2023-004471",
+      "min_targets_shrink": 1,
+      "predicate_pre_named_by_memory": true,
+      "note": "Oracle for the memory demo: the spine resolves the re-surfacing subject onto her accumulated prior; the corroboration gather-target the cold case would chase is already closed, so targets-to-close drop by at least 1, and the predicate is pre-named by the prior. A test oracle only — the numbers are COMPUTED live."
+    }
+  }
 }

@@ -281,7 +281,22 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   clear path; **the file/determination bar BYTE-UNCHANGED**, the A1 guard) + a `read`-from-file evidence source +
   predicate-from-register. `workbench.html` `showcaseSurface` renders names-not-codes + 3 graphs
   (`scMoneyFlowGraph`/`scResolutionGraph`/`scBOGraph`). The cross-pillar contract `docs/rich-case-target-contract.md`
-  is a DEFERRED follow-on. Still-deferred substrate-emission gaps
+  is a DEFERRED follow-on. **Phase 74** adds the companion-only PERSISTENT ENTITY SPINE — `scripts/entity_spine.py`
+  (a NEW gitignored-DuckDB module; `news_store` byte-untouched): observations → an append-only, bitemporal, GRADED
+  `resolution_links` layer (deterministic strong-id MERGE / weak-corroborate / name-only REJECT; reversible split with
+  cascade-invalidation; conflicts both-kept) → `persistent_entities` accumulating prior dispositions. Confidence is a
+  deterministic ordinal GRADE (strong/weak/reject, fail-closed) carried as PROVENANCE on a SEPARATE grade-gated read
+  path — a low-grade link is EXCLUDED (never down-weighted) from the byte-frozen file bar; priors are analyst-visible
+  only (the self-confirming-loop guard — injecting a prior `cleared` → byte-identical verdict). The re-surfacing MEMORY
+  demo (`casefile_memory`; the `resurfacing` block — Vesna Maric on her INDEPENDENT prior-STR PSR-0001) MEASURABLY
+  shrinks gather targets-to-close + pre-names the predicate; the event-driven STALE-prior guard re-opens a prior whose
+  identity changed. `scripts/resolution_scorer.py` scores resolution vs synthetic `data/entity-spine/true_entities.json`
+  (pairwise/B-cubed, synthetic-only qualifier) behind a resolver-input firewall (no cluster-id / no 1:1 surrogate).
+  Standards: `docs/{resolution-link-schema,identity-grade-grammar,confidence-as-provenance-contract,true-entities-scorer-contract}.md`;
+  sibling EMISSION briefs (verified live HEADs — substrate@a3fb02b, casework@cfd989f):
+  `docs/{substrate-graded-counterparty-identifiers,substrate-exogenous-disposition-label,casework-confidence-graded-resolution}-PLAN-BRIEF.md`.
+  Probabilistic/Splink ER + the merge-adjudication Class-J console + graph/Kuzu + the medallion/DuckLake are DEFERRED
+  (named in the standards). Still-deferred substrate-emission gaps
   (named in `signal_brief`): C1 anticipated-activity (a PRINCIPLED measured null), broader C7, a TF slice — the
   consolidated §12 BRIEF (`docs/substrate-determination-signals-PLAN-BRIEF.md`). The chain workbench
   renders the structured STR's COMPLETENESS (the previously-dropped fields surfaced honest-NULL). Doc:
@@ -330,6 +345,12 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   - `python3 tests/gather_quality_harness.py --check` — the GATHER extraction-coverage REGRESSION GATE
     (Phase 70: replay the pinned live capture with NO model; assert finding_coverage/target-closure still
     match the baseline + the deterministic StubPlanner reference; `--freeze` re-captures from a live model).
+  - `python3 scripts/entity_spine.py --selftest` — the persistent entity spine (strong-id merge / name-only
+    reject / weak corroborate; append-only graded links; conflicts both-kept; reversible split with
+    cascade-invalidation; event-driven stale-prior; the no-news-import firewall) · `python3 scripts/resolution_scorer.py
+    --selftest` — the resolution-correctness scorer (pairwise/B-cubed vs synthetic true_entities; the resolver-input
+    firewall rejects a cluster surrogate). Both need DuckDB — run under `.venv` (they SKIP gracefully without it);
+    both are in the `uv run pytest` umbrella.
   - `python3 scripts/derive_signals.py --selftest` — the derivation GATE checks + anchor fixtures.
   - `python3 tests/news_live_test.py` — the live pipeline: build_record + grounding, the 13-fixture
     REPLAY (goldens, no model; US-federal FIXTURE_META allowlist asserted), the second-pass verify,

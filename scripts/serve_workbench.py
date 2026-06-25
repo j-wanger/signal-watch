@@ -59,6 +59,10 @@ from evidence_requirements import (  # noqa: E402  (signal-watch's OWN companion
     gather_targets, gathered_signals, load_requirements, present_atoms, requirements as _requirements,
     validate_requirements,
 )
+# Phase 74 — the entity spine: grade-gate the read-from-file atoms (the grammar's max_grade is the gate);
+# the persistent store backs the re-surfacing "memory" path. Confidence rides this SEPARATE read path —
+# never through evidence_requirements' byte-frozen file bar.
+from entity_spine import EntitySpine, max_grade  # noqa: E402  (signal-watch's OWN companion module)
 
 DEFAULT_PORT = 8030          # serve_news 8000, serve_corpus 8010, serve_chain 8020 — all side by side
 WORKBENCH_DIR = ROOT / "data" / "workbench"
@@ -512,6 +516,32 @@ def _cf_prior_str_hit(case: dict, ents: dict, ref: dict):
     return None
 
 
+def _cf_read_manifest(case: dict) -> tuple:
+    """GRADE-GATE the read-from-file network atom (ML-A4) against the case's resolution edges, using the
+    spine's grammar (max_grade over each resolved/flagged edge's shared-identifier strengths). A strong/weak
+    edge ADMITS ML-A4; a reject/empty (name-only) edge is EXCLUDED — the boolean file bar cannot express
+    "weak", so a low-grade link is excluded, never down-weighted (docs/confidence-as-provenance-contract.md).
+    Returns (read_atoms, manifest) — the manifest lists every candidate as admitted | quarantined-by-low-grade,
+    so the file/clear is auditable down to the link grade that supplied each leg."""
+    admitted, manifest = [], []
+    for e in case.get("resolution_edges", []):
+        if e.get("status") not in ("resolved", "flagged"):
+            continue   # an excluded/other edge never supplies a read atom
+        shared = e.get("shared") or []
+        grade = max_grade(s.get("strength") for s in shared)   # strong/weak/reject; empty -> reject (fail-closed)
+        entry = {"atom": "ML-A4", "via": "resolution-edge", "between": e.get("between"),
+                 "grade": grade, "basis": [s.get("kind") for s in shared]}
+        if grade in ("strong", "weak"):
+            entry["status"] = "admitted"
+            admitted.append("ML-A4")
+        else:
+            entry["status"] = "quarantined-by-low-grade"
+            entry["reason"] = ("resolution edge has no strong/weak shared identifier (name-only / empty) — "
+                               "excluded from the filing inputs, never down-weighted")
+        manifest.append(entry)
+    return sorted(set(admitted)), manifest
+
+
 def casefile_determination(case_id: str) -> dict:
     """COMPUTE the determination for an authored case by DERIVING the engine inputs from its EVIDENCE and
     running the LIVE engine — the verdict is engine OUTPUT, never the authored expected_*. The honest seam:
@@ -532,8 +562,7 @@ def casefile_determination(case_id: str) -> dict:
     caution = _cf_caution_hit(case, ents, ref)
     prior = _cf_prior_str_hit(case, ents, ref)
     gathered = ["corroboration"] if (caution or prior) else []
-    suspicious_link = any(r.get("status") in ("resolved", "flagged") for r in case.get("resolution_edges", []))
-    read = ["ML-A4"] if suspicious_link else []
+    read, read_manifest = _cf_read_manifest(case)   # grade-gated: a low-grade link is EXCLUDED, not down-weighted
     named_risk = ((prior or {}).get("prior_str") or {}).get("predicate")
     mitigation_established = source_established
     mitigation_rebutted = (not source_established) and bool(gathered)
@@ -568,6 +597,8 @@ def casefile_determination(case_id: str) -> dict:
             "disposition": disposition, "presentation_label": label, "named_risk": named_risk,
             "mitigation_established": mitigation_established, "mitigation_rebutted": mitigation_rebutted,
             "present_atoms": atoms_view, "missing": suff["missing"], "sufficiency_line": det.get("sufficiency_line"),
+            # the per-decision GRADE manifest — each read atom admitted | quarantined-by-low-grade (auditable)
+            "read_manifest": read_manifest,
             "evidence_hits": {"caution_list": caution, "prior_str": prior, "source_established": source_established},
             "str_record": det.get("str_record"), "clearance_record": det.get("clearance_record"),
             # the authored expectation is a REGRESSION ORACLE only — never the served verdict (that is computed above)
@@ -601,6 +632,89 @@ def casefile_detail(case_id: str) -> dict:
         raise RunError(f"unknown case '{case_id}' — not in the authored case file")
     return {"badge": BADGE, "showcase": True, "case": case, "reference": cf.get("reference", {}),
             "meta": cf.get("meta", {}), "determination": casefile_determination(case_id)}
+
+
+# ---- the re-surfacing MEMORY demo (Phase 74) -----------------------------------------------------
+# The genuine persistent entity store (gitignored runtime data; 127.0.0.1; never committed, never a dist).
+SPINE_STORE = ROOT / "data" / "entity-spine" / "store" / "workbench-spine.duckdb"
+
+
+def _accumulate_priors(spine, cf: dict) -> None:
+    """Observe every case's entities into the spine (so a re-surfacing entity resolves by identifier), and
+    attach the prior-STR register records as INDEPENDENT-provenance prior dispositions on the resolved
+    subjects (a prior STR is authored separately — it is not hand-set to steer any later verdict)."""
+    for case in cf.get("cases", []):
+        for e in case.get("entities", []):
+            spine.observe(case["case_id"], {"entity_id": e["entity_id"], "display_name": e.get("display_name"),
+                          "kind": e.get("kind"), "role": e.get("role"), "identifiers": e.get("identifiers") or []})
+    for r in cf.get("reference", {}).get("prior_str_register", []):
+        ids = r.get("identifiers") or {}
+        nem = ids.get("normalized_email") or _norm_email(ids.get("email"))
+        if not nem:
+            continue
+        res = spine.observe("PSR:" + r["id"], {"entity_id": r["id"], "display_name": r.get("subject_name"),
+                            "kind": "person", "role": "prior_str",
+                            "identifiers": [{"kind": "email", "value": ids.get("email"), "normalized": nem,
+                                             "strength": "strong"}]})
+        spine.attach_disposition(res["entity_id"], "PSR:" + r["id"], "escalated",
+                                 grounding={"prior_str_id": r.get("prior_str_id"), "predicate": r.get("predicate"),
+                                            "source": "prior_str_register"}, decided_at="2023-01-01")
+
+
+def casefile_memory(store_path: str = ":memory:") -> dict:
+    """The re-surfacing MEMORY demo: Vesna Maric resurfaces as a subject; the persistent spine resolves her
+    by the shared STRONG email across CASE-A + the INDEPENDENT prior-STR register + this case and surfaces her
+    accumulated prior — so the gather targets-to-close SHRINK (a MEASURED number, not a status flag) and the
+    predicate is already named. Also exercises the genuine write-then-read-back seam + the event-driven
+    stale-prior guard. Confidence/priors ride this SEPARATE path — never through the byte-frozen file bar."""
+    cf = load_casefile()
+    rs = cf.get("resurfacing") or {}
+    prof = _requirements()
+    subj_e = (rs.get("entities") or [{}])[0]
+    caps = sorted({a.get("capability") for a in rs.get("alerts", []) if a.get("capability")})
+    ctype = crime_type_for_capabilities(caps, prof) or "money_laundering"
+    # COLD — the re-surfacing case's own signals, no memory (the investigator gathers from scratch)
+    cold_present = present_atoms(ctype, caps, prof)
+    cold_targets = [t["id"] for t in gather_targets(ctype, cold_present, prof)]
+
+    spine = EntitySpine(store_path)
+    try:
+        _accumulate_priors(spine, cf)
+        res = spine.observe(rs.get("case_id", ""), {"entity_id": subj_e.get("entity_id"),
+              "display_name": subj_e.get("display_name"), "kind": "person", "role": "subject",
+              "identifiers": subj_e.get("identifiers") or []})
+        eid = res["entity_id"]
+        priors = spine.prior_dispositions(eid)
+        # persistence: write-then-read-back across a store REOPEN (only meaningful on a file store)
+        read_back = None
+        if store_path != ":memory:":
+            spine.close()
+            spine = EntitySpine(store_path)
+            read_back = len(spine.prior_dispositions(eid))
+        prior_predicate = next((p["grounding"].get("predicate") for p in priors if p["grounding"].get("predicate")), None)
+        # MEMORY — the prior STR is external corroboration -> closes the corroboration gather-target
+        memory_present = present_atoms(ctype, caps, prof, gathered=(["corroboration"] if priors else []))
+        memory_targets = [t["id"] for t in gather_targets(ctype, memory_present, prof)]
+        # the event-driven STALE-PRIOR guard: a split (retract a link) bumps the version -> the prior reads stale
+        link = spine.con.execute(
+            "SELECT link_id FROM resolution_links WHERE entity_id=? AND status='active' LIMIT 1", [eid]).fetchone()
+        stale_after_split = None
+        if link:
+            spine.retract_link(link[0])
+            after = spine.prior_dispositions(eid)
+            stale_after_split = bool(after) and all(p["stale"] for p in after)
+    finally:
+        spine.close()
+
+    return {"badge": BADGE, "case_id": rs.get("case_id"), "display_name": rs.get("display_name"),
+            "resolves_via": rs.get("expected_memory", {}).get("resolves_via"),
+            "subject_entity": eid, "n_priors": len(priors), "prior_predicate": prior_predicate,
+            "prior_source": (priors[0]["record_id"] if priors else None),
+            "cold_targets": cold_targets, "memory_targets": memory_targets,
+            "targets_shrink": len(cold_targets) - len(memory_targets),
+            "predicate_pre_named_by_memory": bool(prior_predicate),
+            "persisted_read_back": read_back, "stale_after_split": stale_after_split,
+            "expected": rs.get("expected_memory")}
 
 
 # ---- the served page -----------------------------------------------------------------------------
@@ -1130,6 +1244,55 @@ def selftest() -> int:
     # the SAME fired signals on both, opposite outcome — the thesis, asserted from the data
     if {a.get("capability") for a in casefile_case("CASE-A")["alerts"]} != {a.get("capability") for a in casefile_case("CASE-B")["alerts"]}:
         failures.append("the pair must fire the IDENTICAL signal set (same grounded signal, opposite outcome)")
+    # ── Phase 74 (T4): the GRADE-GATED read path + the per-decision manifest ──
+    a_manifest = da.get("read_manifest", [])
+    if not (a_manifest and all(m["status"] == "admitted" and m["grade"] == "strong" for m in a_manifest)):
+        failures.append(f"CASE-A ML-A4 should be ADMITTED at grade strong (the Calder/Maric edges are strong): {a_manifest}")
+    # a resolved/flagged edge with NO shared identifier (name-only / empty) -> the atom is QUARANTINED, EXCLUDED
+    _q_read, _q_man = _cf_read_manifest({"resolution_edges": [{"status": "flagged", "between": ["X"], "shared": []}]})
+    if _q_read or not (_q_man and _q_man[0]["status"] == "quarantined-by-low-grade" and _q_man[0]["grade"] == "reject"):
+        failures.append(f"a null-grade (empty-shared) edge must QUARANTINE the read atom (exclude, not down-weight): {_q_man}")
+    # ── Phase 74 (T4): the self-confirming-loop / file-bar guard ──
+    # the file bar must be STRUCTURALLY unable to read priors — no prior/disposition/history parameter
+    import inspect as _inspect
+    for _fn in (evaluate_sufficiency, determine):
+        _leak = set(_inspect.signature(_fn).parameters) & {
+            "prior", "priors", "prior_disposition", "dispositions", "history", "precedent_disposition"}
+        if _leak:
+            failures.append(f"the file bar must not read priors — {_fn.__name__} exposes {_leak}")
+    # injecting a prior 'cleared' must NOT change the verdict for a fixed evidence set (priors are provenance only)
+    _before = json.dumps(casefile_determination("CASE-A"), sort_keys=True, ensure_ascii=False)
+    try:
+        _sp = EntitySpine(":memory:")
+        _subj = (casefile_case("CASE-A").get("subject") or {}).get("entity_ref")
+        _r = _sp.observe("PRIOR-CASE", {"entity_id": _subj, "display_name": "prior", "kind": "org",
+            "identifiers": [{"kind": "email", "value": "p@p.test", "normalized": "p@p.test", "strength": "strong"}]})
+        _sp.attach_disposition(_r["entity_id"], "PRIOR-CASE", "cleared", decided_at="2025-01-01")
+        _sp.close()
+    except RuntimeError:
+        pass   # duckdb absent — the structural signature guard above still holds
+    _after = json.dumps(casefile_determination("CASE-A"), sort_keys=True, ensure_ascii=False)
+    if _before != _after:
+        failures.append("injecting a prior 'cleared' changed the determination — priors must be provenance-only (self-confirming-loop guard)")
+    # ── Phase 74 (T5): the re-surfacing MEMORY demo — genuine persistence, measured short-circuit, stale-prior guard ──
+    import tempfile as _tempfile
+    try:
+        _mem = casefile_memory(os.path.join(_tempfile.mkdtemp(), "spine.duckdb"))
+    except RuntimeError:
+        _mem = None   # duckdb absent (the spine needs it) — the dep-free path skips; .venv runs it fully
+    if _mem is not None:
+        if _mem["prior_predicate"] != "human trafficking":
+            failures.append(f"the re-surfacing subject must carry her INDEPENDENT prior-STR predicate, got {_mem['prior_predicate']!r}")
+        if not (_mem["targets_shrink"] >= 1):
+            failures.append(f"memory must SHRINK the gather targets-to-close (a measured number, not a flag): "
+                            f"cold={_mem['cold_targets']} memory={_mem['memory_targets']}")
+        if not _mem["predicate_pre_named_by_memory"]:
+            failures.append("memory must PRE-NAME the predicate (no re-gather of what the prior already establishes)")
+        if not _mem["n_priors"] or _mem["persisted_read_back"] != _mem["n_priors"]:
+            failures.append(f"the write-then-read-back seam must survive a store reopen: "
+                            f"read_back={_mem['persisted_read_back']} priors={_mem['n_priors']}")
+        if _mem["stale_after_split"] is not True:
+            failures.append("the stale-prior guard must fire 're-decision required' after an identity split (event-driven)")
     # the detail carries the full evidence for the render, and the routes DISPATCH the authored ids
     da_det = casefile_detail("CASE-A")
     if da_det["case"]["display_name"] != "Northgate Hospitality Group Inc." or not da_det["case"]["transactions"]:

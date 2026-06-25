@@ -26,6 +26,8 @@ PY_SELFTESTS = [
     "curate_workbench_cases.py",
     "osint_tools.py",
     "evidence_requirements.py",
+    "entity_spine.py",          # Phase 74 — the persistent entity spine (SKIPs gracefully w/o duckdb; full under .venv)
+    "resolution_scorer.py",     # Phase 74 — the resolution-correctness scorer + the resolver-input firewall
     "serve_workbench.py",
     "serve_chain.py",
     "validate_chain_cases.py",

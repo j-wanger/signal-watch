@@ -81,3 +81,6 @@ config/typologies/*.draft.json
 
 # nana memory MCP per-project store (binary DB; never commit)
 .memory/*.db*
+
+# Phase 74 — the entity spine's runtime DuckDB store (companion-only; never committed)
+data/entity-spine/store/

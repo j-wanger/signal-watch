@@ -41,7 +41,11 @@ except ModuleNotFoundError:  # the companion degrades gracefully; selftest repor
 # ── the identity-grade grammar (docs/identity-grade-grammar.md) — the closed, shared vocabulary ──
 GRADES = ("reject", "weak", "strong")          # ordinal, weakest-first: reject < weak < strong
 _GRADE_RANK = {g: i for i, g in enumerate(GRADES)}
-STRONG_KINDS = ("email", "phone", "account_number", "client_number", "id_registration", "wallet", "domain")
+# `entity_ref` (Phase 75): an upstream resolver's DECLARED stable identity (e.g. aml-substrate's party_id —
+# 100% name-consistent). It is the strongest merge key: a consumer with a trustworthy declared identity keys
+# persistent identity on it, NOT on shared contact identifiers (which an upstream's noise floor makes
+# non-discriminative — those become candidate SHARES links, demoted to `weak`, the consumer-side adjudication).
+STRONG_KINDS = ("entity_ref", "email", "phone", "account_number", "client_number", "id_registration", "wallet", "domain")
 WEAK_KINDS = ("address",)
 # name is NEITHER — an observation that may trigger a candidate link, graded `reject` until an identifier
 # corroborates it.
@@ -331,6 +335,33 @@ class EntitySpine:
             "dispositions": self.prior_dispositions(entity_id),
         }
 
+    def entities_in_multiple_records(self, min_records: int = 2) -> list:
+        """The cross-case MEMORY query: persistent entities observed in >= min_records DISTINCT records.
+        This is the LFCM 'an entity re-surfaces across cases' signal — keyed on the resolved entity_id (so it
+        reflects whatever merge the grammar made, never a raw shared identifier). Returns, per entity, the
+        distinct records it was seen in + its prior dispositions. DETERMINISTIC order: by reach (descending),
+        then the entity's lowest record_id, then display_name — NEVER the entity_id (a random per-run UUID),
+        so the surfaced top-N is stable across runs."""
+        with self._lock:
+            rows = self.con.execute(
+                "SELECT entity_id, count(DISTINCT record_id) AS n FROM observations "
+                "WHERE entity_id IS NOT NULL GROUP BY entity_id HAVING n >= ?",
+                [min_records]).fetchall()
+            out = []
+            for entity_id, n in rows:
+                recs = [r[0] for r in self.con.execute(
+                    "SELECT DISTINCT record_id FROM observations WHERE entity_id=? ORDER BY record_id",
+                    [entity_id]).fetchall()]
+                name = self.con.execute(
+                    "SELECT display_name FROM persistent_entities WHERE entity_id=?", [entity_id]).fetchone()
+                out.append({"entity_id": entity_id, "display_name": (name[0] if name else None),
+                            "n_records": int(n), "records": recs})
+        # stable sort on content (NOT the random entity_id): reach desc, then lowest record_id, then name
+        out.sort(key=lambda e: (-e["n_records"], e["records"][0] if e["records"] else "", e["display_name"] or ""))
+        for e in out:
+            e["dispositions"] = self.prior_dispositions(e["entity_id"])
+        return out
+
     def entity_count(self) -> int:
         with self._lock:
             return int(self.con.execute("SELECT count(*) FROM persistent_entities").fetchone()[0])
@@ -454,10 +485,42 @@ def _selftest() -> int:
     assert "news_store" not in sys.modules and "serve_news" not in sys.modules, \
         "the spine core must not import the news pillar"
 
+    # ── 10. Phase 75 — entity_ref-keyed cross-case memory + the SHARES over-merge REFUSAL ──
+    # A consumer over an upstream resolver (aml-substrate) keys persistent identity on the DECLARED entity_ref
+    # (the strong key); the upstream's shared contact identifiers are DEMOTED to weak candidate-SHARES links
+    # (its deliberate collision noise floor makes them non-discriminative — the T1 over-merge trap).
+    s4 = EntitySpine(":memory:")
+    _eref = lambda v: {"kind": "entity_ref", "value": v, "normalized": v, "strength": "strong"}
+    _shared_email = {"kind": "email", "value": "u33199@icloud.test", "normalized": "u33199@icloud.test", "strength": "weak"}
+    # the SAME declared entity_ref (a beneficial owner) re-surfaces across two cases -> ONE entity (co-reference)
+    ow1 = s4.observe("CASE-1", {"display_name": "David Cote", "kind": "person", "role": "related_party",
+                                "identifiers": [_eref("P-OWNER"), _shared_email]}, ts="2026-01-01")
+    ow2 = s4.observe("CASE-2", {"display_name": "David Cote", "kind": "person", "role": "subject",
+                                "identifiers": [_eref("P-OWNER"), _shared_email]}, ts="2026-02-01")
+    assert ow1["new_entity"] and not ow2["new_entity"], "same entity_ref must merge (declared-identity strong key)"
+    assert ow1["entity_id"] == ow2["entity_id"] and ow2["grade"] == "strong", (ow1, ow2)
+    # the OVER-MERGE TRAP: a DISTINCT entity_ref sharing the SAME (weak-demoted) email must NOT merge
+    other = s4.observe("CASE-3", {"display_name": "Amelia Nguyen", "kind": "person",
+                                  "identifiers": [_eref("P-OTHER"), _shared_email]}, ts="2026-03-01")
+    assert other["entity_id"] != ow1["entity_id"], "distinct entity_refs sharing a weak email must NOT over-merge (T1 trap)"
+    # the cross-case MEMORY query: P-OWNER re-surfaces in CASE-1 + CASE-2; P-OTHER does not
+    reappear = s4.entities_in_multiple_records(min_records=2)
+    assert len(reappear) == 1 and reappear[0]["entity_id"] == ow1["entity_id"], reappear
+    assert reappear[0]["records"] == ["CASE-1", "CASE-2"] and reappear[0]["n_records"] == 2, reappear
+    # DETERMINISM: a SECOND co-reference entity at the SAME reach must order by its lowest record_id (stable),
+    # NOT by the random per-run entity_id — observe it AFTER P-OWNER but with a lower first record_id.
+    s4.observe("CASE-0", {"display_name": "Early Owner", "kind": "person", "identifiers": [_eref("P-EARLY")]}, ts="2026-04-01")
+    s4.observe("CASE-5", {"display_name": "Early Owner", "kind": "person", "identifiers": [_eref("P-EARLY")]}, ts="2026-04-02")
+    reappear2 = s4.entities_in_multiple_records(min_records=2)
+    assert [e["records"][0] for e in reappear2] == ["CASE-0", "CASE-1"], \
+        f"cross-case examples must order by lowest record_id (stable), not the random entity_id: {reappear2}"
+    s4.close()
+
     print("entity_spine --selftest: PASS "  # noqa: T201
           "(strong-id merge + name-only reject + weak corroboration; append-only graded links; "
           "conflicting values both-kept; disposition attach/read; reversible split with cascade-invalidation; "
-          "event-driven stale-prior guard; fail-closed grade; persistence roundtrip)")
+          "event-driven stale-prior guard; fail-closed grade; persistence roundtrip; "
+          "Phase-75 entity_ref-keyed cross-case memory + SHARES over-merge refusal)")
     return 0
 
 

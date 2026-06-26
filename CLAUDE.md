@@ -269,7 +269,7 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   correct-not-bug) determines from KYC-A1 — C14 ALONE (kyc = mechanism + 0 legs); kyc SIGNING is the honest
   cross-pillar FRONTIER — txn-bearing C14 cases SIGN, txn-LESS party-leaf cases fail-CLOSED at casework's
   no-transactions CONTRACT (`e2e_note`, never loosened — a named casework follow-on).
-  Slice **355**, coverage **128/355**, funnel (auto/human/review) 183/110/62; 6 kyc cases (2 sign). The bundle's
+  Slice **376** (substrate v0.5 @fc98b09 + a cross-case CO-REFERENCE pass), coverage **128/376**, funnel (auto/human/review) 202/111/63; 6 kyc cases (2 sign). The bundle's
   `related_parties[]` BO graph renders as the case network (`boGraphHTML`; "N pct"); the gather/finale DEMO case
   resolves from the OSINT corpus (`gather_demo_case_id`), re-curate-robust. **Phase 73** AUTHORS the north-star
   rich case — a SEPARATE companion source `data/casefile/{case.json,schema.md}` (substrate/casework PARKED, the
@@ -292,8 +292,20 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   shrinks gather targets-to-close + pre-names the predicate; the event-driven STALE-prior guard re-opens a prior whose
   identity changed. `scripts/resolution_scorer.py` scores resolution vs synthetic `data/entity-spine/true_entities.json`
   (pairwise/B-cubed, synthetic-only qualifier) behind a resolver-input firewall (no cluster-id / no 1:1 surrogate).
+  **Phase 75** CONSUMES the substrate v0.5 emission (Phase-27/28 named-identity + entity-resolution, additive) into the spine —
+  `substrate_memory` (serve_workbench) feeds each slice case's parties keyed on `entity_ref` (substrate's RELIABLE declared
+  identity — now a STRONG_KINDS key) + the `/memory` panel renders it. **The T1 measure-first gate caught a MECHANISM error:**
+  substrate's shared strong identifiers — and its OWN `resolution_edges` (`status:"resolved"`) — are a deliberate collision
+  NOISE FLOOR + controller-cluster SHARES between DISTINCT entities (`gen/identity.py`), so a strong-MERGE would OVER-MERGE.
+  Honest consume: key cross-case memory on `entity_ref` (substrate email/phone DEMOTED to weak candidate-SHARES, never a merge
+  key); identifiers/resolution_edges are CANDIDATE SHARES links the spine ADJUDICATES. Committed slice: **36 cross-case
+  CO-REFERENCES** (the real-data memory beat) + **66 over-merge-REFUSED**. casework rejects contract_version "0.5" but TOLERATES
+  the additive fields → curate hands it the v0.3 VIEW (committed bundle stays v0.5). The determination bar BYTE-UNCHANGED (the A1
+  guard); `scripts/measure_xcase_overlap.py` is the committed measurement.
   Standards: `docs/{resolution-link-schema,identity-grade-grammar,confidence-as-provenance-contract,true-entities-scorer-contract}.md`;
-  sibling EMISSION briefs (verified live HEADs — substrate@a3fb02b, casework@cfd989f):
+  sibling EMISSION briefs RE-GROUNDED to live HEADs (Phase 75): substrate@fc98b09 — graded-counterparty-identifiers now LARGELY
+  BUILT (the over-merge gap is the deferred merge-adjudication console), exogenous-disposition-label NOT BUILT; casework@4a858e6 —
+  confidence-graded-resolution NOT BUILT (`cleared`/graded-resolution still open; the re-vendor is a no-op, SKIPPED):
   `docs/{substrate-graded-counterparty-identifiers,substrate-exogenous-disposition-label,casework-confidence-graded-resolution}-PLAN-BRIEF.md`.
   Probabilistic/Splink ER + the merge-adjudication Class-J console + graph/Kuzu + the medallion/DuckLake are DEFERRED
   (named in the standards). Still-deferred substrate-emission gaps
@@ -347,7 +359,10 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
     match the baseline + the deterministic StubPlanner reference; `--freeze` re-captures from a live model).
   - `python3 scripts/entity_spine.py --selftest` — the persistent entity spine (strong-id merge / name-only
     reject / weak corroborate; append-only graded links; conflicts both-kept; reversible split with
-    cascade-invalidation; event-driven stale-prior; the no-news-import firewall) · `python3 scripts/resolution_scorer.py
+    cascade-invalidation; event-driven stale-prior; the no-news-import firewall; Phase-75 entity_ref-keyed cross-case
+    memory + SHARES over-merge refusal) · `python3 scripts/measure_xcase_overlap.py --selftest` — the Phase-75 measure-first
+    gate (cross-case entity_ref co-reference vs the shared-identifier over-merge trap; records a count, never asserts nonzero) ·
+    `python3 scripts/resolution_scorer.py
     --selftest` — the resolution-correctness scorer (pairwise/B-cubed vs synthetic true_entities; the resolver-input
     firewall rejects a cluster surrogate). Both need DuckDB — run under `.venv` (they SKIP gracefully without it);
     both are in the `uv run pytest` umbrella.

@@ -61,6 +61,64 @@
   {
    "advisories": [
     "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
+   "bundle": "bundles/CASE-O-000006.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-000006",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Supermarkets Enterprises",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "445110",
+    "nationality": null,
+    "nature_of_business": "Supermarkets and grocery stores",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "LOW",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 111,
+   "subject": {
+    "account_ids": [
+     "A-00143434"
+    ],
+    "customer_id": "O-000006"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
     "fin-2022-alert002",
     "fin-2023-alert001",
     "fin-2025-a003"
@@ -118,6 +176,66 @@
      "A-00143436"
     ],
     "customer_id": "O-000008"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001",
+    "fin-2025-a003"
+   ],
+   "bundle": "bundles/CASE-O-000030.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C15",
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-000030",
+   "confidence": {
+    "combo": "C15+C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 796,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Grocery Enterprises",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "424490",
+    "nationality": null,
+    "nature_of_business": "Grocery wholesale",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "MEDIUM",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 3,
+   "n_txns": 124,
+   "subject": {
+    "account_ids": [
+     "A-00143458"
+    ],
+    "customer_id": "O-000030"
    }
   },
   {
@@ -241,6 +359,126 @@
     "fin-2020-alert001",
     "fin-2023-alert001"
    ],
+   "bundle": "bundles/CASE-O-000129.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-000129",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Residential Trading Co.",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "236110",
+    "nationality": null,
+    "nature_of_business": "Residential building construction",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "LOW",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 102,
+   "subject": {
+    "account_ids": [
+     "A-00143557"
+    ],
+    "customer_id": "O-000129"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2022-alert002",
+    "fin-2023-alert001",
+    "fin-2025-a003"
+   ],
+   "bundle": "bundles/CASE-O-000207.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C15",
+    "C2",
+    "C3",
+    "C5"
+   ],
+   "case_id": "CASE-O-000207",
+   "confidence": {
+    "combo": "C15+C2+C3+C5",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 28,
+     "escalated_pct": 72
+    },
+    "gate": "human-gate",
+    "level": "low",
+    "n_precedent": 42,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "General Logistics",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "811111",
+    "nationality": null,
+    "nature_of_business": "General automotive repair",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "MEDIUM",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 4,
+   "n_txns": 95,
+   "subject": {
+    "account_ids": [
+     "A-00143635"
+    ],
+    "customer_id": "O-000207"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
    "bundle": "bundles/CASE-O-000213.json",
    "cap_assertable": true,
    "capabilities": [
@@ -292,6 +530,182 @@
      "A-00143641"
     ],
     "customer_id": "O-000213"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
+   "bundle": "bundles/CASE-O-000261.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-000261",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Management Services Ltd.",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "541611",
+    "nationality": null,
+    "nature_of_business": "Management consulting services",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "MEDIUM",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 62,
+   "subject": {
+    "account_ids": [
+     "A-00143689"
+    ],
+    "customer_id": "O-000261"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
+   "bundle": "bundles/CASE-O-000267.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-000267",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Retail Imports",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "453998",
+    "nationality": null,
+    "nature_of_business": "Retail trade",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "LOW",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 127,
+   "subject": {
+    "account_ids": [
+     "A-00143695"
+    ],
+    "customer_id": "O-000267"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2022-alert002",
+    "fin-2023-alert001"
+   ],
+   "bundle": "bundles/CASE-O-000309.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3",
+    "C5"
+   ],
+   "case_id": "CASE-O-000309",
+   "confidence": {
+    "combo": "C2+C3+C5",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 62,
+     "escalated_pct": 38
+    },
+    "gate": "review",
+    "level": "medium",
+    "n_precedent": 348,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Retail Capital",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "453998",
+    "nationality": null,
+    "nature_of_business": "Retail trade",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "MEDIUM",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 3,
+   "n_txns": 148,
+   "subject": {
+    "account_ids": [
+     "A-00143737"
+    ],
+    "customer_id": "O-000309"
    }
   },
   {
@@ -473,6 +887,182 @@
   {
    "advisories": [
     "fin-2020-alert001",
+    "fin-2023-alert001",
+    "fin-2025-a003"
+   ],
+   "bundle": "bundles/CASE-O-000501.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C15",
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-000501",
+   "confidence": {
+    "combo": "C15+C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 796,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Electrical Logistics",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "238210",
+    "nationality": null,
+    "nature_of_business": "Electrical contractors",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "MEDIUM",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 3,
+   "n_txns": 190,
+   "subject": {
+    "account_ids": [
+     "A-00143929"
+    ],
+    "customer_id": "O-000501"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
+   "bundle": "bundles/CASE-O-000523.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-000523",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Electrical Enterprises",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "238210",
+    "nationality": null,
+    "nature_of_business": "Electrical contractors",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "LOW",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 125,
+   "subject": {
+    "account_ids": [
+     "A-00143951"
+    ],
+    "customer_id": "O-000523"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
+   "bundle": "bundles/CASE-O-000531.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-000531",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Full-Service Trading Co.",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "722511",
+    "nationality": null,
+    "nature_of_business": "Full-service restaurants",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "LOW",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 88,
+   "subject": {
+    "account_ids": [
+     "A-00143959"
+    ],
+    "customer_id": "O-000531"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
     "fin-2023-alert001"
    ],
    "bundle": "bundles/CASE-O-000549.json",
@@ -526,6 +1116,180 @@
      "A-00143977"
     ],
     "customer_id": "O-000549"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
+   "bundle": "bundles/CASE-O-000584.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-000584",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Electrical Partners",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "238210",
+    "nationality": null,
+    "nature_of_business": "Electrical contractors",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "LOW",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 138,
+   "subject": {
+    "account_ids": [
+     "A-00144012"
+    ],
+    "customer_id": "O-000584"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
+   "bundle": "bundles/CASE-O-000643.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-000643",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Offices Services Ltd.",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "531210",
+    "nationality": null,
+    "nature_of_business": "Offices of real estate agents",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "MEDIUM",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 166,
+   "subject": {
+    "account_ids": [
+     "A-00144071"
+    ],
+    "customer_id": "O-000643"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
+   "bundle": "bundles/CASE-O-000660.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-000660",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Landscaping Services Ltd.",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "561730",
+    "nationality": null,
+    "nature_of_business": "Landscaping services",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "LOW",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 177,
+   "subject": {
+    "account_ids": [
+     "A-00144088"
+    ],
+    "customer_id": "O-000660"
    }
   },
   {
@@ -591,6 +1355,64 @@
     "fin-2020-alert001",
     "fin-2023-alert001"
    ],
+   "bundle": "bundles/CASE-O-000683.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-000683",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "General Imports",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "484110",
+    "nationality": null,
+    "nature_of_business": "General freight trucking, local",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "MEDIUM",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 75,
+   "subject": {
+    "account_ids": [
+     "A-00144111"
+    ],
+    "customer_id": "O-000683"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
    "bundle": "bundles/CASE-O-000782.json",
    "cap_assertable": true,
    "capabilities": [
@@ -616,7 +1438,7 @@
     "synthetic_label": true
    },
    "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
-   "exemplar": "fp_trap",
+   "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
@@ -642,6 +1464,64 @@
      "A-00144210"
     ],
     "customer_id": "O-000782"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
+   "bundle": "bundles/CASE-O-000811.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-000811",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Residential Imports",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "236110",
+    "nationality": null,
+    "nature_of_business": "Residential building construction",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "LOW",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 173,
+   "subject": {
+    "account_ids": [
+     "A-00144239"
+    ],
+    "customer_id": "O-000811"
    }
   },
   {
@@ -707,6 +1587,64 @@
     "fin-2020-alert001",
     "fin-2023-alert001"
    ],
+   "bundle": "bundles/CASE-O-000909.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-000909",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "General Partners",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": "fp_trap",
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "811111",
+    "nationality": null,
+    "nature_of_business": "General automotive repair",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "LOW",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 188,
+   "subject": {
+    "account_ids": [
+     "A-00144337"
+    ],
+    "customer_id": "O-000909"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
    "bundle": "bundles/CASE-O-000995.json",
    "cap_assertable": true,
    "capabilities": [
@@ -765,6 +1703,122 @@
     "fin-2020-alert001",
     "fin-2023-alert001"
    ],
+   "bundle": "bundles/CASE-O-001021.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-001021",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Retail Logistics",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "453998",
+    "nationality": null,
+    "nature_of_business": "Retail trade",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "MEDIUM",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 73,
+   "subject": {
+    "account_ids": [
+     "A-00144449"
+    ],
+    "customer_id": "O-001021"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
+   "bundle": "bundles/CASE-O-001046.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-001046",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Offices Trading Co.",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "531210",
+    "nationality": null,
+    "nature_of_business": "Offices of real estate agents",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "LOW",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 114,
+   "subject": {
+    "account_ids": [
+     "A-00144474"
+    ],
+    "customer_id": "O-001046"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
    "bundle": "bundles/CASE-O-001105.json",
    "cap_assertable": true,
    "capabilities": [
@@ -816,6 +1870,180 @@
      "A-00144533"
     ],
     "customer_id": "O-001105"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
+   "bundle": "bundles/CASE-O-001114.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-001114",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "Supermarkets Imports",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "445110",
+    "nationality": null,
+    "nature_of_business": "Supermarkets and grocery stores",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "MEDIUM",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 136,
+   "subject": {
+    "account_ids": [
+     "A-00144542"
+    ],
+    "customer_id": "O-001114"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
+   "bundle": "bundles/CASE-O-001140.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-001140",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "General Trading Co.",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "811111",
+    "nationality": null,
+    "nature_of_business": "General automotive repair",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "MEDIUM",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 160,
+   "subject": {
+    "account_ids": [
+     "A-00144568"
+    ],
+    "customer_id": "O-001140"
+   }
+  },
+  {
+   "advisories": [
+    "fin-2020-alert001",
+    "fin-2023-alert001"
+   ],
+   "bundle": "bundles/CASE-O-001193.json",
+   "cap_assertable": true,
+   "capabilities": [
+    "C2",
+    "C3"
+   ],
+   "case_id": "CASE-O-001193",
+   "confidence": {
+    "combo": "C2+C3",
+    "disposition_basis": "ILLUSTRATIVE — chosen, not measured (the substrate is label-blind)",
+    "disposition_illustrative": {
+     "cleared_pct": 88,
+     "escalated_pct": 12
+    },
+    "gate": "auto-clear",
+    "level": "high",
+    "n_precedent": 12123,
+    "precedent_basis": "shared fired-signal combo frequency over the emitted population (REAL)"
+   },
+   "display": {
+    "kind": "org",
+    "name": "General Ventures",
+    "synthetic_label": true
+   },
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "exemplar": null,
+   "grounds_e2e": false,
+   "kyc": {
+    "adverse_media_flag": false,
+    "cdd_level": "CDD",
+    "expected_monthly_txn_count": null,
+    "expected_monthly_volume_cents": null,
+    "is_person": false,
+    "naics_code": "484110",
+    "nationality": null,
+    "nature_of_business": "General freight trucking, local",
+    "occupation": null,
+    "pep_tier": null,
+    "residency_status": null,
+    "risk_rating": "LOW",
+    "sanctions_flag": false,
+    "source_of_funds": null,
+    "source_of_wealth": null
+   },
+   "n_alerts": 2,
+   "n_txns": 56,
+   "subject": {
+    "account_ids": [
+     "A-00144621"
+    ],
+    "customer_id": "O-001193"
    }
   },
   {
@@ -21756,7 +22984,7 @@
     "name": "Avery Hassan",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -21860,22 +23088,22 @@
    "casework_pin": "aml-casework@bf15535",
    "groundable": 128,
    "measured": true,
-   "total": 355
+   "total": 376
   },
   "emit_command": "PYTHONPATH=<substrate>/src <substrate>/.venv/bin/python -m aml_substrate.cli --clients 40000 --months 2 --seed 0 --emergence --monitor --emit-evidence --emit-screening --out /tmp/sw-wb-run",
   "exemplars": {
    "ambiguous": "CASE-P-0024293",
-   "fp_trap": "CASE-O-000782",
+   "fp_trap": "CASE-O-000909",
    "mule": "CASE-P-0007311",
    "thin": "CASE-P-0000694"
   },
-  "generated_note": "synthetic substrate emission; GROUNDED detection (real advisory-grounded alerts over real KYC), ILLUSTRATIVE dispositions; display identities synthetic. Phase 71: contract v0.3 (related_parties[] BO-graph + SoF); a case = a CUSTOMER (monitoring + C8/C14-screening bundles MERGED) so the profile-inconsistency leg co-occurs with the network leg — the >=2-leg determination becomes reachable. Phase 72: substrate Phase-26 C14 KYC-integrity emission CONSUMED — C14-PURE customers (no ML co-firing) classify kyc_integrity + close the kyc determination from C14 alone (KYC-A1); txn-bearing kyc cases SIGN, txn-less party-leaf cases fail-closed honestly at casework's no-transactions contract (the kyc sign frontier)",
+  "generated_note": "synthetic substrate emission; GROUNDED detection (real advisory-grounded alerts over real KYC), ILLUSTRATIVE dispositions; display identities synthetic. Phase 71: contract v0.3 (related_parties[] BO-graph + SoF); a case = a CUSTOMER (monitoring + C8/C14-screening bundles MERGED) so the profile-inconsistency leg co-occurs with the network leg — the >=2-leg determination becomes reachable. Phase 72: substrate Phase-26 C14 KYC-integrity emission CONSUMED — C14-PURE customers (no ML co-firing) classify kyc_integrity + close the kyc determination from C14 alone (KYC-A1); txn-bearing kyc cases SIGN, txn-less party-leaf cases fail-closed honestly at casework's no-transactions contract (the kyc sign frontier). Phase 75: substrate Phase-27/28 v0.5 CONSUMED (additive over v0.3) — parties carry display_name (real named-identity, not codes) + entity_ref (substrate's RELIABLE declared identity, 100% name-consistent) + identifiers[]; resolution_edges[] are carried as CANDIDATE SHARES_* links the entity spine ADJUDICATES, NOT trusted as merges (substrate's shared strong identifiers are a deliberate collision noise floor + controller-cluster SHARES between DISTINCT entities — the over-merge trap; cross-case memory keys on entity_ref). T1 finding: ledger Phase-75",
   "illustrative": true,
   "population_total": 23651,
   "run_id": "seed0-n40000-m2",
-  "slice_rule": "the rare 4+-capability cases (cap 120) + a 3-cap-band sample (20) + a deterministic sample of the 1-2-cap noise (cap 180) + a combo-coverage pass (>=1 representative of every population combo); sorted by case_id [VISIBLE volume + full combo spread, not detection difficulty — single-signal-separable]",
-  "slice_total": 355,
-  "substrate_head": "f15c241",
+  "slice_rule": "the rare 4+-capability cases (cap 120) + a 3-cap-band sample (20) + a deterministic sample of the 1-2-cap noise (cap 180) + a combo-coverage pass (>=1 representative of every population combo) + a cross-case co-reference pass (>=2 cases of the top 15 re-surfacing entity_refs, so the persistent-entity MEMORY beat is demonstrable on REAL co-reference); sorted by case_id [VISIBLE volume + full combo spread, not detection difficulty — single-signal-separable]",
+  "slice_total": 376,
+  "substrate_head": "fc98b09",
   "substrate_repo": "aml-substrate"
  }
 }

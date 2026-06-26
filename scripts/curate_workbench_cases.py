@@ -54,7 +54,7 @@ CASES_JSON = OUT_DIR / "cases.json"
 
 BADGE = "Illustrative data & outputs"
 SUBSTRATE_REPO = "aml-substrate"
-SUBSTRATE_HEAD = "f15c241"   # Phase 72: substrate Phase 26 — C14 KYC-integrity emission (txn-less party-leaf) on the v0.3 contract
+SUBSTRATE_HEAD = "fc98b09"   # Phase 75: substrate Phase 28 — entity-resolution emission (v0.5: named-identity + party identifiers[] + resolution_edges[], additive over v0.3)
 RUN_ID = "seed0-n40000-m2"
 EMIT_COMMAND = ("PYTHONPATH=<substrate>/src <substrate>/.venv/bin/python -m aml_substrate.cli "
                 "--clients 40000 --months 2 --seed 0 --emergence --monitor --emit-evidence "
@@ -72,6 +72,12 @@ RICH_CAP_FLOOR = 3
 # substrate is single-signal-separable). Deterministic over the same f90bd39-gen population (seed 0).
 DEFAULT_NOISE_CAP = 180
 DEFAULT_RICH_CAP = 120
+# Phase 75 — the cross-case CO-REFERENCE coverage pass: guarantee a bounded number of REAL cross-case
+# co-reference entities (the same entity_ref re-surfacing across cases) are represented in the slice, so the
+# persistent-entity MEMORY beat is demonstrable on real substrate data (capability-richness selection alone
+# scatters co-reference out of a few-hundred-case slice of a ~23k population). Honest: entity_ref==party_id
+# is 100% name-consistent.
+DEFAULT_COREF_ENTITIES_CAP = 15
 
 # Synthetic DISPLAY identity pools (clearly-synthetic labels over the real KYC; deterministic by id).
 _FIRST = ["Avery", "Bao", "Camila", "Dmitri", "Elena", "Farah", "Gabriel", "Hana", "Ibrahim", "Jin",
@@ -178,15 +184,32 @@ def _measure_grounding(bundle_paths: dict, casework_dir: Path) -> dict:
         raise ValueError(f"aml-casework not found at {casework_dir} (set --measure-casework) — needed to "
                          f"MEASURE real end-to-end grounding")
     venv = casework_dir / ".venv" / "bin" / "python"
-    py = str(venv) if venv.exists() else sys.executable
+    # resolve to ABSOLUTE: the subprocess runs with cwd=<casework_dir>, so a relative venv path (from a
+    # relative --measure-casework like `vendor/aml-casework`) would not resolve against the changed cwd.
+    py = str(venv.resolve()) if venv.exists() else sys.executable
     env = dict(os.environ)
     env["PYTHONPATH"] = str(src.resolve()) + os.pathsep + env.get("PYTHONPATH", "")
     out = {}
+    cw_in_dir = Path(tempfile.mkdtemp(prefix="sw-wb-cwview-"))
+    _MERGE_TMP.append(cw_in_dir)
     for cid in sorted(bundle_paths):
         bp = str(Path(bundle_paths[cid]).resolve())
+        # Phase 75: casework validates contract_version against a v0.3-only allowlist (it TOLERATES the
+        # additive v0.5 fields — display_name/entity_ref/identifiers/resolution_edges — "validate the 16
+        # known keys, tolerate unknown extra fields", contract.py). So hand it the v0.3 VIEW: the same bundle
+        # with the version string relabeled to "0.3" (the highest version casework validates). The COMMITTED
+        # bundle stays honestly labeled v0.5; casework grounds the identical v0.3 subset. Casework adding
+        # v0.4/v0.5 to KNOWN_CONTRACT_VERSIONS is its NOT-BUILT side (the confidence-graded-resolution brief).
+        _b = json.loads(Path(bp).read_text(encoding="utf-8"))
+        if _b.get("contract_version") and _b["contract_version"] not in _CASEWORK_VIEW_VERSIONS:
+            _b["contract_version"] = _CASEWORK_VIEW_VERSION
+            cw_bp = str(cw_in_dir / f"{cid}.json")
+            Path(cw_bp).write_text(json.dumps(_b, ensure_ascii=False), encoding="utf-8")
+        else:
+            cw_bp = bp
         with tempfile.NamedTemporaryFile(suffix=".json") as tf:
             try:
-                proc = subprocess.run([py, "-m", "aml_casework.ingest", bp, "--out", tf.name,
+                proc = subprocess.run([py, "-m", "aml_casework.ingest", cw_bp, "--out", tf.name,
                                        "--drafter", "stub"], cwd=str(casework_dir.resolve()), env=env,
                                       capture_output=True, text=True, timeout=120)
             except (OSError, subprocess.SubprocessError) as ex:
@@ -251,7 +274,57 @@ def _merge_bundles(bundles: list) -> dict:
     merged["alerts"] = alerts
     merged["transactions"] = txns
     merged["related_parties"] = rps
+    # Phase 75 (v0.5): union the substrate ER resolution_edges across the customer's bundles. These are
+    # carried as CANDIDATE SHARES_* links (the consumer ADJUDICATES, never trusts-as-merge): substrate emits
+    # status:"resolved" for ANY shared-strong-identifier pair, but its own gen/identity.py plants a deliberate
+    # collision noise floor + controller-cluster SHARES between DISTINCT entities — so a shared identifier is
+    # a SHARES edge, not same-entity. The reliable identity is entity_ref (T1 finding; ledger Phase-75).
+    seen_e, edges = set(), []
+    for b in ordered:
+        for e in (b.get("resolution_edges") or []):
+            key = tuple(sorted(e.get("between") or [])) + (str(e.get("status")),)
+            if key not in seen_e:
+                seen_e.add(key); edges.append(e)
+    if edges:
+        merged["resolution_edges"] = edges
     return merged
+
+
+_STRENGTH_VOCAB = frozenset({"strong", "weak", None})
+
+# Phase 75: the contract versions aml-casework's verifier validates today (it tolerates additive extra fields
+# but rejects an unknown contract_version STRING). A v0.5 bundle is handed to casework relabeled as the v0.3
+# VIEW (the committed bundle stays v0.5; casework grounds the identical v0.3 subset). Casework adding 0.4/0.5
+# is its NOT-BUILT side (docs/casework-confidence-graded-resolution-PLAN-BRIEF.md).
+_CASEWORK_VIEW_VERSIONS = frozenset({"0.1", "0.2", "0.3"})
+_CASEWORK_VIEW_VERSION = "0.3"
+
+
+def validate_v05_bundle(bundle: dict) -> list:
+    """Curate-boundary check on the v0.5 ADDITIVE shape (Phase 75). Returns a list of problems (empty = ok).
+    v0.5 is additive over v0.3 — every check is conditional on the field being present, so a v0.3 bundle
+    (no display_name/identifiers/resolution_edges) passes unchanged. resolution_edges are validated as
+    CANDIDATE SHARES links (referential integrity to the bundle's own entity_refs), NOT trusted as merges."""
+    problems = []
+    parties = (bundle.get("parties") or []) + (bundle.get("related_parties") or [])
+    known = {p.get("entity_ref") or p.get("party_id") for p in parties if (p.get("entity_ref") or p.get("party_id"))}
+    for p in parties:
+        for i in (p.get("identifiers") or []):
+            if not (i.get("kind") and str(i["kind"]).strip()):
+                problems.append(f"identifier missing kind on {p.get('party_id')}")
+            if i.get("strength") not in _STRENGTH_VOCAB:
+                problems.append(f"identifier strength {i.get('strength')!r} not in {sorted(s for s in _STRENGTH_VOCAB if s)}")
+    for e in (bundle.get("resolution_edges") or []):
+        btw = e.get("between")
+        if not (isinstance(btw, list) and len(btw) == 2):
+            problems.append(f"resolution_edge.between must be a 2-list, got {btw!r}")
+            continue
+        for x in btw:
+            if x not in known:
+                problems.append(f"resolution_edge references unknown entity_ref {x!r} (referential integrity)")
+        if not isinstance(e.get("status"), str):
+            problems.append(f"resolution_edge.status must be a string, got {e.get('status')!r}")
+    return problems
 
 
 _MERGE_TMP: list = []  # holds the per-run tempdir reference so it outlives the call (OS cleans /tmp)
@@ -321,6 +394,32 @@ def select_slice(pop: list, combo_freq: dict, *, rich_cap: int, noise_cap: int,
             rep = min(cands, key=lambda e: e["case_id"])
             if rep["case_id"] not in seen_ids:
                 selected.append(rep); seen_ids.add(rep["case_id"]); present.add(combo)
+    selected = sorted(selected, key=lambda e: e["case_id"])
+
+    # Phase 75 — cross-case CO-REFERENCE pass: the persistent-entity MEMORY beat needs the same entity_ref
+    # (substrate's reliable declared identity) to RE-SURFACE across slice cases. Capability-richness selection
+    # scatters co-reference out (a few-hundred-case slice of a ~23k population rarely shares a beneficial owner),
+    # so guarantee a bounded number of REAL co-reference entities are represented — pulling >=2 of each picked
+    # entity's cases into the
+    # slice (a real population property made VISIBLE, like the combo pass; disclosed in slice_rule). entity_ref
+    # ==party_id is 100% name-consistent → honest co-reference, never a fabricated link. Deterministic.
+    ref_cases: dict = {}
+    for e in enriched:
+        b = e["b"]
+        for p in (b.get("parties") or []) + (b.get("related_parties") or []):
+            x = p.get("entity_ref") or p.get("party_id")
+            if x:
+                ref_cases.setdefault(x, set()).add(e["case_id"])
+    coref = sorted(((x, cs) for x, cs in ref_cases.items() if len(cs) >= 2),
+                   key=lambda t: (-len(t[1]), t[0]))[:DEFAULT_COREF_ENTITIES_CAP]
+    by_cid = {e["case_id"]: e for e in enriched}
+    for _x, cs in coref:
+        in_slice = [c for c in sorted(cs) if c in seen_ids]
+        for cid in sorted(cs):
+            if len(in_slice) >= 2:
+                break
+            if cid not in seen_ids and cid in by_cid:
+                selected.append(by_cid[cid]); seen_ids.add(cid); in_slice.append(cid)
     selected = sorted(selected, key=lambda e: e["case_id"])
 
     # exemplars (label-blind, by composition × gate) — from the SELECTED slice so they're in the queue
@@ -413,11 +512,20 @@ def generate(evidence_dir: Path, *, rich_cap: int = DEFAULT_RICH_CAP,
                                "Phase 72: substrate Phase-26 C14 KYC-integrity emission CONSUMED — C14-PURE "
                                "customers (no ML co-firing) classify kyc_integrity + close the kyc determination "
                                "from C14 alone (KYC-A1); txn-bearing kyc cases SIGN, txn-less party-leaf cases "
-                               "fail-closed honestly at casework's no-transactions contract (the kyc sign frontier)"),
+                               "fail-closed honestly at casework's no-transactions contract (the kyc sign frontier). "
+                               "Phase 75: substrate Phase-27/28 v0.5 CONSUMED (additive over v0.3) — parties carry "
+                               "display_name (real named-identity, not codes) + entity_ref (substrate's RELIABLE "
+                               "declared identity, 100% name-consistent) + identifiers[]; resolution_edges[] are "
+                               "carried as CANDIDATE SHARES_* links the entity spine ADJUDICATES, NOT trusted as "
+                               "merges (substrate's shared strong identifiers are a deliberate collision noise floor "
+                               "+ controller-cluster SHARES between DISTINCT entities — the over-merge trap; cross-case "
+                               "memory keys on entity_ref). T1 finding: ledger Phase-75"),
             "slice_rule": (f"the rare 4+-capability cases (cap {rich_cap}) + a 3-cap-band sample (20) + a "
                            f"deterministic sample of the 1-2-cap noise (cap {noise_cap}) + a combo-coverage "
-                           "pass (>=1 representative of every population combo); sorted by case_id "
-                           "[VISIBLE volume + full combo spread, not detection difficulty — single-signal-separable]"),
+                           f"pass (>=1 representative of every population combo) + a cross-case co-reference "
+                           f"pass (>=2 cases of the top {DEFAULT_COREF_ENTITIES_CAP} re-surfacing entity_refs, "
+                           f"so the persistent-entity MEMORY beat is demonstrable on REAL co-reference); sorted "
+                           "by case_id [VISIBLE volume + full combo spread, not detection difficulty — single-signal-separable]"),
             "population_total": len(pop),
             "slice_total": len(cases),
             "coverage": {
@@ -479,8 +587,17 @@ def validate(index: dict, bundles_dir: Path = BUNDLES_DIR) -> list:
         if cid in seen:
             problems.append(f"duplicate case_id {cid}")
         seen.add(cid)
-        if not (bundles_dir / f"{cid}.json").exists():
+        bp = bundles_dir / f"{cid}.json"
+        if not bp.exists():
             problems.append(f"{cid}: vendored bundle missing ({c.get('bundle')})")
+        else:
+            # Phase 75 — the v0.5 ADDITIVE shape is a BUILD-BOUNDARY guard over every committed bundle (a
+            # future emit with a dangling resolution_edge ref / bad strength token fails LOUDLY here, the
+            # 'deterministic validators at boundaries' posture), not just on the selftest fixtures.
+            try:
+                problems += [f"{cid}: {p}" for p in validate_v05_bundle(json.loads(bp.read_text(encoding="utf-8")))]
+            except (OSError, json.JSONDecodeError) as ex:
+                problems.append(f"{cid}: bundle unreadable ({ex})")
         conf = c.get("confidence", {})
         if conf.get("gate") not in _VALID_GATES:
             problems.append(f"{cid}: bad confidence.gate {conf.get('gate')!r}")
@@ -539,12 +656,17 @@ def selftest() -> int:
 
     # _merge_bundles behaviour (the Phase-71 §12-closure mechanism — a case = a customer): union caps +
     # alerts, DEDUPE shared txns, related_parties from the bundle that has them, base = the most-alert bundle.
-    _mon = {"case_id": "C-X", "contract_version": "0.3", "subject": {"customer_id": "X"},
-            "parties": [{"party_id": "X"}], "related_parties": [{"party_id": "O-1", "label": "OWNS"}],
+    # Phase 75 — v0.5 ADDITIVE fixtures: parties carry display_name/entity_ref/identifiers; a top-level
+    # resolution_edges[] is a CANDIDATE SHARES link (carried, never trusted as merge).
+    _mon = {"case_id": "C-X", "contract_version": "0.5", "subject": {"customer_id": "X"},
+            "parties": [{"party_id": "X", "entity_ref": "X", "display_name": "Acme Corp Ltd"}],
+            "related_parties": [{"party_id": "O-1", "entity_ref": "O-1", "label": "OWNS", "display_name": "Jane Doe",
+                                 "identifiers": [{"kind": "email", "value": "j@x.test", "normalized": "j@x.test", "strength": "strong"}]}],
+            "resolution_edges": [{"between": ["O-1", "X"], "status": "resolved", "shared": [{"kind": "email"}]}],
             "alerts": [{"alert_id": "a1", "capability": "C2"}, {"alert_id": "a2", "capability": "C15"}],
             "transactions": [{"txn_id": "t1"}, {"txn_id": "t2"}]}
-    _scr = {"case_id": "C-X", "contract_version": "0.3", "subject": {"customer_id": "X"},
-            "parties": [{"party_id": "X"}], "related_parties": [],
+    _scr = {"case_id": "C-X", "contract_version": "0.5", "subject": {"customer_id": "X"},
+            "parties": [{"party_id": "X", "entity_ref": "X", "display_name": "Acme Corp Ltd"}], "related_parties": [],
             "alerts": [{"alert_id": "a3", "capability": "C8"}],
             "transactions": [{"txn_id": "t2"}, {"txn_id": "t3"}]}   # t2 overlaps -> must dedupe
     _mg = _merge_bundles([_scr, _mon])   # order-independent: base = the most-alert bundle (_mon)
@@ -556,6 +678,20 @@ def selftest() -> int:
         failures.append(f"_merge_bundles should carry related_parties from the bundle that has them, got {_mg['related_parties']}")
     if len(_mg["alerts"]) != 3:
         failures.append(f"_merge_bundles should union all 3 alerts, got {len(_mg['alerts'])}")
+    # v0.5: display_name/entity_ref/identifiers ride along; resolution_edges carried as candidate SHARES
+    if _mg["parties"][0].get("display_name") != "Acme Corp Ltd":
+        failures.append("_merge_bundles should carry v0.5 display_name on parties")
+    if [tuple(e["between"]) for e in _mg.get("resolution_edges", [])] != [("O-1", "X")]:
+        failures.append(f"_merge_bundles should carry the candidate SHARES resolution_edge, got {_mg.get('resolution_edges')}")
+    if validate_v05_bundle(_mg):
+        failures.append(f"validate_v05_bundle rejected a valid v0.5 merged bundle: {validate_v05_bundle(_mg)}")
+    # validate_v05_bundle CATCHES corruption: a dangling resolution_edge ref + a bad strength vocab
+    _bad = {"parties": [{"party_id": "X", "entity_ref": "X",
+                         "identifiers": [{"kind": "email", "value": "e", "strength": "STRONGEST"}]}],
+            "resolution_edges": [{"between": ["X", "GHOST"], "status": "resolved"}]}
+    _bp = validate_v05_bundle(_bad)
+    if not any("unknown entity_ref" in p for p in _bp) or not any("strength" in p for p in _bp):
+        failures.append(f"validate_v05_bundle failed to catch a dangling edge ref / bad strength vocab: {_bp}")
     if _caps(_merge_bundles([_mon])) != ["C15", "C2"]:   # a single-bundle merge is idempotent on caps
         failures.append("_merge_bundles of one bundle should equal that bundle's caps")
 

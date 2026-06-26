@@ -71,6 +71,16 @@
   .gxbtn{font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--muted);background:var(--panel);border:1px solid var(--line2);border-radius:7px;padding:5px 9px;cursor:pointer;transition:.15s}
   .gxbtn:hover{border-color:var(--teal);color:var(--ink)}
 
+  /* persistent entity intelligence panel (Phase 75) — cross-case memory + the SHARES over-merge adjudication */
+  .memctl{border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:0 13px 13px 0;background:linear-gradient(180deg,var(--panel),var(--panel2));padding:15px 18px;margin:0 0 16px;display:grid;gap:12px}
+  .memgrid{display:flex;gap:14px 32px;flex-wrap:wrap}
+  .memstat{display:flex;align-items:flex-start;gap:11px;max-width:340px}
+  .memstat .n{font-family:var(--mono);font-size:26px;color:var(--teal);font-weight:600;line-height:1}
+  .memstat .l{font-size:12px;color:var(--muted);line-height:1.45}.memstat .l b{color:var(--ink)}
+  .memstat .l .faint{color:var(--faint);font-size:11px}
+  .mements{display:flex;gap:7px 9px;flex-wrap:wrap}
+  .mem-ent{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line2);border-radius:7px;padding:4px 9px}.mem-ent b{color:var(--teal)}
+
   /* the adjudication loop control (on the case surface) — grows precedent, re-routes live */
   .adjud{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:12px;border-top:1px solid var(--line);padding-top:11px}
   .adjud .al{font-family:var(--mono);font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.05em}
@@ -317,6 +327,8 @@
   <div class="pop" id="popStrip"><div class="stat"><span class="n">—</span><span class="l">loading population…</span></div></div>
 
   <div id="gatePanel"></div>
+
+  <div id="memoryPanel"></div>
 
   <div class="wb">
     <aside>
@@ -1266,11 +1278,35 @@ function loadQueue(){
     renderPop(); renderQueue();
   }).catch(e=>{ document.getElementById('queue').innerHTML='<div class="err"><b>Cannot load cases</b>'+esc(String(e))+'</div>'; });
 }
+/* ---------- the persistent entity intelligence beat (Phase 75): cross-case memory + SHARES adjudication ---------- */
+function memoryPanelHTML(mem){
+  if(!mem||!mem.substrate) return '';
+  const s=mem.substrate, cf=mem.casefile||{};
+  const coref=(s.xcase_coref_examples||[]).slice(0,5).map(e=>
+    `<span class="mem-ent" title="seen in ${esc((e.cases||[]).join(', '))}">${esc(e.display_name||e.entity_id)} · <b>${esc(e.n_cases)}</b> cases</span>`).join('');
+  const shrink=(cf.cold_targets&&cf.memory_targets)?(cf.cold_targets.length-cf.memory_targets.length):cf.targets_shrink;
+  return `<div class="memctl">
+    <div class="gxh">Persistent entity intelligence · memory across cases</div>
+    <div class="memgrid">
+      <div class="memstat"><span class="n">${esc(s.n_xcase_coref)}</span><span class="l">entities re-surface across 2+ cases — carry their prior context for free<br><span class="faint">real co-reference: substrate's declared identity (entity_ref), not a shared identifier</span></span></div>
+      <div class="memstat"><span class="n">${esc(s.n_over_merge_refused)}</span><span class="l">candidate SHARES links the spine <b>refused to over-merge</b><br><span class="faint">substrate emits "resolved" for shared contact details between DISTINCT entities — kept apart</span></span></div>
+      ${shrink!=null?`<div class="memstat"><span class="n">${esc(shrink)}</span><span class="l">gather target the memory short-circuit closes for <b>${esc(cf.display_name||'a re-surfacing subject')}</b><br><span class="faint">an independent prior STR pre-names the predicate${cf.prior_predicate?' ("'+esc(cf.prior_predicate)+'")':''}</span></span></div>`:''}
+    </div>
+    ${coref?`<div class="mements">${coref}</div>`:''}
+    <div class="illus">${esc(s.qualifier||'')}</div>
+  </div>`;
+}
+function loadMemory(){
+  if(!CFG.memory) return Promise.resolve();
+  return fetch(CFG.memory).then(r=>r.json()).then(d=>{
+    const el=document.getElementById('memoryPanel'); if(el) el.innerHTML=memoryPanelHTML(d);
+  }).catch(()=>{});
+}
 function boot(){
   const bg=document.getElementById('badge'); if(bg) bg.textContent=CFG.badge||'Illustrative data & outputs';
   BACKEND=(CFG.drafter&&CFG.drafter.default)||'stub';
   POLICY=defaultPolicy();
-  setDraftChip(); renderGate(); loadQueue().then(loadGate);
+  setDraftChip(); renderGate(); loadQueue().then(loadGate); loadMemory();
 }
 if(typeof document!=='undefined'&&document.getElementById('queue')) boot();
 
@@ -1282,6 +1318,7 @@ if(typeof module!=='undefined'&&module.exports){ module.exports={
   runGather,applyGather,gatherPanelHTML,gatherResultHTML,gatherGraphHTML,liveGraphLayout,toolLabel,kindLabel,
   boGraphHTML,boRiskTag,ownLabel,edgeLabel,
   capName,qcardHTML,showcaseSurface,scMoneyFlowGraph,scResolutionGraph,scBOGraph,scSignalWalk,scLedger,scDetermination,scOutcome,scFlags,
+  memoryPanelHTML,loadMemory,
   _state:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ,GATHER}),
   _set:(s)=>{ if(s.META!==undefined)META=s.META; if(s.QUEUE!==undefined)QUEUE=s.QUEUE; if(s.SEL!==undefined)SEL=s.SEL; if(s.DETAIL!==undefined)DETAIL=s.DETAIL; if(s.SIGNALS!==undefined)SIGNALS=s.SIGNALS; if(s.RUN!==undefined)RUN=s.RUN; if(s.GATE!==undefined)setGate(s.GATE); if(s.POLICY!==undefined)POLICY=s.POLICY; if(s.ADJ!==undefined)ADJ=s.ADJ; if(s.GATHER!==undefined)GATHER=s.GATHER; },
   paintSurface,renderQueue,renderPop,riskPanel,walkHTML,ledgerHTML,CANON }; }

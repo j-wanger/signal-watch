@@ -13,6 +13,22 @@
 > **Verified sibling pin: `cfd989fe9b1dfeef9fb26988a69867561c22a26c` ("close Phase 15 delivery gate",
 > branch `feat/phase-1a-deterministic-verifiers`), code-verified 2026-06-25.**
 >
+> **PHASE-75 RE-GROUNDING (signal-watch 2026-06-25 — still NOT BUILT; brief stands, all 3 legs open).**
+> Re-verified live: casework advanced `cfd989f` (P15) → **`4a858e6` ("close Phase 16 — replay-assertion
+> semantic reconciliation C2-C5/C15", `feat/phase-1a-deterministic-verifiers`)**. Phase 16 is an INTERNAL
+> conformance harness (directional behavioral reconciliation) — the verdict engine + subprocess contract are
+> BYTE-UNCHANGED, and NONE of this brief's three legs landed: (1) the affirmative-`cleared` verdict still does
+> not exist (`signoff.py` vocab still `("blocked","needs_more_info","signed")` + `("file","both_defensible")`
+> — CW-4 a GAP); (2) `KNOWN_CONTRACT_VERSIONS` is still `("0.1","0.2","0.3")` — no graded-resolution-link
+> consume; (3) no ER-verification (CW-2). Re-pin to `4a858e6` and execute on casework's own lifecycle.
+> **Sequencing note:** CW-4 (the `cleared` path) is INDEPENDENT — exercisable today via the existing
+> subprocess file-handoff (the signal-watch live engine already COMPUTES the affirmative-clear; casework
+> signing it would close the rich-case loop); the graded-resolution consume (§1/CW-2) gates on substrate's
+> Phase-28 ER emission, which now EXISTS at `fc98b09` — but per the Phase-75 T1 finding, substrate's
+> `resolution_edges` over-merge, so a casework graded-resolution consume must ADJUDICATE (key on the declared
+> identity), not trust the naive "resolved" status. **signal-watch has NOTHING to consume from casework this
+> phase** (Phase 15/16 are internal); the casework re-vendor is a no-op and is SKIPPED.
+>
 > **DRIFT NOTE (read first).** The Phase-73 contract was grounded against casework `bf15535` and noted CW-4
 > as "casework's own current-state names this a Phase-15 candidate." At the verified HEAD casework **is at
 > Phase 15** — and the `cleared` path **still does not exist** (the candidate was *named*, not *built*):

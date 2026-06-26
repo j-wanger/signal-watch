@@ -12,6 +12,23 @@
 > **Verified sibling pin: `a3fb02b4efe5ffb564c88cf3fd4931ba672ab63a` ("close Phase 27", branch `main`),
 > code-verified 2026-06-25.**
 >
+> **PHASE-75 RE-GROUNDING (signal-watch 2026-06-25 — the sibling moved; this brief is now LARGELY BUILT).**
+> Re-verified live: substrate advanced `a3fb02b` (P27) → **`fc98b09` ("close Phase 28 — entity-resolution
+> emission", `main`)**, which BUILT most of this brief. v0.5 (additive over v0.3) now emits: **party-level
+> `identifiers[]` `{kind,value,normalized,strength}`** (email/phone="strong", `_load_identifiers`,
+> `monitor/evidence.py`), **`RelationshipEdge.strength`** ("strong"/"weak"/None, `schema/graph.py`), and a
+> top-level **`resolution_edges[]`** `{between,status,shared,reading,cross_institution}`. **Shape divergence
+> from the ask:** the brief specified *transaction-row* counterparty identifiers; substrate delivered
+> *party-level* identifiers + cross-party `resolution_edges` (architecturally sound — it grounds the ER).
+> **The remaining gap (the real one, from the Phase-75 T1 finding):** substrate emits `resolution_edges`
+> (`status:"resolved"`) for ANY shared-strong-identifier pair — including the controller-cluster / noise-floor
+> SHARES between DISTINCT entities — so they **OVER-MERGE** (verified: distinct-named people emitted "resolved").
+> The `strength` tag does NOT yet distinguish genuine-ER from SHARES-noise; that discrimination (the
+> resolver/scorer over `true_entities`) is the OUTSTANDING piece → the deferred Class-J **merge-adjudication
+> console**. signal-watch Phase 75 CONSUMED the built part by keying identity on `entity_ref` (the reliable
+> declared identity) and treating identifiers/resolution_edges as **candidate SHARES links the spine
+> adjudicates, NOT merges** — see `.dev-wiki/assumption-ledger.md` Phase-75 T1 resolution.
+>
 > **DRIFT NOTE (read first).** The Phase-73 contract was grounded against substrate `f15c241` and assumed
 > the identity hooks were *inert* and the SHARES_* injector *flag-off only*. At the verified HEAD the
 > substrate is **substantially further along** than that contract assumed — this brief re-grounds to the

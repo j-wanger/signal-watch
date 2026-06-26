@@ -11,6 +11,15 @@
 > **Verified sibling pin: `a3fb02b4efe5ffb564c88cf3fd4931ba672ab63a` ("close Phase 27", branch `main`),
 > code-verified 2026-06-25.**
 >
+> **PHASE-75 RE-GROUNDING (signal-watch 2026-06-25 — still NOT BUILT; brief stands).** Re-verified live:
+> substrate advanced `a3fb02b` (P27) → **`fc98b09` ("close Phase 28", `main`)**. Phase 27/28 emitted
+> named-identity (v0.4) + entity-resolution (v0.5) — they did **NOT** touch the disposition-label channel:
+> `monitor/measure.py` stays the deliberate sole reader of the latent label fields; no `intended_disposition`
+> / `intended_basis` field exists in the schema. **This brief remains a confirmed GAP** (the premise holds at
+> the new HEAD) — re-pin to `fc98b09` and execute on the sibling's own lifecycle, on the same evaluation-only
+> channel the existing labels ride. It is the natural follow-on to Phase 28's ER emission (a disposition label
+> would let signal-watch's consume MEASURE its gating against a held-out exogenous truth).
+>
 > **DRIFT / verified-state NOTE.** This brief's premise holds at HEAD — and is *cleaner* than assumed:
 > - `compose.py` is **explicitly score-deferred** (`monitor/compose.py:4-6`, decision D3): "no risk
 >   score, numeric rating, or priority is emitted … presenting it as a real risk score is the

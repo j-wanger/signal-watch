@@ -38,7 +38,7 @@ const SCRIPT = html.slice(open + '<script>'.length, close)
   + `toggleSignals,selectCase,pickBackend,applyMessage,runDecision,paintSurface,renderQueue,renderPop,loadQueue,backendLabel,`
   + `liveGate,liveFunnel,setGate,renderGate,loadGate,onKnob,resetGating,doAdjudicate,policyThresholds,`
   + `runGather,applyGather,gatherPanelHTML,gatherResultHTML,gatherGraphHTML,liveGraphLayout,toolLabel,kindLabel,`
-  + `runDetermine,determinePanelHTML,`
+  + `runDetermine,determinePanelHTML,memoryPanelHTML,`
   + `setState:(s)=>{ if('META'in s)META=s.META; if('QUEUE'in s)QUEUE=s.QUEUE; if('FILTER'in s)FILTER=s.FILTER; if('SEL'in s)SEL=s.SEL; if('DETAIL'in s)DETAIL=s.DETAIL; if('SIGNALS'in s)SIGNALS=s.SIGNALS; if('RUN'in s)RUN=s.RUN; if('GATE'in s)setGate(s.GATE); if('POLICY'in s)POLICY=s.POLICY; if('ADJ'in s)ADJ=s.ADJ; if('GATHER'in s)GATHER=s.GATHER; if('DET'in s)DET=s.DET; },`
   + `getState:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ,GATHER,DET})};`;
 
@@ -668,6 +668,25 @@ ok(!/\b(C[0-9]+|ML-A[0-9]+)\b/.test(scqt), 'showcase: queue cards carry no bare 
 CASE_RESPONSE = JSON.parse(JSON.stringify(CF_A)); CASE_RESPONSE.case.display_name = '<img src=x onerror=alert(1)>';
 await T.selectCase('CASE-A');
 ok(ELEMENTS.surf._html.includes('&lt;img src=x') && !/<img src=x onerror/.test(ELEMENTS.surf._html), 'showcase: XSS-escaped via esc()');
+
+/* ---------- the persistent entity intelligence beat (Phase 75): memory + SHARES adjudication ---------- */
+const MEM = { badge:'Illustrative data & outputs',
+  substrate:{ n_cases_scanned:355, n_entities:480, n_xcase_coref:16, n_candidate_shares:27, n_over_merge_refused:27,
+    xcase_coref_examples:[{entity_id:'P-0002246', display_name:'David Côté', n_cases:3, cases:['CASE-O-000036','CASE-P-0000944','CASE-P-0002246']}],
+    over_merge_examples:[{case_id:'CASE-O-000000', between:['P-0000020','P-0000492']}],
+    qualifier:'entity_ref==party_id is substrate\'s declared identity; a shared strong identifier is a SHARES_* edge between DISTINCT entities, never a same-entity merge — the file/determination bar is byte-unchanged.' },
+  casefile:{ display_name:'Vesna Maric', cold_targets:['ML-A4','ML-A5'], memory_targets:['ML-A4'], targets_shrink:1, prior_predicate:'human trafficking' } };
+const memH = T.memoryPanelHTML(MEM);
+ok(/Persistent entity intelligence/.test(memH), 'memory panel: the persistent-entity-intelligence header renders');
+ok(/16<\/span>/.test(memH) && /re-surface across 2\+ cases/.test(memH), 'memory panel: the cross-case co-reference count (real entity_ref co-reference) renders');
+ok(/27<\/span>/.test(memH) && /refused to over-merge/.test(memH), 'memory panel: the SHARES over-merge-refused count renders (the spine kept distinct entities apart)');
+ok(/David Côté/.test(memH) && /3<\/b> cases/.test(memH), 'memory panel: a re-surfacing entity renders with its case reach');
+ok(/Vesna Maric/.test(memH) && /human trafficking/.test(memH) && /1<\/span>/.test(memH), 'memory panel: the casefile memory short-circuit (targets shrink + pre-named predicate) renders');
+ok(/SHARES_\* edge between DISTINCT entities/.test(memH) && /byte-unchanged/.test(memH), 'memory panel: the honesty qualifier (SHARES-not-merge; file bar byte-unchanged) renders');
+ok(T.memoryPanelHTML(null) === '' && T.memoryPanelHTML({}) === '', 'memory panel: empty when there is no payload');
+const memXSS = T.memoryPanelHTML({ substrate:{ n_xcase_coref:1, n_over_merge_refused:0, n_candidate_shares:0, qualifier:'q',
+  xcase_coref_examples:[{entity_id:'E', display_name:'<img src=x onerror=alert(1)>', n_cases:2, cases:['C-1','C-2']}] }, casefile:{} });
+ok(memXSS.includes('&lt;img src=x') && !/<img src=x onerror/.test(memXSS), 'memory panel: XSS — a malicious entity name is esc()-escaped');
 
 /* ---------- summary ---------- */
 console.log(`\n${pass} passed, ${fails.length} failed`);

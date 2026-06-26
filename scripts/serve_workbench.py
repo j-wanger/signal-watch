@@ -717,9 +717,98 @@ def casefile_memory(store_path: str = ":memory:") -> dict:
             "expected": rs.get("expected_memory")}
 
 
+# ---- the REAL-DATA cross-case memory over the curated substrate slice (Phase 75) -----------------
+def _observe_substrate_party(spine, case_id: str, party: dict):
+    """Observe one substrate party into the spine keyed on `entity_ref` — substrate's RELIABLE declared
+    identity (party_id; 100% name-consistent) — the STRONG merge key. Substrate's shared contact identifiers
+    (email/phone) are DEMOTED to `weak` candidate-SHARES links: its deliberate collision noise floor +
+    controller-cluster SHARES make a shared identifier NON-discriminative for identity (the T1 over-merge
+    trap), so they corroborate-and-render but NEVER drive a merge. Returns (entity_ref, observe-result)."""
+    eref = party.get("entity_ref") or party.get("party_id")
+    if not eref:
+        return None
+    idents = [{"kind": "entity_ref", "value": eref, "normalized": eref, "strength": "strong"}]
+    for i in (party.get("identifiers") or []):
+        if i.get("kind") in ("email", "phone") and i.get("normalized"):
+            idents.append({"kind": i["kind"], "value": i.get("value"),
+                           "normalized": i["normalized"], "strength": "weak"})   # candidate SHARES, NOT a merge key
+    res = spine.observe(case_id, {"entity_id": eref, "display_name": party.get("display_name"),
+                                  "kind": "person" if party.get("is_person") else "org",
+                                  "role": party.get("label") or party.get("role"), "identifiers": idents})
+    return eref, res
+
+
+def substrate_memory(store_path: str = ":memory:", limit_cases: int | None = None) -> dict:
+    """The REAL-DATA cross-case memory over the curated substrate slice (Phase 75 — the consume the user picked:
+    "entity_ref memory + SHARES adjudication"). Accumulates every slice case's parties into the spine keyed on
+    entity_ref, then MEASURES two honest numbers:
+      - CO-REFERENCE: entity_refs re-surfacing in 2+ DISTINCT slice cases (the memory-lever signal — substrate
+        ground truth: entity_ref==party_id is 100% name-consistent). A re-surfacing entity carries its prior
+        cross-case context (which cases, what role) for free instead of re-gathering it cold.
+      - SHARES ADJUDICATION: substrate emits `resolution_edges` (status:"resolved") for ANY shared-strong-id
+        pair — but its own gen/identity.py plants those between DISTINCT entities (noise floor + controller
+        clusters). The spine, keyed on entity_ref, keeps those endpoints DISTINCT — it REFUSES the over-merge
+        substrate's naive resolution asserts. We count the candidate SHARES links the spine declined to merge.
+    Every shared identifier stays a SHARES network edge, never a same-entity merge (the Phase-73 'fabricated
+    coincidence' guard). The file/determination bar is UNTOUCHED — this is all spine/provenance path."""
+    index = load_index()
+    cases = index.get("cases", [])
+    if limit_cases:
+        cases = cases[:limit_cases]
+    spine = EntitySpine(store_path)
+    eref2eid: dict = {}
+    edges: list = []                      # (case_id, A, B) for the SHARES adjudication
+    try:
+        for c in cases:
+            cid = c.get("case_id")
+            try:
+                b = json.loads(_bundle_path(cid).read_text(encoding="utf-8"))
+            except (RunError, OSError, json.JSONDecodeError):
+                continue
+            for p in (b.get("parties") or []) + (b.get("related_parties") or []):
+                r = _observe_substrate_party(spine, cid, p)
+                if r:
+                    eref2eid[r[0]] = r[1]["entity_id"]
+            for e in (b.get("resolution_edges") or []):
+                btw = e.get("between") or []
+                if isinstance(btw, list) and len(btw) == 2 and btw[0] != btw[1]:
+                    edges.append((cid, btw[0], btw[1]))
+        # SHARES adjudication: a substrate "resolved" edge between two DISTINCT entity_refs the spine kept apart
+        refused_pairs, refused_examples = set(), []
+        for cid, a, bb in edges:
+            ea, eb = eref2eid.get(a), eref2eid.get(bb)
+            if ea and eb and ea != eb:                 # the spine resolved both, kept them DISTINCT -> refused
+                pair = tuple(sorted((a, bb)))
+                if pair not in refused_pairs:
+                    refused_pairs.add(pair)
+                    if len(refused_examples) < 8:
+                        refused_examples.append({"case_id": cid, "between": list(pair)})
+        reappear = spine.entities_in_multiple_records(min_records=2)
+    finally:
+        spine.close()
+
+    examples = [{"entity_id": e["entity_id"], "display_name": e["display_name"], "n_cases": e["n_records"],
+                 "cases": e["records"][:6]} for e in reappear[:8]]
+    return {
+        "badge": BADGE,
+        "n_cases_scanned": len(cases),
+        "n_entities": len(eref2eid),
+        "n_xcase_coref": len(reappear),                # entity_refs re-surfacing across 2+ slice cases
+        "xcase_coref_examples": examples,
+        "n_candidate_shares": len(refused_pairs),      # distinct substrate "resolved" pairs of DISTINCT entities
+        "n_over_merge_refused": len(refused_pairs),     # ...all kept distinct: the spine refused the naive merge
+        "over_merge_examples": refused_examples,
+        "qualifier": ("synthetic substrate population; entity_ref==party_id is substrate's declared identity "
+                      "(100% name-consistent — real co-reference). A shared strong identifier is a SHARES_* edge "
+                      "between DISTINCT entities (substrate's collision noise floor + controller clusters), NEVER "
+                      "a same-entity merge — the spine keys identity on entity_ref and ADJUDICATES the SHARES "
+                      "candidates (over-merge refused). The file/determination bar is byte-unchanged."),
+    }
+
+
 # ---- the served page -----------------------------------------------------------------------------
 def live_config(env: dict | None = None) -> dict:
-    return {"cases": "/cases", "case": "/case", "gate": "/gate", "adjudicate": "/adjudicate",
+    return {"cases": "/cases", "case": "/case", "gate": "/gate", "adjudicate": "/adjudicate", "memory": "/memory",
             "gather": "/gather", "run": "/run", "determine": "/determine", "health": "/health", "badge": BADGE,
             "policy": GATING_POLICY,              # the routing KNOBS (the live gating panel's defaults)
             "drafter": sc._drafter_config(env)}   # NAMES + booleans only (§4.5), reused verbatim
@@ -779,6 +868,15 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200, {"ok": True, "live": True, "persist": False,
                              "drafter": default_backend(), "backends": available_backends(),
                              "cases": len(load_index().get("cases", []))})
+        elif path == "/memory":
+            # the persistent entity intelligence beat (Phase 75): the REAL-DATA cross-case memory over the
+            # curated substrate slice (entity_ref-keyed co-reference + the SHARES over-merge adjudication) +
+            # the casefile disposition-memory short-circuit (Vesna Maric). Read-only, :memory: store, persists
+            # nothing; the file/determination bar is untouched (spine/provenance path).
+            try:
+                self._json(200, {"badge": BADGE, "substrate": substrate_memory(), "casefile": casefile_memory()})
+            except RunError as ex:
+                self._json(400, {"error": str(ex)})
         else:
             self._json(404, {"error": f"not found: {path}"})
 
@@ -1293,6 +1391,26 @@ def selftest() -> int:
                             f"read_back={_mem['persisted_read_back']} priors={_mem['n_priors']}")
         if _mem["stale_after_split"] is not True:
             failures.append("the stale-prior guard must fire 're-decision required' after an identity split (event-driven)")
+    # ── Phase 75: the REAL-DATA cross-case memory over the curated substrate slice (entity_ref-keyed) ──
+    try:
+        _sm = substrate_memory(os.path.join(_tempfile.mkdtemp(), "sub-spine.duckdb"))
+    except RuntimeError:
+        _sm = None   # duckdb absent — dep-free path skips; .venv runs it fully
+    if _sm is not None:
+        if _sm["n_cases_scanned"] != len(load_index().get("cases", [])):
+            failures.append(f"substrate_memory must scan every slice case, got {_sm['n_cases_scanned']}")
+        for _k in ("n_xcase_coref", "n_over_merge_refused", "n_candidate_shares", "n_entities"):
+            if not isinstance(_sm[_k], int) or _sm[_k] < 0:
+                failures.append(f"substrate_memory.{_k} must be a non-negative int, got {_sm[_k]!r}")
+        # the entity_ref-keyed design REFUSES every substrate "resolved" edge between distinct entity_refs
+        if _sm["n_over_merge_refused"] != _sm["n_candidate_shares"]:
+            failures.append("the spine must refuse EVERY candidate SHARES over-merge (entity_ref keys identity), "
+                            f"got refused={_sm['n_over_merge_refused']} candidates={_sm['n_candidate_shares']}")
+        if "entity_ref" not in _sm["qualifier"] or "SHARES" not in _sm["qualifier"]:
+            failures.append("substrate_memory must carry the honesty qualifier (entity_ref co-reference; SHARES not merged)")
+        for _e in _sm["xcase_coref_examples"]:
+            if not _e.get("cases") or _e.get("n_cases", 0) < 2:
+                failures.append(f"a cross-case co-reference must name 2+ cases: {_e}")
     # the detail carries the full evidence for the render, and the routes DISPATCH the authored ids
     da_det = casefile_detail("CASE-A")
     if da_det["case"]["display_name"] != "Northgate Hospitality Group Inc." or not da_det["case"]["transactions"]:

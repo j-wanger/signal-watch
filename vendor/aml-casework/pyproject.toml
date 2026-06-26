@@ -17,7 +17,10 @@ pythonpath = ["src", "tests"]
 # (it needs anthropic creds + network + is non-deterministic). The deterministic stub-driven suite is the
 # gate; run the demo with `uv run pytest -m integration`.
 addopts = "-m 'not integration'"
-markers = ["integration: real-model/network test; excluded from the default suite (needs anthropic creds)"]
+markers = [
+    "integration: real-model/network test; excluded from the default suite (needs anthropic creds)",
+    "reconciliation: substrate-gated drift tripwire (no creds; honest-skip when ../aml-substrate is absent). Also carries `integration` so the default suite excludes it; `-m reconciliation` selects the tripwires as a group for the advisory reconciliation lane (distinct from the credential/network `integration` drafter demos).",
+]
 
 [build-system]
 requires = ["hatchling"]

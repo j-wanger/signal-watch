@@ -23,6 +23,7 @@ python3 tests/test_signoff.py               # disposition + sign-off refuses ove
 python3 tests/test_chain.py                 # SIGNED slice walks all 6 verifiers + sign-off green
 python3 tests/test_strata.py                # the disposition strata: conflict / data-gap / both-defensible
 python3 tests/test_corpus_drift.py          # advisory: has the live corpus drifted off the vendored pin?
+python -m aml_casework.detector_reconciliation  # advisory: have casework's copied screening constants drifted off substrate?
 python3 tests/test_ingest.py                # the boundary adapter: reconcile a REAL Pillar-1 txn shape
 python3 tests/test_real_ingest_chain.py     # the REAL multi-typology bundle -> signed STR (the chain end-to-end)
 
@@ -74,16 +75,31 @@ recommend-to-file is the human's call (RGS is human).
 - **Disposition** (`record_signoff`) — the system computes `blocked` (any verifier violation),
   `needs_more_info` (clean but a required element is unsubstantiated — a data gap, distinct from blocked,
   with the missing element named), or `signed` (clean + complete). Over a signable record the human may
-  **assign** `file` (validated: a grounded inculpatory suspicion exists) or `both_defensible` (validated:
-  grounded claims on *both* stances); an unvalidated assignment is refused with a reason.
-- **Stance + conflict-both-kept** — each `narrative_claim` carries a `stance` (`inculpatory` | `exculpatory`,
-  default inculpatory); a transaction may be marked `exculpatory: true` (documented counter-evidence). The
-  citation verifier's *conflict-both-kept* check requires the narrative to RETAIN each exculpatory data row
-  (an exculpatory-stance claim must cite it). The system keeps both sides; it never adjudicates the conflict.
+  **assign** `file` (validated: a grounded inculpatory suspicion exists), `both_defensible` (validated:
+  grounded claims on *both* stances), or `cleared` (validated: a grounded exculpatory mitigation **and** no
+  grounded inculpatory predicate — an affirmative documented dismissal, the **mirror of `file`**); an
+  unvalidated assignment is refused with a reason. The system **never auto-clears** — `cleared` is only ever
+  a validated human claim (system-computing it would move a signable exculpatory-only record `signed → cleared`,
+  breaking the additive invariant; an affirmative clear is a suspicion judgment, which stays human).
+- **Stance + conflict-both-kept** — each `narrative_claim` carries a `stance` (`inculpatory` | `exculpatory`
+  | `neutral`, default inculpatory); a transaction may be marked `exculpatory: true` (documented
+  counter-evidence). A `neutral` claim is *mechanism-acknowledgment* — it cites the alert that fired without
+  asserting suspicion either way, so it grounds NEITHER stance (the seam a `cleared` case rides: the
+  narrative acknowledges the mechanism, satisfying the citation verifier's indicator→suspicion completeness
+  connection, without grounding inculpatory). The *conflict-both-kept* check requires the narrative to RETAIN
+  each exculpatory data row (an exculpatory-stance claim must cite it). The system keeps both sides; it never
+  adjudicates the conflict.
 
-The four stratified fixtures isolate the dispositions the thin slice never touched:
+The five stratified fixtures isolate the dispositions the thin slice never touched:
 `case-conflicting-02` (file, both sides retained), `case-data-gap-03` (needs_more_info),
-`case-both-defensible-04` (human-assigned both_defensible), plus the signed thin slice (file).
+`case-both-defensible-04` (human-assigned both_defensible), `case-cleared-05` (human-assigned `cleared` —
+a registered cash business whose structuring alert is affirmatively explained), plus the signed thin slice (file).
+
+The `cleared` disposition is the casework half of signal-watch's **CW-4** (cross-pillar Round 1): the live
+cleared-by-mitigation verdict, casework's affirmative dismissal. signal-watch's leg-based clear is
+*re-expressed* onto casework's stance model (it is not ported unchanged); casework authors its **own**
+synthetic exculpatory bundle (`case-cleared-05`) because signal-watch's Lakeshore casefile is its own format,
+not a casework contract bundle — the Lakeshore narrative is the semantic template only.
 
 Phase 3 — **enforce grounded-to-source.** The other verifiers prove a cited flag resolves to an *in-bundle*
 id; none opened the corpus, so "this flag IS the real regulator text" was *authored*-real — a human copied it
@@ -210,7 +226,10 @@ subprocess** — the boundary stays subprocess + file-handoff, neither pillar im
   of truth — `python -m aml_casework.ingest … --drafter stub` reproduces it byte-for-byte). **Scope
   (documented):** inculpatory-only — an exculpatory bundle would trip conflict-both-kept and fail *closed* to
   `needs_more_info`, visibly; the documented fallback there is a per-case committed-draft replay, never a
-  loosened verifier.
+  loosened verifier. The affirmative-exculpatory / `cleared` path is realized as a **hand-authored** stratum
+  (`case-cleared-05`, the both_defensible pattern — a neutral mechanism claim + a grounded exculpatory
+  mitigation), closing the long-deferred "widen to an exculpatory case" item; the mechanical stub stays
+  inculpatory-only by design.
 - **`--drafter claude` is fail-soft** — a missing key / absent SDK / network error degrades to the
   deterministic stub, reporting `drafter_effective: "stub"` + a note (a live hiccup becomes a
   connected-but-stubbed result, never a broken chain). `ANTHROPIC_API_KEY` is read by the SDK from the
@@ -452,5 +471,125 @@ the live source / a real emission can (the Phase-6 lesson). Phase 14 reconciles 
 **Contract v0.3 (`related_parties[]`).** The vendored bundle carries the additive v0.3 `related_parties[]`
 beneficial-ownership graph block; casework **validates it to the v0.2 bar** (its determination/network consume
 is signal-watch-side) — vendoring the v0.3 bundle incidentally proves that acceptance end-to-end.
+
+## Phase 15 — detector-drift reconciliation harness (kill the copied-formula *silent*-drift class)
+
+Copied-formula drift has bitten twice (C4/C15 in Phase 6, C14 in Phase 14). The structural fix is **not** to
+stop copying — the re-derivation is what gives screening grounding its *specificity* — but to stop the copies
+drifting **silently**. (The alternative, re-grounding screening on `alert.rule` + corpus lineage *only* like
+C7, was rejected: it would collapse C8 into C7 and let a C14 claim ground against a *clean* party — weaker
+grounding, a false-PASS hole.) `detector_reconciliation.py` is the tripwire — a **standalone, sibling-gated**
+check (the 6-verifier chain is byte-unchanged; it is *not* a per-bundle verifier), mirroring
+`corpus_grounding.check_corpus_drift`:
+
+- **Constant drift-check** (`check_detector_drift`) — reads the live substrate detector **source** (`ast`, no
+  import) and reconciles casework's copied screening **constants** against it: the C7 peer-anomaly floor
+  (`business_activity.MIN_INFLOW_CENTS`) and the C8 income-mismatch floor + multiple
+  (`income_mismatch.MIN_INFLOW_CENTS` / `MISMATCH_MONTHLY_MULTIPLE`). A divergence (or a vanished symbol) is a
+  **warning** naming both values; **honest-skip** when the substrate sibling is absent. Run it:
+  `python -m aml_casework.detector_reconciliation`.
+- **Behavioral C14 reconciliation** (`tests/test_c14_behavioral_reconciliation.py`) — the C14 `_kyc_defect`
+  *predicate* is branch logic a literal-diff can't catch, so it is reconciled **behaviorally**: a synthetic
+  KYC-state battery runs through both casework's copied `_screen_c14` and substrate's **real** `_kyc_defect`
+  (in substrate's own env, via subprocess), and the two must agree **verdict-for-verdict**. A default-suite
+  pin (`labeled_c14_battery`) guards the copy against an *independent* reading of the spec; the live
+  equivalence sweep is `@integration` (excluded from the default suite, honest-skip when the sibling is absent).
+
+**Warn, never a build break.** A substrate re-key is a *human* signal (review + re-pin the copy), not a CI
+failure — so detector-logic drift is **surfaced**, not gated: the check returns warnings and
+`check_detector_drift` never raises (the corpus-drift posture).
+
+**This closes Phase-14 A0's correctness leg.** That gate was deferred to "a real C14 emission," but behavioral
+*equivalence* needs only a **runnable predicate** (which the substrate has), not a real emission — correctness
+≠ coverage. Only a real C14 *emission* (for coverage) stays substrate-gated.
+
+**Scope boundary (named, not silent).** The harness covers only the screening copies with a named
+substrate-symbol provenance (C7/C8 constants, the C14 predicate). The replay assertions (C2–C5, C15) were
+Phase-6 *reconciled-to-semantics* — no 1:1 substrate constant to diff — so they are **out of scope** here; the
+broader semantic reconciliation for them is **Phase 16** (below).
+
+## Phase 16 — replay-assertion semantic reconciliation (C2–C5/C15)
+
+The replay assertions C2–C5/C15 are copied re-derivations of substrate's
+`passthrough`/`funnel`/`structuring`/`cash_placement`/`shell` detectors, living in the **signed** chain
+(`replay_bundle`, verifier #2). They carry the same copied-formula drift risk as the screening copies — but a
+constant-diff can't catch them, because there is no 1:1 constant. **The crux:** substrate fires over the *full*
+transaction stream, while casework re-derives over the *cited subset* of an already-fired alert, so the
+constants *legitimately* differ (casework is deliberately looser). A strict verdict-equality would cry wolf on
+every deliberate-looseness case; a constant-diff has nothing to diff.
+
+So the reconciliation invariant is **directional**:
+
+> **substrate-fires ⇒ casework-grounds over the detector's emitted `txn_ids`.**
+
+The dangerous failure is casework being *stricter* than substrate → a **false-block of a real alert** (the
+C14/Phase-14 bug). Two legs, extending the Phase-15 C14 precedent (`tests/_reconciliation.py` +
+`tests/test_replay_reconciliation.py`):
+
+- **Pinned default-CI battery** (`labeled_replay_battery`) — per-cap synthetic `(alert, cited-txns)` cases with
+  expected verdicts reasoned *independently* from the substrate spec; runs without a substrate checkout. The
+  deliberate-looseness cases ground (casework looser/equal over the firing set); the three analyzed latent
+  false-blocks (C3 fan-in, C15 retention band, C4 non-cash channel) are pinned to their reasoned ungrounded
+  verdict.
+- **`@integration` live equivalence** (`test_casework_replay_grounds_substrate_firing_sets`) — subprocesses
+  substrate's **real** detectors over synthetic firing batteries, takes each `Detection`'s emitted `txn_ids` as
+  the cited set, maps them to casework's cited shape via the **production ingest adapter**
+  (`canonicalize_transactions` — the same boundary a real bundle takes, so the mapping is anchored to reality,
+  not invented; cross-checked against a real fixture's `txn_ids` in the default suite), and asserts the
+  directional verdict. Honest-skip when the sibling is absent.
+
+**Safe deliberate divergences** (casework looser → grounds the firing set, never false-blocks): C2 drops the
+detector's credit-before-debit ordering and the $1k floor; C4's 7-day window ⊇ substrate's 24h and it accepts any
+sub-$10k amount (no $7k band); C5 needs ≥3 cited cash deposits vs substrate's ≥5; C3 uses a count proxy.
+
+**Findings (the gap register).** The harness surfaces three latent false-blocks — cases where the substrate
+detector fires but casework re-derives the firing evidence as *ungrounded* (casework stricter):
+
+| Finding | Substrate fires | casework re-derivation | Logic-reachable? | Data-reachable today? | Triage |
+|---------|-----------------|------------------------|------------------|-----------------------|--------|
+| **C15 retention band** | shell throughput up to ≤10% net retention | grounds throughput only ≤5% (+ a generic-name fallback) | **Yes** (confirmed @ substrate `fc98b09`) | **No** — the real conduit (`CASE-P-0010361`) retains **3.57%**, grounded via throughput | **Document** |
+| **C3 fan-in** | fan-IN (≥5 distinct CREDIT sources) *and* fan-out | re-derives fan-**out** only → counts 0 cited outflows | **Yes** (confirmed @ substrate `fc98b09`) | **No** — the real C3 (`CASE-P-0010361`) is fan-**out**, grounded by the count proxy | **Document** |
+| **C4 non-cash channel** | structuring on sub-$10k CREDIT of **any** channel (no channel filter) | grounds only CASH `cash_deposit` → a non-cash structuring alert counts 0 deposits | **Yes** (confirmed @ substrate `fc98b09`: fires on EMT in-band credits) | **No** — the real C4 (`CASE-P-0010361`) cites CASH deposits; substrate's non-cash sub-$10k stream sits below the $7k band | **Document** |
+
+**Triage outcome (triage-per-finding, by reachability).** All three gaps are *logic*-reachable (substrate's real
+detectors fire on them and casework false-blocks — the `@integration` leg confirms it) but **not**
+*data*-reachable against current substrate emission. So they are **documented as latent, not fixed** — the
+6-verifier chain stays **byte-unchanged**. The directional battery + the `@integration` regression are the
+durable **loud** signal: if substrate's emission ever shifts into a gap (a C15 alert at 5–10% retention, a C3
+fan-in, or a non-cash C4 structuring), the live-equivalence test goes red — surfacing the drift instead of
+false-blocking a real SAR silently. (Were a gap to become data-reachable, the fix is a source-faithful
+re-derivation update to `grounding_replay` — e.g. tracking substrate's 10% retention tolerance, or grounding C4
+on sub-$10k CREDIT of any channel — with a verify-first regression.)
+
+**Named structural gaps** (reconciled only at the transaction-observable level, not faked): C3's
+distinct-counterparty count is not re-derivable without `counterparty_ref` on the cited outflows (a cross-pillar
+follow-up); C15's ownership-graph features (circular ownership, shared-address/director overlap) need a
+relationship graph casework does not carry.
+
+## Phase 17 — the reconciliation lane (operationalize the drift tripwires)
+
+Phase 15 + 16 built four sibling-gated drift tripwires — the copied-constant check
+(`detector_reconciliation.check_detector_drift`), the vendored-corpus check (`corpus_grounding.check_corpus_drift`),
+and the two behavioral `@integration` equivalences (C14 `_kyc_defect`, the replay assertions). They only ever fired
+in a manual `pytest -m integration` run with the substrate sibling present. Phase 17 makes them fire as **one
+advisory lane**.
+
+- **The local runner — fires today** (`python -m aml_casework.reconcile`): consolidates the two `DriftReport` checks
+  into one report and exits non-zero **only** on `drift` (the loud signal). It honest-skips when the sibling is
+  absent and **never raises** — a drift is a human *re-pin signal*, not a build break. This is the command to run
+  when you bump the substrate pin.
+- **The `reconciliation` marker** (`pytest -m reconciliation`): selects the three substrate-gated tripwires apart
+  from the credential/network drafter demos that share the overloaded `integration` marker. The three keep
+  `@pytest.mark.integration`, so the **default suite is unchanged** (they stay excluded) — the marker only adds a
+  group selector for the lane.
+- **The hosted lane** (`.github/workflows/reconciliation.yml`): an **advisory, non-required** workflow (nightly
+  schedule + manual `workflow_dispatch`) that checks out the substrate sibling when reachable and runs the runner +
+  `pytest -m reconciliation` under `continue-on-error`. It is **dormant** until both repos are hosted with cross-repo
+  access (today neither has a git remote) and degrades to honest-skip when the sibling is unavailable. The required
+  gate (`ci.yml`: lint / typecheck / test / security) stays **substrate-independent** — drift surfaces out-of-band,
+  it never blocks a merge.
+
+The first live run already earned its keep: it surfaced a real `corpus-drift` — a vendored advisory with no
+counterpart in the live signal-watch corpus — exactly the re-pin signal the lane exists to make loud.
 
 See `.dev-wiki/` for phase/task state and `DESIGN.md` for full doctrine.

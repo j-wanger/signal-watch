@@ -259,10 +259,12 @@ def drafter_for_env(env: dict | None = None) -> str:
 
 
 # ---- the casework consume (subprocess of the SIBLING's OWN CLI; injectable for the offline test) --
-def casework_consume(bundle_path: Path, out_path: Path, drafter: str) -> dict:
-    """Subprocess `python -m aml_casework.ingest <bundle> --out <signed> --drafter <drafter>` and read
-    back the signed SAR it wrote. file-handoff only — NO sibling import. Returns the consume result
-    {drafter, drafter_effective, signed, blocking_violations, narrative_present, completeness}.
+def casework_consume(bundle_path: Path, out_path: Path, drafter: str, *, disposition: str = "file") -> dict:
+    """Subprocess `python -m aml_casework.ingest <bundle> --out <signed> --drafter <drafter>
+    --disposition <disposition>` and read back the signed SAR it wrote. file-handoff only — NO sibling
+    import. `disposition` is the claimed human disposition the CW-4 `cleared` path consumes (default
+    "file"; "cleared" for an affirmative documented dismissal). Returns the consume result
+    {drafter, drafter_effective, signed, disposition, blocking_violations, narrative_present, completeness}.
 
     Until the casework consume CLI lands (aml-casework/docs/consume-cli-PLAN-BRIEF.md), this raises a
     NAMED RunError — the bridge is honestly gated, never faked."""
@@ -276,7 +278,7 @@ def casework_consume(bundle_path: Path, out_path: Path, drafter: str) -> dict:
     env.update(casework_corpus_env())
     env.setdefault("OPENAI_BASE_URL", DEFAULT_OPENAI_BASE)   # the openai drafter defaults to the local model
     cmd = [py, "-m", "aml_casework.ingest", str(bundle_path),
-           "--out", str(out_path), "--drafter", drafter]
+           "--out", str(out_path), "--drafter", drafter, "--disposition", disposition]
     try:
         proc = subprocess.run(cmd, cwd=str(CASEWORK_DIR), env=env, capture_output=True,
                               text=True, timeout=300)
@@ -299,6 +301,7 @@ def _consume_result_from_sar(sar: dict, drafter: str) -> dict:
         "drafter": drafter,
         "drafter_effective": eff,
         "signed": so.get("signed") is True,
+        "disposition": so.get("disposition"),
         "blocking_violations": so.get("blocking_violations", []),
         "narrative_present": bool(s.get("narrative")),
         "completeness": s.get("completeness", {}),

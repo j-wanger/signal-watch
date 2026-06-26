@@ -162,10 +162,16 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    populations in committed `data/merge/cases.json` (curated by `scripts/curate_merge_cases.py` — a
    companion authoring tool that reuses entity_spine + resolution_scorer; build.py imports NEITHER): **66
    REAL candidate SHARES** (the Phase-75 over-merge-refused residual from the v0.5 slice — distinct
-   `entity_ref`s sharing a noise-floor identifier; CONSENSUS-not-ground-truth, NO oracle; substrate emits
-   no ground truth → the `docs/substrate-true-entities-emission-PLAN-BRIEF.md` handoff) + **13 SYNTHETIC
-   scored cases** (from `data/entity-spine/true_entities.json`; a latent-truth `oracle` block spanning the
-   four quadrants real-co-reference / over-merge-trap / fragmentation-gap / correct-rejection). Arc: Queue
+   `entity_ref`s sharing a noise-floor identifier; CONSENSUS-not-ground-truth, NO oracle. **Phase 77 tried
+   to score these against substrate's `true_entities` and STOPPED at the abort rule: substrate's emitted
+   identity clusters are content-addressed `ENT-<entity_ref>` — a 1:1 relabel of the SAME field the spine
+   keys on — so any "score" is CIRCULAR (true-by-construction agreement, zero discriminating signal). Real
+   scoring stays DEFERRED — it needs a genuine identity layer where `entity_ref ≠ cluster` (real same-person
+   fragments / the open-data fork's real collisions): the `docs/substrate-emit-cli-wiring-PLAN-BRIEF.md` +
+   `docs/substrate-open-reference-data-fork-PLAN-BRIEF.md` handoffs**) + **13 SYNTHETIC scored cases** (from
+   `data/entity-spine/true_entities.json`; a latent-truth `oracle` block spanning the four quadrants
+   real-co-reference / over-merge-trap / fragmentation-gap / correct-rejection — genuinely two-sided:
+   resolver verdict and truth DIVERGE, independent of any spine key). Arc: Queue
    (grouped by basis: strong-shared-id / weak / name-only) → Evidence (both records + the shared signal +
    the deterministic spine baseline, NEUTRAL) → Adjudication (uphold-merge / reject-as-SHARES /
    both-defensible / escalate; rationale REQUIRED) → Verdict (the consensus/scored SPLIT: real → no
@@ -327,12 +333,18 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   the additive fields → curate hands it the v0.3 VIEW (committed bundle stays v0.5). The determination bar BYTE-UNCHANGED (the A1
   guard); `scripts/measure_xcase_overlap.py` is the committed measurement.
   Standards: `docs/{resolution-link-schema,identity-grade-grammar,confidence-as-provenance-contract,true-entities-scorer-contract}.md`;
-  sibling EMISSION briefs RE-GROUNDED to live HEADs (Phase 75): substrate@fc98b09 — graded-counterparty-identifiers now LARGELY
-  BUILT (the over-merge gap is the deferred merge-adjudication console), exogenous-disposition-label NOT BUILT; casework@4a858e6 —
-  confidence-graded-resolution NOT BUILT (`cleared`/graded-resolution still open; the re-vendor is a no-op, SKIPPED):
-  `docs/{substrate-graded-counterparty-identifiers,substrate-exogenous-disposition-label,casework-confidence-graded-resolution}-PLAN-BRIEF.md`.
-  Probabilistic/Splink ER + the merge-adjudication Class-J console + graph/Kuzu + the medallion/DuckLake are DEFERRED
-  (named in the standards). Still-deferred substrate-emission gaps
+  sibling EMISSION briefs RE-GROUNDED to live HEADs (Phase 77, CODE-VERIFIED): substrate@f2da3e4 — `true_entities` (P29) +
+  `intended_disposition` (P30) EXIST but are UNWIRED into the substrate CLI (the emit_* fns run only in substrate tests → the
+  `docs/substrate-emit-cli-wiring-PLAN-BRIEF.md` handoff). Phase 77 ATTEMPTED real-merge scoring from the `--identity` parquet and
+  STOPPED at the abort rule: substrate's identity clusters are content-addressed `ENT-<entity_ref>` (1:1 with the spine's own key) →
+  any score is CIRCULAR (true-by-construction). Real merge scoring stays DEFERRED — it needs `entity_ref ≠ cluster` (a genuine
+  identity layer / the `docs/substrate-open-reference-data-fork-PLAN-BRIEF.md` real collisions). casework@b3546d4 — `cleared` (P18)
+  is BUILT and CONSUMED: the workbench DECIDE signs `cleared` end-to-end on the C5-replayable `data/casefile/cleared-demo.bundle.json`;
+  the north-star Lakeshore CASE-B still fails-closed on casework's fan-OUT-only C3 (Lakeshore's C3 is fan-IN) → the
+  `docs/casework-c3-fan-in-PLAN-BRIEF.md` handoff. Briefs: the Phase-74 `docs/{substrate-graded-counterparty-identifiers,substrate-exogenous-disposition-label,casework-confidence-graded-resolution}-PLAN-BRIEF.md`
+  + the Phase-77 `docs/{substrate-emit-cli-wiring,casework-c3-fan-in,substrate-open-reference-data-fork}-PLAN-BRIEF.md` + `docs/cross-pillar-build-order.md`.
+  Probabilistic/Splink ER + graph/Kuzu + the medallion/DuckLake are DEFERRED
+  (named in the standards; the merge-adjudication Class-J console is now BUILT, Phase 76/77). Still-deferred substrate-emission gaps
   (named in `signal_brief`): C1 anticipated-activity (a PRINCIPLED measured null), broader C7, a TF slice — the
   consolidated §12 BRIEF (`docs/substrate-determination-signals-PLAN-BRIEF.md`). The chain workbench
   renders the structured STR's COMPLETENESS (the previously-dropped fields surfaced honest-NULL). Doc:
@@ -340,9 +352,9 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   cross-platform WHEEL under `dist/` + its pinned corpus snapshot under `fixtures/corpus/`); resolution =
   `AML_CASEWORK_DIR` > vendored > `../aml-casework` sibling > GATED; venv python + `SIGNAL_WATCH_CORPUS` are
   resolved CROSS-PLATFORM (`serve_chain.casework_python`/`casework_corpus_env`). The DECIDE consume is still a
-  SUBPROCESS file-handoff — build.py NEVER imports casework, the 8 dists stay byte-frozen (vendoring is
-  DISTRIBUTION, not coupling). Without setup the DECIDE finale is a named GATED stage; the rest of the arc is
-  unaffected. LIVE neural (optional, server-side only, never in the browser §4.5): the `openai` backend
+  SUBPROCESS file-handoff (now passing `--disposition` file|cleared) — build.py NEVER imports casework, the 9 ship
+  dists stay byte-frozen (the workbench is companion-only, touches no dist; vendoring is DISTRIBUTION, not
+  coupling). Without setup the DECIDE finale is a named GATED stage; the rest of the arc is unaffected. LIVE neural (optional, server-side only, never in the browser §4.5): the `openai` backend
   ALWAYS-AVAILABLE, DEFAULTING to a local model at `127.0.0.1:8080` (NO env — `OPENAI_BASE_URL` only OVERRIDES
   the host/port; the auto-default stays stub unless it's set or a claude key) → pick it to drive the GATHER
   loop + DECIDE prose, else the stub (the casework pipeline still shapes/signs/verifies offline; no model →

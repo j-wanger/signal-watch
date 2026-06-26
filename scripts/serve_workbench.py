@@ -224,11 +224,13 @@ def adjudicate(index: dict, session: dict, case_id: str, disposition: str,
 
 
 # ---- the casework consume — a REFUSAL is a disposition outcome, not a crash (the embrace-fail-closed) -
-def casework_consume_wb(bundle_path: Path, out_path: Path, drafter: str) -> dict:
+def casework_consume_wb(bundle_path: Path, out_path: Path, drafter: str, *, disposition: str = "file") -> dict:
     """Like serve_chain.casework_consume, but a casework REFUSAL (it ran + wrote an UNSIGNED SAR because
     the six Class-G verifiers couldn't independently reproduce a signal — the substrate↔casework C3/C15
     divergence) is a RETURNED outcome (signed:false + blocking_violations), NOT a raised error. Only a
-    genuine launch/crash (no SAR written) raises. The verifier is the oracle — we surface its verdict."""
+    genuine launch/crash (no SAR written) raises. The verifier is the oracle — we surface its verdict.
+    `disposition` is the claimed human disposition (default "file"; "cleared" for the CW-4 documented
+    dismissal — Phase 77)."""
     src = sc.CASEWORK_DIR / "src"
     py = sc.casework_python()                     # cross-platform venv resolution (Phase 67)
     if not src.exists():
@@ -238,7 +240,8 @@ def casework_consume_wb(bundle_path: Path, out_path: Path, drafter: str) -> dict
     env["PYTHONPATH"] = str(src) + os.pathsep + env.get("PYTHONPATH", "")
     env.update(sc.casework_corpus_env())
     env.setdefault("OPENAI_BASE_URL", sc.DEFAULT_OPENAI_BASE)   # the openai drafter defaults to the local model
-    cmd = [py, "-m", "aml_casework.ingest", str(bundle_path), "--out", str(out_path), "--drafter", drafter]
+    cmd = [py, "-m", "aml_casework.ingest", str(bundle_path), "--out", str(out_path),
+           "--drafter", drafter, "--disposition", disposition]
     try:
         proc = subprocess.run(cmd, cwd=str(sc.CASEWORK_DIR), env=env, capture_output=True,
                               text=True, timeout=300)
@@ -248,6 +251,26 @@ def casework_consume_wb(bundle_path: Path, out_path: Path, drafter: str) -> dict
         tail = (proc.stderr or proc.stdout or "").strip().splitlines()[-3:]
         raise RunError("casework consume crashed (no SAR written): " + " | ".join(tail))
     return sc._consume_result_from_sar(json.loads(out_path.read_text(encoding="utf-8")), drafter)
+
+
+# ---- Phase 77: the cross-pillar CLEARED consume (casework CW-4 — a documented dismissal SIGNED) -------
+CLEARED_DEMO_BUNDLE = ROOT / "data" / "casefile" / "cleared-demo.bundle.json"
+
+
+def cleared_demo_consume(*, drafter: str = "stub", tmpdir: Path | None = None) -> dict:
+    """Consume casework's CW-4 `cleared` verdict end-to-end on a casework-REPLAYABLE affirmative-clear
+    (a C5 cash-placement case, `data/casefile/cleared-demo.bundle.json`, grounded on the VENDORED
+    fin-2023-alert001:IND-08): hand it to casework with `--disposition cleared` and surface the signed
+    documented dismissal. This is the Phase-77 cross-pillar cleared consume — distinct from the Lakeshore
+    casefile (CASE-B, fan-in C3) which FAILS-CLOSED at casework's grounding_replay (C3 fan-in != casework's
+    fan-out; the documented Phase-16/63 mismatch — a named follow-on, docs/casework-c3-fan-in-PLAN-BRIEF.md;
+    never fabricate a fitting mechanism). Honest-skips (RunError) when the vendored casework is absent."""
+    import tempfile
+    td = tmpdir or Path(tempfile.mkdtemp())
+    out = td / "cleared-demo-signed.json"
+    res = casework_consume_wb(CLEARED_DEMO_BUNDLE, out, drafter, disposition="cleared")
+    return {"badge": BADGE, "case_id": "CASE-CLR-DEMO", "consume": res,
+            "cleared": res.get("signed") is True and res.get("disposition") == "cleared"}
 
 
 # ---- the live finale (REUSES serve_chain's verify + audit; consume = the fail-closed-aware variant) --
@@ -1469,6 +1492,28 @@ def selftest() -> int:
     if _suff["sufficient"] or not any("corroborating leg" in m for m in _suff["missing"]):
         failures.append(f"the ML sufficiency bar should withhold a determination one leg short, got {_suff}")
 
+    # Phase 77 — the cross-pillar CLEARED consume (casework CW-4): the committed C5 cleared-demo bundle is
+    # cleared-shaped (an exculpatory:true txn + a grounded exculpatory claim, NO crime_type, NO inculpatory
+    # claim), and when the vendored casework is present it SIGNS `cleared` end-to-end via --disposition cleared.
+    # Honest-skip (casework-gated) in a bare clone. The Lakeshore casefile (CASE-B) fails-CLOSED here by design
+    # (fan-in C3 != casework's fan-out grounding_replay) — documented; never faked.
+    cdb = json.loads(CLEARED_DEMO_BUNDLE.read_text(encoding="utf-8"))
+    if not any(t.get("exculpatory") for t in cdb.get("transactions", [])):
+        failures.append("cleared-demo bundle must carry an exculpatory:true transaction (the affirmative source)")
+    if any(c.get("stance") == "inculpatory" for c in cdb.get("str_record", {}).get("narrative_claims", [])):
+        failures.append("cleared-demo bundle must carry NO inculpatory claim (the cleared rule)")
+    if "crime_type" in cdb:
+        failures.append("a cleared case asserts no offence — crime_type must be omitted from the bundle")
+    cleared_note = "casework venv absent — skipped"
+    try:
+        cd = cleared_demo_consume()
+        if not cd["cleared"]:
+            failures.append(f"cleared-demo should SIGN `cleared` via casework, got {cd['consume']}")
+        cleared_note = "casework SIGNS `cleared` (C5 replayable; Lakeshore CASE-B fails-closed on fan-in C3)"
+    except RunError as ex:
+        cleared_note = f"casework live consume skipped — {ex}"
+        print(f"  (cleared-demo: {cleared_note})", file=sys.stderr)  # noqa: T201
+
     # the served page substitutes the config placeholder iff workbench.html exists
     page = render_page(live_config())
     if TEMPLATE.exists():
@@ -1492,6 +1537,7 @@ def selftest() -> int:
           f"Phase-73 north-star pair LEADS the queue + COMPUTES live: "
           f"CASE-A {da['verdict']}/{da['presentation_label']} (predicate {da['named_risk']!r}) vs "
           f"CASE-B {db['verdict']}/{db['presentation_label']} (affirmative mitigation) — same signals, opposite outcome; "
+          f"CW-4 cleared consume: {cleared_note}; "
           f"stubbed finale {seq} -> CONNECTED; pillar-status byte-stable)")
     return 0
 

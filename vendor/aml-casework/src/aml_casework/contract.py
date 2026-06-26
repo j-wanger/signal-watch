@@ -37,8 +37,14 @@ STR_REQUIRED_ELEMENTS = [
 # Pillar 1 alerts are inculpatory by construction, so the marker is only carried
 # when a claim argues the other way. exculpatory claims are how conflicting
 # evidence is RETAINED (conflict-both-kept); the system never weighs which side wins.
+# `neutral` (Phase 18) is mechanism-acknowledgment: a claim that cites the alert which
+# fired WITHOUT asserting suspicion either way. It grounds NEITHER stance (citation.
+# grounded_stances only counts inculpatory/exculpatory), so it satisfies the narrative's
+# indicator->suspicion completeness connection without grounding inculpatory — the seam a
+# `cleared` affirmative-dismissal disposition rides. DEFAULT_STANCE is UNCHANGED (an absent
+# stance is still inculpatory); `neutral` is only ever explicit.
 DEFAULT_STANCE = "inculpatory"
-CLAIM_STANCES = ("inculpatory", "exculpatory")
+CLAIM_STANCES = ("inculpatory", "exculpatory", "neutral")
 
 # Contract versions casework has validated its verifiers against. 0.1 is the original
 # cross-pillar contract; 0.2 (aml-substrate Phase 17, evidence.py CONTRACT_VERSION) adds the

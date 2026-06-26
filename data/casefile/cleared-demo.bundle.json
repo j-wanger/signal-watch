@@ -1,0 +1,132 @@
+{
+ "contract_version": "0.1",
+ "illustrative": true,
+ "case_id": "CASE-CLR-DEMO",
+ "subject": {
+  "customer_id": "P-CLR-0001",
+  "name": "Riverside Grocery & Convenience (SYNTHETIC)",
+  "account_ids": [
+   "A-CLR-0001"
+  ]
+ },
+ "transactions": [
+  {
+   "txn_id": "C-CLR-01",
+   "account_id": "A-CLR-0001",
+   "kind": "cash_deposit",
+   "amount_cents": 860000,
+   "ts": "2026-05-18T10:01:00"
+  },
+  {
+   "txn_id": "C-CLR-02",
+   "account_id": "A-CLR-0001",
+   "kind": "cash_deposit",
+   "amount_cents": 910000,
+   "ts": "2026-05-19T10:02:00"
+  },
+  {
+   "txn_id": "C-CLR-03",
+   "account_id": "A-CLR-0001",
+   "kind": "cash_deposit",
+   "amount_cents": 845000,
+   "ts": "2026-05-20T10:03:00"
+  },
+  {
+   "txn_id": "C-CLR-04",
+   "account_id": "A-CLR-0001",
+   "kind": "cash_deposit",
+   "amount_cents": 890000,
+   "ts": "2026-05-21T10:04:00"
+  },
+  {
+   "txn_id": "C-CLR-05",
+   "account_id": "A-CLR-0001",
+   "kind": "cash_deposit",
+   "amount_cents": 1460000,
+   "ts": "2026-05-11T10:05:00",
+   "exculpatory": true,
+   "memo": "CTR filed on this $14,600 cash deposit (SYNTHETIC). Deposits are the documented daily receipts of a registered cash-intensive grocery (license SYNTHETIC-RB-7741), reconciled to point-of-sale records \u2014 an affirmatively established legitimate source of funds."
+  }
+ ],
+ "alerts": [
+  {
+   "alert_id": "AL-CLR-C5",
+   "detector": "CashPlacementDetector",
+   "capability": "C5",
+   "account_id": "A-CLR-0001",
+   "txn_ids": [
+    "C-CLR-01",
+    "C-CLR-02",
+    "C-CLR-03",
+    "C-CLR-04"
+   ],
+   "rule": ">=3 cash deposits within a short window (cash placement)",
+   "grounding": {
+    "signal_id": "fin-2023-alert001:IND-08",
+    "advisory_id": "fin-2023-alert001",
+    "indicator_id": "IND-08",
+    "capability": "C5",
+    "data_source": "D2",
+    "flag": "Extensive use of cash to purchase assets, such as real estate, and to conduct transactions.",
+    "red_flag": "Cash-bought high-value assets / real-estate placement"
+   }
+  }
+ ],
+ "dossier": {
+  "dossier_id": "DS-CLR",
+  "account_id": "A-CLR-0001",
+  "alert_ids": [
+   "AL-CLR-C5"
+  ]
+ },
+ "str_record": {
+  "case_id": "CASE-CLR-DEMO",
+  "subject_account_ids": [
+   "A-CLR-0001"
+  ],
+  "cited_signal_ids": [
+   "fin-2023-alert001:IND-08"
+  ],
+  "cited_txn_ids": [
+   "C-CLR-01",
+   "C-CLR-02",
+   "C-CLR-03",
+   "C-CLR-04",
+   "C-CLR-05"
+  ],
+  "completeness": {
+   "reporting_entity": true,
+   "transaction_details": true,
+   "account_information": true,
+   "subject_information": true,
+   "typology_grounds": true,
+   "grounds_for_suspicion_narrative": true
+  },
+  "narrative": "The customer made multiple cash deposits within a few days, firing a cash-placement (C5) alert. The customer is a registered cash-intensive grocery; the deposits are documented daily receipts reconciled to point-of-sale records, with a CTR filed on the largest \u2014 an affirmatively established legitimate source of funds that clears the alert.",
+  "narrative_claims": [
+   {
+    "text": "Multiple cash deposits within a few days fired a cash-placement alert.",
+    "cites": [
+     "fin-2023-alert001:IND-08",
+     "C-CLR-01",
+     "C-CLR-02",
+     "C-CLR-03",
+     "C-CLR-04"
+    ],
+    "stance": "neutral"
+   },
+   {
+    "text": "The customer is a registered cash-intensive grocery; the deposits are documented daily receipts reconciled to point-of-sale records with a CTR filed on the largest, an affirmatively established legitimate source of funds.",
+    "cites": [
+     "C-CLR-05"
+    ],
+    "stance": "exculpatory"
+   }
+  ]
+ },
+ "provenance": {
+  "synthetic": "Banking data INVENTED. NO real customer/transaction data.",
+  "grounding_is_real": "signal_id + flag + C/D are REAL signal-watch corpus indicators (fin-2023-alert001 IND-08, C5).",
+  "role": "Phase-77 cross-pillar CLEARED consume demo: a casework-REPLAYABLE (C5 cash-placement) affirmative-clear, signed `cleared` via casework's CW-4 verdict. Distinct from the Lakeshore casefile (fan-in C3) which fails-closed at grounding_replay."
+ }
+}

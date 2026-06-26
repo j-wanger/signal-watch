@@ -34,8 +34,11 @@ SYSTEM_DISPOSITIONS = ("blocked", "needs_more_info", "signed")
 # Dispositions a HUMAN assigns over a signable record. The system never weighs suspicion strength
 # (RGS is human); it only validates the assignment is consistent with the grounded evidence (A3):
 # `file` needs a grounded inculpatory suspicion; `both_defensible` needs a grounded claim on BOTH
-# stances. It NEVER judges which side wins.
-HUMAN_DISPOSITIONS = ("file", "both_defensible")
+# stances; `cleared` (Phase 18 — an affirmative documented dismissal) is the MIRROR of `file`: a
+# grounded exculpatory mitigation AND no grounded inculpatory predicate. It NEVER judges which side
+# wins, and it NEVER auto-clears — `cleared` is only ever a validated human claim (system-computing it
+# would move a signable exculpatory-only record's verdict signed->cleared, breaking back-compat).
+HUMAN_DISPOSITIONS = ("file", "both_defensible", "cleared")
 
 
 def _validate_claimed_disposition(bundle: dict[str, Any], claimed: str) -> list[str]:
@@ -49,6 +52,21 @@ def _validate_claimed_disposition(bundle: dict[str, Any], claimed: str) -> list[
     if claimed == "file":
         if "inculpatory" not in stances:
             return ["file requires a grounded inculpatory suspicion, but no inculpatory claim cites a typology signal"]
+        return []
+    if claimed == "cleared":
+        # The MIRROR of file (the affirmative documented dismissal): a grounded exculpatory mitigation
+        # (a benign explanation backed by retained counter-evidence) AND no grounded inculpatory
+        # predicate (a grounded inculpatory suspicion is file / both_defensible, not a clear).
+        if "exculpatory" not in stances:
+            return [
+                "cleared requires a grounded exculpatory mitigation, but no exculpatory claim cites "
+                "retained counter-evidence"
+            ]
+        if "inculpatory" in stances:
+            return [
+                "cleared requires NO grounded inculpatory predicate (a grounded inculpatory suspicion is "
+                "file or both_defensible, not a clear)"
+            ]
         return []
     # both_defensible: an evidence-backed claim on BOTH stances (genuine ambiguity, not adjudicated)
     absent = [stance for stance in ("inculpatory", "exculpatory") if stance not in stances]
@@ -83,8 +101,8 @@ def record_signoff(
     """Assemble the verified state for a named human to sign and classify its disposition.
 
     The SYSTEM computes ``blocked``/``needs_more_info``/``signed`` from the four verifiers + is_complete.
-    When the human supplies a ``claimed_disposition`` (``file``/``both_defensible``), the system
-    VALIDATES it against the grounded evidence — only over a signable record, and only that the
+    When the human supplies a ``claimed_disposition`` (``file``/``both_defensible``/``cleared``), the
+    system VALIDATES it against the grounded evidence — only over a signable record, and only that the
     required stances are present; it never judges which side wins. A validated claim becomes the
     ``disposition``; an unvalidated one is refused (disposition unchanged) with a ``disposition_reasons``
     entry. ``signed`` stays the back-compat boolean for the system being signable.

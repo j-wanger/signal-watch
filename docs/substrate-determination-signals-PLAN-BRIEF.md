@@ -25,6 +25,18 @@
 > (GROUND it so it SIGNs) + [`cross-pillar-sign-path-COHERENCE.md`](cross-pillar-sign-path-COHERENCE.md) (the
 > single shared C14 predicate + the EMIT｜GROUND｜CONSUME table — the anti-drift guard). The `@b53855c` pin in
 > this brief's header is the Phase-24 authoring pin; the work landed at `@443e4a6` (see the remainder briefs).
+>
+> **⚠ PHASE-76 RE-VERIFICATION DRIFT NOTE (signal-watch 2026-06-26 — read before trusting the body).** Two
+> claims in this brief's STATUS + body are now STALE against the live substrate HEAD `fc98b09`, code-verified:
+> (1) "the substrate **emits no C14**" / "**C14 is tautological**" (§"What exists today", lines ~69/81) is
+> **FALSE at HEAD** — substrate flipped `KycIntegrityDetector` into `SCREENING_EMISSION_DETECTORS` at
+> `f15c241` (Phase 26) and now EMITS a party-leaf KYC-state C14 alert (source-of-funds-not-established);
+> signal-watch CONSUMED it in Phase 72 (727 C14-pure customers determine from KYC-A1). The current C14 picture
+> lives in [`casework-c14-kyc-grounding-PLAN-BRIEF.md`](casework-c14-kyc-grounding-PLAN-BRIEF.md) (LANDED) —
+> read that, not the tautology description below. (2) C14 is a KYC-STATE party-leaf screen (txn-less by
+> design), NOT a transaction-behavioral signal — a sibling reader must not re-derive a "behavioral C14"
+> detector from this body; that would be a category error. The §12 *measurement* framing below stands; the
+> C14 *current-state* paragraphs do not.
 
 ## Why this is the handoff (the §12 measurement)
 

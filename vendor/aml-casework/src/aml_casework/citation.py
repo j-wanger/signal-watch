@@ -46,9 +46,12 @@ def grounded_stances(bundle: dict[str, Any]) -> set[str]:
     - ``exculpatory`` iff an exculpatory-stance claim cites an ``exculpatory: true`` transaction (real
       retained counter-evidence).
 
-    A bare ``exculpatory`` label hung on the inculpatory side's own evidence does NOT count. Sign-off
-    uses this to validate a human-assigned ``file`` / ``both_defensible`` against the evidence — never
-    weighing which side wins, only that each claimed stance is evidence-backed."""
+    A bare ``exculpatory`` label hung on the inculpatory side's own evidence does NOT count. A
+    ``neutral`` (mechanism-acknowledgment) claim grounds NEITHER stance by construction — it matches
+    neither branch below — so a ``cleared`` case can cite the alert that fired (satisfying the
+    narrative's suspicion-connection in :func:`verify_citations`) without grounding inculpatory.
+    Sign-off uses this to validate a human-assigned ``file`` / ``both_defensible`` / ``cleared`` against
+    the evidence — never weighing which side wins, only that each claimed stance is evidence-backed."""
     signals = _signal_ids(bundle)
     exculpatory = _exculpatory_evidence_ids(bundle)
     grounded: set[str] = set()

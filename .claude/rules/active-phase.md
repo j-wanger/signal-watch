@@ -11,6 +11,6 @@ Render the over-merge-refused EXAMPLES as a SHARES network on the `/memory` pane
 ## Gates
 - [x] spec — generated this phase (STANDARD ceremony; `specs/phase-75-consume-substrate-v05-er-emission.md`)
 - [x] Direction confirmed by user (2026-06-25; FULL per-planned + measure-first ACCEPTED; all-accept with the A1 measurement precondition — not silent; ledger Phase-75)
-- [ ] Delivery accepted (orchestrator flips this after the commit verifiably lands)
+- [x] Delivery accepted (post-implementation report 2026-06-25; user "Accept"; committed daef922)
 
 Plan [[phases/phase-75-consume-substrate-v05-er-emission]]; ledger Phase-75.

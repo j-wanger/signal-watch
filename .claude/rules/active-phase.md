@@ -1,6 +1,6 @@
 # Active Phase Context
 
-**Phase 76 — *The merge-adjudication Class-J console: the human gate over candidate SHARES links*** (signal-watch-local, STANDARD) — DELIVERED 2026-06-25; delivery acceptance pending commit (gate-state follows git-state). **Run `/dev-plan` for the next phase.**
+**Phase 76 — *The merge-adjudication Class-J console: the human gate over candidate SHARES links*** (signal-watch-local, STANDARD) — DELIVERED + accepted 2026-06-25 (impl commit c28d6a3). **Run `/dev-plan` for the next phase.**
 
 ## Outcome
 Built the 6th SHIP artifact `merge.html`→`dist/merge/index.html` — the blueprint's Class-J merge-adjudication console (sibling to gate/triage), the human gate over the 66 candidate SHARES Phase 75's spine refused to merge. THE NOVELTY: the ONE console with a measurable correctness ORACLE (`true_entities`, synthetic-only). THE HONESTY SEAM: real cases = consensus-no-oracle; synthetic = scored + synthetic-only-qualified; the Verdict SPLITS them. `--check all` now 9 targets (8 byte-frozen except the launcher cascade); build.py imports no spine/scorer/sibling/curate.
@@ -14,6 +14,6 @@ All T1–T6 [x]. T1 (the A1 oracle-expansion CHECKPOINT) PASSED: oracle 8→25 o
 ## Gates
 - [x] spec — `specs/phase-76-merge-adjudication-console.md`
 - [x] Direction confirmed by user (2026-06-25; all-accept, A1 accept-with-shaping)
-- [ ] Delivery accepted (flips post-commit)
+- [x] Delivery accepted (post-implementation report 2026-06-25; impl commit c28d6a3)
 
 Plan [[phases/phase-76-merge-adjudication-console]]; ledger Phase-76.

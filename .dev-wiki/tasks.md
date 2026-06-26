@@ -717,7 +717,7 @@ Direction = the user's directive "check and consume sibling repo work per planne
 
 > Phase 75 — ALL T1-T6 [x] + D1 [x]. STANDARD ceremony (user override of the project LITE default). Delivery accepted by the user 2026-06-25. The T1 measure-first gate caught a MECHANISM error (the planned strong-merge would over-merge substrate's deliberate noise floor) → re-keyed on `entity_ref` + SHARES adjudication (ledger Phase-75 T1 resolution; A3 REVISED). Adversarial review: 0 must-fix, 2 should-fix + 1 nit ALL FIXED, 1 refuted; honesty/A1/boundary all praise. Companion-only — `--check all` 8/8 byte-frozen, build.py imports nothing new, `evidence_requirements.py` byte-unchanged, M8 not regressed.
 
-<!-- gate-log:phase-76 direction=approved delivery=pending -->
+<!-- gate-log:phase-76 direction=approved delivery=accepted -->
 ## Phase 76 — The merge-adjudication Class-J console: the human gate over candidate SHARES links
 
 Direction = the user's "/dev-plan the merge-adjudication console" + Step-9 picks (FORM = a 6th SHIP console dist/merge; SCORED = show synthetic-scored, defer real). STANDARD. Consumes Phase 75's 66 candidate SHARES + the spine's ambiguous-refusal + the synthetic true_entities scorer. The novelty: the ONE gate with a measurable correctness oracle (synthetic-only). Ledger: assumption-ledger.md Phase 76. Existing 8 dists byte-frozen except the sanctioned launcher cascade; build.py validates merge cases at the boundary, imports no spine/scorer/sibling.

@@ -13,6 +13,6 @@
 ## Gates
 - [x] spec (`specs/phase-77-consume-sibling-emissions.md`)
 - [x] Direction confirmed by user (2026-06-26; all-accept, A1 accept-with-shaping → superseded honestly by the circular-oracle finding)
-- [ ] Delivery accepted (flipped by the delivery commit)
+- [x] Delivery accepted (post-implementation report 2026-06-26)
 
 Plan [[phases/phase-77-consume-sibling-emissions]]; ledger Phase-77. **Next: `/dev-plan` for Phase 78** (frontier may be sibling-rooted — see the build-order doc + the 3 briefs).

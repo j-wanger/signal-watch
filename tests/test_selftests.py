@@ -28,6 +28,7 @@ PY_SELFTESTS = [
     "evidence_requirements.py",
     "entity_spine.py",          # Phase 74 — the persistent entity spine (SKIPs gracefully w/o duckdb; full under .venv)
     "resolution_scorer.py",     # Phase 74 — the resolution-correctness scorer + the resolver-input firewall
+    "curate_merge_cases.py",    # Phase 76 — the merge-console case curator (SKIPs gracefully w/o duckdb; full under .venv)
     "serve_workbench.py",
     "serve_chain.py",
     "validate_chain_cases.py",
@@ -44,6 +45,7 @@ MJS_TESTS = [
     "corpus-explorer.test.mjs",
     "gate-console.test.mjs",
     "triage-console.test.mjs",
+    "merge-console.test.mjs",
     "news-stream.test.mjs",
     "chain.test.mjs",
     "workbench.test.mjs",

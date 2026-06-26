@@ -1,0 +1,3041 @@
+{
+  "_note": "FULLY curated merge-adjudication cases (Phase 76; regeneration-only — .venv/bin/python scripts/curate_merge_cases.py). TWO populations kept visibly separate: (1) 66 REAL candidate SHARES from the committed aml-substrate v0.5 slice (@fc98b09) — the spine refused these over-merges (substrate's collision noise floor / controller clusters); CONSENSUS-not-ground-truth, NO oracle (substrate emits no true_entities for the slice — the T5 sibling handoff). (2) the SYNTHETIC scored cases from data/entity-spine/true_entities.json — latent identity clusters behind the resolver-input firewall let the Reveal SHOW, ON SYNTHETIC DATA ONLY, whether the call matched truth. The latent truth rides ONLY each scored case's `oracle` block (revealed post-disposition); the pre-disposition evidence (a/b) carries no truth field. The real population is synthetic (substrate-generated); its shared email identifiers are domain-masked to example.test in this ship artifact so nothing reads as real data (the local-part token, kept, proves the exact collision). Illustrative; no catch-rate/lift is claimed; every scored number is qualified synthetic-only.",
+  "adjudication_grades": [
+    {
+      "desc": "These records are the SAME entity — confirm the merge the resolver proposed (or should have).",
+      "id": "uphold_merge",
+      "label": "Uphold the merge"
+    },
+    {
+      "desc": "Distinct entities that merely share an identifier — keep them apart; record the link as a SHARES edge, not a merge.",
+      "id": "reject_as_shares",
+      "label": "Reject — keep distinct (a SHARES edge)"
+    },
+    {
+      "desc": "The evidence genuinely underdetermines it — record the ambiguity instead of forcing same-or-distinct.",
+      "id": "both_defensible",
+      "label": "Both defensible"
+    },
+    {
+      "desc": "Insufficient to call either way — route to expert / await more identifiers.",
+      "id": "escalate",
+      "label": "Neither — escalate"
+    }
+  ],
+  "badge": "Illustrative data & outputs",
+  "bases": [
+    {
+      "desc": "share an exact email / phone / account number — a strong-kind identifier",
+      "id": "strong",
+      "label": "Strong shared identifier"
+    },
+    {
+      "desc": "share only a weak identifier (an address) — corroborates, never resolves on its own",
+      "id": "weak",
+      "label": "Weak corroboration"
+    },
+    {
+      "desc": "share only a name — no identifier at all",
+      "id": "name",
+      "label": "Name-only"
+    }
+  ],
+  "brand": {
+    "subtitle": "Merge Console · Vision Prototype",
+    "title": "Signal Watch"
+  },
+  "cases": [
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Chloe Campbell",
+        "ref": "P-0002698",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "William Ahmed",
+        "ref": "P-0028187",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0002698-P-0028187",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user100206@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Priya White",
+        "ref": "P-0006082",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Sophia Fortin",
+        "ref": "P-0018567",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0006082-P-0018567",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user118249@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Priya White",
+        "ref": "P-0006082",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mei Clarke",
+        "ref": "P-0022709",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0006082-P-0022709",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user118249@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Noah Nguyen",
+        "ref": "P-0030229",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Marie Gagnon",
+        "ref": "P-0031672",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0030229-P-0031672",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user151951@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Grace Wong",
+        "ref": "P-0018293",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mia Bergeron",
+        "ref": "P-0018489",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0018293-P-0018489",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user152785@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Grace Wong",
+        "ref": "P-0018293",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Liam Hassan",
+        "ref": "P-0025895",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0018293-P-0025895",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user152785@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Isabella O'Brien",
+        "ref": "P-0018087",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Harper Hassan",
+        "ref": "P-0021490",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0018087-P-0021490",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user156275@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Liam Patel",
+        "ref": "P-0014585",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Noah Kumar",
+        "ref": "P-0025233",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014585-P-0025233",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user173516@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Liam Patel",
+        "ref": "P-0014585",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "David Ali",
+        "ref": "P-0036889",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014585-P-0036889",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user173516@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ryan Clarke",
+        "ref": "P-0006434",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Marie Lee",
+        "ref": "P-0026341",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0006434-P-0026341",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user175132@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Nathan Nguyen",
+        "ref": "P-0008107",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Owen Martin",
+        "ref": "P-0009364",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0008107-P-0009364",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user199957@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Nathan Nguyen",
+        "ref": "P-0008107",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Charlotte Fortin",
+        "ref": "P-0031847",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0008107-P-0031847",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user199957@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Jayden Nguyen",
+        "ref": "P-0018173",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Jean Morin",
+        "ref": "P-0022827",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0018173-P-0022827",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user203952@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Jayden Nguyen",
+        "ref": "P-0018173",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Noah Singh",
+        "ref": "P-0023051",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0018173-P-0023051",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user203952@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Olivia Tremblay",
+        "ref": "P-0016037",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Benjamin Singh",
+        "ref": "P-0036998",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0016037-P-0036998",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user221187@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Maya Côté",
+        "ref": "P-0000948",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Owen Lavoie",
+        "ref": "P-0005459",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0000948-P-0005459",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user233008@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Maya Côté",
+        "ref": "P-0000948",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Olivia White",
+        "ref": "P-0017729",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0000948-P-0017729",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user233008@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "David Wong",
+        "ref": "P-0013066",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Liam Roy",
+        "ref": "P-0020130",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0013066-P-0020130",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user2541@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Nathan Campbell",
+        "ref": "P-0012335",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Fatima Lavoie",
+        "ref": "P-0025923",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0012335-P-0025923",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user264794@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Nathan Campbell",
+        "ref": "P-0012335",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Nathan Smith",
+        "ref": "P-0034866",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0012335-P-0034866",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user264794@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "William Gagnon",
+        "ref": "P-0003271",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Jayden Clarke",
+        "ref": "P-0021226",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0003271-P-0021226",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user284194@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Amelia Singh",
+        "ref": "P-0020606",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Owen Bergeron",
+        "ref": "P-0028523",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0020606-P-0028523",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user302651@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Amelia Singh",
+        "ref": "P-0020606",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan Morin",
+        "ref": "P-0032427",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0020606-P-0032427",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user302651@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Sophia O'Brien",
+        "ref": "P-0004262",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan Hassan",
+        "ref": "P-0005631",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0004262-P-0005631",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user327429@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Sophia O'Brien",
+        "ref": "P-0004262",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Zoe Morin",
+        "ref": "P-0019334",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0004262-P-0019334",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user327429@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Priya Nguyen",
+        "ref": "P-0002413",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "David Lavoie",
+        "ref": "P-0028761",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0002413-P-0028761",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user333475@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Sophia Ali",
+        "ref": "P-0001420",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ava Wong",
+        "ref": "P-0004771",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0001420-P-0004771",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user356116@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Sophia Ali",
+        "ref": "P-0001420",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Sophia Liu",
+        "ref": "P-0019968",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0001420-P-0019968",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user356116@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "HIGH",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Fatima Bergeron",
+        "ref": "P-0002459",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Harper Hassan",
+        "ref": "P-0011830",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0002459-P-0011830",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user372071@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "HIGH",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Fatima Bergeron",
+        "ref": "P-0002459",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ryan Bouchard",
+        "ref": "P-0026833",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0002459-P-0026833",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user372071@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Owen Patel",
+        "ref": "P-0008383",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Emma Thompson",
+        "ref": "P-0010571",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0008383-P-0010571",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user383771@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Owen Patel",
+        "ref": "P-0008383",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ryan MacDonald",
+        "ref": "P-0018178",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0008383-P-0018178",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user383771@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Olivia Anderson",
+        "ref": "P-0014455",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan Kumar",
+        "ref": "P-0016119",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014455-P-0016119",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user38844@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Olivia Anderson",
+        "ref": "P-0014455",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "James Wong",
+        "ref": "P-0021740",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014455-P-0021740",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user38844@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Olivia Anderson",
+        "ref": "P-0014455",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Logan Roy",
+        "ref": "P-0034037",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014455-P-0034037",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user38844@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Olivia Anderson",
+        "ref": "P-0014455",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Wei Bouchard",
+        "ref": "P-0038760",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014455-P-0038760",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user38844@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Aria Clarke",
+        "ref": "P-0020482",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mia Bouchard",
+        "ref": "P-0035177",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0020482-P-0035177",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user507063@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Isabella Clarke",
+        "ref": "P-0003710",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan Gagnon",
+        "ref": "P-0024193",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0003710-P-0024193",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user518833@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Isabella Clarke",
+        "ref": "P-0003710",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Logan Johnson",
+        "ref": "P-0030300",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0003710-P-0030300",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user518833@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Charlotte Côté",
+        "ref": "P-0021105",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mei Clarke",
+        "ref": "P-0023937",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0021105-P-0023937",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user532155@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Charlotte Côté",
+        "ref": "P-0021105",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Priya Lee",
+        "ref": "P-0031409",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0021105-P-0031409",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user532155@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "David Murphy",
+        "ref": "P-0003467",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Emma White",
+        "ref": "P-0034438",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0003467-P-0034438",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user53604@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Maya Campbell",
+        "ref": "P-0014474",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ava Roy",
+        "ref": "P-0019042",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014474-P-0019042",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user545450@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Maya Campbell",
+        "ref": "P-0014474",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mei Taylor",
+        "ref": "P-0028818",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014474-P-0028818",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user545450@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan Roy",
+        "ref": "P-0003841",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Logan Campbell",
+        "ref": "P-0009313",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0003841-P-0009313",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user565472@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan Roy",
+        "ref": "P-0003841",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Daniel Chen",
+        "ref": "P-0017178",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0003841-P-0017178",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user565472@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan Roy",
+        "ref": "P-0003841",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Arjun Lee",
+        "ref": "P-0035001",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0003841-P-0035001",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user565472@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Amelia Taylor",
+        "ref": "P-0010572",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "James Smith",
+        "ref": "P-0014975",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0010572-P-0014975",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user571125@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Charlotte Wong",
+        "ref": "P-0015332",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Wei Smith",
+        "ref": "P-0022999",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0015332-P-0022999",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user57767@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Charlotte Wong",
+        "ref": "P-0015332",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Fatima Kumar",
+        "ref": "P-0030647",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0015332-P-0030647",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user57767@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan White",
+        "ref": "P-0002898",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mia Clarke",
+        "ref": "P-0013693",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0002898-P-0013693",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user583044@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan White",
+        "ref": "P-0002898",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Emma Johnson",
+        "ref": "P-0023383",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0002898-P-0023383",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user583044@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan White",
+        "ref": "P-0002898",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Pierre Morin",
+        "ref": "P-0024855",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0002898-P-0024855",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user583044@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Wei Singh",
+        "ref": "P-0000107",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "HIGH",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Olivia Ahmed",
+        "ref": "P-0007873",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0000107-P-0007873",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user58513@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Wei Singh",
+        "ref": "P-0000107",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Emma Liu",
+        "ref": "P-0023398",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0000107-P-0023398",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user58513@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "William Chen",
+        "ref": "P-0001522",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Daniel Lee",
+        "ref": "P-0012187",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0001522-P-0012187",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user59014@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "William Chen",
+        "ref": "P-0001522",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ella Clarke",
+        "ref": "P-0023779",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0001522-P-0023779",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user59014@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "David Taylor",
+        "ref": "P-0015535",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Sophie Brown",
+        "ref": "P-0025177",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0015535-P-0025177",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user602209@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "HIGH",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mohammed O'Brien",
+        "ref": "P-0006575",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Lucas Kumar",
+        "ref": "P-0013592",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0006575-P-0013592",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user605671@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "HIGH",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mohammed O'Brien",
+        "ref": "P-0006575",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Arjun Khan",
+        "ref": "P-0015783",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0006575-P-0015783",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user605671@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Zoe Zhang",
+        "ref": "P-0004758",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mia Patel",
+        "ref": "P-0007608",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0004758-P-0007608",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user618339@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Zoe Zhang",
+        "ref": "P-0004758",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Benjamin Clarke",
+        "ref": "P-0013041",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0004758-P-0013041",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user618339@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Daniel Ahmed",
+        "ref": "P-0030246",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Harper Zhang",
+        "ref": "P-0034814",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0030246-P-0034814",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user63589@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Isabella Wilson",
+        "ref": "P-0024152",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Zoe Roy",
+        "ref": "P-0026764",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0024152-P-0026764",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user642029@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Pierre Thompson",
+        "ref": "P-0007925",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Nathan Liu",
+        "ref": "P-0015473",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0007925-P-0015473",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user8997@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Pierre Thompson",
+        "ref": "P-0007925",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Fatima Khan",
+        "ref": "P-0017100",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0007925-P-0017100",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user8997@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "rtan@dossier.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Robert Tan",
+        "ref": "o15",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "phone",
+            "value": "+1-555-0155"
+          }
+        ],
+        "kind": "person",
+        "name": "Robert Tan",
+        "ref": "o16",
+        "role": "counterparty"
+      },
+      "basis": "name",
+      "id": "syn-o15-o16",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": null,
+      "source": "synthetic-oracle",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "idrago@dossier.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Ivan Drago",
+        "ref": "o21",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "phone",
+            "value": "+1-555-0170"
+          }
+        ],
+        "kind": "person",
+        "name": "Ivan Drago",
+        "ref": "o22",
+        "role": "counterparty"
+      },
+      "basis": "name",
+      "id": "syn-o21-o22",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": null,
+      "source": "synthetic-oracle",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "phone",
+            "value": "+1-555-0173"
+          }
+        ],
+        "kind": "person",
+        "name": "Sam Okafor",
+        "ref": "o7",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [],
+        "kind": "person",
+        "name": "Sam Okafor",
+        "ref": "o8",
+        "role": "counterparty"
+      },
+      "basis": "name",
+      "id": "syn-o7-o8",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": null,
+      "source": "synthetic-oracle",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "jcalder.mgmt@swiftmail.test"
+          }
+        ],
+        "kind": "person",
+        "name": "James Calder",
+        "ref": "o1",
+        "role": "related_party"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "jcalder.mgmt@swiftmail.test"
+          }
+        ],
+        "kind": "person",
+        "name": "James Calder",
+        "ref": "o2",
+        "role": "counterparty"
+      },
+      "basis": "strong",
+      "id": "syn-o1-o2",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "real-co-reference",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "jcaldermgmt@swiftmail.test"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "merged"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "phone",
+            "value": "+1-555-0140"
+          }
+        ],
+        "kind": "person",
+        "name": "Tanya Webb",
+        "ref": "o10",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "phone",
+            "value": "+1-555-0140"
+          }
+        ],
+        "kind": "person",
+        "name": "Marcus Webb",
+        "ref": "o9",
+        "role": "related_party"
+      },
+      "basis": "strong",
+      "id": "syn-o10-o9",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "over-merge-trap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": {
+        "kind": "phone",
+        "value": "15550140"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "merged"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "desk@coworking.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Daniel Cho",
+        "ref": "o11",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "desk@coworking.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Priya Nair",
+        "ref": "o12",
+        "role": "counterparty"
+      },
+      "basis": "strong",
+      "id": "syn-o11-o12",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "over-merge-trap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "desk@coworking.test"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "merged"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "account_number",
+            "value": "ACCT-555-0100-88"
+          }
+        ],
+        "kind": "person",
+        "name": "Lev Petrov",
+        "ref": "o13",
+        "role": "subject"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "account_number",
+            "value": "ACCT-555-0100-88"
+          }
+        ],
+        "kind": "person",
+        "name": "Olga Petrova",
+        "ref": "o14",
+        "role": "counterparty"
+      },
+      "basis": "strong",
+      "id": "syn-o13-o14",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "over-merge-trap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": {
+        "kind": "account_number",
+        "value": "acct555010088"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "merged"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "glin@corp.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Grace Lin",
+        "ref": "o19",
+        "role": "related_party"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "glin@corp.test"
+          }
+        ],
+        "kind": "person",
+        "name": "G. Lin",
+        "ref": "o20",
+        "role": "counterparty"
+      },
+      "basis": "strong",
+      "id": "syn-o19-o20",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "real-co-reference",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "glin@corp.test"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "merged"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "idrago@dossier.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Ivan Drago",
+        "ref": "o21",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "idrago@dossier.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+1-555-0170"
+          }
+        ],
+        "kind": "person",
+        "name": "Ivan Drago",
+        "ref": "o23",
+        "role": "subject"
+      },
+      "basis": "strong",
+      "id": "syn-o21-o23",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "idrago@dossier.test"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "phone",
+            "value": "+1-555-0170"
+          }
+        ],
+        "kind": "person",
+        "name": "Ivan Drago",
+        "ref": "o22",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "idrago@dossier.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+1-555-0170"
+          }
+        ],
+        "kind": "person",
+        "name": "Ivan Drago",
+        "ref": "o23",
+        "role": "subject"
+      },
+      "basis": "strong",
+      "id": "syn-o22-o23",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "phone",
+        "value": "15550170"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "v.maric@quickmail.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Vesna Maric",
+        "ref": "o5",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "v.maric@quickmail.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Vesna Maric",
+        "ref": "o6",
+        "role": "subject"
+      },
+      "basis": "strong",
+      "id": "syn-o5-o6",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "real-co-reference",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "vmaric@quickmail.test"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "merged"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "arahman@dossier.test"
+          },
+          {
+            "kind": "address",
+            "value": "12 Cedar Lane"
+          }
+        ],
+        "kind": "person",
+        "name": "Aisha Rahman",
+        "ref": "o17",
+        "role": "subject"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "phone",
+            "value": "+1-555-0162"
+          },
+          {
+            "kind": "address",
+            "value": "12 Cedar Lane"
+          }
+        ],
+        "kind": "person",
+        "name": "Aisha Rahman",
+        "ref": "o18",
+        "role": "counterparty"
+      },
+      "basis": "weak",
+      "id": "syn-o17-o18",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "address",
+        "value": "12cedarlane"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "address",
+            "value": "88 Maple Ave"
+          },
+          {
+            "kind": "phone",
+            "value": "+1-555-0180"
+          }
+        ],
+        "kind": "person",
+        "name": "Carlos Reyes",
+        "ref": "o24",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "address",
+            "value": "88 Maple Ave"
+          },
+          {
+            "kind": "phone",
+            "value": "+1-555-0181"
+          }
+        ],
+        "kind": "person",
+        "name": "Nadia Haddad",
+        "ref": "o25",
+        "role": "counterparty"
+      },
+      "basis": "weak",
+      "id": "syn-o24-o25",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": {
+        "kind": "address",
+        "value": "88mapleave"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "kept_distinct"
+    }
+  ],
+  "provenance": {
+    "n_real_consensus": 66,
+    "n_synthetic_scored": 13,
+    "slice_cases": 376,
+    "substrate_head": "fc98b09",
+    "synthetic_qualifier": "measured on synthetic clusters; production has no ground truth"
+  }
+}

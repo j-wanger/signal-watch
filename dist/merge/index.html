@@ -1,0 +1,3650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signal Watch — Merge Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* Theme is shared with the corpus explorer / showcase / gate + triage consoles by deliberate copy:
+     this is the SIXTH SEPARATE single-file ship artifact (dist/merge/) — the existing artifacts stay
+     byte-frozen, so merge.html owns its own copy of the dossier theme rather than a build-time include. */
+  :root{
+    --bg:#0c0e12;--bg2:#10131a;--panel:#151922;--panel2:#1a1f29;
+    --line:#262c39;--line2:#333b4c;--ink:#e9ebf0;--muted:#98a2b5;--faint:#6a7388;
+    --signal:#f6a623;--teal:#4fd1c5;--blue:#5aa9ff;--rose:#ef6079;--green:#54c98a;--violet:#b08cff;
+    --accent:var(--signal);
+    --mono:'JetBrains Mono',ui-monospace,monospace;--body:'Archivo',system-ui,sans-serif;--display:'Newsreader',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1100px 560px at 84% -10%,rgba(246,166,35,.08),transparent 60%),
+      radial-gradient(820px 460px at -6% 8%,rgba(90,169,255,.06),transparent 55%),
+      var(--bg);
+    color:var(--ink);font-family:var(--body);line-height:1.5;-webkit-font-smoothing:antialiased;
+    min-height:100vh;display:flex;flex-direction:column}
+  .shell{max-width:1080px;margin:0 auto;width:100%;padding:0 22px;flex:1;display:flex;flex-direction:column}
+
+  /* header (shared chrome) */
+  header{padding:26px 0 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:13px}
+  .brand .mark{width:34px;height:34px;border-radius:9px;border:1px solid var(--signal);display:grid;place-items:center;color:var(--signal);font-family:var(--mono);font-size:15px;box-shadow:0 0 18px -4px var(--signal) inset}
+  .brand .bt{font-family:var(--display);font-size:20px;line-height:1}
+  .brand .bs{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);margin-top:3px}
+  .badge{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--signal);border:1px solid var(--signal);border-radius:999px;padding:6px 12px;background:rgba(246,166,35,.06)}
+
+  /* stepper (shared) */
+  .stepper{display:flex;gap:4px;padding:16px 0;overflow-x:auto}
+  .step{flex:1;min-width:84px;cursor:pointer;opacity:.5;transition:.25s}
+  .step.done,.step.active{opacity:1}
+  .step .sbar{height:3px;border-radius:2px;background:var(--line2);overflow:hidden}
+  .step.done .sbar,.step.active .sbar{background:var(--signal)}
+  .step .sl{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-top:7px;white-space:nowrap}
+  .step.active .sl{color:var(--ink)}
+
+  /* stage (shared) */
+  .stage{flex:1;padding:24px 0 8px;min-height:430px;position:relative}
+  .scene{animation:fade .5s cubic-bezier(.2,.7,.2,1)}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--signal);margin-bottom:10px}
+  h2{font-family:var(--display);font-weight:500;font-size:clamp(24px,4vw,36px);line-height:1.08;letter-spacing:-.01em;margin-bottom:12px}
+  h2 em{font-style:italic;color:var(--muted)}
+  .lead{color:var(--muted);max-width:740px;font-size:15.5px;margin-bottom:22px}
+  .lead b{color:var(--ink)}
+  .framenote{margin-top:20px;font-size:12px;color:var(--faint);border-left:2px solid var(--line2);padding-left:12px;font-style:italic;font-family:var(--display)}
+  .empty{border:1px dashed var(--line2);border-radius:10px;padding:20px;color:var(--muted);font-family:var(--mono);font-size:12px;background:var(--panel);line-height:1.6}
+
+  /* queue — stat tiles + basis groups + candidate rows */
+  .qstats{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 22px}
+  .qstat{border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:14px 18px;min-width:118px;flex:1}
+  .qstat .qsn{font-family:var(--display);font-size:30px;color:var(--signal);line-height:1}
+  .qstat .qsl{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-top:6px}
+  .axhead{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--signal);margin:18px 0 8px;display:flex;gap:8px;align-items:baseline;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .axhead:first-of-type{margin-top:0}
+  .axhead .axn{color:var(--faint)}
+  .qgrid{display:flex;flex-direction:column;gap:6px}
+  .caserow{display:flex;align-items:center;gap:12px;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:10px 13px;cursor:pointer;transition:.18s;opacity:0;transform:translateX(8px);animation:rin .4s forwards}
+  @keyframes rin{to{opacity:1;transform:none}}
+  .caserow:hover{border-color:var(--line2);background:var(--panel2);transform:translateY(-1px)}
+  .caserow .crmain{flex:1;min-width:0}
+  .caserow .crpair{font-size:13.5px;line-height:1.4;color:var(--ink)}
+  .caserow .crpair .vs{color:var(--faint);font-family:var(--mono);font-size:11px;padding:0 6px}
+  .caserow .crmeta{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:3px}
+  .chip{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:6px;white-space:nowrap;border:1px solid currentColor}
+  .chip.scored{color:var(--teal)}
+  .chip.rec{color:var(--green)}
+  .chip.src{color:var(--faint)}
+  .qfoot{margin-top:18px;display:flex;justify-content:flex-end}
+
+  /* evidence — the two records side by side + the shared identifier + the deterministic baseline */
+  .evgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  @media(max-width:820px){.evgrid{grid-template-columns:1fr}}
+  .reccard{border:1px solid var(--line);background:var(--panel);border-radius:12px;overflow:hidden}
+  .reccard .ah{background:var(--panel2);border-bottom:1px solid var(--line);padding:10px 15px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--signal);display:flex;justify-content:space-between;gap:8px}
+  .reccard .ah .rk{color:var(--faint)}
+  .recname{padding:12px 15px 4px;font-family:var(--display);font-size:18px;color:var(--ink)}
+  .arow{display:flex;gap:10px;padding:8px 15px;border-bottom:1px dashed var(--line);font-size:12.5px;align-items:baseline}
+  .arow:last-child{border-bottom:0}
+  .arow .ak{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);flex:none;width:92px;padding-top:2px}
+  .arow .av{color:var(--ink);line-height:1.5;word-break:break-word}
+  .arow .acode{font-family:var(--mono);font-size:11.5px;color:var(--teal);background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+  .sharedbox{grid-column:1/-1;border:1px solid var(--line);border-left:3px solid var(--teal);background:var(--bg2);border-radius:0 11px 11px 0;padding:13px 16px;margin-top:2px}
+  .sharedbox .sl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  .sharedbox .sv{font-family:var(--mono);font-size:13.5px;color:var(--ink);word-break:break-word}
+  .baseline{grid-column:1/-1;border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:12px 15px;font-size:13.5px;color:var(--muted);line-height:1.5}
+  .baseline b{color:var(--ink)}
+  .baseline .vtag{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;border:1px solid currentColor;border-radius:6px;padding:2px 7px;margin-right:6px}
+  .baseline .vtag.distinct{color:var(--rose)}
+  .baseline .vtag.merged{color:var(--violet)}
+
+  /* adjudication — the non-binary graded gate (shared with the gate console) */
+  .grades{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  @media(max-width:680px){.grades{grid-template-columns:1fr}}
+  .gradebtn{text-align:left;border:1px solid var(--line2);background:var(--panel);color:var(--ink);border-radius:10px;padding:12px 14px;cursor:pointer;transition:.18s;font-family:var(--body);display:flex;flex-direction:column;gap:5px}
+  .gradebtn:hover{background:var(--panel2);border-color:var(--line2)}
+  .gradebtn b{font-size:14px;font-weight:600}
+  .gradebtn span{font-size:12px;color:var(--muted);line-height:1.45}
+  .gradebtn.on{border-color:var(--signal);box-shadow:0 0 0 1px var(--signal);background:rgba(246,166,35,.06)}
+  .gradebtn.on b{color:var(--signal)}
+  .ratwrap{margin-bottom:14px}
+  #rationale{width:100%;min-height:92px;resize:vertical;background:var(--bg2);border:1px solid var(--line2);border-radius:10px;color:var(--ink);font-family:var(--body);font-size:13.5px;line-height:1.55;padding:12px 14px}
+  #rationale:focus{outline:none;border-color:var(--signal)}
+  .blockmsg{border:1px solid var(--rose);border-radius:9px;background:rgba(239,96,121,.07);color:var(--rose);font-family:var(--mono);font-size:11.5px;line-height:1.6;padding:10px 13px;margin-bottom:14px}
+  .recact{display:flex;align-items:center;gap:14px}
+  .recnote{font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+  .recdone{border:1px solid var(--line);border-left:3px solid var(--green);background:var(--panel);border-radius:0 11px 11px 0;padding:14px 16px;margin-bottom:16px}
+  .recdone .rg{font-family:var(--mono);font-size:12px;color:var(--green);letter-spacing:.04em;margin-bottom:6px}
+  .recdone .rr{font-size:13px;color:var(--muted);line-height:1.55}
+
+  /* the verdict (reveal) */
+  .revgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch;margin-bottom:6px}
+  @media(max-width:820px){.revgrid{grid-template-columns:1fr}}
+  .revcard{border:1px solid var(--line);background:var(--panel);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+  .revcard.you{border-color:var(--line2);border-left:3px solid var(--signal)}
+  .revcard.oracle{border-left:3px solid var(--teal)}
+  .revcard.consensus{border-left:3px solid var(--faint)}
+  .revcard .ah{background:var(--panel2);border-bottom:1px solid var(--line);padding:10px 15px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--signal)}
+  .revcard.oracle .ah{color:var(--teal)}
+  .revbody{padding:13px 15px;display:flex;flex-direction:column;gap:9px;flex:1}
+  .revgrade{font-family:var(--mono);font-size:13px;color:var(--ink);letter-spacing:.03em}
+  .revrat{font-size:13px;color:var(--muted);line-height:1.55;border-top:1px dashed var(--line);padding-top:9px}
+  .revagree{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--teal);margin-top:auto}
+  .matchtag{font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+  .matchtag.yes{color:var(--green)}
+  .matchtag.no{color:var(--rose)}
+  .matchtag.amb{color:var(--muted)}
+  .qual{font-family:var(--mono);font-size:10px;color:var(--faint);line-height:1.5;margin-top:6px}
+
+  /* session ledger */
+  .ledgrid{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+  .ledrow{display:flex;align-items:baseline;gap:12px;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:10px 13px}
+  .ledrow .lo{font-family:var(--mono);font-size:11px;color:var(--signal);flex:none}
+  .ledrow .lmain{flex:1;min-width:0}
+  .ledrow .lcase{font-family:var(--mono);font-size:11px;color:var(--ink)}
+  .ledrow .lrat{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:3px}
+  .ledrow .lagree{font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--teal);white-space:nowrap}
+  .agbox{border:1px solid var(--line);border-left:3px solid var(--teal);background:var(--bg2);border-radius:0 11px 11px 0;padding:12px 15px;margin-bottom:16px;font-size:13px;color:var(--muted);line-height:1.55}
+  .agbox b{color:var(--ink)}
+  #export{width:100%;min-height:180px;resize:vertical;background:var(--bg2);border:1px solid var(--line2);border-radius:10px;color:var(--muted);font-family:var(--mono);font-size:11px;line-height:1.6;padding:12px 14px}
+  .expact{display:flex;align-items:center;gap:14px;margin-top:10px}
+
+  /* controls (shared) */
+  .controls{border-top:1px solid var(--line);padding:16px 0 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;position:sticky;bottom:0;background:linear-gradient(0deg,var(--bg) 60%,transparent)}
+  .btn{font-family:var(--body);font-weight:600;font-size:14px;border-radius:10px;padding:12px 22px;cursor:pointer;border:1px solid var(--line2);background:var(--panel);color:var(--ink);transition:.18s}
+  .btn:hover{background:var(--panel2)}
+  .btn.primary{background:var(--signal);color:#0c0e12;border-color:var(--signal)}
+  .btn.primary:hover{filter:brightness(1.08)}
+  .btn.ghost{background:none;border-color:transparent;color:var(--muted)}
+  .btn.ghost:hover{color:var(--ink)}
+  .lgroup{display:flex;align-items:center;gap:6px}
+  .keys{color:var(--faint)}
+  .ctrlhint{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  footer{font-family:var(--mono);font-size:10px;color:var(--faint);text-align:center;padding:0 0 18px;line-height:1.7}
+
+  /* Reduced motion: collapse CSS animation/transition to one instant frame. duration:0s (NOT
+     animation:none) so forwards-fill keyframes (.caserow) settle to their visible end state. */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:.001ms!important;
+      animation-iteration-count:1!important;
+      transition-duration:.001ms!important;
+      scroll-behavior:auto!important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <div class="mark">◈</div>
+      <div><div class="bt" id="brandTitle">Signal Watch</div><div class="bs" id="brandSub">Merge Console · Vision Prototype</div></div>
+    </div>
+    <div class="badge" id="badge">Illustrative data &amp; outputs</div>
+  </header>
+
+  <div class="stage" id="stage"></div>
+
+  <div class="controls">
+    <div class="lgroup">
+      <button class="btn ghost" id="back">‹ Back</button>
+      <button class="btn ghost" id="reset" title="Back to the queue (Esc)">↺ Queue</button>
+    </div>
+    <div class="ctrlhint" id="hint"></div>
+    <button class="btn primary" id="next">Next ›</button>
+  </div>
+
+  <footer>
+    Merge console — the Class-J human gate over entity-resolution candidate links · the deterministic spine resolves what it can and REFUSES the ambiguous; you adjudicate the residual · REAL candidate SHARES are consensus-not-ground-truth (substrate emits no ground truth for the slice); the scored dimension is SYNTHETIC ONLY — measured on synthetic clusters, production has no ground truth · grades &amp; rationales are the presenter's, session-only<br>
+    <span class="keys">←/→ navigate · Space advance · Esc back to the queue</span>
+  </footer>
+</div>
+
+<script>
+// The merge-adjudication dataset is injected here at build time (scripts/build.py merge fills the
+// placeholder from data/merge/cases.json — curated by scripts/curate_merge_cases.py). The engine is
+// generic — no case copy lives in code. Records are RAW text; esc() below is the SOLE escaper (the
+// project convention — never pre-escape a record). The latent truth rides ONLY each scored case's
+// `oracle` block, revealed at the verdict screen, never in the pre-adjudication evidence.
+const DATA = {
+  "_note": "FULLY curated merge-adjudication cases (Phase 76; regeneration-only — .venv/bin/python scripts/curate_merge_cases.py). TWO populations kept visibly separate: (1) 66 REAL candidate SHARES from the committed aml-substrate v0.5 slice (@fc98b09) — the spine refused these over-merges (substrate's collision noise floor / controller clusters); CONSENSUS-not-ground-truth, NO oracle (substrate emits no true_entities for the slice — the T5 sibling handoff). (2) the SYNTHETIC scored cases from data/entity-spine/true_entities.json — latent identity clusters behind the resolver-input firewall let the Reveal SHOW, ON SYNTHETIC DATA ONLY, whether the call matched truth. The latent truth rides ONLY each scored case's `oracle` block (revealed post-disposition); the pre-disposition evidence (a/b) carries no truth field. The real population is synthetic (substrate-generated); its shared email identifiers are domain-masked to example.test in this ship artifact so nothing reads as real data (the local-part token, kept, proves the exact collision). Illustrative; no catch-rate/lift is claimed; every scored number is qualified synthetic-only.",
+  "adjudication_grades": [
+    {
+      "desc": "These records are the SAME entity — confirm the merge the resolver proposed (or should have).",
+      "id": "uphold_merge",
+      "label": "Uphold the merge"
+    },
+    {
+      "desc": "Distinct entities that merely share an identifier — keep them apart; record the link as a SHARES edge, not a merge.",
+      "id": "reject_as_shares",
+      "label": "Reject — keep distinct (a SHARES edge)"
+    },
+    {
+      "desc": "The evidence genuinely underdetermines it — record the ambiguity instead of forcing same-or-distinct.",
+      "id": "both_defensible",
+      "label": "Both defensible"
+    },
+    {
+      "desc": "Insufficient to call either way — route to expert / await more identifiers.",
+      "id": "escalate",
+      "label": "Neither — escalate"
+    }
+  ],
+  "badge": "Illustrative data & outputs",
+  "bases": [
+    {
+      "desc": "share an exact email / phone / account number — a strong-kind identifier",
+      "id": "strong",
+      "label": "Strong shared identifier"
+    },
+    {
+      "desc": "share only a weak identifier (an address) — corroborates, never resolves on its own",
+      "id": "weak",
+      "label": "Weak corroboration"
+    },
+    {
+      "desc": "share only a name — no identifier at all",
+      "id": "name",
+      "label": "Name-only"
+    }
+  ],
+  "brand": {
+    "subtitle": "Merge Console · Vision Prototype",
+    "title": "Signal Watch"
+  },
+  "cases": [
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Chloe Campbell",
+        "ref": "P-0002698",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "William Ahmed",
+        "ref": "P-0028187",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0002698-P-0028187",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user100206@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Priya White",
+        "ref": "P-0006082",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Sophia Fortin",
+        "ref": "P-0018567",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0006082-P-0018567",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user118249@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Priya White",
+        "ref": "P-0006082",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mei Clarke",
+        "ref": "P-0022709",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0006082-P-0022709",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user118249@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Noah Nguyen",
+        "ref": "P-0030229",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Marie Gagnon",
+        "ref": "P-0031672",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0030229-P-0031672",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user151951@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Grace Wong",
+        "ref": "P-0018293",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mia Bergeron",
+        "ref": "P-0018489",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0018293-P-0018489",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user152785@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Grace Wong",
+        "ref": "P-0018293",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Liam Hassan",
+        "ref": "P-0025895",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0018293-P-0025895",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user152785@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Isabella O'Brien",
+        "ref": "P-0018087",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Harper Hassan",
+        "ref": "P-0021490",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0018087-P-0021490",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user156275@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Liam Patel",
+        "ref": "P-0014585",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Noah Kumar",
+        "ref": "P-0025233",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014585-P-0025233",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user173516@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Liam Patel",
+        "ref": "P-0014585",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "David Ali",
+        "ref": "P-0036889",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014585-P-0036889",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user173516@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ryan Clarke",
+        "ref": "P-0006434",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Marie Lee",
+        "ref": "P-0026341",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0006434-P-0026341",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user175132@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Nathan Nguyen",
+        "ref": "P-0008107",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Owen Martin",
+        "ref": "P-0009364",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0008107-P-0009364",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user199957@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Nathan Nguyen",
+        "ref": "P-0008107",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Charlotte Fortin",
+        "ref": "P-0031847",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0008107-P-0031847",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user199957@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Jayden Nguyen",
+        "ref": "P-0018173",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Jean Morin",
+        "ref": "P-0022827",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0018173-P-0022827",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user203952@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Jayden Nguyen",
+        "ref": "P-0018173",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Noah Singh",
+        "ref": "P-0023051",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0018173-P-0023051",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user203952@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Olivia Tremblay",
+        "ref": "P-0016037",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Benjamin Singh",
+        "ref": "P-0036998",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0016037-P-0036998",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user221187@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Maya Côté",
+        "ref": "P-0000948",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Owen Lavoie",
+        "ref": "P-0005459",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0000948-P-0005459",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user233008@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Maya Côté",
+        "ref": "P-0000948",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Olivia White",
+        "ref": "P-0017729",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0000948-P-0017729",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user233008@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "David Wong",
+        "ref": "P-0013066",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Liam Roy",
+        "ref": "P-0020130",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0013066-P-0020130",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user2541@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Nathan Campbell",
+        "ref": "P-0012335",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Fatima Lavoie",
+        "ref": "P-0025923",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0012335-P-0025923",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user264794@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Nathan Campbell",
+        "ref": "P-0012335",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Nathan Smith",
+        "ref": "P-0034866",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0012335-P-0034866",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user264794@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "William Gagnon",
+        "ref": "P-0003271",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Jayden Clarke",
+        "ref": "P-0021226",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0003271-P-0021226",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user284194@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Amelia Singh",
+        "ref": "P-0020606",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Owen Bergeron",
+        "ref": "P-0028523",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0020606-P-0028523",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user302651@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Amelia Singh",
+        "ref": "P-0020606",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan Morin",
+        "ref": "P-0032427",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0020606-P-0032427",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user302651@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Sophia O'Brien",
+        "ref": "P-0004262",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan Hassan",
+        "ref": "P-0005631",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0004262-P-0005631",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user327429@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Sophia O'Brien",
+        "ref": "P-0004262",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Zoe Morin",
+        "ref": "P-0019334",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0004262-P-0019334",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user327429@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Priya Nguyen",
+        "ref": "P-0002413",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "David Lavoie",
+        "ref": "P-0028761",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0002413-P-0028761",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user333475@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Sophia Ali",
+        "ref": "P-0001420",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ava Wong",
+        "ref": "P-0004771",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0001420-P-0004771",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user356116@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Sophia Ali",
+        "ref": "P-0001420",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Sophia Liu",
+        "ref": "P-0019968",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0001420-P-0019968",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user356116@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "HIGH",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Fatima Bergeron",
+        "ref": "P-0002459",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Harper Hassan",
+        "ref": "P-0011830",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0002459-P-0011830",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user372071@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "HIGH",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Fatima Bergeron",
+        "ref": "P-0002459",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ryan Bouchard",
+        "ref": "P-0026833",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0002459-P-0026833",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user372071@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Owen Patel",
+        "ref": "P-0008383",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Emma Thompson",
+        "ref": "P-0010571",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0008383-P-0010571",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user383771@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Owen Patel",
+        "ref": "P-0008383",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ryan MacDonald",
+        "ref": "P-0018178",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0008383-P-0018178",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user383771@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Olivia Anderson",
+        "ref": "P-0014455",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan Kumar",
+        "ref": "P-0016119",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014455-P-0016119",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user38844@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Olivia Anderson",
+        "ref": "P-0014455",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "James Wong",
+        "ref": "P-0021740",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014455-P-0021740",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user38844@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Olivia Anderson",
+        "ref": "P-0014455",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Logan Roy",
+        "ref": "P-0034037",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014455-P-0034037",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user38844@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Olivia Anderson",
+        "ref": "P-0014455",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Wei Bouchard",
+        "ref": "P-0038760",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014455-P-0038760",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user38844@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Aria Clarke",
+        "ref": "P-0020482",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mia Bouchard",
+        "ref": "P-0035177",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0020482-P-0035177",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user507063@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Isabella Clarke",
+        "ref": "P-0003710",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan Gagnon",
+        "ref": "P-0024193",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0003710-P-0024193",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user518833@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Isabella Clarke",
+        "ref": "P-0003710",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Logan Johnson",
+        "ref": "P-0030300",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0003710-P-0030300",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user518833@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Charlotte Côté",
+        "ref": "P-0021105",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mei Clarke",
+        "ref": "P-0023937",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0021105-P-0023937",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user532155@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Charlotte Côté",
+        "ref": "P-0021105",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Priya Lee",
+        "ref": "P-0031409",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0021105-P-0031409",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user532155@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "David Murphy",
+        "ref": "P-0003467",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Emma White",
+        "ref": "P-0034438",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0003467-P-0034438",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user53604@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Maya Campbell",
+        "ref": "P-0014474",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ava Roy",
+        "ref": "P-0019042",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014474-P-0019042",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user545450@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Maya Campbell",
+        "ref": "P-0014474",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mei Taylor",
+        "ref": "P-0028818",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0014474-P-0028818",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user545450@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan Roy",
+        "ref": "P-0003841",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Logan Campbell",
+        "ref": "P-0009313",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0003841-P-0009313",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user565472@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan Roy",
+        "ref": "P-0003841",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Daniel Chen",
+        "ref": "P-0017178",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0003841-P-0017178",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user565472@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan Roy",
+        "ref": "P-0003841",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Arjun Lee",
+        "ref": "P-0035001",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0003841-P-0035001",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user565472@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Amelia Taylor",
+        "ref": "P-0010572",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "James Smith",
+        "ref": "P-0014975",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0010572-P-0014975",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user571125@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Charlotte Wong",
+        "ref": "P-0015332",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Wei Smith",
+        "ref": "P-0022999",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0015332-P-0022999",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user57767@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Charlotte Wong",
+        "ref": "P-0015332",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Fatima Kumar",
+        "ref": "P-0030647",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0015332-P-0030647",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user57767@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan White",
+        "ref": "P-0002898",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mia Clarke",
+        "ref": "P-0013693",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0002898-P-0013693",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user583044@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan White",
+        "ref": "P-0002898",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Emma Johnson",
+        "ref": "P-0023383",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0002898-P-0023383",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user583044@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ethan White",
+        "ref": "P-0002898",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Pierre Morin",
+        "ref": "P-0024855",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0002898-P-0024855",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user583044@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Wei Singh",
+        "ref": "P-0000107",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "HIGH",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Olivia Ahmed",
+        "ref": "P-0007873",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0000107-P-0007873",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user58513@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Wei Singh",
+        "ref": "P-0000107",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Emma Liu",
+        "ref": "P-0023398",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0000107-P-0023398",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user58513@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "William Chen",
+        "ref": "P-0001522",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Daniel Lee",
+        "ref": "P-0012187",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0001522-P-0012187",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user59014@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "William Chen",
+        "ref": "P-0001522",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Ella Clarke",
+        "ref": "P-0023779",
+        "role": null
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0001522-P-0023779",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user59014@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "David Taylor",
+        "ref": "P-0015535",
+        "role": null
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Sophie Brown",
+        "ref": "P-0025177",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0015535-P-0025177",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user602209@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "HIGH",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mohammed O'Brien",
+        "ref": "P-0006575",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Lucas Kumar",
+        "ref": "P-0013592",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0006575-P-0013592",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user605671@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "HIGH",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mohammed O'Brien",
+        "ref": "P-0006575",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Arjun Khan",
+        "ref": "P-0015783",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0006575-P-0015783",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user605671@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Zoe Zhang",
+        "ref": "P-0004758",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Mia Patel",
+        "ref": "P-0007608",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0004758-P-0007608",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user618339@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Zoe Zhang",
+        "ref": "P-0004758",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Benjamin Clarke",
+        "ref": "P-0013041",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0004758-P-0013041",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user618339@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Daniel Ahmed",
+        "ref": "P-0030246",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Harper Zhang",
+        "ref": "P-0034814",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0030246-P-0034814",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user63589@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Isabella Wilson",
+        "ref": "P-0024152",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Zoe Roy",
+        "ref": "P-0026764",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0024152-P-0026764",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user642029@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Pierre Thompson",
+        "ref": "P-0007925",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Nathan Liu",
+        "ref": "P-0015473",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0007925-P-0015473",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user8997@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "MEDIUM",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Pierre Thompson",
+        "ref": "P-0007925",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "b": {
+        "attrs": {
+          "adverse_media": false,
+          "pep": "NONE",
+          "risk": "LOW",
+          "sanctions": false
+        },
+        "kind": "person",
+        "name": "Fatima Khan",
+        "ref": "P-0017100",
+        "role": "BENEFICIAL_OWNER"
+      },
+      "basis": "strong",
+      "cross_institution": true,
+      "id": "real-P-0007925-P-0017100",
+      "scored": false,
+      "shared": {
+        "kind": "email",
+        "value": "user8997@example.test"
+      },
+      "source": "substrate-v0.5-slice",
+      "spine_verdict": "kept_distinct",
+      "substrate_claim": "resolved"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "rtan@dossier.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Robert Tan",
+        "ref": "o15",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "phone",
+            "value": "+1-555-0155"
+          }
+        ],
+        "kind": "person",
+        "name": "Robert Tan",
+        "ref": "o16",
+        "role": "counterparty"
+      },
+      "basis": "name",
+      "id": "syn-o15-o16",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": null,
+      "source": "synthetic-oracle",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "idrago@dossier.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Ivan Drago",
+        "ref": "o21",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "phone",
+            "value": "+1-555-0170"
+          }
+        ],
+        "kind": "person",
+        "name": "Ivan Drago",
+        "ref": "o22",
+        "role": "counterparty"
+      },
+      "basis": "name",
+      "id": "syn-o21-o22",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": null,
+      "source": "synthetic-oracle",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "phone",
+            "value": "+1-555-0173"
+          }
+        ],
+        "kind": "person",
+        "name": "Sam Okafor",
+        "ref": "o7",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [],
+        "kind": "person",
+        "name": "Sam Okafor",
+        "ref": "o8",
+        "role": "counterparty"
+      },
+      "basis": "name",
+      "id": "syn-o7-o8",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": null,
+      "source": "synthetic-oracle",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "jcalder.mgmt@swiftmail.test"
+          }
+        ],
+        "kind": "person",
+        "name": "James Calder",
+        "ref": "o1",
+        "role": "related_party"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "jcalder.mgmt@swiftmail.test"
+          }
+        ],
+        "kind": "person",
+        "name": "James Calder",
+        "ref": "o2",
+        "role": "counterparty"
+      },
+      "basis": "strong",
+      "id": "syn-o1-o2",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "real-co-reference",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "jcaldermgmt@swiftmail.test"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "merged"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "phone",
+            "value": "+1-555-0140"
+          }
+        ],
+        "kind": "person",
+        "name": "Tanya Webb",
+        "ref": "o10",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "phone",
+            "value": "+1-555-0140"
+          }
+        ],
+        "kind": "person",
+        "name": "Marcus Webb",
+        "ref": "o9",
+        "role": "related_party"
+      },
+      "basis": "strong",
+      "id": "syn-o10-o9",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "over-merge-trap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": {
+        "kind": "phone",
+        "value": "15550140"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "merged"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "desk@coworking.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Daniel Cho",
+        "ref": "o11",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "desk@coworking.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Priya Nair",
+        "ref": "o12",
+        "role": "counterparty"
+      },
+      "basis": "strong",
+      "id": "syn-o11-o12",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "over-merge-trap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "desk@coworking.test"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "merged"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "account_number",
+            "value": "ACCT-555-0100-88"
+          }
+        ],
+        "kind": "person",
+        "name": "Lev Petrov",
+        "ref": "o13",
+        "role": "subject"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "account_number",
+            "value": "ACCT-555-0100-88"
+          }
+        ],
+        "kind": "person",
+        "name": "Olga Petrova",
+        "ref": "o14",
+        "role": "counterparty"
+      },
+      "basis": "strong",
+      "id": "syn-o13-o14",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "over-merge-trap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": {
+        "kind": "account_number",
+        "value": "acct555010088"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "merged"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "glin@corp.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Grace Lin",
+        "ref": "o19",
+        "role": "related_party"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "glin@corp.test"
+          }
+        ],
+        "kind": "person",
+        "name": "G. Lin",
+        "ref": "o20",
+        "role": "counterparty"
+      },
+      "basis": "strong",
+      "id": "syn-o19-o20",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "real-co-reference",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "glin@corp.test"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "merged"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "idrago@dossier.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Ivan Drago",
+        "ref": "o21",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "idrago@dossier.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+1-555-0170"
+          }
+        ],
+        "kind": "person",
+        "name": "Ivan Drago",
+        "ref": "o23",
+        "role": "subject"
+      },
+      "basis": "strong",
+      "id": "syn-o21-o23",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "idrago@dossier.test"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "phone",
+            "value": "+1-555-0170"
+          }
+        ],
+        "kind": "person",
+        "name": "Ivan Drago",
+        "ref": "o22",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "idrago@dossier.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+1-555-0170"
+          }
+        ],
+        "kind": "person",
+        "name": "Ivan Drago",
+        "ref": "o23",
+        "role": "subject"
+      },
+      "basis": "strong",
+      "id": "syn-o22-o23",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "phone",
+        "value": "15550170"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "v.maric@quickmail.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Vesna Maric",
+        "ref": "o5",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "v.maric@quickmail.test"
+          }
+        ],
+        "kind": "person",
+        "name": "Vesna Maric",
+        "ref": "o6",
+        "role": "subject"
+      },
+      "basis": "strong",
+      "id": "syn-o5-o6",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "real-co-reference",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "vmaric@quickmail.test"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "merged"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "arahman@dossier.test"
+          },
+          {
+            "kind": "address",
+            "value": "12 Cedar Lane"
+          }
+        ],
+        "kind": "person",
+        "name": "Aisha Rahman",
+        "ref": "o17",
+        "role": "subject"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "phone",
+            "value": "+1-555-0162"
+          },
+          {
+            "kind": "address",
+            "value": "12 Cedar Lane"
+          }
+        ],
+        "kind": "person",
+        "name": "Aisha Rahman",
+        "ref": "o18",
+        "role": "counterparty"
+      },
+      "basis": "weak",
+      "id": "syn-o17-o18",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "address",
+        "value": "12cedarlane"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "address",
+            "value": "88 Maple Ave"
+          },
+          {
+            "kind": "phone",
+            "value": "+1-555-0180"
+          }
+        ],
+        "kind": "person",
+        "name": "Carlos Reyes",
+        "ref": "o24",
+        "role": "counterparty"
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "address",
+            "value": "88 Maple Ave"
+          },
+          {
+            "kind": "phone",
+            "value": "+1-555-0181"
+          }
+        ],
+        "kind": "person",
+        "name": "Nadia Haddad",
+        "ref": "o25",
+        "role": "counterparty"
+      },
+      "basis": "weak",
+      "id": "syn-o24-o25",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on synthetic clusters; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": {
+        "kind": "address",
+        "value": "88mapleave"
+      },
+      "source": "synthetic-oracle",
+      "spine_verdict": "kept_distinct"
+    }
+  ],
+  "provenance": {
+    "n_real_consensus": 66,
+    "n_synthetic_scored": 13,
+    "slice_cases": 376,
+    "substrate_head": "fc98b09",
+    "synthetic_qualifier": "measured on synthetic clusters; production has no ground truth"
+  }
+};
+
+const BRAND=(DATA&&typeof DATA.brand==='object'&&DATA.brand)||{};
+const CASES=(DATA&&Array.isArray(DATA.cases))?DATA.cases.filter(c=>c&&typeof c==='object'&&c.id):[];
+const GRADES=(DATA&&Array.isArray(DATA.adjudication_grades))?DATA.adjudication_grades:[];
+const GRADE_BY={};GRADES.forEach(g=>{if(g&&g.id)GRADE_BY[g.id]=g;});
+const BASES=(DATA&&Array.isArray(DATA.bases))?DATA.bases:[];
+const BASIS_BY={};BASES.forEach(b=>{if(b&&b.id)BASIS_BY[b.id]=b;});
+const PROV=(DATA&&typeof DATA.provenance==='object'&&DATA.provenance)||{};
+
+// escapes text AND attribute positions (quotes included).
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+const STEPS=['Queue','Evidence','Adjudication','The verdict','Session ledger'];
+
+/* ---------- state (session-only — nothing persists) ---------- */
+let view='queue', current=null, screen=0, maxScreen=0;
+let dispositions=[];                       // the session ledger
+let draft={grade:null,rationale:''};       // the in-progress adjudication
+let blocked='';                            // honest gate-refusal message ('' = not blocked)
+
+const stage=document.getElementById('stage');
+const nextBtn=document.getElementById('next'), backBtn=document.getElementById('back');
+const resetBtn=document.getElementById('reset'), hint=document.getElementById('hint');
+const REDUCED=!!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+function curCase(){return CASES.find(c=>c.id===current)||null;}
+function recordedFor(id){return dispositions.find(d=>d.case_id===id)||null;}
+function basisLabel(id){return (BASIS_BY[id]&&BASIS_BY[id].label)||id;}
+function gradeShort(id){return (GRADE_BY[id]&&GRADE_BY[id].label)||id;}
+function sharedText(c){
+  if(c.basis==='name')return 'the same name — “'+esc(c.a&&c.a.name)+'”';
+  if(c.shared&&c.shared.kind)return esc(c.shared.kind)+' · '+esc(c.shared.value);
+  return 'a shared signal';
+}
+// the deterministic resolver's call, in the human grade vocab (the verdict's baseline)
+function baselineGrade(c){return c.spine_verdict==='merged'?'uphold_merge':'reject_as_shares';}
+function oracleMatch(c,grade){return !!(c.scored&&c.oracle&&grade===c.oracle.correct_adjudication);}
+function agreementFor(c,grade){
+  if(c.scored&&c.oracle){
+    if(grade===c.oracle.correct_adjudication)return 'matches the synthetic oracle';
+    if(grade==='both_defensible')return 'recorded ambiguity — the oracle records one truth';
+    if(grade==='escalate')return 'escalated — the oracle records one truth';
+    return 'differs from the synthetic oracle';
+  }
+  // real consensus: measured against the deterministic spine baseline (it refused the merge)
+  if(grade==='reject_as_shares')return 'upholds the spine’s refusal (consensus)';
+  if(grade==='uphold_merge')return 'overrides the spine — would merge (consensus differs)';
+  if(grade==='both_defensible')return 'both defensible — wider than the spine’s call';
+  return 'escalated — beyond the deterministic baseline';
+}
+
+/* ---------- stepper (rendered INSIDE the stage, at the top of every scene) ---------- */
+function stepIndex(){return view==='queue'?0:view==='ledger'?4:screen+1;}
+function stepsHtml(){
+  const at=stepIndex();
+  return `<div class="stepper">${STEPS.map((s,i)=>
+    `<div class="step ${i<at?'done':''} ${i===at?'active':''}" data-i="${i}"><div class="sbar"></div><div class="sl">${i+1}· ${s}</div></div>`
+  ).join('')}</div>`;
+}
+function wireSteps(){
+  stage.querySelectorAll('.step').forEach(el=>el.onclick=()=>{
+    const i=+el.dataset.i;
+    if(i===0){toQueue();return;}
+    if(i===4){toLedger();return;}
+    if(view==='case'&&i-1<=maxScreen)gotoScreen(i-1);   // gotoScreen refuses an unrecorded verdict
+  });
+}
+
+/* ---------- screen: the candidate-SHARES queue (grouped by basis) ---------- */
+function renderQueue(){
+  const total=CASES.length, done=dispositions.length;
+  const nReal=CASES.filter(c=>!c.scored).length, nScored=CASES.filter(c=>c.scored).length;
+  let k=0;
+  const groups=BASES.map(b=>{
+    // scored (synthetic, the differentiator) first within each basis, then deterministic by id
+    const rows=CASES.filter(c=>c.basis===b.id).sort((x,y)=>(y.scored?1:0)-(x.scored?1:0)||(x.id<y.id?-1:x.id>y.id?1:0));
+    if(!rows.length)return '';
+    return `<div class="axhead">${esc(b.label)} <span class="axn">${rows.length} candidate${rows.length===1?'':'s'} · ${esc(b.desc)}</span></div>
+      <div class="qgrid">${rows.map(c=>{
+        const rec=recordedFor(c.id);
+        const delay=REDUCED?0:Math.min(k++*55,1400);
+        return `<div class="caserow" data-id="${esc(c.id)}" style="animation-delay:${delay}ms">
+          <div class="crmain">
+            <div class="crpair">${esc(c.a&&c.a.name)}<span class="vs">⇄</span>${esc(c.b&&c.b.name)}</div>
+            <div class="crmeta">shares ${sharedText(c)}</div>
+          </div>
+          ${rec?`<span class="chip rec">Recorded · ${esc(gradeShort(rec.grade))}</span>`:''}
+          ${c.scored?`<span class="chip scored">Scored · synthetic</span>`:`<span class="chip src">Consensus</span>`}
+        </div>`;}).join('')}</div>`;
+  }).join('');
+  stage.innerHTML=stepsHtml()+`<div class="scene">
+    <div class="eyebrow">Merge console · Class J — human judgment over identity links</div>
+    <h2>The merge-adjudication queue — <em>candidate links the resolver refused</em></h2>
+    <p class="lead">Entity resolution proposes that two records are the <b>same</b> party. The deterministic spine merges what it can on a declared identity and <b>refuses the ambiguous</b> — two distinct entities that merely share an identifier. Those refusals are below, grouped by the shared signal. Most are <b>real</b> candidate SHARES from the substrate slice — there is <b>no ground truth</b> for them (consensus, not correctness). A smaller set is <b>synthetic</b>, carrying a latent-truth oracle, so the verdict can show — on synthetic data only — whether your call matched truth. The resolver assembles the evidence; you adjudicate.</p>
+    <div class="qstats">
+      <div class="qstat"><div class="qsn">${total}</div><div class="qsl">candidate links</div></div>
+      <div class="qstat"><div class="qsn">${nReal}</div><div class="qsl">real · consensus</div></div>
+      <div class="qstat"><div class="qsn">${nScored}</div><div class="qsl">synthetic · scored</div></div>
+      <div class="qstat"><div class="qsn">${done}</div><div class="qsl">adjudicated this session</div></div>
+    </div>
+    ${groups}
+    <div class="qfoot"><button class="btn ghost" id="goledger">Session ledger (${done}) ›</button></div>
+  </div>`;
+  stage.querySelectorAll('.caserow').forEach(el=>{el.onclick=()=>pickCase(el.dataset.id);});
+  const gl=document.getElementById('goledger'); if(gl)gl.onclick=toLedger;
+}
+
+/* ---------- screen: evidence (the two records + the shared signal; NEUTRAL — no oracle) ---------- */
+function recCard(label,r,scored){
+  const idents=(r&&Array.isArray(r.identifiers))?r.identifiers:[];
+  const at=(r&&r.attrs)||{};
+  const attrRows=scored
+    ? idents.map(i=>`<div class="arow"><span class="ak">${esc(i.kind)}</span><span class="av">${esc(i.value)}</span></div>`).join('')
+      || `<div class="arow"><span class="ak">identifiers</span><span class="av">none presented in this record</span></div>`
+    : `<div class="arow"><span class="ak">Risk rating</span><span class="av">${esc(at.risk||'—')}</span></div>
+       <div class="arow"><span class="ak">PEP tier</span><span class="av">${esc(at.pep||'—')}</span></div>
+       <div class="arow"><span class="ak">Sanctions</span><span class="av">${at.sanctions?'flagged':'none'}</span></div>
+       <div class="arow"><span class="ak">Adverse media</span><span class="av">${at.adverse_media?'flagged':'none'}</span></div>`;
+  return `<div class="reccard">
+    <div class="ah">${esc(label)}<span class="rk">${esc((r&&r.kind)||'')}${r&&r.role?' · '+esc(r.role):''}</span></div>
+    <div class="recname">${esc(r&&r.name)}</div>
+    ${attrRows}
+  </div>`;
+}
+function renderEvidence(c){
+  const dist=c.spine_verdict!=='merged';
+  const baseline=dist
+    ? `<span class="vtag distinct">kept distinct</span> The deterministic resolver <b>refused</b> to merge these — it keys identity on the declared reference, and these declared identities differ.`
+    : `<span class="vtag merged">merged</span> The deterministic resolver <b>merged</b> these on the single shared identifier.`;
+  const claim=(!c.scored&&c.substrate_claim==='resolved')
+    ? ` The upstream resolver, by contrast, asserted these <b>resolve to the same entity</b> — the claim the spine declined.`:'';
+  stage.innerHTML=stepsHtml()+`<div class="scene">
+    <div class="eyebrow">Candidate ${esc(c.id)}</div>
+    <h2>The evidence — <em>two records, one shared signal</em></h2>
+    <p class="lead">The two records and what links them. Read them on the evidence alone — a shared identifier proves contact, <b>not identity</b>. They are linked by <b>${esc(basisLabel(c.basis))}</b>${c.cross_institution?' · seen across institutions':''}.</p>
+    <div class="evgrid">
+      ${recCard('Record A',c.a,c.scored)}
+      ${recCard('Record B',c.b,c.scored)}
+      <div class="sharedbox"><div class="sl">The shared signal</div><div class="sv">Both records present ${sharedText(c)}</div></div>
+      <div class="baseline">${baseline}${claim}</div>
+    </div>
+    <div class="framenote">A shared identifier is a household landline, a joint account, a shared inbox, or a coincidence as often as it is the same person — and the same person fragments across records with no shared identifier at all. A grounding gate cannot decide which; that is exactly the judgment this gate asks of you.</div>
+  </div>`;
+}
+
+/* ---------- screen: adjudication (the non-binary graded gate) ---------- */
+function renderAdjudication(c){
+  const rec=recordedFor(c.id);
+  if(rec){
+    stage.innerHTML=stepsHtml()+`<div class="scene">
+      <div class="eyebrow">Candidate ${esc(c.id)} · adjudication</div>
+      <h2>Adjudication recorded — <em>this session</em></h2>
+      <p class="lead">This candidate already carries a session adjudication. Advance to the verdict.</p>
+      <div class="recdone">
+        <div class="rg">${esc(gradeShort(rec.grade))}</div>
+        <div class="rr">${esc(rec.rationale)}</div>
+      </div>
+    </div>`;
+    return;
+  }
+  stage.innerHTML=stepsHtml()+`<div class="scene">
+    <div class="eyebrow">Candidate ${esc(c.id)} · adjudication</div>
+    <h2>Your adjudication — <em>graded, with rationale</em></h2>
+    <p class="lead">The gate is non-binary: four grades, not merge/don’t-merge. The grade carries the call; the <b>rationale carries the audit</b> — an adjudication with an empty rationale does not record.</p>
+    <div class="grades">${GRADES.map(g=>
+      `<button class="gradebtn${draft.grade===g.id?' on':''}" data-grade="${esc(g.id)}"><b>${esc(g.label)}</b><span>${esc(g.desc)}</span></button>`).join('')}</div>
+    <div class="ratwrap">
+      <div class="doclabel"></div>
+      <textarea id="rationale" rows="4" placeholder="Why this call — the reasoning an examiner would read…">${esc(draft.rationale)}</textarea>
+    </div>
+    ${blocked?`<div id="blockmsg" class="blockmsg">${esc(blocked)}</div>`:''}
+    <div class="recact">
+      <button class="btn primary" id="record">Record adjudication</button>
+      <span class="recnote">grade + rationale required · session-only</span>
+    </div>
+  </div>`;
+  stage.querySelectorAll('.gradebtn').forEach(el=>{el.onclick=()=>pickGrade(el.dataset.grade);});
+  const r=document.getElementById('rationale'); if(r)r.oninput=()=>setRationale(r.value);
+  const rb=document.getElementById('record'); if(rb)rb.onclick=recordDisposition;
+}
+
+/* ---------- screen: the verdict (revealed ONLY post-adjudication) ---------- */
+function renderVerdict(c){
+  const rec=recordedFor(c.id);
+  if(!rec){gotoScreen(1);return;}
+  const dist=c.spine_verdict!=='merged';
+  const baseTag=dist?'<span class="vtag distinct">kept distinct</span>':'<span class="vtag merged">merged</span>';
+  let truthCard;
+  if(c.scored&&c.oracle){
+    const same=c.oracle.same_entity;
+    const correct=gradeShort(c.oracle.correct_adjudication);
+    let mt;
+    if(rec.grade===c.oracle.correct_adjudication)mt='<span class="matchtag yes">✓ your call matched the synthetic truth</span>';
+    else if(rec.grade==='both_defensible'||rec.grade==='escalate')mt='<span class="matchtag amb">you recorded ambiguity — the oracle records one truth</span>';
+    else mt='<span class="matchtag no">✗ your call differs from the synthetic truth</span>';
+    truthCard=`<div class="revcard oracle">
+      <div class="ah">Synthetic ground truth · scored</div>
+      <div class="revbody">
+        <div class="revgrade">Latent truth: <b>${same?'the SAME entity':'DISTINCT entities'}</b></div>
+        <div class="revgrade">Defensible call: ${esc(correct)}</div>
+        <div class="revrat">${mt}</div>
+        <div class="qual">${esc(c.oracle.qualifier)}</div>
+      </div>
+    </div>`;
+  }else{
+    truthCard=`<div class="revcard consensus">
+      <div class="ah">No ground truth · consensus</div>
+      <div class="revbody">
+        <div class="revgrade">${baseTag} the spine refused this merge</div>
+        ${c.substrate_claim==='resolved'?`<div class="revgrade">the upstream resolver asserted: same entity</div>`:''}
+        <div class="revrat">Real substrate data carries no oracle — substrate emits no ground-truth identities for the slice (a named sibling handoff). This is <b>consensus, not correctness</b>; your call is the precedent.</div>
+      </div>
+    </div>`;
+  }
+  stage.innerHTML=stepsHtml()+`<div class="scene">
+    <div class="eyebrow">Candidate ${esc(c.id)} · the verdict</div>
+    <h2>The verdict — <em>${c.scored?'measured against synthetic truth':'consensus, not a score'}</em></h2>
+    <p class="lead">The deterministic baseline beside your adjudication. ${c.scored?'This candidate is <b>synthetic</b> — a latent-truth oracle exists, so the comparison is measured (on synthetic clusters only).':'This candidate is <b>real</b> — there is no oracle, so your call stands as consensus precedent, never scored.'}</p>
+    <div class="revgrid">
+      <div class="revcard you">
+        <div class="ah">Your adjudication · this session</div>
+        <div class="revbody">
+          <div class="revgrade">${esc(gradeShort(rec.grade))}</div>
+          <div class="revrat">${esc(rec.rationale)}</div>
+          <div class="revagree">${esc(rec.agreement)}</div>
+        </div>
+      </div>
+      ${truthCard}
+    </div>
+    <div class="framenote">Precedent, not a leaderboard — the real cases have no ground truth, and the scored cases are synthetic by construction (measured on synthetic clusters; production has no ground truth). The resolver's refusal is a starting point, not the answer.</div>
+  </div>`;
+}
+
+/* ---------- screen: the session ledger ---------- */
+function renderLedger(){
+  const rows=dispositions.map(d=>`<div class="ledrow">
+      <span class="lo">#${d.order}</span>
+      <div class="lmain">
+        <div class="lcase">${esc(d.case_id)} · ${d.scored?'synthetic':'consensus'}</div>
+        <div class="lrat">${esc(d.rationale)}</div>
+      </div>
+      <span class="chip ${d.scored?'scored':'src'}">${esc(gradeShort(d.grade))}</span>
+      <span class="lagree">${esc(d.agreement)}</span>
+    </div>`).join('');
+  const scored=dispositions.filter(d=>d.scored);
+  const matched=scored.filter(d=>d.oracle_match===true).length;
+  const realN=dispositions.filter(d=>!d.scored).length;
+  const exp={
+    artifact:'Signal Watch — Merge Console (vision prototype)',
+    note:'Session-only merge-adjudication ledger. REAL candidate SHARES are consensus-not-ground-truth (no oracle); the scored agreement is SYNTHETIC ONLY — '+(PROV.synthetic_qualifier||'measured on synthetic clusters; production has no ground truth')+'. Illustrative outputs; a judgment ledger, not a detection-quality score.',
+    provenance:PROV,
+    candidates_total:CASES.length,
+    scored_agreement:{matched:matched, scored_adjudicated:scored.length, qualifier:(PROV.synthetic_qualifier||'measured on synthetic clusters; production has no ground truth')},
+    consensus_adjudicated:realN,
+    dispositions:dispositions,
+  };
+  const agbox=dispositions.length?`<div class="agbox">
+    <b>${realN}</b> real candidate${realN===1?'':'s'} adjudicated as <b>consensus</b> (no ground truth — your calls are precedent).
+    ${scored.length?` On the <b>synthetic</b> scored set, <b>${matched}/${scored.length}</b> of your calls matched the latent oracle — <span style="color:var(--faint)">${esc(PROV.synthetic_qualifier||'measured on synthetic clusters; production has no ground truth')}</span>.`:` No synthetic scored candidates adjudicated yet.`}
+  </div>`:'';
+  stage.innerHTML=stepsHtml()+`<div class="scene">
+    <div class="eyebrow">Merge console · session ledger</div>
+    <h2>The session ledger — <em>judgment as precedent</em></h2>
+    <p class="lead"><b>Session-only:</b> this offline file persists nothing — close the tab and the ledger is gone. The agreement arithmetic splits the two populations: real cases are consensus precedent; the scored number is measured on synthetic clusters only.</p>
+    ${agbox}
+    ${dispositions.length?`<div class="ledgrid">${rows}</div>
+      <div class="doclabel">Export — the session JSON (copy out to keep)</div>
+      <textarea id="export" readonly>${esc(JSON.stringify(exp,null,2))}</textarea>
+      <div class="expact"><button class="btn" id="copyexp">Copy JSON</button><button class="btn ghost" id="clearses">Clear session</button><span class="recnote" id="copynote"></span></div>`
+    :`<div class="empty">No adjudications recorded this session yet. Pick a candidate from the queue, grade it with a rationale, and it lands here.</div>`}
+  </div>`;
+  const cp=document.getElementById('copyexp');
+  if(cp)cp.onclick=()=>{const t=document.getElementById('export');if(!t)return;t.select();
+    try{document.execCommand('copy');const n=document.getElementById('copynote');if(n)n.textContent='copied';}catch(e){}};
+  const cl=document.getElementById('clearses');
+  if(cl)cl.onclick=()=>{dispositions=[];render();};
+}
+
+/* ---------- render dispatch ---------- */
+const CASE_SCREENS=[renderEvidence,renderAdjudication,renderVerdict];
+function render(){
+  try{
+    if(view==='queue')renderQueue();
+    else if(view==='ledger')renderLedger();
+    else{
+      const c=curCase();
+      if(!c){view='queue';renderQueue();}
+      else CASE_SCREENS[screen](c);
+    }
+  }catch(e){
+    console.error('merge render',view,screen,e);
+    stage.innerHTML=stepsHtml()+'<div class="scene"><div class="eyebrow">Merge console</div><h2>This view can\'t render</h2><div class="empty">The data for this screen is missing or malformed — return to the queue.</div></div>';
+  }
+  wireSteps();
+  updateControls();
+  window.scrollTo({top:0,behavior:REDUCED?'auto':'smooth'});
+}
+
+/* ---------- navigation + the gate actions ---------- */
+function pickCase(id){
+  const c=CASES.find(x=>x.id===id); if(!c)return;
+  current=id; view='case'; screen=0; maxScreen=0; blocked='';
+  const rec=recordedFor(id);
+  draft=rec?{grade:rec.grade,rationale:rec.rationale}:{grade:null,rationale:''};
+  if(rec)maxScreen=2;                       // an already-adjudicated candidate may revisit its verdict
+  render();
+}
+function pickGrade(g){
+  if(!GRADE_BY[g])return;
+  draft.grade=g; blocked='';
+  if(view==='case'&&screen===1)render();
+}
+function setRationale(v){draft.rationale=String(v==null?'':v);}
+function recordDisposition(){
+  if(view!=='case')return;
+  const c=curCase(); if(!c)return;
+  if(recordedFor(c.id)){gotoScreen(2);return;}
+  const g=GRADE_BY[draft.grade], rat=draft.rationale.trim();
+  if(!g||!rat){
+    blocked='Not recorded — an adjudication needs BOTH a grade and a written rationale. The rationale is the audit evidence; an empty one records nothing.';
+    screen=1; render(); return;
+  }
+  dispositions.push({
+    order:dispositions.length+1,
+    case_id:c.id, source:c.source, scored:!!c.scored, basis:c.basis,
+    grade:g.id, grade_label:g.label,
+    rationale:draft.rationale,
+    agreement:agreementFor(c,g.id),
+    oracle_match:(c.scored&&c.oracle)?oracleMatch(c,g.id):null,
+    oracle_truth:(c.scored&&c.oracle)?(c.oracle.same_entity?'same':'distinct'):null,
+  });
+  blocked=''; screen=2; maxScreen=2; render();
+}
+function gotoScreen(s){
+  if(view!=='case')return;
+  s=Math.max(0,Math.min(CASE_SCREENS.length-1,s));
+  if(s===2&&!recordedFor(current))return;   // the verdict is unreachable pre-adjudication
+  screen=s; maxScreen=Math.max(maxScreen,screen); render();
+}
+function toQueue(){view='queue';current=null;screen=0;maxScreen=0;blocked='';render();}
+function toLedger(){view='ledger';current=null;screen=0;maxScreen=0;blocked='';render();}
+function advance(){
+  if(view==='queue')return;                 // candidates are picked, not paged
+  if(view==='ledger')return;
+  if(screen===0){gotoScreen(1);return;}
+  if(screen===1){ if(recordedFor(current))gotoScreen(2); else recordDisposition(); return; }
+  toLedger();                               // from the verdict → the session ledger
+}
+function back(){
+  if(view==='queue')return;
+  if(view==='ledger'){toQueue();return;}
+  if(screen<=0){toQueue();return;}
+  screen--; render();
+}
+function updateControls(){
+  if(view==='queue'){
+    backBtn.style.visibility='hidden';
+    resetBtn.style.visibility='hidden';
+    nextBtn.style.visibility='hidden';
+    hint.textContent='Pick a candidate link to adjudicate →';
+    return;
+  }
+  if(view==='ledger'){
+    backBtn.style.visibility='visible'; backBtn.textContent='‹ Queue';
+    resetBtn.style.visibility='hidden';
+    nextBtn.style.visibility='hidden';
+    hint.textContent='Copy the session JSON out to keep the record';
+    return;
+  }
+  backBtn.style.visibility='visible';
+  resetBtn.style.visibility='visible';
+  nextBtn.style.visibility='visible';
+  backBtn.textContent=['‹ Queue','‹ Evidence','‹ Adjudication'][screen]||'‹ Back';
+  nextBtn.textContent=screen===0?'Adjudication ›':screen===1?(recordedFor(current)?'The verdict ›':'Record adjudication ›'):'Session ledger ›';
+  hint.textContent=['Read both records on the evidence alone','Grade + rationale — the rationale is the audit record','Your call beside the deterministic baseline'][screen]||'';
+}
+
+nextBtn.onclick=advance;
+backBtn.onclick=back;
+resetBtn.onclick=toQueue;
+// keyboard: ←/→ navigate, Space advances, Esc → back to the queue. Guarded inside INPUT/TEXTAREA/SELECT
+// so typing a rationale never navigates.
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target&&e.target.tagName))return;
+  const onBtn=e.target&&e.target.tagName==='BUTTON';
+  switch(e.key){
+    case 'ArrowRight':case 'PageDown':e.preventDefault();advance();break;
+    case 'ArrowLeft':case 'PageUp':e.preventDefault();back();break;
+    case ' ':case 'Spacebar':if(onBtn)break;e.preventDefault();advance();break;
+    case 'Escape':e.preventDefault();if(view!=='queue')toQueue();break;
+  }
+});
+
+render();
+</script>
+</body>
+</html>

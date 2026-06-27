@@ -1,5 +1,12 @@
 # PLAN-BRIEF — aml-substrate: the open-reference-data fork (anchor the synthetic universe to open data)
 
+> **◐ PARTLY LANDED 2026-06-27.** substrate Phase 33 (`f9e63e7`) shipped open-data **Stage-1** realism
+> (US Census surnames / SSA given names / GLEIF legal names under `--anchored`); the Phase-32 anchored fork's
+> same-person identity FRAGMENTS gave the merge console its NON-circular, genuinely two-sided real-data oracle
+> (consumed by signal-watch **Phase 79 T3/T4** — the substrate-scored merge population, superseding the
+> consensus-66). **Stage 2** (sanctions/FATF anchors) + **Stage 3** (paid-landmine routing) remain OPEN. The
+> original handoff follows (historical).
+
 > **A signal-watch → aml-substrate handoff brief** (the Phase-55–58 / 74–76 pattern: signal-watch authors the
 > contract; the sibling implements + measures it on its own lifecycle — *no code lands in substrate from here*).
 > Synthetic / illustrative; **no catch-rate, lift, or precision asserted.** **Pinned to verified substrate HEAD

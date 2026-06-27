@@ -264,15 +264,39 @@ def cleared_demo_consume(*, drafter: str = "stub", tmpdir: Path | None = None) -
     """Consume casework's CW-4 `cleared` verdict end-to-end on a casework-REPLAYABLE affirmative-clear
     (a C5 cash-placement case, `data/casefile/cleared-demo.bundle.json`, grounded on the VENDORED
     fin-2023-alert001:IND-08): hand it to casework with `--disposition cleared` and surface the signed
-    documented dismissal. This is the Phase-77 cross-pillar cleared consume — distinct from the Lakeshore
-    casefile (CASE-B, fan-in C3) which FAILS-CLOSED at casework's grounding_replay (C3 fan-in != casework's
-    fan-out; the documented Phase-16/63 mismatch — a named follow-on, docs/casework-c3-fan-in-PLAN-BRIEF.md;
-    never fabricate a fitting mechanism). Honest-skips (RunError) when the vendored casework is absent."""
+    documented dismissal. This is the Phase-77 cross-pillar cleared consume — the C5 cash-placement sibling
+    of the Phase-79 Lakeshore CASE-B fan-in co-sign (lakeshore_cosign_consume), which ALSO signs `cleared`
+    now that casework's C3 fan-in re-derivation (Phase 19, CW-3) landed. Honest-skips (RunError) when the
+    vendored casework is absent."""
     import tempfile
     td = tmpdir or Path(tempfile.mkdtemp())
     out = td / "cleared-demo-signed.json"
     res = casework_consume_wb(CLEARED_DEMO_BUNDLE, out, drafter, disposition="cleared")
     return {"badge": BADGE, "case_id": "CASE-CLR-DEMO", "consume": res,
+            "cleared": res.get("signed") is True and res.get("disposition") == "cleared"}
+
+
+# ---- Phase 79: the NORTH-STAR Lakeshore CASE-B cross-pillar CLEARED CO-SIGN (casework CW-4 via C3 FAN-IN) -
+CASE_B_BUNDLE = ROOT / "data" / "casefile" / "case-b.bundle.json"
+
+
+def lakeshore_cosign_consume(*, drafter: str = "stub", tmpdir: Path | None = None) -> dict:
+    """Consume casework's CW-4 `cleared` verdict end-to-end on the NORTH-STAR Lakeshore casefile (CASE-B,
+    fan-in C3) — its casework-contract translation `data/casefile/case-b.bundle.json` (the 8 distinct
+    catering-client inbound credits within a 7-day window + a documented exculpatory settlement, grounded on
+    the VENDORED fin-2023-alert001:IND-02 multi-originator-deposit indicator): hand it to casework with
+    `--disposition cleared` and surface the signed documented dismissal. casework's C3 FAN-IN re-derivation
+    (Phase 19, CW-3 — the unblocking sibling work the casework-c3-fan-in brief asked for) independently
+    reproduces the funnel-in mechanism, so the Lakeshore-shaped cleared CO-SIGNS end-to-end — closing the
+    north-star matched pair (Northgate files / Lakeshore clears, both via casework). The casefile's own
+    AL-LS-C3 keeps fin-2020-alert001:IND-05 for matched-pair signal symmetry with CASE-A; this bundle grounds
+    on the faithful IND-02 (the divergence disclosed in the bundle provenance). Honest-skips (RunError) when
+    the vendored casework is absent."""
+    import tempfile
+    td = tmpdir or Path(tempfile.mkdtemp())
+    out = td / "case-b-signed.json"
+    res = casework_consume_wb(CASE_B_BUNDLE, out, drafter, disposition="cleared")
+    return {"badge": BADGE, "case_id": "CASE-B", "consume": res,
             "cleared": res.get("signed") is True and res.get("disposition") == "cleared"}
 
 
@@ -1564,8 +1588,8 @@ def selftest() -> int:
     # Phase 77 — the cross-pillar CLEARED consume (casework CW-4): the committed C5 cleared-demo bundle is
     # cleared-shaped (an exculpatory:true txn + a grounded exculpatory claim, NO crime_type, NO inculpatory
     # claim), and when the vendored casework is present it SIGNS `cleared` end-to-end via --disposition cleared.
-    # Honest-skip (casework-gated) in a bare clone. The Lakeshore casefile (CASE-B) fails-CLOSED here by design
-    # (fan-in C3 != casework's fan-out grounding_replay) — documented; never faked.
+    # Honest-skip (casework-gated) in a bare clone. The Lakeshore casefile (CASE-B) cleared CO-SIGN is
+    # asserted separately below (Phase 79 — casework's fan-in C3 re-derivation now reproduces it end-to-end).
     cdb = json.loads(CLEARED_DEMO_BUNDLE.read_text(encoding="utf-8"))
     if not any(t.get("exculpatory") for t in cdb.get("transactions", [])):
         failures.append("cleared-demo bundle must carry an exculpatory:true transaction (the affirmative source)")
@@ -1578,10 +1602,34 @@ def selftest() -> int:
         cd = cleared_demo_consume()
         if not cd["cleared"]:
             failures.append(f"cleared-demo should SIGN `cleared` via casework, got {cd['consume']}")
-        cleared_note = "casework SIGNS `cleared` (C5 replayable; Lakeshore CASE-B fails-closed on fan-in C3)"
+        cleared_note = "casework SIGNS `cleared` (C5 cash-placement, replayable)"
     except RunError as ex:
         cleared_note = f"casework live consume skipped — {ex}"
         print(f"  (cleared-demo: {cleared_note})", file=sys.stderr)  # noqa: T201
+
+    # Phase 79 — the NORTH-STAR Lakeshore CASE-B cross-pillar CLEARED CO-SIGN: the casefile's casework-contract
+    # bundle (the fan-in C3 funnel-in + a documented exculpatory settlement) SIGNS `cleared` via casework's
+    # Phase-19 fan-in re-derivation — the matched-pair loop closes end-to-end (Northgate files / Lakeshore
+    # clears, both via casework). Honest-skip (casework-gated) in a bare clone.
+    lcb = json.loads(CASE_B_BUNDLE.read_text(encoding="utf-8"))
+    if not any(t.get("exculpatory") for t in lcb.get("transactions", [])):
+        failures.append("case-b bundle must carry an exculpatory:true transaction (the affirmative source)")
+    if any(c.get("stance") == "inculpatory" for c in lcb.get("str_record", {}).get("narrative_claims", [])):
+        failures.append("case-b bundle must carry NO inculpatory claim (the cleared rule)")
+    if "crime_type" in lcb:
+        failures.append("a cleared case asserts no offence — crime_type must be omitted from the case-b bundle")
+    _fanin = [t for t in lcb["transactions"] if t["txn_id"] in set(lcb["alerts"][0]["txn_ids"])]
+    if len({t["counterparty_name"] for t in _fanin}) < 5:
+        failures.append("case-b fan-in alert must cite >=5 distinct inbound originators (casework's funnel-in bar)")
+    lakeshore_note = "casework venv absent — skipped"
+    try:
+        lc = lakeshore_cosign_consume()
+        if not lc["cleared"]:
+            failures.append(f"Lakeshore CASE-B should SIGN `cleared` via casework's fan-in C3, got {lc['consume']}")
+        lakeshore_note = "casework SIGNS `cleared` (CASE-B fan-in C3 — the matched pair closes end-to-end)"
+    except RunError as ex:
+        lakeshore_note = f"casework live consume skipped — {ex}"
+        print(f"  (lakeshore co-sign: {lakeshore_note})", file=sys.stderr)  # noqa: T201
 
     # the served page substitutes the config placeholder iff workbench.html exists
     page = render_page(live_config())
@@ -1606,7 +1654,7 @@ def selftest() -> int:
           f"Phase-73 north-star pair LEADS the queue + COMPUTES live: "
           f"CASE-A {da['verdict']}/{da['presentation_label']} (predicate {da['named_risk']!r}) vs "
           f"CASE-B {db['verdict']}/{db['presentation_label']} (affirmative mitigation) — same signals, opposite outcome; "
-          f"CW-4 cleared consume: {cleared_note}; "
+          f"CW-4 cleared consume: {cleared_note}; Lakeshore CASE-B co-sign: {lakeshore_note}; "
           f"stubbed finale {seq} -> CONNECTED; pillar-status byte-stable)")
     return 0
 

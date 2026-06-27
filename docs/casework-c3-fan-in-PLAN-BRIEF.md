@@ -1,5 +1,11 @@
 # PLAN-BRIEF — aml-casework: support C3 fan-IN in grounding_replay (the Lakeshore co-sign gap)
 
+> **✅ CLOSED 2026-06-27.** aml-casework Phase 19 (`ed93a0d`) built `_c3_fan_in` in `grounding_replay.py`
+> (the commit explicitly "Closes signal-watch's casework-c3-fan-in-PLAN-BRIEF.md"). signal-watch **Phase 79
+> T1/T2** re-vendored casework `b3546d4 → 076fb8e` + shaped Lakeshore **CASE-B** into a fan-in-C3 casework
+> bundle (`data/casefile/case-b.bundle.json`) — it SIGNS `cleared` end-to-end, closing the north-star matched
+> pair (Northgate files / Lakeshore clears, both via casework). The original handoff follows (historical).
+
 > **A signal-watch → aml-casework handoff brief** (the Phase-55–58 / 74–76 pattern: signal-watch authors the
 > contract; the sibling implements on its own lifecycle — *no code lands in casework from here*). Synthetic /
 > illustrative; no catch-rate, lift, or precision asserted. **Pinned to verified casework HEAD `b3546d4`

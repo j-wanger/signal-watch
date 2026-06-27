@@ -93,13 +93,21 @@ recommend-to-file is the human's call (RGS is human).
 The five stratified fixtures isolate the dispositions the thin slice never touched:
 `case-conflicting-02` (file, both sides retained), `case-data-gap-03` (needs_more_info),
 `case-both-defensible-04` (human-assigned both_defensible), `case-cleared-05` (human-assigned `cleared` —
-a registered cash business whose structuring alert is affirmatively explained), plus the signed thin slice (file).
+a registered cash business whose structuring alert is affirmatively explained), `case-cleared-c3-fanin-06`
+(human-assigned `cleared` via a C3 **fan-in** mechanism — a catering business's many client receipts,
+affirmatively explained), plus the signed thin slice (file).
 
 The `cleared` disposition is the casework half of signal-watch's **CW-4** (cross-pillar Round 1): the live
 cleared-by-mitigation verdict, casework's affirmative dismissal. signal-watch's leg-based clear is
 *re-expressed* onto casework's stance model (it is not ported unchanged); casework authors its **own**
 synthetic exculpatory bundle (`case-cleared-05`) because signal-watch's Lakeshore casefile is its own format,
 not a casework contract bundle — the Lakeshore narrative is the semantic template only.
+
+Phase 19 (**CW-3**) extends this: signal-watch's north-star **Lakeshore CASE-B** is a *fan-in* funnel (a catering
+business's many client receipts), which casework's fan-out-only C3 false-blocked — so the Lakeshore `cleared` could
+not co-sign end-to-end. casework's C3 now re-derives fan-in as well (additive, never loosening), and
+`case-cleared-c3-fanin-06` is the authored fan-in `cleared` stratum. See **Phase 19** below; it closes
+signal-watch's `casework-c3-fan-in-PLAN-BRIEF.md` handoff.
 
 Phase 3 — **enforce grounded-to-source.** The other verifiers prove a cited flag resolves to an *in-bundle*
 id; none opened the corpus, so "this flag IS the real regulator text" was *authored*-real — a human copied it
@@ -183,9 +191,10 @@ replay layer had been grounded against *invented fixture semantics*, and reconci
   **C4** broadened from an over-narrow `(9000,10000)` band to canonical structuring (sub-$10k cash deposits
   *aggregating* to ≥$10k — the real deposits are ~$7–8k); **C15** gained a throughput / ~0-net-retention
   sub-signal *alongside* the grounded generic-"trading company" name match (the real shell conduit carries
-  no names); and **C2 / C3 / C5** were registered. C3 is **count-based** fan-out (≥N outflows) with a
-  documented limitation — the bundle omits counterparty refs, so "distinct counterparties" is not
-  re-derivable (a Pillar-1 follow-up).
+  no names); and **C2 / C3 / C5** were registered. C3 re-derives the funnel typology in **either direction** (Phase 19):
+  fan-**out** (≥N outflows) OR fan-**in** (≥N distinct inbound originators), with a documented limitation — when
+  the bundle omits counterparty refs, "distinct counterparties/originators" is not re-derivable and C3 falls back
+  to a count proxy (a Pillar-1 follow-up).
 - **No-PII completeness** (`completeness._has_subject_information`) — the first real ingest also showed the
   subject is identified by `customer_id` only: the substrate emits **no personal name** by design ("no real
   customer data, ever"). The completeness check required a `name` the fixtures had invented, so it was
@@ -203,8 +212,9 @@ replay layer had been grounded against *invented fixture semantics*, and reconci
 
 Deferred: migrating the Phase 1–5 fixtures to the canonical real txn shape + tightening the contract §2 txn
 row (the ingest adapter isolates the drift for now); enriching the bundle with counterparty refs so C3 can
-re-derive distinct-counterparty fan-out; and tightening `completeness`'s reporting-entity proxy to a real
-field — all Pillar-1 / cross-pillar-contract follow-ups.
+re-derive distinct counterparties/originators (both fan-out and fan-in — Phase 19 added the fan-in direction;
+both fall back to a count proxy when refs are absent); and tightening `completeness`'s reporting-entity proxy to a
+real field — all Pillar-1 / cross-pillar-contract follow-ups.
 
 ## Phase 7 — the consume CLI (`python -m aml_casework.ingest`)
 
@@ -542,19 +552,23 @@ C14/Phase-14 bug). Two legs, extending the Phase-15 C14 precedent (`tests/_recon
 detector's credit-before-debit ordering and the $1k floor; C4's 7-day window ⊇ substrate's 24h and it accepts any
 sub-$10k amount (no $7k band); C5 needs ≥3 cited cash deposits vs substrate's ≥5; C3 uses a count proxy.
 
-**Findings (the gap register).** The harness surfaces three latent false-blocks — cases where the substrate
-detector fires but casework re-derives the firing evidence as *ungrounded* (casework stricter):
+**Findings (the gap register).** The harness surfaced three latent false-blocks — cases where the substrate
+detector fires but casework re-derives the firing evidence as *ungrounded* (casework stricter). One (C3 fan-in) was
+**resolved in Phase 19** when it became data-reachable; two remain documented-latent:
 
 | Finding | Substrate fires | casework re-derivation | Logic-reachable? | Data-reachable today? | Triage |
 |---------|-----------------|------------------------|------------------|-----------------------|--------|
 | **C15 retention band** | shell throughput up to ≤10% net retention | grounds throughput only ≤5% (+ a generic-name fallback) | **Yes** (confirmed @ substrate `fc98b09`) | **No** — the real conduit (`CASE-P-0010361`) retains **3.57%**, grounded via throughput | **Document** |
-| **C3 fan-in** | fan-IN (≥5 distinct CREDIT sources) *and* fan-out | re-derives fan-**out** only → counts 0 cited outflows | **Yes** (confirmed @ substrate `fc98b09`) | **No** — the real C3 (`CASE-P-0010361`) is fan-**out**, grounded by the count proxy | **Document** |
+| **C3 fan-in** *(RESOLVED Phase 19)* | fan-IN (≥5 distinct CREDIT sources) *and* fan-out | now re-derives **both** — fan-out (≥N outflows) OR fan-in (≥N distinct inbound originators) | **Yes** (confirmed @ substrate `fc98b09`) | **Yes** — signal-watch's Lakeshore CASE-B is fan-in; the co-sign was blocked | **Fixed** (additive fan-in re-derivation — see Phase 19) |
 | **C4 non-cash channel** | structuring on sub-$10k CREDIT of **any** channel (no channel filter) | grounds only CASH `cash_deposit` → a non-cash structuring alert counts 0 deposits | **Yes** (confirmed @ substrate `fc98b09`: fires on EMT in-band credits) | **No** — the real C4 (`CASE-P-0010361`) cites CASH deposits; substrate's non-cash sub-$10k stream sits below the $7k band | **Document** |
 
 **Triage outcome (triage-per-finding, by reachability).** All three gaps are *logic*-reachable (substrate's real
-detectors fire on them and casework false-blocks — the `@integration` leg confirms it) but **not**
-*data*-reachable against current substrate emission. So they are **documented as latent, not fixed** — the
-6-verifier chain stays **byte-unchanged**. The directional battery + the `@integration` regression are the
+detectors fire on them and casework false-blocks — the `@integration` leg confirms it). Two (C15 retention, C4
+non-cash) are **not** *data*-reachable against current substrate emission, so they stay **documented as latent, not
+fixed** — the 6-verifier chain stays **byte-unchanged** for them. The third (**C3 fan-in**) *became*
+data-reachable — a concrete downstream consumer (signal-watch's Lakeshore co-sign) needs it — and was **fixed in
+Phase 19** (an additive fan-in re-derivation; see below). This is the triage-per-finding fork working as designed:
+document while latent, fix when a real consumer makes it reachable. The directional battery + the `@integration` regression are the
 durable **loud** signal: if substrate's emission ever shifts into a gap (a C15 alert at 5–10% retention, a C3
 fan-in, or a non-cash C4 structuring), the live-equivalence test goes red — surfacing the drift instead of
 false-blocking a real SAR silently. (Were a gap to become data-reachable, the fix is a source-faithful
@@ -591,5 +605,33 @@ advisory lane**.
 
 The first live run already earned its keep: it surfaced a real `corpus-drift` — a vendored advisory with no
 counterpart in the live signal-watch corpus — exactly the re-pin signal the lane exists to make loud.
+
+## Phase 19 — C3 fan-in (the Lakeshore co-sign gap, CW-3)
+
+Phase 16 documented a latent false-block: casework's C3 re-derived the funnel typology **fan-out only** (≥N DEBIT
+outflows), while substrate's `FunnelDetector` also fires **fan-in** (≥N distinct CREDIT originators into one
+account). That gap became data-reachable when signal-watch's Phase 77 tried to co-sign its north-star **Lakeshore
+CASE-B** — a catering business's many client receipts (8 inbound credits, 0 outflows) — as `cleared`: casework
+correctly *refused* (the verifier never fabricates a fan-out it cannot see), leaving the Lakeshore `cleared`
+un-co-signable. signal-watch named the gap in `casework-c3-fan-in-PLAN-BRIEF.md`.
+
+- **The fix (`grounding_replay._assert_c3_funnel_fan`)** — C3 now grounds if **either** direction re-derives:
+  fan-out (≥`_MIN_FANOUT_COUNT` DEBIT outflows in the window — **byte-unchanged**) OR fan-in
+  (≥`_MIN_FANOUT_COUNT` inbound CREDIT originators in the window). This is **additive** and source-faithful —
+  casework's C3 was *stricter* than the C3 capability, so adding fan-in **reduces a false-block**, it never loosens
+  a gate. The file bar and the other five verifiers are byte-unchanged; no existing verdict moves.
+- **Distinct-when-present (the honesty rule)** — fan-in counts **distinct** inbound originators (`counterparty_name`,
+  empty-guarded) when refs are present, so ≥N credits from *one* originator (repeat business, not a funnel) is
+  refused. When refs are absent it falls back to a count proxy — the same documented gap fan-out carries.
+- **The authored stratum** — `case-cleared-c3-fanin-06` is a Lakeshore-shaped fan-in `cleared` bundle (≥5
+  distinct-originator inbound credits + a reconciled `exculpatory: true` settlement, a neutral mechanism claim, no
+  inculpatory claim) that reaches `signed` then validates `cleared`. casework authors its own contract bundle —
+  signal-watch's Lakeshore casefile is its own format (the CW-4 finding).
+- **The Phase-16 tripwire flipped** — closing the false-block fired the directional battery
+  (`tests/test_replay_reconciliation.py`); the C3 fan-in case now pins as **grounds** (resolved), leaving C15
+  retention and C4 non-cash as the two remaining documented-latent gaps.
+
+Once casework re-derives fan-in, signal-watch's Lakeshore DECIDE co-signs `cleared` end-to-end — closing the
+`casework-c3-fan-in-PLAN-BRIEF.md` handoff (CW-3).
 
 See `.dev-wiki/` for phase/task state and `DESIGN.md` for full doctrine.

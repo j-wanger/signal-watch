@@ -75,11 +75,15 @@ _PLACEMENT_WINDOW = timedelta(days=7)
 _PASSTHROUGH_MIN_FRACTION = 0.80
 _PASSTHROUGH_WINDOW = timedelta(hours=72)
 
-# --- C3 funnel/fan: >=N outflow transactions within a short window. NOTE (Phase 6, documented honesty
-#     gap): the detector's rule is "fan-out to N DISTINCT COUNTERPARTIES", but the real bundle carries
-#     counterparty_ref=null on the cited outflows, so distinct-counterparty is NOT re-derivable from the
-#     evidence. This is the weaker COUNT-based re-derivation; tightening it needs Pillar 1 to emit
-#     counterparty refs (a cross-pillar follow-up). ---
+# --- C3 funnel/fan: the funnel typology in EITHER direction (substrate fires over the full stream;
+#     casework re-derives whichever direction the CITED subset exhibits). fan-OUT: >=N DEBIT outflows
+#     within the window. fan-IN (Phase 19): >=N DISTINCT inbound ORIGINATORS (counterparty_name,
+#     empty-guarded) crediting one account within the window. NOTE (Phase 6/19, documented honesty gap,
+#     SYMMETRIC across both directions): the detector's rule is ">=N DISTINCT COUNTERPARTIES", but the
+#     real bundle carries counterparty refs=null on the cited rows, so distinct is not always
+#     re-derivable — the COUNT-based re-derivation is the honest fallback when refs are absent (tightening
+#     it needs Pillar 1 to emit refs, a cross-pillar follow-up). The same N + window apply to both
+#     directions. ---
 _MIN_FANOUT_COUNT = 5
 _FANOUT_WINDOW = timedelta(days=7)
 
@@ -233,10 +237,10 @@ def _assert_c2_passthrough(alert: dict[str, Any], cited_txns: list[dict[str, Any
     return []
 
 
-def _assert_c3_funnel_fan(alert: dict[str, Any], cited_txns: list[dict[str, Any]]) -> list[str]:
-    where = f"alerts[{alert.get('alert_id')}].replay(C3)"
-    # COUNT-based fan-out (documented honesty gap: distinct-counterparty is not re-derivable — the
-    # bundle omits counterparty refs on the cited outflows; see the module note + ledger A3).
+def _c3_fan_out(cited_txns: list[dict[str, Any]], where: str) -> list[str]:
+    """fan-OUT leg: >=_MIN_FANOUT_COUNT DEBIT outflows within _FANOUT_WINDOW (count-proxy — the
+    documented distinct-counterparty gap; the bundle omits refs on the cited outflows, ledger A3).
+    []=re-derives, [reason]=does not."""
     outflows = [t for t in cited_txns if t.get("direction") == "DEBIT" and t.get("amount_cents", 0) > 0]
     if len(outflows) < _MIN_FANOUT_COUNT:
         return [f"{where}: only {len(outflows)} cited outflow(s); the fan-out pattern needs >={_MIN_FANOUT_COUNT}"]
@@ -246,6 +250,45 @@ def _assert_c3_funnel_fan(alert: dict[str, Any], cited_txns: list[dict[str, Any]
     if times[-1] - times[0] > _FANOUT_WINDOW:
         return [f"{where}: fan-out outflows span {times[-1] - times[0]} > the {_FANOUT_WINDOW.days}d window"]
     return []
+
+
+def _c3_fan_in(cited_txns: list[dict[str, Any]], where: str) -> list[str]:
+    """fan-IN leg: >=_MIN_FANOUT_COUNT inbound CREDIT originators within _FANOUT_WINDOW. Counts DISTINCT
+    originators (counterparty_name, empty-guarded) when any ref is present; else the count-proxy fallback
+    over the inflow rows (symmetric to fan-out's gap). A single-originator >=N-credit set is REFUSED (it
+    is repeat business, not a funnel). []=re-derives, [reason]=does not."""
+    inflows = [t for t in cited_txns if t.get("direction") == "CREDIT" and t.get("amount_cents", 0) > 0]
+    if len(inflows) < _MIN_FANOUT_COUNT:
+        return [f"{where}: only {len(inflows)} cited inflow(s); the fan-in pattern needs >={_MIN_FANOUT_COUNT}"]
+    # distinct originators when named; the empty-guard (str-or-empty -> strip -> falsy dropped) keeps an
+    # empty/missing counterparty_name from counting as a distinct originator (the Phase-3 substring trap).
+    originators = {name for t in inflows if (name := str(t.get("counterparty_name") or "").strip())}
+    if originators and len(originators) < _MIN_FANOUT_COUNT:
+        return [
+            f"{where}: only {len(originators)} distinct inbound originator(s); "
+            f"the fan-in pattern needs >={_MIN_FANOUT_COUNT}"
+        ]
+    times = _sorted_times(inflows, where)
+    if isinstance(times, str):
+        return [times]
+    if times[-1] - times[0] > _FANOUT_WINDOW:
+        return [f"{where}: fan-in inflows span {times[-1] - times[0]} > the {_FANOUT_WINDOW.days}d window"]
+    return []
+
+
+def _assert_c3_funnel_fan(alert: dict[str, Any], cited_txns: list[dict[str, Any]]) -> list[str]:
+    # C3 covers the funnel typology in EITHER direction; ground if the cited txns re-derive fan-OUT OR
+    # fan-IN. casework's C3 was fan-out-only (Phase 6) — STRICTER than the capability, false-blocking a
+    # genuine fan-in alert (the Phase-77 Lakeshore co-sign gap). Adding fan-in is additive + source-
+    # faithful, NEVER a loosening (it reduces a false-block). When both legs fail, report both tried.
+    where = f"alerts[{alert.get('alert_id')}].replay(C3)"
+    fan_out = _c3_fan_out(cited_txns, where)
+    if not fan_out:
+        return []
+    fan_in = _c3_fan_in(cited_txns, where)
+    if not fan_in:
+        return []
+    return fan_out + fan_in
 
 
 def _is_generic_trading(txn: dict[str, Any]) -> bool:

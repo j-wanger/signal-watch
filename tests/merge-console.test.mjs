@@ -5,19 +5,20 @@
 //
 // What it does: loads merge.html (the TEMPLATE — the 6th single-file offline artifact), injects a
 // controlled STUB dataset at the single injection placeholder (so the harness owns the XSS strings and
-// the consensus-vs-scored split), evaluates the inline script under the shim, then drives the 5-screen arc
-// (Queue → Evidence → Adjudication → Verdict → Ledger) and asserts the Phase-76 invariants:
+// the substrate-vs-synthetic provenance split), evaluates the inline script under the shim, then drives the
+// 5-screen arc (Queue → Evidence → Adjudication → Verdict → Ledger) and asserts the invariants (Phase-76 +
+// the Phase-79 SUPERSEDE — BOTH populations are now SCORED, the split is oracle PROVENANCE):
 //   - the queue groups candidate links BY BASIS (strong-shared-id / weak / name-only); honest split
-//     counts (real consensus vs synthetic scored); a "scored · synthetic" chip on synthetic candidates;
+//     counts (real-substrate scored vs synthetic scored); a "scored · substrate"/"scored · synthetic" chip;
 //   - Evidence shows BOTH records + the shared signal + the deterministic spine baseline, NEUTRALLY —
 //     the latent-truth ORACLE never appears pre-adjudication (the firewall: truth rides the verdict only);
 //   - the non-binary graded gate: recording is BLOCKED without grade + rationale (the Class-J obligation),
 //     records with both;
-//   - the Verdict appears ONLY post-adjudication and SPLITS real-consensus from synthetic-scored:
-//       * a REAL case shows "consensus, no ground truth" and carries NO oracle;
-//       * a SYNTHETIC case shows the latent truth + a match indicator + the synthetic-only qualifier;
-//   - the Ledger accumulates; export is valid JSON; the agreement arithmetic splits consensus from the
-//     synthetic-scored set (matched/scored, qualified); session-only honesty copy;
+//   - the Verdict appears ONLY post-adjudication and shows the latent-truth oracle for BOTH populations:
+//       * a SUBSTRATE case shows substrate's OWN anchored ground truth + a match indicator + the qualifier;
+//       * a SYNTHETIC case shows the authored latent truth + a match indicator + the synthetic-only qualifier;
+//   - the Ledger accumulates; export is valid JSON; the agreement arithmetic is over ALL scored cases,
+//     split BY PROVENANCE (substrate / synthetic), each synthetic-only-qualified; session-only honesty copy;
 //   - the always-on badge node; NO catch-rate/lift wording;
 //   - XSS: case fields containing <script> / & render escaped (esc() is the sole escaper);
 //   - ←/→/Space/Esc presenter navigation (guarded inside INPUT/TEXTAREA); the reduced-motion branch.
@@ -31,6 +32,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE = resolve(HERE, '..', 'merge.html');
 const PLACEHOLDER = '__MERGE__';
 const QUAL = 'measured on synthetic clusters; production has no ground truth';
+const SUB_QUAL = 'measured on a synthetic aml-substrate slice; production has no ground truth';
 
 /* ---------- assertion tally ---------- */
 let pass = 0;
@@ -62,17 +64,18 @@ const STUB = {
     { id: 'weak', label: 'Weak corroboration', desc: 'share only an address' },
     { id: 'name', label: 'Name-only', desc: 'share only a name' },
   ],
-  provenance: { substrate_head: 'fc98b09', slice_cases: 376, n_real_consensus: 1, n_synthetic_scored: 3,
-                synthetic_qualifier: QUAL },
+  provenance: { substrate_head: 'c099259', substrate_slice: { params: { clients: 400, seed: 0 } },
+                n_substrate_scored: 1, n_synthetic_scored: 3,
+                synthetic_qualifier: QUAL, substrate_qualifier: SUB_QUAL },
   cases: [
-    { // REAL consensus — strong shared email, two distinct names, NO oracle
-      id: 'real-P-0001-P-0002', source: 'substrate-v0.5-slice', scored: false, basis: 'strong',
-      shared: { kind: 'email', value: 'user383771@example.test' }, cross_institution: true,
-      spine_verdict: 'kept_distinct', substrate_claim: 'resolved',
-      a: { ref: 'P-0001', name: 'Owen Patel', kind: 'person', role: 'BENEFICIAL_OWNER',
-           attrs: { risk: 'LOW', pep: 'NONE', sanctions: false, adverse_media: false } },
-      b: { ref: 'P-0002', name: 'Emma Thompson', kind: 'person', role: 'BENEFICIAL_OWNER',
-           attrs: { risk: 'MEDIUM', pep: 'NONE', sanctions: false, adverse_media: false } } },
+    { // SUBSTRATE-anchored scored — strong shared email, demoted-spine REFUSED; a noise-floor collision (truth DISTINCT → reject correct)
+      id: 'sub-P-0001-P-0002', source: 'substrate-anchored-slice', scored: true, basis: 'strong',
+      shared: { kind: 'email', value: 'user383771@example.test' }, spine_verdict: 'kept_distinct',
+      a: { ref: 'P-0001', name: 'Owen Patel', kind: 'person', role: 'beneficial_owner',
+           identifiers: [{ kind: 'email', value: 'user383771@example.test' }] },
+      b: { ref: 'P-0002', name: 'Emma Thompson', kind: 'person', role: 'counterparty',
+           identifiers: [{ kind: 'email', value: 'user383771@example.test' }] },
+      oracle: { same_entity: false, klass: 'correct-rejection', correct_adjudication: 'reject_as_shares', qualifier: SUB_QUAL } },
     { // SYNTHETIC scored — over-merge trap (resolver MERGED; truth DISTINCT → reject is correct)
       id: 'syn-o9-o10', source: 'synthetic-oracle', scored: true, basis: 'strong',
       shared: { kind: 'phone', value: '15550140' }, spine_verdict: 'merged',
@@ -236,7 +239,7 @@ eq(rows, STUB.cases.length, 'queue lists every candidate as a row');
 ok(/Strong shared identifier/.test(env.__stage._html) && /Weak corroboration/.test(env.__stage._html)
   && /Name-only/.test(env.__stage._html), 'queue groups candidates by basis (strong / weak / name)');
 eq((env.__stage._html.match(/Scored · synthetic/g) || []).length, 3, 'each synthetic candidate carries a "scored · synthetic" chip');
-ok(/Consensus/.test(env.__stage._html), 'the real candidate carries a "consensus" chip');
+eq((env.__stage._html.match(/Scored · substrate/g) || []).length, 1, 'the substrate candidate carries a "scored · substrate" chip (both populations scored — the supersede)');
 ok(env.__stage._html.includes('Owen Patel') && env.__stage._html.includes('Emma Thompson'),
   'queue rows show the two record names of each candidate pair');
 // NEUTRALITY: the latent truth never appears before the verdict
@@ -253,8 +256,8 @@ ok(env.__stage._html.includes('Owen Patel') && env.__stage._html.includes('Emma 
   'Evidence shows BOTH record names');
 ok(env.__stage._html.includes(escH(cReal.shared.value)), 'Evidence shows the shared identifier value');
 ok(/kept distinct/.test(env.__stage._html), 'Evidence shows the deterministic spine baseline (kept distinct)');
-ok(/same entity/i.test(env.__stage._html), 'Evidence shows the upstream resolver claim for the real case');
-ok(/Risk rating/.test(env.__stage._html), 'Evidence shows the real record KYC attributes');
+ok(/demoted/i.test(env.__stage._html), 'Evidence frames the demoted-spine baseline (substrate noise-floor email/phone demoted)');
+ok((env.__stage._html.match(/user383771@example.test/g) || []).length >= 2, 'Evidence shows the shared email in BOTH the signal box and the record identifiers');
 // the firewall in the render: the oracle truth is NOT in the pre-adjudication evidence
 ok(!/Latent truth/.test(env.__stage._html) && !/Synthetic ground truth/.test(env.__stage._html)
   && !/Defensible call/.test(env.__stage._html), 'FIREWALL: Evidence never reveals the latent-truth oracle');
@@ -272,20 +275,21 @@ ok(/id="blockmsg"/.test(env.__stage._html), 'an honest blocked message renders')
 api.pickGrade('reject_as_shares');
 api.recordDisposition();
 ok(api.screen === 1 && api.dispositions.length === 0, 'grade alone is still blocked (rationale required — the Class-J obligation)');
-const RAT_REAL = 'Distinct beneficial owners sharing a noise-floor email; no ground truth — record as a SHARES edge. <&test>';
+const RAT_REAL = 'Distinct beneficial owners sharing a noise-floor email — record as a SHARES edge, not a merge. <&test>';
 api.setRationale(RAT_REAL);
 api.recordDisposition();
 eq(api.dispositions.length, 1, 'grade + rationale → the adjudication records');
 ok(api.dispositions[0].grade === 'reject_as_shares' && api.dispositions[0].rationale === RAT_REAL
-  && api.dispositions[0].scored === false, 'the recorded real disposition carries grade + rationale + scored=false');
+  && api.dispositions[0].scored === true, 'the recorded substrate disposition carries grade + rationale + scored=true (both populations scored)');
 
-// ---- (4) Verdict for a REAL case: consensus, NO oracle ----
+// ---- (4) Verdict for the SUBSTRATE case: SCORED against substrate's anchored oracle (the supersede) ----
 eq(api.screen, 2, 'recording advances to the Verdict');
-ok(/consensus/i.test(env.__stage._html) && /no ground truth/i.test(env.__stage._html),
-  'the REAL verdict frames the call as consensus, no ground truth');
-ok(!/Synthetic ground truth/.test(env.__stage._html) && !/Latent truth/.test(env.__stage._html),
-  'the REAL verdict carries NO oracle (no fabricated ground truth on real data)');
-ok(env.__stage._html.includes(escH(RAT_REAL)), 'the REAL verdict shows the presenter rationale (escaped)');
+ok(/Substrate's anchored ground truth/.test(env.__stage._html),
+  'the SUBSTRATE verdict shows substrate\'s anchored ground-truth oracle (both populations scored — the supersede)');
+ok(/DISTINCT entities/.test(env.__stage._html) && /matched the latent truth/i.test(env.__stage._html),
+  'the substrate oracle reveals DISTINCT (a noise-floor collision) and the correct reject call matched');
+ok(env.__stage._html.includes(SUB_QUAL), 'the substrate verdict carries the synthetic-SUBSTRATE qualifier');
+ok(env.__stage._html.includes(escH(RAT_REAL)), 'the substrate verdict shows the presenter rationale (escaped)');
 
 // the guard: a FRESH (unrecorded) candidate can never reach the Verdict directly
 api.pickCase(STUB.cases[1].id);
@@ -307,7 +311,7 @@ api.recordDisposition();
 eq(api.screen, 2, 'synthetic adjudication advances to the Verdict');
 ok(/Synthetic ground truth/.test(env.__stage._html), 'the SYNTHETIC verdict shows the latent-truth oracle card');
 ok(/DISTINCT entities/.test(env.__stage._html), 'the oracle shows the latent truth (distinct entities)');
-ok(/matched the synthetic truth/i.test(env.__stage._html), 'a correct call is shown as matching the synthetic truth');
+ok(/matched the latent truth/i.test(env.__stage._html), 'a correct call is shown as matching the latent truth');
 ok(env.__stage._html.includes(QUAL), 'the synthetic verdict carries the synthetic-only qualifier');
 
 // a WRONG call on a synthetic case shows the mismatch
@@ -318,14 +322,14 @@ api.pickGrade('reject_as_shares');                 // the WRONG call (truth is S
 api.setRationale('Different identifiers — I keep them apart.');
 api.recordDisposition();
 ok(/the SAME entity/.test(env.__stage._html), 'the fragmentation oracle shows the latent truth (same entity)');
-ok(/differs from the synthetic truth/i.test(env.__stage._html), 'a wrong call is shown as differing from the synthetic truth');
+ok(/differs from the latent truth/i.test(env.__stage._html), 'a wrong call is shown as differing from the latent truth');
 
-// ---- (6) Ledger: accumulation + the consensus/scored split + JSON export ----
+// ---- (6) Ledger: accumulation + the agreement arithmetic (both scored, by provenance) + JSON export ----
 api.advance();
 eq(api.view, 'ledger', 'advance from the Verdict reaches the session Ledger');
 eq((env.__stage._html.match(/class="ledrow"/g) || []).length, 3, 'ledger accumulates all session adjudications');
-ok(/1<\/b> real/.test(env.__stage._html) || /1 real/.test(env.__stage._html), 'ledger reports the consensus (real) count');
-ok(env.__stage._html.includes(QUAL), 'the ledger agreement arithmetic carries the synthetic-only qualifier');
+ok(/2\/3<\/b> of your calls matched/.test(env.__stage._html), 'ledger reports the overall agreement (2 of 3 matched the latent oracle)');
+ok(env.__stage._html.includes(SUB_QUAL) || env.__stage._html.includes(QUAL), 'the ledger agreement arithmetic carries a synthetic-only qualifier');
 ok(/persists nothing/i.test(env.__stage._html), 'ledger states honestly that the offline file persists nothing');
 const expM = /<textarea id="export"[^>]*>([\s\S]*?)<\/textarea>/.exec(env.__stage._html);
 ok(!!expM, 'export textarea present');
@@ -333,11 +337,13 @@ let exported = null;
 try { exported = JSON.parse(unesc(expM ? expM[1] : '')); } catch { /* fails the next assert */ }
 ok(exported && Array.isArray(exported.dispositions) && exported.dispositions.length === 3,
   'export textarea contains VALID JSON with all three adjudications');
-ok(exported && exported.scored_agreement && exported.scored_agreement.matched === 1
-  && exported.scored_agreement.scored_adjudicated === 2,
-  'exported scored_agreement counts only synthetic cases (1 of 2 matched the oracle)');
-ok(exported && exported.consensus_adjudicated === 1, 'exported consensus_adjudicated counts only the real case');
-ok(exported && exported.scored_agreement.qualifier === QUAL, 'the exported scored agreement is qualified synthetic-only');
+ok(exported && exported.agreement && exported.agreement.matched === 2 && exported.agreement.scored_adjudicated === 3,
+  'exported agreement counts ALL scored cases (2 of 3 matched the latent oracle)');
+ok(exported && exported.agreement.by_provenance
+  && exported.agreement.by_provenance.substrate.matched === 1 && exported.agreement.by_provenance.substrate.adjudicated === 1
+  && exported.agreement.by_provenance.synthetic.matched === 1 && exported.agreement.by_provenance.synthetic.adjudicated === 2,
+  'exported agreement splits by provenance (substrate 1/1, synthetic 1/2)');
+ok(exported && exported.agreement.qualifier === SUB_QUAL, 'the exported agreement is qualified synthetic-only (substrate slice)');
 ok(env.__errors.length === 0, 'full arc drove with no console errors');
 
 // ---- (7) XSS: hostile fields render escaped ----

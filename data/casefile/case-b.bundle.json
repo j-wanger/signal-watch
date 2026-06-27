@@ -1,0 +1,72 @@
+{
+  "contract_version": "0.1",
+  "illustrative": true,
+  "case_id": "CASE-B",
+  "subject": {
+    "customer_id": "E-LAKESHORE",
+    "name": "Lakeshore Catering Group Inc. (SYNTHETIC)",
+    "account_ids": ["A-LS-0001"]
+  },
+  "transactions": [
+    {"txn_id": "T-LS-01", "account_id": "A-LS-0001", "direction": "CREDIT", "amount_cents": 920000, "ts": "2026-04-02T11:00:00", "counterparty_name": "Halton Conference Centre Ltd."},
+    {"txn_id": "T-LS-02", "account_id": "A-LS-0001", "direction": "CREDIT", "amount_cents": 450000, "ts": "2026-04-02T14:21:00", "counterparty_name": "Priya Raman"},
+    {"txn_id": "T-LS-03", "account_id": "A-LS-0001", "direction": "CREDIT", "amount_cents": 380000, "ts": "2026-04-03T09:33:00", "counterparty_name": "John Calderon"},
+    {"txn_id": "T-LS-04", "account_id": "A-LS-0001", "direction": "CREDIT", "amount_cents": 760000, "ts": "2026-04-04T10:05:00", "counterparty_name": "Oakville Sports & Events Ltd."},
+    {"txn_id": "T-LS-05", "account_id": "A-LS-0001", "direction": "CREDIT", "amount_cents": 420000, "ts": "2026-04-05T16:42:00", "counterparty_name": "David Brunelle"},
+    {"txn_id": "T-LS-06", "account_id": "A-LS-0001", "direction": "CREDIT", "amount_cents": 610000, "ts": "2026-04-06T12:18:00", "counterparty_name": "Lakeshore Yacht Club"},
+    {"txn_id": "T-LS-07", "account_id": "A-LS-0001", "direction": "CREDIT", "amount_cents": 390000, "ts": "2026-04-07T15:50:00", "counterparty_name": "Mei Lin Events"},
+    {"txn_id": "T-LS-08", "account_id": "A-LS-0001", "direction": "CREDIT", "amount_cents": 420000, "ts": "2026-04-08T13:27:00", "counterparty_name": "Corporate Catering Solutions Inc."},
+    {"txn_id": "T-LS-EXC", "account_id": "A-LS-0001", "direction": "CREDIT", "amount_cents": 1140000, "ts": "2026-04-01T10:00:00", "counterparty_name": "Crestview Corporate Events", "exculpatory": true, "memo": "Reconciled $11,400 quarterly catering-contract settlement (SYNTHETIC). The incoming client payments are the documented receipts of a registered event-catering business (Lakeshore Catering Group Inc.), each matched to a signed catering contract and point-of-sale records and consistent with the declared monthly catering profile — an affirmatively established legitimate source of funds for the multi-originator inbound activity."}
+  ],
+  "alerts": [
+    {
+      "alert_id": "AL-LS-C3",
+      "detector": "multi_originator_funnel_in",
+      "capability": "C3",
+      "account_id": "A-LS-0001",
+      "txn_ids": ["T-LS-01", "T-LS-02", "T-LS-03", "T-LS-04", "T-LS-05", "T-LS-06", "T-LS-07", "T-LS-08"],
+      "rule": "multi-originator funnel-in: >=5 inbound deposits from distinct originators into one account within 7d",
+      "grounding": {
+        "signal_id": "fin-2023-alert001:IND-02",
+        "advisory_id": "fin-2023-alert001",
+        "indicator_id": "IND-02",
+        "capability": "C3",
+        "data_source": "D2",
+        "flag": "Deposits made by multiple individuals in multiple locations into a single account, not affiliated with the account holder’s area of residence or work, with no apparent business purpose.",
+        "red_flag": "Multi-individual multi-location deposits into one out-of-area account (funnel-in)"
+      }
+    }
+  ],
+  "dossier": {
+    "dossier_id": "DS-LS",
+    "account_id": "A-LS-0001",
+    "alert_ids": ["AL-LS-C3"]
+  },
+  "str_record": {
+    "case_id": "CASE-B",
+    "subject_account_ids": ["A-LS-0001"],
+    "cited_signal_ids": ["fin-2023-alert001:IND-02"],
+    "cited_txn_ids": ["T-LS-01", "T-LS-02", "T-LS-03", "T-LS-04", "T-LS-05", "T-LS-06", "T-LS-07", "T-LS-08", "T-LS-EXC"],
+    "completeness": {
+      "reporting_entity": true,
+      "transaction_details": true,
+      "account_information": true,
+      "subject_information": true,
+      "typology_grounds": true,
+      "grounds_for_suspicion_narrative": true
+    },
+    "narrative": "Between 2026-04-02 and 2026-04-08, Lakeshore Catering Group Inc. (account A-LS-0001) received eight inbound payments of $3,800 to $9,200 from eight distinct corporate and event-catering clients, which triggered a multi-originator funnel-in alert. The payments are documented catering-contract settlements: the business records a reconciled $11,400 quarterly client settlement supported by signed contracts and point-of-sale records, and the period volume fits the declared monthly catering profile. The documented and reconciled source affirmatively clears the alert.",
+    "narrative_claims": [
+      {"text": "Eight inbound payments from eight distinct corporate and event-catering originators within a single week triggered a multi-originator funnel-in alert.", "cites": ["fin-2023-alert001:IND-02", "T-LS-01", "T-LS-02", "T-LS-03", "T-LS-04", "T-LS-05", "T-LS-06", "T-LS-07", "T-LS-08"], "stance": "neutral"},
+      {"text": "Lakeshore Catering Group is a registered event-catering business whose incoming payments are documented client settlements reconciled to signed contracts and point-of-sale records and consistent with the declared monthly profile; the reconciled $11,400 settlement is an affirmatively established legitimate source of funds.", "cites": ["T-LS-EXC"], "stance": "exculpatory"}
+    ]
+  },
+  "provenance": {
+    "synthetic": "Banking data is INVENTED. NO real customer/transaction data (program non-negotiable).",
+    "grounding_is_real": "signal_id + verbatim flag + C/D codes are REAL signal-watch corpus indicators (fin-2023-alert001 IND-02, the C3 multi-originator-deposit funnel-in indicator), machine-grounded by casework's corpus_grounding against the pinned vendored corpus.",
+    "grounding_note": "This casework bundle grounds the C3 fan-in on fin-2023-alert001:IND-02 (the FAITHFUL multi-originator-deposit indicator for Lakeshore's catering funnel). signal-watch's own casefile (data/casefile/case.json, AL-LS-C3) grounds the same alert on fin-2020-alert001:IND-05 for MATCHED-PAIR signal symmetry with CASE-A (Northgate) — a less faithful indicator (social-media solicitation). The casefile grounding is left untouched to preserve the matched pair + the FILE case; the divergence is disclosed, not buried (a candidate future faithfulness fix that would require re-grounding both cases).",
+    "window_note": "The 8 inbound catering receipts are authored within a <=7-day window (2026-04-02..04-08) to match casework's fan-in funnel definition (grounding_replay _FANOUT_WINDOW = 7 days: >=5 distinct originators crediting one account within 7 days). This is DELIBERATE and verifier-driven — the casefile's original ~14-day receipt span would NOT re-derive casework's funnel-in — AND faithful, because a multi-originator funnel concentrates in time by construction (8 client payments to an active event-catering business within a week is realistic). The determination verdict is UNAFFECTED: the engine keys on the established source-of-funds + mitigation, not on receipt timing (cleared both ways; the user confirmed the compression).",
+    "exculpatory_note": "T-LS-EXC is an authored casework-contract artifact, not a re-encoding of a specific casefile transaction: casework's `cleared` rule REQUIRES a cited exculpatory:true row, and this row EXPRESSES the source-of-funds that case.json's CASE-B mitigation establishes generically ('the source of funds is established ... the inbound legs reconcile to the stated catering business'). The specific $11,400 figure + the signed-contracts/point-of-sale framing are ILLUSTRATIVE bundle detail (the badge covers synthetic-ness); the reference fixture case-cleared-c3-fanin-06.json uses the identical settlement-row pattern.",
+    "role": "Phase 79 cross-pillar CLEARED co-sign (casework CW-4): the north-star Lakeshore casefile (CASE-B) signed `cleared` end-to-end via casework's C3 FAN-IN re-derivation (Phase 19, CW-3 — the unblocking sibling work). The funnel typology fired in the FAN-IN direction (>=5 distinct inbound originators crediting one account within a 7-day window — the catering business's many client receipts) and is AFFIRMATIVELY EXPLAINED: a documented, reconciled legitimate source of funds. The narrative ACKNOWLEDGES the alert with a NEUTRAL mechanism-acknowledgment claim and grounds the affirmative mitigation with an EXCULPATORY claim -> grounded_stances == {exculpatory}, no grounded inculpatory predicate. `cleared` is HUMAN-ASSIGNED (the mirror of `file`). signal-watch's data/casefile/case.json is its own casefile format, not casework-consumable; this is its casework-contract translation (the FAN-IN alert + its exculpation; the legitimate outbound supplier debits are case display-detail, not part of the alert)."
+  }
+}

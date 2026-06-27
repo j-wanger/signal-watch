@@ -1,5 +1,12 @@
 # PLAN-BRIEF — aml-substrate: wire the eval-oracle emissions into the CLI
 
+> **✅ RESOLVED 2026-06-27.** substrate Phase 31 (`9677a37`) wired `--emit-eval-oracles` across the CLI;
+> Phase 32/33 (`31cb439`/`f9e63e7`) added the `--anchored` NON-circular identity oracle (opaque `GT-<hash>`
+> clusters, `entity_ref ≠ cluster` — curing the Phase-77 circular-echo abort). signal-watch consumed BOTH
+> across the tool-use boundary: **Phase 78** (the `intended_disposition` oracle → the determination-validation
+> harness) + **Phase 79 T3/T4** (the `--anchored` identity oracle → the merge console's real-data SCORED
+> population, superseding the consensus-66). The original handoff follows (historical).
+
 > **A signal-watch → aml-substrate handoff brief** (the Phase-55–58 / 74–76 pattern: signal-watch authors the
 > contract; the sibling implements on its own lifecycle — *no code lands in substrate from here*). Synthetic /
 > illustrative; no catch-rate, lift, or precision asserted. **Pinned to verified substrate HEAD `f2da3e4`

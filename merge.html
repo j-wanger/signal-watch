@@ -198,7 +198,7 @@
   </div>
 
   <footer>
-    Merge console — the Class-J human gate over entity-resolution candidate links · the deterministic spine resolves what it can and REFUSES the ambiguous; you adjudicate the residual · REAL candidate SHARES are consensus-not-ground-truth (substrate emits no ground truth for the slice); the scored dimension is SYNTHETIC ONLY — measured on synthetic clusters, production has no ground truth · grades &amp; rationales are the presenter's, session-only<br>
+    Merge console — the Class-J human gate over entity-resolution candidate links · the deterministic spine resolves what it can and REFUSES the ambiguous; you adjudicate the residual · BOTH populations are SCORED against a latent-truth oracle (real-substrate vs synthetic) — SYNTHETIC ONLY, measured on a synthetic substrate slice, production has no ground truth · grades &amp; rationales are the presenter's, session-only<br>
     <span class="keys">←/→ navigate · Space advance · Esc back to the queue</span>
   </footer>
 </div>
@@ -246,19 +246,19 @@ function sharedText(c){
 }
 // the deterministic resolver's call, in the human grade vocab (the verdict's baseline)
 function baselineGrade(c){return c.spine_verdict==='merged'?'uphold_merge':'reject_as_shares';}
+// the oracle PROVENANCE — real-substrate (substrate's anchored GT- truth) vs hand-authored synthetic. BOTH
+// are SCORED (Phase 79 supersede); the split is provenance, each synthetic-only-qualified, never production.
+function isSub(c){return (c&&c.source)==='substrate-anchored-slice';}
+function provLabel(c){return isSub(c)?'substrate':'synthetic';}
 function oracleMatch(c,grade){return !!(c.scored&&c.oracle&&grade===c.oracle.correct_adjudication);}
 function agreementFor(c,grade){
   if(c.scored&&c.oracle){
-    if(grade===c.oracle.correct_adjudication)return 'matches the synthetic oracle';
+    if(grade===c.oracle.correct_adjudication)return 'matches the latent oracle';
     if(grade==='both_defensible')return 'recorded ambiguity — the oracle records one truth';
     if(grade==='escalate')return 'escalated — the oracle records one truth';
-    return 'differs from the synthetic oracle';
+    return 'differs from the latent oracle';
   }
-  // real consensus: measured against the deterministic spine baseline (it refused the merge)
-  if(grade==='reject_as_shares')return 'upholds the spine’s refusal (consensus)';
-  if(grade==='uphold_merge')return 'overrides the spine — would merge (consensus differs)';
-  if(grade==='both_defensible')return 'both defensible — wider than the spine’s call';
-  return 'escalated — beyond the deterministic baseline';
+  return 'no oracle';   // unreachable under the Phase-79 supersede (every case is scored)
 }
 
 /* ---------- stepper (rendered INSIDE the stage, at the top of every scene) ---------- */
@@ -281,11 +281,11 @@ function wireSteps(){
 /* ---------- screen: the candidate-SHARES queue (grouped by basis) ---------- */
 function renderQueue(){
   const total=CASES.length, done=dispositions.length;
-  const nReal=CASES.filter(c=>!c.scored).length, nScored=CASES.filter(c=>c.scored).length;
+  const nSub=CASES.filter(isSub).length, nSyn=CASES.filter(c=>!isSub(c)).length;
   let k=0;
   const groups=BASES.map(b=>{
-    // scored (synthetic, the differentiator) first within each basis, then deterministic by id
-    const rows=CASES.filter(c=>c.basis===b.id).sort((x,y)=>(y.scored?1:0)-(x.scored?1:0)||(x.id<y.id?-1:x.id>y.id?1:0));
+    // substrate-scored (the real-data population) first within each basis, then deterministic by id
+    const rows=CASES.filter(c=>c.basis===b.id).sort((x,y)=>(isSub(y)?1:0)-(isSub(x)?1:0)||(x.id<y.id?-1:x.id>y.id?1:0));
     if(!rows.length)return '';
     return `<div class="axhead">${esc(b.label)} <span class="axn">${rows.length} candidate${rows.length===1?'':'s'} · ${esc(b.desc)}</span></div>
       <div class="qgrid">${rows.map(c=>{
@@ -297,17 +297,17 @@ function renderQueue(){
             <div class="crmeta">shares ${sharedText(c)}</div>
           </div>
           ${rec?`<span class="chip rec">Recorded · ${esc(gradeShort(rec.grade))}</span>`:''}
-          ${c.scored?`<span class="chip scored">Scored · synthetic</span>`:`<span class="chip src">Consensus</span>`}
+          <span class="chip scored">Scored · ${provLabel(c)}</span>
         </div>`;}).join('')}</div>`;
   }).join('');
   stage.innerHTML=stepsHtml()+`<div class="scene">
     <div class="eyebrow">Merge console · Class J — human judgment over identity links</div>
     <h2>The merge-adjudication queue — <em>candidate links the resolver refused</em></h2>
-    <p class="lead">Entity resolution proposes that two records are the <b>same</b> party. The deterministic spine merges what it can on a declared identity and <b>refuses the ambiguous</b> — two distinct entities that merely share an identifier. Those refusals are below, grouped by the shared signal. Most are <b>real</b> candidate SHARES from the substrate slice — there is <b>no ground truth</b> for them (consensus, not correctness). A smaller set is <b>synthetic</b>, carrying a latent-truth oracle, so the verdict can show — on synthetic data only — whether your call matched truth. The resolver assembles the evidence; you adjudicate.</p>
+    <p class="lead">Entity resolution proposes that two records are the <b>same</b> party. The deterministic spine merges what it can on a declared identity and <b>refuses the ambiguous</b> — two distinct entities that merely share an identifier. Those refusals are below, grouped by the shared signal. Both populations are <b>scored</b> against a latent-truth oracle. The <b>real-substrate</b> cases run against aml-substrate's OWN anchored identity ground truth: the demoted spine <b>REFUSED every one</b> (it keys on the declared reference, substrate's noise-floor email/phone demoted to weak), so the <b>oracle does the discrimination</b> — it reveals which refusals were real same-person fragments the spine should have UPHELD (a fragmentation gap) vs noise-floor collisions it correctly kept apart (a correct rejection). This scores the demotion policy against truth, not a merge/refuse resolver — that lives in the <b>synthetic</b> set, an authored oracle whose resolver both merges and refuses, spanning all four quadrants. Every score is <b>synthetic by construction</b> — measured on a synthetic substrate slice, never production. The resolver assembles the evidence; you adjudicate.</p>
     <div class="qstats">
       <div class="qstat"><div class="qsn">${total}</div><div class="qsl">candidate links</div></div>
-      <div class="qstat"><div class="qsn">${nReal}</div><div class="qsl">real · consensus</div></div>
-      <div class="qstat"><div class="qsn">${nScored}</div><div class="qsl">synthetic · scored</div></div>
+      <div class="qstat"><div class="qsn">${nSub}</div><div class="qsl">real-substrate · scored</div></div>
+      <div class="qstat"><div class="qsn">${nSyn}</div><div class="qsl">synthetic · scored</div></div>
       <div class="qstat"><div class="qsn">${done}</div><div class="qsl">adjudicated this session</div></div>
     </div>
     ${groups}
@@ -318,16 +318,10 @@ function renderQueue(){
 }
 
 /* ---------- screen: evidence (the two records + the shared signal; NEUTRAL — no oracle) ---------- */
-function recCard(label,r,scored){
+function recCard(label,r){
   const idents=(r&&Array.isArray(r.identifiers))?r.identifiers:[];
-  const at=(r&&r.attrs)||{};
-  const attrRows=scored
-    ? idents.map(i=>`<div class="arow"><span class="ak">${esc(i.kind)}</span><span class="av">${esc(i.value)}</span></div>`).join('')
-      || `<div class="arow"><span class="ak">identifiers</span><span class="av">none presented in this record</span></div>`
-    : `<div class="arow"><span class="ak">Risk rating</span><span class="av">${esc(at.risk||'—')}</span></div>
-       <div class="arow"><span class="ak">PEP tier</span><span class="av">${esc(at.pep||'—')}</span></div>
-       <div class="arow"><span class="ak">Sanctions</span><span class="av">${at.sanctions?'flagged':'none'}</span></div>
-       <div class="arow"><span class="ak">Adverse media</span><span class="av">${at.adverse_media?'flagged':'none'}</span></div>`;
+  const attrRows=idents.map(i=>`<div class="arow"><span class="ak">${esc(i.kind)}</span><span class="av">${esc(i.value)}</span></div>`).join('')
+    || `<div class="arow"><span class="ak">identifiers</span><span class="av">none presented in this record</span></div>`;
   return `<div class="reccard">
     <div class="ah">${esc(label)}<span class="rk">${esc((r&&r.kind)||'')}${r&&r.role?' · '+esc(r.role):''}</span></div>
     <div class="recname">${esc(r&&r.name)}</div>
@@ -337,19 +331,17 @@ function recCard(label,r,scored){
 function renderEvidence(c){
   const dist=c.spine_verdict!=='merged';
   const baseline=dist
-    ? `<span class="vtag distinct">kept distinct</span> The deterministic resolver <b>refused</b> to merge these — it keys identity on the declared reference, and these declared identities differ.`
+    ? `<span class="vtag distinct">kept distinct</span> The deterministic resolver <b>refused</b> to merge these — it keys identity on the declared reference (substrate's noise-floor email/phone <b>demoted</b> to weak), and these declared identities differ.`
     : `<span class="vtag merged">merged</span> The deterministic resolver <b>merged</b> these on the single shared identifier.`;
-  const claim=(!c.scored&&c.substrate_claim==='resolved')
-    ? ` The upstream resolver, by contrast, asserted these <b>resolve to the same entity</b> — the claim the spine declined.`:'';
   stage.innerHTML=stepsHtml()+`<div class="scene">
-    <div class="eyebrow">Candidate ${esc(c.id)}</div>
+    <div class="eyebrow">Candidate ${esc(c.id)} · ${provLabel(c)}</div>
     <h2>The evidence — <em>two records, one shared signal</em></h2>
-    <p class="lead">The two records and what links them. Read them on the evidence alone — a shared identifier proves contact, <b>not identity</b>. They are linked by <b>${esc(basisLabel(c.basis))}</b>${c.cross_institution?' · seen across institutions':''}.</p>
+    <p class="lead">The two records and what links them. Read them on the evidence alone — a shared identifier proves contact, <b>not identity</b>. They are linked by <b>${esc(basisLabel(c.basis))}</b>.</p>
     <div class="evgrid">
-      ${recCard('Record A',c.a,c.scored)}
-      ${recCard('Record B',c.b,c.scored)}
+      ${recCard('Record A',c.a)}
+      ${recCard('Record B',c.b)}
       <div class="sharedbox"><div class="sl">The shared signal</div><div class="sv">Both records present ${sharedText(c)}</div></div>
-      <div class="baseline">${baseline}${claim}</div>
+      <div class="baseline">${baseline}</div>
     </div>
     <div class="framenote">A shared identifier is a household landline, a joint account, a shared inbox, or a coincidence as often as it is the same person — and the same person fragments across records with no shared identifier at all. A grounding gate cannot decide which; that is exactly the judgment this gate asks of you.</div>
   </div>`;
@@ -397,37 +389,26 @@ function renderVerdict(c){
   if(!rec){gotoScreen(1);return;}
   const dist=c.spine_verdict!=='merged';
   const baseTag=dist?'<span class="vtag distinct">kept distinct</span>':'<span class="vtag merged">merged</span>';
-  let truthCard;
-  if(c.scored&&c.oracle){
-    const same=c.oracle.same_entity;
-    const correct=gradeShort(c.oracle.correct_adjudication);
-    let mt;
-    if(rec.grade===c.oracle.correct_adjudication)mt='<span class="matchtag yes">✓ your call matched the synthetic truth</span>';
-    else if(rec.grade==='both_defensible'||rec.grade==='escalate')mt='<span class="matchtag amb">you recorded ambiguity — the oracle records one truth</span>';
-    else mt='<span class="matchtag no">✗ your call differs from the synthetic truth</span>';
-    truthCard=`<div class="revcard oracle">
-      <div class="ah">Synthetic ground truth · scored</div>
+  const same=c.oracle.same_entity;
+  const correct=gradeShort(c.oracle.correct_adjudication);
+  let mt;
+  if(rec.grade===c.oracle.correct_adjudication)mt='<span class="matchtag yes">✓ your call matched the latent truth</span>';
+  else if(rec.grade==='both_defensible'||rec.grade==='escalate')mt='<span class="matchtag amb">you recorded ambiguity — the oracle records one truth</span>';
+  else mt='<span class="matchtag no">✗ your call differs from the latent truth</span>';
+  const truthCard=`<div class="revcard oracle">
+      <div class="ah">${isSub(c)?"Substrate's anchored ground truth · scored":'Synthetic ground truth · scored'}</div>
       <div class="revbody">
+        <div class="revgrade">${baseTag} the deterministic spine ${dist?'refused this merge':'merged these'}</div>
         <div class="revgrade">Latent truth: <b>${same?'the SAME entity':'DISTINCT entities'}</b></div>
         <div class="revgrade">Defensible call: ${esc(correct)}</div>
         <div class="revrat">${mt}</div>
         <div class="qual">${esc(c.oracle.qualifier)}</div>
       </div>
     </div>`;
-  }else{
-    truthCard=`<div class="revcard consensus">
-      <div class="ah">No ground truth · consensus</div>
-      <div class="revbody">
-        <div class="revgrade">${baseTag} the spine refused this merge</div>
-        ${c.substrate_claim==='resolved'?`<div class="revgrade">the upstream resolver asserted: same entity</div>`:''}
-        <div class="revrat">Real substrate data carries no oracle — substrate emits no ground-truth identities for the slice (a named sibling handoff). This is <b>consensus, not correctness</b>; your call is the precedent.</div>
-      </div>
-    </div>`;
-  }
   stage.innerHTML=stepsHtml()+`<div class="scene">
     <div class="eyebrow">Candidate ${esc(c.id)} · the verdict</div>
-    <h2>The verdict — <em>${c.scored?'measured against synthetic truth':'consensus, not a score'}</em></h2>
-    <p class="lead">The deterministic baseline beside your adjudication. ${c.scored?'This candidate is <b>synthetic</b> — a latent-truth oracle exists, so the comparison is measured (on synthetic clusters only).':'This candidate is <b>real</b> — there is no oracle, so your call stands as consensus precedent, never scored.'}</p>
+    <h2>The verdict — <em>measured against the latent truth</em></h2>
+    <p class="lead">The deterministic baseline beside your adjudication. This candidate is <b>${provLabel(c)}</b> — a latent-truth oracle exists (${isSub(c)?"aml-substrate's OWN anchored identity ground truth":'an authored synthetic oracle'}), so the comparison is measured — on a synthetic slice only, never production.</p>
     <div class="revgrid">
       <div class="revcard you">
         <div class="ah">Your adjudication · this session</div>
@@ -439,7 +420,7 @@ function renderVerdict(c){
       </div>
       ${truthCard}
     </div>
-    <div class="framenote">Precedent, not a leaderboard — the real cases have no ground truth, and the scored cases are synthetic by construction (measured on synthetic clusters; production has no ground truth). The resolver's refusal is a starting point, not the answer.</div>
+    <div class="framenote">Precedent, not a leaderboard — both populations are synthetic by construction (measured on a synthetic substrate slice; production has no ground truth). The resolver's call is a starting point, not the answer.</div>
   </div>`;
 }
 
@@ -448,32 +429,35 @@ function renderLedger(){
   const rows=dispositions.map(d=>`<div class="ledrow">
       <span class="lo">#${d.order}</span>
       <div class="lmain">
-        <div class="lcase">${esc(d.case_id)} · ${d.scored?'synthetic':'consensus'}</div>
+        <div class="lcase">${esc(d.case_id)} · ${isSub(d)?'substrate':'synthetic'}</div>
         <div class="lrat">${esc(d.rationale)}</div>
       </div>
-      <span class="chip ${d.scored?'scored':'src'}">${esc(gradeShort(d.grade))}</span>
+      <span class="chip scored">${esc(gradeShort(d.grade))}</span>
       <span class="lagree">${esc(d.agreement)}</span>
     </div>`).join('');
-  const scored=dispositions.filter(d=>d.scored);
-  const matched=scored.filter(d=>d.oracle_match===true).length;
-  const realN=dispositions.filter(d=>!d.scored).length;
+  const matched=dispositions.filter(d=>d.oracle_match===true).length;
+  const subN=dispositions.filter(isSub), synN=dispositions.filter(d=>!isSub(d));
+  const subMatched=subN.filter(d=>d.oracle_match===true).length, synMatched=synN.filter(d=>d.oracle_match===true).length;
+  const qual=PROV.substrate_qualifier||PROV.synthetic_qualifier||'measured on a synthetic substrate slice; production has no ground truth';
   const exp={
     artifact:'Signal Watch — Merge Console (vision prototype)',
-    note:'Session-only merge-adjudication ledger. REAL candidate SHARES are consensus-not-ground-truth (no oracle); the scored agreement is SYNTHETIC ONLY — '+(PROV.synthetic_qualifier||'measured on synthetic clusters; production has no ground truth')+'. Illustrative outputs; a judgment ledger, not a detection-quality score.',
+    note:'Session-only merge-adjudication ledger. BOTH populations are SCORED against a latent-truth oracle — the real-substrate cases against aml-substrate\'s OWN anchored identity ground truth, the synthetic against an authored oracle. SYNTHETIC ONLY — '+qual+'. Illustrative outputs; a judgment ledger, NOT a detection-quality score.',
     provenance:PROV,
     candidates_total:CASES.length,
-    scored_agreement:{matched:matched, scored_adjudicated:scored.length, qualifier:(PROV.synthetic_qualifier||'measured on synthetic clusters; production has no ground truth')},
-    consensus_adjudicated:realN,
+    agreement:{matched:matched, scored_adjudicated:dispositions.length,
+               by_provenance:{substrate:{matched:subMatched, adjudicated:subN.length},
+                              synthetic:{matched:synMatched, adjudicated:synN.length}},
+               qualifier:qual},
     dispositions:dispositions,
   };
   const agbox=dispositions.length?`<div class="agbox">
-    <b>${realN}</b> real candidate${realN===1?'':'s'} adjudicated as <b>consensus</b> (no ground truth — your calls are precedent).
-    ${scored.length?` On the <b>synthetic</b> scored set, <b>${matched}/${scored.length}</b> of your calls matched the latent oracle — <span style="color:var(--faint)">${esc(PROV.synthetic_qualifier||'measured on synthetic clusters; production has no ground truth')}</span>.`:` No synthetic scored candidates adjudicated yet.`}
+    <b>${matched}/${dispositions.length}</b> of your calls matched the latent oracle — <span style="color:var(--faint)">${esc(qual)}</span>.
+    ${subN.length?` Real-substrate: <b>${subMatched}/${subN.length}</b>.`:''}${synN.length?` Synthetic: <b>${synMatched}/${synN.length}</b>.`:''}
   </div>`:'';
   stage.innerHTML=stepsHtml()+`<div class="scene">
     <div class="eyebrow">Merge console · session ledger</div>
     <h2>The session ledger — <em>judgment as precedent</em></h2>
-    <p class="lead"><b>Session-only:</b> this offline file persists nothing — close the tab and the ledger is gone. The agreement arithmetic splits the two populations: real cases are consensus precedent; the scored number is measured on synthetic clusters only.</p>
+    <p class="lead"><b>Session-only:</b> this offline file persists nothing — close the tab and the ledger is gone. Both populations are scored against a latent-truth oracle (real-substrate vs synthetic); the agreement number is measured on a synthetic substrate slice only, never production.</p>
     ${agbox}
     ${dispositions.length?`<div class="ledgrid">${rows}</div>
       <div class="doclabel">Export — the session JSON (copy out to keep)</div>

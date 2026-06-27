@@ -37,16 +37,14 @@ from pathlib import Path
 _HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(_HERE))
 ROOT = _HERE.parent
-WORKBENCH_DIR = ROOT / "data" / "workbench"
-CASES_INDEX = WORKBENCH_DIR / "cases.json"
-BUNDLES_DIR = WORKBENCH_DIR / "bundles"
 TRUE_ENTITIES = ROOT / "data" / "entity-spine" / "true_entities.json"
+SUBSTRATE_ANCHORED = ROOT / "data" / "entity-spine" / "substrate-anchored-slice.json"
 OUT_PATH = ROOT / "data" / "merge" / "cases.json"
 
-# the verified substrate HEAD the committed slice was curated from (Phase 75; mirrors curate_workbench_cases)
-SUBSTRATE_HEAD = "fc98b09"
+# the verified substrate HEAD the ANCHORED slice was emitted from (Phase 79 — the Phase-32/33 anchored fork;
+# supersedes the Phase-75 consensus slice @fc98b09 now that a non-circular GT-<hash> oracle exists)
+SUBSTRATE_HEAD = "c099259"
 
-from entity_spine import EntitySpine                                   # noqa: E402  (companion; needs duckdb)
 from resolution_scorer import (                                       # noqa: E402
     KLASS_OVER_MERGE_TRAP, KLASS_FRAGMENTATION_GAP, KLASS_REAL_CO_REFERENCE, KLASS_CORRECT_REJECTION,
     SYNTHETIC_QUALIFIER, candidate_pairs, resolver_input, run_resolver, load_true_entities,
@@ -79,110 +77,65 @@ BASES = [
 ]
 BASIS_IDS = frozenset(b["id"] for b in BASES)
 
-SOURCE_CONSENSUS = "substrate-v0.5-slice"   # real candidate SHARES — no oracle
-SOURCE_SCORED = "synthetic-oracle"          # synthetic — scored against true_entities
+SOURCE_SUBSTRATE_SCORED = "substrate-anchored-slice"   # real-substrate — scored vs the anchored GT-<hash> oracle (Phase 79)
+SOURCE_SCORED = "synthetic-oracle"                     # hand-authored synthetic — scored vs true_entities
+SOURCES = frozenset({SOURCE_SUBSTRATE_SCORED, SOURCE_SCORED})
+# Both populations are SYNTHETIC + SCORED; the split is now oracle PROVENANCE, each synthetic-only-qualified.
+# (Phase 79 supersede: the substrate slice was never REAL production data — it LACKED an oracle until the
+#  anchored fork emitted one; scoring it against substrate's OWN latent ground truth is honest, qualified.)
+SUBSTRATE_QUALIFIER = "measured on a synthetic aml-substrate slice; production has no ground truth"
 
 # the latent truth's correct adjudication, in the closed grade vocab
 _CORRECT = {True: "uphold_merge", False: "reject_as_shares"}
 
 # fields that would LEAK the latent truth into the pre-disposition evidence — forbidden on a/b (the firewall)
 _TRUTH_LEAK_KEYS = ("cluster", "same_entity", "correct_adjudication", "klass", "note", "oracle")
-
-
-def _safe_value(kind: str, value: str) -> str:
-    """Render a substrate-generated identifier UNAMBIGUOUSLY synthetic in the SHIPPED artifact (the
-    synthetic-by-construction discipline — Phase 73's .test/.example/555 rule). The substrate population is
-    already synthetic, but its emails sit on real domains (outlook.com/…); a ship file must never READ as real
-    data. We keep the local-part token (it proves the exact-match collision — both sides share it) and swap the
-    domain to the reserved `example.test`. Deterministic; identical inputs → identical output, so a shared
-    identifier stays shared."""
-    v = str(value or "")
-    if kind == "email" and "@" in v:
-        return v.split("@", 1)[0] + "@example.test"
-    return v
+# NB: email domain-masking to example.test now happens at DISTILLATION time (the committed
+# data/entity-spine/substrate-anchored-slice.json carries masked locals); validate() re-checks no real
+# domain ships. The synthetic-13 emails are authored .test by construction.
 
 
 # --------------------------------------------------------------------------------------------------
-def _observe_substrate_party(spine: "EntitySpine", case_id: str, party: dict):
-    """Observe one substrate party into the spine keyed on `entity_ref` (the reliable declared identity =
-    the STRONG merge key); email/phone are DEMOTED to `weak` candidate-SHARES (substrate's noise floor makes
-    them non-discriminative). Mirrors serve_workbench._observe_substrate_party (Phase 75) — replicated here
-    rather than importing the HTTP server, to keep this authoring tool decoupled from the live layer."""
-    eref = party.get("entity_ref") or party.get("party_id")
-    if not eref:
-        return None
-    idents = [{"kind": "entity_ref", "value": eref, "normalized": eref, "strength": "strong"}]
-    for i in (party.get("identifiers") or []):
-        if i.get("kind") in ("email", "phone") and i.get("normalized"):
-            idents.append({"kind": i["kind"], "value": i.get("value"),
-                           "normalized": i["normalized"], "strength": "weak"})
-    res = spine.observe(case_id, {"entity_id": eref, "display_name": party.get("display_name"),
-                                  "kind": "person" if party.get("is_person") else "org",
-                                  "role": party.get("label") or party.get("role"), "identifiers": idents})
-    return eref, res
+def load_substrate_anchored() -> dict:
+    return json.loads(SUBSTRATE_ANCHORED.read_text(encoding="utf-8"))
 
 
-def enumerate_real_shares() -> list:
-    """The 66 REAL candidate SHARES the spine refused over the committed v0.5 slice — consensus cases, no
-    oracle. Deterministic over the FIXED committed population (Phase-75 measured: 66)."""
-    index = json.loads(CASES_INDEX.read_text(encoding="utf-8"))
-    spine = EntitySpine(":memory:")
-    eref2eid: dict = {}
-    eref2party: dict = {}
-    edges: list = []
-    try:
-        for c in index.get("cases", []):
-            cid = c.get("case_id")
-            try:
-                b = json.loads((BUNDLES_DIR / f"{cid}.json").read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
-                continue
-            for p in (b.get("parties") or []) + (b.get("related_parties") or []):
-                r = _observe_substrate_party(spine, cid, p)
-                if not r:
-                    continue
-                eref, res = r
-                eref2eid[eref] = res["entity_id"]
-                if eref not in eref2party:                 # first observation wins (deterministic given stable order)
-                    eref2party[eref] = {"name": p.get("display_name"),
-                                        "kind": "person" if p.get("is_person") else "org",
-                                        "role": p.get("label") or p.get("role"),
-                                        "risk": p.get("risk_rating"), "pep": p.get("pep_tier"),
-                                        "sanctions": bool(p.get("sanctions_flag")),
-                                        "adverse_media": bool(p.get("adverse_media_flag"))}
-            for e in (b.get("resolution_edges") or []):
-                btw = e.get("between") or []
-                if isinstance(btw, list) and len(btw) == 2 and btw[0] != btw[1]:
-                    edges.append((cid, btw[0], btw[1], e.get("shared") or [], bool(e.get("cross_institution"))))
-        seen, cases = set(), []
-        for cid, a, bb, shared, xinst in edges:
-            ea, eb = eref2eid.get(a), eref2eid.get(bb)
-            if not (ea and eb and ea != eb):               # both resolved + kept DISTINCT -> the spine refused
-                continue
-            pair = tuple(sorted((a, bb)))
-            if pair in seen:
-                continue
-            seen.add(pair)
-            pa, pb = eref2party.get(pair[0], {}), eref2party.get(pair[1], {})
-            sh = shared[0] if shared else {}
-            cases.append({
-                "id": f"real-{pair[0]}-{pair[1]}",
-                "source": SOURCE_CONSENSUS, "scored": False, "basis": "strong",
-                "shared": {"kind": sh.get("kind"),
-                           "value": _safe_value(sh.get("kind"), sh.get("value") or sh.get("normalized"))},
-                "cross_institution": xinst,
-                "spine_verdict": "kept_distinct", "substrate_claim": "resolved",
-                "a": {"ref": pair[0], "name": pa.get("name"), "kind": pa.get("kind"), "role": pa.get("role"),
-                      "attrs": {"risk": pa.get("risk"), "pep": pa.get("pep"),
-                                "sanctions": pa.get("sanctions"), "adverse_media": pa.get("adverse_media")}},
-                "b": {"ref": pair[1], "name": pb.get("name"), "kind": pb.get("kind"), "role": pb.get("role"),
-                      "attrs": {"risk": pb.get("risk"), "pep": pb.get("pep"),
-                                "sanctions": pb.get("sanctions"), "adverse_media": pb.get("adverse_media")}},
-            })
-    finally:
-        spine.close()
-    # deterministic order: by shared identifier, then the sorted entity_ref pair
-    cases.sort(key=lambda c: (c["shared"].get("value") or "", c["a"]["ref"], c["b"]["ref"]))
+def enumerate_substrate_scored() -> list:
+    """The SUBSTRATE-anchored SCORED real population (Phase 79 — SUPERSEDES the Phase-76/77 consensus-66).
+    Reads the committed substrate-anchored capture (data/entity-spine/substrate-anchored-slice.json — the
+    aml-substrate `--anchored --emit-eval-oracles` emit's GT-<hash> latent oracle + the candidate-relevant
+    observations; emails domain-masked, email/phone DEMOTED to weak per Phase-75's noise-floor finding),
+    runs the SAME deterministic resolver the synthetic path uses, enumerates the merge candidates, and scores
+    each against the latent GT- cluster. NON-circular (GT-<hash> != entity_ref — the Phase-77 abort is cured)
+    + genuinely two-sided (fragment co-references the demoted spine MISSES vs noise-floor collisions it
+    correctly refuses). The oracle is substrate's OWN latent ground truth (not fabricated); every scored
+    number carries the synthetic-SUBSTRATE qualifier. NO substrate run — replays the committed capture."""
+    data = load_substrate_anchored()
+    observations = data.get("observations", [])
+    inputs = [resolver_input(o) for o in observations]
+    pred = run_resolver(inputs)
+    true = {o["obs_id"]: o["cluster"] for o in observations}
+    cands = candidate_pairs(observations, pred, true)
+    by_id = {o["obs_id"]: o for o in observations}
+    cases = []
+    for c in cands:
+        a, b = by_id[c["a"]], by_id[c["b"]]
+        shared = c.get("shared") or []
+        sh = shared[0] if shared else None
+        cases.append({
+            "id": f"sub-{c['a']}-{c['b']}",
+            "source": SOURCE_SUBSTRATE_SCORED, "scored": True, "basis": c["basis"],
+            "shared": ({"kind": sh.get("kind"), "value": sh.get("normalized")} if sh else None),
+            "spine_verdict": "merged" if c["resolver_merged"] else "kept_distinct",
+            "a": _obs_side(a), "b": _obs_side(b),
+            "oracle": {
+                "same_entity": c["same_entity"],
+                "klass": c["klass"],
+                "correct_adjudication": _CORRECT[c["same_entity"]],
+                "qualifier": SUBSTRATE_QUALIFIER,
+            },
+        })
+    cases.sort(key=lambda c: (c["basis"], c["a"]["ref"], c["b"]["ref"]))
     return cases
 
 
@@ -231,35 +184,41 @@ def enumerate_synthetic_scored() -> list:
 
 
 def build() -> dict:
-    real = enumerate_real_shares()
+    substrate = enumerate_substrate_scored()
     syn = enumerate_synthetic_scored()
+    cap = load_substrate_anchored()
     return {
-        "_note": ("FULLY curated merge-adjudication cases (Phase 76; regeneration-only — "
-                  ".venv/bin/python scripts/curate_merge_cases.py). TWO populations kept visibly separate: "
-                  f"(1) {len(real)} REAL candidate SHARES from the committed aml-substrate v0.5 slice "
-                  f"(@{SUBSTRATE_HEAD}) — the spine refused these over-merges (substrate's collision noise "
-                  "floor / controller clusters); CONSENSUS-not-ground-truth, NO oracle (substrate emits no "
-                  "true_entities for the slice — the T5 sibling handoff). (2) the SYNTHETIC scored cases from "
-                  "data/entity-spine/true_entities.json — latent identity clusters behind the resolver-input "
-                  "firewall let the Reveal SHOW, ON SYNTHETIC DATA ONLY, whether the call matched truth. The "
-                  "latent truth rides ONLY each scored case's `oracle` block (revealed post-disposition); the "
-                  "pre-disposition evidence (a/b) carries no truth field. The real population is synthetic "
-                  "(substrate-generated); its shared email identifiers are domain-masked to example.test in this "
-                  "ship artifact so nothing reads as real data (the local-part token, kept, proves the exact "
-                  "collision). Illustrative; no catch-rate/lift is claimed; every scored number is qualified "
-                  "synthetic-only."),
+        "_note": ("FULLY curated merge-adjudication cases (Phase 76; SUPERSEDE Phase 79; regeneration-only — "
+                  ".venv/bin/python scripts/curate_merge_cases.py). TWO SCORED populations, kept visibly "
+                  "separate by oracle PROVENANCE (Phase 79 supersede: BOTH are synthetic and BOTH are scored — "
+                  "the prior consensus-vs-scored split retired now that the real-substrate population has a "
+                  "non-circular oracle): "
+                  f"(1) {len(substrate)} REAL-SUBSTRATE candidate SHARES from aml-substrate's --anchored "
+                  f"--emit-eval-oracles slice (@{SUBSTRATE_HEAD}, Phase-32/33 anchored fork) — scored against "
+                  "substrate's OWN latent GT-<hash> identity oracle (NON-circular: GT != entity_ref, so the "
+                  "Phase-77 circular-oracle abort is CURED). The demoted spine (email/phone weak — Phase-75's "
+                  "noise floor) refuses every candidate; the oracle reveals which are real fragment "
+                  "co-references it MISSED (uphold_merge) vs noise-floor collisions it correctly refused "
+                  "(reject_as_shares). SUPERSEDES the Phase-76/77 consensus-66 (which had no oracle). "
+                  f"(2) {len(syn)} hand-authored SYNTHETIC scored cases from data/entity-spine/true_entities.json "
+                  "— spanning all 4 quadrants / 3 bases. BOTH populations' latent truth rides ONLY each case's "
+                  "`oracle` block (revealed post-disposition); the pre-disposition evidence (a/b) carries no "
+                  "truth field (the resolver-input firewall). Shared emails are domain-masked to example.test "
+                  "(the local-part token kept, proving the exact collision). Illustrative; no "
+                  "catch-rate/lift/precision is claimed; every scored number is synthetic-only-qualified."),
         "badge": BADGE,
         "brand": {"title": "Signal Watch", "subtitle": "Merge Console · Vision Prototype"},
         "adjudication_grades": ADJUDICATION_GRADES,
         "bases": BASES,
         "provenance": {
             "substrate_head": SUBSTRATE_HEAD,
-            "slice_cases": len(json.loads(CASES_INDEX.read_text(encoding="utf-8")).get("cases", [])),
-            "n_real_consensus": len(real),
+            "substrate_slice": cap.get("provenance", {}),
+            "n_substrate_scored": len(substrate),
             "n_synthetic_scored": len(syn),
             "synthetic_qualifier": SYNTHETIC_QUALIFIER,
+            "substrate_qualifier": SUBSTRATE_QUALIFIER,
         },
-        "cases": real + syn,
+        "cases": substrate + syn,
     }
 
 
@@ -281,7 +240,7 @@ def validate(data: dict) -> list:
     cases = data.get("cases") or []
     if not cases:
         errs.append("no cases")
-    seen, n_real, n_syn = set(), 0, 0
+    seen, n_substrate, n_syn = set(), 0, 0
     for c in cases:
         cid = c.get("id")
         if not cid:
@@ -304,22 +263,15 @@ def validate(data: dict) -> list:
             if leak:
                 errs.append(f"{cid}.{side}: resolver-input firewall — evidence carries truth field(s) {leak}")
         src, scored, oracle = c.get("source"), c.get("scored"), c.get("oracle")
-        if src == SOURCE_CONSENSUS:
-            n_real += 1
-            if scored is not False:
-                errs.append(f"{cid}: real consensus case must have scored=false")
-            if oracle is not None:
-                errs.append(f"{cid}: a REAL case must carry NO oracle (no fabricated ground truth on real data)")
-            if c.get("basis") != "strong":
-                errs.append(f"{cid}: real candidate SHARES are strong-shared-id (basis=strong)")
-            if c.get("spine_verdict") != "kept_distinct":
-                errs.append(f"{cid}: real candidate SHARES are over-merge-REFUSED (spine_verdict=kept_distinct)")
-        elif src == SOURCE_SCORED:
-            n_syn += 1
+        if src not in SOURCES:
+            errs.append(f"{cid}: source {src!r} not in {sorted(SOURCES)}")
+        else:
+            # BOTH populations are SCORED (Phase 79 supersede) — each carries an oracle, qualified by provenance.
+            want_qual = SUBSTRATE_QUALIFIER if src == SOURCE_SUBSTRATE_SCORED else SYNTHETIC_QUALIFIER
             if scored is not True:
-                errs.append(f"{cid}: synthetic scored case must have scored=true")
+                errs.append(f"{cid}: a scored case must have scored=true")
             if not isinstance(oracle, dict):
-                errs.append(f"{cid}: synthetic case must carry an oracle block")
+                errs.append(f"{cid}: a scored case must carry an oracle block")
             else:
                 if not isinstance(oracle.get("same_entity"), bool):
                     errs.append(f"{cid}: oracle.same_entity must be a bool")
@@ -327,20 +279,32 @@ def validate(data: dict) -> list:
                     errs.append(f"{cid}: oracle.correct_adjudication not in the grade vocab")
                 if oracle.get("correct_adjudication") != _CORRECT.get(oracle.get("same_entity")):
                     errs.append(f"{cid}: oracle.correct_adjudication must follow same_entity")
-                if oracle.get("qualifier") != SYNTHETIC_QUALIFIER:
-                    errs.append(f"{cid}: every scored case must carry the synthetic-only qualifier")
-        else:
-            errs.append(f"{cid}: source {src!r} not in {{{SOURCE_CONSENSUS}, {SOURCE_SCORED}}}")
+                if oracle.get("qualifier") != want_qual:
+                    errs.append(f"{cid}: scored case must carry its provenance qualifier "
+                                f"({'synthetic-substrate' if src == SOURCE_SUBSTRATE_SCORED else 'synthetic-only'})")
+            if src == SOURCE_SUBSTRATE_SCORED:
+                n_substrate += 1
+                # the real-substrate population is the DEMOTED-spine refused residual over strong-shared ids
+                if c.get("basis") != "strong":
+                    errs.append(f"{cid}: substrate candidate SHARES are strong-shared-id (basis=strong)")
+                if c.get("spine_verdict") != "kept_distinct":
+                    errs.append(f"{cid}: substrate cases are demoted-spine refused (spine_verdict=kept_distinct)")
+                # the synthetic-by-construction masking firewall — no real email domain may ship
+                sh = c.get("shared") or {}
+                if sh.get("kind") == "email" and not str(sh.get("value") or "").endswith("@example.test"):
+                    errs.append(f"{cid}: a shipped substrate email must be domain-masked to example.test")
+            else:
+                n_syn += 1
         if c.get("basis") in ("strong", "weak") and not (c.get("shared") and c["shared"].get("kind")):
             errs.append(f"{cid}: a {c.get('basis')} basis needs a shared identifier")
         if c.get("basis") == "name" and c.get("shared"):
             errs.append(f"{cid}: a name-only basis must have no shared identifier")
-    if n_real == 0:
-        errs.append("no real consensus candidate SHARES (expected the v0.5 over-merge-refused residual)")
+    if n_substrate == 0:
+        errs.append("no substrate-scored candidate SHARES (the anchored-slice population is missing)")
     if n_syn == 0:
-        errs.append("no synthetic scored cases (the scored differentiator is missing)")
+        errs.append("no synthetic scored cases (the hand-authored scored population is missing)")
     prov = data.get("provenance") or {}
-    if prov.get("n_real_consensus") != n_real or prov.get("n_synthetic_scored") != n_syn:
+    if prov.get("n_substrate_scored") != n_substrate or prov.get("n_synthetic_scored") != n_syn:
         errs.append("provenance counts disagree with the actual case populations")
     return errs
 
@@ -357,18 +321,24 @@ def _selftest() -> int:
     assert not errs, f"the freshly built dataset must validate clean: {errs}"
 
     cases = data["cases"]
-    real = [c for c in cases if c["source"] == SOURCE_CONSENSUS]
+    substrate = [c for c in cases if c["source"] == SOURCE_SUBSTRATE_SCORED]
     syn = [c for c in cases if c["source"] == SOURCE_SCORED]
-    assert real and syn, "both populations must be present"
-    # the REAL consensus population matches the Phase-75 over-merge-refused finding
-    assert all(c["scored"] is False and "oracle" not in c for c in real), "real cases are consensus-only"
-    assert all(c["basis"] == "strong" and c["spine_verdict"] == "kept_distinct" for c in real), \
-        "real candidate SHARES are strong-shared-id over-merges the spine refused"
+    assert substrate and syn, "both scored populations must be present"
+    # the SUBSTRATE-anchored population: SCORED (oracle), demoted-spine refused, TWO-SIDED, substrate-qualified
+    assert all(c["scored"] is True and isinstance(c.get("oracle"), dict) for c in substrate), \
+        "substrate cases are scored (carry an oracle)"
+    assert all(c["basis"] == "strong" and c["spine_verdict"] == "kept_distinct" for c in substrate), \
+        "substrate candidate SHARES are strong-shared-id, demoted-spine refused"
+    assert all(c["oracle"]["qualifier"] == SUBSTRATE_QUALIFIER for c in substrate), \
+        "substrate cases carry the synthetic-substrate qualifier"
+    sub_same = {c["oracle"]["same_entity"] for c in substrate}
+    assert sub_same == {True, False}, \
+        f"the anchored slice must be TWO-SIDED (uphold + reject), got same_entity={sub_same} (the Phase-77 cure)"
     # the SYNTHETIC scored population spans the quadrants + carries the oracle
     klasses = {c["oracle"]["klass"] for c in syn}
     assert {KLASS_OVER_MERGE_TRAP, KLASS_FRAGMENTATION_GAP, KLASS_REAL_CO_REFERENCE,
             KLASS_CORRECT_REJECTION} <= klasses, f"scored cases must span all four quadrants: {klasses}"
-    assert all(c["oracle"]["qualifier"] == SYNTHETIC_QUALIFIER for c in syn), "every scored case is qualified"
+    assert all(c["oracle"]["qualifier"] == SYNTHETIC_QUALIFIER for c in syn), "every synthetic scored case is qualified"
     bases = {c["basis"] for c in syn}
     assert bases == {"strong", "weak", "name"}, f"scored cases must exercise all three bases: {bases}"
 
@@ -388,10 +358,16 @@ def _selftest() -> int:
         mut(d)
         return validate(d)
 
-    def _put_oracle_on_real(d):
-        r = next(c for c in d["cases"] if c["source"] == SOURCE_CONSENSUS)
-        r["oracle"] = {"same_entity": True, "correct_adjudication": "uphold_merge",
-                       "qualifier": SYNTHETIC_QUALIFIER}
+    def _unscored_substrate(d):                # a substrate case stripped of its oracle (must stay scored)
+        r = next(c for c in d["cases"] if c["source"] == SOURCE_SUBSTRATE_SCORED)
+        r["scored"] = False
+        r.pop("oracle", None)
+
+    def _wrong_qualifier_substrate(d):         # a substrate case carrying the WRONG provenance qualifier
+        next(c for c in d["cases"] if c["source"] == SOURCE_SUBSTRATE_SCORED)["oracle"]["qualifier"] = SYNTHETIC_QUALIFIER
+
+    def _unmasked_email(d):                    # a real substrate email shipped on a real domain (mask firewall)
+        next(c for c in d["cases"] if c["source"] == SOURCE_SUBSTRATE_SCORED)["shared"] = {"kind": "email", "value": "evil@gmail.com"}
 
     def _leak_truth(d):
         s = next(c for c in d["cases"] if c["source"] == SOURCE_SCORED)
@@ -412,27 +388,31 @@ def _selftest() -> int:
     def _note_leak(d):                         # the natural place a truth annotation would hide on evidence
         next(c for c in d["cases"])["a"]["note"] = "these are the same person, cluster C-LEAK"
 
-    def _real_nonstrong(d):                    # a real case mis-shaped off the strong-shared-id residual
-        next(c for c in d["cases"] if c["source"] == SOURCE_CONSENSUS)["basis"] = "name"
+    def _substrate_nonstrong(d):               # a substrate case mis-shaped off the strong-shared-id residual
+        next(c for c in d["cases"] if c["source"] == SOURCE_SUBSTRATE_SCORED)["basis"] = "name"
 
     checks = [
-        ("oracle fabricated on a real case", _put_oracle_on_real, "no fabricated ground truth"),
+        ("substrate case stripped of its oracle", _unscored_substrate, "must carry an oracle block"),
+        ("substrate case with the wrong provenance qualifier", _wrong_qualifier_substrate, "provenance qualifier"),
+        ("a real substrate email shipped unmasked", _unmasked_email, "domain-masked to example.test"),
         ("truth leaked into evidence", _leak_truth, "firewall"),
         ("a free-text note leaked onto evidence", _note_leak, "firewall"),
-        ("scored case missing the qualifier", _strip_qualifier, "synthetic-only qualifier"),
+        ("scored case missing the qualifier", _strip_qualifier, "provenance qualifier"),
         ("adjudication vocab widened", _bad_grade, "adjudication_grades must be exactly"),
         ("oracle correct_adjudication flipped", _flip_correct, "must follow same_entity"),
-        ("a real case mis-shaped off basis=strong", _real_nonstrong, "strong-shared-id"),
+        ("a substrate case mis-shaped off basis=strong", _substrate_nonstrong, "strong-shared-id"),
     ]
     for name, mut, needle in checks:
         es = broken(mut)
         assert any(needle in e for e in es), f"validate must REJECT: {name} (looked for {needle!r}; got {es})"
 
     print(  # noqa: T201
-        f"curate_merge_cases --selftest: PASS — {len(real)} REAL consensus candidate SHARES (over-merge "
-        f"refused, no oracle) + {len(syn)} SYNTHETIC scored cases across all 4 quadrants / 3 bases; "
-        f"firewall holds (no truth in evidence); deterministic; 7 broken fixtures rejected. "
-        f"[scored numbers: {SYNTHETIC_QUALIFIER}]")
+        f"curate_merge_cases --selftest: PASS — {len(substrate)} REAL-SUBSTRATE scored candidate SHARES "
+        f"(anchored GT- oracle, NON-circular, two-sided: "
+        f"{sum(1 for c in substrate if c['oracle']['same_entity'])} uphold / "
+        f"{sum(1 for c in substrate if not c['oracle']['same_entity'])} reject) + {len(syn)} SYNTHETIC scored "
+        f"cases across all 4 quadrants / 3 bases; firewall holds (no truth in evidence); deterministic; "
+        f"{len(checks)} broken fixtures rejected. [scored numbers: synthetic-only-qualified]")
     return 0
 
 
@@ -451,9 +431,9 @@ def main() -> int:
         return 1
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
-    n_real = data["provenance"]["n_real_consensus"]
+    n_sub = data["provenance"]["n_substrate_scored"]
     n_syn = data["provenance"]["n_synthetic_scored"]
-    print(f"wrote {OUT_PATH.relative_to(ROOT)} — {n_real} real consensus + {n_syn} synthetic scored cases")  # noqa: T201
+    print(f"wrote {OUT_PATH.relative_to(ROOT)} — {n_sub} substrate-scored + {n_syn} synthetic scored cases")  # noqa: T201
     return 0
 
 

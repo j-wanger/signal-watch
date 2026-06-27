@@ -1,0 +1,691 @@
+{
+ "contract_version": "0.1",
+ "note": "EVAL-ONLY substrate-anchored merge-oracle slice (Phase 79). Distilled from aml-substrate's --anchored --emit-eval-oracles emit (Phase 32/33): the candidate-relevant observations (parties sharing a normalized email/phone) + the latent GT-<hash> cluster ground truth. The cluster id is the EVAL-ONLY oracle (never a resolver input — the resolver-input firewall). email/phone are DEMOTED to weak (Phase-75: substrate's identifier collisions are a deliberate noise floor). Emails domain-masked to example.test (the local-part token kept, so the collision is preserved).",
+ "provenance": {
+  "emit_command": "PYTHONPATH=src .venv/bin/python -m aml_substrate.cli --clients 400 --months 10 --seed 0 --emergence --anchored --emit-eval-oracles --emit-screening --out <out>",
+  "substrate_pin": "c099259",
+  "params": {
+   "clients": 400,
+   "months": 10,
+   "seed": 0,
+   "anchored": true
+  },
+  "n_observations": 32,
+  "n_total_entity_refs": 257,
+  "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth"
+ },
+ "observations": [
+  {
+   "obs_id": "P-0000016",
+   "name": "Ella Jennings",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user2340@example.test",
+     "normalized": "user2340@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000006133",
+     "normalized": "10000006133",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-90bc4e1006b4"
+  },
+  {
+   "obs_id": "P-0000022",
+   "name": "Abraham Morrison",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user5952@example.test",
+     "normalized": "user5952@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000006507",
+     "normalized": "10000006507",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-4395916089e3"
+  },
+  {
+   "obs_id": "P-0000025",
+   "name": "Olivia Garcia",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user6223@example.test",
+     "normalized": "user6223@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000008316",
+     "normalized": "10000008316",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-c0dea90d506b"
+  },
+  {
+   "obs_id": "P-0000051",
+   "name": "Chloe Poole",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user2340@example.test",
+     "normalized": "user2340@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000003721",
+     "normalized": "10000003721",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-252bd1d4fa17"
+  },
+  {
+   "obs_id": "P-0000056",
+   "name": "Dylan Hanson",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user3840@example.test",
+     "normalized": "user3840@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000003681",
+     "normalized": "10000003681",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-93ba85a95c36"
+  },
+  {
+   "obs_id": "P-0000059",
+   "name": "Kylie Rogers",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user454@example.test",
+     "normalized": "user454@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000006309",
+     "normalized": "10000006309",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-87d5e8fd7532"
+  },
+  {
+   "obs_id": "P-0000069",
+   "name": "Serenity Carlisle",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user2340@example.test",
+     "normalized": "user2340@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000005095",
+     "normalized": "10000005095",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-222a7a2c71d7"
+  },
+  {
+   "obs_id": "P-0000132",
+   "name": "Alaina Castaneda",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user6223@example.test",
+     "normalized": "user6223@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000008636",
+     "normalized": "10000008636",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-9a8c32af6c64"
+  },
+  {
+   "obs_id": "P-0000135",
+   "name": "Simon Anthony",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user2084@example.test",
+     "normalized": "user2084@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000009138",
+     "normalized": "10000009138",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-34cd2cc5ccb8"
+  },
+  {
+   "obs_id": "P-0000171",
+   "name": "Christopher Morales",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user2084@example.test",
+     "normalized": "user2084@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000007124",
+     "normalized": "10000007124",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-9d0bfb527f34"
+  },
+  {
+   "obs_id": "P-0000189",
+   "name": "Eleanor Chavez",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user3690@example.test",
+     "normalized": "user3690@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000009517",
+     "normalized": "10000009517",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-1c8bbea1cb97"
+  },
+  {
+   "obs_id": "P-0000190",
+   "name": "Noah Cardenas",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user5717@example.test",
+     "normalized": "user5717@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000008025",
+     "normalized": "10000008025",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-7b4b6cc137f3"
+  },
+  {
+   "obs_id": "P-0000195",
+   "name": "Reese Allen",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user476@example.test",
+     "normalized": "user476@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000009434",
+     "normalized": "10000009434",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-805ae1ae7487"
+  },
+  {
+   "obs_id": "P-0000196",
+   "name": "Alexia Knight",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user2927@example.test",
+     "normalized": "user2927@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000003562",
+     "normalized": "10000003562",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-95a663659de8"
+  },
+  {
+   "obs_id": "P-0000223",
+   "name": "Jennifer Hendrickson",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user5952@example.test",
+     "normalized": "user5952@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000000275",
+     "normalized": "10000000275",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-ecb5f6f78902"
+  },
+  {
+   "obs_id": "P-0000252",
+   "name": "Anna Vega",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user454@example.test",
+     "normalized": "user454@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000002033",
+     "normalized": "10000002033",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-4216d81c1821"
+  },
+  {
+   "obs_id": "P-0000268",
+   "name": "Jackson Jeffries",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user2927@example.test",
+     "normalized": "user2927@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000004410",
+     "normalized": "10000004410",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-60880026d8ac"
+  },
+  {
+   "obs_id": "P-0000303",
+   "name": "Olivia Hicks",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user476@example.test",
+     "normalized": "user476@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000003540",
+     "normalized": "10000003540",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-4cef01b42b38"
+  },
+  {
+   "obs_id": "P-0000362",
+   "name": "Marissa Green",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user2927@example.test",
+     "normalized": "user2927@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000009665",
+     "normalized": "10000009665",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-c81f389ec6a6"
+  },
+  {
+   "obs_id": "P-0000365",
+   "name": "Kenneth Golden",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user3690@example.test",
+     "normalized": "user3690@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000001370",
+     "normalized": "10000001370",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-a4b7517f91cb"
+  },
+  {
+   "obs_id": "P-FRAG-000002",
+   "name": "Arbaham Morirson",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user5952@example.test",
+     "normalized": "user5952@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+11000000002",
+     "normalized": "11000000002",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-4395916089e3"
+  },
+  {
+   "obs_id": "P-FRAG-000005",
+   "name": "Chleo Pooel",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user1000000005@example.test",
+     "normalized": "user1000000005@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000003721",
+     "normalized": "10000003721",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-252bd1d4fa17"
+  },
+  {
+   "obs_id": "P-FRAG-000007",
+   "name": "Dylna Hansno",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user1000000007@example.test",
+     "normalized": "user1000000007@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000003681",
+     "normalized": "10000003681",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-93ba85a95c36"
+  },
+  {
+   "obs_id": "P-FRAG-000010",
+   "name": "Klyie Rogesr",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user454@example.test",
+     "normalized": "user454@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+11000000010",
+     "normalized": "11000000010",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-87d5e8fd7532"
+  },
+  {
+   "obs_id": "P-FRAG-000014",
+   "name": "Serentiy aCrlisle",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user2340@example.test",
+     "normalized": "user2340@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+11000000014",
+     "normalized": "11000000014",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-222a7a2c71d7"
+  },
+  {
+   "obs_id": "P-FRAG-000015",
+   "name": "Siomn Antohny",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user1000000015@example.test",
+     "normalized": "user1000000015@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000009138",
+     "normalized": "10000009138",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-34cd2cc5ccb8"
+  },
+  {
+   "obs_id": "P-FRAG-000016",
+   "name": "Simno Anthoyn",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user1000000016@example.test",
+     "normalized": "user1000000016@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000009138",
+     "normalized": "10000009138",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-34cd2cc5ccb8"
+  },
+  {
+   "obs_id": "P-FRAG-000019",
+   "name": "Naoh Cardeans",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user1000000019@example.test",
+     "normalized": "user1000000019@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000008025",
+     "normalized": "10000008025",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-7b4b6cc137f3"
+  },
+  {
+   "obs_id": "P-FRAG-000021",
+   "name": "Jen Hendirckson",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user1000000021@example.test",
+     "normalized": "user1000000021@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000000275",
+     "normalized": "10000000275",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-ecb5f6f78902"
+  },
+  {
+   "obs_id": "P-FRAG-000023",
+   "name": "Anna eVga",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user1000000023@example.test",
+     "normalized": "user1000000023@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000002033",
+     "normalized": "10000002033",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-4216d81c1821"
+  },
+  {
+   "obs_id": "P-FRAG-000024",
+   "name": "Jacksno Jefrfies",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user1000000024@example.test",
+     "normalized": "user1000000024@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000004410",
+     "normalized": "10000004410",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-60880026d8ac"
+  },
+  {
+   "obs_id": "P-FRAG-000025",
+   "name": "Marisas Green",
+   "kind": "person",
+   "role": "LEGIT",
+   "identifiers": [
+    {
+     "kind": "email",
+     "value": "user1000000025@example.test",
+     "normalized": "user1000000025@example.test",
+     "strength": "weak"
+    },
+    {
+     "kind": "phone",
+     "value": "+10000009665",
+     "normalized": "10000009665",
+     "strength": "weak"
+    }
+   ],
+   "cluster": "GT-c81f389ec6a6"
+  }
+ ]
+}

@@ -16,6 +16,17 @@
 > item 2 below) + a **§12 discovery feed** in the workbench (companion-only; `evidence_requirements.py` +
 > all 9 dists byte-frozen). The merge real-66 stays CONSENSUS (substrate Phase 31's own commit re-confirms the
 > slice is all-singleton — still circular). Doc: `docs/determination-validation.md`.
+>
+> **UPDATE 2026-06-27 (Phase 79 — the consumes LANDED):** both Phase-77-deferred blocks resolved sibling-side
+> + consumed. aml-casework advanced **`b3546d4` → `076fb8e` (Phase 19, `ed93a0d`)** — `_c3_fan_in` built; aml-substrate
+> advanced **`9677a37` → `c099259` (Phase 32/33)** — the `--anchored` fork mints NON-circular `GT-<hash>` identity
+> clusters (`entity_ref ≠ cluster`). signal-watch **Phase 79 CONSUMED both**: (1) **Track-C′ item 3** — re-vendored
+> casework + the north-star **Lakeshore CASE-B SIGNS `cleared`** end-to-end via fan-in C3 (the matched pair closes,
+> both via casework). (2) **Track-C′ item 1** — the merge console's real population **SUPERSEDED** the consensus-66
+> with **29 substrate-anchored SCORED cases** (genuinely two-sided: 13 uphold / 16 reject, scored against the
+> non-circular `GT-` oracle; the Phase-77 circular-oracle abort CURED). `dist/merge` re-frozen; the other 8 dists +
+> `evidence_requirements.py` byte-frozen. The three handoff briefs are now CLOSED/RESOLVED (see their banners).
+> Substrate open-data **Stage 2/3** + casework's CI-promotion criterion remain the open sibling frontiers.
 
 ## What changed since the last snapshot
 

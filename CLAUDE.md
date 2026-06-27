@@ -153,33 +153,36 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    "chosen, not measured"; JSON export; persists nothing). Badge always-on; NO LLM/fetch; no
    FINTRAC content (novel stratum is US-federal public domain only — no footer machinery).
 
-6. **Merge console** (Phase 76, M9) — `merge.html` → `dist/merge/index.html`. The blueprint's Class-J
-   **merge-adjudication** gate dramatized — the human gate over entity-resolution candidate links (the
-   deterministic spine resolves what it can on the declared `entity_ref` and REFUSES the ambiguous; the
-   human adjudicates the residual). **The novelty:** unlike the consensus-only gate console + the
-   label-blind §14 triage, the merge gate is the ONE gate with a measurable correctness ORACLE — so the
-   Reveal SHOWS, where the oracle exists, whether the call matched truth (synthetic-only, qualified). TWO
-   populations in committed `data/merge/cases.json` (curated by `scripts/curate_merge_cases.py` — a
-   companion authoring tool that reuses entity_spine + resolution_scorer; build.py imports NEITHER): **66
-   REAL candidate SHARES** (the Phase-75 over-merge-refused residual from the v0.5 slice — distinct
-   `entity_ref`s sharing a noise-floor identifier; CONSENSUS-not-ground-truth, NO oracle. **Phase 77 tried
-   to score these against substrate's `true_entities` and STOPPED at the abort rule: substrate's emitted
-   identity clusters are content-addressed `ENT-<entity_ref>` — a 1:1 relabel of the SAME field the spine
-   keys on — so any "score" is CIRCULAR (true-by-construction agreement, zero discriminating signal). Real
-   scoring stays DEFERRED — it needs a genuine identity layer where `entity_ref ≠ cluster` (real same-person
-   fragments / the open-data fork's real collisions): the `docs/substrate-emit-cli-wiring-PLAN-BRIEF.md` +
-   `docs/substrate-open-reference-data-fork-PLAN-BRIEF.md` handoffs**) + **13 SYNTHETIC scored cases** (from
-   `data/entity-spine/true_entities.json`; a latent-truth `oracle` block spanning the four quadrants
-   real-co-reference / over-merge-trap / fragmentation-gap / correct-rejection — genuinely two-sided:
-   resolver verdict and truth DIVERGE, independent of any spine key). Arc: Queue
-   (grouped by basis: strong-shared-id / weak / name-only) → Evidence (both records + the shared signal +
-   the deterministic spine baseline, NEUTRAL) → Adjudication (uphold-merge / reject-as-SHARES /
-   both-defensible / escalate; rationale REQUIRED) → Verdict (the consensus/scored SPLIT: real → no
-   oracle; synthetic → the latent truth + a match indicator + the synthetic-only qualifier) → session
-   ledger (consensus-vs-scored agreement arithmetic; JSON export; persists nothing). THE RESOLVER-INPUT
-   FIREWALL translated to the ship artifact: the pre-adjudication evidence carries NO truth field (the
-   `oracle` rides a separate block, revealed post-disposition only; build-boundary `validate_merge_cases`
-   guards it). Real substrate emails domain-masked to example.test. Badge always-on; NO LLM/fetch; no
+6. **Merge console** (Phase 76, M9; **Phase-79 supersede**) — `merge.html` → `dist/merge/index.html`. The
+   blueprint's Class-J **merge-adjudication** gate dramatized — the human gate over entity-resolution
+   candidate links (the deterministic spine resolves what it can on the declared `entity_ref` and REFUSES
+   the ambiguous; the human adjudicates the residual). **The novelty:** unlike the consensus-only gate
+   console + the label-blind §14 triage, the merge gate is the ONE gate with a measurable correctness
+   ORACLE — the Reveal SHOWS, for EVERY case, whether the call matched truth (synthetic-only, qualified).
+   **TWO SCORED populations** in committed `data/merge/cases.json` (curated by
+   `scripts/curate_merge_cases.py` — a companion authoring tool reusing entity_spine + resolution_scorer;
+   build.py imports NEITHER), split by oracle PROVENANCE (**the Phase-79 supersede RETIRED the prior
+   consensus-vs-scored split — both are now scored**): **29 REAL-SUBSTRATE candidate SHARES** scored against
+   aml-substrate's OWN latent identity oracle — the Phase-32/33 `--anchored --emit-eval-oracles` fork emits
+   NON-circular opaque `GT-<hash>` clusters (NOT the `ENT-<entity_ref>` echo that aborted the Phase-77
+   attempt; `entity_ref ≠ cluster` at last). The demoted spine (substrate's noise-floor email/phone DEMOTED
+   to weak, Phase-75) refuses every candidate; the oracle reveals which are real same-person fragments it
+   MISSED (uphold-merge) vs noise-floor collisions it correctly refused (reject-as-SHARES) — genuinely
+   two-sided (13 uphold / 16 reject). Distilled to the committed no-substrate capture
+   `data/entity-spine/substrate-anchored-slice.json` (the candidate-relevant observations + the GT- oracle;
+   emails domain-masked, email/phone demoted; replays with NO substrate). **+ 13 SYNTHETIC scored cases**
+   (from `data/entity-spine/true_entities.json`; spanning the four quadrants real-co-reference /
+   over-merge-trap / fragmentation-gap / correct-rejection). Both populations' latent truth rides ONLY each
+   case's `oracle` block (revealed post-disposition); each is synthetic-only-qualified (the substrate one
+   "measured on a synthetic aml-substrate slice"). Arc: Queue (grouped by basis: strong-shared-id / weak /
+   name-only) → Evidence (both records + the shared signal + the deterministic spine baseline, NEUTRAL) →
+   Adjudication (uphold-merge / reject-as-SHARES / both-defensible / escalate; rationale REQUIRED) → Verdict
+   (the latent truth + a match indicator + the qualifier, for BOTH populations — substrate cases show
+   "substrate's anchored ground truth") → session ledger (agreement arithmetic over all scored cases, split
+   by provenance; JSON export; persists nothing). THE RESOLVER-INPUT FIREWALL translated to the ship
+   artifact: the pre-adjudication evidence carries NO truth field (the `oracle` rides a separate block,
+   revealed post-disposition only; build-boundary `validate_merge_cases` guards it IN EXACT PARITY with the
+   curate validator). Real substrate emails domain-masked to example.test. Badge always-on; NO LLM/fetch; no
    FINTRAC content.
 
 ### Build (`scripts/build.py`)

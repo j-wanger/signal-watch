@@ -45,7 +45,9 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-79-consume-sibling-emissions -->
-<!-- gate-log:phase-79 direction=approved delivery=pending -->
+<!-- gate-log:phase-79 direction=approved delivery=accepted -->
+<!-- delivery: ACCEPTED 2026-06-27, committed 031a33a -->
+
 <!-- status: PLANNED 2026-06-27 (STANDARD). Floor + gated-upside bundle for the two Phase-77-deferred consumes, both code-verified RESOLVED sibling-side (casework Phase 19 @076fb8e built _c3_fan_in; substrate Phase 32 @c099259 mints entity_ref≠cluster anchored fragments). FLOOR (committed): Lakeshore CASE-B signs cleared via fan-in C3 (re-vendor b3546d4→076fb8e, no-regression checkpoint, companion-only). GATED UPSIDE: the merge real-data oracle — MEASURE-FIRST companion-only (the live --anchored --emit-eval-oracles run CRASHED today with substrate ReplayError) → gate the dist/merge re-freeze on a clean two-sided non-tautological result; ABORT (Phase-77 rule) → consensus + a substrate emit-stability brief, no dist touch. A1: evidence_requirements.py byte-unchanged; build.py imports no spine/scorer/sibling/curate; 8 non-merge dists byte-frozen; dist/merge the ONE sanctioned (gated) re-freeze. -->
 
 ## Phase 79 — Consume sibling emissions: Lakeshore fan-in C3 floor + the merge real-data oracle (gated)

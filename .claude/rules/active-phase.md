@@ -1,18 +1,51 @@
 # Active Phase Context
 
-**Phase 77 — *Consume the three sibling emissions* (exogenous-disposition harness · casework `cleared` · true_entities → merge real-scoring)** (signal-watch-local, STANDARD) — DELIVERED 2026-06-26. Net: **1 consume landed, 2 deferred honestly; companion-only — NO dist touched.**
+**Phase 78 — *Consume the disposition oracle*: the determination-validation harness (the circularity exit) + the §12 discovery-feed control** (signal-watch-local, STANDARD) — DELIVERED + accepted 2026-06-26. Net: harness + §12 feed landed; the exogenous oracle revealed ML-discriminates-but-misses (§12 gap) + the KYC structural over-flag; companion-only, 9 dists byte-frozen, A1 held. Adversarial review 0 must-fix / 3 fixed / 3 refuted / 10 praise.
 
-## Outcome
-- **CONSUMED — casework `cleared` (P18):** re-vendored casework `b3546d4`; a C5-replayable proxy (`data/casefile/cleared-demo.bundle.json` + `serve_workbench.cleared_demo_consume`) SIGNS `cleared` end-to-end (adversarially HONEST). North-star Lakeshore CASE-B fails-closed (casework C3=fan-out, Lakeshore=fan-in) → `docs/casework-c3-fan-in-PLAN-BRIEF.md`. A3 abort held.
-- **DEFERRED — exogenous-disposition validation harness:** substrate `emit_*` are CLI-UNWIRED (test-only) → `docs/substrate-emit-cli-wiring-PLAN-BRIEF.md`.
-- **DEFERRED at the abort rule — true_entities → merge real-66 scoring:** the `--identity` oracle is CIRCULAR (`cluster == ENT-<entity_ref>`, the field the spine keys on) → reverted real-66 to CONSENSUS per the user; the two-sided synthetic-13 untouched; `dist/merge` byte-frozen. Real scoring needs `entity_ref ≠ cluster` (the open-data fork).
+## Objective
+Consume substrate Phase 31's now-CLI-reachable `eval/intended_disposition.json` (`--emit-eval-oracles`)
+to build the determination-validation harness Phase-77 A2 deferred — the FIRST validation of
+`evaluate_sufficiency` against an oracle it did not author — then pivot it into a control: a §12
+discovery feed over the engine-vs-oracle disagreement cases in the investigator workbench.
+Companion-only; the engine + all 9 dists stay byte-frozen.
 
-## Verification
-`build.py --check all` 9/9 byte-frozen (zero drift) · `uv run pytest` 24/24 · all node arcs · build.py imports no spine/scorer/sibling/curate · honesty governor + resolver-input firewall hold · cleared-demo adversarial review HONEST.
+## Scope
+- `scripts/determination_validation_harness.py` (NEW; `--freeze`/`--check`/`--selftest`)
+- `tests/fixtures/determination-validation/{capture,baseline}.json`
+- `scripts/serve_workbench.py`, `workbench.html` (the §12 discovery feed)
+- `docs/determination-validation.md`, CLAUDE.md, `docs/cross-pillar-build-order.md`
+
+## Key constraints (LOAD-BEARING)
+- **Bundle-only, non-circular frame:** score the bundle-derived structure (mechanism + ≥2 legs); HOLD
+  OUT the human-gate inputs (named_predicate_risk, mitigation) and NAME them as the boundary — NEVER
+  derive them from the oracle basis. The oracle is authored blind to the sufficiency rule.
+- **The firewall:** the oracle label never enters an engine input (`assert_no_oracle_leak`). The
+  discovery feed is presentation-only (the Phase-74 priors-are-provenance precedent).
+- **A1 guard:** `evidence_requirements.py` BYTE-UNCHANGED (`git diff --quiet`).
+- **Boundary:** build.py imports no harness/serve_workbench/substrate; all 9 dists byte-frozen.
+- **Honesty governor:** no catch-rate/precision/lift/recall; synthetic-only qualified; badge always-on.
+- Substrate pin **9677a37** (Phase 31); `--check` replays the committed capture with NO substrate run.
+
+## Exit criteria
+`--check` → the per-class confusion structure vs a committed baseline (no substrate run); the §12
+discovery feed renders the *missed* / *over-flag* cells annotated by the engine's `missing[]`;
+`--check all` 9/9 byte-frozen; `uv run pytest` green; `evidence_requirements.py` byte-unchanged.
+
+## Abort rule
+Any dist drift / a build.py companion-or-substrate import / an engine change / an oracle-label leak
+into the engine / a confusion number presented as a catch-rate / a dist requiring a live substrate
+read → STOP-and-surface. **Measure-first (T2):** if the matrix is degenerate (signal-file-ready ≈ 0
+or non-discriminating across oracle classes) → STOP+REPORT, down-scope T3 to an honest-degeneracy
+report; never fabricate a discovery feed over a non-result.
 
 ## Gates
-- [x] spec (`specs/phase-77-consume-sibling-emissions.md`)
-- [x] Direction confirmed by user (2026-06-26; all-accept, A1 accept-with-shaping → superseded honestly by the circular-oracle finding)
+- [x] spec (`specs/phase-78-consume-disposition-validation-control.md`)
+- [x] Direction confirmed by user (assumption positions taken 2026-06-26; bundle-only frame +
+      measure→control deliverable; no unresolved reject/don't-know)
 - [x] Delivery accepted (post-implementation report 2026-06-26)
 
-Plan [[phases/phase-77-consume-sibling-emissions]]; ledger Phase-77. **Next: `/dev-plan` for Phase 78** (frontier may be sibling-rooted — see the build-order doc + the 3 briefs).
+Spec `specs/phase-78-consume-disposition-validation-control.md`; plan
+[[phases/phase-78-consume-disposition-validation-control]]; ledger Phase-78.
+**Next after delivery:** the open-data fork (substrate) unblocks the two-sided real merge oracle;
+casework C3 fan-in unblocks the Lakeshore co-sign — both sibling-rooted (see
+`docs/cross-pillar-build-order.md`).

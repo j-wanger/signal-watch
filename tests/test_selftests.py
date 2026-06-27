@@ -29,6 +29,7 @@ PY_SELFTESTS = [
     "entity_spine.py",          # Phase 74 — the persistent entity spine (SKIPs gracefully w/o duckdb; full under .venv)
     "resolution_scorer.py",     # Phase 74 — the resolution-correctness scorer + the resolver-input firewall
     "curate_merge_cases.py",    # Phase 76 — the merge-console case curator (SKIPs gracefully w/o duckdb; full under .venv)
+    "determination_validation_harness.py",  # Phase 78 — the determination-validation firewall + recompute (dep-free)
     "serve_workbench.py",
     "serve_chain.py",
     "validate_chain_cases.py",
@@ -69,6 +70,17 @@ def test_gather_quality_harness() -> None:
     r = subprocess.run([sys.executable, str(path), "--check"], cwd=str(ROOT),
                        capture_output=True, text=True, timeout=120)
     assert r.returncode == 0, f"gather_quality_harness --check FAILED:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
+
+
+def test_determination_validation_harness() -> None:
+    """Phase 78 — the determination-validation REGRESSION GATE: replay the committed substrate-oracle capture
+    with NO substrate and assert the live engine still matches the frozen confusion structure (the
+    bundle-only signal-assembly vs the exogenous file/clear oracle; the circularity exit)."""
+    path = SCRIPTS / "determination_validation_harness.py"
+    assert path.exists(), "missing scripts/determination_validation_harness.py"
+    r = subprocess.run([sys.executable, str(path), "--check"], cwd=str(ROOT),
+                       capture_output=True, text=True, timeout=120)
+    assert r.returncode == 0, f"determination_validation_harness --check FAILED:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="node not installed — .mjs arc tests skipped")

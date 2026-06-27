@@ -9,6 +9,13 @@
 > - **signal-watch** `b18ef71` (Phase 76, `main`)
 >
 > Synthetic / illustrative; no catch-rate, lift, or precision asserted.
+>
+> **UPDATE 2026-06-26 (Phase 78):** aml-substrate advanced **`f2da3e4` → `9677a37` (Phase 31 — emit-cli-wiring)**,
+> which CLI-wired `--emit-eval-oracles`. signal-watch **Phase 78 CONSUMED** the now-reachable
+> `eval/intended_disposition.json` → the **determination-validation harness** (the "circularity exit", Track-C′
+> item 2 below) + a **§12 discovery feed** in the workbench (companion-only; `evidence_requirements.py` +
+> all 9 dists byte-frozen). The merge real-66 stays CONSENSUS (substrate Phase 31's own commit re-confirms the
+> slice is all-singleton — still circular). Doc: `docs/determination-validation.md`.
 
 ## What changed since the last snapshot
 
@@ -58,9 +65,14 @@ The bottleneck moved here. Three consumes, in rough value order:
    `identity/true_entities.json`, looks up each SHARES pair's clusters → flips the 66 from consensus to scored.
    Honest result: **66/66 correct-rejection** (the spine's refusals confirmed against substrate's declared-identity
    truth). Frame the one-sidedness explicitly (no should-merge in the real slice). Rebuilds `dist/merge`.
-2. **Consume Phase 30 `intended_disposition` → a determination-engine validation harness** (the circularity exit):
+2. **Consume Phase 30/31 `intended_disposition` → a determination-engine validation harness** (the circularity exit):
    pass bundles (no label) through `evaluate_sufficiency` → compare to the exogenous `file|clear`. Companion-only,
    synthetic-only-qualified. The highest *strategic* consume (validates the engine against an oracle it didn't make).
+   ✓ **DONE — signal-watch Phase 78** (`scripts/determination_validation_harness.py`; unblocked once substrate
+   Phase 31 CLI-wired `--emit-eval-oracles`). Bundle-only frame (mechanism + ≥legs; human-gate inputs held out =
+   non-circular); 6935-case slice → the ML signal layer discriminates (file-ready on far more oracle-file than
+   oracle-clear) but misses most file cases (§12 gap), and the KYC bar is a structural over-flag (a source-of-funds
+   gap alone is not laundering). Surfaced as the workbench §12 discovery feed. Doc: `docs/determination-validation.md`.
 3. **Consume casework Phase 18 `cleared` → the Lakeshore DECIDE signs a documented dismissal.** Re-vendor
    `bf15535→b3546d4` (`scripts/vendor_casework.sh`); shape the Lakeshore case into a **casework-contract bundle**
    (v0.1, an `exculpatory:true` txn + neutral/exculpatory claims) and pass `--disposition cleared`. Completes the

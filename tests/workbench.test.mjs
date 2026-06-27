@@ -38,7 +38,7 @@ const SCRIPT = html.slice(open + '<script>'.length, close)
   + `toggleSignals,selectCase,pickBackend,applyMessage,runDecision,paintSurface,renderQueue,renderPop,loadQueue,backendLabel,`
   + `liveGate,liveFunnel,setGate,renderGate,loadGate,onKnob,resetGating,doAdjudicate,policyThresholds,`
   + `runGather,applyGather,gatherPanelHTML,gatherResultHTML,gatherGraphHTML,liveGraphLayout,toolLabel,kindLabel,`
-  + `runDetermine,determinePanelHTML,memoryPanelHTML,`
+  + `runDetermine,determinePanelHTML,memoryPanelHTML,discoveryPanelHTML,`
   + `setState:(s)=>{ if('META'in s)META=s.META; if('QUEUE'in s)QUEUE=s.QUEUE; if('FILTER'in s)FILTER=s.FILTER; if('SEL'in s)SEL=s.SEL; if('DETAIL'in s)DETAIL=s.DETAIL; if('SIGNALS'in s)SIGNALS=s.SIGNALS; if('RUN'in s)RUN=s.RUN; if('GATE'in s)setGate(s.GATE); if('POLICY'in s)POLICY=s.POLICY; if('ADJ'in s)ADJ=s.ADJ; if('GATHER'in s)GATHER=s.GATHER; if('DET'in s)DET=s.DET; },`
   + `getState:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ,GATHER,DET})};`;
 
@@ -687,6 +687,31 @@ ok(T.memoryPanelHTML(null) === '' && T.memoryPanelHTML({}) === '', 'memory panel
 const memXSS = T.memoryPanelHTML({ substrate:{ n_xcase_coref:1, n_over_merge_refused:0, n_candidate_shares:0, qualifier:'q',
   xcase_coref_examples:[{entity_id:'E', display_name:'<img src=x onerror=alert(1)>', n_cases:2, cases:['C-1','C-2']}] }, casefile:{} });
 ok(memXSS.includes('&lt;img src=x') && !/<img src=x onerror/.test(memXSS), 'memory panel: XSS — a malicious entity name is esc()-escaped');
+
+/* ---------- the §12 discovery feed (Phase 78): determination-validation disagreement queue ---------- */
+const DISC = { badge:'Illustrative data & outputs', available:true,
+  n_cases:6935, oracle_split:{file:121,clear:6814}, degenerate:false,
+  confusion:{file_ready__file:50, file_ready__clear:1320, not_ready__file:71, not_ready__clear:5494},
+  by_crime_type:{ kyc_integrity:{file_ready__file:0,file_ready__clear:727,not_ready__file:0,not_ready__clear:0},
+                  money_laundering:{file_ready__file:50,file_ready__clear:593,not_ready__file:71,not_ready__clear:5494} },
+  n_missed_total:71, n_over_flag_total:1320,
+  missed:[{case_id:'CASE-P-0000096', caps:['C8'], crime_type:'money_laundering', oracle_basis:'layering_no_economic_purpose',
+           missing:['need 1 mechanism atom(s), have 0','need 2 corroborating leg(s), have 1'], n_mech:0, n_legs:1}],
+  over_flag:[{case_id:'CASE-XSS', caps:['<b>C9</b>'], crime_type:'kyc_integrity', oracle_basis:'<img src=x onerror=alert(1)>'}],
+  sample_note:'the missed/over-flag lists are a bounded sample; n_missed_total / n_over_flag_total carry the full counts (no silent cap).',
+  note:'EVAL-ONLY determination-validation baseline (Phase 78). Counts only — no rate, score, or multiplier is claimed.' };
+const discH = T.discoveryPanelHTML(DISC);
+ok(/§12 discovery/.test(discH), 'discovery panel: the §12 disagreement-feed header renders');
+ok(/71<\/span>/.test(discH) && /missed/.test(discH), 'discovery panel: the missed (§12 signal-gap) count renders');
+ok(/1320<\/span>/.test(discH) && /over-flag/.test(discH), 'discovery panel: the over-flag (defensive-exposure) count renders');
+ok(/727<\/span>/.test(discH) && /gap alone is not laundering/.test(discH), 'discovery panel: the kyc structural over-flag finding renders');
+ok(/CASE-P-0000096/.test(discH) && /need 1 mechanism atom/.test(discH), 'discovery panel: a missed row carries the engine\'s own missing[] §12 gap');
+ok(/no silent cap/.test(discH), 'discovery panel: the bounded-sample disclosure renders (no silent cap)');
+ok(T.discoveryPanelHTML(null) === '' && T.discoveryPanelHTML({available:false}) === '', 'discovery panel: empty when unavailable (offline workbench unaffected)');
+ok(discH.includes('&lt;img src=x') && !/<img src=x onerror/.test(discH), 'discovery panel: XSS — a malicious oracle_basis is esc()-escaped');
+ok(discH.includes(escH('<b>C9</b>')) && !/<b>C9<\/b>/.test(discH), 'discovery panel: XSS — a malicious cap string is esc()-escaped');
+ok(!/\b(lift|precision|recall|catch[\s-]?rate|f1|auroc)\b/i.test(discH) && !/\d+(\.\d+)?\s*%/.test(discH) && !/\d+(\.\d+)?x\b/.test(discH),
+   'discovery panel: NO catch-rate/precision/lift/%/Nx vocabulary (the honesty governor — counts only)');
 
 /* ---------- summary ---------- */
 console.log(`\n${pass} passed, ${fails.length} failed`);

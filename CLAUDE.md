@@ -359,8 +359,14 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   the host/port; the auto-default stays stub unless it's set or a claude key) → pick it to drive the GATHER
   loop + DECIDE prose, else the stub (the casework pipeline still shapes/signs/verifies offline; no model →
   fast TCP-refuse → stub + a "no model at :8080" note). Live tier needs Python ≥3.11 + uv-or-pip (the
-  offline ship artifacts stay zero-dep, stdlib-3.10; `make setup` is a POSIX shortcut for the script). Doc:
-  `docs/case-workbench.md`. Precursor the CHAIN workbench: `python3 scripts/serve_chain.py` → http://localhost:8020
+  offline ship artifacts stay zero-dep, stdlib-3.10; `make setup` is a POSIX shortcut for the script). **The §12
+  DISCOVERY FEED (Phase 78, companion-only):** a read-only `/discovery` route + panel surfaces the
+  determination-validation harness's engine-vs-oracle disagreement queue — *missed* (oracle-file, signals not
+  assembled = a §12 build target, each with the engine's own `missing[]`) + *over-flag* (oracle-clear, signals
+  file-ready = defensive exposure, incl. the KYC structural over-flag). PRESENTATION-ONLY: the exogenous oracle
+  rides this path, NEVER the determination engine (the priors-are-provenance firewall; `evidence_requirements.py`
+  byte-unchanged). Source = `scripts/determination_validation_harness.py` (the "circularity exit"; doc
+  `docs/determination-validation.md`). Doc: `docs/case-workbench.md`. Precursor the CHAIN workbench: `python3 scripts/serve_chain.py` → http://localhost:8020
   (`docs/chain-workbench.md`). Companion ports: news 8000 · corpus 8010 · chain 8020 · workbench 8030.
 - Drift guard before presenting: `python3 scripts/build.py --check all` (frozen dists byte-identical).
 - Test (dep-free, no install — except the DuckDB store selftests, which run under `.venv`):
@@ -402,6 +408,12 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   - `python3 tests/gather_quality_harness.py --check` — the GATHER extraction-coverage REGRESSION GATE
     (Phase 70: replay the pinned live capture with NO model; assert finding_coverage/target-closure still
     match the baseline + the deterministic StubPlanner reference; `--freeze` re-captures from a live model).
+  - `python3 scripts/determination_validation_harness.py --check` / `--selftest` — the DETERMINATION-VALIDATION
+    REGRESSION GATE (Phase 78, the "circularity exit"): replay the committed substrate-oracle capture with NO
+    substrate, RE-RUN the engine per case (bundle-only: mechanism + ≥legs, human-gate inputs HELD OUT) and
+    assert the live engine still matches the frozen confusion structure vs aml-substrate's EXOGENOUS
+    `intended_disposition` oracle (authored blind to the sufficiency rule; `assert_no_oracle_leak` + the
+    signature guard hold the firewall). `--freeze --emit-dir <out>` re-captures from a substrate emit @9677a37.
   - `python3 scripts/entity_spine.py --selftest` — the persistent entity spine (strong-id merge / name-only
     reject / weak corroborate; append-only graded links; conflicts both-kept; reversible split with
     cascade-invalidation; event-driven stale-prior; the no-news-import firewall; Phase-75 entity_ref-keyed cross-case

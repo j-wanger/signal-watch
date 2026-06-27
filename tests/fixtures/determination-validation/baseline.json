@@ -1,0 +1,758 @@
+{
+  "note": "EVAL-ONLY determination-validation baseline (Phase 78). The frozen per-class confusion structure of signal-watch's bundle-only signal-assembly vs aml-substrate's exogenous intended_disposition oracle (authored blind to the sufficiency rule). measured over a synthetic substrate slice; production has no ground-truth disposition. Counts only — no rate, score, or multiplier is claimed.",
+  "substrate_pin": "9677a37",
+  "definitions": {
+    "signal_file_ready": "the BUNDLE-ONLY signal structure reaches the crime_type's file-bar STRUCTURE — mechanism atom present AND >= the required corroborating legs — computed from the merged fired capabilities alone, with the human-gate inputs (named predicate risk, mitigation) HELD OUT. NOT a full determination, which also needs the held-out human gate; this measures whether the §12 signal layer pre-positions the decision.",
+    "file_ready__file": "signals assembled AND the oracle would file — the signal layer pre-positions correctly.",
+    "file_ready__clear": "OVER-FLAG: signals assembled but the oracle is clear — a defensive-filing exposure (the signals fire on a benign case the human gate must dismiss).",
+    "not_ready__file": "MISSED: the oracle would file but the signals did NOT assemble to file-ready — a §12 signal/gather gap; the case's `missing` names the absent mechanism/leg to build.",
+    "not_ready__clear": "signals not assembled AND the oracle is clear — appropriately not pre-positioned to file.",
+    "degenerate": "the structure does not discriminate: zero file-ready, or the file-ready rate among oracle-file equals the rate among oracle-clear. If set, the measure-first gate down-scopes to an honest report rather than a discovery feed."
+  },
+  "n_cases": 6935,
+  "confusion": {
+    "file_ready__file": 50,
+    "file_ready__clear": 1320,
+    "not_ready__file": 71,
+    "not_ready__clear": 5494
+  },
+  "by_crime_type": {
+    "kyc_integrity": {
+      "file_ready__file": 0,
+      "file_ready__clear": 727,
+      "not_ready__file": 0,
+      "not_ready__clear": 0
+    },
+    "money_laundering": {
+      "file_ready__file": 50,
+      "file_ready__clear": 593,
+      "not_ready__file": 71,
+      "not_ready__clear": 5494
+    }
+  },
+  "oracle_split": {
+    "file": 121,
+    "clear": 6814
+  },
+  "per_basis_fileready": {
+    "coincidental_collision": {
+      "n": 339,
+      "file_ready": 65
+    },
+    "explained_source_of_funds": {
+      "n": 4485,
+      "file_ready": 268
+    },
+    "illicit_proceeds_placement": {
+      "n": 1,
+      "file_ready": 0
+    },
+    "layering_no_economic_purpose": {
+      "n": 28,
+      "file_ready": 0
+    },
+    "null": {
+      "n": 1990,
+      "file_ready": 987
+    },
+    "structuring_below_threshold": {
+      "n": 92,
+      "file_ready": 50
+    }
+  },
+  "n_missed_total": 71,
+  "n_over_flag_total": 1320,
+  "degenerate": false,
+  "disagreement_sample": {
+    "missed": [
+      {
+        "case_id": "CASE-P-0000096",
+        "caps": [
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "layering_no_economic_purpose",
+        "missing": [
+          "need 1 mechanism atom(s), have 0 (the laundering/integrity mechanism — gather or build a mechanism signal)",
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 0,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0000220",
+        "caps": [
+          "C14",
+          "C2",
+          "C4",
+          "C5"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 2,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0000638",
+        "caps": [
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "layering_no_economic_purpose",
+        "missing": [
+          "need 1 mechanism atom(s), have 0 (the laundering/integrity mechanism — gather or build a mechanism signal)",
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 0,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0000955",
+        "caps": [
+          "C14",
+          "C2"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 1,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0001269",
+        "caps": [
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "layering_no_economic_purpose",
+        "missing": [
+          "need 1 mechanism atom(s), have 0 (the laundering/integrity mechanism — gather or build a mechanism signal)",
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 0,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0002482",
+        "caps": [
+          "C2",
+          "C4",
+          "C5",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 2,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0002852",
+        "caps": [
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "layering_no_economic_purpose",
+        "missing": [
+          "need 1 mechanism atom(s), have 0 (the laundering/integrity mechanism — gather or build a mechanism signal)",
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 0,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0002918",
+        "caps": [
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 1,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0003068",
+        "caps": [
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 1,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0003931",
+        "caps": [
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 1,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0005393",
+        "caps": [
+          "C2",
+          "C5",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 1,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0006003",
+        "caps": [
+          "C2",
+          "C4",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 2,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0006087",
+        "caps": [
+          "C2",
+          "C4",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 2,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0006297",
+        "caps": [
+          "C2",
+          "C5",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 1,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0006345",
+        "caps": [
+          "C2",
+          "C4",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 2,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0006772",
+        "caps": [
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "layering_no_economic_purpose",
+        "missing": [
+          "need 1 mechanism atom(s), have 0 (the laundering/integrity mechanism — gather or build a mechanism signal)",
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 0,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0007204",
+        "caps": [
+          "C14",
+          "C2",
+          "C4"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 2,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0008302",
+        "caps": [
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 1,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0008512",
+        "caps": [
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 1,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0008725",
+        "caps": [
+          "C2",
+          "C3",
+          "C4",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 2,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0010302",
+        "caps": [
+          "C2",
+          "C4",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 2,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0010371",
+        "caps": [
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "layering_no_economic_purpose",
+        "missing": [
+          "need 1 mechanism atom(s), have 0 (the laundering/integrity mechanism — gather or build a mechanism signal)",
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 0,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0010644",
+        "caps": [
+          "C2",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 1,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0010684",
+        "caps": [
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "layering_no_economic_purpose",
+        "missing": [
+          "need 1 mechanism atom(s), have 0 (the laundering/integrity mechanism — gather or build a mechanism signal)",
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 0,
+        "n_legs": 1
+      },
+      {
+        "case_id": "CASE-P-0011482",
+        "caps": [
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "structuring_below_threshold",
+        "missing": [
+          "need 2 corroborating leg(s), have 1 (gather network / source-of-funds / corroboration evidence)"
+        ],
+        "n_mech": 1,
+        "n_legs": 1
+      }
+    ],
+    "over_flag": [
+      {
+        "case_id": "CASE-P-0000008",
+        "caps": [
+          "C15",
+          "C2",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "explained_source_of_funds",
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 2
+      },
+      {
+        "case_id": "CASE-P-0000009",
+        "caps": [
+          "C14"
+        ],
+        "crime_type": "kyc_integrity",
+        "oracle_basis": "coincidental_collision",
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 0
+      },
+      {
+        "case_id": "CASE-P-0000015",
+        "caps": [
+          "C14"
+        ],
+        "crime_type": "kyc_integrity",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 0
+      },
+      {
+        "case_id": "CASE-P-0000017",
+        "caps": [
+          "C15",
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "explained_source_of_funds",
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 2
+      },
+      {
+        "case_id": "CASE-P-0000022",
+        "caps": [
+          "C14",
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 2
+      },
+      {
+        "case_id": "CASE-P-0000049",
+        "caps": [
+          "C14"
+        ],
+        "crime_type": "kyc_integrity",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 0
+      },
+      {
+        "case_id": "CASE-P-0000059",
+        "caps": [
+          "C14",
+          "C15",
+          "C2",
+          "C3"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 2
+      },
+      {
+        "case_id": "CASE-P-0000068",
+        "caps": [
+          "C14",
+          "C2",
+          "C3",
+          "C5",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 2
+      },
+      {
+        "case_id": "CASE-P-0000072",
+        "caps": [
+          "C14"
+        ],
+        "crime_type": "kyc_integrity",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 0
+      },
+      {
+        "case_id": "CASE-P-0000076",
+        "caps": [
+          "C14"
+        ],
+        "crime_type": "kyc_integrity",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 0
+      },
+      {
+        "case_id": "CASE-P-0000084",
+        "caps": [
+          "C14"
+        ],
+        "crime_type": "kyc_integrity",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 0
+      },
+      {
+        "case_id": "CASE-P-0000193",
+        "caps": [
+          "C14",
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 2
+      },
+      {
+        "case_id": "CASE-P-0000199",
+        "caps": [
+          "C14",
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 2
+      },
+      {
+        "case_id": "CASE-P-0000312",
+        "caps": [
+          "C14",
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 2
+      },
+      {
+        "case_id": "CASE-P-0000316",
+        "caps": [
+          "C14",
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 2
+      },
+      {
+        "case_id": "CASE-P-0000319",
+        "caps": [
+          "C15",
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "explained_source_of_funds",
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 2
+      },
+      {
+        "case_id": "CASE-P-0000392",
+        "caps": [
+          "C14"
+        ],
+        "crime_type": "kyc_integrity",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 0
+      },
+      {
+        "case_id": "CASE-P-0000479",
+        "caps": [
+          "C14",
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 2
+      },
+      {
+        "case_id": "CASE-P-0000483",
+        "caps": [
+          "C14"
+        ],
+        "crime_type": "kyc_integrity",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 0
+      },
+      {
+        "case_id": "CASE-P-0000502",
+        "caps": [
+          "C14"
+        ],
+        "crime_type": "kyc_integrity",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 0
+      },
+      {
+        "case_id": "CASE-P-0000507",
+        "caps": [
+          "C14"
+        ],
+        "crime_type": "kyc_integrity",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 0
+      },
+      {
+        "case_id": "CASE-P-0000531",
+        "caps": [
+          "C14"
+        ],
+        "crime_type": "kyc_integrity",
+        "oracle_basis": "coincidental_collision",
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 0
+      },
+      {
+        "case_id": "CASE-P-0000533",
+        "caps": [
+          "C14",
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 2
+      },
+      {
+        "case_id": "CASE-P-0000635",
+        "caps": [
+          "C15",
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": "explained_source_of_funds",
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 2
+      },
+      {
+        "case_id": "CASE-P-0000647",
+        "caps": [
+          "C14",
+          "C2",
+          "C3",
+          "C8"
+        ],
+        "crime_type": "money_laundering",
+        "oracle_basis": null,
+        "missing": [],
+        "n_mech": 1,
+        "n_legs": 2
+      }
+    ]
+  }
+}

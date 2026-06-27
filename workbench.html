@@ -80,6 +80,12 @@
   .memstat .l .faint{color:var(--faint);font-size:11px}
   .mements{display:flex;gap:7px 9px;flex-wrap:wrap}
   .mem-ent{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line2);border-radius:7px;padding:4px 9px}.mem-ent b{color:var(--teal)}
+  .disc-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px 22px}
+  @media(max-width:760px){.disc-cols{grid-template-columns:1fr}}
+  .disc-h{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+  .disc-row{border-top:1px solid var(--line2);padding:6px 0;font-size:12px;color:var(--muted)}
+  .disc-id{font-family:var(--mono);color:var(--ink)}
+  .disc-gap{color:var(--faint);font-size:11px;margin-top:3px;line-height:1.4}
 
   /* the adjudication loop control (on the case surface) — grows precedent, re-routes live */
   .adjud{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:12px;border-top:1px solid var(--line);padding-top:11px}
@@ -329,6 +335,7 @@
   <div id="gatePanel"></div>
 
   <div id="memoryPanel"></div>
+  <div id="discoveryPanel"></div>
 
   <div class="wb">
     <aside>
@@ -1302,11 +1309,43 @@ function loadMemory(){
     const el=document.getElementById('memoryPanel'); if(el) el.innerHTML=memoryPanelHTML(d);
   }).catch(()=>{});
 }
+function discoveryPanelHTML(d){
+  // the §12 discovery feed: signal-watch's bundle-only signal-assembly vs an EXOGENOUS file/clear oracle
+  // (authored blind to the sufficiency rule). Counts only — the missed cell is the §12 build queue; the
+  // over-flag cell the defensive-filing exposure. Presentation-only (the oracle never touches the engine).
+  if(!d||!d.available) return '';
+  const ct=d.by_crime_type||{}, kyc=ct.kyc_integrity||{};
+  const missed=(d.missed||[]).slice(0,8).map(r=>
+    `<div class="disc-row"><span class="disc-id">${esc(r.case_id)}</span> <span class="faint">${esc((r.caps||[]).join(','))} · ${esc(r.crime_type||'')}</span>`
+    +`<div class="disc-gap">${(r.missing||[]).map(m=>esc(m)).join('<br>')||'—'}</div></div>`).join('');
+  const over=(d.over_flag||[]).slice(0,8).map(r=>
+    `<div class="disc-row"><span class="disc-id">${esc(r.case_id)}</span> <span class="faint">${esc((r.caps||[]).join(','))} · ${esc(r.crime_type||'')} · oracle basis ${esc(r.oracle_basis||'—')}</span></div>`).join('');
+  return `<div class="memctl">
+    <div class="gxh">§12 discovery · signal-assembly vs an exogenous file/clear oracle</div>
+    <div class="memgrid">
+      <div class="memstat"><span class="n">${esc(d.n_missed_total)}</span><span class="l"><b>missed</b> — the oracle would file but the signals did not assemble<br><span class="faint">a §12 signal/gather gap: each names the absent mechanism/leg to build</span></span></div>
+      <div class="memstat"><span class="n">${esc(d.n_over_flag_total)}</span><span class="l"><b>over-flag</b> — the signals assembled but the oracle is clear<br><span class="faint">a defensive-filing exposure the human gate must dismiss</span></span></div>
+      <div class="memstat"><span class="n">${esc(kyc.file_ready__clear||0)}</span><span class="l">kyc cases the source-of-funds gap alone pre-positions to file<br><span class="faint">every one is oracle-clear — a gap alone is not laundering (a structural over-flag)</span></span></div>
+    </div>
+    <div class="disc-cols">
+      <div><div class="disc-h">§12 build queue · missed (oracle file, signals not assembled)</div>${missed||'<div class="faint">none</div>'}</div>
+      <div><div class="disc-h">over-flag · defensive exposure (oracle clear, signals assembled)</div>${over||'<div class="faint">none</div>'}</div>
+    </div>
+    <div class="faint">${esc(d.sample_note||'')}</div>
+    <div class="illus">${esc(d.note||'')}</div>
+  </div>`;
+}
+function loadDiscovery(){
+  if(!CFG.discovery) return Promise.resolve();
+  return fetch(CFG.discovery).then(r=>r.json()).then(d=>{
+    const el=document.getElementById('discoveryPanel'); if(el) el.innerHTML=discoveryPanelHTML(d);
+  }).catch(()=>{});
+}
 function boot(){
   const bg=document.getElementById('badge'); if(bg) bg.textContent=CFG.badge||'Illustrative data & outputs';
   BACKEND=(CFG.drafter&&CFG.drafter.default)||'stub';
   POLICY=defaultPolicy();
-  setDraftChip(); renderGate(); loadQueue().then(loadGate); loadMemory();
+  setDraftChip(); renderGate(); loadQueue().then(loadGate); loadMemory(); loadDiscovery();
 }
 if(typeof document!=='undefined'&&document.getElementById('queue')) boot();
 
@@ -1318,7 +1357,7 @@ if(typeof module!=='undefined'&&module.exports){ module.exports={
   runGather,applyGather,gatherPanelHTML,gatherResultHTML,gatherGraphHTML,liveGraphLayout,toolLabel,kindLabel,
   boGraphHTML,boRiskTag,ownLabel,edgeLabel,
   capName,qcardHTML,showcaseSurface,scMoneyFlowGraph,scResolutionGraph,scBOGraph,scSignalWalk,scLedger,scDetermination,scOutcome,scFlags,
-  memoryPanelHTML,loadMemory,
+  memoryPanelHTML,loadMemory,discoveryPanelHTML,loadDiscovery,
   _state:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ,GATHER}),
   _set:(s)=>{ if(s.META!==undefined)META=s.META; if(s.QUEUE!==undefined)QUEUE=s.QUEUE; if(s.SEL!==undefined)SEL=s.SEL; if(s.DETAIL!==undefined)DETAIL=s.DETAIL; if(s.SIGNALS!==undefined)SIGNALS=s.SIGNALS; if(s.RUN!==undefined)RUN=s.RUN; if(s.GATE!==undefined)setGate(s.GATE); if(s.POLICY!==undefined)POLICY=s.POLICY; if(s.ADJ!==undefined)ADJ=s.ADJ; if(s.GATHER!==undefined)GATHER=s.GATHER; },
   paintSurface,renderQueue,renderPop,riskPanel,walkHTML,ledgerHTML,CANON }; }

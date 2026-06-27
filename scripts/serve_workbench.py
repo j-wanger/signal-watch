@@ -70,6 +70,9 @@ CASES_JSON = WORKBENCH_DIR / "cases.json"
 BUNDLES_DIR = WORKBENCH_DIR / "bundles"
 TEMPLATE = ROOT / "workbench.html"
 PLACEHOLDER = "<!--__WORKBENCH_CONFIG__-->"
+# Phase 78 — the §12 discovery feed reads the committed determination-validation measurement (the harness's
+# baseline). PRESENTATION-ONLY: the oracle label rides this path, NEVER the determination engine.
+DISCOVERY_BASELINE = ROOT / "tests" / "fixtures" / "determination-validation" / "baseline.json"
 
 
 # ---- the vendored population (data, read-only) ---------------------------------------------------
@@ -829,9 +832,45 @@ def substrate_memory(store_path: str = ":memory:", limit_cases: int | None = Non
     }
 
 
+# ---- the §12 discovery feed: the determination-validation disagreement queue (Phase 78) ----------
+def discovery_feed() -> dict:
+    """The §12 DISCOVERY FEED — the engine-vs-oracle disagreement queue from the determination-validation
+    harness (the committed tests/fixtures/determination-validation/baseline.json). The harness scored
+    signal-watch's BUNDLE-ONLY signal-assembly (mechanism + >= the required legs, human-gate inputs HELD OUT)
+    against aml-substrate's EXOGENOUS intended_disposition oracle (authored BLIND to the sufficiency rule).
+    This surfaces the two disagreement cells as an analyst gather/build queue:
+      - MISSED    (oracle=file, signals NOT assembled) — a §12 signal/gather gap; each row names the absent
+                  mechanism/leg to build (the engine's OWN missing[]).
+      - OVER-FLAG (oracle=clear, signals ARE assembled) — a defensive-filing exposure.
+    PRESENTATION-ONLY: this reads the committed measurement; the oracle label NEVER reaches the determination
+    engine (determine / evaluate_sufficiency are NOT called here — the Phase-74 priors-are-provenance firewall).
+    Counts only; synthetic-only qualified; no rate/score/multiplier."""
+    if not DISCOVERY_BASELINE.exists():
+        return {"badge": BADGE, "available": False,
+                "note": ("the determination-validation baseline is not built — run "
+                         "scripts/determination_validation_harness.py --freeze (needs a substrate emit @"
+                         "9677a37). The offline workbench is unaffected.")}
+    b = json.loads(DISCOVERY_BASELINE.read_text(encoding="utf-8"))
+    samp = b.get("disagreement_sample", {})
+    return {
+        "badge": BADGE, "available": True,
+        "note": b.get("note"), "substrate_pin": b.get("substrate_pin"),
+        "definitions": b.get("definitions", {}),
+        "n_cases": b.get("n_cases"), "oracle_split": b.get("oracle_split"),
+        "confusion": b.get("confusion"), "by_crime_type": b.get("by_crime_type"),
+        "per_basis_fileready": b.get("per_basis_fileready"),
+        "degenerate": b.get("degenerate"),
+        "n_missed_total": b.get("n_missed_total"), "n_over_flag_total": b.get("n_over_flag_total"),
+        "missed": samp.get("missed", []), "over_flag": samp.get("over_flag", []),
+        "sample_note": ("the missed/over-flag lists are a bounded sample; n_missed_total / n_over_flag_total "
+                        "carry the full counts (no silent cap)."),
+    }
+
+
 # ---- the served page -----------------------------------------------------------------------------
 def live_config(env: dict | None = None) -> dict:
     return {"cases": "/cases", "case": "/case", "gate": "/gate", "adjudicate": "/adjudicate", "memory": "/memory",
+            "discovery": "/discovery",            # Phase 78 — the §12 determination-validation disagreement feed
             "gather": "/gather", "run": "/run", "determine": "/determine", "health": "/health", "badge": BADGE,
             "policy": GATING_POLICY,              # the routing KNOBS (the live gating panel's defaults)
             "drafter": sc._drafter_config(env)}   # NAMES + booleans only (§4.5), reused verbatim
@@ -898,6 +937,14 @@ class Handler(BaseHTTPRequestHandler):
             # nothing; the file/determination bar is untouched (spine/provenance path).
             try:
                 self._json(200, {"badge": BADGE, "substrate": substrate_memory(), "casefile": casefile_memory()})
+            except RunError as ex:
+                self._json(400, {"error": str(ex)})
+        elif path == "/discovery":
+            # the §12 discovery feed (Phase 78): the determination-validation disagreement queue (missed §12
+            # gaps + over-flag defensive exposures) from the committed harness baseline. Read-only, persists
+            # nothing; PRESENTATION-ONLY — the oracle never reaches the determination engine.
+            try:
+                self._json(200, discovery_feed())
             except RunError as ex:
                 self._json(400, {"error": str(ex)})
         else:
@@ -1434,6 +1481,28 @@ def selftest() -> int:
         for _e in _sm["xcase_coref_examples"]:
             if not _e.get("cases") or _e.get("n_cases", 0) < 2:
                 failures.append(f"a cross-case co-reference must name 2+ cases: {_e}")
+    # ── Phase 78: the §12 discovery feed (the determination-validation disagreement queue) ──
+    _df = discovery_feed()
+    if not _df.get("available"):
+        failures.append("discovery_feed must be available (the committed baseline.json exists)")
+    else:
+        _conf = _df.get("confusion") or {}
+        _cells = ("file_ready__file", "file_ready__clear", "not_ready__file", "not_ready__clear")
+        if any(not isinstance(_conf.get(k), int) or _conf.get(k, -1) < 0 for k in _cells):
+            failures.append(f"discovery_feed confusion cells must be non-negative ints: {_conf}")
+        if sum(_conf.get(k, 0) for k in _cells) != _df.get("n_cases"):
+            failures.append("discovery_feed confusion cells must sum to n_cases")
+        if _df["n_missed_total"] < len(_df["missed"]) or _df["n_over_flag_total"] < len(_df["over_flag"]):
+            failures.append("discovery_feed sample must not exceed its total (no silent over-cap)")
+        if not _df["missed"] or not _df["over_flag"]:
+            failures.append("the committed measurement should carry both disagreement cells (non-degenerate)")
+        # FIREWALL: the discovery feed carries the oracle, but surfacing it must NOT touch the engine —
+        # the determination is byte-identical across a discovery_feed() call (presentation-only path).
+        _b = json.dumps(determine_case("CASE-B"), sort_keys=True, ensure_ascii=False)
+        discovery_feed()
+        if json.dumps(determine_case("CASE-B"), sort_keys=True, ensure_ascii=False) != _b:
+            failures.append("the §12 discovery feed leaked into the engine — determine_case changed "
+                            "(the oracle must stay presentation-only)")
     # the detail carries the full evidence for the render, and the routes DISPATCH the authored ids
     da_det = casefile_detail("CASE-A")
     if da_det["case"]["display_name"] != "Northgate Hospitality Group Inc." or not da_det["case"]["transactions"]:

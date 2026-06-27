@@ -1,0 +1,1074 @@
+{
+  "contract_version": "0.5",
+  "note": "EVAL-ONLY sanctions-screening merge slice (Phase 80). Each observation's `cluster` is the GT-<hash> latent identity oracle — NEVER a resolver input (the firewall). `sanctions_screen` is OBSERVABLE bank screening state (a label-blind OFAC name collision — no party IS a designated person), surfaced only on the post-disposition-safe evidence side. Emails domain-masked to example.test.",
+  "observations": [
+    {
+      "cluster": "GT-6fd9b1c9da78",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user49497@example.test",
+          "strength": "weak",
+          "value": "user49497@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000269801",
+          "strength": "weak",
+          "value": "+10000269801"
+        }
+      ],
+      "kind": "person",
+      "name": "Katherine Fernandez",
+      "obs_id": "P-0000143",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-32b869421157",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user61241@example.test",
+          "strength": "weak",
+          "value": "user61241@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000094733",
+          "strength": "weak",
+          "value": "+10000094733"
+        }
+      ],
+      "kind": "person",
+      "name": "Elijah Hernandez",
+      "obs_id": "P-0000503",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-cd4f142c756b",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user903@example.test",
+          "strength": "weak",
+          "value": "user903@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000243550",
+          "strength": "weak",
+          "value": "+10000243550"
+        }
+      ],
+      "kind": "person",
+      "name": "Carter King",
+      "obs_id": "P-0000781",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-09bf5b5acb58",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user17627@example.test",
+          "strength": "weak",
+          "value": "user17627@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000043596",
+          "strength": "weak",
+          "value": "+10000043596"
+        }
+      ],
+      "kind": "person",
+      "name": "Nathan Perez",
+      "obs_id": "P-0001127",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-c94024acf744",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user23245@example.test",
+          "strength": "weak",
+          "value": "user23245@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000072186",
+          "strength": "weak",
+          "value": "+10000072186"
+        }
+      ],
+      "kind": "person",
+      "name": "Elizabeth Rodriguez",
+      "obs_id": "P-0001288",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-8cace9990b20",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user65255@example.test",
+          "strength": "weak",
+          "value": "user65255@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000270706",
+          "strength": "weak",
+          "value": "+10000270706"
+        }
+      ],
+      "kind": "person",
+      "name": "Addison Martinez",
+      "obs_id": "P-0001552",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-bff79a398c95",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user64028@example.test",
+          "strength": "weak",
+          "value": "user64028@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000065296",
+          "strength": "weak",
+          "value": "+10000065296"
+        }
+      ],
+      "kind": "person",
+      "name": "Fabian Velasquez",
+      "obs_id": "P-0001682",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-6d26abf9a7ee",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user75035@example.test",
+          "strength": "weak",
+          "value": "user75035@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000025000",
+          "strength": "weak",
+          "value": "+10000025000"
+        }
+      ],
+      "kind": "person",
+      "name": "Jacob Rodriguez",
+      "obs_id": "P-0001970",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-6761eb160d77",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user70326@example.test",
+          "strength": "weak",
+          "value": "user70326@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000247358",
+          "strength": "weak",
+          "value": "+10000247358"
+        }
+      ],
+      "kind": "person",
+      "name": "Alyssa Johnson",
+      "obs_id": "P-0002011",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-d284abd947a1",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user88559@example.test",
+          "strength": "weak",
+          "value": "user88559@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000272662",
+          "strength": "weak",
+          "value": "+10000272662"
+        }
+      ],
+      "kind": "person",
+      "name": "Joshua Ruiz",
+      "obs_id": "P-0002673",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-b565b54404e2",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user89304@example.test",
+          "strength": "weak",
+          "value": "user89304@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000104904",
+          "strength": "weak",
+          "value": "+10000104904"
+        }
+      ],
+      "kind": "person",
+      "name": "Jacob Harris",
+      "obs_id": "P-0003008",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-4f9602f9a659",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user45114@example.test",
+          "strength": "weak",
+          "value": "user45114@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000212825",
+          "strength": "weak",
+          "value": "+10000212825"
+        }
+      ],
+      "kind": "person",
+      "name": "Amelia Rodriguez",
+      "obs_id": "P-0003060",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-5548abc428ac",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user63540@example.test",
+          "strength": "weak",
+          "value": "user63540@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000017785",
+          "strength": "weak",
+          "value": "+10000017785"
+        }
+      ],
+      "kind": "person",
+      "name": "Omar Johnson",
+      "obs_id": "P-0003466",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-bbc973d76911",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user98145@example.test",
+          "strength": "weak",
+          "value": "user98145@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000034390",
+          "strength": "weak",
+          "value": "+10000034390"
+        }
+      ],
+      "kind": "person",
+      "name": "Nathan Perez",
+      "obs_id": "P-0004210",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-e6f46aa3abd4",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user58664@example.test",
+          "strength": "weak",
+          "value": "user58664@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000238079",
+          "strength": "weak",
+          "value": "+10000238079"
+        }
+      ],
+      "kind": "person",
+      "name": "Cooper Green",
+      "obs_id": "P-0004630",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-48258e94e1ba",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user89124@example.test",
+          "strength": "weak",
+          "value": "user89124@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000197451",
+          "strength": "weak",
+          "value": "+10000197451"
+        }
+      ],
+      "kind": "person",
+      "name": "Alyssa Johnson",
+      "obs_id": "P-0004887",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-7da223719428",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user64041@example.test",
+          "strength": "weak",
+          "value": "user64041@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000233019",
+          "strength": "weak",
+          "value": "+10000233019"
+        }
+      ],
+      "kind": "person",
+      "name": "Samuel Santiago",
+      "obs_id": "P-0005137",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-5445f3733de1",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user81679@example.test",
+          "strength": "weak",
+          "value": "user81679@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000062061",
+          "strength": "weak",
+          "value": "+10000062061"
+        }
+      ],
+      "kind": "person",
+      "name": "Samuel Santiago",
+      "obs_id": "P-0005755",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-024d8a6a949c",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user69533@example.test",
+          "strength": "weak",
+          "value": "user69533@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000154188",
+          "strength": "weak",
+          "value": "+10000154188"
+        }
+      ],
+      "kind": "person",
+      "name": "Jesus Avila",
+      "obs_id": "P-0006291",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-b51256b9d20e",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user96618@example.test",
+          "strength": "weak",
+          "value": "user96618@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000087988",
+          "strength": "weak",
+          "value": "+10000087988"
+        }
+      ],
+      "kind": "person",
+      "name": "Cadence Morgan",
+      "obs_id": "P-0006561",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-67a366a8d724",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user97653@example.test",
+          "strength": "weak",
+          "value": "user97653@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000006662",
+          "strength": "weak",
+          "value": "+10000006662"
+        }
+      ],
+      "kind": "person",
+      "name": "Elijah Hernandez",
+      "obs_id": "P-0006887",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-a58e73af7fcf",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user74071@example.test",
+          "strength": "weak",
+          "value": "user74071@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000289753",
+          "strength": "weak",
+          "value": "+10000289753"
+        }
+      ],
+      "kind": "person",
+      "name": "Joshua Ruiz",
+      "obs_id": "P-0007081",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-73a449abb421",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user72227@example.test",
+          "strength": "weak",
+          "value": "user72227@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000201482",
+          "strength": "weak",
+          "value": "+10000201482"
+        }
+      ],
+      "kind": "person",
+      "name": "Ariana Guerrero",
+      "obs_id": "P-0007382",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-f7f732cb4bbf",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user24295@example.test",
+          "strength": "weak",
+          "value": "user24295@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000224579",
+          "strength": "weak",
+          "value": "+10000224579"
+        }
+      ],
+      "kind": "person",
+      "name": "Omar Johnson",
+      "obs_id": "P-0007728",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-62d70a13bef5",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user95380@example.test",
+          "strength": "weak",
+          "value": "user95380@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000127094",
+          "strength": "weak",
+          "value": "+10000127094"
+        }
+      ],
+      "kind": "person",
+      "name": "Jacob Rodriguez",
+      "obs_id": "P-0008171",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-71c41f0491e7",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user20239@example.test",
+          "strength": "weak",
+          "value": "user20239@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000154801",
+          "strength": "weak",
+          "value": "+10000154801"
+        }
+      ],
+      "kind": "person",
+      "name": "Carter King",
+      "obs_id": "P-0008573",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-407085dcab42",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user54901@example.test",
+          "strength": "weak",
+          "value": "user54901@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000280671",
+          "strength": "weak",
+          "value": "+10000280671"
+        }
+      ],
+      "kind": "person",
+      "name": "Elizabeth Rodriguez",
+      "obs_id": "P-0009642",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-c056a70a9c7c",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user86359@example.test",
+          "strength": "weak",
+          "value": "user86359@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000033958",
+          "strength": "weak",
+          "value": "+10000033958"
+        }
+      ],
+      "kind": "person",
+      "name": "Jacob Harris",
+      "obs_id": "P-0010417",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-71400bf5eb49",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user83396@example.test",
+          "strength": "weak",
+          "value": "user83396@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000263947",
+          "strength": "weak",
+          "value": "+10000263947"
+        }
+      ],
+      "kind": "person",
+      "name": "Preston Soto",
+      "obs_id": "P-0010571",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-a16176d2dbdc",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user58426@example.test",
+          "strength": "weak",
+          "value": "user58426@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000009529",
+          "strength": "weak",
+          "value": "+10000009529"
+        }
+      ],
+      "kind": "person",
+      "name": "Addison Martinez",
+      "obs_id": "P-0011162",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-8ea5f0005340",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user903@example.test",
+          "strength": "weak",
+          "value": "user903@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000032980",
+          "strength": "weak",
+          "value": "+10000032980"
+        }
+      ],
+      "kind": "person",
+      "name": "Marley Jimenez",
+      "obs_id": "P-0011476",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-6fd9b1c9da78",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user69355@example.test",
+          "strength": "weak",
+          "value": "user69355@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000269801",
+          "strength": "weak",
+          "value": "+10000269801"
+        }
+      ],
+      "kind": "person",
+      "name": "Kate Fernadnez",
+      "obs_id": "P-FRAG-000008",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-6fd9b1c9da78",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user34402@example.test",
+          "strength": "weak",
+          "value": "user34402@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000269801",
+          "strength": "weak",
+          "value": "+10000269801"
+        }
+      ],
+      "kind": "person",
+      "name": "Kate eFrnandez",
+      "obs_id": "P-FRAG-000009",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-4f9602f9a659",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user685@example.test",
+          "strength": "weak",
+          "value": "user685@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000212825",
+          "strength": "weak",
+          "value": "+10000212825"
+        }
+      ],
+      "kind": "person",
+      "name": "Amleia Rodirguez",
+      "obs_id": "P-FRAG-000257",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-e6f46aa3abd4",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user4030@example.test",
+          "strength": "weak",
+          "value": "user4030@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "11000000418",
+          "strength": "weak",
+          "value": "+11000000418"
+        }
+      ],
+      "kind": "person",
+      "name": "Cooper Green",
+      "obs_id": "P-FRAG-000418",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": true,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-e6f46aa3abd4",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user64028@example.test",
+          "strength": "weak",
+          "value": "user64028@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000238079",
+          "strength": "weak",
+          "value": "+10000238079"
+        }
+      ],
+      "kind": "person",
+      "name": "Coopre Green",
+      "obs_id": "P-FRAG-000419",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-024d8a6a949c",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user69533@example.test",
+          "strength": "weak",
+          "value": "user69533@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "11000000553",
+          "strength": "weak",
+          "value": "+11000000553"
+        }
+      ],
+      "kind": "person",
+      "name": "Jessu Avial",
+      "obs_id": "P-FRAG-000553",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-024d8a6a949c",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user93074@example.test",
+          "strength": "weak",
+          "value": "user93074@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000154188",
+          "strength": "weak",
+          "value": "+10000154188"
+        }
+      ],
+      "kind": "person",
+      "name": "Jeuss Avlia",
+      "obs_id": "P-FRAG-000554",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-b51256b9d20e",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user96618@example.test",
+          "strength": "weak",
+          "value": "user96618@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "11000000580",
+          "strength": "weak",
+          "value": "+11000000580"
+        }
+      ],
+      "kind": "person",
+      "name": "Cadnece oMrgan",
+      "obs_id": "P-FRAG-000580",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-73a449abb421",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user72227@example.test",
+          "strength": "weak",
+          "value": "user72227@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "11000000656",
+          "strength": "weak",
+          "value": "+11000000656"
+        }
+      ],
+      "kind": "person",
+      "name": "rAiana Guerreor",
+      "obs_id": "P-FRAG-000656",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-71400bf5eb49",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user72988@example.test",
+          "strength": "weak",
+          "value": "user72988@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000263947",
+          "strength": "weak",
+          "value": "+10000263947"
+        }
+      ],
+      "kind": "person",
+      "name": "rPeston oSto",
+      "obs_id": "P-FRAG-000905",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    },
+    {
+      "cluster": "GT-71400bf5eb49",
+      "identifiers": [
+        {
+          "kind": "email",
+          "normalized": "user21720@example.test",
+          "strength": "weak",
+          "value": "user21720@example.test"
+        },
+        {
+          "kind": "phone",
+          "normalized": "10000263947",
+          "strength": "weak",
+          "value": "+10000263947"
+        }
+      ],
+      "kind": "person",
+      "name": "Prseton Soot",
+      "obs_id": "P-FRAG-000906",
+      "role": "LEGIT",
+      "sanctions_screen": {
+        "flagged": false,
+        "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+      }
+    }
+  ],
+  "provenance": {
+    "emit_command": "PYTHONPATH=<sub>/src <sub>/.venv/bin/python -m aml_substrate.cli --clients 12000 --months 3 --seed 0 --emergence --anchored --screen --emit-screening --emit-eval-oracles --out <emit>",
+    "n_candidates_sanctions_touching": 24,
+    "n_flagged_obs": 25,
+    "n_observations": 42,
+    "params": {
+      "anchored": true,
+      "clients": 12000,
+      "months": 3,
+      "seed": 0
+    },
+    "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+    "substrate_pin": "1f5901e",
+    "two_sided": {
+      "reject_as_shares": 13,
+      "uphold_merge": 11
+    }
+  }
+}

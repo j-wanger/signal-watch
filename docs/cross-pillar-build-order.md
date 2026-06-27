@@ -27,6 +27,23 @@
 > non-circular `GT-` oracle; the Phase-77 circular-oracle abort CURED). `dist/merge` re-frozen; the other 8 dists +
 > `evidence_requirements.py` byte-frozen. The three handoff briefs are now CLOSED/RESOLVED (see their banners).
 > Substrate open-data **Stage 2/3** + casework's CI-promotion criterion remain the open sibling frontiers.
+>
+> **UPDATE 2026-06-27 (Phase 80 — the Phase-34 sanctions-screening consume LANDED):** aml-substrate advanced
+> **`c099259` → `1f5901e` (Phase 34 — seam-5 sanctions screening)** — `sanctions_flag` made LIVE under `--anchored`
+> via a label-blind OFAC-watchlist name collision + a revived non-tautological C14 (the escalation-gap branch).
+> signal-watch **Phase 80 CONSUMED both halves**: (a) the **merge console** gained an **OFAC name-collision case
+> class** — a third SCORED population (24 cases, two-sided 11 uphold / 13 reject) where the merge question is
+> entity resolution under sanctions screening (a flagged record + its same-person fragment that evaded screening
+> = uphold; two strangers sharing a watchlisted name = the common-name false positive = reject); `dist/merge`
+> re-frozen (the ONE sanctioned dist touch; the 8 non-merge dists + `evidence_requirements.py` byte-frozen). (b) the
+> **workbench §12** gained a **non-tautological sanctions-driven C14 leg** (companion-only): a C14-PURE party leaf
+> (`data/casefile/sanctions-c14-demo.bundle.json`) lights the **KYC-A1** determination atom from a real sanctions
+> signal — and casework's **Phase-19 party-leaf C14 grounding** (re-vendored @076fb8e) **SIGNS** it end-to-end
+> (disposition `file`), the txn-less party-leaf C14 that used to fail-closed at casework's no-transactions contract.
+> The measure-first gate cleared GREEN (the two-sidedness is genuine, from the Phase-32 fragment overlay running
+> alongside sanctions; no one-sided abort). The remaining frontier is **substrate P35+** (TF slice / broader C7 /
+> org-name sanctions / open-data Stage 2/3 — `docs/substrate-p35-determination-signals-PLAN-BRIEF.md`) +
+> casework's CI-promotion criterion. **C1/ML-A6 is a documented measured null, not an ask.**
 
 ## What changed since the last snapshot
 

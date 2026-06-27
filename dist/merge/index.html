@@ -90,6 +90,9 @@
   .arow:last-child{border-bottom:0}
   .arow .ak{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);flex:none;width:92px;padding-top:2px}
   .arow .av{color:var(--ink);line-height:1.5;word-break:break-word}
+  .arow.sanc{background:rgba(246,166,35,.05)}
+  .arow.sanc .ak{color:var(--signal)}
+  .arow.sanc .av{color:var(--signal)}
   .arow .acode{font-family:var(--mono);font-size:11.5px;color:var(--teal);background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
   .sharedbox{grid-column:1/-1;border:1px solid var(--line);border-left:3px solid var(--teal);background:var(--bg2);border-radius:0 11px 11px 0;padding:13px 16px;margin-top:2px}
   .sharedbox .sl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
@@ -198,7 +201,7 @@
   </div>
 
   <footer>
-    Merge console — the Class-J human gate over entity-resolution candidate links · the deterministic spine resolves what it can and REFUSES the ambiguous; you adjudicate the residual · BOTH populations are SCORED against a latent-truth oracle (real-substrate vs synthetic) — SYNTHETIC ONLY, measured on a synthetic substrate slice, production has no ground truth · grades &amp; rationales are the presenter's, session-only<br>
+    Merge console — the Class-J human gate over entity-resolution candidate links · the deterministic spine resolves what it can and REFUSES the ambiguous; you adjudicate the residual · THREE populations are SCORED against a latent-truth oracle (real-substrate · OFAC name-collision · synthetic) — SYNTHETIC ONLY, measured on a synthetic substrate slice, production has no ground truth · grades &amp; rationales are the presenter's, session-only<br>
     <span class="keys">←/→ navigate · Space advance · Esc back to the queue</span>
   </footer>
 </div>
@@ -210,7 +213,7 @@
 // project convention — never pre-escape a record). The latent truth rides ONLY each scored case's
 // `oracle` block, revealed at the verdict screen, never in the pre-adjudication evidence.
 const DATA = {
-  "_note": "FULLY curated merge-adjudication cases (Phase 76; SUPERSEDE Phase 79; regeneration-only — .venv/bin/python scripts/curate_merge_cases.py). TWO SCORED populations, kept visibly separate by oracle PROVENANCE (Phase 79 supersede: BOTH are synthetic and BOTH are scored — the prior consensus-vs-scored split retired now that the real-substrate population has a non-circular oracle): (1) 29 REAL-SUBSTRATE candidate SHARES from aml-substrate's --anchored --emit-eval-oracles slice (@c099259, Phase-32/33 anchored fork) — scored against substrate's OWN latent GT-<hash> identity oracle (NON-circular: GT != entity_ref, so the Phase-77 circular-oracle abort is CURED). The demoted spine (email/phone weak — Phase-75's noise floor) refuses every candidate; the oracle reveals which are real fragment co-references it MISSED (uphold_merge) vs noise-floor collisions it correctly refused (reject_as_shares). SUPERSEDES the Phase-76/77 consensus-66 (which had no oracle). (2) 13 hand-authored SYNTHETIC scored cases from data/entity-spine/true_entities.json — spanning all 4 quadrants / 3 bases. BOTH populations' latent truth rides ONLY each case's `oracle` block (revealed post-disposition); the pre-disposition evidence (a/b) carries no truth field (the resolver-input firewall). Shared emails are domain-masked to example.test (the local-part token kept, proving the exact collision). Illustrative; no catch-rate/lift/precision is claimed; every scored number is synthetic-only-qualified.",
+  "_note": "FULLY curated merge-adjudication cases (Phase 76; SUPERSEDE Phase 79; + the Phase-80 sanctions class; regeneration-only — .venv/bin/python scripts/curate_merge_cases.py). THREE SCORED populations, kept visibly separate by oracle PROVENANCE (all synthetic, all scored against a non-circular GT-<hash>/true_entities oracle, each provenance-qualified): (1) 29 REAL-SUBSTRATE candidate SHARES from aml-substrate's --anchored --emit-eval-oracles slice (@c099259, Phase-32/33 anchored fork) — scored against substrate's OWN latent GT-<hash> identity oracle (NON-circular: GT != entity_ref). The demoted spine (email/phone weak — Phase-75's noise floor) refuses every candidate; the oracle reveals which are real fragment co-references it MISSED (uphold_merge) vs noise-floor collisions it correctly refused (reject_as_shares). (2) 24 OFAC NAME-COLLISION sanctions-screening cases from the Phase-34 --anchored sanctions slice (@1f5901e) — a LABEL-BLIND watchlist name collision (no party IS a designated person); the merge question is 'are these two RECORDS the same customer', with the watchlist flag as evidence. Two-sided: a flagged record + its same-person fragment that evaded screening (uphold_merge — entity resolution is prerequisite to correct sanctions coverage) vs two distinct customers sharing a watchlisted name (reject_as_shares — the common-name false positive). (3) 13 hand-authored SYNTHETIC scored cases from data/entity-spine/true_entities.json — spanning all 4 quadrants / 3 bases. ALL populations' latent truth rides ONLY each case's `oracle` block (revealed post-disposition); the pre-disposition evidence (a/b) carries no truth field (the resolver-input firewall). Shared emails are domain-masked to example.test (the local-part token kept, proving the exact collision). Illustrative; no rate, score, or multiplier is claimed; every scored number is synthetic-only-qualified.",
   "adjudication_grades": [
     {
       "desc": "These records are the SAME entity — confirm the merge the resolver proposed (or should have).",
@@ -1682,6 +1685,1338 @@ const DATA = {
         "identifiers": [
           {
             "kind": "email",
+            "value": "user61241@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000094733"
+          }
+        ],
+        "kind": "person",
+        "name": "Elijah Hernandez",
+        "ref": "P-0000503",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user97653@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000006662"
+          }
+        ],
+        "kind": "person",
+        "name": "Elijah Hernandez",
+        "ref": "P-0006887",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "name",
+      "id": "sanc-P-0000503-P-0006887",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": null,
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user903@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000243550"
+          }
+        ],
+        "kind": "person",
+        "name": "Carter King",
+        "ref": "P-0000781",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user20239@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000154801"
+          }
+        ],
+        "kind": "person",
+        "name": "Carter King",
+        "ref": "P-0008573",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "name",
+      "id": "sanc-P-0000781-P-0008573",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": null,
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user17627@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000043596"
+          }
+        ],
+        "kind": "person",
+        "name": "Nathan Perez",
+        "ref": "P-0001127",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user98145@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000034390"
+          }
+        ],
+        "kind": "person",
+        "name": "Nathan Perez",
+        "ref": "P-0004210",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "name",
+      "id": "sanc-P-0001127-P-0004210",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": null,
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user23245@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000072186"
+          }
+        ],
+        "kind": "person",
+        "name": "Elizabeth Rodriguez",
+        "ref": "P-0001288",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user54901@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000280671"
+          }
+        ],
+        "kind": "person",
+        "name": "Elizabeth Rodriguez",
+        "ref": "P-0009642",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "name",
+      "id": "sanc-P-0001288-P-0009642",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": null,
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user65255@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000270706"
+          }
+        ],
+        "kind": "person",
+        "name": "Addison Martinez",
+        "ref": "P-0001552",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user58426@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000009529"
+          }
+        ],
+        "kind": "person",
+        "name": "Addison Martinez",
+        "ref": "P-0011162",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "name",
+      "id": "sanc-P-0001552-P-0011162",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": null,
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user75035@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000025000"
+          }
+        ],
+        "kind": "person",
+        "name": "Jacob Rodriguez",
+        "ref": "P-0001970",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user95380@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000127094"
+          }
+        ],
+        "kind": "person",
+        "name": "Jacob Rodriguez",
+        "ref": "P-0008171",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "name",
+      "id": "sanc-P-0001970-P-0008171",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": null,
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user70326@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000247358"
+          }
+        ],
+        "kind": "person",
+        "name": "Alyssa Johnson",
+        "ref": "P-0002011",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user89124@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000197451"
+          }
+        ],
+        "kind": "person",
+        "name": "Alyssa Johnson",
+        "ref": "P-0004887",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "name",
+      "id": "sanc-P-0002011-P-0004887",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": null,
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user88559@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000272662"
+          }
+        ],
+        "kind": "person",
+        "name": "Joshua Ruiz",
+        "ref": "P-0002673",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user74071@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000289753"
+          }
+        ],
+        "kind": "person",
+        "name": "Joshua Ruiz",
+        "ref": "P-0007081",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "name",
+      "id": "sanc-P-0002673-P-0007081",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": null,
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user89304@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000104904"
+          }
+        ],
+        "kind": "person",
+        "name": "Jacob Harris",
+        "ref": "P-0003008",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user86359@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000033958"
+          }
+        ],
+        "kind": "person",
+        "name": "Jacob Harris",
+        "ref": "P-0010417",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "name",
+      "id": "sanc-P-0003008-P-0010417",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": null,
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user63540@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000017785"
+          }
+        ],
+        "kind": "person",
+        "name": "Omar Johnson",
+        "ref": "P-0003466",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user24295@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000224579"
+          }
+        ],
+        "kind": "person",
+        "name": "Omar Johnson",
+        "ref": "P-0007728",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "name",
+      "id": "sanc-P-0003466-P-0007728",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": null,
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user58664@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000238079"
+          }
+        ],
+        "kind": "person",
+        "name": "Cooper Green",
+        "ref": "P-0004630",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user4030@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+11000000418"
+          }
+        ],
+        "kind": "person",
+        "name": "Cooper Green",
+        "ref": "P-FRAG-000418",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "name",
+      "id": "sanc-P-0004630-P-FRAG-000418",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": null,
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user64041@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000233019"
+          }
+        ],
+        "kind": "person",
+        "name": "Samuel Santiago",
+        "ref": "P-0005137",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user81679@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000062061"
+          }
+        ],
+        "kind": "person",
+        "name": "Samuel Santiago",
+        "ref": "P-0005755",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "name",
+      "id": "sanc-P-0005137-P-0005755",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": null,
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user49497@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000269801"
+          }
+        ],
+        "kind": "person",
+        "name": "Katherine Fernandez",
+        "ref": "P-0000143",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user69355@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000269801"
+          }
+        ],
+        "kind": "person",
+        "name": "Kate Fernadnez",
+        "ref": "P-FRAG-000008",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "strong",
+      "id": "sanc-P-0000143-P-FRAG-000008",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "phone",
+        "value": "10000269801"
+      },
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user49497@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000269801"
+          }
+        ],
+        "kind": "person",
+        "name": "Katherine Fernandez",
+        "ref": "P-0000143",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user34402@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000269801"
+          }
+        ],
+        "kind": "person",
+        "name": "Kate eFrnandez",
+        "ref": "P-FRAG-000009",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "strong",
+      "id": "sanc-P-0000143-P-FRAG-000009",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "phone",
+        "value": "10000269801"
+      },
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user903@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000243550"
+          }
+        ],
+        "kind": "person",
+        "name": "Carter King",
+        "ref": "P-0000781",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user903@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000032980"
+          }
+        ],
+        "kind": "person",
+        "name": "Marley Jimenez",
+        "ref": "P-0011476",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "strong",
+      "id": "sanc-P-0000781-P-0011476",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "user903@example.test"
+      },
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user64028@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000065296"
+          }
+        ],
+        "kind": "person",
+        "name": "Fabian Velasquez",
+        "ref": "P-0001682",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user64028@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000238079"
+          }
+        ],
+        "kind": "person",
+        "name": "Coopre Green",
+        "ref": "P-FRAG-000419",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "strong",
+      "id": "sanc-P-0001682-P-FRAG-000419",
+      "oracle": {
+        "correct_adjudication": "reject_as_shares",
+        "klass": "correct-rejection",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": false
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "user64028@example.test"
+      },
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user45114@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000212825"
+          }
+        ],
+        "kind": "person",
+        "name": "Amelia Rodriguez",
+        "ref": "P-0003060",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user685@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000212825"
+          }
+        ],
+        "kind": "person",
+        "name": "Amleia Rodirguez",
+        "ref": "P-FRAG-000257",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "strong",
+      "id": "sanc-P-0003060-P-FRAG-000257",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "phone",
+        "value": "10000212825"
+      },
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user58664@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000238079"
+          }
+        ],
+        "kind": "person",
+        "name": "Cooper Green",
+        "ref": "P-0004630",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user64028@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000238079"
+          }
+        ],
+        "kind": "person",
+        "name": "Coopre Green",
+        "ref": "P-FRAG-000419",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "strong",
+      "id": "sanc-P-0004630-P-FRAG-000419",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "phone",
+        "value": "10000238079"
+      },
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user69533@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000154188"
+          }
+        ],
+        "kind": "person",
+        "name": "Jesus Avila",
+        "ref": "P-0006291",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user69533@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+11000000553"
+          }
+        ],
+        "kind": "person",
+        "name": "Jessu Avial",
+        "ref": "P-FRAG-000553",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "strong",
+      "id": "sanc-P-0006291-P-FRAG-000553",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "user69533@example.test"
+      },
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user69533@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000154188"
+          }
+        ],
+        "kind": "person",
+        "name": "Jesus Avila",
+        "ref": "P-0006291",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user93074@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000154188"
+          }
+        ],
+        "kind": "person",
+        "name": "Jeuss Avlia",
+        "ref": "P-FRAG-000554",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "strong",
+      "id": "sanc-P-0006291-P-FRAG-000554",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "phone",
+        "value": "10000154188"
+      },
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user96618@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000087988"
+          }
+        ],
+        "kind": "person",
+        "name": "Cadence Morgan",
+        "ref": "P-0006561",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user96618@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+11000000580"
+          }
+        ],
+        "kind": "person",
+        "name": "Cadnece oMrgan",
+        "ref": "P-FRAG-000580",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "strong",
+      "id": "sanc-P-0006561-P-FRAG-000580",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "user96618@example.test"
+      },
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user72227@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000201482"
+          }
+        ],
+        "kind": "person",
+        "name": "Ariana Guerrero",
+        "ref": "P-0007382",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user72227@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+11000000656"
+          }
+        ],
+        "kind": "person",
+        "name": "rAiana Guerreor",
+        "ref": "P-FRAG-000656",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "strong",
+      "id": "sanc-P-0007382-P-FRAG-000656",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "email",
+        "value": "user72227@example.test"
+      },
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user83396@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000263947"
+          }
+        ],
+        "kind": "person",
+        "name": "Preston Soto",
+        "ref": "P-0010571",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user72988@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000263947"
+          }
+        ],
+        "kind": "person",
+        "name": "rPeston oSto",
+        "ref": "P-FRAG-000905",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "strong",
+      "id": "sanc-P-0010571-P-FRAG-000905",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "phone",
+        "value": "10000263947"
+      },
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user83396@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000263947"
+          }
+        ],
+        "kind": "person",
+        "name": "Preston Soto",
+        "ref": "P-0010571",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": true,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "b": {
+        "identifiers": [
+          {
+            "kind": "email",
+            "value": "user21720@example.test"
+          },
+          {
+            "kind": "phone",
+            "value": "+10000263947"
+          }
+        ],
+        "kind": "person",
+        "name": "Prseton Soot",
+        "ref": "P-FRAG-000906",
+        "role": "LEGIT",
+        "sanctions_screen": {
+          "flagged": false,
+          "source": "OFAC SDN (US-federal public domain, 17 USC 105) — label-blind name collision; no party IS a designated person"
+        }
+      },
+      "basis": "strong",
+      "id": "sanc-P-0010571-P-FRAG-000906",
+      "oracle": {
+        "correct_adjudication": "uphold_merge",
+        "klass": "fragmentation-gap",
+        "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+        "same_entity": true
+      },
+      "scored": true,
+      "shared": {
+        "kind": "phone",
+        "value": "10000263947"
+      },
+      "source": "substrate-sanctions-slice",
+      "spine_verdict": "kept_distinct"
+    },
+    {
+      "a": {
+        "identifiers": [
+          {
+            "kind": "email",
             "value": "rtan@dossier.test"
           }
         ],
@@ -2222,10 +3557,30 @@ const DATA = {
     }
   ],
   "provenance": {
+    "n_substrate_sanctions_scored": 24,
     "n_substrate_scored": 29,
     "n_synthetic_scored": 13,
     "substrate_head": "c099259",
     "substrate_qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+    "substrate_sanctions_head": "1f5901e",
+    "substrate_sanctions_slice": {
+      "emit_command": "PYTHONPATH=<sub>/src <sub>/.venv/bin/python -m aml_substrate.cli --clients 12000 --months 3 --seed 0 --emergence --anchored --screen --emit-screening --emit-eval-oracles --out <emit>",
+      "n_candidates_sanctions_touching": 24,
+      "n_flagged_obs": 25,
+      "n_observations": 42,
+      "params": {
+        "anchored": true,
+        "clients": 12000,
+        "months": 3,
+        "seed": 0
+      },
+      "qualifier": "measured on a synthetic aml-substrate slice; production has no ground truth",
+      "substrate_pin": "1f5901e",
+      "two_sided": {
+        "reject_as_shares": 13,
+        "uphold_merge": 11
+      }
+    },
     "substrate_slice": {
       "emit_command": "PYTHONPATH=src .venv/bin/python -m aml_substrate.cli --clients 400 --months 10 --seed 0 --emergence --anchored --emit-eval-oracles --emit-screening --out <out>",
       "n_observations": 32,
@@ -2278,10 +3633,13 @@ function sharedText(c){
 }
 // the deterministic resolver's call, in the human grade vocab (the verdict's baseline)
 function baselineGrade(c){return c.spine_verdict==='merged'?'uphold_merge':'reject_as_shares';}
-// the oracle PROVENANCE — real-substrate (substrate's anchored GT- truth) vs hand-authored synthetic. BOTH
-// are SCORED (Phase 79 supersede); the split is provenance, each synthetic-only-qualified, never production.
-function isSub(c){return (c&&c.source)==='substrate-anchored-slice';}
-function provLabel(c){return isSub(c)?'substrate':'synthetic';}
+// the oracle PROVENANCE — three SCORED populations, each against a non-circular latent-truth oracle, split by
+// provenance (all synthetic-substrate / synthetic-only qualified, never production): the anchored real-substrate
+// slice, the Phase-80 OFAC name-collision sanctions slice, and the hand-authored synthetic set.
+function isAnchored(c){return (c&&c.source)==='substrate-anchored-slice';}
+function isSanc(c){return (c&&c.source)==='substrate-sanctions-slice';}
+function isSub(c){return isAnchored(c)||isSanc(c);}            // both substrate-derived sources (same qualifier)
+function provLabel(c){return isSanc(c)?'OFAC name-collision':isAnchored(c)?'substrate':'synthetic';}
 function oracleMatch(c,grade){return !!(c.scored&&c.oracle&&grade===c.oracle.correct_adjudication);}
 function agreementFor(c,grade){
   if(c.scored&&c.oracle){
@@ -2313,10 +3671,10 @@ function wireSteps(){
 /* ---------- screen: the candidate-SHARES queue (grouped by basis) ---------- */
 function renderQueue(){
   const total=CASES.length, done=dispositions.length;
-  const nSub=CASES.filter(isSub).length, nSyn=CASES.filter(c=>!isSub(c)).length;
+  const nAnch=CASES.filter(isAnchored).length, nSanc=CASES.filter(isSanc).length, nSyn=CASES.filter(c=>!isSub(c)).length;
   let k=0;
   const groups=BASES.map(b=>{
-    // substrate-scored (the real-data population) first within each basis, then deterministic by id
+    // substrate-scored populations first within each basis (sanctions then anchored), then deterministic by id
     const rows=CASES.filter(c=>c.basis===b.id).sort((x,y)=>(isSub(y)?1:0)-(isSub(x)?1:0)||(x.id<y.id?-1:x.id>y.id?1:0));
     if(!rows.length)return '';
     return `<div class="axhead">${esc(b.label)} <span class="axn">${rows.length} candidate${rows.length===1?'':'s'} · ${esc(b.desc)}</span></div>
@@ -2335,12 +3693,13 @@ function renderQueue(){
   stage.innerHTML=stepsHtml()+`<div class="scene">
     <div class="eyebrow">Merge console · Class J — human judgment over identity links</div>
     <h2>The merge-adjudication queue — <em>candidate links the resolver refused</em></h2>
-    <p class="lead">Entity resolution proposes that two records are the <b>same</b> party. The deterministic spine merges what it can on a declared identity and <b>refuses the ambiguous</b> — two distinct entities that merely share an identifier. Those refusals are below, grouped by the shared signal. Both populations are <b>scored</b> against a latent-truth oracle. The <b>real-substrate</b> cases run against aml-substrate's OWN anchored identity ground truth: the demoted spine <b>REFUSED every one</b> (it keys on the declared reference, substrate's noise-floor email/phone demoted to weak), so the <b>oracle does the discrimination</b> — it reveals which refusals were real same-person fragments the spine should have UPHELD (a fragmentation gap) vs noise-floor collisions it correctly kept apart (a correct rejection). This scores the demotion policy against truth, not a merge/refuse resolver — that lives in the <b>synthetic</b> set, an authored oracle whose resolver both merges and refuses, spanning all four quadrants. Every score is <b>synthetic by construction</b> — measured on a synthetic substrate slice, never production. The resolver assembles the evidence; you adjudicate.</p>
+    <p class="lead">Entity resolution proposes that two records are the <b>same</b> party. The deterministic spine merges what it can on a declared identity and <b>refuses the ambiguous</b> — two distinct entities that merely share an identifier. Those refusals are below, grouped by the shared signal. Both populations are <b>scored</b> against a latent-truth oracle. The <b>real-substrate</b> cases run against aml-substrate's OWN anchored identity ground truth: the demoted spine <b>REFUSED every one</b> (it keys on the declared reference, substrate's noise-floor email/phone demoted to weak), so the <b>oracle does the discrimination</b> — it reveals which refusals were real same-person fragments the spine should have UPHELD (a fragmentation gap) vs noise-floor collisions it correctly kept apart (a correct rejection). This scores the demotion policy against truth, not a merge/refuse resolver — that lives in the <b>synthetic</b> set, an authored oracle whose resolver both merges and refuses, spanning all four quadrants. A third population — the <b>OFAC name-collision</b> class — is sanctions screening's entity-resolution problem: a customer whose name coincidentally matches a public-domain watchlist (a <b>label-blind</b> collision — no record IS a designated person), where the merge call is whether two flagged-or-colliding records are the <b>same customer</b> (a flagged person + the fragment that evaded screening — uphold) or <b>strangers</b> sharing a watchlisted name (the common-name false positive — reject). Every score is <b>synthetic by construction</b> — measured on a synthetic substrate slice, never production. The resolver assembles the evidence; you adjudicate.</p>
     <div class="qstats">
       <div class="qstat"><div class="qsn">${total}</div><div class="qsl">candidate links</div></div>
-      <div class="qstat"><div class="qsn">${nSub}</div><div class="qsl">real-substrate · scored</div></div>
+      <div class="qstat"><div class="qsn">${nAnch}</div><div class="qsl">real-substrate · scored</div></div>
+      <div class="qstat"><div class="qsn">${nSanc}</div><div class="qsl">OFAC name-collision · scored</div></div>
       <div class="qstat"><div class="qsn">${nSyn}</div><div class="qsl">synthetic · scored</div></div>
-      <div class="qstat"><div class="qsn">${done}</div><div class="qsl">adjudicated this session</div></div>
+      <div class="qstat"><div class="qsn">${done}</div><div class="qsl">adjudicated</div></div>
     </div>
     ${groups}
     <div class="qfoot"><button class="btn ghost" id="goledger">Session ledger (${done}) ›</button></div>
@@ -2354,10 +3713,17 @@ function recCard(label,r){
   const idents=(r&&Array.isArray(r.identifiers))?r.identifiers:[];
   const attrRows=idents.map(i=>`<div class="arow"><span class="ak">${esc(i.kind)}</span><span class="av">${esc(i.value)}</span></div>`).join('')
     || `<div class="arow"><span class="ak">identifiers</span><span class="av">none presented in this record</span></div>`;
+  // OBSERVABLE bank screening state — a sanctions hit is a label-blind name collision (the record is NOT a
+  // designated person); it raises the stakes of the identity call, it is not the latent truth of the merge.
+  const sc=(r&&r.sanctions_screen)||null;
+  const scRow=(sc&&sc.flagged)
+    ? `<div class="arow sanc"><span class="ak">sanctions screen</span><span class="av">⚠ OFAC watchlist name match — coincidental (this record is not a designated person)</span></div>`
+    : '';
   return `<div class="reccard">
     <div class="ah">${esc(label)}<span class="rk">${esc((r&&r.kind)||'')}${r&&r.role?' · '+esc(r.role):''}</span></div>
     <div class="recname">${esc(r&&r.name)}</div>
     ${attrRows}
+    ${scRow}
   </div>`;
 }
 function renderEvidence(c){
@@ -2368,7 +3734,7 @@ function renderEvidence(c){
   stage.innerHTML=stepsHtml()+`<div class="scene">
     <div class="eyebrow">Candidate ${esc(c.id)} · ${provLabel(c)}</div>
     <h2>The evidence — <em>two records, one shared signal</em></h2>
-    <p class="lead">The two records and what links them. Read them on the evidence alone — a shared identifier proves contact, <b>not identity</b>. They are linked by <b>${esc(basisLabel(c.basis))}</b>.</p>
+    <p class="lead">The two records and what links them. Read them on the evidence alone — a shared identifier proves contact, <b>not identity</b>. They are linked by <b>${esc(basisLabel(c.basis))}</b>.${isSanc(c)?' At least one record tripped <b>sanctions screening</b> on the shared name — a <b>label-blind OFAC watchlist collision</b> (neither record IS a designated person). The question is identity: are these the <b>same customer</b> (so the watchlist exposure belongs to one consolidated person — the fragment that evaded screening) or <b>two strangers</b> who share a watchlisted name (the common-name false positive)?':''}</p>
     <div class="evgrid">
       ${recCard('Record A',c.a)}
       ${recCard('Record B',c.b)}
@@ -2428,7 +3794,7 @@ function renderVerdict(c){
   else if(rec.grade==='both_defensible'||rec.grade==='escalate')mt='<span class="matchtag amb">you recorded ambiguity — the oracle records one truth</span>';
   else mt='<span class="matchtag no">✗ your call differs from the latent truth</span>';
   const truthCard=`<div class="revcard oracle">
-      <div class="ah">${isSub(c)?"Substrate's anchored ground truth · scored":'Synthetic ground truth · scored'}</div>
+      <div class="ah">${isSub(c)?"Substrate's latent ground truth · scored":'Synthetic ground truth · scored'}</div>
       <div class="revbody">
         <div class="revgrade">${baseTag} the deterministic spine ${dist?'refused this merge':'merged these'}</div>
         <div class="revgrade">Latent truth: <b>${same?'the SAME entity':'DISTINCT entities'}</b></div>
@@ -2461,35 +3827,37 @@ function renderLedger(){
   const rows=dispositions.map(d=>`<div class="ledrow">
       <span class="lo">#${d.order}</span>
       <div class="lmain">
-        <div class="lcase">${esc(d.case_id)} · ${isSub(d)?'substrate':'synthetic'}</div>
+        <div class="lcase">${esc(d.case_id)} · ${esc(provLabel(d))}</div>
         <div class="lrat">${esc(d.rationale)}</div>
       </div>
       <span class="chip scored">${esc(gradeShort(d.grade))}</span>
       <span class="lagree">${esc(d.agreement)}</span>
     </div>`).join('');
   const matched=dispositions.filter(d=>d.oracle_match===true).length;
-  const subN=dispositions.filter(isSub), synN=dispositions.filter(d=>!isSub(d));
-  const subMatched=subN.filter(d=>d.oracle_match===true).length, synMatched=synN.filter(d=>d.oracle_match===true).length;
+  const anchN=dispositions.filter(isAnchored), sancN=dispositions.filter(isSanc), synN=dispositions.filter(d=>!isSub(d));
+  const mm=a=>a.filter(d=>d.oracle_match===true).length;
+  const anchM=mm(anchN), sancM=mm(sancN), synM=mm(synN);
   const qual=PROV.substrate_qualifier||PROV.synthetic_qualifier||'measured on a synthetic substrate slice; production has no ground truth';
   const exp={
     artifact:'Signal Watch — Merge Console (vision prototype)',
-    note:'Session-only merge-adjudication ledger. BOTH populations are SCORED against a latent-truth oracle — the real-substrate cases against aml-substrate\'s OWN anchored identity ground truth, the synthetic against an authored oracle. SYNTHETIC ONLY — '+qual+'. Illustrative outputs; a judgment ledger, NOT a detection-quality score.',
+    note:'Session-only merge-adjudication ledger. THREE populations are SCORED against a latent-truth oracle — the real-substrate + OFAC name-collision cases against aml-substrate\'s OWN anchored identity ground truth, the synthetic against an authored oracle. SYNTHETIC ONLY — '+qual+'. Illustrative outputs; a judgment ledger, not a detection-quality measure.',
     provenance:PROV,
     candidates_total:CASES.length,
     agreement:{matched:matched, scored_adjudicated:dispositions.length,
-               by_provenance:{substrate:{matched:subMatched, adjudicated:subN.length},
-                              synthetic:{matched:synMatched, adjudicated:synN.length}},
+               by_provenance:{'substrate':{matched:anchM, adjudicated:anchN.length},
+                              'ofac-name-collision':{matched:sancM, adjudicated:sancN.length},
+                              'synthetic':{matched:synM, adjudicated:synN.length}},
                qualifier:qual},
     dispositions:dispositions,
   };
   const agbox=dispositions.length?`<div class="agbox">
     <b>${matched}/${dispositions.length}</b> of your calls matched the latent oracle — <span style="color:var(--faint)">${esc(qual)}</span>.
-    ${subN.length?` Real-substrate: <b>${subMatched}/${subN.length}</b>.`:''}${synN.length?` Synthetic: <b>${synMatched}/${synN.length}</b>.`:''}
+    ${anchN.length?` Real-substrate: <b>${anchM}/${anchN.length}</b>.`:''}${sancN.length?` OFAC name-collision: <b>${sancM}/${sancN.length}</b>.`:''}${synN.length?` Synthetic: <b>${synM}/${synN.length}</b>.`:''}
   </div>`:'';
   stage.innerHTML=stepsHtml()+`<div class="scene">
     <div class="eyebrow">Merge console · session ledger</div>
     <h2>The session ledger — <em>judgment as precedent</em></h2>
-    <p class="lead"><b>Session-only:</b> this offline file persists nothing — close the tab and the ledger is gone. Both populations are scored against a latent-truth oracle (real-substrate vs synthetic); the agreement number is measured on a synthetic substrate slice only, never production.</p>
+    <p class="lead"><b>Session-only:</b> this offline file persists nothing — close the tab and the ledger is gone. All three populations are scored against a latent-truth oracle (real-substrate · OFAC name-collision · synthetic); the agreement number is measured on a synthetic substrate slice only, never production.</p>
     ${agbox}
     ${dispositions.length?`<div class="ledgrid">${rows}</div>
       <div class="doclabel">Export — the session JSON (copy out to keep)</div>

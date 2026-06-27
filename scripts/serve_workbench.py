@@ -300,6 +300,42 @@ def lakeshore_cosign_consume(*, drafter: str = "stub", tmpdir: Path | None = Non
             "cleared": res.get("signed") is True and res.get("disposition") == "cleared"}
 
 
+# ---- Phase 80: the §12 KYC leg from a NON-TAUTOLOGICAL sanctions-driven C14 (the Phase-34 consume) --------
+SANCTIONS_C14_BUNDLE = ROOT / "data" / "casefile" / "sanctions-c14-demo.bundle.json"
+
+
+def sanctions_c14_consume(*, drafter: str = "stub", tmpdir: Path | None = None) -> dict:
+    """Consume aml-substrate's Phase-34 sanctions-screening realism: a NON-TAUTOLOGICAL sanctions-driven C14.
+    The committed bundle (data/casefile/sanctions-c14-demo.bundle.json — a REAL Phase-34 `--anchored
+    --emit-screening` C14-PURE kyc_integrity party leaf) fires C14 on a SANCTIONS-FLAGGED party under a
+    non-EDD classification — the revived escalation-gap branch (a LABEL-BLIND OFAC name collision: the party
+    is NOT a designated person), NOT the pre-Phase-34 EDD≔HIGH construction tautology. Two things land:
+      (1) the §12 DETERMINATION lights the KYC-A1 atom from this real signal (C14-pure -> kyc_integrity), where
+          the pre-Phase-34 slice's C14 fired only on the construction tautology;
+      (2) casework's Phase-19 party-leaf C14 grounding (re-vendored @076fb8e) re-derives the KYC defect over
+          the resolving party leaf and SIGNS end-to-end — the txn-less party-leaf C14 that used to fail-closed
+          at casework's no-transactions contract (the Phase-72 frontier) now signs.
+    Companion-only; the determination engine (evidence_requirements) is BYTE-UNCHANGED — this only feeds it a
+    real signal. Honest-skips (RunError) when the vendored casework is absent."""
+    import tempfile
+    bundle = json.loads(SANCTIONS_C14_BUNDLE.read_text(encoding="utf-8"))
+    party = (bundle.get("parties") or [{}])[0]
+    caps = sorted({a.get("capability") for a in bundle.get("alerts", []) if a.get("capability")})
+    prof = load_requirements()
+    ctype = crime_type_for_capabilities(caps, prof)
+    present = present_atoms(ctype, caps, prof) if ctype else []
+    det = determine(ctype, caps, prof) if ctype else {}
+    kyc_leg = ctype == "kyc_integrity" and any("KYC" in a for a in present)
+    td = tmpdir or Path(tempfile.mkdtemp())
+    res = casework_consume_wb(SANCTIONS_C14_BUNDLE, td / "sanctions-c14-signed.json", drafter)
+    return {"badge": BADGE, "case_id": bundle.get("case_id", "CASE-SANC-C14"),
+            "sanctions_flagged": bool(party.get("sanctions_flag")),
+            "non_tautological": party.get("cdd_level") != "EDD",   # the escalation-gap branch (not EDD≔HIGH)
+            "crime_type": ctype, "present_atoms": present, "kyc_leg_lights": kyc_leg,
+            "determination": det.get("verdict"), "consume": res,
+            "grounds_e2e": res.get("signed") is True, "disposition": res.get("disposition")}
+
+
 # ---- the live finale (REUSES serve_chain's verify + audit; consume = the fail-closed-aware variant) --
 def run_case(case_id: str, *, on_stage, consume=casework_consume_wb, verify=verify_e2e,
              drafter: str | None = None, tmpdir: Path | None = None, env: dict | None = None) -> dict:
@@ -1631,6 +1667,44 @@ def selftest() -> int:
         lakeshore_note = f"casework live consume skipped — {ex}"
         print(f"  (lakeshore co-sign: {lakeshore_note})", file=sys.stderr)  # noqa: T201
 
+    # Phase 80 — the §12 KYC leg from a NON-TAUTOLOGICAL sanctions-driven C14 (the Phase-34 consume): a
+    # C14-PURE party leaf whose C14 fires on a SANCTIONS-FLAGGED party under a non-EDD classification (the
+    # revived escalation-gap branch — a label-blind OFAC name collision, NOT a designated person, NOT the
+    # EDD≔HIGH tautology). The determination lights KYC-A1 from the real signal; casework's Phase-19
+    # party-leaf grounding (re-vendored @076fb8e) signs the txn-less leaf that used to fail-closed.
+    scb = json.loads(SANCTIONS_C14_BUNDLE.read_text(encoding="utf-8"))
+    _scaps = sorted({a.get("capability") for a in scb.get("alerts", []) if a.get("capability")})
+    _scparty = (scb.get("parties") or [{}])[0]
+    if _scaps != ["C14"]:
+        failures.append(f"sanctions-c14 bundle must be C14-PURE (the kyc determination), got caps {_scaps}")
+    if not _scparty.get("sanctions_flag"):
+        failures.append("sanctions-c14 bundle's party must be sanctions-flagged (the escalation-gap trigger)")
+    if _scparty.get("cdd_level") == "EDD":
+        failures.append("sanctions-c14 bundle must be NON-EDD (the escalation gap, not the EDD≔HIGH tautology)")
+    if scb.get("contract_version") not in ("0.1", "0.2", "0.3"):
+        failures.append(f"sanctions-c14 bundle contract_version {scb.get('contract_version')!r} not casework-validatable")
+    if not any(isinstance(a.get("party_ref"), str) and a["party_ref"] == _scparty.get("party_id")
+               for a in scb.get("alerts", [])):
+        failures.append("sanctions-c14 bundle needs a resolving party_ref (casework's party-leaf grounding)")
+    # the §12 DETERMINATION lights the KYC leg — ALWAYS checked (no casework needed; the engine is BYTE-UNCHANGED)
+    _scprof = load_requirements()
+    _scct = crime_type_for_capabilities(_scaps, _scprof)
+    _scatoms = present_atoms(_scct, _scaps, _scprof) if _scct else []
+    if not (_scct == "kyc_integrity" and "KYC-A1" in _scatoms):
+        failures.append(f"sanctions-c14 must light the §12 KYC leg (kyc_integrity / KYC-A1), got ct={_scct} atoms={_scatoms}")
+    # casework SIGNS the party-leaf C14 (the Phase-19 grounding) — honest-skip if the vendored casework is absent
+    sanctions_note = "casework venv absent — skipped"
+    try:
+        scres = sanctions_c14_consume()
+        if not scres["grounds_e2e"]:
+            failures.append(f"sanctions-c14 should SIGN via casework's party-leaf C14 grounding, got {scres['consume']}")
+        if not (scres["kyc_leg_lights"] and scres["sanctions_flagged"] and scres["non_tautological"]):
+            failures.append(f"sanctions-c14 consume must report kyc-leg + sanctions-flagged + non-tautological, got {scres}")
+        sanctions_note = f"§12 KYC leg lights (KYC-A1) + casework SIGNS the party-leaf C14 (disposition {scres.get('disposition')})"
+    except RunError as ex:
+        sanctions_note = f"casework live consume skipped — {ex}"
+        print(f"  (sanctions-c14: {sanctions_note})", file=sys.stderr)  # noqa: T201
+
     # the served page substitutes the config placeholder iff workbench.html exists
     page = render_page(live_config())
     if TEMPLATE.exists():
@@ -1655,6 +1729,7 @@ def selftest() -> int:
           f"CASE-A {da['verdict']}/{da['presentation_label']} (predicate {da['named_risk']!r}) vs "
           f"CASE-B {db['verdict']}/{db['presentation_label']} (affirmative mitigation) — same signals, opposite outcome; "
           f"CW-4 cleared consume: {cleared_note}; Lakeshore CASE-B co-sign: {lakeshore_note}; "
+          f"sanctions-C14 (Phase-34): {sanctions_note}; "
           f"stubbed finale {seq} -> CONNECTED; pillar-status byte-stable)")
     return 0
 

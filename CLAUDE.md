@@ -153,16 +153,16 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    "chosen, not measured"; JSON export; persists nothing). Badge always-on; NO LLM/fetch; no
    FINTRAC content (novel stratum is US-federal public domain only — no footer machinery).
 
-6. **Merge console** (Phase 76, M9; **Phase-79 supersede**) — `merge.html` → `dist/merge/index.html`. The
+6. **Merge console** (Phase 76, M9; **Phase-79 supersede + Phase-80 sanctions class**) — `merge.html` → `dist/merge/index.html`. The
    blueprint's Class-J **merge-adjudication** gate dramatized — the human gate over entity-resolution
    candidate links (the deterministic spine resolves what it can on the declared `entity_ref` and REFUSES
    the ambiguous; the human adjudicates the residual). **The novelty:** unlike the consensus-only gate
    console + the label-blind §14 triage, the merge gate is the ONE gate with a measurable correctness
    ORACLE — the Reveal SHOWS, for EVERY case, whether the call matched truth (synthetic-only, qualified).
-   **TWO SCORED populations** in committed `data/merge/cases.json` (curated by
+   **THREE SCORED populations** in committed `data/merge/cases.json` (curated by
    `scripts/curate_merge_cases.py` — a companion authoring tool reusing entity_spine + resolution_scorer;
-   build.py imports NEITHER), split by oracle PROVENANCE (**the Phase-79 supersede RETIRED the prior
-   consensus-vs-scored split — both are now scored**): **29 REAL-SUBSTRATE candidate SHARES** scored against
+   build.py imports NEITHER), split by oracle PROVENANCE (**all scored against a non-circular latent-truth
+   oracle, each provenance-qualified**): **29 REAL-SUBSTRATE candidate SHARES** scored against
    aml-substrate's OWN latent identity oracle — the Phase-32/33 `--anchored --emit-eval-oracles` fork emits
    NON-circular opaque `GT-<hash>` clusters (NOT the `ENT-<entity_ref>` echo that aborted the Phase-77
    attempt; `entity_ref ≠ cluster` at last). The demoted spine (substrate's noise-floor email/phone DEMOTED
@@ -170,7 +170,15 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    MISSED (uphold-merge) vs noise-floor collisions it correctly refused (reject-as-SHARES) — genuinely
    two-sided (13 uphold / 16 reject). Distilled to the committed no-substrate capture
    `data/entity-spine/substrate-anchored-slice.json` (the candidate-relevant observations + the GT- oracle;
-   emails domain-masked, email/phone demoted; replays with NO substrate). **+ 13 SYNTHETIC scored cases**
+   emails domain-masked, email/phone demoted; replays with NO substrate). **+ 24 OFAC NAME-COLLISION sanctions
+   cases** (Phase 80 — the Phase-34 `--anchored` seam-5 sanctions slice @`1f5901e`,
+   `data/entity-spine/substrate-sanctions-slice.json` via `scripts/distill_sanctions_slice.py`): a LABEL-BLIND
+   OFAC-watchlist name collision (no party IS a designated person) where the merge question is entity resolution
+   under sanctions screening — a flagged record + its same-person fragment that evaded screening (uphold-merge)
+   vs two strangers sharing a watchlisted name (the common-name false positive — reject-as-SHARES); two-sided
+   (11 uphold / 13 reject), spanning the strong + name bases, scored against the same non-circular `GT-<hash>`
+   oracle, the watchlist flag carried as OBSERVABLE evidence (`sanctions_screen`, never the truth),
+   synthetic-substrate-qualified. **+ 13 SYNTHETIC scored cases**
    (from `data/entity-spine/true_entities.json`; spanning the four quadrants real-co-reference /
    over-merge-trap / fragmentation-gap / correct-rejection). Both populations' latent truth rides ONLY each
    case's `oracle` block (revealed post-disposition); each is synthetic-only-qualified (the substrate one
@@ -299,9 +307,13 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   customer's monitoring + C8/C14-screening bundles (a case = a customer) so C8 (ML-A3) co-occurs with
   C15/`related_parties[]` (ML-A4) — the **§12 ML loop CLOSES from REAL signals** (≥2-leg, no GATHER). The **§12 KYC
   loop CLOSES too** (Phase 72): a C14-PURE customer (no ML co-firing → `kyc_integrity` via the dual-map,
-  correct-not-bug) determines from KYC-A1 — C14 ALONE (kyc = mechanism + 0 legs); kyc SIGNING is the honest
-  cross-pillar FRONTIER — txn-bearing C14 cases SIGN, txn-LESS party-leaf cases fail-CLOSED at casework's
-  no-transactions CONTRACT (`e2e_note`, never loosened — a named casework follow-on).
+  correct-not-bug) determines from KYC-A1 — C14 ALONE (kyc = mechanism + 0 legs). kyc SIGNING (**Phase 80**): a
+  txn-LESS party-leaf C14 SIGNS when its party leaf resolves + the KYC defect re-derives — the Phase-34
+  sanctions-driven C14 (`serve_workbench.sanctions_c14_consume` over `data/casefile/sanctions-c14-demo.bundle.json`,
+  a C14-PURE sanctions-flagged non-EDD party = the revived escalation-gap branch) lights KYC-A1 + SIGNS end-to-end
+  (disposition `file`) via casework's Phase-19 party-leaf grounding (re-vendored @076fb8e). Some slice C14-pure
+  cases still fail-CLOSED where the party shape doesn't ground (`e2e_note`) — so it is no longer a blanket
+  no-transactions refusal; the txn-less party-leaf C14 CAN sign.
   Slice **376** (substrate v0.5 @fc98b09 + a cross-case CO-REFERENCE pass), coverage **128/376**, funnel (auto/human/review) 202/111/63; 6 kyc cases (2 sign). The bundle's
   `related_parties[]` BO graph renders as the case network (`boGraphHTML`; "N pct"); the gather/finale DEMO case
   resolves from the OSINT corpus (`gather_demo_case_id`), re-curate-robust. **Phase 73** AUTHORS the north-star

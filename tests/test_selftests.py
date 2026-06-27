@@ -29,6 +29,7 @@ PY_SELFTESTS = [
     "entity_spine.py",          # Phase 74 — the persistent entity spine (SKIPs gracefully w/o duckdb; full under .venv)
     "resolution_scorer.py",     # Phase 74 — the resolution-correctness scorer + the resolver-input firewall
     "curate_merge_cases.py",    # Phase 76 — the merge-console case curator (SKIPs gracefully w/o duckdb; full under .venv)
+    "distill_sanctions_slice.py",  # Phase 80 — the OFAC name-collision merge slice (replays the committed slice, no substrate)
     "determination_validation_harness.py",  # Phase 78 — the determination-validation firewall + recompute (dep-free)
     "serve_workbench.py",
     "serve_chain.py",

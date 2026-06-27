@@ -65,7 +65,8 @@ const STUB = {
     { id: 'name', label: 'Name-only', desc: 'share only a name' },
   ],
   provenance: { substrate_head: 'c099259', substrate_slice: { params: { clients: 400, seed: 0 } },
-                n_substrate_scored: 1, n_synthetic_scored: 3,
+                substrate_sanctions_head: '1f5901e', substrate_sanctions_slice: { params: { clients: 12000, seed: 0 } },
+                n_substrate_scored: 1, n_substrate_sanctions_scored: 2, n_synthetic_scored: 3,
                 synthetic_qualifier: QUAL, substrate_qualifier: SUB_QUAL },
   cases: [
     { // SUBSTRATE-anchored scored — strong shared email, demoted-spine REFUSED; a noise-floor collision (truth DISTINCT → reject correct)
@@ -99,6 +100,26 @@ const STUB = {
       b: { ref: 'oY', name: 'Nadia & Haddad', kind: 'person', role: 'counterparty',
            identifiers: [{ kind: 'address', value: '88 Maple Ave' }] },
       oracle: { same_entity: false, klass: 'correct-rejection', correct_adjudication: 'reject_as_shares', qualifier: QUAL } },
+    { // SANCTIONS uphold (cases[4]) — an OFAC-flagged record + its same-person FRAGMENT that evaded screening (strong shared email; truth SAME → uphold)
+      id: 'sanc-P-0143-P-FRAG-0008', source: 'substrate-sanctions-slice', scored: true, basis: 'strong',
+      shared: { kind: 'email', value: 'user44021@example.test' }, spine_verdict: 'kept_distinct',
+      a: { ref: 'P-0143', name: 'Katherine Fernandez', kind: 'person', role: 'LEGIT',
+           identifiers: [{ kind: 'email', value: 'user44021@example.test' }],
+           sanctions_screen: { flagged: true, source: 'OFAC SDN (US-federal public domain)' } },
+      b: { ref: 'P-FRAG-0008', name: 'Kate Fernadnez', kind: 'person', role: 'LEGIT',
+           identifiers: [{ kind: 'email', value: 'user44021@example.test' }],
+           sanctions_screen: { flagged: false, source: 'OFAC SDN (US-federal public domain)' } },
+      oracle: { same_entity: true, klass: 'fragmentation-gap', correct_adjudication: 'uphold_merge', qualifier: SUB_QUAL } },
+    { // SANCTIONS reject (cases[5]) — two DISTINCT customers sharing a watchlisted name, one flagged (name-only; truth DISTINCT → reject = the common-name false positive)
+      id: 'sanc-P-0503-P-6887', source: 'substrate-sanctions-slice', scored: true, basis: 'name',
+      shared: null, spine_verdict: 'kept_distinct',
+      a: { ref: 'P-0503', name: 'Elijah Hernandez', kind: 'person', role: 'LEGIT',
+           identifiers: [{ kind: 'phone', value: '10000012345' }],
+           sanctions_screen: { flagged: true, source: 'OFAC SDN (US-federal public domain)' } },
+      b: { ref: 'P-6887', name: 'Elijah Hernandez', kind: 'person', role: 'LEGIT',
+           identifiers: [{ kind: 'phone', value: '10000067890' }],
+           sanctions_screen: { flagged: false, source: 'OFAC SDN (US-federal public domain)' } },
+      oracle: { same_entity: false, klass: 'correct-rejection', correct_adjudication: 'reject_as_shares', qualifier: SUB_QUAL } },
   ],
 };
 
@@ -284,8 +305,8 @@ ok(api.dispositions[0].grade === 'reject_as_shares' && api.dispositions[0].ratio
 
 // ---- (4) Verdict for the SUBSTRATE case: SCORED against substrate's anchored oracle (the supersede) ----
 eq(api.screen, 2, 'recording advances to the Verdict');
-ok(/Substrate's anchored ground truth/.test(env.__stage._html),
-  'the SUBSTRATE verdict shows substrate\'s anchored ground-truth oracle (both populations scored — the supersede)');
+ok(/Substrate's latent ground truth/.test(env.__stage._html),
+  'the SUBSTRATE verdict shows substrate\'s latent ground-truth oracle (all populations scored)');
 ok(/DISTINCT entities/.test(env.__stage._html) && /matched the latent truth/i.test(env.__stage._html),
   'the substrate oracle reveals DISTINCT (a noise-floor collision) and the correct reject call matched');
 ok(env.__stage._html.includes(SUB_QUAL), 'the substrate verdict carries the synthetic-SUBSTRATE qualifier');
@@ -354,6 +375,53 @@ ok(!/<script>alert/.test(envX.__stage._html) && envX.__stage._html.includes('&lt
   'XSS: a record name containing <script> renders escaped, never as markup');
 ok(envX.__stage._html.includes('Nadia &amp; Haddad'), 'XSS: a name containing & renders escaped');
 ok(envX.__stage._html.includes(escH('88 Maple Ave <test>')), 'XSS: a shared identifier value with <…> renders escaped');
+
+// ---- (7b) SANCTIONS class: the OFAC name-collision merge cases (Phase 80) — fresh env, its own ledger ----
+const envS = boot(true);
+const apiS = envS.__api;
+apiS.toQueue();
+ok(/OFAC name-collision/.test(envS.__stage._html), 'the queue surfaces the OFAC name-collision population stat');
+ok(/label-blind/i.test(envS.__stage._html) && /common-name false positive/i.test(envS.__stage._html),
+  'the queue frames the sanctions class as a label-blind collision + the common-name false positive');
+// the UPHOLD case — a flagged record + its same-person FRAGMENT that evaded screening
+const cSancUp = STUB.cases[4];
+apiS.pickCase(cSancUp.id);
+ok(/sanctions screen/i.test(envS.__stage._html) && /OFAC watchlist name match/i.test(envS.__stage._html),
+  'the Evidence renders the OBSERVABLE sanctions-screen watchlist match on the flagged record');
+ok(/not a designated person/i.test(envS.__stage._html),
+  'the sanctions evidence is framed as coincidental — NOT a designated person (the compliance line)');
+ok(/same customer/i.test(envS.__stage._html) && /evaded screening/i.test(envS.__stage._html),
+  'the Evidence frames the merge as an identity question (the fragment that evaded screening)');
+ok(!/the SAME entity/.test(envS.__stage._html) && !/Latent truth/.test(envS.__stage._html),
+  'FIREWALL: the sanctions Evidence hides the oracle (truth revealed only post-adjudication)');
+apiS.advance();
+apiS.pickGrade('uphold_merge');                    // the correct call (truth SAME)
+apiS.setRationale('Same person — the fragment that evaded screening; merging attaches the watchlist exposure correctly.');
+apiS.recordDisposition();
+eq(apiS.screen, 2, 'the sanctions adjudication advances to the Verdict');
+ok(/the SAME entity/.test(envS.__stage._html) && /matched the latent truth/i.test(envS.__stage._html),
+  'the sanctions UPHOLD verdict reveals SAME entity (the fragment) and the correct uphold matched');
+ok(envS.__stage._html.includes(SUB_QUAL), 'the sanctions verdict carries the synthetic-substrate qualifier');
+// the REJECT case — two DISTINCT customers sharing a watchlisted name (the common-name false positive)
+const cSancRej = STUB.cases[5];
+apiS.pickCase(cSancRej.id);
+ok(/Elijah Hernandez/.test(envS.__stage._html), 'the sanctions reject case shows the shared watchlisted name');
+apiS.advance();
+apiS.pickGrade('reject_as_shares');                // the correct call (truth DISTINCT — the namesake)
+apiS.setRationale('Two different customers sharing a watchlisted name — keep distinct; a merge would spread the hit.');
+apiS.recordDisposition();
+ok(/DISTINCT entities/.test(envS.__stage._html) && /matched the latent truth/i.test(envS.__stage._html),
+  'the sanctions REJECT verdict reveals DISTINCT (the namesake) and the correct reject matched');
+apiS.toLedger();
+ok(/OFAC name-collision/i.test(envS.__stage._html), 'the ledger agreement splits out the OFAC name-collision provenance');
+const expMS = /<textarea id="export"[^>]*>([\s\S]*?)<\/textarea>/.exec(envS.__stage._html);
+let exportedS = null;
+try { exportedS = JSON.parse(unesc(expMS ? expMS[1] : '')); } catch { /* fails the next assert */ }
+ok(exportedS && exportedS.agreement.by_provenance['ofac-name-collision']
+   && exportedS.agreement.by_provenance['ofac-name-collision'].adjudicated === 2
+   && exportedS.agreement.by_provenance['ofac-name-collision'].matched === 2,
+  'the exported agreement reports the OFAC name-collision bucket (2 adjudicated, 2 matched)');
+ok(envS.__errors.length === 0, 'the sanctions arc drove with no console errors');
 
 // ---- (8) honest EMPTY ledger state (fresh context) ----
 const envE = boot(true);

@@ -90,6 +90,9 @@
   .arow:last-child{border-bottom:0}
   .arow .ak{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);flex:none;width:92px;padding-top:2px}
   .arow .av{color:var(--ink);line-height:1.5;word-break:break-word}
+  .arow.sanc{background:rgba(246,166,35,.05)}
+  .arow.sanc .ak{color:var(--signal)}
+  .arow.sanc .av{color:var(--signal)}
   .arow .acode{font-family:var(--mono);font-size:11.5px;color:var(--teal);background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
   .sharedbox{grid-column:1/-1;border:1px solid var(--line);border-left:3px solid var(--teal);background:var(--bg2);border-radius:0 11px 11px 0;padding:13px 16px;margin-top:2px}
   .sharedbox .sl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
@@ -198,7 +201,7 @@
   </div>
 
   <footer>
-    Merge console — the Class-J human gate over entity-resolution candidate links · the deterministic spine resolves what it can and REFUSES the ambiguous; you adjudicate the residual · BOTH populations are SCORED against a latent-truth oracle (real-substrate vs synthetic) — SYNTHETIC ONLY, measured on a synthetic substrate slice, production has no ground truth · grades &amp; rationales are the presenter's, session-only<br>
+    Merge console — the Class-J human gate over entity-resolution candidate links · the deterministic spine resolves what it can and REFUSES the ambiguous; you adjudicate the residual · THREE populations are SCORED against a latent-truth oracle (real-substrate · OFAC name-collision · synthetic) — SYNTHETIC ONLY, measured on a synthetic substrate slice, production has no ground truth · grades &amp; rationales are the presenter's, session-only<br>
     <span class="keys">←/→ navigate · Space advance · Esc back to the queue</span>
   </footer>
 </div>
@@ -246,10 +249,13 @@ function sharedText(c){
 }
 // the deterministic resolver's call, in the human grade vocab (the verdict's baseline)
 function baselineGrade(c){return c.spine_verdict==='merged'?'uphold_merge':'reject_as_shares';}
-// the oracle PROVENANCE — real-substrate (substrate's anchored GT- truth) vs hand-authored synthetic. BOTH
-// are SCORED (Phase 79 supersede); the split is provenance, each synthetic-only-qualified, never production.
-function isSub(c){return (c&&c.source)==='substrate-anchored-slice';}
-function provLabel(c){return isSub(c)?'substrate':'synthetic';}
+// the oracle PROVENANCE — three SCORED populations, each against a non-circular latent-truth oracle, split by
+// provenance (all synthetic-substrate / synthetic-only qualified, never production): the anchored real-substrate
+// slice, the Phase-80 OFAC name-collision sanctions slice, and the hand-authored synthetic set.
+function isAnchored(c){return (c&&c.source)==='substrate-anchored-slice';}
+function isSanc(c){return (c&&c.source)==='substrate-sanctions-slice';}
+function isSub(c){return isAnchored(c)||isSanc(c);}            // both substrate-derived sources (same qualifier)
+function provLabel(c){return isSanc(c)?'OFAC name-collision':isAnchored(c)?'substrate':'synthetic';}
 function oracleMatch(c,grade){return !!(c.scored&&c.oracle&&grade===c.oracle.correct_adjudication);}
 function agreementFor(c,grade){
   if(c.scored&&c.oracle){
@@ -281,10 +287,10 @@ function wireSteps(){
 /* ---------- screen: the candidate-SHARES queue (grouped by basis) ---------- */
 function renderQueue(){
   const total=CASES.length, done=dispositions.length;
-  const nSub=CASES.filter(isSub).length, nSyn=CASES.filter(c=>!isSub(c)).length;
+  const nAnch=CASES.filter(isAnchored).length, nSanc=CASES.filter(isSanc).length, nSyn=CASES.filter(c=>!isSub(c)).length;
   let k=0;
   const groups=BASES.map(b=>{
-    // substrate-scored (the real-data population) first within each basis, then deterministic by id
+    // substrate-scored populations first within each basis (sanctions then anchored), then deterministic by id
     const rows=CASES.filter(c=>c.basis===b.id).sort((x,y)=>(isSub(y)?1:0)-(isSub(x)?1:0)||(x.id<y.id?-1:x.id>y.id?1:0));
     if(!rows.length)return '';
     return `<div class="axhead">${esc(b.label)} <span class="axn">${rows.length} candidate${rows.length===1?'':'s'} · ${esc(b.desc)}</span></div>
@@ -303,12 +309,13 @@ function renderQueue(){
   stage.innerHTML=stepsHtml()+`<div class="scene">
     <div class="eyebrow">Merge console · Class J — human judgment over identity links</div>
     <h2>The merge-adjudication queue — <em>candidate links the resolver refused</em></h2>
-    <p class="lead">Entity resolution proposes that two records are the <b>same</b> party. The deterministic spine merges what it can on a declared identity and <b>refuses the ambiguous</b> — two distinct entities that merely share an identifier. Those refusals are below, grouped by the shared signal. Both populations are <b>scored</b> against a latent-truth oracle. The <b>real-substrate</b> cases run against aml-substrate's OWN anchored identity ground truth: the demoted spine <b>REFUSED every one</b> (it keys on the declared reference, substrate's noise-floor email/phone demoted to weak), so the <b>oracle does the discrimination</b> — it reveals which refusals were real same-person fragments the spine should have UPHELD (a fragmentation gap) vs noise-floor collisions it correctly kept apart (a correct rejection). This scores the demotion policy against truth, not a merge/refuse resolver — that lives in the <b>synthetic</b> set, an authored oracle whose resolver both merges and refuses, spanning all four quadrants. Every score is <b>synthetic by construction</b> — measured on a synthetic substrate slice, never production. The resolver assembles the evidence; you adjudicate.</p>
+    <p class="lead">Entity resolution proposes that two records are the <b>same</b> party. The deterministic spine merges what it can on a declared identity and <b>refuses the ambiguous</b> — two distinct entities that merely share an identifier. Those refusals are below, grouped by the shared signal. Both populations are <b>scored</b> against a latent-truth oracle. The <b>real-substrate</b> cases run against aml-substrate's OWN anchored identity ground truth: the demoted spine <b>REFUSED every one</b> (it keys on the declared reference, substrate's noise-floor email/phone demoted to weak), so the <b>oracle does the discrimination</b> — it reveals which refusals were real same-person fragments the spine should have UPHELD (a fragmentation gap) vs noise-floor collisions it correctly kept apart (a correct rejection). This scores the demotion policy against truth, not a merge/refuse resolver — that lives in the <b>synthetic</b> set, an authored oracle whose resolver both merges and refuses, spanning all four quadrants. A third population — the <b>OFAC name-collision</b> class — is sanctions screening's entity-resolution problem: a customer whose name coincidentally matches a public-domain watchlist (a <b>label-blind</b> collision — no record IS a designated person), where the merge call is whether two flagged-or-colliding records are the <b>same customer</b> (a flagged person + the fragment that evaded screening — uphold) or <b>strangers</b> sharing a watchlisted name (the common-name false positive — reject). Every score is <b>synthetic by construction</b> — measured on a synthetic substrate slice, never production. The resolver assembles the evidence; you adjudicate.</p>
     <div class="qstats">
       <div class="qstat"><div class="qsn">${total}</div><div class="qsl">candidate links</div></div>
-      <div class="qstat"><div class="qsn">${nSub}</div><div class="qsl">real-substrate · scored</div></div>
+      <div class="qstat"><div class="qsn">${nAnch}</div><div class="qsl">real-substrate · scored</div></div>
+      <div class="qstat"><div class="qsn">${nSanc}</div><div class="qsl">OFAC name-collision · scored</div></div>
       <div class="qstat"><div class="qsn">${nSyn}</div><div class="qsl">synthetic · scored</div></div>
-      <div class="qstat"><div class="qsn">${done}</div><div class="qsl">adjudicated this session</div></div>
+      <div class="qstat"><div class="qsn">${done}</div><div class="qsl">adjudicated</div></div>
     </div>
     ${groups}
     <div class="qfoot"><button class="btn ghost" id="goledger">Session ledger (${done}) ›</button></div>
@@ -322,10 +329,17 @@ function recCard(label,r){
   const idents=(r&&Array.isArray(r.identifiers))?r.identifiers:[];
   const attrRows=idents.map(i=>`<div class="arow"><span class="ak">${esc(i.kind)}</span><span class="av">${esc(i.value)}</span></div>`).join('')
     || `<div class="arow"><span class="ak">identifiers</span><span class="av">none presented in this record</span></div>`;
+  // OBSERVABLE bank screening state — a sanctions hit is a label-blind name collision (the record is NOT a
+  // designated person); it raises the stakes of the identity call, it is not the latent truth of the merge.
+  const sc=(r&&r.sanctions_screen)||null;
+  const scRow=(sc&&sc.flagged)
+    ? `<div class="arow sanc"><span class="ak">sanctions screen</span><span class="av">⚠ OFAC watchlist name match — coincidental (this record is not a designated person)</span></div>`
+    : '';
   return `<div class="reccard">
     <div class="ah">${esc(label)}<span class="rk">${esc((r&&r.kind)||'')}${r&&r.role?' · '+esc(r.role):''}</span></div>
     <div class="recname">${esc(r&&r.name)}</div>
     ${attrRows}
+    ${scRow}
   </div>`;
 }
 function renderEvidence(c){
@@ -336,7 +350,7 @@ function renderEvidence(c){
   stage.innerHTML=stepsHtml()+`<div class="scene">
     <div class="eyebrow">Candidate ${esc(c.id)} · ${provLabel(c)}</div>
     <h2>The evidence — <em>two records, one shared signal</em></h2>
-    <p class="lead">The two records and what links them. Read them on the evidence alone — a shared identifier proves contact, <b>not identity</b>. They are linked by <b>${esc(basisLabel(c.basis))}</b>.</p>
+    <p class="lead">The two records and what links them. Read them on the evidence alone — a shared identifier proves contact, <b>not identity</b>. They are linked by <b>${esc(basisLabel(c.basis))}</b>.${isSanc(c)?' At least one record tripped <b>sanctions screening</b> on the shared name — a <b>label-blind OFAC watchlist collision</b> (neither record IS a designated person). The question is identity: are these the <b>same customer</b> (so the watchlist exposure belongs to one consolidated person — the fragment that evaded screening) or <b>two strangers</b> who share a watchlisted name (the common-name false positive)?':''}</p>
     <div class="evgrid">
       ${recCard('Record A',c.a)}
       ${recCard('Record B',c.b)}
@@ -396,7 +410,7 @@ function renderVerdict(c){
   else if(rec.grade==='both_defensible'||rec.grade==='escalate')mt='<span class="matchtag amb">you recorded ambiguity — the oracle records one truth</span>';
   else mt='<span class="matchtag no">✗ your call differs from the latent truth</span>';
   const truthCard=`<div class="revcard oracle">
-      <div class="ah">${isSub(c)?"Substrate's anchored ground truth · scored":'Synthetic ground truth · scored'}</div>
+      <div class="ah">${isSub(c)?"Substrate's latent ground truth · scored":'Synthetic ground truth · scored'}</div>
       <div class="revbody">
         <div class="revgrade">${baseTag} the deterministic spine ${dist?'refused this merge':'merged these'}</div>
         <div class="revgrade">Latent truth: <b>${same?'the SAME entity':'DISTINCT entities'}</b></div>
@@ -429,35 +443,37 @@ function renderLedger(){
   const rows=dispositions.map(d=>`<div class="ledrow">
       <span class="lo">#${d.order}</span>
       <div class="lmain">
-        <div class="lcase">${esc(d.case_id)} · ${isSub(d)?'substrate':'synthetic'}</div>
+        <div class="lcase">${esc(d.case_id)} · ${esc(provLabel(d))}</div>
         <div class="lrat">${esc(d.rationale)}</div>
       </div>
       <span class="chip scored">${esc(gradeShort(d.grade))}</span>
       <span class="lagree">${esc(d.agreement)}</span>
     </div>`).join('');
   const matched=dispositions.filter(d=>d.oracle_match===true).length;
-  const subN=dispositions.filter(isSub), synN=dispositions.filter(d=>!isSub(d));
-  const subMatched=subN.filter(d=>d.oracle_match===true).length, synMatched=synN.filter(d=>d.oracle_match===true).length;
+  const anchN=dispositions.filter(isAnchored), sancN=dispositions.filter(isSanc), synN=dispositions.filter(d=>!isSub(d));
+  const mm=a=>a.filter(d=>d.oracle_match===true).length;
+  const anchM=mm(anchN), sancM=mm(sancN), synM=mm(synN);
   const qual=PROV.substrate_qualifier||PROV.synthetic_qualifier||'measured on a synthetic substrate slice; production has no ground truth';
   const exp={
     artifact:'Signal Watch — Merge Console (vision prototype)',
-    note:'Session-only merge-adjudication ledger. BOTH populations are SCORED against a latent-truth oracle — the real-substrate cases against aml-substrate\'s OWN anchored identity ground truth, the synthetic against an authored oracle. SYNTHETIC ONLY — '+qual+'. Illustrative outputs; a judgment ledger, NOT a detection-quality score.',
+    note:'Session-only merge-adjudication ledger. THREE populations are SCORED against a latent-truth oracle — the real-substrate + OFAC name-collision cases against aml-substrate\'s OWN anchored identity ground truth, the synthetic against an authored oracle. SYNTHETIC ONLY — '+qual+'. Illustrative outputs; a judgment ledger, not a detection-quality measure.',
     provenance:PROV,
     candidates_total:CASES.length,
     agreement:{matched:matched, scored_adjudicated:dispositions.length,
-               by_provenance:{substrate:{matched:subMatched, adjudicated:subN.length},
-                              synthetic:{matched:synMatched, adjudicated:synN.length}},
+               by_provenance:{'substrate':{matched:anchM, adjudicated:anchN.length},
+                              'ofac-name-collision':{matched:sancM, adjudicated:sancN.length},
+                              'synthetic':{matched:synM, adjudicated:synN.length}},
                qualifier:qual},
     dispositions:dispositions,
   };
   const agbox=dispositions.length?`<div class="agbox">
     <b>${matched}/${dispositions.length}</b> of your calls matched the latent oracle — <span style="color:var(--faint)">${esc(qual)}</span>.
-    ${subN.length?` Real-substrate: <b>${subMatched}/${subN.length}</b>.`:''}${synN.length?` Synthetic: <b>${synMatched}/${synN.length}</b>.`:''}
+    ${anchN.length?` Real-substrate: <b>${anchM}/${anchN.length}</b>.`:''}${sancN.length?` OFAC name-collision: <b>${sancM}/${sancN.length}</b>.`:''}${synN.length?` Synthetic: <b>${synM}/${synN.length}</b>.`:''}
   </div>`:'';
   stage.innerHTML=stepsHtml()+`<div class="scene">
     <div class="eyebrow">Merge console · session ledger</div>
     <h2>The session ledger — <em>judgment as precedent</em></h2>
-    <p class="lead"><b>Session-only:</b> this offline file persists nothing — close the tab and the ledger is gone. Both populations are scored against a latent-truth oracle (real-substrate vs synthetic); the agreement number is measured on a synthetic substrate slice only, never production.</p>
+    <p class="lead"><b>Session-only:</b> this offline file persists nothing — close the tab and the ledger is gone. All three populations are scored against a latent-truth oracle (real-substrate · OFAC name-collision · synthetic); the agreement number is measured on a synthetic substrate slice only, never production.</p>
     ${agbox}
     ${dispositions.length?`<div class="ledgrid">${rows}</div>
       <div class="doclabel">Export — the session JSON (copy out to keep)</div>

@@ -313,7 +313,19 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   a C14-PURE sanctions-flagged non-EDD party = the revived escalation-gap branch) lights KYC-A1 + SIGNS end-to-end
   (disposition `file`) via casework's Phase-19 party-leaf grounding (re-vendored @076fb8e). Some slice C14-pure
   cases still fail-CLOSED where the party shape doesn't ground (`e2e_note`) — so it is no longer a blanket
-  no-transactions refusal; the txn-less party-leaf C14 CAN sign.
+  no-transactions refusal; the txn-less party-leaf C14 CAN sign. **Phase 81** consumes substrate's sanctions ARC
+  (Phases 35/36/37 @`f7fbdb0`) HONESTLY — both planned consumes hit their measure-first branches: the merge
+  org-name-collision class ABORTED (substrate fragments persons not orgs → one-sided; `dist/merge` byte-frozen →
+  `docs/substrate-org-fragment-emit-PLAN-BRIEF.md`); the **C17 exposure-via-ownership leg is DEGENERATE as a
+  determination advance** (13 sanctioned-BO customers, ALL oracle-clear [label-blind, corr≈0]; a C17 leg moves 0 to
+  the bar — they carry no laundering mechanism) so it ships **OBSERVABLE-ONLY**: a `/sanctions-c17-exposure` route +
+  panel + `serve_workbench.sanctions_c17_exposure_consume` over `data/casefile/sanctions-c17-exposure-demo.bundle.json`
+  (a masked f7fbdb0 case — a customer whose BENEFICIAL OWNER carries a label-blind OFAC name collision, a common-name
+  false positive; the BO is NEVER designated) surface the exposure and the LIVE engine SHOWS the case does NOT reach
+  the bar (`evidence_requirements.py` + the profile BYTE-UNCHANGED — no atom that never fires; the determination-leg
+  follow-on → `docs/substrate-exposure-signal-PLAN-BRIEF.md`). P37's `counterparty_country` (beyond US/CA) renders as
+  an OBSERVABLE (no leg; a C20 jurisdiction leg is a named future item). The open-sanctions ship-compliance license
+  matrix → `docs/open-sanctions-data-fork-PLAN-BRIEF.md` (OpenSanctions CC-BY-NC = no-ship; OFAC PD / UK OGL = ship).
   Slice **376** (substrate v0.5 @fc98b09 + a cross-case CO-REFERENCE pass), coverage **128/376**, funnel (auto/human/review) 202/111/63; 6 kyc cases (2 sign). The bundle's
   `related_parties[]` BO graph renders as the case network (`boGraphHTML`; "N pct"); the gather/finale DEMO case
   resolves from the OSINT corpus (`gather_demo_case_id`), re-curate-robust. **Phase 73** AUTHORS the north-star

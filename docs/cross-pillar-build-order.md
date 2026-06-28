@@ -44,6 +44,32 @@
 > alongside sanctions; no one-sided abort). The remaining frontier is **substrate P35+** (TF slice / broader C7 /
 > org-name sanctions / open-data Stage 2/3 — `docs/substrate-p35-determination-signals-PLAN-BRIEF.md`) +
 > casework's CI-promotion criterion. **C1/ML-A6 is a documented measured null, not an ask.**
+>
+> **UPDATE 2026-06-28 (Phase 81 — the sanctions ARC consume; two measure-first NON-RESULTS, one observable):**
+> aml-substrate advanced **`1f5901e` → `f7fbdb0` (Phases 35/36/37)** — P35 org-name OFAC screening (`4f49e53`),
+> P36 exposure-via-ownership C17 (`1651b1e`), P37 geo enrichment (`5b5cf32`). aml-casework UNCHANGED at `076fb8e`
+> (does NOT ground C17). signal-watch **Phase 81** consumed the arc HONESTLY — both planned consumes hit their
+> measure-first abort/degenerate branches; the value landed in observable + briefs:
+> - **(merge org-name collision) → ABORTED (structurally one-sided).** substrate fragments PERSONS but NOT orgs
+>   (0 org fragment clusters), so every org-name collision is between distinct orgs → all-reject. `dist/merge`
+>   BYTE-FROZEN (no touch); → **[`substrate-org-fragment-emit-PLAN-BRIEF.md`](substrate-org-fragment-emit-PLAN-BRIEF.md)**.
+> - **(C17 exposure-via-ownership) → DEGENERATE as a determination leg; shipped OBSERVABLE-ONLY.** 13 customers
+>   carry a sanctioned BO; ALL oracle-clear (label-blind, corr≈0); a C17 leg moves 0 to the bar (the cohort lacks
+>   a laundering mechanism). The workbench surfaces the exposure as a screening OBSERVABLE (a `/sanctions-c17-exposure`
+>   route + panel + `data/casefile/sanctions-c17-exposure-demo.bundle.json`) and the live engine SHOWS it does NOT
+>   reach the bar — `evidence_requirements.py` + the profile BYTE-UNCHANGED (no atom that never fires). Determination-leg
+>   follow-on → **[`substrate-exposure-signal-PLAN-BRIEF.md`](substrate-exposure-signal-PLAN-BRIEF.md)**.
+> - **(P37 geo) → CONSUMED as an observable** (`counterparty_country` beyond US/CA; no leg). A C20 high-risk-jurisdiction
+>   determination leg is a named future item (MUST control for txn-volume — substrate's caveat).
+> - **(open sanctions datasets, non-commercial)** — the SHIP-compliance license matrix authored:
+>   **[`open-sanctions-data-fork-PLAN-BRIEF.md`](open-sanctions-data-fork-PLAN-BRIEF.md)** (OFAC PD / UK OGL → ship;
+>   OpenSanctions CC-BY-NC → no-ship; the demo's buy-in purpose is plausibly commercial). The P35 brief is RECONCILED:
+>   TF + broader-C7 were substrate-CUT (already-null / tell-unavoidable); org-name built-but-one-sided.
+> - **casework C17-SIGN gap (NEW, named):** casework does NOT ground C17, so a sanctioned-exposure case would DETERMINE
+>   (signal-watch engine) but not SIGN through casework — a named handoff, moot this phase (the C17 consume is
+>   observable-only, no determination to sign). The remaining open frontiers: substrate org-fragment emit + the
+>   discriminating-exposure-signal + open-data Stage 2/3 + a C20 jurisdiction leg; casework's CI-promotion criterion
+>   + C17 grounding.
 
 ## What changed since the last snapshot
 

@@ -336,6 +336,54 @@ def sanctions_c14_consume(*, drafter: str = "stub", tmpdir: Path | None = None) 
             "grounds_e2e": res.get("signed") is True, "disposition": res.get("disposition")}
 
 
+# ---- Phase 81: the C17 exposure-via-ownership OBSERVABLE (the Phase-36 consume — measure-first DEGENERATE) ----
+SANCTIONS_C17_BUNDLE = ROOT / "data" / "casefile" / "sanctions-c17-exposure-demo.bundle.json"
+
+
+def sanctions_c17_exposure_consume() -> dict:
+    """Consume aml-substrate's Phase-36 exposure-via-ownership signal (capability C17) as a SCREENING
+    OBSERVABLE — NOT a determination leg. The Phase-81 measure-first gate (T1b) found this CONSUME
+    DEGENERATE for a determination advance: on the f7fbdb0 12k/3m/seed0 emit, 13 customers carry a
+    sanctioned beneficial owner, ALL 13 are oracle-CLEAR (substrate's sanctions_flag is label-blind,
+    corr≈0 with laundering), and a hypothetical C17 leg moves ZERO of them to the determination bar —
+    they carry NO money-laundering MECHANISM (placement / layering / structuring), so adding a leg
+    cannot satisfy `mechanism + 2 legs`. So the honest consume is OBSERVABLE-ONLY: surface that a
+    customer's beneficial owner carries a label-blind sanctions collision (a common-name false positive
+    — the BO is NEVER a designated person), and SHOW (via the live engine) that the case does NOT reach
+    the determination bar — a label-blind exposure does not, by itself, license a filing.
+
+    The determination-leg consume is DEFERRED to a discriminating exposure signal (a sanctioned BO that
+    genuinely co-occurs with a laundering mechanism) — docs/substrate-exposure-signal-PLAN-BRIEF.md.
+    Companion-only; NOTHING is injected into determine() (evidence_requirements.py AND the profile are
+    BYTE-UNCHANGED — the firewall: no profile atom that never fires)."""
+    bundle = json.loads(SANCTIONS_C17_BUNDLE.read_text(encoding="utf-8"))
+    rps = bundle.get("related_parties") or []
+    sanctioned_bos = [{"display_name": p.get("display_name"), "label": p.get("label"),
+                       "is_person": p.get("is_person"), "ownership_pct": p.get("ownership_pct")}
+                      for p in rps if p.get("sanctions_flag")]
+    # the case's OWN fired capabilities — C17 is NOT injected (it is observable-only, not a leg)
+    caps = sorted({a.get("capability") for a in bundle.get("alerts", []) if a.get("capability")})
+    prof = load_requirements()
+    ctype = crime_type_for_capabilities(caps, prof)
+    present = present_atoms(ctype, caps, prof) if ctype else []
+    det = determine(ctype, caps, prof) if ctype else {}
+    # P37 geo OBSERVABLE — counterparty jurisdictions beyond {US,CA} (the 22-country enrichment); no leg
+    geo = sorted({t.get("counterparty_country") for t in (bundle.get("transactions") or [])
+                  if t.get("counterparty_country") and t.get("counterparty_country") not in ("US", "CA")})
+    return {"badge": BADGE, "case_id": bundle.get("case_id", "CASE-SANC-C17-EXPO"),
+            "subject_sanctioned": bool((bundle.get("parties") or [{}])[0].get("sanctions_flag")),  # False — risk via ownership
+            "exposure_observable": bool(sanctioned_bos),
+            "sanctioned_beneficial_owners": sanctioned_bos,
+            "false_positive_trap": True,   # the BO name token-collides with the watchlist; the BO is NOT designated
+            "crime_type": ctype, "present_atoms": present,
+            "determination": det.get("verdict"),
+            "advances_determination": bool(det.get("sufficient")),     # False — no mechanism, so the exposure does not file
+            "reason_no_determination": ("a label-blind sanctions exposure is neither a laundering mechanism nor a "
+                                        "second independent leg; the bar (mechanism + 2 legs) is unmet"),
+            "geo_observable": geo,                                     # P37 — foreign counterparty jurisdictions
+            "leg_consume_deferred": "docs/substrate-exposure-signal-PLAN-BRIEF.md"}
+
+
 # ---- the live finale (REUSES serve_chain's verify + audit; consume = the fail-closed-aware variant) --
 def run_case(case_id: str, *, on_stage, consume=casework_consume_wb, verify=verify_e2e,
              drafter: str | None = None, tmpdir: Path | None = None, env: dict | None = None) -> dict:
@@ -931,6 +979,7 @@ def discovery_feed() -> dict:
 def live_config(env: dict | None = None) -> dict:
     return {"cases": "/cases", "case": "/case", "gate": "/gate", "adjudicate": "/adjudicate", "memory": "/memory",
             "discovery": "/discovery",            # Phase 78 — the §12 determination-validation disagreement feed
+            "sanctionsC17": "/sanctions-c17-exposure",   # Phase 81 — the exposure-via-ownership screening OBSERVABLE
             "gather": "/gather", "run": "/run", "determine": "/determine", "health": "/health", "badge": BADGE,
             "policy": GATING_POLICY,              # the routing KNOBS (the live gating panel's defaults)
             "drafter": sc._drafter_config(env)}   # NAMES + booleans only (§4.5), reused verbatim
@@ -1006,6 +1055,14 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 self._json(200, discovery_feed())
             except RunError as ex:
+                self._json(400, {"error": str(ex)})
+        elif path == "/sanctions-c17-exposure":
+            # Phase 81 — the C17 exposure-via-ownership OBSERVABLE (the Phase-36 consume; measure-first
+            # DEGENERATE). Read-only, persists nothing; PRESENTATION-ONLY — the sanctions flag is OBSERVABLE
+            # screening state, never a determination input (NOTHING injected into determine()).
+            try:
+                self._json(200, sanctions_c17_exposure_consume())
+            except (RunError, OSError) as ex:
                 self._json(400, {"error": str(ex)})
         else:
             self._json(404, {"error": f"not found: {path}"})
@@ -1705,6 +1762,31 @@ def selftest() -> int:
         sanctions_note = f"casework live consume skipped — {ex}"
         print(f"  (sanctions-c14: {sanctions_note})", file=sys.stderr)  # noqa: T201
 
+    # Phase 81 — the C17 exposure-via-ownership OBSERVABLE (the Phase-36 consume; measure-first DEGENERATE).
+    # The honest beat: a customer whose BENEFICIAL OWNER carries a label-blind sanctions collision (a
+    # common-name false positive — the BO is NOT a designated person) is surfaced as a screening OBSERVABLE,
+    # and the LIVE engine SHOWS the case does NOT reach the determination bar (no mechanism) — a label-blind
+    # exposure does not, by itself, license a filing. NOTHING is injected into determine() (the profile +
+    # evidence_requirements.py stay BYTE-UNCHANGED — no atom that never fires).
+    c17 = sanctions_c17_exposure_consume()
+    if c17["subject_sanctioned"] is not False:
+        failures.append("c17-exposure demo subject must be CLEAN — the risk traces via OWNERSHIP, not the subject")
+    if not c17["exposure_observable"] or not c17["sanctioned_beneficial_owners"]:
+        failures.append("c17-exposure demo must surface a sanctioned BENEFICIAL OWNER (the exposure observable)")
+    if c17["advances_determination"] is not False or c17["determination"] != "needs_more_info":
+        failures.append(f"c17-exposure must NOT reach the determination bar (label-blind, no mechanism), got "
+                        f"advances={c17['advances_determination']} verdict={c17['determination']}")
+    if "ML-A8" in c17["present_atoms"] or any(a not in {"ML-A3", "ML-A7"} for a in c17["present_atoms"]):
+        failures.append(f"c17-exposure must NOT inject a C17 leg atom (observable-only), present={c17['present_atoms']}")
+    if not c17["geo_observable"]:
+        failures.append("c17-exposure demo must carry the P37 geo observable (a foreign counterparty jurisdiction)")
+    # the A1/firewall guard: the consume injects NO profile atom — the engine profile is byte-unchanged
+    if "C17" in json.dumps(load_requirements()):
+        failures.append("the evidence-requirements profile must carry NO C17 atom (the observable-only firewall)")
+    c17_note = (f"C17 exposure OBSERVABLE: {len(c17['sanctioned_beneficial_owners'])} sanctioned BO surfaced, "
+                f"case verdict {c17['determination']} (does NOT advance a determination — the T1b degeneracy); "
+                f"P37 geo {c17['geo_observable']}")
+
     # the served page substitutes the config placeholder iff workbench.html exists
     page = render_page(live_config())
     if TEMPLATE.exists():
@@ -1730,6 +1812,7 @@ def selftest() -> int:
           f"CASE-B {db['verdict']}/{db['presentation_label']} (affirmative mitigation) — same signals, opposite outcome; "
           f"CW-4 cleared consume: {cleared_note}; Lakeshore CASE-B co-sign: {lakeshore_note}; "
           f"sanctions-C14 (Phase-34): {sanctions_note}; "
+          f"sanctions-C17 (Phase-36): {c17_note}; "
           f"stubbed finale {seq} -> CONNECTED; pillar-status byte-stable)")
     return 0
 

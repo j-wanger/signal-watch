@@ -38,7 +38,7 @@ const SCRIPT = html.slice(open + '<script>'.length, close)
   + `toggleSignals,selectCase,pickBackend,applyMessage,runDecision,paintSurface,renderQueue,renderPop,loadQueue,backendLabel,`
   + `liveGate,liveFunnel,setGate,renderGate,loadGate,onKnob,resetGating,doAdjudicate,policyThresholds,`
   + `runGather,applyGather,gatherPanelHTML,gatherResultHTML,gatherGraphHTML,liveGraphLayout,toolLabel,kindLabel,`
-  + `runDetermine,determinePanelHTML,memoryPanelHTML,discoveryPanelHTML,`
+  + `runDetermine,determinePanelHTML,memoryPanelHTML,discoveryPanelHTML,sanctionsC17PanelHTML,`
   + `setState:(s)=>{ if('META'in s)META=s.META; if('QUEUE'in s)QUEUE=s.QUEUE; if('FILTER'in s)FILTER=s.FILTER; if('SEL'in s)SEL=s.SEL; if('DETAIL'in s)DETAIL=s.DETAIL; if('SIGNALS'in s)SIGNALS=s.SIGNALS; if('RUN'in s)RUN=s.RUN; if('GATE'in s)setGate(s.GATE); if('POLICY'in s)POLICY=s.POLICY; if('ADJ'in s)ADJ=s.ADJ; if('GATHER'in s)GATHER=s.GATHER; if('DET'in s)DET=s.DET; },`
   + `getState:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ,GATHER,DET})};`;
 
@@ -712,6 +712,35 @@ ok(discH.includes('&lt;img src=x') && !/<img src=x onerror/.test(discH), 'discov
 ok(discH.includes(escH('<b>C9</b>')) && !/<b>C9<\/b>/.test(discH), 'discovery panel: XSS — a malicious cap string is esc()-escaped');
 ok(!/\b(lift|precision|recall|catch[\s-]?rate|f1|auroc)\b/i.test(discH) && !/\d+(\.\d+)?\s*%/.test(discH) && !/\d+(\.\d+)?x\b/.test(discH),
    'discovery panel: NO catch-rate/precision/lift/%/Nx vocabulary (the honesty governor — counts only)');
+
+/* ---------- the C17 exposure-via-ownership OBSERVABLE (Phase 81): measure-first DEGENERATE, observable-only ---------- */
+const C17 = { badge:'Illustrative data & outputs', case_id:'CASE-SANC-C17-EXPO',
+  subject_sanctioned:false, exposure_observable:true, false_positive_trap:true,
+  sanctioned_beneficial_owners:[{display_name:'Samantha Jung', label:'BENEFICIAL_OWNER', is_person:true, ownership_pct:33}],
+  crime_type:'money_laundering', present_atoms:['ML-A3'], determination:'needs_more_info', advances_determination:false,
+  reason_no_determination:'a label-blind sanctions exposure is neither a laundering mechanism nor a second independent leg; the bar (mechanism + 2 legs) is unmet',
+  geo_observable:['AE'], leg_consume_deferred:'docs/substrate-exposure-signal-PLAN-BRIEF.md' };
+const c17H = T.sanctionsC17PanelHTML(C17);
+ok(/sanctions exposure via ownership/.test(c17H) && /OBSERVABLE \(not a determination\)/.test(c17H),
+   'c17 panel: the exposure-via-ownership header frames it as an observable, not a determination');
+ok(/Samantha Jung/.test(c17H) && /beneficial owner/.test(c17H) && /33 pct/.test(c17H),
+   'c17 panel: the sanctioned beneficial owner renders with its ownership share (N pct, no % symbol)');
+ok(/NOT a designated person/.test(c17H) && /common-name false positive/.test(c17H),
+   'c17 panel: the false-positive-trap framing renders (the BO is NEVER a designated person)');
+ok(/0<\/span>/.test(c17H) && /determinations advanced/.test(c17H) && /needs_more_info/.test(c17H),
+   'c17 panel: ZERO determinations advanced + the case verdict (needs_more_info) — the exposure does not license a filing');
+ok(/AE<\/span>/.test(c17H) && /P37 observable \(no leg\)/.test(c17H),
+   'c17 panel: the P37 counterparty-jurisdiction observable renders (beyond US/CA, no leg)');
+ok(/neither a mechanism nor a corroborating leg/.test(c17H) && /awaits a discriminating exposure signal/.test(c17H),
+   'c17 panel: the honest framing (exposure != determination; a determination leg awaits a discriminating signal) renders');
+ok(T.sanctionsC17PanelHTML(null) === '' && T.sanctionsC17PanelHTML({exposure_observable:false}) === '',
+   'c17 panel: empty when there is no sanctioned-ownership exposure (offline workbench unaffected)');
+const c17XSS = T.sanctionsC17PanelHTML({exposure_observable:true, advances_determination:false, determination:'needs_more_info',
+  reason_no_determination:'x', geo_observable:['<img src=x onerror=alert(1)>'],
+  sanctioned_beneficial_owners:[{display_name:'<img src=x onerror=alert(1)>', label:'BENEFICIAL_OWNER', ownership_pct:1}]});
+ok(c17XSS.includes('&lt;img src=x') && !/<img src=x onerror/.test(c17XSS), 'c17 panel: XSS — a malicious BO name / jurisdiction is esc()-escaped');
+ok(!/\b(lift|precision|recall|catch[\s-]?rate|f1|auroc|multiplier)\b/i.test(c17H) && !/\d+(\.\d+)?\s*%/.test(c17H) && !/\d+(\.\d+)?x\b/.test(c17H),
+   'c17 panel: NO catch-rate/precision/lift/%/Nx vocabulary (the honesty governor; "N pct" not "N%")');
 
 /* ---------- summary ---------- */
 console.log(`\n${pass} passed, ${fails.length} failed`);

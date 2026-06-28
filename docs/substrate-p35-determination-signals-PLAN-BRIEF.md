@@ -1,5 +1,38 @@
 # PLAN-BRIEF — aml-substrate P35+: the remaining determination-signal frontier (TF · broader C7 · org-name sanctions · open-data Stage 2/3)
 
+> **◼ RECONCILED 2026-06-28 (Phase 81) — most of this frontier is now RESOLVED; substrate advanced
+> `1f5901e` → `f7fbdb0` (Phases 35/36/37), code-verified + measured this session.** Per-ask status (supersedes
+> the "still-unbuilt frontier" section below, kept historical):
+> - **(1) TF slice → substrate-CUT** (NOT an open ask). substrate measured it `already-null` this session (no TF
+>   crime type; `{US,CA}`-only jurisdiction; the disposition basis needs a high-blast crime-mix edit the consumer's
+>   brief forbids) and retains it as an honest-null artifact. signal-watch's TF `evidence-requirements.json` profile
+>   stays authored-but-unexercised by design.
+> - **(2) broader C7 → substrate-CUT** (NOT an open ask). substrate measured it `tell-unavoidable` this session (at
+>   m=1 a pure magnitude screen; mules are the magnitude outliers, `corr` 0.172/0.187 over the 0.10 label-blind
+>   gate) and kept the `broaden_c7_probe.py` cut-record. A broadened C7 would re-introduce the forbidden flag↔label tell.
+> - **(3) org-name sanctions → BUILT (substrate Phase 35 `4f49e53`) but the merge consume is BLOCKED, one-sided.**
+>   signal-watch Phase 81 T1a MEASURED it STRUCTURALLY ONE-SIDED: substrate's anchored fragment overlay is
+>   person-only (0 org fragment clusters), so an org-name collision can never be a same-org UPHOLD → all-reject →
+>   the merge org case can't ship two-sided. → **[`substrate-org-fragment-emit-PLAN-BRIEF.md`](substrate-org-fragment-emit-PLAN-BRIEF.md)**
+>   (the new ask: fragment orgs like persons). The org-name screening ALSO feeds the workbench: a sanctioned org BO
+>   is one source of the Phase-36 C17 exposure leg (consumed below).
+> - **(NEW) Phase 36 — exposure-via-ownership C17 leg → CONSUMED (Phase 81 T4)** as a DEFENSIVE-EXPOSURE
+>   determination leg. Measured: it fires on 13 customers with a sanctioned beneficial owner but all are oracle-CLEAR
+>   (the `sanctions_flag` is label-blind, `corr≈0`) → a defensible precautionary basis, NOT a latent-laundering
+>   discriminator (the Phase-78 §12 discovery feed classifies it as over-flag). NOT a detection lift.
+> - **(NEW) Phase 37 — geo/jurisdiction enrichment → CONSUMED (Phase 81 T4)** as a rendered OBSERVABLE (22-country
+>   `counterparty_country` + FATF tail, no leg). A C20 high-risk-jurisdiction determination leg is the named FUTURE
+>   item — it MUST control for txn-volume (substrate's caveat: mules transact more, a naive "any high-risk exposure"
+>   flag inherits txn-count mediation).
+> - **(4) open-data Stage 2/3 → still deferred** (substrate-side); the signal-watch SHIP-compliance angle is now
+>   mapped in **[`open-sanctions-data-fork-PLAN-BRIEF.md`](open-sanctions-data-fork-PLAN-BRIEF.md)** (the per-source
+>   license matrix + the non-commercial boundary); the substrate-anchoring angle stays in
+>   [`substrate-open-reference-data-fork-PLAN-BRIEF.md`](substrate-open-reference-data-fork-PLAN-BRIEF.md).
+>
+> Net: of the four original asks, two are substrate-CUT (TF, C7), one is built-but-blocked-on-a-new-ask (org-name →
+> org-fragment brief), one stays deferred (open-data → two licensing briefs); the two unanticipated Phase-36/37
+> emissions are consumed. The historical brief follows.
+
 > **A signal-watch → aml-substrate handoff brief** (the Phase-55–58 sibling-brief pattern). Authored in
 > signal-watch (Phase 80); **executed in an aml-substrate session**. signal-watch defines the *contract* it
 > needs; the substrate owns the build. **Code-verified live this session at aml-substrate @`1f5901e`

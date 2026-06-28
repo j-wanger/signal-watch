@@ -336,6 +336,7 @@
 
   <div id="memoryPanel"></div>
   <div id="discoveryPanel"></div>
+  <div id="sanctionsC17Panel"></div>
 
   <div class="wb">
     <aside>
@@ -1341,11 +1342,41 @@ function loadDiscovery(){
     const el=document.getElementById('discoveryPanel'); if(el) el.innerHTML=discoveryPanelHTML(d);
   }).catch(()=>{});
 }
+function sanctionsC17PanelHTML(d){
+  // Phase 81 — the C17 exposure-via-ownership OBSERVABLE (substrate Phase 36). The customer is NOT directly
+  // flagged; the risk traces THROUGH OWNERSHIP — a beneficial owner's name token-collides with the watchlist
+  // (a common-name false positive; the BO is NEVER a designated person). Observable-only: the live engine
+  // SHOWS the case does NOT reach the determination bar (no laundering mechanism), so a label-blind exposure
+  // does not, by itself, license a filing. Measure-first DEGENERATE: 0 of the cohort advance a determination.
+  if(!d||!d.exposure_observable) return '';
+  const bos=(d.sanctioned_beneficial_owners||[]).map(p=>
+    `<span class="chip" style="border-color:var(--rose)">⚑ ${esc(p.display_name||'—')} · ${esc((p.label||'').toLowerCase().replace(/_/g,' '))}${p.ownership_pct!=null?' · '+esc(p.ownership_pct)+' pct':''}</span>`).join('');
+  const geo=(d.geo_observable||[]).map(c=>`<span class="chip">${esc(c)}</span>`).join('')||'<span class="faint">none</span>';
+  const advances=d.advances_determination===true;
+  return `<div class="memctl">
+    <div class="gxh">sanctions exposure via ownership · a screening OBSERVABLE (not a determination)</div>
+    <div class="memgrid">
+      <div class="memstat"><span class="n">${esc((d.sanctioned_beneficial_owners||[]).length)}</span><span class="l"><b>sanctioned beneficial owner</b> — a label-blind name collision on the ownership graph<br><span class="faint">a common-name false positive · the beneficial owner is NOT a designated person · the customer is not directly flagged</span></span></div>
+      <div class="memstat"><span class="n">${advances?'—':'0'}</span><span class="l"><b>determinations advanced</b> by this exposure<br><span class="faint">case verdict <b>${esc(d.determination||'—')}</b> — ${esc(d.reason_no_determination||'')}</span></span></div>
+    </div>
+    <div class="disc-h">the sanctioned ownership exposure</div>
+    <div style="margin:4px 0 8px">${bos||'<span class="faint">none</span>'}</div>
+    <div class="disc-h">counterparty jurisdictions beyond US / CA · P37 observable (no leg)</div>
+    <div style="margin:4px 0 8px">${geo}</div>
+    <div class="illus">A label-blind sanctions exposure (independent of laundering) is neither a mechanism nor a corroborating leg — it is an observable the human gate weighs, not a determination basis. A determination leg awaits a discriminating exposure signal (${esc(d.leg_consume_deferred||'a sibling brief')}).</div>
+  </div>`;
+}
+function loadSanctionsC17(){
+  if(!CFG.sanctionsC17) return Promise.resolve();
+  return fetch(CFG.sanctionsC17).then(r=>r.json()).then(d=>{
+    const el=document.getElementById('sanctionsC17Panel'); if(el) el.innerHTML=sanctionsC17PanelHTML(d);
+  }).catch(()=>{});
+}
 function boot(){
   const bg=document.getElementById('badge'); if(bg) bg.textContent=CFG.badge||'Illustrative data & outputs';
   BACKEND=(CFG.drafter&&CFG.drafter.default)||'stub';
   POLICY=defaultPolicy();
-  setDraftChip(); renderGate(); loadQueue().then(loadGate); loadMemory(); loadDiscovery();
+  setDraftChip(); renderGate(); loadQueue().then(loadGate); loadMemory(); loadDiscovery(); loadSanctionsC17();
 }
 if(typeof document!=='undefined'&&document.getElementById('queue')) boot();
 
@@ -1357,7 +1388,7 @@ if(typeof module!=='undefined'&&module.exports){ module.exports={
   runGather,applyGather,gatherPanelHTML,gatherResultHTML,gatherGraphHTML,liveGraphLayout,toolLabel,kindLabel,
   boGraphHTML,boRiskTag,ownLabel,edgeLabel,
   capName,qcardHTML,showcaseSurface,scMoneyFlowGraph,scResolutionGraph,scBOGraph,scSignalWalk,scLedger,scDetermination,scOutcome,scFlags,
-  memoryPanelHTML,loadMemory,discoveryPanelHTML,loadDiscovery,
+  memoryPanelHTML,loadMemory,discoveryPanelHTML,loadDiscovery,sanctionsC17PanelHTML,loadSanctionsC17,
   _state:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ,GATHER}),
   _set:(s)=>{ if(s.META!==undefined)META=s.META; if(s.QUEUE!==undefined)QUEUE=s.QUEUE; if(s.SEL!==undefined)SEL=s.SEL; if(s.DETAIL!==undefined)DETAIL=s.DETAIL; if(s.SIGNALS!==undefined)SIGNALS=s.SIGNALS; if(s.RUN!==undefined)RUN=s.RUN; if(s.GATE!==undefined)setGate(s.GATE); if(s.POLICY!==undefined)POLICY=s.POLICY; if(s.ADJ!==undefined)ADJ=s.ADJ; if(s.GATHER!==undefined)GATHER=s.GATHER; },
   paintSurface,renderQueue,renderPop,riskPanel,walkHTML,ledgerHTML,CANON }; }

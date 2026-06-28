@@ -1,0 +1,469 @@
+{
+ "case_id": "CASE-SANC-C17-EXPO",
+ "contract_version": "0.3",
+ "illustrative": true,
+ "provenance": {
+  "source": "aml-substrate @f7fbdb0 (Phase 37) --anchored --emit-screening, case CASE-P-0003214 (real-frequency SYNTHETIC), distilled + email-masked (ALL @-strings -> example.test, incl. resolution_edges) for Phase 81 T4 (observable-only)",
+  "note": "OBSERVABLE-ONLY demo of an exposure-via-ownership SCREENING signal (substrate P36 C17): the customer is NOT directly flagged; the risk traces THROUGH OWNERSHIP — a BENEFICIAL OWNER carries a sanctions_flag from a LABEL-BLIND OFAC name-token collision (a common-name false positive). The beneficial owner is NEVER a designated person; NO party IS sanctioned. The exposure is a screening OBSERVABLE, NOT a determination basis: the case carries NO money-laundering MECHANISM (placement / layering / structuring), so it does NOT reach the determination bar (mechanism + 2 independent legs). A label-blind exposure (corr~=0 with laundering) does not, by itself, license a filing.",
+  "t1b_finding": "Measured on the f7fbdb0 12k/3m/seed0 emit: 13 customers carry a sanctioned beneficial owner; ALL 13 are oracle-CLEAR; a hypothetical C17 determination leg moves 0 of them to the bar (they lack a money-laundering mechanism). The determination-leg consume is DEFERRED to a discriminating exposure signal — see docs/substrate-exposure-signal-PLAN-BRIEF.md.",
+  "qualifier": "synthetic-substrate-anchored; illustrative; no rate, score, or multiplier is claimed"
+ },
+ "subject": {
+  "account_ids": [
+   "A-00011837"
+  ],
+  "customer_id": "P-0003214"
+ },
+ "parties": [
+  {
+   "adverse_media_flag": false,
+   "cdd_level": "CDD",
+   "display_name": "Katie Orozco",
+   "entity_ref": "P-0003214",
+   "expected_monthly_txn_count": 34,
+   "expected_monthly_volume_cents": 432843,
+   "identifiers": [
+    {
+     "kind": "email",
+     "normalized": "user61081@example.test",
+     "strength": "strong",
+     "value": "user61081@example.test"
+    },
+    {
+     "kind": "phone",
+     "normalized": "+10000132619",
+     "strength": "strong",
+     "value": "+10000132619"
+    }
+   ],
+   "is_person": true,
+   "naics_code": null,
+   "nationality": null,
+   "nature_of_business": null,
+   "occupation": "Software developer",
+   "party_id": "P-0003214",
+   "pep_tier": "NONE",
+   "residency_status": null,
+   "risk_rating": "MEDIUM",
+   "sanctions_flag": false,
+   "source_of_funds": "Inheritance or gift",
+   "source_of_wealth": null
+  }
+ ],
+ "related_parties": [
+  {
+   "adverse_media_flag": false,
+   "cdd_level": "CDD",
+   "display_name": "EDM 01 INFRA LP",
+   "entity_ref": "O-000233",
+   "is_person": false,
+   "label": "BENEFICIAL_OWNER",
+   "ownership_pct": 34,
+   "party_id": "O-000233",
+   "pep_tier": null,
+   "risk_rating": "MEDIUM",
+   "sanctions_flag": false
+  },
+  {
+   "adverse_media_flag": false,
+   "cdd_level": "CDD",
+   "display_name": "EDM 01 INFRA LP",
+   "entity_ref": "O-000233",
+   "is_person": false,
+   "label": "DIRECTOR_OF",
+   "ownership_pct": null,
+   "party_id": "O-000233",
+   "pep_tier": null,
+   "risk_rating": "MEDIUM",
+   "sanctions_flag": false
+  },
+  {
+   "adverse_media_flag": false,
+   "cdd_level": "CDD",
+   "display_name": "Molly Owens",
+   "entity_ref": "P-0000476",
+   "identifiers": [
+    {
+     "kind": "email",
+     "normalized": "user61081@example.test",
+     "strength": "strong",
+     "value": "user61081@example.test"
+    },
+    {
+     "kind": "phone",
+     "normalized": "+10000277732",
+     "strength": "strong",
+     "value": "+10000277732"
+    }
+   ],
+   "is_person": true,
+   "label": "BENEFICIAL_OWNER",
+   "ownership_pct": 33,
+   "party_id": "P-0000476",
+   "pep_tier": "NONE",
+   "risk_rating": "MEDIUM",
+   "sanctions_flag": false
+  },
+  {
+   "adverse_media_flag": false,
+   "cdd_level": "CDD",
+   "display_name": "Samantha Jung",
+   "entity_ref": "P-0011316",
+   "identifiers": [
+    {
+     "kind": "email",
+     "normalized": "user61081@example.test",
+     "strength": "strong",
+     "value": "user61081@example.test"
+    },
+    {
+     "kind": "phone",
+     "normalized": "+10000146722",
+     "strength": "strong",
+     "value": "+10000146722"
+    }
+   ],
+   "is_person": true,
+   "label": "BENEFICIAL_OWNER",
+   "ownership_pct": 33,
+   "party_id": "P-0011316",
+   "pep_tier": "NONE",
+   "risk_rating": "LOW",
+   "sanctions_flag": true
+  },
+  {
+   "adverse_media_flag": false,
+   "cdd_level": "CDD",
+   "display_name": "Molyl wOens",
+   "entity_ref": "P-FRAG-000027",
+   "identifiers": [
+    {
+     "kind": "email",
+     "normalized": "user44913@example.test",
+     "strength": "strong",
+     "value": "user44913@example.test"
+    },
+    {
+     "kind": "phone",
+     "normalized": "+11000000027",
+     "strength": "strong",
+     "value": "+11000000027"
+    }
+   ],
+   "is_person": true,
+   "label": "BENEFICIAL_OWNER",
+   "ownership_pct": 0,
+   "party_id": "P-FRAG-000027",
+   "pep_tier": "NONE",
+   "risk_rating": "MEDIUM",
+   "sanctions_flag": false
+  },
+  {
+   "adverse_media_flag": false,
+   "cdd_level": "CDD",
+   "display_name": "Katei Oorzco",
+   "entity_ref": "P-FRAG-000272",
+   "identifiers": [
+    {
+     "kind": "email",
+     "normalized": "user44520@example.test",
+     "strength": "strong",
+     "value": "user44520@example.test"
+    },
+    {
+     "kind": "phone",
+     "normalized": "+11000000272",
+     "strength": "strong",
+     "value": "+11000000272"
+    }
+   ],
+   "is_person": true,
+   "label": "BENEFICIAL_OWNER",
+   "ownership_pct": 0,
+   "party_id": "P-FRAG-000272",
+   "pep_tier": "NONE",
+   "risk_rating": "MEDIUM",
+   "sanctions_flag": false
+  },
+  {
+   "adverse_media_flag": false,
+   "cdd_level": "CDD",
+   "display_name": "Kaite Orzoco",
+   "entity_ref": "P-FRAG-000273",
+   "identifiers": [
+    {
+     "kind": "email",
+     "normalized": "user83225@example.test",
+     "strength": "strong",
+     "value": "user83225@example.test"
+    },
+    {
+     "kind": "phone",
+     "normalized": "+11000000273",
+     "strength": "strong",
+     "value": "+11000000273"
+    }
+   ],
+   "is_person": true,
+   "label": "BENEFICIAL_OWNER",
+   "ownership_pct": 0,
+   "party_id": "P-FRAG-000273",
+   "pep_tier": "NONE",
+   "risk_rating": "MEDIUM",
+   "sanctions_flag": false
+  },
+  {
+   "adverse_media_flag": false,
+   "cdd_level": "CDD",
+   "display_name": "Samatnha Jnug",
+   "entity_ref": "P-FRAG-000985",
+   "identifiers": [
+    {
+     "kind": "email",
+     "normalized": "user35042@example.test",
+     "strength": "strong",
+     "value": "user35042@example.test"
+    },
+    {
+     "kind": "phone",
+     "normalized": "+11000000985",
+     "strength": "strong",
+     "value": "+11000000985"
+    }
+   ],
+   "is_person": true,
+   "label": "BENEFICIAL_OWNER",
+   "ownership_pct": 0,
+   "party_id": "P-FRAG-000985",
+   "pep_tier": "NONE",
+   "risk_rating": "LOW",
+   "sanctions_flag": false
+  }
+ ],
+ "resolution_edges": [
+  {
+   "between": [
+    "P-0000476",
+    "P-0003214"
+   ],
+   "cross_institution": true,
+   "reading": "shared strong identifier present on both — exact-on-identifier (cross-account ER)",
+   "shared": [
+    {
+     "kind": "email",
+     "normalized": "user61081@example.test",
+     "strength": "strong",
+     "value": "user61081@example.test"
+    }
+   ],
+   "status": "resolved"
+  },
+  {
+   "between": [
+    "P-0000476",
+    "P-0011316"
+   ],
+   "cross_institution": true,
+   "reading": "shared strong identifier present on both — exact-on-identifier (cross-account ER)",
+   "shared": [
+    {
+     "kind": "email",
+     "normalized": "user61081@example.test",
+     "strength": "strong",
+     "value": "user61081@example.test"
+    }
+   ],
+   "status": "resolved"
+  }
+ ],
+ "alerts": [
+  {
+   "account_id": "A-00011837",
+   "alert_id": "AL-5107729d6692",
+   "capability": "C8",
+   "detector": "income_mismatch",
+   "grounding": {
+    "advisory_id": "fin-2023-alert001",
+    "capability": "C8",
+    "data_source": "D2",
+    "flag": "A customer making cash deposits that are inconsistent with the customer’s line of business.",
+    "indicator_id": "IND-07",
+    "signal_id": "fin-2023-alert001:IND-07"
+   },
+   "rule": "inflow 7322427 cents exceeds 12x the declared monthly volume 432843 cents (income/activity inconsistency)",
+   "txn_ids": [
+    "T-00165177",
+    "T-00165178",
+    "T-00165180",
+    "T-00165181",
+    "T-00165184",
+    "T-00165187",
+    "T-00165190",
+    "T-00165191",
+    "T-00165194",
+    "T-00165195",
+    "T-00165196",
+    "T-00165201",
+    "T-00165205",
+    "T-00165206",
+    "T-00165207",
+    "T-00165209",
+    "T-00165211",
+    "T-00165215",
+    "T-00165216",
+    "T-00165217",
+    "T-00165218",
+    "T-00165221",
+    "T-00165224",
+    "T-00165225",
+    "T-00165226",
+    "T-00165227",
+    "T-00165229",
+    "T-00165232",
+    "T-00165237",
+    "T-00165240",
+    "T-00165241",
+    "T-00165243",
+    "T-00165247",
+    "T-00165248",
+    "T-00165249",
+    "T-00165250",
+    "T-00165251",
+    "T-00165252",
+    "T-00664724"
+   ]
+  }
+ ],
+ "transactions": [
+  {
+   "account_id": "A-00011837",
+   "amount_cents": 202001,
+   "channel": "AFT",
+   "counterparty_account_id": null,
+   "counterparty_country": "US",
+   "counterparty_name": "Logan Kumar",
+   "counterparty_ref": "CP-P-0003214-06",
+   "currency": "CAD",
+   "direction": "CREDIT",
+   "timestamp": "2024-01-02T22:49:42",
+   "txn_id": "T-00165177"
+  },
+  {
+   "account_id": "A-00011837",
+   "amount_cents": 369519,
+   "channel": "AFT",
+   "counterparty_account_id": null,
+   "counterparty_country": "CA",
+   "counterparty_name": "Ryan Chen",
+   "counterparty_ref": "CP-P-0003214-07",
+   "currency": "CAD",
+   "direction": "CREDIT",
+   "timestamp": "2024-01-03T17:54:26",
+   "txn_id": "T-00165178"
+  },
+  {
+   "account_id": "A-00011837",
+   "amount_cents": 3409,
+   "channel": "CARD",
+   "counterparty_account_id": null,
+   "counterparty_country": "AE",
+   "counterparty_name": "Harper Martin",
+   "counterparty_ref": "CP-P-0003214-01",
+   "currency": "CAD",
+   "direction": "DEBIT",
+   "timestamp": "2024-01-05T21:10:20",
+   "txn_id": "T-00165179"
+  },
+  {
+   "account_id": "A-00011837",
+   "amount_cents": 4479,
+   "channel": "CHEQUE",
+   "counterparty_account_id": null,
+   "counterparty_country": "CA",
+   "counterparty_name": "Ella Taylor",
+   "counterparty_ref": "CP-P-0003214-02",
+   "currency": "CAD",
+   "direction": "CREDIT",
+   "timestamp": "2024-01-06T16:40:10",
+   "txn_id": "T-00165181"
+  },
+  {
+   "account_id": "A-00011837",
+   "amount_cents": 6242,
+   "channel": "AFT",
+   "counterparty_account_id": null,
+   "counterparty_country": "CA",
+   "counterparty_name": "Emma Martin",
+   "counterparty_ref": "CP-P-0003214-00",
+   "currency": "CAD",
+   "direction": "DEBIT",
+   "timestamp": "2024-01-08T07:07:23",
+   "txn_id": "T-00165182"
+  },
+  {
+   "account_id": "A-00011837",
+   "amount_cents": 68161,
+   "channel": "AFT",
+   "counterparty_account_id": null,
+   "counterparty_country": "CA",
+   "counterparty_name": "Ryan Chen",
+   "counterparty_ref": "CP-P-0003214-07",
+   "currency": "CAD",
+   "direction": "DEBIT",
+   "timestamp": "2024-01-12T08:33:03",
+   "txn_id": "T-00165183"
+  },
+  {
+   "account_id": "A-00011837",
+   "amount_cents": 90386,
+   "channel": "AFT",
+   "counterparty_account_id": null,
+   "counterparty_country": "CA",
+   "counterparty_name": "Fatima Fortin",
+   "counterparty_ref": "CP-P-0003214-04",
+   "currency": "CAD",
+   "direction": "CREDIT",
+   "timestamp": "2024-01-12T15:52:10",
+   "txn_id": "T-00165184"
+  },
+  {
+   "account_id": "A-00011837",
+   "amount_cents": 120000,
+   "channel": "WIRE",
+   "counterparty_account_id": null,
+   "counterparty_country": "CA",
+   "counterparty_name": "Sophie Wang",
+   "counterparty_ref": "CP-P-0003214-05",
+   "currency": "CAD",
+   "direction": "DEBIT",
+   "timestamp": "2024-01-12T16:45:05",
+   "txn_id": "T-00165185"
+  },
+  {
+   "account_id": "A-00011837",
+   "amount_cents": 289724,
+   "channel": "EMT",
+   "counterparty_account_id": null,
+   "counterparty_country": "AE",
+   "counterparty_name": "Harper Martin",
+   "counterparty_ref": "CP-P-0003214-01",
+   "currency": "CAD",
+   "direction": "CREDIT",
+   "timestamp": "2024-01-14T00:55:19",
+   "txn_id": "T-00165190"
+  },
+  {
+   "account_id": "A-00011837",
+   "amount_cents": 5497,
+   "channel": "CHEQUE",
+   "counterparty_account_id": null,
+   "counterparty_country": "AE",
+   "counterparty_name": "Harper Martin",
+   "counterparty_ref": "CP-P-0003214-01",
+   "currency": "CAD",
+   "direction": "DEBIT",
+   "timestamp": "2024-01-14T08:18:07",
+   "txn_id": "T-00165193"
+  }
+ ]
+}

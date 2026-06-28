@@ -31,7 +31,7 @@ Any UNSANCTIONED ship dist drift (the 8 non-merge dists, or `dist/merge` before 
 ## Gates
 - [x] spec (`specs/phase-81-consume-substrate-sanctions-arc.md`)
 - [x] Direction confirmed by user (2026-06-28, AskUserQuestion — Q1 "All three (+ P37 geo)" · Q2 "Plan-only brief + license matrix" · Q3 "Evidence-advance, rule frozen" · Q4 "Accept both abort fallbacks"; assumption positions taken, no unresolved reject/don't-know; ledger Phase-81)
-- [ ] Delivery accepted (post-implementation report)
+- [x] Delivery accepted (post-implementation report 2026-06-28; adversarial review 4-dim → 0 must-fix / 2 should-fix FIXED / 14 praise; user "Push" → impl commit 52c5d10, committed + pushed to main)
 
 Spec `specs/phase-81-consume-substrate-sanctions-arc.md`; plan
 [[phases/phase-81-consume-substrate-sanctions-arc]]; ledger Phase-81.

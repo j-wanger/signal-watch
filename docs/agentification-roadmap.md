@@ -19,7 +19,7 @@ the gate byte-for-byte over the cited source and confirm nothing on screen is un
 license a filing is a deterministic, public-guidance-authored predicate, never a learned-from-labels judge.
 The roadmap below extends the pattern; it never relaxes it.
 
-## Built today — the pattern proven in 5 live loops (the proof it works)
+## Built today — the pattern proven in 6 live loops (the proof it works)
 
 All five share ONE transport (a local OpenAI-compatible model at `127.0.0.1:8080/v1`), so **a single local
 model lights up every live demo at once** (no per-loop wiring). The offline ship artifacts make ZERO
@@ -53,13 +53,29 @@ live loop** (`serve_merge.py` + a build-stripped overlay in `merge.html`; all 9 
 pinned as a regression gate (`tests/merge_adjudicator_quality_harness.py`). The human still adjudicates; the
 agent's call is a measured proposal beside the latent truth. Full walkthrough: `docs/merge-live.md`.
 
-### Stage 2 — the HIGH-VALUE agent: a §12 determination pre-proposer  *(high leverage, light dependency)*
-An agent reads the assembled §12 bundle (the grounded predicate + mitigation + legs we wired at scale this
-quarter) and proposes **file / clear / needs-more-info + a rationale**. The seam is ALREADY built —
-`determine_case` takes `named_risk` / `mitigation_established` as override kwargs (`serve_workbench.py:567`),
-the **A1-frozen** sufficiency engine + the §12 discovery oracle dispose/score, and the human gate holds the
-decision. The agent assembles + proposes; it never licenses the filing (the rule stays a deterministic
-predicate). Dependency: a live model; almost no new code.
+### Stage 2 — the HIGH-VALUE agent: a §12 determination pre-proposer  ✅ **BUILT (Phase 85)**
+An agent reads the case EVIDENCE (the fired capabilities + the mapped crime type — the oracle firewall:
+`determination_proposer.proposer_input` + `assert_no_oracle_leak`, reused from the validation harness) and
+proposes **file / clear / needs-more-info + a rationale**, measured **two-sided** against aml-substrate's
+EXOGENOUS `intended_disposition` oracle (the Phase-78 capture, authored blind to the sufficiency rule — the
+SAME non-circular oracle the determination-validation harness uses) vs the deterministic engine baseline. The
+seam was already built — `determine_case` takes `named_risk` / `mitigation_established` as override kwargs; the
+**A1-frozen** sufficiency engine still LICENSES the determination, the human still DECIDES; the proposal is a
+presentation beside the gate, never an engine input. **Measured (counts only, synthetic substrate slice — no
+rate, score, or multiplier; the full 6935-case capture, the agent deduped to 46 cap-signatures so the whole
+population is covered, with a base-rate-informed prompt):** the live agent (a local Qwen MoE) **eliminated all
+727 KYC structural over-flags** the rigid rule marks file-ready (a customer-due-diligence gap alone is not a
+filing basis) and **committed `file` on 74 oracle-file cases vs the engine's 50** (higher file sensitivity) —
+but it **over-files on the volume ML class** (committed-wrong **4482** vs the engine's **593**), because it
+reasons from per-case red-flag CO-OCCURRENCE without the base-rate prior the calibrated rule encodes. Even
+GIVEN the public base-rate context, a per-case agent over-files on the dominant `C2|C3|C8` signature (4040
+cases, 4029 benign) — the benign-ness is a POPULATION property invisible in a single case. **The honest
+finding VINDICATES propose→gate→decide:** the agent is a sensitivity-rich *proposer* (it surfaces files +
+fixes the structural KYC over-flag); the deterministic engine + the human gate supply the population-calibrated
+discipline the per-case agent cannot. Surfaced as the **6th companion live loop** (`serve_workbench.py`
+`/propose-determination` + the proposal panel in `workbench.html`; all 9 ship dists byte-frozen,
+`evidence_requirements.py` byte-unchanged) and pinned as a regression gate
+(`tests/determination_proposer_quality_harness.py`). Full walkthrough: `docs/determination-live.md`.
 
 ### Stage 3 — the DRAFTING agent: a real STR drafter behind the verifiers  *(high leverage, near-zero new code)*
 Replace the deterministic stub drafter with a real agent drafter — the **Drafter Protocol + a `--drafter`
@@ -97,10 +113,10 @@ These are the load-bearing reason the agentic layer is defensible; agentificatio
 ## Status & sequencing
 
 - **Built:** the 4 original live loops + **Stage 1 (the merge adjudicator — the measured-quality headline,
-  Phase 83)** = 5 live loops. **Next, in leverage order:** Stage 2 (determination pre-proposer — the
-  high-value decision support; the `determine_case` seam is built) → Stage 3 (STR drafter — near-zero code) →
-  Stage 4 (triage second-rater). Each is independently shippable + companion-only; none touches a ship dist or
-  a frozen gate.
+  Phase 83)** + **Stage 2 (the §12 determination pre-proposer — the propose→gate→decide vindication, Phase
+  85)** = 6 live loops. **Next, in leverage order:** Stage 3 (STR drafter — the Drafter Protocol + a
+  `--drafter` switch already exist, near-zero new code) → Stage 4 (triage second-rater). Each is independently
+  shippable + companion-only; none touches a ship dist or a frozen gate.
 - **Contract:** `program-blueprint.md` §2/§4/§6/§11 (the design); this doc is the build sequencing over it.
   Cross-pillar note: signal-watch RUNS the agents; substrate + casework are the deterministic producers/verifiers.
 - **The honest frame:** agentification here is mostly *wiring live models to seams that already exist, under

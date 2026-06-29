@@ -30,6 +30,7 @@ PY_SELFTESTS = [
     "resolution_scorer.py",     # Phase 74 — the resolution-correctness scorer + the resolver-input firewall
     "curate_merge_cases.py",    # Phase 76 — the merge-console case curator (SKIPs gracefully w/o duckdb; full under .venv)
     "merge_adjudicator.py",     # Phase 83 — the merge adjudicator (firewall + stub baseline; dep-free, no model)
+    "determination_proposer.py",  # Phase 85 — the §12 determination pre-proposer (firewall + two-sided stub baseline; dep-free)
     "distill_sanctions_slice.py",  # Phase 80 — the OFAC name-collision merge slice (replays the committed slice, no substrate)
     "determination_validation_harness.py",  # Phase 78 — the determination-validation firewall + recompute (dep-free)
     "serve_workbench.py",
@@ -84,6 +85,17 @@ def test_merge_adjudicator_quality_harness() -> None:
     r = subprocess.run([sys.executable, str(path), "--check"], cwd=str(ROOT),
                        capture_output=True, text=True, timeout=120)
     assert r.returncode == 0, f"merge_adjudicator_quality_harness --check FAILED:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
+
+
+def test_determination_proposer_quality_harness() -> None:
+    """Phase 85 — the §12 DETERMINATION-PROPOSER quality REGRESSION GATE: re-derive the StubProposer (engine
+    echo) two-sided baseline from the committed capture (dep-free, no model) + replay the pinned live capture
+    by cap-signature (if present) and assert the agent's two-sided counts still match the frozen baseline."""
+    path = ROOT / "tests" / "determination_proposer_quality_harness.py"
+    assert path.exists(), "missing tests/determination_proposer_quality_harness.py"
+    r = subprocess.run([sys.executable, str(path), "--check"], cwd=str(ROOT),
+                       capture_output=True, text=True, timeout=120)
+    assert r.returncode == 0, f"determination_proposer_quality_harness --check FAILED:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
 
 
 def test_determination_validation_harness() -> None:

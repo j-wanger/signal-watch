@@ -431,6 +431,13 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   `python3 scripts/serve_merge.py` → http://localhost:8040 (the agent proposes each call beside the human gate,
   measured against the committed oracle; `--backend stub` demos with no model). Offline `dist/merge` unaffected;
   doc: `docs/merge-live.md`.
+- Workbench §12 determination PRE-PROPOSER LIVE mode (Phase 85, the 6th live loop — optional, dev/authoring-time):
+  in the running workbench (`serve_workbench.py`, port 8030) the Determination beat carries a §12 pre-proposer
+  panel — pick the `openai` backend + "Ask the agent to propose" → the agent proposes file/clear/needs-more-info
+  from the evidence (the oracle firewall) beside the human gate. Measured TWO-SIDED vs the exogenous
+  `intended_disposition` oracle via `tests/determination_proposer_quality_harness.py` (the agent proposes per
+  cap-signature — 46 cover all 6935 cases). Stub default (no model) echoes the engine baseline. Doc:
+  `docs/determination-live.md`.
 - Drift guard before presenting: `python3 scripts/build.py --check all` (frozen dists byte-identical).
 - Test (dep-free, no install — except the DuckDB store selftests, which run under `.venv`):
   - `node tests/corpus-explorer.test.mjs` — the story landing + the 6-screen per-doc arc + the
@@ -466,6 +473,14 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
     no model) · `python3 scripts/serve_merge.py --selftest` (the served page + payload parity + the on-the-wire
     oracle firewall + stub/live/degrade). `merge-console.test.mjs` also asserts the offline strip (`dist/merge`
     carries no live code) + the live-branch (the overlay fires a firewall-clean `/adjudicate` request).
+    The Phase-85 §12 determination PRE-PROPOSER (the 6th live loop, companion): `python3
+    scripts/determination_proposer.py --selftest` (the oracle firewall [reused from the validation harness] +
+    the two-sided StubProposer engine baseline [agree 50 / over-flag 1320 / abstain 5565] + the 46-call
+    signature cache, dep-free) · `python3 tests/determination_proposer_quality_harness.py --check` (the live
+    agent capture replayed by signature + the stub baseline, no model; `--freeze` re-captures from a model).
+    The served `/propose-determination` route (stub default, the propose→gate→decide framing, the on-the-wire
+    oracle firewall) is asserted in `serve_workbench.py --selftest`; the workbench pre-proposer panel in
+    `workbench.test.mjs` (the proposal beside the unchanged human gate; XSS; the oracle never renders).
   - `node tests/news-stream.test.mjs` — the adverse-media arc + fuzzy matcher; both motion modes;
     the companion-served live overrides (watchlist screen/escalate/view/prune + the alias-aware
     matcher [exact-yes/fuzzy-no per class] + the SVG network [deterministic liveGraphLayout:
@@ -534,12 +549,15 @@ adjudicable fact pattern — the §12-right/§14-wrong-source boundary)] + the N
 `docs/blueprint-report.html` + the `dist/triage/` triage console [Phase 49 — §14's loop embryo made
 demo-able]).
 **Agentification track (forward roadmap, cross-cutting): `docs/agentification-roadmap.md`** — the
-propose→gate→decide sequencing for agentic loops. 5 live loops now (news/corpus extraction · GATHER
+propose→gate→decide sequencing for agentic loops. 6 live loops now (news/corpus extraction · GATHER
 tool-calling · DECIDE drafting · the **merge adjudicator** — Stage 1 BUILT Phase 83, scored vs this gate's
-correctness oracle, the measured-quality headline: agent 54 / spine 33 of 66). Next, in leverage order: a §12
-determination pre-proposer (the `determine_case` seam is built) → a real STR drafter (the Drafter Protocol
-exists) → a §14 triage second-rater. Contract = `program-blueprint.md` §2/§4/§6/§11; the gates + the human
-decision stay deterministic by design.
+correctness oracle: agent 54 / spine 33 of 66 · the **§12 determination pre-proposer** — Stage 2 BUILT Phase
+85, scored TWO-SIDED vs the exogenous `intended_disposition` oracle: the agent eliminates all 727 KYC
+structural over-flags + commits `file` on 74 oracle-file cases [engine 50] but over-files on the volume ML
+class [4482 vs engine 593] — it lacks the population base-rate prior the calibrated rule encodes, VINDICATING
+propose→gate→decide; companion-only, `evidence_requirements.py` byte-unchanged; `docs/determination-live.md`).
+Next, in leverage order: a real STR drafter (the Drafter Protocol exists) → a §14 triage second-rater. Contract
+= `program-blueprint.md` §2/§4/§6/§11; the gates + the human decision stay deterministic by design.
 Per-phase detail: git log + `.dev-wiki/` journal + HANDOFF.md §8.
 
 ## Definition of done

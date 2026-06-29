@@ -38,9 +38,9 @@ const SCRIPT = html.slice(open + '<script>'.length, close)
   + `toggleSignals,selectCase,pickBackend,applyMessage,runDecision,paintSurface,renderQueue,renderPop,loadQueue,backendLabel,`
   + `liveGate,liveFunnel,setGate,renderGate,loadGate,onKnob,resetGating,doAdjudicate,policyThresholds,`
   + `runGather,applyGather,gatherPanelHTML,gatherResultHTML,gatherGraphHTML,liveGraphLayout,toolLabel,kindLabel,`
-  + `runDetermine,determinePanelHTML,memoryPanelHTML,discoveryPanelHTML,sanctionsC17PanelHTML,`
-  + `setState:(s)=>{ if('META'in s)META=s.META; if('QUEUE'in s)QUEUE=s.QUEUE; if('FILTER'in s)FILTER=s.FILTER; if('SEL'in s)SEL=s.SEL; if('DETAIL'in s)DETAIL=s.DETAIL; if('SIGNALS'in s)SIGNALS=s.SIGNALS; if('RUN'in s)RUN=s.RUN; if('GATE'in s)setGate(s.GATE); if('POLICY'in s)POLICY=s.POLICY; if('ADJ'in s)ADJ=s.ADJ; if('GATHER'in s)GATHER=s.GATHER; if('DET'in s)DET=s.DET; },`
-  + `getState:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ,GATHER,DET})};`;
+  + `runDetermine,determinePanelHTML,proposerPanelHTML,runPropose,memoryPanelHTML,discoveryPanelHTML,sanctionsC17PanelHTML,`
+  + `setState:(s)=>{ if('META'in s)META=s.META; if('QUEUE'in s)QUEUE=s.QUEUE; if('FILTER'in s)FILTER=s.FILTER; if('SEL'in s)SEL=s.SEL; if('DETAIL'in s)DETAIL=s.DETAIL; if('SIGNALS'in s)SIGNALS=s.SIGNALS; if('RUN'in s)RUN=s.RUN; if('GATE'in s)setGate(s.GATE); if('POLICY'in s)POLICY=s.POLICY; if('ADJ'in s)ADJ=s.ADJ; if('GATHER'in s)GATHER=s.GATHER; if('DET'in s)DET=s.DET; if('PROP'in s)PROP=s.PROP; },`
+  + `getState:()=>({META,QUEUE,FILTER,SEL,DETAIL,SIGNALS,BACKEND,RUN,GATE,POLICY,ADJ,GATHER,DET,PROP})};`;
 
 /* ---------- DOM + fetch shim ---------- */
 function makeEl(id){
@@ -85,8 +85,11 @@ let GATE_RESPONSE = null, ADJ_RESPONSE = null;     // the gating-engine stubs (s
 let LAST_GATE_URL = null, LAST_ADJ_BODY = null;
 let GATHER_CHUNKS = [], LAST_GATHER_BODY = null;    // the gather-beat stream stub (Phase 65)
 let DETERMINE_RESPONSE = null, LAST_DETERMINE_BODY = null;   // the determination stub (Phase 69 T4)
+let PROPOSE_RESPONSE = null, LAST_PROPOSE_BODY = null;       // the §12 pre-proposer stub (Phase 85)
 function fetchShim(url, opts){
   const u = String(url);
+  if (u.includes('/propose-determination')){ try { LAST_PROPOSE_BODY = JSON.parse((opts&&opts.body)||'{}'); } catch(e){ LAST_PROPOSE_BODY = null; }
+    return Promise.resolve({ ok:true, json:()=>Promise.resolve(PROPOSE_RESPONSE||{error:'no propose stub'}) }); }
   if (u.includes('/determine')){ try { LAST_DETERMINE_BODY = JSON.parse((opts&&opts.body)||'{}'); } catch(e){ LAST_DETERMINE_BODY = null; }
     return Promise.resolve({ ok:true, json:()=>Promise.resolve(DETERMINE_RESPONSE||{error:'no determine stub'}) }); }
   if (u.includes('/gather')){ try { LAST_GATHER_BODY = JSON.parse((opts&&opts.body)||'{}'); } catch(e){ LAST_GATHER_BODY = null; }
@@ -103,7 +106,7 @@ function fetchShim(url, opts){
 }
 
 const WB_CFG = { cases:'/cases', case:'/case', gate:'/gate', adjudicate:'/adjudicate', run:'/run',
-  gather:'/gather', determine:'/determine',
+  gather:'/gather', determine:'/determine', propose:'/propose-determination',
   health:'/health', badge:'Illustrative data & outputs',
   policy:{ thresholds:{high:500, medium:50}, gate_of_level:{high:'auto-clear', medium:'review', low:'human-gate'} },
   drafter:{ default:'stub', available:['stub','claude','openai'],
@@ -621,6 +624,47 @@ ok(/Affirmative mitigation<\/span><b>established<\/b>/.test(dgc) && /reconciled 
    'Phase 82: the grounded affirmative mitigation renders (the P40 consume)');
 ok(/DOCUMENTED DISMISSAL · cleared/.test(dgc) && /source of funds is affirmatively explained/.test(dgc),
    'Phase 82: a grounded mitigation resolves a mechanism-only case to a documented dismissal (the §12 clear at scale)');
+
+/* ---------- Phase 85: the §12 PRE-PROPOSER panel (the 6th live loop) — propose -> gate -> decide ---------- */
+T.setState({ SEL:'CASE-P-MULE', DETAIL:MULE_DETAIL, DET:null, PROP:null, GATHER:null, RUN:null }); T.paintSurface();
+ok(/§12 pre-proposer · agentification Stage 2/.test(ELEMENTS.surf._html) && /id="propBtn"/.test(ELEMENTS.surf._html),
+   'Phase 85: the pre-proposer panel + its button render inside the determination beat');
+ok(/id="detBtn"/.test(ELEMENTS.surf._html),
+   'Phase 85: the human determination gate (Determine button) is unchanged — the agent proposes, the human decides');
+
+// a STUB proposal (engine echo) renders the call + rationale + the propose->gate->decide framing + the qualifier
+PROPOSE_RESPONSE = { badge:'Illustrative data & outputs', case_id:'CASE-P-MULE', crime_type:'money_laundering',
+  proposal:{ call:'needs_more_info', rationale:'mechanism present but the corroborating leg is short of the bar' },
+  backend:{ requested:null, effective:'stub', note:null },
+  qualifier:'measured over a synthetic substrate slice; production has no ground-truth disposition. Counts only — no rate, score, or multiplier is claimed.',
+  framing:'the agent PROPOSES; the deterministic engine LICENSES the determination (evidence_requirements, unchanged); the human DECIDES' };
+await T.runPropose();
+const pp = ELEMENTS.surf._html;
+ok(LAST_PROPOSE_BODY && LAST_PROPOSE_BODY.case === 'CASE-P-MULE',
+   'Phase 85: runPropose POSTs the selected case to /propose-determination');
+ok(/Agent proposes: <b>NEEDS MORE INFO<\/b>/.test(pp) && /the corroborating leg is short of the bar/.test(pp),
+   'Phase 85: the agent proposal renders the call + the rationale');
+ok(/proposed, not decided/.test(pp) && /the deterministic engine LICENSES the determination/.test(pp),
+   'Phase 85: the panel carries the propose->gate->decide framing (proposed, not decided)');
+ok(/deterministic stub — echoes the engine baseline/.test(pp),
+   'Phase 85: the stub backend is labelled (no model implied)');
+ok(/production has no ground-truth disposition/.test(pp),
+   'Phase 85: the synthetic-substrate qualifier renders on the proposal');
+
+// the oracle NEVER renders (the firewall); a live-agent proposal is labelled; a model-supplied rationale is esc()-escaped
+PROPOSE_RESPONSE = { badge:'Illustrative data & outputs', case_id:'CASE-P-MULE', crime_type:'money_laundering',
+  proposal:{ call:'file', rationale:'<img src=x onerror=alert(1)>' },
+  backend:{ requested:'openai', effective:'openai', note:null },
+  qualifier:'measured over a synthetic substrate slice; production has no ground-truth disposition. Counts only — no rate, score, or multiplier is claimed.',
+  framing:'the agent PROPOSES; the deterministic engine LICENSES the determination (evidence_requirements, unchanged); the human DECIDES' };
+await T.runPropose();
+const ppx = ELEMENTS.surf._html;
+ok(ppx.includes(escH('<img src=x onerror=alert(1)>')) && !/<img src=x onerror/.test(ppx),
+   'Phase 85: XSS — a model-supplied rationale is esc()-escaped in the proposal panel');
+ok(/live agent \(local model\)/.test(ppx),
+   'Phase 85: the live-agent backend is labelled when the model answers');
+ok(!/intended_disposition|oracle_disposition|oracle_basis/.test(ppx),
+   'Phase 85: the oracle firewall — no intended_disposition/oracle field ever renders on the proposal surface');
 
 /* ---------- Phase 72: the kyc/C14 consume — determination from C14 + the honest sign frontier ---------- */
 // a txn-less C14 party-leaf: the queue badge surfaces the casework no-transactions CONTRACT reason (the frontier)

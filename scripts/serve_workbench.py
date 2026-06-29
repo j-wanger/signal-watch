@@ -602,6 +602,35 @@ def determine_case(case_id: str, *, gathered=(), named_risk: str | None = None,
                            "gate is context only — seeing a combo more often is not a determination")}
 
 
+# ---- the §12 DETERMINATION PRE-PROPOSER (Phase 85, the 6th live loop) — an AGENT proposes the call ---------
+# propose -> gate -> decide. The agent PROPOSES file/cleared/needs-more-info from the case EVIDENCE ONLY
+# (caps + crime_type — the oracle firewall; a served slice case carries no disposition oracle anyway, the
+# measurement vs the exogenous oracle lives in the companion harness). The deterministic engine
+# (determine_case) still LICENSES the determination; the human still DECIDES. The proposal is a presentation
+# beside the gate — it never feeds the sufficiency engine (evidence_requirements is BYTE-UNCHANGED).
+def propose_determination(case_id: str, *, backend: str | None = None, env: dict | None = None) -> dict:
+    """Run the §12 determination proposer over one SERVED case and return its proposal — WITHOUT any oracle
+    field (the on-the-wire firewall). StubProposer (echo the engine's bundle-only verdict) by default; a
+    LiveProposer when the backend resolves to openai. Pure; persists nothing."""
+    import determination_proposer as dp            # lazy: the proposer path only; build.py imports neither
+    env = env if env is not None else os.environ
+    index = load_index()
+    entry = _case_entry(index, case_id)             # raises RunError on an unknown case
+    caps = sorted({c for c in _entry_caps(entry) if c})
+    ev = dp.proposer_input({"case_id": case_id, "caps": caps})   # {case_id, caps, crime_type} — the firewall view
+    dp.assert_no_oracle_leak([ev])                  # the firewall, before the proposal (a served case has no oracle)
+    be = resolve_gather_backend(backend, env)
+    proposer = (dp.LiveProposer(lambda m: call_openai(m, env))
+                if be.get("effective") == "openai" else dp.StubProposer())
+    res = proposer.propose(ev)
+    return {"badge": BADGE, "case_id": case_id, "crime_type": ev.get("crime_type"),
+            "proposal": {"call": res["call"], "rationale": res["rationale"]},
+            "backend": {"requested": be.get("requested"), "effective": be.get("effective"), "note": be.get("note")},
+            "qualifier": dp.PROPOSER_QUALIFIER,
+            "framing": ("the agent PROPOSES; the deterministic engine LICENSES the determination "
+                        "(evidence_requirements, unchanged); the human DECIDES")}
+
+
 # ---- the authored NORTH-STAR case file (Phase 73) — the rich matched pair, COMPUTED by the live engine
 # A SEPARATE source from the vendored population: two AUTHORED cases (data/casefile/case.json) whose verdict
 # is COMPUTED live by the same evidence_requirements engine. The engine inputs are DERIVED FROM THE EVIDENCE
@@ -1100,9 +1129,35 @@ class Handler(BaseHTTPRequestHandler):
             self._gather(); return
         if p == "/determine":
             self._determine(); return
+        if p == "/propose-determination":
+            self._propose_determination(); return
         if p == "/adjudicate":
             self._adjudicate(); return
         self._json(404, {"error": f"not found: {self.path}"})
+
+    def _propose_determination(self):
+        payload, err = self._read_json()
+        if err:
+            self._json(400, {"error": err}); return
+        case_id = (payload.get("case") or payload.get("case_id") or "").strip()
+        if not case_id:
+            self._json(400, {"error": "missing 'case' (the case_id to propose; GET /cases lists them)"}); return
+        backend = (payload.get("backend") or payload.get("drafter") or "").strip() or None
+        # single-flight: a live proposal is a model call — a second would split the model's throughput
+        lock = self.server.__dict__.setdefault("propose_lock", threading.Lock())
+        if not lock.acquire(blocking=False):
+            self._json(409, {"error": "another determination proposal is already running — wait for it to finish"})
+            return
+        try:
+            self._json(200, propose_determination(case_id, backend=backend))
+        except RunError as ex:
+            self._json(400, {"error": str(ex)})
+        except (OSError, ValueError, KeyError, json.JSONDecodeError) as ex:
+            # a LIVE-model transport hiccup (GatherError, sanitized class-name-only — no host/url, §4.5) or a
+            # malformed payload yields a CLEAN named error, not a dropped connection (mirrors `_gather`).
+            self._json(502, {"error": f"determination proposal failed: {ex}"})
+        finally:
+            lock.release()
 
     def _determine(self):
         payload, err = self._read_json()
@@ -1710,6 +1765,34 @@ def selftest() -> int:
     # an unknown case is a NAMED error, not a crash
     try:
         determine_case("CASE-DOES-NOT-EXIST"); failures.append("determine_case on an unknown case should raise")
+    except RunError:
+        pass
+
+    # Phase 85 — the §12 determination PRE-PROPOSER served route (the 6th live loop): the StubProposer (engine
+    # echo) proposes a call WITHOUT any oracle on the wire (the firewall), defaults to the stub (no model), and
+    # an unknown case is a NAMED error. The agent PROPOSES; determine_case still LICENSES; the human DECIDES.
+    import determination_proposer as _dp
+    _prop = propose_determination(mule_id)               # stub default (no backend) — dep-free, no model
+    if _prop.get("proposal", {}).get("call") not in _dp.VOCAB:
+        failures.append(f"propose_determination must return a call in {_dp.VOCAB}, got {_prop.get('proposal')}")
+    if not _prop.get("proposal", {}).get("rationale"):
+        failures.append("propose_determination must carry a rationale")
+    if _prop.get("backend", {}).get("effective") != "stub":
+        failures.append(f"propose_determination must default to the STUB (no model), got {_prop.get('backend')}")
+    if "engine LICENSES" not in _prop.get("framing", ""):
+        failures.append("propose_determination must carry the propose->gate->decide framing")
+    _pblob = json.dumps(_prop, ensure_ascii=False).lower()
+    for _leak in ("intended_disposition", "oracle_disposition", '"oracle"', "oracle_basis"):
+        if _leak in _pblob:
+            failures.append(f"propose_determination leaked an oracle field on the wire: {_leak}")
+    # the served stub path matches a DIRECT StubProposer over the same firewalled evidence (wiring correctness)
+    _ev = _dp.proposer_input({"case_id": mule_id,
+                              "caps": sorted({c for c in _entry_caps(_case_entry(load_index(), mule_id)) if c})})
+    if _prop["proposal"]["call"] != _dp.StubProposer().propose(_ev)["call"]:
+        failures.append("propose_determination's stub path must echo a direct StubProposer (the engine baseline)")
+    try:
+        propose_determination("CASE-DOES-NOT-EXIST")
+        failures.append("propose_determination on an unknown case should raise")
     except RunError:
         pass
 

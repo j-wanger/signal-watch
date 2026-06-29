@@ -1,0 +1,268 @@
+{
+  "note": "Phase 85 — the §12 determination-proposer regression gate. `stub_expected` is the deterministic StubProposer (engine echo) baseline over the committed determination-validation capture (dep-free, always checked). `live_signatures`/`live_expected`, when present, are ONE pinned live capture: the agent's proposal per cap-signature (46 cover all 6935 cases) replayed with NO model in --check. The oracle is the EXOGENOUS aml-substrate intended_disposition (synthetic slice; production has no ground truth). Counts only — no rate, score, or multiplier is claimed; the measurement is two-sided (by oracle class + crime_type), abstentions separate.",
+  "model": "local",
+  "stub_expected": {
+    "n_cases": 6935,
+    "agree": 50,
+    "disagree": 1320,
+    "abstain": 5565,
+    "committed": 1370,
+    "by_oracle": {
+      "clear": {
+        "agree": 0,
+        "disagree": 1320,
+        "abstain": 5494,
+        "n": 6814
+      },
+      "file": {
+        "agree": 50,
+        "disagree": 0,
+        "abstain": 71,
+        "n": 121
+      }
+    },
+    "by_crime_type": {
+      "money_laundering": {
+        "agree": 50,
+        "disagree": 593,
+        "abstain": 5565,
+        "n": 6208
+      },
+      "kyc_integrity": {
+        "agree": 0,
+        "disagree": 727,
+        "abstain": 0,
+        "n": 727
+      }
+    },
+    "calls": {
+      "file": 1370,
+      "needs_more_info": 5565
+    }
+  },
+  "live_signatures": {
+    "C14": {
+      "call": "needs_more_info",
+      "rationale": "The sole signal indicates a KYC integrity issue, but without evidence of a specific laundering mechanism or corroborating transactional anomalies, this single control gap is insufficient to distinguish between benign compliance gaps and suspicious activity."
+    },
+    "C14|C15": {
+      "call": "needs_more_info",
+      "rationale": "The fired signals indicate potential structural risks regarding customer identity and ownership but lack specific transactional evidence of a laundering mechanism or illicit fund flows to support a filing."
+    },
+    "C14|C15|C2": {
+      "call": "needs_more_info",
+      "rationale": "The presence of KYC gaps and shell-company indicators without specific transactional data demonstrating a rapid pass-through mechanism or corroborating evidence of illicit fund movement is insufficient to establish a laundering mechanism, as these signals often co-occur with benign corporate structures."
+    },
+    "C14|C15|C2|C3": {
+      "call": "needs_more_info",
+      "rationale": "The presence of KYC gaps and structural indicators (shell companies) without specific transactional evidence of a laundering mechanism or independent corroboration of illicit flow is insufficient to distinguish between a compliance failure and actual suspicious activity."
+    },
+    "C14|C15|C2|C3|C4": {
+      "call": "needs_more_info",
+      "rationale": "The provided signals describe detection categories and potential risk indicators (KYC gaps, shell company analysis, pass-through flows) but lack specific factual evidence of a laundering mechanism or independent corroboration required to distinguish suspicious activity from legitimate business operations."
+    },
+    "C14|C15|C2|C3|C5": {
+      "call": "needs_more_info",
+      "rationale": "While the signals indicate a high-risk profile involving potential shell companies and rapid pass-through transactions, the absence of specific transactional details (such as amounts, counterparties, or geographic links) prevents confirming that these patterns constitute a corroborated laundering mechanism rather than benign business activity."
+    },
+    "C14|C15|C2|C3|C8": {
+      "call": "needs_more_info",
+      "rationale": "While the signals indicate a high-risk profile involving potential shell entities and inconsistent income, the absence of specific transactional details (such as amounts, counterparties, or geographic links) prevents confirming a corroborated laundering mechanism distinct from legitimate business complexity."
+    },
+    "C14|C15|C2|C4": {
+      "call": "needs_more_info",
+      "rationale": "The provided signals describe detection capabilities and crime types rather than specific transactional facts or corroborating evidence of a laundering mechanism, making it impossible to determine if the activity is suspicious or benign."
+    },
+    "C14|C15|C2|C4|C5|C8": {
+      "call": "needs_more_info",
+      "rationale": "While multiple high-risk signals are present, they lack specific transactional details or independent corroboration of a laundering mechanism, and the case could equally represent a legitimate but complex business structure requiring further investigation."
+    },
+    "C14|C15|C2|C4|C8": {
+      "call": "needs_more_info",
+      "rationale": "While the signals indicate high-risk indicators such as structuring and shell company analysis, they lack specific transactional details (e.g., amounts, counterparties, or actual flow-through evidence) to confirm a laundering mechanism rather than benign structural or compliance gaps."
+    },
+    "C14|C15|C3": {
+      "call": "needs_more_info",
+      "rationale": "The provided signals identify structural risks (KYC gaps, shell company potential, and network complexity) but lack specific transactional evidence of a laundering mechanism or illicit fund flows to distinguish this from legitimate business activity."
+    },
+    "C14|C15|C3|C8": {
+      "call": "needs_more_info",
+      "rationale": "The fired signals indicate structural red flags (KYC gaps, shell company risks, network complexity, and income inconsistencies) but lack specific transactional evidence or independent corroboration of a laundering mechanism to distinguish this from ordinary business anomalies."
+    },
+    "C14|C2": {
+      "call": "needs_more_info",
+      "rationale": "While the rapid pass-through pattern suggests a potential laundering mechanism, the KYC integrity signal alone does not corroborate illicit intent without evidence of actual deception or non-cooperation, and this combination is insufficient to definitively rule out legitimate business activity."
+    },
+    "C14|C2|C3": {
+      "call": "needs_more_info",
+      "rationale": "While the signals indicate a high-risk structure (pass-through and network activity) combined with KYC issues, the absence of specific transactional details or corroborating evidence of illicit intent prevents distinguishing this from legitimate complex business operations or false positives."
+    },
+    "C14|C2|C3|C5": {
+      "call": "file",
+      "rationale": "The simultaneous presence of rapid pass-through flows, a multi-originator funnel network, and cash-intensity anomalies provides corroborating evidence of a specific money-laundering mechanism that is inconsistent with ordinary legitimate business activity."
+    },
+    "C14|C2|C3|C5|C8": {
+      "call": "needs_more_info",
+      "rationale": "While the signals indicate a high-risk profile with potential laundering mechanisms (pass-through, funneling, cash intensity) and KYC gaps, the absence of specific transactional details or corroborating evidence linking these anomalies to illicit intent prevents a definitive filing decision over benign explanations."
+    },
+    "C14|C2|C3|C8": {
+      "call": "needs_more_info",
+      "rationale": "While the signals indicate a high-risk profile involving KYC gaps and structural laundering patterns (pass-through, funnel-in), the absence of specific transactional details or corroborating evidence linking these structural anomalies to illicit funds prevents affirmatively establishing a laundering mechanism over legitimate business explanations."
+    },
+    "C14|C2|C4": {
+      "call": "needs_more_info",
+      "rationale": "While the signals suggest potential structuring and pass-through activity, the absence of corroborating transactional details (such as specific amounts, counterparties, or velocity metrics) prevents confirming a laundering mechanism distinct from legitimate business behavior."
+    },
+    "C14|C2|C4|C5": {
+      "call": "file",
+      "rationale": "The simultaneous occurrence of rapid pass-through transactions, structuring to evade reporting thresholds, and cash-intensity anomalies provides corroborating evidence of a specific money-laundering mechanism that is inconsistent with ordinary legitimate business activity."
+    },
+    "C14|C2|C8": {
+      "call": "needs_more_info",
+      "rationale": "While the signals indicate a potential laundering mechanism (rapid pass-through) and risk factors (KYC gaps, profile inconsistency), the absence of specific transactional details or corroborating evidence prevents confirming that these are inconsistent with legitimate activity rather than benign anomalies."
+    },
+    "C14|C3": {
+      "call": "needs_more_info",
+      "rationale": "The presence of a KYC gap (C14) without an identified laundering mechanism and the structural signal of network complexity (C3) are common in legitimate business but insufficient to prove money laundering without evidence of illicit fund flows or intent."
+    },
+    "C14|C3|C5": {
+      "call": "needs_more_info",
+      "rationale": "The presence of a KYC gap (C14) without an established laundering mechanism does not constitute a filing basis, and while C3 and C5 suggest potential structuring or layering, the evidence is insufficient to confirm that these signals represent illicit activity rather than benign business behavior without further corroboration."
+    },
+    "C14|C3|C5|C8": {
+      "call": "needs_more_info",
+      "rationale": "While the case presents a high-risk profile with multiple co-occurring red flags (KYC gaps, network anomalies, cash intensity, and income inconsistency), these signals are common in legitimate business complexities and lack specific corroborating evidence of a distinct laundering mechanism or illicit fund flow to definitively distinguish them from benign activity."
+    },
+    "C14|C3|C8": {
+      "call": "needs_more_info",
+      "rationale": "The presence of a KYC gap (C14) without an established laundering mechanism does not constitute a filing basis, and while network activity (C3) and profile inconsistency (C8) are present, they lack the specific corroborating evidence required to distinguish suspicious behavior from legitimate business anomalies."
+    },
+    "C14|C8": {
+      "call": "needs_more_info",
+      "rationale": "The presence of a KYC gap and income inconsistency alone does not establish a laundering mechanism or corroborating evidence, as these signals are common among legitimate customers and insufficient to prove suspicious activity without further context."
+    },
+    "C15|C2|C3|C4|C5|C8": {
+      "call": "file",
+      "rationale": "The simultaneous presence of a complex shell-network structure (C15), rapid pass-through flows (C2), multi-originator funneling (C3), structuring (C4), cash intensity (C5), and income-activity inconsistency (C8) provides corroborated, independent evidence of a sophisticated money-laundering mechanism that is inconsistent with legitimate business activity."
+    },
+    "C15|C2|C3|C4|C8": {
+      "call": "file",
+      "rationale": "The simultaneous presence of a shell company structure (C15), rapid pass-through flows (C2), complex network funneling (C3), structuring to evade reporting (C4), and income-profile inconsistency (C8) provides corroborated, multi-leg evidence of a specific money-laundering mechanism that is inconsistent with legitimate business activity."
+    },
+    "C15|C2|C3|C5|C8": {
+      "call": "file",
+      "rationale": "The simultaneous presence of a shell company structure, rapid pass-through transactions, cash-intensity anomalies, and income-profile inconsistencies provides corroborated evidence of a specific money-laundering mechanism that is inconsistent with legitimate business activity."
+    },
+    "C15|C2|C3|C8": {
+      "call": "file",
+      "rationale": "The simultaneous presence of a shell company structure (C15), rapid pass-through transactions (C2), complex network funneling (C3), and income-activity inconsistency (C8) establishes a corroborated laundering mechanism that is inconsistent with legitimate business activity."
+    },
+    "C15|C2|C4|C5|C8": {
+      "call": "file",
+      "rationale": "The simultaneous presence of a shell company structure, rapid pass-through flows, structuring to evade reporting, high cash intensity, and income-activity mismatch provides independent corroboration of a complex laundering mechanism that is inconsistent with legitimate business activity."
+    },
+    "C15|C2|C4|C8": {
+      "call": "file",
+      "rationale": "The simultaneous presence of a shell company structure, rapid pass-through transactions, structuring to evade reporting, and income-activity mismatches constitutes a corroborated laundering mechanism that is inconsistent with legitimate business activity."
+    },
+    "C15|C2|C5|C8": {
+      "call": "file",
+      "rationale": "The simultaneous presence of a shell company structure, rapid pass-through transactions, cash-intensity anomalies, and income-activity inconsistencies provides corroborated evidence of a specific money-laundering mechanism that is inconsistent with legitimate business activity."
+    },
+    "C15|C2|C8": {
+      "call": "file",
+      "rationale": "The simultaneous presence of a shell company structure (C15), rapid pass-through transactions (C2), and income-activity inconsistency (C8) constitutes a corroborated laundering mechanism that is inconsistent with legitimate business operations."
+    },
+    "C15|C3|C8": {
+      "call": "file",
+      "rationale": "The combination of a shell/nominee network structure, multi-originator funneling activity, and income-activity inconsistency provides corroborating evidence of a specific money-laundering mechanism that is inconsistent with legitimate business operations."
+    },
+    "C15|C8": {
+      "call": "needs_more_info",
+      "rationale": "The presence of a shell company and income inconsistency suggests potential risk but lacks specific transactional evidence of a laundering mechanism or independent corroboration to distinguish this from benign structural arrangements or reporting errors."
+    },
+    "C2|C3|C4|C8": {
+      "call": "file",
+      "rationale": "The simultaneous presence of rapid pass-through flows, a multi-originator funnel network, structuring to evade reporting thresholds, and an income-activity profile inconsistency provides corroborated evidence of a specific money-laundering mechanism that is inconsistent with legitimate business activity."
+    },
+    "C2|C3|C5|C8": {
+      "call": "file",
+      "rationale": "The simultaneous presence of rapid pass-through flows, a multi-originator funnel network, cash-intensity anomalies, and income-activity inconsistencies provides independent corroboration of a structured money-laundering mechanism that is inconsistent with legitimate business activity."
+    },
+    "C2|C3|C8": {
+      "call": "file",
+      "rationale": "The combination of rapid pass-through activity, a complex multi-originator funnel structure, and significant income-activity inconsistencies provides corroborated evidence of a specific money-laundering mechanism that is inconsistent with legitimate business behavior."
+    },
+    "C2|C4|C5|C8": {
+      "call": "file",
+      "rationale": "The simultaneous occurrence of rapid pass-through, structuring, cash-intensity anomalies, and income-profile inconsistency provides corroborated evidence of a specific money-laundering mechanism (placement and layering) that is inconsistent with legitimate business activity."
+    },
+    "C2|C4|C8": {
+      "call": "file",
+      "rationale": "The simultaneous occurrence of rapid pass-through transactions, structuring to evade reporting thresholds, and a profile-activity inconsistency provides corroborating evidence of a specific money-laundering mechanism that is inconsistent with ordinary legitimate business activity."
+    },
+    "C2|C5|C8": {
+      "call": "needs_more_info",
+      "rationale": "While the signals suggest a potential laundering mechanism (rapid pass-through) inconsistent with the customer's profile and involving cash, the absence of corroborating details regarding the source of funds or specific transaction counterparts prevents confirming that these patterns are inconsistent with legitimate business activity rather than benign anomalies."
+    },
+    "C2|C8": {
+      "call": "needs_more_info",
+      "rationale": "While the signals indicate a potential laundering mechanism (rapid pass-through) and inconsistency, they lack corroborating independent legs such as source-of-funds verification or specific transaction counterparties to rule out legitimate business explanations."
+    },
+    "C3|C5|C8": {
+      "call": "file",
+      "rationale": "The simultaneous presence of a complex multi-originator network structure, cash-intensity anomalies, and income-activity inconsistencies provides corroborating evidence of a specific money-laundering mechanism that is inconsistent with ordinary legitimate business activity."
+    },
+    "C3|C8": {
+      "call": "needs_more_info",
+      "rationale": "While the signals indicate a complex network structure and income inconsistency, these are common in legitimate business operations and lack specific corroborating evidence of illicit fund movement or intent to conceal, making them insufficient for a definitive filing without further investigation."
+    },
+    "C5|C8": {
+      "call": "needs_more_info",
+      "rationale": "The presence of cash-intensity and income-profile inconsistencies indicates elevated risk but lacks specific evidence of a laundering mechanism or corroborating transactional patterns required to distinguish legitimate business anomalies from illicit activity."
+    },
+    "C8": {
+      "call": "needs_more_info",
+      "rationale": "A single signal indicating an income-versus-activity inconsistency lacks corroborating evidence of a specific laundering mechanism or illicit fund movement, making it equally consistent with benign reporting errors or legitimate but unusual business activities."
+    }
+  },
+  "live_expected": {
+    "n_cases": 6935,
+    "agree": 74,
+    "disagree": 4482,
+    "abstain": 2379,
+    "committed": 4556,
+    "by_oracle": {
+      "clear": {
+        "agree": 0,
+        "disagree": 4482,
+        "abstain": 2332,
+        "n": 6814
+      },
+      "file": {
+        "agree": 74,
+        "disagree": 0,
+        "abstain": 47,
+        "n": 121
+      }
+    },
+    "by_crime_type": {
+      "money_laundering": {
+        "agree": 74,
+        "disagree": 4482,
+        "abstain": 1652,
+        "n": 6208
+      },
+      "kyc_integrity": {
+        "agree": 0,
+        "disagree": 0,
+        "abstain": 727,
+        "n": 727
+      }
+    },
+    "calls": {
+      "file": 4556,
+      "needs_more_info": 2379
+    }
+  }
+}

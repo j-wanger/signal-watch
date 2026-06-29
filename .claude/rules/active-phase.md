@@ -25,6 +25,6 @@ Any unsanctioned dist drift (any of the 9 not byte-identical) / an `evidence_req
 ## Gates
 - [x] spec (`## Formal Spec` IN the phase article [[phases/phase-84-workbench-rich-case-render-at-scale]] — standard ceremony, no separate /spec round; the contract is fully determined)
 - [x] Direction confirmed by user (2026-06-29, AskUserQuestion two rounds — 4 surfaced assumptions taken as accept-all positions: scope = render-parity, decisiveness = re-sharpen-the-brief; all_accept tracked, NOT silent; ledger Phase-84)
-- [ ] Delivery accepted
+- [x] Delivery accepted (2026-06-29 — delivery report accepted; impl + debrief committed `a3e669a`, pushed to main; all 9 dists byte-frozen, workbench tests 184→195, `evidence_requirements.py` unchanged)
 
 Decisions [[decisions/phase-84-render-drop-not-emit-gap]] · [[decisions/phase-84-adapter-gated-by-probe]] · [[decisions/phase-84-decisiveness-substrate-gated]] · [[decisions/phase-84-names-honest-without-implied-ER]]; plan [[phases/phase-84-workbench-rich-case-render-at-scale]]; ledger Phase-84.

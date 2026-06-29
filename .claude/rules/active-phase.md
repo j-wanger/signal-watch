@@ -14,6 +14,6 @@ substrate Ask #3 (a second corroborating leg, the dominant ML §12 file-loop blo
 ## Gates
 - [x] spec (`specs/phase-82-consume-sibling-northstar-evidence-at-scale.md`)
 - [x] Direction confirmed by user (2026-06-29, AskUserQuestion — scope "Both clusters (full batch)" · §12 "measure-first-with-fallback, rule frozen" · merge "measure two-sidedness on our own path, one-sided → abort" · casework "re-vendor + funnel re-measure"; all_accept, NOT silent; ledger Phase-82)
-- [ ] Delivery accepted
+- [x] Delivery accepted (post-implementation report 2026-06-29; adversarial review 4-dim → 32 praise / 0 must-fix-remaining [the 1 must-fix RESOLVED: CASE-P-0025128 is casework's narrative-seam frontier, not a regression]; impl commit efa7abd; committed + pushed to main)
 
 Decisions [[decisions/phase-82-grounded-evidence-consume-path]] · [[decisions/phase-82-merge-org-abort-no-resolution-handle]] · [[decisions/phase-82-kyc-signs-honest-relaxation]]; plan [[phases/phase-82-consume-sibling-northstar-evidence-at-scale]]; ledger Phase-82.

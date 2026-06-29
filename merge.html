@@ -604,6 +604,64 @@ document.addEventListener('keydown',e=>{
   }
 });
 
+  /*LIVE_START*/
+  /* Phase 83 — the merge-adjudicator LIVE overlay (companion-served ONLY; build.py strips this whole region
+     so dist/merge stays byte-identical and makes zero model/fetch call). When serve_merge.py injects
+     DATA.live, an agent PROPOSES a call beside the human gate (display-only — the human still decides), and
+     post-disposition shows the agent vs the latent oracle + a counts-only session tally. The agent never
+     receives the oracle (the server strips to the evidence surface); these panels render only what the
+     /adjudicate response carries: {call, rationale, backend}. */
+  if(DATA.live){(function(){
+    var LIVE=DATA.live, proposals={};
+    document.head.insertAdjacentHTML('beforeend','<style>'+
+      '.livepanel{margin-top:18px;border:1px solid var(--line);border-left:3px solid var(--signal);'+
+      'border-radius:8px;padding:14px 16px;background:rgba(246,166,35,.045)}'+
+      '.lphead{font:600 11px/1.4 var(--mono);letter-spacing:.07em;text-transform:uppercase;'+
+      'color:var(--signal);display:flex;justify-content:space-between;gap:10px;align-items:baseline}'+
+      '.lptag{font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0}'+
+      '.lpbody{margin-top:9px;font-size:14px;color:var(--ink)}'+
+      '.lpcall{font-weight:700}.lprat{margin-top:4px;color:var(--faint)}'+
+      '.lpnote{margin-top:6px;font-size:12px;color:var(--faint)}.lpmatch{margin-top:7px;font-weight:600}'+
+      '</style>');
+    function gLabel(id){var g=GRADES.find(function(x){return x.id===id;});return g?g.label:id;}
+    function panel(head,bodyHtml){var s=stage.querySelector('.scene');if(!s)return null;
+      var d=document.createElement('div');d.className='livepanel';
+      d.innerHTML='<div class="lphead">'+esc(head)+' <span class="lptag">live · '+esc(LIVE.backend)+'</span></div>'+
+        '<div class="lpbody" id="lpbody">'+bodyHtml+'</div>';s.appendChild(d);return d;}
+    function adjudPanel(){var c=curCase();if(!c)return;
+      panel('Agent proposal — you decide','consulting the agent…');
+      var cached=proposals[c.id];if(cached){paint(cached);return;}
+      fetch(LIVE.adjudicate,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({case_id:c.id,backend:LIVE.backend})})
+        .then(function(r){return r.json();}).then(function(p){
+          if(p.error){fail(p.error);return;}proposals[c.id]=p;
+          var cc=curCase();if(cc&&cc.id===c.id&&view==='case'&&screen===1)paint(p);})
+        .catch(function(e){fail(String(e));});
+      function paint(p){var b=document.getElementById('lpbody');if(!b)return;
+        b.innerHTML='<div class="lpcall">'+esc(gLabel(p.call))+'</div><div class="lprat">'+esc(p.rationale)+'</div>'+
+          (p.backend&&p.backend.note?'<div class="lpnote">'+esc(p.backend.note)+'</div>':'');}
+      function fail(m){var b=document.getElementById('lpbody');if(b)b.innerHTML='<div class="lpnote">agent unavailable — '+esc(m)+'</div>';}}
+    function verdictPanel(){var c=curCase();if(!c)return;var p=proposals[c.id];if(!p||!c.oracle)return;
+      var def=(p.call==='both_defensible'||p.call==='escalate');
+      var tag=def?'the agent deferred — the oracle records one truth'
+        :(p.call===c.oracle.correct_adjudication?'✓ the agent matched the latent truth':'✗ the agent differs from the latent truth');
+      panel('Agent vs the latent truth',
+        '<div class="lpcall">'+esc(gLabel(p.call))+'</div><div class="lprat">'+esc(p.rationale)+'</div><div class="lpmatch">'+esc(tag)+'</div>');}
+    function ledgerPanel(){var ids=Object.keys(proposals);if(!ids.length)return;
+      var agree=0,dis=0,def=0;ids.forEach(function(id){var c=CASES.find(function(x){return x.id===id;});if(!c||!c.oracle)return;
+        var call=proposals[id].call;if(call==='both_defensible'||call==='escalate')def++;
+        else if(call===c.oracle.correct_adjudication)agree++;else dis++;});
+      panel('Agent agreement · this session',
+        '<b>'+agree+'</b> of the agent’s calls matched the latent oracle across <b>'+ids.length+'</b> consulted ('+
+        dis+' differed, '+def+' deferred) — counts only, on a synthetic slice; production has no ground truth.');}
+    var _orig=render;
+    render=function(){_orig();try{
+      if(view==='case'&&screen===1)adjudPanel();
+      else if(view==='case'&&screen===2)verdictPanel();
+      else if(view==='ledger')ledgerPanel();
+    }catch(e){console.error('merge live overlay',e);}};
+  })();}
+  /*LIVE_END*/
 render();
 </script>
 </body>

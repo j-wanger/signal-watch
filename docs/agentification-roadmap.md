@@ -19,10 +19,10 @@ the gate byte-for-byte over the cited source and confirm nothing on screen is un
 license a filing is a deterministic, public-guidance-authored predicate, never a learned-from-labels judge.
 The roadmap below extends the pattern; it never relaxes it.
 
-## Built today — the pattern proven in 4 live loops (the proof it works)
+## Built today — the pattern proven in 5 live loops (the proof it works)
 
-All four share ONE transport (a local OpenAI-compatible model at `127.0.0.1:8080/v1`), so **a single local
-model lights up all four live demos at once** (no per-loop wiring). The offline ship artifacts make ZERO
+All five share ONE transport (a local OpenAI-compatible model at `127.0.0.1:8080/v1`), so **a single local
+model lights up every live demo at once** (no per-loop wiring). The offline ship artifacts make ZERO
 model/fetch call (the live code is build-stripped, §4.5) — the agentic work is companion-served only.
 
 | Loop | The agent's job | The deterministic gate | Demoable today |
@@ -31,6 +31,7 @@ model/fetch call (the live code is build-stripped, §4.5) — the agentic work i
 | **Corpus derivation** (`serve_corpus.py:208`, `derive_signals.py:364`) | propose {section, verbatim flag, red-flag, C/D codes} per indicator | the FROZEN `check_record` gate disposes + **one** violation-guided re-prompt, then drops honestly — the most rigorously gated loop | needs a live model on :8080 |
 | **GATHER** (`osint_tools.py:463`, `LivePlanner:405`, `gate_finding:230`) | agentic **tool-calling** over a synthetic OSINT corpus — chains multi-hop, seeks the unmet determination atoms | each finding grounded-or-dropped against the exact records that tool returned | **YES, offline** — `StubPlanner` is the deterministic default + the coverage reference; the live path is the under-test variant |
 | **DECIDE drafting** (`serve_workbench.py:388`, the `serve_chain` Drafter Protocol) | draft the STR narrative (claude / openai / opencode drafters) | casework's six grounding verifiers refuse to sign what they can't reproduce | **YES, offline** — deterministic stub drafter; live drafters wired via creds/endpoint |
+| **Merge adjudication** (Phase 83 — `serve_merge.py`, `merge_adjudicator.py`, `tests/merge_adjudicator_quality_harness.py`) | propose each merge call (uphold / reject / both-defensible / escalate) + a rationale from the evidence ONLY (the oracle firewall) | scored against the committed non-circular oracle — the ONE gate with a correctness oracle; the `StubAdjudicator` (echo the spine) is the deterministic baseline | **YES, offline** — the stub baseline is dep-free + always checkable; the live agent is the under-test variant on :8080 |
 
 ## The roadmap — the next agentic loops (sequenced by leverage × dependency)
 
@@ -38,14 +39,19 @@ The striking finding: **the seams and the gates already exist** — these are mo
 existing seam, measure its quality against an existing gate*, not new infrastructure. Each stays under the
 propose→gate→decide discipline.
 
-### Stage 1 — the MEASURABLE agent: a merge adjudicator scored against the oracle  *(highest leverage)*
-**The standout agentic-evaluation story.** The merge console is the ONE gate with a **non-circular `GT-<hash>`
-correctness oracle** (`resolution_scorer.py`, the resolver-input firewall enforced at the schema boundary). So
-an agent can propose each merge call (uphold / reject / both-defensible / escalate) and its judgment can be
-**measured against ground truth** — the most credible "how good is the agent, *really*?" claim in the whole
-system (a measured agreement count, framed as counts only — no rate, score, or multiplier). Dependency: a live model + a thin
-agent-proposer harness over the built scorer. The human still adjudicates; the agent's call is a measured
-proposal beside the latent truth.
+### Stage 1 — the MEASURABLE agent: a merge adjudicator scored against the oracle  ✅ **BUILT (Phase 83)**
+**The standout agentic-evaluation story — now live.** The merge console is the ONE gate with a **non-circular
+`GT-<hash>` correctness oracle** (`resolution_scorer.py`, the resolver-input firewall enforced at the schema
+boundary). The agent proposes each merge call (uphold / reject / both-defensible / escalate) from the evidence
+ONLY (the oracle firewall — `merge_adjudicator.adjudicator_input` + `assert_no_oracle_leak`), and its judgment
+is **measured against the latent truth** — the most credible "how good is the agent, *really*?" claim in the
+system. **Measured (counts only, synthetic + synthetic-aml-substrate-slice oracles; no rate, score, or
+multiplier):** over the 66 committed scored cases the agent matched the oracle on **54**, vs **33** for the
+deterministic `StubAdjudicator` (echo the spine) — it recovered **21 of the 33 cases the deterministic
+resolver got wrong** (18 of 30 fragmentation-gaps + all 3 over-merge-traps). Surfaced as the **5th companion
+live loop** (`serve_merge.py` + a build-stripped overlay in `merge.html`; all 9 ship dists byte-frozen) and
+pinned as a regression gate (`tests/merge_adjudicator_quality_harness.py`). The human still adjudicates; the
+agent's call is a measured proposal beside the latent truth. Full walkthrough: `docs/merge-live.md`.
 
 ### Stage 2 — the HIGH-VALUE agent: a §12 determination pre-proposer  *(high leverage, light dependency)*
 An agent reads the assembled §12 bundle (the grounded predicate + mitigation + legs we wired at scale this
@@ -90,10 +96,11 @@ These are the load-bearing reason the agentic layer is defensible; agentificatio
 
 ## Status & sequencing
 
-- **Built:** the 4 live loops (proof of the pattern). **Next, in leverage order:** Stage 1 (merge — the
-  measured-quality headline) → Stage 2 (determination pre-proposer — the high-value decision support) →
-  Stage 3 (STR drafter — near-zero code) → Stage 4 (triage second-rater). Each is independently shippable +
-  companion-only; none touches a ship dist or a frozen gate.
+- **Built:** the 4 original live loops + **Stage 1 (the merge adjudicator — the measured-quality headline,
+  Phase 83)** = 5 live loops. **Next, in leverage order:** Stage 2 (determination pre-proposer — the
+  high-value decision support; the `determine_case` seam is built) → Stage 3 (STR drafter — near-zero code) →
+  Stage 4 (triage second-rater). Each is independently shippable + companion-only; none touches a ship dist or
+  a frozen gate.
 - **Contract:** `program-blueprint.md` §2/§4/§6/§11 (the design); this doc is the build sequencing over it.
   Cross-pillar note: signal-watch RUNS the agents; substrate + casework are the deterministic producers/verifiers.
 - **The honest frame:** agentification here is mostly *wiring live models to seams that already exist, under

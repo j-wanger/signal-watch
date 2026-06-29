@@ -1,19 +1,29 @@
 # Active Phase Context
 
-**Phase 82 — *Consume sibling emissions: north-star evidence AT SCALE* — substrate P39 predicate + P40 mitigation §12 loops + merge org-collision class (P38) + casework P20 signing re-vendor** (signal-watch-local, STANDARD) — IMPLEMENTED 2026-06-29 → READY FOR COMPLETION (delivery gate pending the commit). substrate re-pinned f7fbdb0→**294d3e5**; casework re-vendored 076fb8e→**04cc335**. All 8 tasks done.
+**Phase 83 — *Agentification Stage 1: the merge adjudicator agent, oracle-scored* (the 5th companion live loop)** (signal-watch-local, STANDARD, agentic) — PLANNED 2026-06-29 → READY FOR IMPLEMENTATION (begin at T1). Siblings stalled at the Phase-82 pins (substrate `294d3e5` / casework `04cc335`, code-verified LIVE) — no consume; the agentification roadmap is the forward path.
 
-## Outcome
-The §12 loop closes from GROUNDED bundle evidence AT SCALE: `serve_workbench.determine_case` (`_bundle_evidence`) READS the P39 predicate + P40 mitigation from each bundle as DATA — NOT a rule edit (the engine already exposes the params at `evidence_requirements.py` line 310-312, BYTE-UNCHANGED, A1) → the 376-case slice resolves **1 KYC-integrity determination** (31 over the full 23,651-customer population) + **17 ML affirmative `cleared`**, was 0/0; the human still adjudicates, the evidence is grounded-not-typed. **Two of four deltas were honest non-results, each measure-first gate doing its job:** the merge-org class ABORTED a 3rd time (P38 built the org fork but the fragments share NO resolution handle with their base → one-sided → `dist/merge` BYTE-FROZEN, brief sharpened); casework re-vendor 04cc335 (coverage 128→256) surfaced one honest C14 narrative-seam fail-close (kyc-sign 2→1, "≥1 must sign" preserved, NOT a code regression). The ML FILE loop stays blocked on substrate Ask #3 (a second corroborating leg as a fired signal — the next frontier).
+## Objective
+Build the agentification roadmap's Stage 1 — the FIRST measurable agent: a companion-only merge adjudicator (StubAdjudicator + LiveAdjudicator) that PROPOSES one of {uphold_merge, reject_as_shares, both_defensible, escalate} + a rationale per merge case, MEASURED against the committed non-circular `GT-<hash>` oracle in `data/merge/cases.json` (the ONE gate with a correctness oracle). Surface it as the 5th companion LIVE loop (`serve_merge.py` + a build-stripped `/*LIVE_*/` overlay in `merge.html`); run it live once, pin the capture, record the agreement counts. The deliverable is the MEASUREMENT; the agent is deliberately thin; the human still adjudicates (propose→gate→decide).
 
-## Verification (held)
-`evidence_requirements.py` BYTE-UNCHANGED (`git diff --quiet`, A1); `--check all` 9/9 (8 non-merge byte-frozen + `dist/merge` UNTOUCHED); build.py imports no spine/scorer/sibling/curate/casework (firewall clean); `data/merge/cases.json` + `dist/merge/**` UNTOUCHED; `tests/workbench.test.mjs` 178→184; `uv run pytest` 27; honesty governor swept (incl. docs).
+## Scope (file globs)
+`scripts/merge_adjudicator.py` · `tests/merge_adjudicator_quality_harness.py` · `tests/test_selftests.py` · `scripts/serve_merge.py` · `merge.html` · `scripts/build.py` (merge-target strip) · `tests/merge-console.test.mjs` · `tests/fixtures/merge-adjudicator/**` · `docs/merge-live.md` · `docs/agentification-roadmap.md` · `CLAUDE.md` · `HANDOFF.md`
 
-## Open frontier (sibling-rooted)
-substrate Ask #3 (a second corroborating leg, the dominant ML §12 file-loop blocker) · Ask #4 (multi-hop ownership_edges + flagged/excluded resolution edges) · the org-fragment RESOLUTION HANDLE (un-aborts merge-org two-sided) · a C20 high-risk-jurisdiction determination leg (control for txn-volume) · the casework C17-sign + txn-bearing-C14 narrative-seam gaps. Durability candidate (sibling-independent): a CLAUDE.md hygiene trim (513 → ≤~200, like the Phase-44 T6 trim).
+## Key constraints
+- §4.5 / dist boundary: ALL 9 ship dists BYTE-FROZEN; the LIVE overlay build-stripped → `dist/merge` byte-identical (`--check merge`); the offline file makes NO model call.
+- The oracle firewall: the agent provably NEVER sees the `oracle` (`adjudicator_input()` strip + `assert_no_oracle_leak()`); `/adjudicate` carries no oracle pre-disposition.
+- build.py imports NO merge_adjudicator/serve_merge/scorer/spine/curate/casework (grep guard); `evidence_requirements.py` UNTOUCHED (this is merge, not §12).
+- Honesty: counts-only; the synthetic-substrate qualifier on every number; the word-ban (no catch-rate/lift/precision/recall) extends to the LIVE markers + the docs.
+- Execute-once: NO model on :8080 → ship the StubAdjudicator baseline (33/66) + flag the live capture a named follow-on; NEVER fabricate a live agent number.
+
+## Exit criteria
+`merge_adjudicator.py --selftest` 0 (firewall + 33-right/33-wrong + counts-by-quadrant + deferrals + qualifier, no banned words); `merge_adjudicator_quality_harness.py --check` 0 + in `uv run pytest`; `serve_merge.py --selftest` 0; `--check merge` byte-identical + `--check all` 9/9; `merge-console.test.mjs` green (existing + live-branch + offline-strip); the agreement counts recorded (stub unconditionally; live pinned OR pending-with-note); docs + CLAUDE.md trued in place; honesty swept.
+
+## Abort rule
+Any unsanctioned dist drift (esp. `dist/merge` not byte-identical after strip) / a build.py companion import / an oracle leak to the client pre-disposition / an `evidence_requirements.py` change / any agreement count presented as a catch-rate/lift/precision/recall → STOP-and-surface. If blocked >3 attempts: ask user — skip or abort.
 
 ## Gates
-- [x] spec (`specs/phase-82-consume-sibling-northstar-evidence-at-scale.md`)
-- [x] Direction confirmed by user (2026-06-29, AskUserQuestion — scope "Both clusters (full batch)" · §12 "measure-first-with-fallback, rule frozen" · merge "measure two-sidedness on our own path, one-sided → abort" · casework "re-vendor + funnel re-measure"; all_accept, NOT silent; ledger Phase-82)
-- [x] Delivery accepted (post-implementation report 2026-06-29; adversarial review 4-dim → 32 praise / 0 must-fix-remaining [the 1 must-fix RESOLVED: CASE-P-0025128 is casework's narrative-seam frontier, not a regression]; impl commit efa7abd; committed + pushed to main)
+- [x] spec (`specs/phase-83-merge-adjudicator-oracle-scored.md`)
+- [x] Direction confirmed by user (2026-06-29, AskUserQuestion two rounds — Frontier "Agentification S1: merge adjudicator" · Q1 "Accept — measure, report by quadrant" · Q2 "4-way + count deferrals" · Q3 "Add a served surface now" · Q3b "(A) companion live mode"; all_accept, NOT silent; ledger Phase-83)
+- [ ] Delivery accepted
 
-Decisions [[decisions/phase-82-grounded-evidence-consume-path]] · [[decisions/phase-82-merge-org-abort-no-resolution-handle]] · [[decisions/phase-82-kyc-signs-honest-relaxation]]; plan [[phases/phase-82-consume-sibling-northstar-evidence-at-scale]]; ledger Phase-82.
+Decisions [[decisions/phase-83-merge-adjudicator-stage1-frame]] · [[decisions/phase-83-companion-live-not-baked]] · [[decisions/phase-83-4way-vocab-count-deferrals]] · [[decisions/phase-83-measure-by-quadrant-two-sided-baseline]]; plan [[phases/phase-83-merge-adjudicator-oracle-scored]]; ledger Phase-83.

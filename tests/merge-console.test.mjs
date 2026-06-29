@@ -128,10 +128,22 @@ const rawHtml = readFileSync(TEMPLATE, 'utf8');
 ok(rawHtml.split(PLACEHOLDER).length === 2, 'merge.html carries exactly ONE injection placeholder');
 ok(/id="badge"/.test(rawHtml) && /Illustrative data/.test(rawHtml), 'the always-on "Illustrative data & outputs" badge node is present in the chrome');
 ok(/prefers-reduced-motion/.test(rawHtml), 'the reduced-motion CSS branch exists');
-ok(!/fetch\(/.test(rawHtml) && !/<script src/.test(rawHtml) && !/type="module"/.test(rawHtml),
-  'template is self-contained (no fetch / external script / ES module)');
+// Phase 83: the template now carries the companion-only merge-adjudicator LIVE overlay (the 5th live loop).
+// build.py render_merge STRIPS the /*LIVE_START*/.../*LIVE_END*/ region so dist/merge stays self-contained AND
+// byte-identical. Assert: the SOURCE has the overlay; the STRIPPED source AND the committed offline ship
+// carry zero network/live code (§4.5 — the offline file makes no model/fetch call).
+ok(/\/\*LIVE_START\*\//.test(rawHtml) && /adjudPanel/.test(rawHtml) && /fetch\(/.test(rawHtml),
+  'the template carries the companion LIVE overlay (DATA.live → the agent-proposal panel; the 5th live loop)');
+const LIVE_RE = /\n[ \t]*\/\*LIVE_START\*\/[\s\S]*?\/\*LIVE_END\*\//g;
+const stripped = rawHtml.replace(LIVE_RE, '');
+ok(!/fetch\(/.test(stripped) && !/\/\*LIVE_START\*\//.test(stripped) && !/adjudPanel/.test(stripped)
+  && !/<script src/.test(stripped) && !/type="module"/.test(stripped),
+  'the STRIPPED template (the offline ship) is self-contained — no fetch / live region / external script / ES module');
+const OFFLINE = readFileSync(resolve(HERE, '..', 'dist', 'merge', 'index.html'), 'utf8');
+ok(!/fetch\(/.test(OFFLINE) && !/\/\*LIVE_START\*\//.test(OFFLINE) && !/adjudPanel/.test(OFFLINE),
+  'the committed offline dist/merge carries NO live-mode code (build-time stripped; §4.5 — zero model/fetch)');
 ok(!/catch[- ]rate/i.test(rawHtml) && !/\blift\b/i.test(rawHtml) && !/precision/i.test(rawHtml),
-  'NO catch-rate / lift / precision wording anywhere in the template (the honesty governor)');
+  'NO catch-rate / lift / precision wording anywhere in the template incl. the live overlay (the honesty governor)');
 
 const html = rawHtml.replace(PLACEHOLDER, JSON.stringify(STUB));
 const open = html.indexOf('<script>');
@@ -167,6 +179,7 @@ function makePseudo(classes, dataset) {
     },
     setAttribute() {}, getAttribute() { return null; },
     querySelector() { return { textContent: '' }; },
+    appendChild() {},
   };
 }
 
@@ -180,9 +193,10 @@ function makeEnv(reduced) {
   function dynEl() {
     const set = new Set();
     return { _html: '', style: {}, textContent: '', value: '', scrollTop: 0, scrollHeight: 0,
-      onclick: null, oninput: null,
+      onclick: null, oninput: null, className: '',
       get innerHTML() { return this._html; }, set innerHTML(v) { this._html = String(v); },
       insertAdjacentHTML(_pos, h) { this._html += String(h); },
+      appendChild(c) { if (c && c._html != null) this._html += c._html; return c; },
       select() {}, focus() {},
       classList: { add: (...c) => c.forEach(x => set.add(x)), remove: (...c) => c.forEach(x => set.delete(x)), contains: c => set.has(c) } };
   }
@@ -212,6 +226,8 @@ function makeEnv(reduced) {
     addEventListener(type, fn) { listeners[type] = fn; },
     querySelectorAll(sel) { return queryAll(stage._html, sel); },
     execCommand() { return true; },
+    head: dynEl(),                       // Phase 83: the live overlay injects its <style> here (companion-only)
+    createElement: () => dynEl(),        // Phase 83: the live overlay builds its panel via createElement
   };
   const window = {
     matchMedia: q => ({ matches: reduced, media: q, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} }),
@@ -240,8 +256,30 @@ const EPILOGUE = `;__capture({CASES,GRADES,REDUCED,
   get dispositions(){return dispositions}, get draft(){return draft}, get blocked(){return blocked}});`;
 function boot(reduced) {
   const env = makeEnv(reduced);
+  env.__fetches = [];
   vm.createContext(env);
   vm.runInContext(SCRIPT + EPILOGUE, env, { filename: 'merge-console-inline.js' });
+  return env;
+}
+
+// Phase 83: boot the companion-SERVED page (DATA.live present) with a fetch recorder, to exercise the live
+// merge-adjudicator overlay that the stripped offline dist never carries.
+function liveFetch(env) {
+  return (url, opts) => {
+    let body = {}; try { body = JSON.parse((opts && opts.body) || '{}'); } catch { /* recorded as {} */ }
+    env.__fetches.push({ url: String(url), body });
+    return Promise.resolve({ json: () => Promise.resolve(
+      { call: 'uphold_merge', rationale: 'shared exact email — same person', backend: { requested: 'openai', effective: 'openai' } }) });
+  };
+}
+function bootWith(dataset, reduced, fetchFactory) {
+  const env = makeEnv(reduced);
+  env.__fetches = [];
+  if (fetchFactory) env.fetch = fetchFactory(env);
+  vm.createContext(env);
+  const h = rawHtml.replace(PLACEHOLDER, JSON.stringify(dataset));
+  const o = h.indexOf('<script>'), c = h.lastIndexOf('</script>');
+  vm.runInContext(h.slice(o + '<script>'.length, c) + EPILOGUE, env, { filename: 'merge-live-inline.js' });
   return env;
 }
 
@@ -458,6 +496,32 @@ row.onclick();
 eq(apiC.view, 'case', 'clicking a queue row opens the candidate');
 const envR = boot(true);
 eq(envR.__api.REDUCED, true, 'prefers-reduced-motion context: REDUCED branch engages');
+
+// ---- (11) the companion LIVE merge-adjudicator overlay (Phase 83 — DATA.live present; offline strips it) ----
+const liveData = JSON.parse(JSON.stringify(STUB));
+liveData.live = { adjudicate: '/adjudicate', backend: 'openai' };
+const envL = bootWith(liveData, true, liveFetch);
+const apiL = envL.__api;
+ok(apiL && typeof apiL.pickCase === 'function', 'LIVE overlay: the served page boots with DATA.live set; internals re-exported');
+ok(/livepanel/.test(envL.document.head._html), 'LIVE overlay: the agent-panel <style> is injected by JS (companion-only — no static CSS in the ship)');
+ok(envL.__errors.length === 0, 'LIVE overlay: the render wrap installs with no console errors');
+// drive to the adjudication gate — the overlay fires ONE firewall-clean /adjudicate request
+apiL.pickCase(STUB.cases[0].id);
+apiL.advance();                                    // Evidence → Adjudication (screen 1)
+eq(apiL.screen, 1, 'LIVE overlay: reaching the adjudication gate');
+eq(envL.__fetches.length, 1, 'LIVE overlay: the gate screen fires exactly one /adjudicate request');
+const req = envL.__fetches[0];
+ok(/\/adjudicate$/.test(req.url), 'LIVE overlay: the request targets the same-origin /adjudicate endpoint');
+ok(req.body.case_id === STUB.cases[0].id && req.body.backend === 'openai',
+  'LIVE overlay: the /adjudicate request carries the case_id + backend');
+ok(!('oracle' in req.body) && !('correct_adjudication' in req.body) && !('same_entity' in req.body) && !('klass' in req.body),
+  'FIREWALL (client): the /adjudicate request carries NO oracle truth — the agent is consulted on the evidence id alone');
+// the offline default (no DATA.live) injects no live style + fires nothing — the live branch is gated
+const envNL = boot(true);
+ok(!/livepanel/.test((envNL.document.head && envNL.document.head._html) || ''),
+  'NO-LIVE default: no live <style> injected when DATA.live is absent (the branch is gated on DATA.live)');
+envNL.__api.pickCase(STUB.cases[0].id); envNL.__api.advance();
+eq(envNL.__fetches.length, 0, 'NO-LIVE default: the offline page fires no /adjudicate request');
 
 /* ---------- verdict ---------- */
 console.log(`\n${pass} passed, ${fails.length} failed`);

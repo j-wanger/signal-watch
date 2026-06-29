@@ -192,6 +192,16 @@ This section is the DURABLE, currently-true architecture — not a changelog.
    revealed post-disposition only; build-boundary `validate_merge_cases` guards it IN EXACT PARITY with the
    curate validator). Real substrate emails domain-masked to example.test. Badge always-on; NO LLM/fetch; no
    FINTRAC content.
+   **Optional LIVE adjudicator mode (Phase 83 — companion-served, dev/authoring-time only; the agentification
+   roadmap's Stage 1 = the 5th live loop, the first MEASURABLE agent; doc `docs/merge-live.md`):**
+   `scripts/serve_merge.py` (stdlib, port 8040) serves the page + a build-stripped `/*LIVE_*/` overlay where an
+   agent (`scripts/merge_adjudicator.py`) PROPOSES each call from the EVIDENCE ONLY (the oracle firewall:
+   `adjudicator_input` + `assert_no_oracle_leak`; the `/adjudicate` response carries no truth) beside the human
+   gate — the `StubAdjudicator` (echo the spine) the offline default + the two-sided baseline. MEASURED against
+   this gate's correctness oracle (counts only, synthetic-qualified): the agent matched **54 of 66** vs **33**
+   for the spine baseline (recovered 21 of the 33 the resolver got wrong), pinned via
+   `tests/merge_adjudicator_quality_harness.py`. Offline `dist/merge` byte-identical (overlay stripped); nothing
+   persisted; build.py imports neither.
 
 ### Build (`scripts/build.py`)
 Validates a config against the schema (fail-loud), resolves `text_file`→inline, inlines everything →
@@ -409,7 +419,11 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   rides this path, NEVER the determination engine (the priors-are-provenance firewall; `evidence_requirements.py`
   byte-unchanged). Source = `scripts/determination_validation_harness.py` (the "circularity exit"; doc
   `docs/determination-validation.md`). Doc: `docs/case-workbench.md`. Precursor the CHAIN workbench: `python3 scripts/serve_chain.py` → http://localhost:8020
-  (`docs/chain-workbench.md`). Companion ports: news 8000 · corpus 8010 · chain 8020 · workbench 8030.
+  (`docs/chain-workbench.md`). Companion ports: news 8000 · corpus 8010 · chain 8020 · workbench 8030 · merge 8040.
+- Merge LIVE adjudicator mode (optional, dev/authoring-time, stdlib-only — no venv): llama-server up, then
+  `python3 scripts/serve_merge.py` → http://localhost:8040 (the agent proposes each call beside the human gate,
+  measured against the committed oracle; `--backend stub` demos with no model). Offline `dist/merge` unaffected;
+  doc: `docs/merge-live.md`.
 - Drift guard before presenting: `python3 scripts/build.py --check all` (frozen dists byte-identical).
 - Test (dep-free, no install — except the DuckDB store selftests, which run under `.venv`):
   - `node tests/corpus-explorer.test.mjs` — the story landing + the 6-screen per-doc arc + the
@@ -438,7 +452,13 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
     the honesty-governor word-ban [no catch-rate/lift/precision]; XSS, keyboard guards, both motion modes) ·
     `python3 scripts/curate_merge_cases.py --selftest` — the merge-case curator validators (firewall: no
     truth in evidence; consensus/scored split; closed vocab; deterministic regen; 7 broken fixtures rejected;
-    reproduces the Phase-75 66 over-merge-refused). Needs DuckDB — run under `.venv` (SKIPs without it).
+    reproduces the Phase-75 66 over-merge-refused). Needs DuckDB — run under `.venv` (SKIPs without it). The
+    Phase-83 merge ADJUDICATOR (the 5th live loop, companion): `python3 scripts/merge_adjudicator.py --selftest`
+    (the oracle firewall + the two-sided stub baseline 33/33, dep-free) · `python3
+    tests/merge_adjudicator_quality_harness.py --check` (the live-capture replay regression + the stub baseline,
+    no model) · `python3 scripts/serve_merge.py --selftest` (the served page + payload parity + the on-the-wire
+    oracle firewall + stub/live/degrade). `merge-console.test.mjs` also asserts the offline strip (`dist/merge`
+    carries no live code) + the live-branch (the overlay fires a firewall-clean `/adjudicate` request).
   - `node tests/news-stream.test.mjs` — the adverse-media arc + fuzzy matcher; both motion modes;
     the companion-served live overrides (watchlist screen/escalate/view/prune + the alias-aware
     matcher [exact-yes/fuzzy-no per class] + the SVG network [deterministic liveGraphLayout:
@@ -507,11 +527,12 @@ adjudicable fact pattern — the §12-right/§14-wrong-source boundary)] + the N
 `docs/blueprint-report.html` + the `dist/triage/` triage console [Phase 49 — §14's loop embryo made
 demo-able]).
 **Agentification track (forward roadmap, cross-cutting): `docs/agentification-roadmap.md`** — the
-propose→gate→decide sequencing for the next agentic loops on top of the 4 already-live ones (news/corpus
-extraction · GATHER tool-calling · DECIDE drafting). Order by leverage: a merge adjudicator scored vs the
-GT-`<hash>` oracle (the measured-quality headline) → a §12 determination pre-proposer (the `determine_case`
-seam is built) → a real STR drafter (the Drafter Protocol exists) → a §14 triage second-rater. Contract =
-`program-blueprint.md` §2/§4/§6/§11; the gates + the human decision stay deterministic by design.
+propose→gate→decide sequencing for agentic loops. 5 live loops now (news/corpus extraction · GATHER
+tool-calling · DECIDE drafting · the **merge adjudicator** — Stage 1 BUILT Phase 83, scored vs this gate's
+correctness oracle, the measured-quality headline: agent 54 / spine 33 of 66). Next, in leverage order: a §12
+determination pre-proposer (the `determine_case` seam is built) → a real STR drafter (the Drafter Protocol
+exists) → a §14 triage second-rater. Contract = `program-blueprint.md` §2/§4/§6/§11; the gates + the human
+decision stay deterministic by design.
 Per-phase detail: git log + `.dev-wiki/` journal + HANDOFF.md §8.
 
 ## Definition of done

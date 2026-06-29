@@ -1,0 +1,224 @@
+{
+  "note": "Phase 83 — the merge-adjudicator regression gate. `stub_expected` is the deterministic StubAdjudicator baseline over the committed oracle (dep-free, always checked). `live_responses`/`live_expected`, when present, are ONE pinned live capture replayed with NO model in --check (the GATHER replay pattern). The oracle is synthetic + synthetic-aml-substrate-slice; production has no ground truth. No rate, score, or multiplier is claimed — counts only.",
+  "model": "local",
+  "stub_expected": {
+    "agree": 33,
+    "disagree": 33,
+    "deferred": 0,
+    "scored": 66,
+    "by_quadrant": {
+      "correct-rejection": {
+        "agree": 30,
+        "disagree": 0,
+        "deferred": 0,
+        "n": 30
+      },
+      "fragmentation-gap": {
+        "agree": 0,
+        "disagree": 30,
+        "deferred": 0,
+        "n": 30
+      },
+      "real-co-reference": {
+        "agree": 3,
+        "disagree": 0,
+        "deferred": 0,
+        "n": 3
+      },
+      "over-merge-trap": {
+        "agree": 0,
+        "disagree": 3,
+        "deferred": 0,
+        "n": 3
+      }
+    },
+    "by_provenance": {
+      "substrate-anchored-slice": {
+        "agree": 16,
+        "disagree": 13,
+        "deferred": 0,
+        "n": 29
+      },
+      "substrate-sanctions-slice": {
+        "agree": 13,
+        "disagree": 11,
+        "deferred": 0,
+        "n": 24
+      },
+      "synthetic-oracle": {
+        "agree": 4,
+        "disagree": 9,
+        "deferred": 0,
+        "n": 13
+      }
+    },
+    "by_basis": {
+      "strong": {
+        "agree": 21,
+        "disagree": 28,
+        "deferred": 0,
+        "n": 49
+      },
+      "name": {
+        "agree": 11,
+        "disagree": 4,
+        "deferred": 0,
+        "n": 15
+      },
+      "weak": {
+        "agree": 1,
+        "disagree": 1,
+        "deferred": 0,
+        "n": 2
+      }
+    },
+    "calls": {
+      "reject_as_shares": 60,
+      "uphold_merge": 6
+    }
+  },
+  "live_responses": [
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although they share a strong email identifier, the distinct names and different phone numbers suggest two separate individuals sharing an account or email alias rather than being the same person.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although the records share a strong identifier (email), the distinct names and different phone numbers, combined with the resolver's decision to keep them distinct, indicate they are likely two different individuals sharing an account or email alias rather than the same person.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although both records share a strong identifier (email), the deterministic resolver already classified them as distinct, and the significant discrepancy in names ('Ella Jennings' vs 'Serentiy aCrlisle') combined with different phone numbers suggests these are likely distinct individuals sharing an email account or alias rather than the same person.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although they share a strong email identifier, the distinct names and different phone numbers indicate two separate individuals likely sharing an account or household, making a merge inappropriate.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact email address is a strong identifier for a specific individual, and the name differences are clearly typographical errors, outweighing the different phone number which may indicate a secondary line or data entry variance.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although they share an exact email, the distinct names and different phone numbers indicate two separate individuals likely sharing a household or account, warranting a SHARES edge rather than a merge.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although the records share a strong identifier (email), the deterministic resolver already classified them as distinct, and the presence of different phone numbers alongside completely different names suggests they are likely distinct individuals sharing an email address (e.g., a household or shared account) rather than the same person.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact phone number is a strong identifier that outweighs the minor typographical errors in the names, indicating these records refer to the same individual.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although the shared email is a strong identifier, the distinct phone numbers and significantly different names suggest two separate individuals (e.g., family members or data entry errors) rather than the same person, supporting the resolver's decision to keep them distinct.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The shared phone number is a strong identifier, but the significant discrepancies in both email addresses and names (Dylan Hanson vs Dylna Hansno) indicate these are likely distinct individuals sharing a contact method or household, warranting a shares edge rather than a merge.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although they share a strong email identifier, the distinct names and different phone numbers suggest two separate individuals sharing an account or email alias rather than being the same person.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact email address is a strong identifier for a specific individual, and the name differences are clearly typographical errors, outweighing the different phone numbers which may belong to the same household or be secondary contact methods.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact email address is a strong identifier for a specific individual, and the name similarity combined with the deterministic resolver's distinct call likely reflects data entry errors or household sharing rather than two different people, warranting a merge in an AML context to avoid missing links.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although they share a strong email identifier, the distinct names and different phone numbers suggest two separate individuals sharing an account or email alias, consistent with the deterministic resolver's decision to keep them distinct.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although the shared phone number is a strong identifier, the deterministic resolver has already classified them as distinct, and the significant discrepancies in names and emails suggest they are likely different individuals sharing a contact method rather than the same person with typos.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although the phone number is shared, the significant discrepancies in names (Simon Anthony vs Simno Anthoyn) and emails suggest distinct individuals or data errors rather than a definitive match, warranting a shares relationship over a merge.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although they share a strong email identifier, the completely different names and distinct phone numbers indicate two separate individuals likely sharing an account or household, warranting a shares edge rather than a merge.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The shared phone number is a strong identifier but not conclusive for identity given the significant discrepancies in names and emails, supporting the deterministic resolver's decision to keep them distinct.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although they share an exact email, the distinct names and different phone numbers indicate two separate individuals likely sharing a household or account, warranting a SHARES edge rather than a merge.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although they share a strong email identifier, the distinct names and different phone numbers suggest two separate individuals sharing an account or email alias rather than being the same person.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although they share a strong email identifier, the distinct names and different phone numbers suggest two separate individuals sharing an account or email alias rather than being the same person.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although both records share a strong identifier (email), the names are completely different and the phone numbers differ significantly, indicating distinct individuals likely sharing an account or email alias rather than being the same person.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact phone number is a strong identifier that outweighs the minor spelling variation in the first name ('Jennifer' vs 'Jen') and the different email addresses, indicating they are the same person.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although the records share a strong identifier (exact email), the deterministic resolver already classified them as distinct, and the significant discrepancy in names ('Anna Vega' vs 'Klyie Rogesr') combined with different phone numbers suggests they are likely distinct individuals sharing an account or email alias rather than the same person.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although the phone number is identical, the significant discrepancy in email addresses (user454 vs user1000000023) and the non-trivial name variation ('Vega' vs 'eVga') suggest distinct individuals or data errors rather than a definitive match, warranting a shares relationship over a merge.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although they share a strong email identifier, the distinct names and different phone numbers suggest two separate individuals sharing an account or email alias rather than being the same person.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although the phone number is shared, the significant discrepancies in both names and emails suggest distinct individuals or data errors rather than a definitive match, supporting the resolver's decision to keep them distinct.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact phone number is a strong identifier for an individual, and the name similarity ('Marissa' vs 'Marisas') suggests a minor typo or variation rather than two distinct people sharing a recycled number.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The shared exact phone number is a strong identifier but not conclusive for identity given the distinct emails and significantly different names, supporting the deterministic resolver's decision to keep them distinct while acknowledging they share an identifier.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a common name with distinct emails and phone numbers, indicating they are different individuals rather than the same entity.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a common name with distinct emails and phone numbers, indicating they are different individuals who happen to have the same name rather than the same entity.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a common name with distinct emails and phone numbers, indicating they are different individuals who happen to have the same name.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a common name with distinct emails and phone numbers, indicating they are likely different individuals rather than the same person.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a common name with distinct emails and phone numbers, indicating two different individuals rather than the same entity.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a common name with distinct emails and phone numbers, indicating they are different individuals rather than the same entity.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a common name with distinct emails and phone numbers, indicating two different individuals who happen to have the same name rather than the same entity.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a common name with distinct emails and phone numbers, indicating they are different individuals rather than the same entity.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a common name with distinct identifiers and conflicting sanctions screening flags, indicating they are distinct entities that merely share an identifier.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a common name with distinct identifiers and no overlapping contact information, indicating they are distinct entities that merely share an identifier.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a common name with distinct identifiers and no corroborating evidence, indicating they are distinct entities that merely share an identifier.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a common name with distinct identifiers and no corroborating evidence, indicating they are distinct entities that merely share an identifier.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact phone number constitutes strong evidence of identity that outweighs the minor name variation ('Katherine' vs 'Kate', 'Fernandez' vs 'Fernadnez') and different email addresses, indicating they are the same person.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact phone number is a strong identifier that outweighs the minor name variation ('Katherine' vs 'Kate', 'Fernandez' vs 'eFrnandez'), indicating they are the same person.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although both records share a strong email identifier, they have completely different names and phone numbers, and the deterministic resolver already kept them distinct, suggesting the shared email is likely due to a household or data entry anomaly rather than identity.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although the shared email is a strong identifier, the deterministic resolver already classified them as distinct, and the significant name discrepancy combined with different phone numbers suggests they are likely distinct individuals sharing an account or email alias rather than the same person.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact phone number constitutes strong evidence of identity that outweighs the minor typographical variations in names and different email addresses, indicating these records refer to the same individual.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact phone number constitutes strong evidence of identity that outweighs the minor name typo ('Cooper' vs 'Coopre') and different emails, indicating a single individual with data entry variations.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact email address is a strong identifier indicating the same individual, despite the name typo and different phone number which likely reflects data entry variance or multiple contact methods for the same person.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact phone number constitutes strong evidence of identity that outweighs the minor typographical variations in the names and distinct email addresses, indicating these records refer to the same individual.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact email address is a strong identifier that outweighs the minor name typo and different phone number, indicating these records refer to the same individual.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact email address is a strong identifier for a specific individual, and the name differences are attributable to data entry errors or typos rather than indicating distinct persons.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact phone number constitutes strong evidence of identity that outweighs the name typo and distinct email addresses, indicating a single individual with data entry variations.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact phone number constitutes strong evidence of identity that outweighs the minor typographical variations in names and distinct email addresses, indicating a single individual.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a common name without any overlapping strong identifiers like email or phone, which is insufficient to confirm they are the same person.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a common name without any overlapping strong identifiers like email or phone, which is insufficient to confirm they are the same person.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share only a name without any overlapping strong identifiers like phone or email, making it insufficient to confirm they are the same person despite the resolver's distinct call.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The records share an exact email address, which serves as a strong deterministic identifier for the same individual despite differing roles.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although they share a phone number, the distinct first names (Tanya vs. Marcus) strongly suggest two different individuals within the same household or family unit rather than the same person.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although the email is shared, the distinct names 'Daniel Cho' and 'Priya Nair' combined with a generic coworking address strongly suggest two different individuals sharing a workspace or alias, rather than the same person.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"Although both records share the same account number, the distinct names 'Lev Petrov' and 'Olga Petrova' strongly suggest two different individuals (e.g., spouses or business partners) sharing a single account, rather than being the same person.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact email address serves as a strong deterministic identifier for an individual, and the name variation is consistent with the same person.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact email address constitutes strong identifier evidence that outweighs the deterministic resolver's distinct call, indicating these records likely refer to the same individual.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The shared exact phone number constitutes strong identifier evidence that outweighs the deterministic resolver's default distinctness, indicating these records likely refer to the same individual.\"\n}",
+    "{\n\"call\": \"uphold_merge\",\n\"rationale\": \"The records share an exact email address and identical name, providing strong deterministic evidence that they refer to the same individual.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share a weak basis (address) but have distinct strong identifiers (email vs phone), and the deterministic resolver already classified them as distinct, suggesting they are likely different individuals at the same location.\"\n}",
+    "{\n\"call\": \"reject_as_shares\",\n\"rationale\": \"The records share a weak address basis but have distinct names and phone numbers, indicating they are likely different individuals at the same location rather than the same person.\"\n}"
+  ],
+  "live_expected": {
+    "agree": 54,
+    "disagree": 12,
+    "deferred": 0,
+    "scored": 66,
+    "by_quadrant": {
+      "correct-rejection": {
+        "agree": 30,
+        "disagree": 0,
+        "deferred": 0,
+        "n": 30
+      },
+      "fragmentation-gap": {
+        "agree": 18,
+        "disagree": 12,
+        "deferred": 0,
+        "n": 30
+      },
+      "real-co-reference": {
+        "agree": 3,
+        "disagree": 0,
+        "deferred": 0,
+        "n": 3
+      },
+      "over-merge-trap": {
+        "agree": 3,
+        "disagree": 0,
+        "deferred": 0,
+        "n": 3
+      }
+    },
+    "by_provenance": {
+      "substrate-anchored-slice": {
+        "agree": 22,
+        "disagree": 7,
+        "deferred": 0,
+        "n": 29
+      },
+      "substrate-sanctions-slice": {
+        "agree": 23,
+        "disagree": 1,
+        "deferred": 0,
+        "n": 24
+      },
+      "synthetic-oracle": {
+        "agree": 9,
+        "disagree": 4,
+        "deferred": 0,
+        "n": 13
+      }
+    },
+    "by_basis": {
+      "strong": {
+        "agree": 42,
+        "disagree": 7,
+        "deferred": 0,
+        "n": 49
+      },
+      "name": {
+        "agree": 11,
+        "disagree": 4,
+        "deferred": 0,
+        "n": 15
+      },
+      "weak": {
+        "agree": 1,
+        "disagree": 1,
+        "deferred": 0,
+        "n": 2
+      }
+    },
+    "calls": {
+      "reject_as_shares": 45,
+      "uphold_merge": 21
+    }
+  }
+}

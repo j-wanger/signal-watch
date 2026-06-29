@@ -1528,7 +1528,11 @@ def render_merge(template: str) -> str:
     """Validate + inline the merge-adjudication dataset into merge.html. Pure: no disk write — the single
     source of truth for dist/merge/index.html (shared by build/check). No corpus/taxonomy load: the merge
     cases reference no corpus docs (self-contained entity_refs / obs_ids), so the only boundary check is the
-    structural + vocab + firewall validator above."""
+    structural + vocab + firewall validator above. Phase 83: the companion merge-adjudicator LIVE overlay
+    (`/*LIVE_START*/.../*LIVE_END*/` in merge.html, served only by serve_merge.py) is STRIPPED here — the
+    regex eats the leading newline so the offline dist stays byte-identical, and the strip runs BEFORE the
+    self-contained guard so the live region's fetch never trips it (the corpus/news precedent)."""
+    template = LIVE_REGION_RE.sub("", template)
     data = load_merge_cases()
     errors = validate_merge_cases(data)
     if errors:

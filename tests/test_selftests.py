@@ -29,6 +29,7 @@ PY_SELFTESTS = [
     "entity_spine.py",          # Phase 74 — the persistent entity spine (SKIPs gracefully w/o duckdb; full under .venv)
     "resolution_scorer.py",     # Phase 74 — the resolution-correctness scorer + the resolver-input firewall
     "curate_merge_cases.py",    # Phase 76 — the merge-console case curator (SKIPs gracefully w/o duckdb; full under .venv)
+    "merge_adjudicator.py",     # Phase 83 — the merge adjudicator (firewall + stub baseline; dep-free, no model)
     "distill_sanctions_slice.py",  # Phase 80 — the OFAC name-collision merge slice (replays the committed slice, no substrate)
     "determination_validation_harness.py",  # Phase 78 — the determination-validation firewall + recompute (dep-free)
     "serve_workbench.py",
@@ -41,6 +42,7 @@ PY_SELFTESTS = [
     "news_fetch.py",
     "serve_corpus.py",
     "serve_news.py",
+    "serve_merge.py",           # Phase 83 — the merge-console live companion (offline render + firewall; no model)
 ]
 
 MJS_TESTS = [
@@ -71,6 +73,17 @@ def test_gather_quality_harness() -> None:
     r = subprocess.run([sys.executable, str(path), "--check"], cwd=str(ROOT),
                        capture_output=True, text=True, timeout=120)
     assert r.returncode == 0, f"gather_quality_harness --check FAILED:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
+
+
+def test_merge_adjudicator_quality_harness() -> None:
+    """Phase 83 — the MERGE-ADJUDICATOR quality REGRESSION GATE: re-derive the StubAdjudicator baseline from
+    the committed oracle (dep-free, no model) + replay the pinned live capture (if present) and assert the
+    agent's agreement counts still match the frozen baseline (the GATHER replay pattern; counts only)."""
+    path = ROOT / "tests" / "merge_adjudicator_quality_harness.py"
+    assert path.exists(), "missing tests/merge_adjudicator_quality_harness.py"
+    r = subprocess.run([sys.executable, str(path), "--check"], cwd=str(ROOT),
+                       capture_output=True, text=True, timeout=120)
+    assert r.returncode == 0, f"merge_adjudicator_quality_harness --check FAILED:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
 
 
 def test_determination_validation_harness() -> None:

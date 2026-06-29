@@ -30,10 +30,15 @@ read-from-a-record DATA the frozen engine already takes):
   over-flagging. A correct interaction surfaced: a case carrying BOTH a grounded predicate and mitigation is
   NOT cleared (the unaddressed prior-STR predicate blocks the affirmative clear — the engine staying honest).
 
-**Still OPEN (the named frontier):** Ask **#3** (the second corroborating leg as a fired signal — the dominant ML
-file-loop blocker on this slice) + Ask **#4** (multi-hop `ownership_edges` + `flagged`/`excluded` resolution edges).
-These remain the highest-leverage substrate emissions for the ML §12 file loop. Re-verify the live HEAD before
-acting (sibling state drifts — [[cross-pillar-review-verify-sibling-repo]]).
+**Still OPEN — and Ask #3 is now THE critical path (do-first):** with #1 + #2 consumed, signal-watch's §12 loop
+generates the CLEAR half at scale (17 ML clears) + the KYC-FILE half (1 in-slice / 31 at full pop), but the
+**ML-FILE half reaches 0 cases** — the slice's ML cases carry the mechanism + the predicate (#1) yet **0 have a
+second corroborating leg**, so 0 clear the `mechanism + ≥2 legs + predicate` bar. **Ask #3 (the second corroborating
+leg as a fired signal) is the SINGLE emission that flips the ML FILE loop from 0 → generates-at-scale** and completes
+the FILE half of the north-star — the highest-leverage move in the whole cross-pillar program right now. Ask **#4**
+(multi-hop `ownership_edges` + `flagged`/`excluded` edges) DEEPENS the corroboration AFTER #3; it is not the blocker.
+A dated pointer to this priority lives in substrate's own repo (`aml-substrate/docs/signal-watch-consume-priority.md`).
+Re-verify the live HEAD before acting (sibling state drifts — [[cross-pillar-review-verify-sibling-repo]]).
 
 ## Intent
 

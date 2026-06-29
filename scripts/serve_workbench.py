@@ -546,15 +546,35 @@ def run_gather(case_id: str, *, on_stage, backend: str | None = None, env: dict 
 
 
 # ---- the DIFFERENTIATED DETERMINATION (Phase 69 T4) — sufficiency supersedes frequency ------------
+def _bundle_evidence(case_id: str) -> dict:
+    """Phase 82 — the GROUNDED §12 decision evidence a slice case carries in its substrate bundle: the named
+    predicate (a prior-STR register hit, surfaced via a `flagged` resolution edge) and the affirmative
+    mitigation (reconciled source-of-funds). Read-only; a bundle without the fields (an old capture) → honest
+    nulls. This is the read-from-a-record input that REPLACES the analyst-typed predicate/mitigation — the
+    determination stays a HUMAN gate (the analyst adjudicates the disposition); the EVIDENCE is now grounded."""
+    try:
+        b = json.loads(_bundle_path(case_id).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {"predicate": None, "predicate_source": None, "mitigation_established": False, "mitigation": None}
+    npr = b.get("named_predicate_risk") or {}
+    mit = b.get("mitigation_evidence") or {}
+    return {"predicate": npr.get("value") if npr.get("named") else None,
+            "predicate_source": npr.get("source"),
+            "mitigation_established": bool(mit.get("established")),
+            "mitigation": mit or None}
+
+
 def determine_case(case_id: str, *, gathered=(), named_risk: str | None = None,
-                   mitigation_rebutted: bool = False, index: dict | None = None,
-                   precedent: dict | None = None) -> dict:
+                   mitigation_rebutted: bool = False, mitigation_established: bool | None = None,
+                   index: dict | None = None, precedent: dict | None = None) -> dict:
     """The DETERMINATION for one case: licensed by evidence-SUFFICIENCY (mechanism + corroborating legs +
     a NAMED predicate risk + no unrebutted mitigation), NOT combo-frequency. The Phase-64 frequency gate is
     DEMOTED to CONTEXT for the contrast — it decides WHERE to spend judgment (§12), never that a
     determination holds. Insufficiency is a legitimate non-decision whose `missing` NAMES the gap. Pure;
-    persists nothing. named_risk + mitigation_rebutted are the HUMAN elicitation inputs (the gate where a
-    person fills what the data cannot)."""
+    persists nothing. Phase 82 — the predicate + affirmative mitigation are READ from the case's substrate
+    bundle (grounded prior-STR register + reconciled source-of-funds) so the §12 loop closes from
+    read-from-a-record evidence at scale; a passed named_risk / mitigation_established (the HUMAN elicitation,
+    the gate where a person confirms or overrides what the record carries) takes precedence over the bundle."""
     if is_casefile_id(case_id):                      # Phase 73 — the authored pair computes via the SAME engine
         return casefile_determination(case_id)
     index = index or load_index()
@@ -562,14 +582,19 @@ def determine_case(case_id: str, *, gathered=(), named_risk: str | None = None,
     prof = _requirements()
     caps = _entry_caps(entry)
     ctype = crime_type_for_capabilities(caps, prof)
-    det = (determine(ctype, caps, prof, gathered=gathered, named_predicate_risk=bool(named_risk),
-                     mitigation_rebutted=mitigation_rebutted) if ctype else None)
+    grounded = _bundle_evidence(case_id)             # Phase 82 — read the grounded predicate + mitigation
+    eff_named_risk = named_risk if named_risk is not None else grounded["predicate"]
+    eff_mit_established = (mitigation_established if mitigation_established is not None
+                          else grounded["mitigation_established"])
+    det = (determine(ctype, caps, prof, gathered=gathered, named_predicate_risk=bool(eff_named_risk),
+                     mitigation_rebutted=mitigation_rebutted, mitigation_established=eff_mit_established)
+           if ctype else None)
     conf = entry.get("confidence", {})
     combo = conf.get("combo")
     n = (precedent or session_precedent(index)).get(combo, conf.get("n_precedent", 0))
     freq = route(n)
-    return {"badge": BADGE, "case_id": case_id, "crime_type": ctype, "named_risk": named_risk or None,
-            "determination": det,
+    return {"badge": BADGE, "case_id": case_id, "crime_type": ctype, "named_risk": eff_named_risk or None,
+            "determination": det, "grounded_evidence": grounded,
             "frequency_context": {"combo": combo, "n_precedent": n, "gate": freq["gate"],
                                   "note": "precedent FREQUENCY — context for WHERE to spend judgment, "
                                           "never the determination trigger"},
@@ -1481,17 +1506,54 @@ def selftest() -> int:
         # the gate is REAL — without a named predicate risk the kyc determination is WITHHELD
         if determine_case(kc["case_id"])["determination"]["verdict"] == "determination":
             failures.append("§12 kyc: a kyc case must WITHHOLD without a named predicate risk (the gate is real)")
-        # the SIGN frontier, asserted by RULE (not a count): a kyc case SIGNS iff it carries transactions;
-        # a txn-less one fails-CLOSED with the honest casework no-transactions contract reason.
+        # the SIGN frontier, asserted by RULE (not a count): a txn-LESS kyc case ALWAYS fails-CLOSED at
+        # casework's no-transactions contract; a TXN-BEARING one is signable but NOT guaranteed — casework's
+        # C14 grounding honestly REFUSES a shape it cannot reproduce a signable record from (Phase 82: the
+        # 294d3e5 slice carries a txn-bearing C14 case casework can't sign, a real "refusal IS defensibility"
+        # frontier), so a txn-bearing fail-close must still carry an HONEST casework reason, just not the
+        # no-transactions one. >=1 txn-bearing kyc MUST sign (the consume payoff stays asserted).
         for c in kyc_cases:
             if c.get("grounds_e2e") is True and c.get("n_txns", 0) == 0:
                 failures.append(f"§12 kyc: {c['case_id']} signed with no transactions — casework requires txns")
-            if c.get("grounds_e2e") is False and "no transactions" not in (c.get("e2e_note") or ""):
-                failures.append(f"§12 kyc: a fail-closed kyc case must surface the honest casework-contract "
-                                f"reason (no transactions), got {c.get('e2e_note')!r}")
+            note = (c.get("e2e_note") or "").strip()
+            if c.get("grounds_e2e") is False and c.get("n_txns", 0) == 0 and "no transactions" not in note:
+                failures.append(f"§12 kyc: a TXN-LESS fail-closed kyc case must surface the honest casework "
+                                f"no-transactions contract reason, got {note!r}")
+            if c.get("grounds_e2e") is False and not note:
+                failures.append(f"§12 kyc: a fail-closed kyc case must carry an honest casework refusal "
+                                f"reason in e2e_note (the defensibility frontier), got empty")
         if not any(c.get("grounds_e2e") is True for c in kyc_cases):
             failures.append("§12 kyc: expected >=1 txn-bearing kyc case to SIGN end-to-end through the "
                             "re-vendored casework (the consume payoff — none signed in the committed slice)")
+
+    # ---- Phase 82: the §12 loop closes from GROUNDED EVIDENCE AT SCALE (the substrate P39 predicate + P40
+    # mitigation consume). determine_case READS the named predicate (a prior-STR register hit) + the affirmative
+    # mitigation (reconciled source-of-funds) from each case's substrate bundle — NO analyst typing — so a slice
+    # case reaches the determination/clear bar from a read-from-a-record input. The file BAR is unchanged (A1);
+    # the EVIDENCE is now grounded. Honest, label-blind, measure-first: a grounded predicate is a real escalation
+    # the exogenous oracle is blind to (never an accuracy claim); a grounded mitigation REDUCES over-flagging.
+    p82_grounded = p82_file = p82_clear = 0
+    for c in index["cases"]:
+        dc = determine_case(c["case_id"], index=index)        # NO human input — pure read-from-record
+        ge = dc.get("grounded_evidence") or {}
+        v = (dc.get("determination") or {}).get("verdict")
+        if ge.get("predicate") or ge.get("mitigation_established"):
+            p82_grounded += 1
+        if ge.get("predicate") and v == "determination":
+            p82_file += 1
+        if ge.get("mitigation_established") and v == "cleared":
+            p82_clear += 1
+    if p82_grounded == 0:
+        failures.append("§12 Phase-82: NO slice case carries a grounded predicate/mitigation from its bundle "
+                        "— the P39/P40 evidence consume did not land (re-emit at substrate >=294d3e5)")
+    if p82_file == 0 and p82_clear == 0:
+        failures.append("§12 Phase-82: the grounded predicate + mitigation moved 0 slice cases to a "
+                        "determination/clear from a read-from-record input — the consume is degenerate (expected >=1)")
+    # the grounded evidence must be SURFACED in the determine_case payload (the workbench renders it)
+    _dc_demo = determine_case("CASE-P-0025128", index=index) if any(
+        c["case_id"] == "CASE-P-0025128" for c in index["cases"]) else None
+    if _dc_demo is not None and "grounded_evidence" not in _dc_demo:
+        failures.append("§12 Phase-82: determine_case must expose grounded_evidence for the workbench to render")
 
     # ---- Phase 73: the authored NORTH-STAR pair COMPUTES file vs cleared via the LIVE engine ----
     # The matched pair fires the IDENTICAL grounded signals but resolves OPPOSITELY — the verdict is engine

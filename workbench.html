@@ -281,6 +281,12 @@
   .determine .dh{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--signal);margin-bottom:10px}
   .detctx{font-family:var(--mono);font-size:11px;line-height:1.55;color:var(--muted);border:1px dashed var(--line2);border-radius:9px;padding:9px 12px;margin-bottom:11px}
   .detctx .dmut{color:var(--faint)}
+  /* Phase 82 — the GROUNDED §12 decision-evidence panel (predicate + mitigation read from the case record) */
+  .gepanel{border:1px solid var(--line2);border-left:3px solid var(--green);border-radius:0 9px 9px 0;background:rgba(84,201,138,.055);padding:9px 12px;margin-bottom:11px}
+  .geh{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--green);line-height:1.5;margin-bottom:7px}
+  .gei{font:12px/1.55 var(--body);color:var(--dim);margin-top:4px}
+  .gei .gel{display:inline-block;min-width:118px;font:9px/1 var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--faint)}
+  .gei .ges{color:var(--faint);font-size:11px;margin-left:6px}
   .datoms{list-style:none;display:grid;gap:4px;margin:0 0 12px}
   .datoms li{display:flex;align-items:baseline;gap:9px;font-size:12.5px;padding:2px 0}
   .datoms li.gap{color:var(--muted)}
@@ -296,6 +302,7 @@
   .detv{border-radius:0 11px 11px 0;padding:12px 15px;font-size:13.5px;line-height:1.55}
   .detv.yes{border:1px solid var(--green);border-left:3px solid var(--green);background:rgba(84,201,138,.08);color:var(--ink)}
   .detv.no{border:1px solid var(--signal);border-left:3px solid var(--signal);background:rgba(246,166,35,.07);color:var(--ink)}
+  .detv.clear{border:1px solid var(--green);border-left:3px solid var(--green);background:rgba(84,201,138,.06);color:var(--ink)}
   .dgaps{list-style:none;margin-top:8px;display:grid;gap:5px}
   .dgaps li{font-family:var(--mono);font-size:11.5px;color:var(--muted);padding-left:14px;position:relative}
   .dgaps li::before{content:'→';position:absolute;left:0;color:var(--signal)}
@@ -848,18 +855,30 @@ function determinePanelHTML(){
         : 'mechanism + corroborating legs + named risk + no unrebutted mitigation';
       verdict=`<div class="detv yes">DETERMINATION · ${esc(res.named_risk||'risk named')} — the evidence is sufficient (${esc(basis)}).</div>`;
     }
+    else if(d.verdict==='cleared'){
+      // Phase 82 — the affirmative-clear half: a grounded source-of-funds mitigation resolves a mechanism-only
+      // case (no corroborating legs, no nameable predicate) to a documented dismissal — the §12 clear at scale.
+      verdict=`<div class="detv clear">DOCUMENTED DISMISSAL · cleared — the source of funds is affirmatively explained (mechanism present, no corroborating legs, no nameable predicate, affirmative mitigation established).</div>`;
+    }
     else verdict=`<div class="detv no">NEEDS MORE INFO — a determination is not yet licensed. Gaps that name what to gather, or what signal to build (the §12 loop):<ul class="dgaps">${(d.missing||[]).map(m=>`<li>${esc(m)}</li>`).join('')}</ul></div>`;
   }
   // the §12 DISCOVERY-LOOP brief: the unmet, NON-gatherable atoms → signals/data to BUILD in aml-substrate
   const brief=(d&&d.signal_brief)||[];
   const briefHTML=brief.length?`<div class="sbrief"><div class="sbh">Signals to build (§12 discovery loop) · the unmet evidence GATHER cannot supply names what the program should build next</div><ul class="sblist">${brief.map(b=>`<li><span class="sba">${esc(b.atom)}</span><span class="sbl">${esc(b.label)}</span><span class="sbc">${esc([...(b.capabilities||[]),...(b.data_sources||[])].join(' · '))}</span></li>`).join('')}</ul></div>`:'';
+  const ge=(res&&res.grounded_evidence)||{};
   const risk=(det&&det.risk)||'';
   const mit=!!(det&&det.mit);
+  // Phase 82 — the GROUNDED §12 decision evidence the case carries in its substrate bundle (read from a
+  // record, NOT analyst-typed): the prior-STR predicate + the reconciled source-of-funds. The read-from-a-
+  // record input that closes the §12 loop at scale — the human still adjudicates the disposition.
+  const gePred=ge.predicate?`<div class="gei"><span class="gel">Predicate risk</span><b>${esc(ge.predicate)}</b><span class="ges">read from the prior-STR register${ge.predicate_source?' · '+esc(ge.predicate_source):''}</span></div>`:'';
+  const geMit=ge.mitigation_established?`<div class="gei"><span class="gel">Affirmative mitigation</span><b>established</b><span class="ges">reconciled source-of-funds (bank-observable)</span></div>`:'';
+  const gePanel=(gePred||geMit)?`<div class="gepanel"><div class="geh">Grounded decision evidence · read from the case record, not analyst-typed — the §12 loop at scale</div>${gePred}${geMit}</div>`:'';
   return `<div class="determine">
     <div class="dh">Determination · licensed by evidence-sufficiency, not frequency</div>
-    ${contrast}${atomList}
+    ${contrast}${gePanel}${atomList}
     <div class="detform">
-      <input id="detRisk" class="detinput" placeholder="State the specific risk you are filing for (e.g. human trafficking, fentanyl)" value="${esc(risk)}">
+      <input id="detRisk" class="detinput" placeholder="State the specific risk you are filing for (e.g. human trafficking, fentanyl)" value="${esc(risk||ge.predicate||'')}">
       <label class="detlbl"><input type="checkbox" id="detMit"${mit?' checked':''}> source-of-funds / anticipated-activity considered — no benign explanation remains</label>
       <button class="btn" id="detBtn">Determine</button>
     </div>

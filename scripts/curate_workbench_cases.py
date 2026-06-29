@@ -54,7 +54,7 @@ CASES_JSON = OUT_DIR / "cases.json"
 
 BADGE = "Illustrative data & outputs"
 SUBSTRATE_REPO = "aml-substrate"
-SUBSTRATE_HEAD = "fc98b09"   # Phase 75: substrate Phase 28 — entity-resolution emission (v0.5: named-identity + party identifiers[] + resolution_edges[], additive over v0.3)
+SUBSTRATE_HEAD = "294d3e5"   # Phase 82: substrate Phase 40 — the north-star DECISION-EVIDENCE emission (P39 prior_str_register + named_predicate_risk + flagged edges; P40 mitigation_evidence + exculpatory legs), additive over the v0.5 entity-resolution shape
 RUN_ID = "seed0-n40000-m2"
 EMIT_COMMAND = ("PYTHONPATH=<substrate>/src <substrate>/.venv/bin/python -m aml_substrate.cli "
                 "--clients 40000 --months 2 --seed 0 --emergence --monitor --emit-evidence "
@@ -231,13 +231,21 @@ def _measure_grounding(bundle_paths: dict, casework_dir: Path) -> dict:
                     f"cited evidence ({len(viols)} violation(s))" if caps else
                     f"casework refused ({len(viols)} violation(s))")
         else:
-            # NO drafter summary — casework rejected the bundle at the CONTRACT boundary, before drafting
-            # (Phase 72: a txn-LESS C14 party-leaf bundle fails casework's no-transactions contract — the
-            # kyc sign FRONTIER). Surface the honest contract reason, never a bare "0 violations".
-            detail = [ln.strip().lstrip("- ").strip()
-                      for ln in (proc.stdout + "\n" + proc.stderr).splitlines() if ln.strip().startswith("-")]
-            reason = "; ".join(detail) if detail else "casework produced no signable record"
-            note = f"casework refused at the contract boundary: {reason}"
+            # signed=False with NO blocking_violations — TWO honest failure modes (Phase 82 distinguishes them):
+            #   (1) CONTRACT-boundary rejection, NO drafter summary (e.g. a txn-LESS C14 party-leaf fails
+            #       casework's no-transactions contract before drafting — the Phase-72 kyc sign FRONTIER); OR
+            #   (2) NARRATIVE-SEAM failure — the drafter RAN but couldn't produce a verifiable STR ("seam left
+            #       open"; a txn-BEARING C14 shape casework's stub drafter can't draft-and-verify — the
+            #       Phase-82 frontier, e.g. CASE-P-0025128). Surface the honest reason, never a bare "0 violations".
+            text = proc.stdout + "\n" + proc.stderr
+            detail = [ln.strip().lstrip("- ").strip() for ln in text.splitlines() if ln.strip().startswith("-")]
+            seam = [ln.strip() for ln in text.splitlines() if "seam left open" in ln or "failed verification" in ln]
+            if summ and seam:
+                note = f"casework's narrative seam failed closed: {seam[-1]}"
+            elif detail:
+                note = f"casework refused at the contract boundary: {'; '.join(detail)}"
+            else:
+                note = "casework refused at the contract boundary: casework produced no signable record"
         out[cid] = {"signs": signs, "note": note}
     return out
 
@@ -316,6 +324,17 @@ def validate_v05_bundle(bundle: dict) -> list:
                 problems.append(f"identifier strength {i.get('strength')!r} not in {sorted(s for s in _STRENGTH_VOCAB if s)}")
     for e in (bundle.get("resolution_edges") or []):
         btw = e.get("between")
+        if e.get("status") == "flagged":
+            # Phase 82 (substrate P39): a prior-STR-register GROUNDING edge — a single subject/counterparty
+            # NAME matches a `matched_register` entry (the named-predicate evidence), a distinct shape from the
+            # v0.5 SHARES pair. between names >=1 party by NAME (not an entity_ref), so it is NOT referential-
+            # integrity-checked against the bundle's own refs; it MUST carry the matched_register id.
+            if not (isinstance(btw, list) and len(btw) >= 1):
+                problems.append(f"flagged resolution_edge.between must name >=1 party, got {btw!r}")
+            if not (e.get("matched_register") and str(e["matched_register"]).strip()):
+                problems.append(f"flagged resolution_edge must carry a matched_register (the prior-STR id), "
+                                f"got {e.get('matched_register')!r}")
+            continue
         if not (isinstance(btw, list) and len(btw) == 2):
             problems.append(f"resolution_edge.between must be a 2-list, got {btw!r}")
             continue
@@ -692,6 +711,16 @@ def selftest() -> int:
     _bp = validate_v05_bundle(_bad)
     if not any("unknown entity_ref" in p for p in _bp) or not any("strength" in p for p in _bp):
         failures.append(f"validate_v05_bundle failed to catch a dangling edge ref / bad strength vocab: {_bp}")
+    # Phase 82: a valid P39 `flagged` grounding edge (1-list between + matched_register) PASSES; one missing the
+    # matched_register is REJECTED (the new branch's reject path — the prior-STR grounding must be identified)
+    _flag_ok = {"parties": [{"party_id": "X", "entity_ref": "X"}],
+                "resolution_edges": [{"between": ["Nathan Lavoie"], "status": "flagged", "matched_register": "PSR-0872"}]}
+    if validate_v05_bundle(_flag_ok):
+        failures.append(f"validate_v05_bundle rejected a valid P39 flagged grounding edge: {validate_v05_bundle(_flag_ok)}")
+    _flag_bad = {"parties": [{"party_id": "X", "entity_ref": "X"}],
+                 "resolution_edges": [{"between": ["Nathan Lavoie"], "status": "flagged"}]}
+    if not any("matched_register" in p for p in validate_v05_bundle(_flag_bad)):
+        failures.append("validate_v05_bundle must reject a flagged edge missing its matched_register (the prior-STR id)")
     if _caps(_merge_bundles([_mon])) != ["C15", "C2"]:   # a single-bundle merge is idempotent on caps
         failures.append("_merge_bundles of one bundle should equal that bundle's caps")
 

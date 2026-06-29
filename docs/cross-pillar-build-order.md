@@ -70,6 +70,29 @@
 >   observable-only, no determination to sign). The remaining open frontiers: substrate org-fragment emit + the
 >   discriminating-exposure-signal + open-data Stage 2/3 + a C20 jurisdiction leg; casework's CI-promotion criterion
 >   + C17 grounding.
+>
+> **UPDATE 2026-06-29 (Phase 82 — the north-star DECISION-EVIDENCE consume + casework re-vendor; one measure-first abort):**
+> aml-substrate advanced **`f7fbdb0` → `294d3e5` (Phases 38/39/40)**; aml-casework **`076fb8e` → `04cc335` (Phases 20/21)**.
+> signal-watch **Phase 82** consumed three of four READY emissions; the fourth aborted measure-first:
+> - **(P39 predicate + P40 mitigation → the §12 loop closes from GROUNDED evidence at scale)** — CONSUMED into the
+>   workbench (`serve_workbench.determine_case` READS the prior-STR predicate + reconciled mitigation from each
+>   bundle; `evidence_requirements.py` BYTE-UNCHANGED, the A1 guard). On the 376-case slice: **1 KYC-integrity
+>   determination** (grounded prior-STR predicate; 31 over the full 23,651-customer population) + **17 affirmative
+>   `cleared`** (reconciled source-of-funds — the Lakeshore thesis at scale). HONEST BOUND: the predicate does NOT
+>   advance the **ML** file loop (0 slice ML cases have mechanism + 2 legs lacking only the predicate) → substrate
+>   Ask #3 (the second leg) stays the dominant ML blocker. The 8 non-merge dists + `dist/merge` byte-frozen
+>   (companion-only). → [`substrate-northstar-evidence-emission-PLAN-BRIEF.md`](substrate-northstar-evidence-emission-PLAN-BRIEF.md) #1/#2 CONSUMED.
+> - **(casework P20 C15/C4 reconcile → north-star FILES SIGN at scale)** — re-vendored `04cc335`; the slice's
+>   end-to-end SIGNED coverage moved from **128/376 to 256/376** (the C15-throughput + C4 any-channel cases that
+>   fail-closed now sign; verifier strictness intact). → [`casework-northstar-signing-PLAN-BRIEF.md`](casework-northstar-signing-PLAN-BRIEF.md) #2 LANDED.
+> - **(P38 org-fragment → the merge ORG-collision class) → ABORTED measure-first (still one-sided).** substrate
+>   BUILT the org fork (364 `O-FRAG` records, 16 flag-intersected), but on signal-watch's OWN distill/scorer path
+>   the fragments share NO resolution handle (perturbed name + fresh corp#/address — no shared identifier), so
+>   they never become merge CANDIDATES → 0 uphold, all-reject. `dist/merge` BYTE-FROZEN (untouched); the SHARPENED
+>   ask (retain a shared incorporation_number/address handle) → [`substrate-org-fragment-emit-PLAN-BRIEF.md`](substrate-org-fragment-emit-PLAN-BRIEF.md).
+> - **Still OPEN:** substrate Ask #3 (second corroborating leg — the ML file-loop blocker) + Ask #4 (ownership
+>   edges) + the org-fragment resolution handle + a C20 jurisdiction leg + open-data Stage 2/3; casework's
+>   CI-promotion criterion + C17 grounding + the txn-bearing-C14 sign frontier.
 
 ## What changed since the last snapshot
 

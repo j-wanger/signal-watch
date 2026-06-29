@@ -584,6 +584,44 @@ await T.runDetermine();
 ok(ELEMENTS.surf._html.includes(escH('<img src=x>')) && !/DETERMINATION · <img src=x>/.test(ELEMENTS.surf._html),
    'XSS: a model/operator-supplied named risk is esc()-escaped in the determination verdict');
 
+/* ---------- Phase 82: the §12 loop closes from GROUNDED EVIDENCE (read from the bundle, NOT analyst-typed) ---------- */
+// the PREDICATE half — a grounded prior-STR predicate reaches a kyc determination with NO analyst typing
+DETERMINE_RESPONSE = {
+  badge:'Illustrative data & outputs', case_id:'CASE-P-MULE', crime_type:'kyc_integrity', named_risk:'drug trafficking',
+  grounded_evidence:{ predicate:'drug trafficking', predicate_source:'PSR-0872', mitigation_established:false, mitigation:null },
+  frequency_context:{ combo:'C14', n_precedent:5, gate:'human-gate' },
+  determination:{ crime_type:'kyc_integrity', verdict:'determination', sufficient:true, missing:[],
+    completeness:{ str:{required:[],satisfied:[],missing:[]}, present_atom_ids:['KYC-A1'],
+      atoms:[ { id:'KYC-A1', label:'KYC-integrity mechanism', kind:'mechanism', present:true } ] } } };
+ELEMENTS.detRisk.value = ''; ELEMENTS.detMit.checked = false;     // NO analyst typing — the evidence is grounded
+await T.runDetermine();
+const dgp = ELEMENTS.surf._html;
+ok(/Grounded decision evidence · read from the case record/.test(dgp),
+   'Phase 82: the grounded-evidence panel renders (the read-from-a-record consume, not analyst-typed)');
+ok(/Predicate risk<\/span><b>drug trafficking<\/b>/.test(dgp) && /read from the prior-STR register · PSR-0872/.test(dgp),
+   'Phase 82: the grounded predicate + its prior-STR register source render (the P39 consume)');
+ok(/DETERMINATION · drug trafficking — the evidence is sufficient/.test(dgp),
+   'Phase 82: the grounded predicate alone (no analyst typing) reaches a kyc determination — the §12 loop at scale');
+ok(LAST_DETERMINE_BODY && LAST_DETERMINE_BODY.named_risk === '',
+   'Phase 82: the analyst typed NOTHING — the predicate came from the record, not the form');
+
+// the MITIGATION half — a grounded affirmative mitigation resolves a mechanism-only case to a documented dismissal
+DETERMINE_RESPONSE = {
+  badge:'Illustrative data & outputs', case_id:'CASE-P-MULE', crime_type:'money_laundering', named_risk:null,
+  grounded_evidence:{ predicate:null, predicate_source:null, mitigation_established:true,
+    mitigation:{ established:true, basis:'corroborated_legitimate_inflow' } },
+  frequency_context:{ combo:'C2+C3', n_precedent:9, gate:'review' },
+  determination:{ crime_type:'money_laundering', verdict:'cleared', sufficient:false, missing:[],
+    completeness:{ str:{required:[],satisfied:[],missing:[]}, present_atom_ids:['ML-A1'],
+      atoms:[ { id:'ML-A1', label:'Layering mechanism', kind:'mechanism', present:true } ] } } };
+ELEMENTS.detRisk.value = ''; ELEMENTS.detMit.checked = false;
+await T.runDetermine();
+const dgc = ELEMENTS.surf._html;
+ok(/Affirmative mitigation<\/span><b>established<\/b>/.test(dgc) && /reconciled source-of-funds/.test(dgc),
+   'Phase 82: the grounded affirmative mitigation renders (the P40 consume)');
+ok(/DOCUMENTED DISMISSAL · cleared/.test(dgc) && /source of funds is affirmatively explained/.test(dgc),
+   'Phase 82: a grounded mitigation resolves a mechanism-only case to a documented dismissal (the §12 clear at scale)');
+
 /* ---------- Phase 72: the kyc/C14 consume — determination from C14 + the honest sign frontier ---------- */
 // a txn-less C14 party-leaf: the queue badge surfaces the casework no-transactions CONTRACT reason (the frontier)
 const KYC_CASE = { case_id:'CASE-P-KYC', display:{ name:'Noor Okafor', synthetic_label:true },

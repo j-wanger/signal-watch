@@ -315,7 +315,9 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   cases still fail-CLOSED where the party shape doesn't ground (`e2e_note`) — so it is no longer a blanket
   no-transactions refusal; the txn-less party-leaf C14 CAN sign. **Phase 81** consumes substrate's sanctions ARC
   (Phases 35/36/37 @`f7fbdb0`) HONESTLY — both planned consumes hit their measure-first branches: the merge
-  org-name-collision class ABORTED (substrate fragments persons not orgs → one-sided; `dist/merge` byte-frozen →
+  org-name-collision class ABORTED — RE-CHECKED Phase 82 against substrate P38's org-fragment emit (`294d3e5`):
+  STILL one-sided (substrate DID emit `O-FRAG` org fragments, but they share no resolution handle — perturbed name
+  + fresh corp#/address — so they never become merge candidates → 0 uphold); `dist/merge` byte-frozen →
   `docs/substrate-org-fragment-emit-PLAN-BRIEF.md`); the **C17 exposure-via-ownership leg is DEGENERATE as a
   determination advance** (13 sanctioned-BO customers, ALL oracle-clear [label-blind, corr≈0]; a C17 leg moves 0 to
   the bar — they carry no laundering mechanism) so it ships **OBSERVABLE-ONLY**: a `/sanctions-c17-exposure` route +
@@ -326,7 +328,20 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   follow-on → `docs/substrate-exposure-signal-PLAN-BRIEF.md`). P37's `counterparty_country` (beyond US/CA) renders as
   an OBSERVABLE (no leg; a C20 jurisdiction leg is a named future item). The open-sanctions ship-compliance license
   matrix → `docs/open-sanctions-data-fork-PLAN-BRIEF.md` (OpenSanctions CC-BY-NC = no-ship; OFAC PD / UK OGL = ship).
-  Slice **376** (substrate v0.5 @fc98b09 + a cross-case CO-REFERENCE pass), coverage **128/376**, funnel (auto/human/review) 202/111/63; 6 kyc cases (2 sign). The bundle's
+  Slice **376** (substrate @**294d3e5** + a cross-case CO-REFERENCE pass), coverage **256/376** (casework
+  re-vendored @**04cc335** — the Phase-20 C15/C4 reconcile lets the throughput-conduit + any-channel cases sign),
+  funnel (auto/human/review) 202/111/63; 6 kyc cases (1 sign — a txn-bearing C14 shape casework can't reproduce
+  fails-closed honestly). **Phase 82 — the §12 loop closes from GROUNDED decision evidence:**
+  `serve_workbench.determine_case` (`_bundle_evidence`) READS the prior-STR predicate (substrate P39
+  `named_predicate_risk` via a `flagged` resolution edge) + the affirmative mitigation (P40 `mitigation_evidence`)
+  from each bundle — read-from-a-record, NOT analyst-typed (the human still adjudicates the disposition) — so the
+  slice resolves **1 KYC-integrity determination** (grounded prior-STR predicate; 31 over the full 23,651-customer
+  population) + **17 affirmative `cleared`** (reconciled source-of-funds — the Lakeshore "source of funds is the
+  difference" thesis at scale), was 0/0; `workbench.html` `paintDet` renders the grounded-evidence panel + the
+  `cleared` branch; `evidence_requirements.py` BYTE-UNCHANGED (A1 — the predicate/mitigation are DATA the frozen
+  engine already reads; a case carrying BOTH a predicate and mitigation is NOT cleared, the prior-STR predicate
+  blocks the affirmative clear). The ML file loop still needs substrate's SECOND corroborating leg (Ask #3 —
+  `docs/substrate-northstar-evidence-emission-PLAN-BRIEF.md`). The bundle's
   `related_parties[]` BO graph renders as the case network (`boGraphHTML`; "N pct"); the gather/finale DEMO case
   resolves from the OSINT corpus (`gather_demo_case_id`), re-curate-robust. **Phase 73** AUTHORS the north-star
   rich case — a SEPARATE companion source `data/casefile/{case.json,schema.md}` (substrate/casework PARKED, the

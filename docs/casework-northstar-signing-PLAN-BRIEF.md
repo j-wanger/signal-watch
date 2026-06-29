@@ -2,10 +2,26 @@
 
 > **A signal-watch → aml-casework handoff brief** (the Phase-67–79 vendoring pattern: signal-watch authors the
 > contract; casework implements the grounding verifiers on its own lifecycle — *no code lands in casework from
-> here*). Synthetic / illustrative; **no rate, score, or multiplier is claimed.** **Pinned to the vendored
-> aml-casework HEAD `076fb8e` (Phase 19), code-verified 2026-06-28.** Companion to
+> here*). Synthetic / illustrative; **no rate, score, or multiplier is claimed.** **Re-vendored to aml-casework
+> HEAD `04cc335` (Phase 21); Ask #2 (C15) LANDED, signal-watch Phase 82 (2026-06-29).** Companion to
 > [`northstar-at-scale-build-order.md`](northstar-at-scale-build-order.md) and the substrate half
 > [`substrate-northstar-evidence-emission-PLAN-BRIEF.md`](substrate-northstar-evidence-emission-PLAN-BRIEF.md).
+
+## STATUS (signal-watch Phase 82 — Ask #1 done earlier; Ask #2 LANDED via the casework P20 re-vendor)
+
+- **Ask #1 — fan-IN C3 grounding** was DONE at casework Phase 19 (`_c3_fan_in`) and consumed at signal-watch Phase
+  79 (the matched-pair Lakeshore co-sign); the original brief's "190/376 C3 fail-close" measurement was STALE
+  (pre-Phase-19).
+- **Ask #2 — C15 shell / nominee replay** is LANDED: casework **Phase 20** (`a059fc5`) reconciled C15 (shell
+  throughput) + C4 (any-channel structuring) to substrate's real `ShellDetector`/`StructuringDetector`
+  definitions; signal-watch re-vendored `076fb8e → 04cc335` and re-measured the signing funnel over the 376-case
+  slice: **the cases casework SIGNS end-to-end moved from 128/376 to 256/376** (the C15-throughput-conduit + C4
+  any-channel cases that previously fail-closed now sign for the right reason — verifier strictness intact: it
+  signs the legitimate topology, still refuses what it cannot reproduce). Casework Phase 21 (`7398ddc`, drift
+  tripwire) is internal hardening, picked up free by the re-vendor.
+- **Ask #3 — the grounded STR-narrative contract** stays a documentation clarification (the DECIDE consume remains
+  the live narrative author). The honest sign FRONTIER persists: a txn-bearing C14 shape casework cannot reproduce
+  a signable record from still fails-CLOSED (the "refusal IS defensibility" climax) — a named casework follow-on.
 
 ## Intent
 

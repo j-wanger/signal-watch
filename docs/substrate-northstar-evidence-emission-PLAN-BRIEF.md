@@ -2,10 +2,38 @@
 
 > **A signal-watch → aml-substrate handoff brief** (the Phase-55–79 pattern: signal-watch authors the contract;
 > the sibling implements + measures it on its own lifecycle — *no code lands in substrate from here*). Synthetic /
-> illustrative; **no rate, score, or multiplier is claimed.** **Pinned to verified substrate HEAD `f7fbdb0`
-> (Phase 37), code-verified 2026-06-28.** Companion to
+> illustrative; **no rate, score, or multiplier is claimed.** **Re-pinned to substrate HEAD `294d3e5`
+> (Phase 40); Asks #1 + #2 CONSUMED by signal-watch Phase 82 (2026-06-29).** Companion to
 > [`northstar-at-scale-build-order.md`](northstar-at-scale-build-order.md) (the coordination overview) and
 > [`casework-northstar-signing-PLAN-BRIEF.md`](casework-northstar-signing-PLAN-BRIEF.md) (the sibling half).
+
+## STATUS (signal-watch Phase 82 — Asks #1 + #2 BUILT by substrate Phases 39/40 and CONSUMED)
+
+substrate built the two highest-leverage asks and signal-watch consumed them into the workbench §12 loop
+(companion-only; `evidence_requirements.py` BYTE-UNCHANGED — the A1 guard; the predicate + mitigation are
+read-from-a-record DATA the frozen engine already takes):
+
+- **Ask #1 — the predicate-bearing reference layer** → **substrate Phase 39** (`1483c84`): emits
+  `reference.prior_str_register[]` + `named_predicate_risk` + `flagged` resolution edges, label-blind. **CONSUMED:**
+  `serve_workbench.determine_case` READS the grounded predicate from the bundle (no analyst typing); on the
+  committed 376-case slice **1 KYC-integrity case reaches a determination** from a grounded prior-STR predicate
+  (was 0 — every case stalled at `needs_more_info`); over the full 23,651-customer population the grounded predicate
+  reaches the KYC-integrity bar on **31** cases. HONEST BOUND: the predicate does NOT advance the **ML** file loop
+  on this slice (**0** ML cases have mechanism + 2 legs lacking only the predicate) — the ML file loop still needs
+  Ask #3 (the second corroborating leg). A grounded predicate is a real escalation the exogenous oracle is blind to
+  (never an accuracy claim — the Phase-78 over-flag framing holds).
+- **Ask #2 — affirmative-mitigation OBSERVABLE evidence** → **substrate Phase 40** (`978c8fe`): emits
+  `mitigation_evidence{established, basis, corroborants[]}` + `exculpatory:true` legs, ≥2-corroborant (non-echo),
+  oracle-firewalled. **CONSUMED:** the workbench reads it to earn the affirmative `cleared` verdict; on the slice
+  **17 ML cases affirmatively CLEAR** from a reconciled source-of-funds (was clear-by-absence only) — the
+  north-star Lakeshore "the source of funds is the difference" thesis GENERATED at scale, and a REDUCTION of
+  over-flagging. A correct interaction surfaced: a case carrying BOTH a grounded predicate and mitigation is
+  NOT cleared (the unaddressed prior-STR predicate blocks the affirmative clear — the engine staying honest).
+
+**Still OPEN (the named frontier):** Ask **#3** (the second corroborating leg as a fired signal — the dominant ML
+file-loop blocker on this slice) + Ask **#4** (multi-hop `ownership_edges` + `flagged`/`excluded` resolution edges).
+These remain the highest-leverage substrate emissions for the ML §12 file loop. Re-verify the live HEAD before
+acting (sibling state drifts — [[cross-pillar-review-verify-sibling-repo]]).
 
 ## Intent
 

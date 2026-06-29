@@ -16,15 +16,19 @@ byte-unchanged) — it is a standalone, sibling-gated check, mirroring ``corpus_
 - **Honest-skip** — when the substrate sibling is absent (CI / no checkout), it skips; casework's copies stay
   the pinned oracle.
 
-Scope = the screening copies with a NAMED substrate-symbol provenance: the C7 peer-anomaly floor
-(``business_activity.MIN_INFLOW_CENTS``) and the C8 income-mismatch floor + monthly multiple
-(``income_mismatch.MIN_INFLOW_CENTS`` / ``MISMATCH_MONTHLY_MULTIPLE``). The casework-side value is IMPORTED
-from :mod:`grounding_replay` (never re-hardcoded here) so the check reconciles the LIVE copy — there is no
-third copy to drift. The C14 ``_kyc_defect`` PREDICATE is branch LOGIC, not a constant; a source-literal diff
-cannot capture it, so it is reconciled BEHAVIORALLY (run substrate's real predicate over a synthetic party
-battery) in ``tests/test_c14_behavioral_reconciliation.py``. The replay assertions (C2-C5, C15) were Phase-6
-reconciled-to-SEMANTICS, not copied from a single substrate constant, so they have no literal to diff and are
-OUT of scope (a named boundary, not a silent omission).
+Scope = every casework copy with a NAMED substrate-symbol provenance and a literal to diff. The screening
+floors (Phase 10/11): the C7 peer-anomaly floor (``business_activity.MIN_INFLOW_CENTS``) and the C8
+income-mismatch floor + monthly multiple (``income_mismatch.MIN_INFLOW_CENTS`` / ``MISMATCH_MONTHLY_MULTIPLE``).
+The replay constants (Phase 20): the C15 shell throughput leg (``shell.RETENTION_TOLERANCE`` float /
+``MIN_THROUGHPUT_CENTS`` / ``MIN_COUNTERPARTIES``) and the C4 structuring band leg (``structuring.BAND_LOW_CENTS``
+/ ``BAND_HIGH_CENTS`` / ``MIN_DEPOSITS`` / ``AGGREGATE_THRESHOLD_CENTS`` / ``WINDOW`` timedelta) — these are
+re-derivations of substrate detectors over copied literals, so they DO diff (Phase 21 widened the extractor to
+read float + timedelta). The casework-side value is IMPORTED from :mod:`grounding_replay` (never re-hardcoded
+here) so the check reconciles the LIVE copy — there is no third copy to drift. The C14 ``_kyc_defect`` PREDICATE
+is branch LOGIC, not a constant; a source-literal diff cannot capture it, so it is reconciled BEHAVIORALLY (run
+substrate's real predicate over a synthetic party battery) in ``tests/test_c14_behavioral_reconciliation.py``.
+Still OUT of scope (a named boundary, not a silent omission): C2/C3/C5, the C15 generic-trading name-match leg,
+and the C4 cash-only leg — Phase-6 reconciled-to-SEMANTICS, with no single substrate constant to diff.
 
 Substrate root resolution: ``AML_SUBSTRATE_ROOT`` env > the conventional sibling checkout (``../aml-substrate``).
 """
@@ -37,9 +41,17 @@ from dataclasses import dataclass
 
 from aml_casework.corpus_grounding import DriftReport
 from aml_casework.grounding_replay import (
+    _CTR_THRESHOLD_CENTS,
+    _MIN_SHELL_COUNTERPARTIES,
+    _MIN_SHELL_THROUGHPUT_CENTS,
+    _MIN_STRUCTURING_COUNT,
     _MISMATCH_MIN_INFLOW_CENTS,
     _MISMATCH_MONTHLY_MULTIPLE,
     _PEER_ANOMALY_MIN_INFLOW_CENTS,
+    _SHELL_RETENTION_TOLERANCE,
+    _STRUCTURING_24H_WINDOW,
+    _STRUCTURING_BAND_HIGH_CENTS,
+    _STRUCTURING_BAND_LOW_CENTS,
 )
 
 # The substrate ref casework's screening constants were copied from (Phase 11/14, copied-with-provenance).
@@ -57,19 +69,25 @@ _DETECTOR_SUBDIR = os.path.join("src", "aml_substrate", "monitor", "detectors")
 
 @dataclass(frozen=True)
 class _CopiedConstant:
-    """One integer literal casework COPIED from a named substrate detector symbol. ``casework_value`` is the
-    LIVE casework copy (imported from :mod:`grounding_replay`), reconciled against the live substrate source."""
+    """One literal casework COPIED from a named substrate detector symbol. ``casework_value`` is the LIVE
+    casework copy (imported from :mod:`grounding_replay`), reconciled against the live substrate source. A
+    value is an ``int``/``float``, or — for a ``timedelta`` copy (structuring.py ``WINDOW``) — its total-seconds
+    ``float`` (so a substrate unit-rewrite of the same duration is in_sync, not a false drift)."""
 
-    capability: str  # the screening capability the copy grounds (C7 / C8)
+    capability: str  # the capability the copy grounds (C7 / C8 screening; C15 / C4 replay)
     detector_file: str  # the substrate detector source filename
     symbol: str  # the module-level symbol name in that file
-    casework_value: int  # the value casework copied (the reconciliation target — the live copy)
+    casework_value: int | float  # the value casework copied (the reconciliation target — the live copy)
     casework_site: str  # where casework holds the copy (named in the warning)
 
 
-# The copied screening constants with a NAMED substrate-symbol provenance (Phase 10/11). The C7 floor and the
-# C8 floor are INDEPENDENT copies of two distinct substrate symbols that numerically coincide ($25k) — both
-# are reconciled. (C14's predicate is branch logic, reconciled behaviorally — see the module docstring.)
+# The copied constants with a NAMED substrate-symbol provenance. The C7/C8 screening floors (Phase 10/11) are
+# INDEPENDENT copies of two distinct substrate symbols that numerically coincide ($25k) — both reconciled. The
+# C15/C4 replay constants (Phase 20) extend the table to the shell.py / structuring.py copies: a float
+# (RETENTION_TOLERANCE) and a timedelta (WINDOW) join here once the extractor reads them (Phase 21). The 8th —
+# AGGREGATE_THRESHOLD_CENTS vs casework's regulatory _CTR_THRESHOLD_CENTS — is reconciled despite being framed
+# regulatory (the C7/C8 coincident-symbol precedent: reconcile every substrate symbol the grounding depends on).
+# (C14's predicate is branch logic, reconciled behaviorally — see the module docstring.)
 _COPIED_CONSTANTS: tuple[_CopiedConstant, ...] = (
     _CopiedConstant(
         "C7",
@@ -92,6 +110,64 @@ _COPIED_CONSTANTS: tuple[_CopiedConstant, ...] = (
         _MISMATCH_MONTHLY_MULTIPLE,
         "grounding_replay._MISMATCH_MONTHLY_MULTIPLE",
     ),
+    # C15 — substrate shell.py ShellDetector (Phase 20): a float tolerance + two int floors.
+    _CopiedConstant(
+        "C15",
+        "shell.py",
+        "RETENTION_TOLERANCE",
+        _SHELL_RETENTION_TOLERANCE,
+        "grounding_replay._SHELL_RETENTION_TOLERANCE",
+    ),
+    _CopiedConstant(
+        "C15",
+        "shell.py",
+        "MIN_THROUGHPUT_CENTS",
+        _MIN_SHELL_THROUGHPUT_CENTS,
+        "grounding_replay._MIN_SHELL_THROUGHPUT_CENTS",
+    ),
+    _CopiedConstant(
+        "C15",
+        "shell.py",
+        "MIN_COUNTERPARTIES",
+        _MIN_SHELL_COUNTERPARTIES,
+        "grounding_replay._MIN_SHELL_COUNTERPARTIES",
+    ),
+    # C4 — substrate structuring.py StructuringDetector (Phase 20): the band + count + aggregate + 24h WINDOW.
+    _CopiedConstant(
+        "C4",
+        "structuring.py",
+        "BAND_LOW_CENTS",
+        _STRUCTURING_BAND_LOW_CENTS,
+        "grounding_replay._STRUCTURING_BAND_LOW_CENTS",
+    ),
+    _CopiedConstant(
+        "C4",
+        "structuring.py",
+        "BAND_HIGH_CENTS",
+        _STRUCTURING_BAND_HIGH_CENTS,
+        "grounding_replay._STRUCTURING_BAND_HIGH_CENTS",
+    ),
+    _CopiedConstant(
+        "C4",
+        "structuring.py",
+        "MIN_DEPOSITS",
+        _MIN_STRUCTURING_COUNT,
+        "grounding_replay._MIN_STRUCTURING_COUNT",
+    ),
+    _CopiedConstant(
+        "C4",
+        "structuring.py",
+        "AGGREGATE_THRESHOLD_CENTS",
+        _CTR_THRESHOLD_CENTS,
+        "grounding_replay._CTR_THRESHOLD_CENTS",
+    ),
+    _CopiedConstant(
+        "C4",
+        "structuring.py",
+        "WINDOW",
+        _STRUCTURING_24H_WINDOW.total_seconds(),  # the timedelta copy, normalized to total-seconds
+        "grounding_replay._STRUCTURING_24H_WINDOW",
+    ),
 )
 
 
@@ -100,24 +176,85 @@ def substrate_root(root: str | None = None) -> str:
     return root or os.environ.get(_ROOT_ENV) or _SIBLING_SUBSTRATE_ROOT
 
 
-def _module_int_literals(path: str) -> dict[str, int] | None:
-    """Every module-level ``NAME = <int literal>`` (plain or annotated) in a Python source file, read by AST
-    (no import, no exec).
+# ``datetime.timedelta`` unit -> seconds, mirroring the constructor signature. Phase 20 copied a ``timedelta``
+# constant (structuring.py ``WINDOW``); reconciling it as a total-seconds SCALAR (not a reconstructed object)
+# means a substrate unit-rewrite of the SAME duration (``hours=24`` -> ``days=1``) is in_sync, not a false drift.
+_TIMEDELTA_UNIT_SECONDS: dict[str, float] = {
+    "days": 86_400.0,
+    "seconds": 1.0,
+    "microseconds": 0.000_001,
+    "milliseconds": 0.001,
+    "minutes": 60.0,
+    "hours": 3_600.0,
+    "weeks": 604_800.0,
+}
+# The positional order of the ``timedelta(...)`` constructor (days, seconds, microseconds, ...).
+_TIMEDELTA_POSITIONAL: tuple[str, ...] = (
+    "days",
+    "seconds",
+    "microseconds",
+    "milliseconds",
+    "minutes",
+    "hours",
+    "weeks",
+)
+
+
+def _numeric_constant(node: ast.expr | None) -> int | float | None:
+    """The value of an ``int``/``float`` literal node (``bool`` excluded — an ``int`` subclass), else ``None``."""
+    if isinstance(node, ast.Constant) and isinstance(node.value, int | float) and not isinstance(node.value, bool):
+        return node.value
+    return None
+
+
+def _timedelta_seconds(call: ast.Call) -> float | None:
+    """Total seconds of a ``timedelta(...)`` / ``<alias>.timedelta(...)`` call built from CONSTANT numeric args,
+    or ``None`` when the node is not a statically-readable timedelta literal (a non-timedelta call, a computed
+    arg, ``**kwargs``, or an unknown unit). ``None`` is the honest "cannot reconcile this copy" signal — the
+    caller fail-louds, never guesses, never raises."""
+    func = call.func
+    is_timedelta = (isinstance(func, ast.Name) and func.id == "timedelta") or (
+        isinstance(func, ast.Attribute) and func.attr == "timedelta"
+    )
+    if not is_timedelta:
+        return None
+    if len(call.args) > len(_TIMEDELTA_POSITIONAL):  # more positionals than the signature — not a readable literal
+        return None
+    total = 0.0
+    for unit, arg in zip(_TIMEDELTA_POSITIONAL, call.args, strict=False):  # fewer positionals than 7 is valid
+        value = _numeric_constant(arg)
+        if value is None:
+            return None
+        total += value * _TIMEDELTA_UNIT_SECONDS[unit]
+    for kw in call.keywords:
+        if kw.arg is None or kw.arg not in _TIMEDELTA_UNIT_SECONDS:  # **kwargs or an unknown unit
+            return None
+        value = _numeric_constant(kw.value)
+        if value is None:
+            return None
+        total += value * _TIMEDELTA_UNIT_SECONDS[kw.arg]
+    return total
+
+
+def _module_literals(path: str) -> dict[str, int | float] | None:
+    """Every module-level ``NAME = <literal>`` (plain or annotated) in a Python source file, read by AST (no
+    import, no exec). A literal is an ``int`` or ``float`` constant, or a ``timedelta(...)`` call of constant
+    numeric args (normalized to total-seconds, ``float``).
 
     Read-only and import-free: parses the substrate source as DATA, so reconciling a constant never drags in
-    the substrate engine. Only plain int literals are captured (``bool`` is excluded — it is an ``int``
-    subclass); a COMPUTED constant is absent from the map, so a caller's ``.get`` fails closed to a warning.
-    Returns ``None`` when the source cannot be read/parsed (a malformed / mid-refactor checkout) — the caller
-    emits a warning and NEVER raises (the warn-never-fail contract; a broken sibling must not crash the
-    tripwire)."""
+    the substrate engine. ``bool`` is excluded (an ``int`` subclass); a COMPUTED constant — or a timedelta the
+    extractor cannot statically read — is ABSENT from the map, so a caller's ``.get`` fails closed to a warning
+    (never a guess). Returns ``None`` when the source cannot be read/parsed (a malformed / mid-refactor
+    checkout) — the caller emits a warning and NEVER raises (the warn-never-fail contract; a broken sibling
+    must not crash the tripwire)."""
     try:
         with open(path, encoding="utf-8") as fh:
             tree = ast.parse(fh.read(), filename=path)
     except (OSError, SyntaxError):
         return None
-    out: dict[str, int] = {}
+    out: dict[str, int | float] = {}
     for node in tree.body:
-        # plain `NAME = <int>` (possibly chained targets) or annotated `NAME: int = <int>`
+        # plain `NAME = <literal>` (possibly chained targets) or annotated `NAME: T = <literal>`
         if isinstance(node, ast.Assign):
             targets = [t for t in node.targets if isinstance(t, ast.Name)]
             value: ast.expr | None = node.value
@@ -126,10 +263,13 @@ def _module_int_literals(path: str) -> dict[str, int] | None:
             value = node.value  # None for a bare annotation (`NAME: int`) — skipped below
         else:
             continue
-        if not (isinstance(value, ast.Constant) and isinstance(value.value, int) and not isinstance(value.value, bool)):
+        literal = _numeric_constant(value)
+        if literal is None and isinstance(value, ast.Call):
+            literal = _timedelta_seconds(value)
+        if literal is None:
             continue
         for target in targets:
-            out[target.id] = value.value
+            out[target.id] = literal
     return out
 
 
@@ -153,7 +293,7 @@ def check_detector_drift(root: str | None = None) -> DriftReport:
             ],
         )
     warnings: list[str] = []
-    literals_by_file: dict[str, dict[str, int] | None] = {}
+    literals_by_file: dict[str, dict[str, int | float] | None] = {}
     for c in _COPIED_CONSTANTS:
         path = os.path.join(detectors_dir, c.detector_file)
         if not os.path.isfile(path):
@@ -163,7 +303,7 @@ def check_detector_drift(root: str | None = None) -> DriftReport:
             )
             continue
         if path not in literals_by_file:
-            literals_by_file[path] = _module_int_literals(path)
+            literals_by_file[path] = _module_literals(path)
         literals = literals_by_file[path]
         if literals is None:
             warnings.append(

@@ -29,9 +29,9 @@
     "name": "General Partners",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -87,7 +87,7 @@
     "name": "Supermarkets Enterprises",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -149,9 +149,9 @@
     "name": "General Trading Co.",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -209,7 +209,7 @@
     "name": "Grocery Enterprises",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -325,7 +325,7 @@
     "name": "Offices Partners",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -383,7 +383,7 @@
     "name": "Residential Trading Co.",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -445,7 +445,7 @@
     "name": "General Logistics",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -503,7 +503,7 @@
     "name": "Landscaping Ventures",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -561,7 +561,7 @@
     "name": "Management Services Ltd.",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -619,9 +619,9 @@
     "name": "Retail Imports",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -679,7 +679,7 @@
     "name": "Retail Capital",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -737,9 +737,9 @@
     "name": "Offices Imports",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -797,9 +797,9 @@
     "name": "Landscaping Trading Co.",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -855,9 +855,9 @@
     "name": "Landscaping Logistics",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -915,7 +915,7 @@
     "name": "Electrical Logistics",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -973,9 +973,9 @@
     "name": "Electrical Enterprises",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -1031,9 +1031,9 @@
     "name": "Full-Service Trading Co.",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -1089,9 +1089,9 @@
     "name": "Grocery Enterprises",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -1147,9 +1147,9 @@
     "name": "Electrical Partners",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -1205,9 +1205,9 @@
     "name": "Offices Services Ltd.",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -1263,9 +1263,9 @@
     "name": "Landscaping Services Ltd.",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -1321,9 +1321,9 @@
     "name": "Management Imports",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -1379,9 +1379,9 @@
     "name": "General Imports",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -1437,9 +1437,9 @@
     "name": "Retail Partners",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -1495,7 +1495,7 @@
     "name": "Residential Imports",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -1553,9 +1553,9 @@
     "name": "Landscaping Trading Co.",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -1611,9 +1611,9 @@
     "name": "General Partners",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": "fp_trap",
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -1669,7 +1669,7 @@
     "name": "General Ventures",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -1727,9 +1727,9 @@
     "name": "Retail Logistics",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -1785,7 +1785,7 @@
     "name": "Offices Trading Co.",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -1843,9 +1843,9 @@
     "name": "Offices Partners",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -1901,9 +1901,9 @@
     "name": "Supermarkets Imports",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -1959,9 +1959,9 @@
     "name": "General Trading Co.",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -2017,9 +2017,9 @@
     "name": "General Ventures",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -2077,9 +2077,9 @@
     "name": "Khadija Ferreira",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -2136,9 +2136,9 @@
     "name": "Zane Dubois",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -2260,7 +2260,7 @@
     "name": "Ximena Kowalski",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -2328,7 +2328,7 @@
     "name": "Priya Romano",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -2519,9 +2519,9 @@
     "name": "Sven Yusuf",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -2642,9 +2642,9 @@
     "name": "Rosa Yusuf",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -2704,9 +2704,9 @@
     "name": "Uma Gagnon",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -2763,9 +2763,9 @@
     "name": "Liam Quirke",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -2824,7 +2824,7 @@
     "name": "Farah Ivanov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -2887,9 +2887,9 @@
     "name": "Uma Okafor",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": "thin",
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -2946,9 +2946,9 @@
     "name": "Uma Okafor",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -3067,9 +3067,9 @@
     "name": "Khadija Ueda",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -3183,9 +3183,9 @@
     "name": "Ximena Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "EDD",
@@ -3243,7 +3243,7 @@
     "name": "Viktor Dubois",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -3364,7 +3364,7 @@
     "name": "Jin Ivanov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -3430,9 +3430,9 @@
     "name": "Rosa Romano",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -3489,9 +3489,9 @@
     "name": "Gabriel Petrov",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -3549,9 +3549,9 @@
     "name": "Uma Chen",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -3613,9 +3613,9 @@
     "name": "Priya Ueda",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -3734,9 +3734,9 @@
     "name": "Rosa Jain",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -3798,7 +3798,7 @@
     "name": "Viktor Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -3864,9 +3864,9 @@
     "name": "Zane Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -3930,9 +3930,9 @@
     "name": "Rosa Jain",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -4172,9 +4172,9 @@
     "name": "Ximena Okafor",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -4236,9 +4236,9 @@
     "name": "Yara Kowalski",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -4295,9 +4295,9 @@
     "name": "Rosa Volkov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -4356,9 +4356,9 @@
     "name": "Rosa Yusuf",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -4540,9 +4540,9 @@
     "name": "Hana Xu",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "EDD",
@@ -4603,9 +4603,9 @@
     "name": "Yara Okafor",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -4664,9 +4664,9 @@
     "name": "Ibrahim Xu",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -4727,9 +4727,9 @@
     "name": "Zane Dubois",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -4845,9 +4845,9 @@
     "name": "Elena Tremblay",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -4905,9 +4905,9 @@
     "name": "Viktor Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -5028,7 +5028,7 @@
     "name": "Camila Adeyemi",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -5271,9 +5271,9 @@
     "name": "Camila Wong",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -5385,9 +5385,9 @@
     "name": "Rosa Gagnon",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -5447,9 +5447,9 @@
     "name": "Farah Petrov",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -5572,9 +5572,9 @@
     "name": "Wei Singh",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3, C4 from the cited evidence (3 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -5631,9 +5631,9 @@
     "name": "Liam Marchetti",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -5693,9 +5693,9 @@
     "name": "Tariq Romano",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -5757,9 +5757,9 @@
     "name": "Hana Ennis",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -5819,9 +5819,9 @@
     "name": "Viktor Dubois",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -5883,7 +5883,7 @@
     "name": "Noor Ferreira",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -5943,9 +5943,9 @@
     "name": "Rosa Nakamura",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -6007,9 +6007,9 @@
     "name": "Camila Ennis",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -6071,7 +6071,7 @@
     "name": "Wei Volkov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -6133,7 +6133,7 @@
     "name": "Ibrahim Ivanov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -6195,9 +6195,9 @@
     "name": "Liam Quirke",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "EDD",
@@ -6258,7 +6258,7 @@
     "name": "Priya Romano",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -6441,9 +6441,9 @@
     "name": "Priya Yusuf",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -6560,9 +6560,9 @@
     "name": "Jin Tremblay",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -6627,9 +6627,9 @@
     "name": "Yara Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -6691,7 +6691,7 @@
     "name": "Quinn Romano",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -6750,9 +6750,9 @@
     "name": "Ibrahim Ivanov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -6809,9 +6809,9 @@
     "name": "Omar Ueda",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -6869,9 +6869,9 @@
     "name": "Quinn Ueda",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -7125,9 +7125,9 @@
     "name": "Quinn Yusuf",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": "mule",
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -7249,9 +7249,9 @@
     "name": "Priya Romano",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -7376,9 +7376,9 @@
     "name": "Zane Wong",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -7436,7 +7436,7 @@
     "name": "Mei Ferreira",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -7495,7 +7495,7 @@
     "name": "Camila Adeyemi",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -7615,9 +7615,9 @@
     "name": "Camila Wong",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -7738,9 +7738,9 @@
     "name": "Ximena Hassan",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -7864,9 +7864,9 @@
     "name": "Ximena Kowalski",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -7928,9 +7928,9 @@
     "name": "Uma Gagnon",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -7985,9 +7985,9 @@
     "name": "Zane Singh",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -8049,9 +8049,9 @@
     "name": "Noor Ueda",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -8108,9 +8108,9 @@
     "name": "Rosa Yusuf",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -8171,7 +8171,7 @@
     "name": "Wei Kowalski",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -8232,9 +8232,9 @@
     "name": "Zane Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -8296,9 +8296,9 @@
     "name": "Priya Yusuf",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3, C4 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -8358,9 +8358,9 @@
     "name": "Ibrahim Boucher",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -8420,7 +8420,7 @@
     "name": "Dmitri Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -8481,9 +8481,9 @@
     "name": "Khadija Marchetti",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -8543,9 +8543,9 @@
     "name": "Mei Ferreira",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -8606,9 +8606,9 @@
     "name": "Viktor Gagnon",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -8670,9 +8670,9 @@
     "name": "Avery Dubois",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3, C4 from the cited evidence (3 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -8729,7 +8729,7 @@
     "name": "Ibrahim Quirke",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -8789,7 +8789,7 @@
     "name": "Dmitri Ennis",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -8846,9 +8846,9 @@
     "name": "Elena Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -8964,9 +8964,9 @@
     "name": "Jin Xu",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -9026,7 +9026,7 @@
     "name": "Camila Adeyemi",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -9268,9 +9268,9 @@
     "name": "Noor Ferreira",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -9328,9 +9328,9 @@
     "name": "Tariq Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -9390,9 +9390,9 @@
     "name": "Camila Ennis",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -9458,7 +9458,7 @@
     "name": "Hana Marchetti",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -9577,9 +9577,9 @@
     "name": "Quinn Yusuf",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -9645,9 +9645,9 @@
     "name": "Rosa Volkov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -9712,7 +9712,7 @@
     "name": "Bao Petrov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -9833,9 +9833,9 @@
     "name": "Hana Marchetti",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -9894,9 +9894,9 @@
     "name": "Uma Volkov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -9954,9 +9954,9 @@
     "name": "Tariq Volkov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -10013,9 +10013,9 @@
     "name": "Wei Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -10072,7 +10072,7 @@
     "name": "Dmitri Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -10131,9 +10131,9 @@
     "name": "Avery Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -10195,9 +10195,9 @@
     "name": "Jin Quirke",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -10257,9 +10257,9 @@
     "name": "Ibrahim Ennis",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "EDD",
@@ -10380,9 +10380,9 @@
     "name": "Wei Gagnon",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -10444,9 +10444,9 @@
     "name": "Elena Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -10503,7 +10503,7 @@
     "name": "Wei Dubois",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -10562,7 +10562,7 @@
     "name": "Jin Ivanov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -10678,9 +10678,9 @@
     "name": "Zane Wong",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -10741,9 +10741,9 @@
     "name": "Hana Petrov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -10860,7 +10860,7 @@
     "name": "Yara Wong",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -10920,7 +10920,7 @@
     "name": "Noor Boucher",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -10979,9 +10979,9 @@
     "name": "Avery Adeyemi",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -11099,7 +11099,7 @@
     "name": "Quinn Romano",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -11158,9 +11158,9 @@
     "name": "Yara Hassan",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -11220,7 +11220,7 @@
     "name": "Omar Chen",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -11287,9 +11287,9 @@
     "name": "Bao Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -11419,9 +11419,9 @@
     "name": "Avery Wong",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -11481,9 +11481,9 @@
     "name": "Wei Singh",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -11540,9 +11540,9 @@
     "name": "Priya Jain",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -11719,9 +11719,9 @@
     "name": "Rosa Romano",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -11781,7 +11781,7 @@
     "name": "Camila Wong",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -11842,9 +11842,9 @@
     "name": "Tariq Nakamura",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -11904,9 +11904,9 @@
     "name": "Priya Jain",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -12034,7 +12034,7 @@
     "name": "Viktor Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -12096,7 +12096,7 @@
     "name": "Liam Xu",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -12159,9 +12159,9 @@
     "name": "Viktor Dubois",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -12219,9 +12219,9 @@
     "name": "Tariq Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -12278,9 +12278,9 @@
     "name": "Avery Wong",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -12341,9 +12341,9 @@
     "name": "Mei Ueda",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -12460,9 +12460,9 @@
     "name": "Ibrahim Quirke",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -12574,9 +12574,9 @@
     "name": "Zane Singh",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -12750,9 +12750,9 @@
     "name": "Hana Ivanov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -12813,9 +12813,9 @@
     "name": "Sven Nakamura",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -12934,9 +12934,9 @@
     "name": "Elena Adeyemi",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -13053,7 +13053,7 @@
     "name": "Tariq Gagnon",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -13112,7 +13112,7 @@
     "name": "Priya Jain",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -13170,9 +13170,9 @@
     "name": "Ibrahim Boucher",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -13232,9 +13232,9 @@
     "name": "Priya Jain",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -13294,9 +13294,9 @@
     "name": "Yara Kowalski",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -13360,7 +13360,7 @@
     "name": "Ibrahim Quirke",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -13481,7 +13481,7 @@
     "name": "Rosa Volkov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -13605,9 +13605,9 @@
     "name": "Rosa Gagnon",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -13666,7 +13666,7 @@
     "name": "Hana Ivanov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -13731,9 +13731,9 @@
     "name": "Khadija Quirke",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -13855,9 +13855,9 @@
     "name": "Quinn Jain",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -13917,7 +13917,7 @@
     "name": "Quinn Ueda",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -14040,9 +14040,9 @@
     "name": "Rosa Romano",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -14099,9 +14099,9 @@
     "name": "Uma Chen",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -14159,9 +14159,9 @@
     "name": "Hana Tremblay",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -14218,9 +14218,9 @@
     "name": "Avery Dubois",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -14277,7 +14277,7 @@
     "name": "Avery Adeyemi",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -14339,9 +14339,9 @@
     "name": "Mei Ueda",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -14402,7 +14402,7 @@
     "name": "Jin Boucher",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -14465,9 +14465,9 @@
     "name": "Noor Yusuf",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -14528,9 +14528,9 @@
     "name": "Yara Hassan",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -14587,9 +14587,9 @@
     "name": "Yara Singh",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -14646,9 +14646,9 @@
     "name": "Yara Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -14767,7 +14767,7 @@
     "name": "Tariq Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -14831,9 +14831,9 @@
     "name": "Uma Chen",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -14895,9 +14895,9 @@
     "name": "Noor Boucher",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -15133,7 +15133,7 @@
     "name": "Yara Wong",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -15258,9 +15258,9 @@
     "name": "Quinn Gagnon",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -15317,9 +15317,9 @@
     "name": "Wei Kowalski",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -15437,9 +15437,9 @@
     "name": "Yara Kowalski",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -15500,9 +15500,9 @@
     "name": "Khadija Ferreira",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -15562,9 +15562,9 @@
     "name": "Dmitri Adeyemi",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": "ambiguous",
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -15630,9 +15630,9 @@
     "name": "Yara Kowalski",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -15756,7 +15756,7 @@
     "name": "Gabriel Xu",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -15815,7 +15815,7 @@
     "name": "Ibrahim Ennis",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -15877,9 +15877,9 @@
     "name": "Yara Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -15943,9 +15943,9 @@
     "name": "Avery Dubois",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -16057,9 +16057,9 @@
     "name": "Sven Yusuf",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -16122,9 +16122,9 @@
     "name": "Elena Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -16249,9 +16249,9 @@
     "name": "Jin Boucher",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -16308,9 +16308,9 @@
     "name": "Yara Hassan",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -16368,7 +16368,7 @@
     "name": "Mei Jain",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -16489,9 +16489,9 @@
     "name": "Jin Ferreira",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -16553,9 +16553,9 @@
     "name": "Farah Tremblay",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -16617,9 +16617,9 @@
     "name": "Zane Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -16679,9 +16679,9 @@
     "name": "Tariq Gagnon",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -16799,9 +16799,9 @@
     "name": "Noor Quirke",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -16858,9 +16858,9 @@
     "name": "Avery Wong",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -16984,9 +16984,9 @@
     "name": "Wei Dubois",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -17043,9 +17043,9 @@
     "name": "Zane Okafor",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -17102,9 +17102,9 @@
     "name": "Mei Marchetti",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -17166,9 +17166,9 @@
     "name": "Noor Jain",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -17289,7 +17289,7 @@
     "name": "Priya Ueda",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -17352,9 +17352,9 @@
     "name": "Jin Boucher",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -17412,7 +17412,7 @@
     "name": "Viktor Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -17540,9 +17540,9 @@
     "name": "Yara Kowalski",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -17599,9 +17599,9 @@
     "name": "Gabriel Ennis",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -17775,9 +17775,9 @@
     "name": "Noor Quirke",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -17844,9 +17844,9 @@
     "name": "Jin Tremblay",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -17966,9 +17966,9 @@
     "name": "Hana Ennis",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -18100,9 +18100,9 @@
     "name": "Omar Ferreira",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -18162,9 +18162,9 @@
     "name": "Ximena Okafor",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "EDD",
@@ -18229,9 +18229,9 @@
     "name": "Zane Singh",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -18292,9 +18292,9 @@
     "name": "Yara Dubois",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -18350,9 +18350,9 @@
     "name": "Khadija Xu",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -18591,9 +18591,9 @@
     "name": "Dmitri Ennis",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -18712,9 +18712,9 @@
     "name": "Rosa Chen",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -18774,9 +18774,9 @@
     "name": "Ximena Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -18842,9 +18842,9 @@
     "name": "Ximena Zhao",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -18903,9 +18903,9 @@
     "name": "Avery Wong",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -19019,9 +19019,9 @@
     "name": "Avery Adeyemi",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -19137,9 +19137,9 @@
     "name": "Mei Jain",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -19199,9 +19199,9 @@
     "name": "Uma Kowalski",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "EDD",
@@ -19267,7 +19267,7 @@
     "name": "Dmitri Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -19330,9 +19330,9 @@
     "name": "Avery Singh",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -19392,9 +19392,9 @@
     "name": "Viktor Gagnon",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "EDD",
@@ -19459,9 +19459,9 @@
     "name": "Avery Wong",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -19579,9 +19579,9 @@
     "name": "Sven Gagnon",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -19641,9 +19641,9 @@
     "name": "Omar Ueda",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "EDD",
@@ -19711,9 +19711,9 @@
     "name": "Tariq Romano",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3, C4 from the cited evidence (3 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -19770,9 +19770,9 @@
     "name": "Dmitri Ennis",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -19834,9 +19834,9 @@
     "name": "Khadija Marchetti",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -19893,9 +19893,9 @@
     "name": "Jin Marchetti",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -19954,7 +19954,7 @@
     "name": "Viktor Gagnon",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -20011,9 +20011,9 @@
     "name": "Rosa Volkov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -20137,7 +20137,7 @@
     "name": "Camila Wong",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -20199,9 +20199,9 @@
     "name": "Mei Ferreira",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -20323,9 +20323,9 @@
     "name": "Ibrahim Ivanov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "EDD",
@@ -20386,7 +20386,7 @@
     "name": "Quinn Nakamura",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -20445,9 +20445,9 @@
     "name": "Wei Volkov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -20502,9 +20502,9 @@
     "name": "Quinn Romano",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -20561,9 +20561,9 @@
     "name": "Hana Ennis",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -20623,9 +20623,9 @@
     "name": "Jin Quirke",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -20689,9 +20689,9 @@
     "name": "Quinn Chen",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -20814,9 +20814,9 @@
     "name": "Ibrahim Marchetti",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -20874,9 +20874,9 @@
     "name": "Sven Volkov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -20936,9 +20936,9 @@
     "name": "Zane Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "EDD",
@@ -21059,9 +21059,9 @@
     "name": "Zane Okafor",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -21123,9 +21123,9 @@
     "name": "Priya Ferreira",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3, C4 from the cited evidence (3 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -21250,9 +21250,9 @@
     "name": "Avery Singh",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -21313,9 +21313,9 @@
     "name": "Avery Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -21376,9 +21376,9 @@
     "name": "Rosa Romano",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -21435,9 +21435,9 @@
     "name": "Priya Jain",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -21499,9 +21499,9 @@
     "name": "Jin Ferreira",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3, C4 from the cited evidence (3 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -21558,9 +21558,9 @@
     "name": "Uma Romano",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -21621,9 +21621,9 @@
     "name": "Viktor Dubois",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -21683,7 +21683,7 @@
     "name": "Zane Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -21742,9 +21742,9 @@
     "name": "Liam Ferreira",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -21801,9 +21801,9 @@
     "name": "Liam Ferreira",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -21863,7 +21863,7 @@
     "name": "Avery Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -21925,9 +21925,9 @@
     "name": "Zane Dubois",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -22044,9 +22044,9 @@
     "name": "Wei Gagnon",
     "synthetic_label": true
    },
-   "e2e_note": "signed end-to-end",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
-   "grounds_e2e": true,
+   "grounds_e2e": false,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -22106,9 +22106,9 @@
     "name": "Sven Romano",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C15, C3 from the cited evidence (2 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -22170,7 +22170,7 @@
     "name": "Liam Marchetti",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -22232,9 +22232,9 @@
     "name": "Camila Adeyemi",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -22294,7 +22294,7 @@
     "name": "Elena Ennis",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -22419,7 +22419,7 @@
     "name": "Priya Chen",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -22596,9 +22596,9 @@
     "name": "Wei Gagnon",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -22658,9 +22658,9 @@
     "name": "Priya Yusuf",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -22724,7 +22724,7 @@
     "name": "Zane Lefebvre",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "casework's narrative seam failed closed: narrative generation failed closed after 3 attempts; seam left open",
    "exemplar": null,
    "grounds_e2e": false,
    "kyc": {
@@ -22920,9 +22920,9 @@
     "name": "Farah Ivanov",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -22984,9 +22984,9 @@
     "name": "Avery Hassan",
     "synthetic_label": true
    },
-   "e2e_note": "casework refused — independent replay couldn't reproduce C3 from the cited evidence (1 violation(s))",
+   "e2e_note": "signed end-to-end",
    "exemplar": null,
-   "grounds_e2e": false,
+   "grounds_e2e": true,
    "kyc": {
     "adverse_media_flag": false,
     "cdd_level": "CDD",
@@ -23085,8 +23085,8 @@
   },
   "coverage": {
    "basis": "MEASURED: cases aml-casework actually SIGNS end-to-end (drafter=stub; the six Class-G verifiers independently re-derive each signal). Composed cases that fail are a real substrate↔casework C3/C15 replay divergence — the gate correctly refusing, the honest frontier.",
-   "casework_pin": "aml-casework@bf15535",
-   "groundable": 128,
+   "casework_pin": "aml-casework@04cc335",
+   "groundable": 256,
    "measured": true,
    "total": 376
   },
@@ -23103,7 +23103,7 @@
   "run_id": "seed0-n40000-m2",
   "slice_rule": "the rare 4+-capability cases (cap 120) + a 3-cap-band sample (20) + a deterministic sample of the 1-2-cap noise (cap 180) + a combo-coverage pass (>=1 representative of every population combo) + a cross-case co-reference pass (>=2 cases of the top 15 re-surfacing entity_refs, so the persistent-entity MEMORY beat is demonstrable on REAL co-reference); sorted by case_id [VISIBLE volume + full combo spread, not detection difficulty — single-signal-separable]",
   "slice_total": 376,
-  "substrate_head": "fc98b09",
+  "substrate_head": "294d3e5",
   "substrate_repo": "aml-substrate"
  }
 }

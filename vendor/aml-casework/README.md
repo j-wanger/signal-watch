@@ -513,10 +513,12 @@ failure — so detector-logic drift is **surfaced**, not gated: the check return
 *equivalence* needs only a **runnable predicate** (which the substrate has), not a real emission — correctness
 ≠ coverage. Only a real C14 *emission* (for coverage) stays substrate-gated.
 
-**Scope boundary (named, not silent).** The harness covers only the screening copies with a named
-substrate-symbol provenance (C7/C8 constants, the C14 predicate). The replay assertions (C2–C5, C15) were
-Phase-6 *reconciled-to-semantics* — no 1:1 substrate constant to diff — so they are **out of scope** here; the
-broader semantic reconciliation for them is **Phase 16** (below).
+**Scope boundary (named, not silent).** The harness covers casework copies with a named substrate-symbol
+provenance and a literal to diff: the C7/C8 constants, the C14 predicate (behavioral), and — since **Phase 21**
+— the C15/C4 replay constants Phase 20 copied from `shell.py` / `structuring.py` (incl. the float
+`RETENTION_TOLERANCE` and the `timedelta` `WINDOW`). The remaining replay assertions (C2–C5, the C15 name-match
+leg, the C4 cash leg) were Phase-6 *reconciled-to-semantics* — no 1:1 substrate constant to diff — so they stay
+**out of scope** here; the broader semantic reconciliation for them is **Phase 16** (below).
 
 ## Phase 16 — replay-assertion semantic reconciliation (C2–C5/C15)
 
@@ -553,27 +555,26 @@ detector's credit-before-debit ordering and the $1k floor; C4's 7-day window ⊇
 sub-$10k amount (no $7k band); C5 needs ≥3 cited cash deposits vs substrate's ≥5; C3 uses a count proxy.
 
 **Findings (the gap register).** The harness surfaced three latent false-blocks — cases where the substrate
-detector fires but casework re-derives the firing evidence as *ungrounded* (casework stricter). One (C3 fan-in) was
-**resolved in Phase 19** when it became data-reachable; two remain documented-latent:
+detector fires but casework re-derives the firing evidence as *ungrounded* (casework stricter). **All three are now
+RESOLVED**, each once a downstream consumer made it data-reachable: C3 fan-in in **Phase 19**, and the C15 retention
+band + C4 non-cash channel in **Phase 20** (the north-star slice made both reachable at population scale):
 
-| Finding | Substrate fires | casework re-derivation | Logic-reachable? | Data-reachable today? | Triage |
-|---------|-----------------|------------------------|------------------|-----------------------|--------|
-| **C15 retention band** | shell throughput up to ≤10% net retention | grounds throughput only ≤5% (+ a generic-name fallback) | **Yes** (confirmed @ substrate `fc98b09`) | **No** — the real conduit (`CASE-P-0010361`) retains **3.57%**, grounded via throughput | **Document** |
-| **C3 fan-in** *(RESOLVED Phase 19)* | fan-IN (≥5 distinct CREDIT sources) *and* fan-out | now re-derives **both** — fan-out (≥N outflows) OR fan-in (≥N distinct inbound originators) | **Yes** (confirmed @ substrate `fc98b09`) | **Yes** — signal-watch's Lakeshore CASE-B is fan-in; the co-sign was blocked | **Fixed** (additive fan-in re-derivation — see Phase 19) |
-| **C4 non-cash channel** | structuring on sub-$10k CREDIT of **any** channel (no channel filter) | grounds only CASH `cash_deposit` → a non-cash structuring alert counts 0 deposits | **Yes** (confirmed @ substrate `fc98b09`: fires on EMT in-band credits) | **No** — the real C4 (`CASE-P-0010361`) cites CASH deposits; substrate's non-cash sub-$10k stream sits below the $7k band | **Document** |
+| Finding | Substrate fires | casework re-derivation | Logic-reachable? | Data-reachable? | Triage |
+|---------|-----------------|------------------------|------------------|-----------------|--------|
+| **C15 retention band** *(RESOLVED Phase 20)* | shell throughput up to ≤10% net retention, ≥3 counterparties, ≥$10k inflow | now re-derives substrate's **full ShellDetector** def (≤10% of inflow + ≥3 distinct counterparties + ≥$10k) — REPLACED the ≤5%-of-max proxy | **Yes** | **Yes** — the slice's 5–10%-retention multi-counterparty conduits (49 cases) | **Fixed** (source-faithful REPLACE — see Phase 20) |
+| **C3 fan-in** *(RESOLVED Phase 19)* | fan-IN (≥5 distinct CREDIT sources) *and* fan-out | now re-derives **both** — fan-out (≥N outflows) OR fan-in (≥N distinct inbound originators) | **Yes** | **Yes** — signal-watch's Lakeshore CASE-B is fan-in; the co-sign was blocked | **Fixed** (additive fan-in re-derivation — see Phase 19) |
+| **C4 non-cash channel** *(RESOLVED Phase 20)* | structuring on sub-$10k CREDIT of **any** channel (no channel filter) | now grounds via an **additive** substrate-`StructuringDetector` leg (any-channel CREDIT in [$7k,$9,999.99], ≥3 in 24h, agg ≥$10k) alongside the byte-unchanged cash leg | **Yes** | **Yes** — the slice's EMT sub-$10k structuring (6 cases) | **Fixed** (additive band leg — see Phase 20) |
 
-**Triage outcome (triage-per-finding, by reachability).** All three gaps are *logic*-reachable (substrate's real
-detectors fire on them and casework false-blocks — the `@integration` leg confirms it). Two (C15 retention, C4
-non-cash) are **not** *data*-reachable against current substrate emission, so they stay **documented as latent, not
-fixed** — the 6-verifier chain stays **byte-unchanged** for them. The third (**C3 fan-in**) *became*
-data-reachable — a concrete downstream consumer (signal-watch's Lakeshore co-sign) needs it — and was **fixed in
-Phase 19** (an additive fan-in re-derivation; see below). This is the triage-per-finding fork working as designed:
-document while latent, fix when a real consumer makes it reachable. The directional battery + the `@integration` regression are the
-durable **loud** signal: if substrate's emission ever shifts into a gap (a C15 alert at 5–10% retention, a C3
-fan-in, or a non-cash C4 structuring), the live-equivalence test goes red — surfacing the drift instead of
-false-blocking a real SAR silently. (Were a gap to become data-reachable, the fix is a source-faithful
-re-derivation update to `grounding_replay` — e.g. tracking substrate's 10% retention tolerance, or grounding C4
-on sub-$10k CREDIT of any channel — with a verify-first regression.)
+**Triage outcome (triage-per-finding, by reachability).** This is the triage-per-finding fork working exactly as
+designed: **document while latent, fix when a real consumer makes it reachable.** All three gaps were *logic*-reachable
+from the start (the `@integration` leg confirmed substrate fires and casework false-blocks), but none was *data*-reachable
+against the committed real bundle — so each stayed documented-latent and byte-unchanged until a concrete downstream
+consumer needed it. signal-watch's north-star slice then made all three reachable: the Lakeshore co-sign needed C3 fan-in
+(Phase 19), and the population-scale signing measurement surfaced 49 legitimate C15 conduits (5–10% retention) + 6 EMT C4
+structuring alerts that casework false-blocked (Phase 20). Each fix is a **source-faithful re-derivation** of substrate's
+real detector — never a threshold loosened in isolation: C15 adopts the full `ShellDetector` (the wider ≤10% ratio *plus*
+the ≥3-counterparty and ≥$10k floors casework lacked); C4 adds substrate's `StructuringDetector` band leg additively. The
+directional battery + the `@integration` regression remain the durable **loud** signal for any *future* drift.
 
 **Named structural gaps** (reconciled only at the transaction-observable level, not faked): C3's
 distinct-counterparty count is not re-derivable without `counterparty_ref` on the cited outflows (a cross-pillar
@@ -633,5 +634,66 @@ un-co-signable. signal-watch named the gap in `casework-c3-fan-in-PLAN-BRIEF.md`
 
 Once casework re-derives fan-in, signal-watch's Lakeshore DECIDE co-signs `cleared` end-to-end — closing the
 `casework-c3-fan-in-PLAN-BRIEF.md` handoff (CW-3).
+
+## Phase 20 — close the C15 + C4 latent false-blocks (north-star signing at scale)
+
+signal-watch's `casework-northstar-signing-PLAN-BRIEF.md` asked casework to ground the two topologies that dominate
+its north-star FILE population so generated cases SIGN at scale. **A measurement reframed the brief:** its headline ask
+(C3 fan-in, "190 of 376 cases fail-close") was **stale** — it cited a `cases.json` measured *before* casework was
+re-vendored to Phase 19, so C3 fan-in was already done (re-running the current chain over the same 376 bundles: **0**
+C3 failures). The genuinely-failing population was the two **Phase-16 documented-latent false-blocks**, now data-reachable:
+**49 C15** throughput conduits and **6 C4** non-cash structuring alerts. Both are source-faithful reconciliations of
+substrate's real detectors — closing the gap register above (C3 was the third).
+
+- **C15 — REPLACE the throughput leg (`grounding_replay._assert_c15_shell`).** The Phase-6 proxy grounded throughput at
+  ≤5% net retention over `max(in,out)` with **no** counterparty/throughput floor — *stricter on the ratio yet looser on
+  the floors* than substrate's `ShellDetector`. It is replaced by substrate's exact definition: inflow ≥ $10k **and**
+  `|in−out| / inflow ≤ 10%` **and** ≥3 distinct counterparties (empty-guarded `counterparty_name`, the shared Phase-19
+  helper). The generic-"trading company" name-match leg is **byte-unchanged**. Replacing (not adding) is byte-identical:
+  the only fixture that grounds C15 via throughput is the real `CASE-P-0010361` (3.6% retention, 15 counterparties,
+  $103k inflow), which survives the full definition; the synthetic fixtures ground via the untouched name-match leg.
+- **C4 — ADD an any-channel band leg (`grounding_replay._assert_c4_structuring`).** casework grounded only CASH
+  `cash_deposit`, false-blocking the slice's EMT sub-$10k structuring. An **additive** OR-leg re-derives substrate's
+  channel-agnostic `StructuringDetector`: ≥3 CREDIT deposits in the **$7,000–$9,999.99** band, within **24h**,
+  aggregating ≥$10k. The cash-only leg is tried first and stays byte-unchanged — additive-OR can only turn refuse→ground,
+  so no existing verdict moves. Both legs' constants are copied-with-provenance from substrate `shell.py` / `structuring.py`
+  (no sibling import).
+- **Not a loosening.** Both are governed by the Phase-16 directional invariant (*substrate-fires ⇒ casework-grounds*):
+  casework was **stricter-than-source** and false-blocked legitimately-fired alerts. Adopting the *full* definition widens
+  the ratio/channel **and adds substrate's own floors** (C15 ≥3 counterparties + ≥$10k; C4 the $7k band + 24h window) — net
+  "ground the topology, same strictness". The >10%-retention, sub-$7k, and out-of-window cases still refuse.
+- **The authored strata** — `case-c15-conduit-07` (a near-zero-retention conduit across distinct counterparties, grounding
+  via the throughput leg) and `case-c4-anychannel-08` (EMT sub-$10k band structuring, grounding via the band leg) each
+  reach `signed` → `file`. The Phase-16 directional battery flips both ungrounded→grounds; **zero** replay-assertion
+  latent false-blocks remain.
+
+**Cross-pillar handoff (back to signal-watch)** — see `docs/casework-northstar-signing-FINDINGS.md`: the brief's C3 #1
+is already done (re-vendor casework + re-compute the stale `cases.json`); 8 slice bundles fail casework's contract
+(multi-account subjects + txn-less bundles — a bundle-shaping fix on signal-watch's side); and the `fin-2025-a003` C15
+advisory pin still wants a live counterpart (the Phase-17 corpus-drift signal).
+
+## Phase 21 — the drift tripwire now covers the Phase-20 float/timedelta copies
+
+Phase 20 copied **8 constants** from substrate `shell.py` / `structuring.py` into the C15/C4 replay legs — but the
+detector-drift tripwire (Phase 15) could not see them: `detector_reconciliation`'s AST extractor was **int-only**, so
+the **float** `RETENTION_TOLERANCE` and the **`timedelta`** `WINDOW` had no literal it could diff. That reopened the
+exact *silent*-drift class Phase 15 exists to kill — on the constants Phase 20 itself copied. This phase closes it:
+
+- The extractor (`_module_int_literals` → **`_module_literals`**) now reads `int`, `float`, **and** `timedelta(...)`
+  calls — both the bare `timedelta(hours=24)` (casework) and the attribute `dt.timedelta(hours=24)` (substrate),
+  **normalized to total-seconds** so a substrate unit-rewrite of the same duration (`hours=24` → `days=1`) reconciles
+  in_sync rather than crying wolf. A timedelta shape it can't statically read (a computed arg, an unknown unit) is
+  **fail-loud** — the copy "can no longer be reconciled" warning — never a guess, never a raise (warn-never-fail holds).
+- `_COPIED_CONSTANTS` gains the **8** Phase-20 rows: shell `RETENTION_TOLERANCE` / `MIN_THROUGHPUT_CENTS` /
+  `MIN_COUNTERPARTIES` (C15) and structuring `BAND_LOW_CENTS` / `BAND_HIGH_CENTS` / `MIN_DEPOSITS` /
+  `AGGREGATE_THRESHOLD_CENTS` / `WINDOW` (C4). The 8th (`AGGREGATE_THRESHOLD_CENTS` vs casework's regulatory
+  `_CTR_THRESHOLD_CENTS`) is reconciled despite being framed regulatory — the **C7/C8 coincident-symbol precedent**
+  (reconcile every substrate symbol the grounding depends on). Each value is **imported** from `grounding_replay`, so
+  the check reconciles the *live* copy — no third copy to drift.
+
+`python -m aml_casework.reconcile` and `python -m aml_casework.detector_reconciliation` consolidate the new constants
+for free — no runner change. The 6-verifier chain and `grounding_replay`'s logic are **byte-unchanged** (this is a
+standalone tripwire); the C7/C8 reconciliation stays byte-identical; zero new deps. **Still out of scope** (no 1:1
+constant): C2/C3/C5, the C15 generic-trading name-match leg, and the C4 cash-only leg — Phase-6 reconciled-to-semantics.
 
 See `.dev-wiki/` for phase/task state and `DESIGN.md` for full doctrine.

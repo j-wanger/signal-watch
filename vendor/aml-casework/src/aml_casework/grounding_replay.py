@@ -60,6 +60,16 @@ from typing import Any
 _CTR_THRESHOLD_CENTS = 1_000_000  # $10,000 — the CTR-filing threshold the structuring stays under
 _MIN_STRUCTURING_COUNT = 3
 _STRUCTURING_WINDOW = timedelta(days=7)
+# Phase 20 (additive): substrate StructuringDetector (structuring.py) re-derived source-faithfully — the
+# detector is channel-AGNOSTIC (>=3 CREDIT deposits in the sub-threshold BAND aggregating >=$10k within 24h),
+# so casework's CASH-only leg above false-blocked a non-cash (e.g. EMT) structuring alert (the Phase-16 latent
+# #2, made data-reachable by the north-star slice). The band leg is ADDITIVE — the cash leg is byte-unchanged,
+# tried first; only an alert the cash leg can't ground reaches the band leg. Constants COPIED-with-provenance
+# from substrate structuring.py (BAND_LOW_CENTS / BAND_HIGH_CENTS / WINDOW; MIN_DEPOSITS == _MIN_STRUCTURING_COUNT,
+# AGGREGATE_THRESHOLD_CENTS == _CTR_THRESHOLD_CENTS); no sibling import (DESIGN / assumption A1).
+_STRUCTURING_BAND_LOW_CENTS = 700_000  # structuring.py BAND_LOW_CENTS — $7,000.00 (the smurf band floor)
+_STRUCTURING_BAND_HIGH_CENTS = 999_999  # structuring.py BAND_HIGH_CENTS — $9,999.99 (strictly under the $10k trigger)
+_STRUCTURING_24H_WINDOW = timedelta(hours=24)  # structuring.py WINDOW — the 24-hour aggregation window
 
 # --- C5 cash-placement: >=N cash deposits within a short window (physical cash entering the banking
 #     system — the placement stage). Distinct from C4: placement does not require sub-threshold amounts
@@ -99,15 +109,22 @@ _GENERIC_TRADING_MARKERS = (
     "import",
     "export",
 )
-# --- C15 throughput (Phase 6): the shell_nominee conduit also manifests as ~0 net retention — total
-#     inflow ~= total outflow over the cited flow (money passes through). The bar: net retention
-#     (|in - out| / max(in, out)) at or below this fraction. The real conduit retains ~3.6%, so the bar
-#     is set tight (5%) to keep the throughput path discriminating — it is the WEAKER of the two C15
-#     sub-signals (a balanced ordinary account can also show low retention), so it backs up the grounded
-#     generic-"trading company" name match rather than replacing it. Tightening further (a hop-count or
-#     volume floor) is a follow-up; for now the tight ratio + the name-match alternative bound the
-#     false-positive surface. ---
-_MAX_NET_RETENTION_RATIO = 0.05
+# --- C15 throughput (Phase 20 — source-faithful to substrate ShellDetector): the shell_nominee conduit is
+#     a near-zero-retention throughput HUB that passes nearly everything it receives straight back out across
+#     MANY distinct counterparties. Re-derived over the cited flow exactly as substrate
+#     monitor/detectors/shell.py does: total inflow >= a floor, |inflow - outflow| <= a tolerance OF INFLOW
+#     (~0 net retention), AND the cited rows span >= N distinct counterparties. This REPLACES the Phase-6 tight
+#     5%-of-max(in,out) proxy (which carried NO counterparty/throughput floor): that proxy was STRICTER on the
+#     ratio yet LOOSER on the floors than the real detector, so it false-blocked the legitimate 5-10%-retention
+#     multi-counterparty conduits the north-star slice surfaced (the Phase-16 documented latent #1, now
+#     data-reachable). Constants COPIED-with-provenance from substrate shell.py (RETENTION_TOLERANCE /
+#     MIN_THROUGHPUT_CENTS / MIN_COUNTERPARTIES); no sibling import (DESIGN / assumption A1). The name-match
+#     leg (the generic "trading company" path) is unchanged and still backs the throughput path. ---
+_SHELL_RETENTION_TOLERANCE = (
+    0.10  # shell.py RETENTION_TOLERANCE — |inflow - outflow| <= 10% of inflow => ~0 net retention
+)
+_MIN_SHELL_THROUGHPUT_CENTS = 1_000_000  # shell.py MIN_THROUGHPUT_CENTS — $10,000 minimum inflow through the hub
+_MIN_SHELL_COUNTERPARTIES = 3  # shell.py MIN_COUNTERPARTIES — the conduit must span >= 3 distinct counterparties
 
 # --- C7 peer / business-activity anomaly (SCREENING-grounded, NOT replay-reproducible). Pillar 1's
 #     BusinessActivityAnomalyDetector is a ScreeningDetector: it fires on an account whose total inflow
@@ -176,8 +193,9 @@ def _sorted_times(txns: list[dict[str, Any]], where: str) -> list[datetime] | st
     return times
 
 
-def _assert_c4_structuring(alert: dict[str, Any], cited_txns: list[dict[str, Any]]) -> list[str]:
-    where = f"alerts[{alert.get('alert_id')}].replay(C4)"
+def _c4_cash_structuring(cited_txns: list[dict[str, Any]], where: str) -> list[str]:
+    """cash leg (BYTE-UNCHANGED, Phase 6): >=_MIN_STRUCTURING_COUNT sub-$10k cash_deposit rows aggregating
+    >=$10k within _STRUCTURING_WINDOW. []=re-derives, [reason]=does not."""
     deposits = [
         t for t in cited_txns if t.get("kind") == "cash_deposit" and 0 < t.get("amount_cents", 0) < _CTR_THRESHOLD_CENTS
     ]
@@ -197,6 +215,50 @@ def _assert_c4_structuring(alert: dict[str, Any], cited_txns: list[dict[str, Any
     if times[-1] - times[0] > _STRUCTURING_WINDOW:
         return [f"{where}: structuring deposits span {times[-1] - times[0]} > the {_STRUCTURING_WINDOW.days}d window"]
     return []
+
+
+def _c4_band_structuring(cited_txns: list[dict[str, Any]], where: str) -> list[str]:
+    """band leg (Phase 20, additive — substrate StructuringDetector): >=_MIN_STRUCTURING_COUNT CREDIT deposits
+    in the sub-threshold band [$7,000, $9,999.99] of ANY channel, aggregating >=_CTR_THRESHOLD_CENTS within a
+    24h window. The cited set IS the alert's firing window, so a span check re-derives substrate's rolling 24h
+    window over it. []=re-derives, [reason]=does not. Fail-closed: a missing ts -> the window is not
+    re-derivable (via _sorted_times)."""
+    band = [
+        t
+        for t in cited_txns
+        if t.get("direction") == "CREDIT"
+        and _STRUCTURING_BAND_LOW_CENTS <= int(t.get("amount_cents", 0)) <= _STRUCTURING_BAND_HIGH_CENTS
+    ]
+    if len(band) < _MIN_STRUCTURING_COUNT:
+        return [
+            f"{where}: only {len(band)} in-band sub-$10k CREDIT deposit(s) (any channel); "
+            f"the structuring pattern needs >={_MIN_STRUCTURING_COUNT}"
+        ]
+    total = sum(int(t["amount_cents"]) for t in band)
+    if total < _CTR_THRESHOLD_CENTS:
+        return [f"{where}: in-band deposits aggregate to {total} cents (< the $10,000 reportable sum); not structuring"]
+    times = _sorted_times(band, where)
+    if isinstance(times, str):
+        return [times]
+    if times[-1] - times[0] > _STRUCTURING_24H_WINDOW:
+        return [f"{where}: in-band deposits span {times[-1] - times[0]} > the 24h window"]
+    return []
+
+
+def _assert_c4_structuring(alert: dict[str, Any], cited_txns: list[dict[str, Any]]) -> list[str]:
+    # C4 grounds via EITHER the cash-only leg (BYTE-UNCHANGED) OR substrate's channel-agnostic
+    # StructuringDetector (the Phase-16 latent #2 — casework grounded only CASH, false-blocking the slice's
+    # EMT/AFT sub-$10k structuring alerts). The cash leg is tried first, so every existing cash-grounded
+    # verdict is byte-identical; only an alert the cash leg can't ground reaches the band leg. When both
+    # fail, report both tried.
+    where = f"alerts[{alert.get('alert_id')}].replay(C4)"
+    cash = _c4_cash_structuring(cited_txns, where)
+    if not cash:
+        return []
+    band = _c4_band_structuring(cited_txns, where)
+    if not band:
+        return []
+    return cash + band
 
 
 def _assert_c5_cash_placement(alert: dict[str, Any], cited_txns: list[dict[str, Any]]) -> list[str]:
@@ -237,6 +299,14 @@ def _assert_c2_passthrough(alert: dict[str, Any], cited_txns: list[dict[str, Any
     return []
 
 
+def _distinct_counterparty_names(txns: list[dict[str, Any]]) -> set[str]:
+    """The set of distinct, NON-EMPTY counterparty_name values among ``txns``. The empty-guard
+    (str-or-empty -> strip -> falsy dropped) keeps an empty/missing counterparty_name from counting as a
+    distinct counterparty (the Phase-3 substring trap). Shared by the C3 fan-in originator count and the
+    C15 shell-conduit counterparty span."""
+    return {name for t in txns if (name := str(t.get("counterparty_name") or "").strip())}
+
+
 def _c3_fan_out(cited_txns: list[dict[str, Any]], where: str) -> list[str]:
     """fan-OUT leg: >=_MIN_FANOUT_COUNT DEBIT outflows within _FANOUT_WINDOW (count-proxy — the
     documented distinct-counterparty gap; the bundle omits refs on the cited outflows, ledger A3).
@@ -260,9 +330,9 @@ def _c3_fan_in(cited_txns: list[dict[str, Any]], where: str) -> list[str]:
     inflows = [t for t in cited_txns if t.get("direction") == "CREDIT" and t.get("amount_cents", 0) > 0]
     if len(inflows) < _MIN_FANOUT_COUNT:
         return [f"{where}: only {len(inflows)} cited inflow(s); the fan-in pattern needs >={_MIN_FANOUT_COUNT}"]
-    # distinct originators when named; the empty-guard (str-or-empty -> strip -> falsy dropped) keeps an
-    # empty/missing counterparty_name from counting as a distinct originator (the Phase-3 substring trap).
-    originators = {name for t in inflows if (name := str(t.get("counterparty_name") or "").strip())}
+    # distinct originators when named (the shared empty-guarded counterparty count); a single-originator
+    # >=N-credit set is repeat business, not a funnel — refused.
+    originators = _distinct_counterparty_names(inflows)
     if originators and len(originators) < _MIN_FANOUT_COUNT:
         return [
             f"{where}: only {len(originators)} distinct inbound originator(s); "
@@ -296,31 +366,44 @@ def _is_generic_trading(txn: dict[str, Any]) -> bool:
     return any(marker in name for marker in _GENERIC_TRADING_MARKERS)
 
 
-def _net_retention_ratio(cited_txns: list[dict[str, Any]]) -> float | None:
-    """|in - out| / max(in, out) over the cited flow, or None when a side is empty (not a conduit ->
-    throughput is not re-derivable). The empty-side guard avoids a divide-by-zero AND a false 'balanced'."""
-    total_in = sum(int(t.get("amount_cents", 0)) for t in cited_txns if t.get("direction") == "CREDIT")
-    total_out = sum(int(t.get("amount_cents", 0)) for t in cited_txns if t.get("direction") == "DEBIT")
-    if total_in <= 0 or total_out <= 0:
-        return None
-    return abs(total_in - total_out) / max(total_in, total_out)
+def _c15_throughput(cited_txns: list[dict[str, Any]], where: str) -> list[str]:
+    """throughput leg: substrate ShellDetector re-derived over the cited flow — a near-zero-retention HUB
+    spanning >=_MIN_SHELL_COUNTERPARTIES distinct counterparties. Grounds iff inflow >=
+    _MIN_SHELL_THROUGHPUT_CENTS AND |inflow - outflow| <= _SHELL_RETENTION_TOLERANCE * inflow AND the cited
+    rows span >=_MIN_SHELL_COUNTERPARTIES distinct counterparty_name (empty-guarded). []=re-derives,
+    [reason]=does not. Fail-closed: a zero/absent inflow can never clear the floor (no silent sign), and the
+    retention check divides by an inflow already proven > 0."""
+    inflow = sum(int(t.get("amount_cents", 0)) for t in cited_txns if t.get("direction") == "CREDIT")
+    outflow = sum(int(t.get("amount_cents", 0)) for t in cited_txns if t.get("direction") == "DEBIT")
+    if inflow < _MIN_SHELL_THROUGHPUT_CENTS:
+        return [
+            f"{where}: cited inflow {inflow} cents < the ${_MIN_SHELL_THROUGHPUT_CENTS // 100:,} "
+            f"shell-throughput floor; the pass-through conduit is not re-derivable"
+        ]
+    if abs(inflow - outflow) > _SHELL_RETENTION_TOLERANCE * inflow:
+        return [
+            f"{where}: net retention {abs(inflow - outflow) / inflow:.0%} of inflow > the "
+            f"{_SHELL_RETENTION_TOLERANCE:.0%} tolerance; not a ~0-retention pass-through conduit"
+        ]
+    counterparties = _distinct_counterparty_names(cited_txns)
+    if len(counterparties) < _MIN_SHELL_COUNTERPARTIES:
+        return [
+            f"{where}: the cited flow spans {len(counterparties)} distinct counterparty(ies); "
+            f"the shell/nominee conduit needs >={_MIN_SHELL_COUNTERPARTIES}"
+        ]
+    return []
 
 
 def _assert_c15_shell(alert: dict[str, Any], cited_txns: list[dict[str, Any]]) -> list[str]:
+    # C15 grounds via EITHER (a) a generic "trading company" counterparty in the cited outflows (IND-04's
+    # advisory text; the synthetic fixtures) OR (b) the substrate ShellDetector throughput signature (the
+    # real conduit + the slice's many-counterparty conduits). Phase 20 REPLACED the Phase-6 tight
+    # 5%-of-max(in,out) proxy with substrate shell.py's exact definition (the Phase-16 latent #1 — casework
+    # was STRICTER-on-the-ratio yet LOOSER-on-the-floors than source); the name-match leg (a) is byte-unchanged.
     where = f"alerts[{alert.get('alert_id')}].replay(C15)"
-    # (a) a generic "trading company" counterparty in the cited outflows — grounds to IND-04's general
-    #     "trading companies" advisory text (the synthetic fixtures exhibit this).
     if any(_is_generic_trading(t) for t in cited_txns if t.get("kind") == "wire_out"):
         return []
-    # (b) conduit throughput — total in ~= total out (low net retention), the shell_nominee pass-through
-    #     behavior (the REAL bundle exhibits this; its counterparties carry no generic names).
-    retention = _net_retention_ratio(cited_txns)
-    if retention is not None and retention <= _MAX_NET_RETENTION_RATIO:
-        return []
-    return [
-        f"{where}: no shell pattern in the cited evidence — neither an outflow to a generic 'trading "
-        f"company' counterparty nor low-net-retention throughput (net retention={retention})"
-    ]
+    return _c15_throughput(cited_txns, where)
 
 
 def _screen_c7_peer_anomaly(

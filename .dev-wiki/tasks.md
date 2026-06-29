@@ -45,7 +45,7 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-86-str-drafter-consistency-measure -->
-<!-- gate-log:phase-86 direction=approved delivery=pending -->
+<!-- gate-log:phase-86 direction=approved delivery=accepted -->
 
 ## Phase 86 — STR drafter behind the verifiers: the consistency-measured drafting agent (Agentification Stage 3)
 

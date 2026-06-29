@@ -7,7 +7,7 @@ parents: [phase-85-determination-pre-proposer, phase-83-merge-adjudicator-oracle
 created: 2026-06-29
 updated: 2026-06-29
 source: plan
-status: active
+status: completed
 ceremony: standard
 scope: ["tests/drafter_quality_harness.py", "tests/fixtures/drafter-quality/**", "tests/test_selftests.py", "tests/workbench.test.mjs", "tests/chain.test.mjs", "workbench.html", "chain.html", "docs/drafter-live.md", "docs/agentification-roadmap.md", "CLAUDE.md", "HANDOFF.md"]
 entry_criteria: "Phase 85 DELIVERED + accepted 2026-06-29 (impl 2008692; all 6 tasks [x]; all 9 dists byte-frozen, evidence_requirements.py untouched). The agentification roadmap names Stage 3 (the STR drafter) as the next leg. STATE-LOADER FINDING (code-verified, surfaced pre-gate): the STR drafter + its verifier gate ALREADY SHIPPED in Phase 57 — the Drafter Protocol, the --drafter {stub,claude,openai,opencode} switch, the backend mapping serve_chain.py:188, the live-draft staged reveal. A live model is up on 127.0.0.1:8080. serve_chain.casework_consume returns {signed, blocking_violations, narrative_present, completeness, drafter_effective} (serve_chain.py:262-308). The drafter has NO correctness oracle (free-text drafting)."
@@ -144,23 +144,50 @@ Files and modules affected (companion-only — NO ship/dist target; build.py imp
 
 ## Exit Criteria
 
-- [ ] `python3 tests/drafter_quality_harness.py --check` PASS (or the honest "run --freeze (needs the
+- [x] `python3 tests/drafter_quality_harness.py --check` PASS (or the honest "run --freeze (needs the
       casework venv + a live model)" message when no fixture); registered in the uv-run-pytest umbrella
-- [ ] The live (or stub-only, honestly) counts-only headline recorded (stub vs live sign/refuse, the
+- [x] The live (or stub-only, honestly) counts-only headline recorded (stub vs live sign/refuse, the
       fabrication-guard catches, the narrative-seam contrast outcome; synthetic-substrate-qualified;
       no rate words; the fixture committed + replaying through `--check`)
-- [ ] `node tests/workbench.test.mjs` green (assertion count grows); the live-draft sign/refuse
+- [x] `node tests/workbench.test.mjs` green (assertion count grows 205→206); the live-draft sign/refuse
       assertion passes
-- [ ] `docs/agentification-roadmap.md` Stage 3 marked BUILT (now TWO consistency-not-correctness
+- [x] `docs/agentification-roadmap.md` Stage 3 marked BUILT (now TWO consistency-not-correctness
       harnesses — GATHER + the drafter); `docs/drafter-live.md` written + cross-linked from the roadmap
-- [ ] Companion-only: `python3 scripts/build.py --check all` 9/9 byte-frozen; `git diff --quiet
+- [x] Companion-only: `python3 scripts/build.py --check all` 9/9 byte-frozen; `git diff --quiet
       vendor/aml-casework` AND `git diff --quiet scripts/evidence_requirements.py` both empty; build.py
       imports nothing new (grep: no `drafter_quality_harness`); the 256/376 §12 funnel unchanged
-- [ ] CLAUDE.md `## Current state` + Milestones + How-to-run + Test list + HANDOFF §8 trued IN PLACE
+- [x] CLAUDE.md `## Current state` + Milestones + How-to-run + Test list + HANDOFF §8 trued IN PLACE
       (no per-phase bullet)
-- [ ] Honesty swept (no catch-rate/lift/precision/recall in the new files/docs; the synthetic
+- [x] Honesty swept (no catch-rate/lift/precision/recall in the new files/docs; the synthetic
       qualifier on every recorded number; a degenerate population surfaced as an honest NULL, never a
       manufactured contrast)
+
+## Outcome (debrief 2026-06-29 — DELIVERED + accepted; impl `c8f32b8`, pushed to main)
+
+All 5 tasks `[x]`; exit criteria MET. **The measured headline = the gate-bounded 4/4 tie.** A model
+WAS on :8080, so EXECUTE-ONCE landed for real: over the 4 designed casefile bundles the live agent
+drafter matched the deterministic stub **4/4** — signed the SAME 3 (narratives the six Class-G
+verifiers accepted), fail-closed on the SAME 1 (the narrative-seam `CASE-P-0025128` → casework's
+`needs_more_info`; no narrative the verifiers would sign), with **0 fabrications caught + 0
+recoveries**. The agent did NOT hallucinate a narrative to force a file. THE FINDING: the drafter
+measure is consistency-BOUNDED by the gate — because the verifiers refuse anything ungrounded, a
+competent agent drafter and the stub CONVERGE at the gate, so the GATE (not the drafter) determines
+defensibility. A tie is a real result; it vindicates propose→gate→decide from the DRAFTING side,
+mirroring Stage 2's vindication from the determination side ([[phase-86-gate-bounded-drafter-tie]]).
+Honest limitation: this population does not exercise the discriminating behaviors (recovered=0,
+caught=0) — the deliberately-ungrounded adversarial case (to fire the guard live) is a named
+follow-on, deliberately NOT contrived (honesty over drama).
+
+Companion-only invariants HELD: all 9 ship dists byte-frozen (`--check all` 9/9); `vendor/aml-casework`
++ `scripts/evidence_requirements.py` git-diff empty; build.py imports nothing new; the 256/376 §12
+funnel untouched. `workbench.test.mjs` 205→206; `uv run pytest` 32→34. Pre-delivery adversarial
+review: 2 MINORs fixed inline (an over-attributed seam-case refusal cause — the docs now state only
+what the capture proves). Escape hatches: DISCOVERY (planning — the drafter shipped Phase 57 → reshape
+to the measurement frame) + DISCOVERY (impl — the 2 review MINORs). Ledger Phase-86 all 5 rows HELD
+(A1 with the honest nuance: the population WAS non-degenerate at the population level, but the
+live-vs-stub CONTRAST resolved to a tie — reported straight). Roadmap Stage 3 marked BUILT/MEASURED;
+the next leg = Stage 4 (the §14 triage second-rater). Journal:
+[[2026-06-29-phase-86-str-drafter-consistency-measure]].
 
 ## Constraints
 

@@ -45,7 +45,7 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-83-merge-adjudicator-oracle-scored -->
-<!-- gate-log:phase-83 direction=approved delivery=pending -->
+<!-- gate-log:phase-83 direction=approved delivery=accepted -->
 
 ## Phase 83 — Agentification Stage 1: the merge adjudicator agent, oracle-scored (the 5th companion live loop)
 

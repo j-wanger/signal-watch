@@ -24,6 +24,6 @@ Any unsanctioned dist drift (esp. `dist/merge` not byte-identical after strip) /
 ## Gates
 - [x] spec (`specs/phase-83-merge-adjudicator-oracle-scored.md`)
 - [x] Direction confirmed by user (2026-06-29, AskUserQuestion two rounds — Frontier "Agentification S1: merge adjudicator" · Q1 "Accept — measure, report by quadrant" · Q2 "4-way + count deferrals" · Q3 "Add a served surface now" · Q3b "(A) companion live mode"; all_accept, NOT silent; ledger Phase-83)
-- [ ] Delivery accepted
+- [x] Delivery accepted (post-implementation report 2026-06-29; impl commit db7e3ae; agent 54/66 vs spine 33; all 9 dists byte-frozen; committed + pushed to main)
 
 Decisions [[decisions/phase-83-merge-adjudicator-stage1-frame]] · [[decisions/phase-83-companion-live-not-baked]] · [[decisions/phase-83-4way-vocab-count-deferrals]] · [[decisions/phase-83-measure-by-quadrant-two-sided-baseline]]; plan [[phases/phase-83-merge-adjudicator-oracle-scored]]; ledger Phase-83.

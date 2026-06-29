@@ -45,7 +45,7 @@
 > - Phase 7: Pipeline walking skeleton (M6) — COMPLETED + accepted
 
 <!-- phase:phase-85-determination-pre-proposer -->
-<!-- gate-log:phase-85 direction=approved delivery=pending -->
+<!-- gate-log:phase-85 direction=approved delivery=accepted -->
 
 ## Phase 85 — §12 determination pre-proposer: the 6th live loop, oracle-scored (Agentification Stage 2)
 

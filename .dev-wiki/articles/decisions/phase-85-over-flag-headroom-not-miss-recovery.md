@@ -8,6 +8,7 @@ created: 2026-06-29
 updated: 2026-06-29
 source: plan
 confidence: medium
+status: corrected-at-impl
 ---
 
 ## Context
@@ -53,3 +54,28 @@ are a data gap, not the agent's to recover).
   §12-discovery-feed queue-prioritizer — still honest, still local.
 - This is the A1 (T0-weakest) row of the assumption ledger; its revisit-status confirms or falsifies
   the over-flag-headroom shape at debrief.
+
+## CORRECTED at impl (the live measurement contradicted the optimistic half)
+
+The two-sided FRAME held, the FIREWALL held, and the file-miss NULL held — but the predicted SHAPE of
+the agent's win was WRONG. The live capture (a local Qwen MoE over the full 6935-case capture via 46
+cap-signatures; counts only, synthetic substrate slice) showed:
+
+- The agent DID correct the structural KYC over-flag — it abstains on all **727** KYC-pure file-ready
+  cases (the predicted over-flag win HELD on the KYC class).
+- The agent recovers MORE oracle-file cases — committed `file` on **74** vs the engine's **50** (higher
+  file sensitivity, the opposite of a recall NULL — though the misses it does not recover are still the
+  substrate-Ask-#3 data gap).
+- BUT the agent OVER-files on the volume ML class — committed-wrong **4482** vs the engine's **593**. It
+  files the dominant `C2|C3|C8` signature (4040 cases, 4029 benign) because it reasons from per-case
+  red-flag CO-OCCURRENCE; the benign-ness is a POPULATION base-rate property invisible in a single case,
+  which the calibrated deterministic rule encodes and the per-case agent cannot infer.
+
+So the prediction "clean precision-recovery on the over-flag" was INCOMPLETE: the agent TRADES the
+engine's conservatism for sensitivity (recovers files + fixes the KYC over-flag, over-files on ML) —
+it does not strictly dominate. The A1 DISCIPLINE held (reported two-sided + honestly; the miss-side
+null held; surfaced-not-silent; re-measured ONCE with population base-rate context at the user's call,
+NOT iterated-to-fit against the oracle); only the predicted shape was replaced. The honest finding
+VINDICATES propose→gate→decide — a sensitivity-rich PROPOSER, the deterministic engine + the human gate
+supplying the population-calibrated discipline. See [[phase-85-base-rate-remeasure-not-overfit]] for the
+mid-build remeasure call.

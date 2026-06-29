@@ -151,28 +151,29 @@ Files and modules affected (companion-only — NO ship/dist target; build.py imp
 
 ## Exit Criteria
 
-- [ ] `python3 scripts/determination_proposer.py --selftest` PASS (firewall rejects an oracle leak +
+- [x] `python3 scripts/determination_proposer.py --selftest` PASS (firewall rejects an oracle leak +
       `proposer_input` strips it; StubProposer echoes the engine verdict; the stub baseline reproduces
       the engine-vs-oracle two-sided confusion; no banned words)
-- [ ] `python3 tests/determination_proposer_quality_harness.py --check` green; the two-sided confusion
+- [x] `python3 tests/determination_proposer_quality_harness.py --check` green; the two-sided confusion
       counts (agent-vs-oracle, engine-vs-oracle, on file AND clear) + the abstention-coverage figure
       match the committed baseline; in `uv run pytest`
-- [ ] `python3 scripts/serve_workbench.py --selftest` PASS incl. the `/propose-determination` route +
+- [x] `python3 scripts/serve_workbench.py --selftest` PASS incl. the `/propose-determination` route +
       the on-the-wire oracle firewall + single-flight + stub/live/degrade
-- [ ] `node tests/workbench.test.mjs` green (count grows from 195): the proposal panel renders;
+- [x] `node tests/workbench.test.mjs` green (195→205): the proposal panel renders;
       "proposed, not decided" + the synthetic qualifier present; `intended_disposition`/oracle NEVER
       appears pre-decision; the human gate licensing unchanged; a firewall-clean `/propose-determination`
       request fires
-- [ ] The live headline recorded HONESTLY (counts-only, two-sided, synthetic-qualified — over-flag
-      precision-recovery + the file-miss NULL) if a model was reachable on :8080; ELSE the stub baseline
-      + the one-command `--freeze` fold-forward note
-- [ ] Companion-only: `python3 scripts/build.py --check all` 9/9 byte-frozen; `git diff --quiet
+- [x] The live headline recorded HONESTLY (counts-only, two-sided, synthetic-qualified — the agent
+      corrected all 727 KYC over-flags + recovered files [74 vs 50] but over-files the volume ML class
+      [4482 vs 593]; a model WAS reachable on :8080, base-rate-informed prompt, re-measured once at the
+      user's call — not iterated-to-fit)
+- [x] Companion-only: `python3 scripts/build.py --check all` 9/9 byte-frozen; `git diff --quiet
       scripts/evidence_requirements.py`; build.py imports nothing new (grep:
       determination_proposer|serve_workbench|curate_workbench|casework|entity_spine); the 256/376 funnel
       unchanged
-- [ ] `docs/agentification-roadmap.md` Stage 2 marked BUILT (the 6th live loop); CLAUDE.md `## Current
+- [x] `docs/agentification-roadmap.md` Stage 2 marked BUILT (the 6th live loop); CLAUDE.md `## Current
       state` + Milestones + How-to-run + Test list + HANDOFF §8 trued IN PLACE
-- [ ] Honesty swept (no catch-rate/lift/precision/recall in the new files/docs; the synthetic qualifier
+- [x] Honesty swept (no catch-rate/lift/precision/recall in the new files/docs; the synthetic qualifier
       on every recorded number; abstention reported as coverage separate from accuracy)
 
 ## Constraints

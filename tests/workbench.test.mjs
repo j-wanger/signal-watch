@@ -780,6 +780,54 @@ ok(c17XSS.includes('&lt;img src=x') && !/<img src=x onerror/.test(c17XSS), 'c17 
 ok(!/\b(lift|precision|recall|catch[\s-]?rate|f1|auroc|multiplier)\b/i.test(c17H) && !/\d+(\.\d+)?\s*%/.test(c17H) && !/\d+(\.\d+)?x\b/.test(c17H),
    'c17 panel: NO catch-rate/precision/lift/%/Nx vocabulary (the honesty governor; "N pct" not "N%")');
 
+/* ---------- Phase 84: the slice render surfaces the EMITTED identity (names, not codes) ---------- */
+// The substrate slice bundles already carry counterparty_name + related_parties[].display_name (372/376
+// bundles). Before Phase 84 the slice render read the *_ref/party_id CODE; now it reads the name with a
+// code fallback (CASH/internal legs have no name). Companion-only — no ship dist touched.
+const RICH_SLICE = {
+  case:{ case_id:'CASE-O-RICH', display:{name:'Cedar Contracting Ltd.', kind:'org'},
+    kyc:{risk_rating:'MEDIUM', cdd_level:'CDD', nature_of_business:'trucking'}, capabilities:['C2','C3'], n_txns:3 },
+  bundle:{
+    subject:{customer_id:'O-000000', account_ids:['A-1']},
+    parties:[{display_name:'Cedar Contracting Ltd.', party_id:'O-000000', is_person:false,
+      risk_rating:'MEDIUM', cdd_level:'CDD', nature_of_business:'trucking'}],
+    alerts:[],
+    transactions:[
+      { txn_id:'T-1', timestamp:'2024-01-01T10:00:00', channel:'WIRE', direction:'DEBIT', amount_cents:222084,
+        counterparty_ref:'CP-O-000000-07', counterparty_name:'Lucas Ahmed', counterparty_country:'CA' },
+      { txn_id:'T-2', timestamp:'2024-01-01T21:00:00', channel:'CASH', direction:'CREDIT', amount_cents:2000,
+        counterparty_ref:null, counterparty_name:null, counterparty_country:null },
+      { txn_id:'T-3', timestamp:'2024-01-02T13:00:00', channel:'EMT', direction:'CREDIT', amount_cents:90000,
+        counterparty_ref:'CP-O-000000-02', counterparty_name:'Jayden Côté', counterparty_country:'CA' },
+    ],
+    related_parties:[
+      { display_name:'Owen Patel', party_id:'P-0008383', entity_ref:'P-0008383', label:'BENEFICIAL_OWNER',
+        ownership_pct:33, is_person:true, risk_rating:'LOW', cdd_level:'CDD' },
+      { display_name:'Emma Thompson', party_id:'P-0010571', entity_ref:'P-0010571', label:'BENEFICIAL_OWNER',
+        ownership_pct:34, is_person:true, risk_rating:'MEDIUM', cdd_level:'CDD' },
+    ],
+    resolution_edges:[
+      { between:['P-0008383','P-0010571'], status:'resolved', cross_institution:true,
+        shared:[{kind:'email', normalized:'x@y.test', strength:'strong', value:'x@y.test'}],
+        reading:'shared strong identifier present on both — exact-on-identifier' },
+    ],
+    reference:{ prior_str_register:[] },
+  }, signals:[] };
+T.setState({ SEL:'CASE-O-RICH', DETAIL:RICH_SLICE, SIGNALS:false, RUN:null, GATHER:null, DET:null }); T.paintSurface();
+const sr = ELEMENTS.surf._html;
+ok(/Lucas Ahmed/.test(sr) && /Jayden Côté/.test(sr), 'P84: a slice transaction shows the counterparty NAME, not the CP- code');
+ok(!/CP-O-000000-07/.test(sr), 'P84: the bare counterparty_ref code is no longer shown when a name is present');
+ok(/Owen Patel/.test(sr) && !/P-0008383/.test(sr), 'P84: the BO graph shows the related-party display_name, not the party_id code');
+ok(/Cedar Contracting Ltd\./.test(sr), 'P84: the BO subject node shows the org display_name (not the customer_id)');
+ok(/class="cpcc"/.test(sr) && /CA<\/span>/.test(sr), 'P84: the counterparty country renders as a rail observable');
+ok((sr.match(/<td>—<\/td>/g)||[]).length === 1, 'P84: a CASH leg with no counterparty falls back to the em-dash placeholder (code fallback)');
+// render-parity: the slice surface reuses the northstar money-flow + entity-resolution graph builders
+ok(/Money-flow network/.test(sr), 'P84: the slice surface renders the reused money-flow network panel');
+ok(/Entity resolution/.test(sr) && /Emma Thompson/.test(sr), 'P84: the slice surface renders the entity-resolution network with display names (not party_id codes)');
+ok(/no cross-account entity resolution is implied/.test(sr), 'P84: the money-flow honesty note disclaims cross-account ER (per-account-local counterparties)');
+ok(/multi-hop ownership chain pending substrate emission/.test(sr), 'P84: the BO graph honestly marks single-hop / multi-hop-pending degradation');
+ok(!/\b(lift|precision|recall|catch[\s-]?rate)\b/i.test(sr) && !/\d+(\.\d+)?\s*%/.test(sr), 'P84: the enriched slice surface adds NO catch-rate/precision/lift/% vocabulary (honesty governor)');
+
 /* ---------- summary ---------- */
 console.log(`\n${pass} passed, ${fails.length} failed`);
 if (fails.length){ console.error('FAILURES:\n  - ' + fails.join('\n  - ')); process.exit(1); }

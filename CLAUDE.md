@@ -351,8 +351,15 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   `cleared` branch; `evidence_requirements.py` BYTE-UNCHANGED (A1 — the predicate/mitigation are DATA the frozen
   engine already reads; a case carrying BOTH a predicate and mitigation is NOT cleared, the prior-STR predicate
   blocks the affirmative clear). The ML file loop still needs substrate's SECOND corroborating leg (Ask #3 —
-  `docs/substrate-northstar-evidence-emission-PLAN-BRIEF.md`). The bundle's
-  `related_parties[]` BO graph renders as the case network (`boGraphHTML`; "N pct"); the gather/finale DEMO case
+  `docs/substrate-northstar-evidence-emission-PLAN-BRIEF.md` — **Phase 84 re-verified Ask #3 a substrate
+  MEASURED-NULL (HEAD `3716f77`/Phase 41); the SUB-1 counterparty NAMES are emitted — the "workbench shows
+  codes" gap was render-side**). The bundle's `related_parties[]` BO graph renders as the case network
+  (`boGraphHTML`); **the SLICE render now surfaces the EMITTED identity (Phase 84): the ledger + counterparty
+  chips read `counterparty_name` (372/376 bundles, +country), `boGraphHTML` reads `display_name` ("N pct",
+  code-fallback on CASH/internal legs), and the slice surface REUSES the northstar money-flow + entity-resolution
+  graphs via a client adapter `sliceShowcaseDetail` (within-account aggregation; no cross-account ER implied; the
+  multi-hop ownership chain honestly degrades — substrate emits no `ownership_edges`). Companion-only —
+  `serve_workbench` untouched, all 9 dists byte-frozen.** The gather/finale DEMO case
   resolves from the OSINT corpus (`gather_demo_case_id`), re-curate-robust. **Phase 73** AUTHORS the north-star
   rich case — a SEPARATE companion source `data/casefile/{case.json,schema.md}` (substrate/casework PARKED, the
   artifact-is-the-spec): the matched FILE/DISMISS pair (CASE-A Northgate files / CASE-B Lakeshore clears) firing

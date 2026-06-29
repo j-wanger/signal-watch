@@ -1,29 +1,30 @@
 # Active Phase Context
 
-**Phase 83 — *Agentification Stage 1: the merge adjudicator agent, oracle-scored* (the 5th companion live loop)** (signal-watch-local, STANDARD, agentic) — PLANNED 2026-06-29 → READY FOR IMPLEMENTATION (begin at T1). Siblings stalled at the Phase-82 pins (substrate `294d3e5` / casework `04cc335`, code-verified LIVE) — no consume; the agentification roadmap is the forward path.
+**Phase 84 — *Rich render at scale: surface the workbench slice cases' emitted identity/network + re-sharpen the substrate decisiveness handoff*** (signal-watch-local, STANDARD, companion-only RENDER) — DELIVERED 2026-06-29, READY FOR COMPLETION (all 6 tasks [x], exit criteria met). The "no counterparty names" gap was DIAGNOSED as a STALE RENDER PATH in `workbench.html` — NOT a substrate emit gap, NOT a curation drop; the rich identity was already in the bundles. DISCOVERY: the adapter went CLIENT-SIDE (`sliceShowcaseDetail`/`sliceNetworks` in `workbench.html`), NOT the planned server-side `showcaseSurface` route (which would have stripped the existing §12 surface); `serve_workbench.py` untouched.
 
 ## Objective
-Build the agentification roadmap's Stage 1 — the FIRST measurable agent: a companion-only merge adjudicator (StubAdjudicator + LiveAdjudicator) that PROPOSES one of {uphold_merge, reject_as_shares, both_defensible, escalate} + a rationale per merge case, MEASURED against the committed non-circular `GT-<hash>` oracle in `data/merge/cases.json` (the ONE gate with a correctness oracle). Surface it as the 5th companion LIVE loop (`serve_merge.py` + a build-stripped `/*LIVE_*/` overlay in `merge.html`); run it live once, pin the capture, record the agreement counts. The deliverable is the MEASUREMENT; the agent is deliberately thin; the human still adjudicates (propose→gate→decide).
+Surface the rich identity/network the slice cases ALREADY carry in their committed bundles (real counterparty names, money-flow + resolution surface) — closing the case-quality gap vs the hand-authored Northgate/Lakeshore pair — via a CLIENT-SIDE slice→sc*-builder adapter in `workbench.html` (reusing `scMoneyFlowGraph`/`scResolutionGraph`). And re-sharpen the substrate handoff for the DECISIVE half (FILE/CLEAR), which stays substrate-gated. Companion-only; all 9 ship dists byte-frozen.
 
 ## Scope (file globs)
-`scripts/merge_adjudicator.py` · `tests/merge_adjudicator_quality_harness.py` · `tests/test_selftests.py` · `scripts/serve_merge.py` · `merge.html` · `scripts/build.py` (merge-target strip) · `tests/merge-console.test.mjs` · `tests/fixtures/merge-adjudicator/**` · `docs/merge-live.md` · `docs/agentification-roadmap.md` · `CLAUDE.md` · `HANDOFF.md`
+`scripts/serve_workbench.py` · `workbench.html` · `tests/workbench.test.mjs` · `docs/substrate-northstar-evidence-emission-PLAN-BRIEF.md` · `docs/rich-case-target-contract.md` · `docs/cross-pillar-build-order.md` · `CLAUDE.md` · `HANDOFF.md`
 
 ## Key constraints
-- §4.5 / dist boundary: ALL 9 ship dists BYTE-FROZEN; the LIVE overlay build-stripped → `dist/merge` byte-identical (`--check merge`); the offline file makes NO model call.
-- The oracle firewall: the agent provably NEVER sees the `oracle` (`adjudicator_input()` strip + `assert_no_oracle_leak()`); `/adjudicate` carries no oracle pre-disposition.
-- build.py imports NO merge_adjudicator/serve_merge/scorer/spine/curate/casework (grep guard); `evidence_requirements.py` UNTOUCHED (this is merge, not §12).
-- Honesty: counts-only; the synthetic-substrate qualifier on every number; the word-ban (no catch-rate/lift/precision/recall) extends to the LIVE markers + the docs.
-- Execute-once: NO model on :8080 → ship the StubAdjudicator baseline (33/66) + flag the live capture a named follow-on; NEVER fabricate a live agent number.
+- Companion-only / dist boundary: ALL 9 ship dists BYTE-FROZEN (`--check all` 9/9 — the workbench touches NO dist); `evidence_requirements.py` UNTOUCHED (this is RENDER, not §12); the 256/376 casework signing funnel byte-unchanged (render is decoupled from signing).
+- build.py imports NO companion module (serve_workbench/curate/casework/spine — grep guard).
+- Adapter, NOT a one-line `showcase:True` flip (the slice flat shape differs from the authored `case.json`); GATED by the T1 feasibility probe — if the rich graphs do NOT degrade gracefully on heterogeneous slice data, fall back to an in-place name fix only.
+- Names honest WITHIN-account/by-ref with a no-cross-account-ER badge (per-account-local synthetic names → never imply ER; no fuzzy name-matching, the >90%-FP discipline); multi-hop BO degrades to flat named BO + an "Ask #4 pending" marker; never fabricate a name where `counterparty_name` is absent (code-fallback).
+- Honesty: counts-only; the synthetic-substrate qualifier on every number; the word-ban (no catch-rate/lift/precision/recall) extends to the new render markers + the docs.
+- Decisiveness (slice cases FILE/CLEAR like northstar) is OUT OF SCOPE — substrate-gated (Ask #3 = 2nd-leg measured-null, Ask #4 = ownership_edges CLI-null); the brief re-sharpen is the handoff.
 
 ## Exit criteria
-`merge_adjudicator.py --selftest` 0 (firewall + 33-right/33-wrong + counts-by-quadrant + deferrals + qualifier, no banned words); `merge_adjudicator_quality_harness.py --check` 0 + in `uv run pytest`; `serve_merge.py --selftest` 0; `--check merge` byte-identical + `--check all` 9/9; `merge-console.test.mjs` green (existing + live-branch + offline-strip); the agreement counts recorded (stub unconditionally; live pinned OR pending-with-note); docs + CLAUDE.md trued in place; honesty swept.
+T1 feasibility-probe go/no-go recorded; the slice→showcase adapter in `case_detail` (counterparty{name,country,role} + entities[] display_name + resolution_edges passthrough + single-hop BO, code-fallback when name absent); slice cases render NAMES not CP- codes (ledger + money-flow with the no-cross-account-ER badge + resolution graph + named BO + the "Ask #4 pending" marker); the substrate brief re-grounded to HEAD `3716f77` (Ask #3 measured-null, Ask #4 CLI-null) + the SUB-1 "bare codes" claim trued + the consume noted in `cross-pillar-build-order.md`; `--check all` 9/9 byte-frozen + `evidence_requirements.py` git-diff empty + the 256/376 funnel re-asserted unchanged; `node tests/workbench.test.mjs` green + `python3 scripts/serve_workbench.py --selftest` PASS; honesty swept; CLAUDE.md + HANDOFF trued IN PLACE (no per-phase bullet).
 
 ## Abort rule
-Any unsanctioned dist drift (esp. `dist/merge` not byte-identical after strip) / a build.py companion import / an oracle leak to the client pre-disposition / an `evidence_requirements.py` change / any agreement count presented as a catch-rate/lift/precision/recall → STOP-and-surface. If blocked >3 attempts: ask user — skip or abort.
+Any unsanctioned dist drift (any of the 9 not byte-identical) / an `evidence_requirements.py` change / a build.py companion import / a change to the 256/376 funnel / any render implying cross-account ER (no fuzzy match; badge mandatory) / a fabricated counterparty name / any count presented as a catch-rate/lift/precision/recall → STOP-and-surface. Measure-first: the T1 probe gates the adapter route (fail → in-place name fix only). DECISIVENESS stays OUT OF SCOPE. If blocked >3 attempts: ask user — skip or abort.
 
 ## Gates
-- [x] spec (`specs/phase-83-merge-adjudicator-oracle-scored.md`)
-- [x] Direction confirmed by user (2026-06-29, AskUserQuestion two rounds — Frontier "Agentification S1: merge adjudicator" · Q1 "Accept — measure, report by quadrant" · Q2 "4-way + count deferrals" · Q3 "Add a served surface now" · Q3b "(A) companion live mode"; all_accept, NOT silent; ledger Phase-83)
-- [x] Delivery accepted (post-implementation report 2026-06-29; impl commit db7e3ae; agent 54/66 vs spine 33; all 9 dists byte-frozen; committed + pushed to main)
+- [x] spec (`## Formal Spec` IN the phase article [[phases/phase-84-workbench-rich-case-render-at-scale]] — standard ceremony, no separate /spec round; the contract is fully determined)
+- [x] Direction confirmed by user (2026-06-29, AskUserQuestion two rounds — 4 surfaced assumptions taken as accept-all positions: scope = render-parity, decisiveness = re-sharpen-the-brief; all_accept tracked, NOT silent; ledger Phase-84)
+- [ ] Delivery accepted
 
-Decisions [[decisions/phase-83-merge-adjudicator-stage1-frame]] · [[decisions/phase-83-companion-live-not-baked]] · [[decisions/phase-83-4way-vocab-count-deferrals]] · [[decisions/phase-83-measure-by-quadrant-two-sided-baseline]]; plan [[phases/phase-83-merge-adjudicator-oracle-scored]]; ledger Phase-83.
+Decisions [[decisions/phase-84-render-drop-not-emit-gap]] · [[decisions/phase-84-adapter-gated-by-probe]] · [[decisions/phase-84-decisiveness-substrate-gated]] · [[decisions/phase-84-names-honest-without-implied-ER]]; plan [[phases/phase-84-workbench-rich-case-render-at-scale]]; ledger Phase-84.

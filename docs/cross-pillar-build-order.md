@@ -93,6 +93,18 @@
 > - **Still OPEN:** substrate Ask #3 (second corroborating leg — the ML file-loop blocker) + Ask #4 (ownership
 >   edges) + the org-fragment resolution handle + a C20 jurisdiction leg + open-data Stage 2/3; casework's
 >   CI-promotion criterion + C17 grounding + the txn-bearing-C14 sign frontier.
+>
+> **UPDATE 2026-06-29 (Phase 84 — workbench RICH RENDER at scale; no consume, a render-drop fix + a re-verify):**
+> signal-watch **Phase 84** closed a signal-watch-SIDE render drop in the investigator workbench (companion-only,
+> no sibling advance consumed): the bulk substrate-slice cases rendered coded counterparties/BO nodes while the
+> committed bundles already carried `counterparty_name` (372/376) + `display_name` — emitted by substrate since
+> contract v0.4, dropped only at `workbench.html`'s slice render. Fixed in place (names + the reused northstar
+> money-flow/resolution graphs via a client adapter; multi-hop BO honestly degrades); `serve_workbench.py` +
+> `evidence_requirements.py` + all 9 dists byte-frozen. RE-VERIFIED substrate HEAD **`3716f77` (Phase 41)**: Ask #3
+> (the 2nd corroborating FILE-side leg) is a substrate **MEASURED-NULL**, Ask #4 `ownership_edges` stays CLI-null —
+> so the workbench's signal-watch-LOCAL render frontier is now largely CLOSED; the decisive FILE/CLEAR-at-scale
+> lever is substrate-gated (the re-sharpened `substrate-northstar-evidence-emission-PLAN-BRIEF.md`; the stale SUB-1
+> "bare codes" claim in `rich-case-target-contract.md` corrected).
 
 ## What changed since the last snapshot
 

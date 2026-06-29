@@ -3,7 +3,16 @@
 > **A signal-watch → aml-substrate handoff brief** (the Phase-55–79 pattern: signal-watch authors the contract;
 > the sibling implements + measures it on its own lifecycle — *no code lands in substrate from here*). Synthetic /
 > illustrative; **no rate, score, or multiplier is claimed.** **Re-pinned to substrate HEAD `294d3e5`
-> (Phase 40); Asks #1 + #2 CONSUMED by signal-watch Phase 82 (2026-06-29).** Companion to
+> (Phase 40); Asks #1 + #2 CONSUMED by signal-watch Phase 82 (2026-06-29).** **RE-VERIFIED at substrate HEAD
+> `3716f77` (Phase 41) by signal-watch Phase 84 (2026-06-29): Ask #3 (the second corroborating leg) was
+> substrate-ATTEMPTED and shipped a MEASURED NULL at Phase 41 (`8eae22d`) — "no faithful, non-vacuous,
+> launderer-flipping second leg exists on the current substrate" (no `src/`/`gen/` change). So the ML-file
+> blocker is no longer "unbuilt" — it is a substrate-CONCLUDED dead-end on the current generator; the ask
+> shifts to the open-reference-data fork (real-shaped collisions) or a different corroboration signal, NOT a
+> re-request of the same leg. SUB-1 counterparty NAMES are EMITTED (contract v0.4, re-attached at the evidence
+> serialization boundary) — the "workbench shows codes" gap was signal-watch-side render, closed by Phase 84;
+> Ask #4 `ownership_edges` stays CLI-null (probe/test-only) = the multi-hop-chain blocker the render honestly
+> degrades around.** Companion to
 > [`northstar-at-scale-build-order.md`](northstar-at-scale-build-order.md) (the coordination overview) and
 > [`casework-northstar-signing-PLAN-BRIEF.md`](casework-northstar-signing-PLAN-BRIEF.md) (the sibling half).
 

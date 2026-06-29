@@ -155,6 +155,7 @@
   table.tx tr:last-child td{border-bottom:none}
   td.amt{text-align:right;color:var(--ink)}
   td.dir-CREDIT{color:var(--green)}td.dir-DEBIT{color:var(--rose)}
+  .cpcc{color:var(--faint);font-size:10px;margin-left:5px}
   .signals-on table.tx tbody tr{opacity:.32;transition:.25s}
   .signals-on table.tx tbody tr.cited{opacity:1;background:rgba(246,166,35,.08)}
   .signals-on table.tx tbody tr.cited td:first-child{box-shadow:inset 2px 0 0 var(--signal)}
@@ -553,7 +554,7 @@ function channelSummary(txns){
 }
 function counterpartySummary(txns){
   const by={};
-  (txns||[]).forEach(t=>{const k=t.counterparty_ref||t.counterparty_account_id||'—'; by[k]=(by[k]||0)+1;});
+  (txns||[]).forEach(t=>{const k=t.counterparty_name||t.counterparty_ref||t.counterparty_account_id||'—'; by[k]=(by[k]||0)+1;});
   const ks=Object.keys(by).sort((a,b)=>by[b]-by[a]).slice(0,12);
   return ks.map(k=>`<span class="chip">${esc(k)} · ${esc(by[k])}</span>`).join('') + (Object.keys(by).length>12?` <span class="chip">+${Object.keys(by).length-12} more</span>`:'');
 }
@@ -577,7 +578,7 @@ function txTable(txns){
       <td>${esc((t.timestamp||'').slice(0,10))}</td><td>${esc(t.channel)}</td>
       <td class="dir-${esc(t.direction)}">${esc(t.direction)}</td>
       <td class="amt">${esc(money(t.amount_cents))}</td>
-      <td>${esc(t.counterparty_ref||t.counterparty_account_id||'—')}</td></tr>`;
+      <td>${esc(t.counterparty_name||t.counterparty_ref||t.counterparty_account_id||'—')}${t.counterparty_country?' <span class="cpcc">'+esc(t.counterparty_country)+'</span>':''}</td></tr>`;
   }).join('');
   return `<div class="txwrap"><table class="tx"><thead><tr><th>date</th><th>channel</th><th>dir</th><th>amount</th><th>counterparty</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
@@ -729,16 +730,18 @@ function boRiskTag(p){
 function boGraphHTML(bundle){
   const rps=(bundle&&bundle.related_parties)||[];
   if(!rps.length) return '';
-  const subj=((bundle.parties||[{}])[0]||{}).party_id || (bundle.subject||{}).customer_id || 'subject';
-  const entities=[{name:subj}].concat(rps.map(p=>({name:String(p.party_id||'')})));
-  const rels=rps.map(p=>({from:subj,to:String(p.party_id||''),label:ownLabel(p.label),
+  const sp=(bundle.parties||[{}])[0]||{};
+  const subj=sp.display_name || sp.party_id || (bundle.subject||{}).customer_id || 'subject';
+  const cpName=p=>String(p.display_name||p.party_id||'');
+  const entities=[{name:subj}].concat(rps.map(p=>({name:cpName(p)})));
+  const rels=rps.map(p=>({from:subj,to:cpName(p),label:ownLabel(p.label),
     ownership_pct:(p.ownership_pct!=null?p.ownership_pct:null),
     evidence:(p.is_person?'person':'entity')+(boRiskTag(p)?' · '+boRiskTag(p):'')+' · CDD '+esc(p.cdd_level||'?')}));
   const g=liveGraphLayout(entities,rels,[subj]);
   const P={}; g.nodes.forEach(n=>P[n.name]=n);
   let h='<div class="pnl span"><div class="ph">Beneficial-ownership network '
     +'<span style="color:var(--faint)">declared KYC ownership · '+esc(rps.length)+' related part'+(rps.length===1?'y':'ies')+'</span></div>';
-  h+='<div class="gnet"><div class="gnh">Network <span class="gnl">declared beneficial-ownership graph from the case KYC (synthetic) — real emitted edges, not gathered</span></div>';
+  h+='<div class="gnet"><div class="gnh">Network <span class="gnl">declared beneficial-ownership graph from the case KYC (synthetic) — real emitted edges, not gathered · single-hop (multi-hop ownership chain pending substrate emission)</span></div>';
   h+='<svg class="gnsvg" viewBox="0 0 '+g.w+' '+g.h+'" role="img" aria-label="declared beneficial-ownership network (synthetic KYC)">';
   g.edges.forEach(e=>{const f=P[e.from],t=P[e.to]; if(!f||!t)return;
     h+='<g class="gge"><line x1="'+f.x+'" y1="'+f.y+'" x2="'+t.x+'" y2="'+t.y+'"></line>'
@@ -749,10 +752,35 @@ function boGraphHTML(bundle){
   h+='</svg>';
   rps.forEach(p=>{const tag=boRiskTag(p);
     h+='<div class="gerow"><span class="gw">'+esc(subj)+'</span><span class="gl">—'+esc(ownLabel(p.label))
-     +(p.ownership_pct!=null?' · '+esc(p.ownership_pct)+' pct':'')+'→</span><span class="gw">'+esc(String(p.party_id||''))+'</span>'
+     +(p.ownership_pct!=null?' · '+esc(p.ownership_pct)+' pct':'')+'→</span><span class="gw">'+esc(cpName(p))+'</span>'
      +(tag?'<div class="gev">'+tag+'</div>':'')+'</div>';});
   h+='</div></div>';
   return h;
+}
+/* Phase 84 — adapt the flat slice bundle into the shape the northstar sc* graph builders read, so the
+   slice surface gets the SAME money-flow + entity-resolution networks (the data is already in the bundle —
+   counterparty_name + resolution_edges + display_name). Counterparties are grouped by NAME (per-account-local;
+   no cross-account entity_ref is asserted — the honesty note in sliceNetworks says so). */
+function sliceShowcaseDetail(b){
+  b=b||{};
+  const sp=(b.parties||[{}])[0]||{};
+  const subjRef=sp.entity_ref||sp.party_id||(b.subject||{}).customer_id||'subject';
+  const ents=[{entity_id:subjRef, display_name:sp.display_name||subjRef, kind:sp.is_person?'person':'org', role:'subject'}];
+  (b.related_parties||[]).forEach(p=>{const id=p.entity_ref||p.party_id; if(id)
+    ents.push({entity_id:id, display_name:p.display_name||id, kind:p.is_person?'person':'org', role:'related_party'});});
+  const txns=(b.transactions||[]).map(t=>({direction:t.direction, channel:t.channel, timestamp:t.timestamp,
+    amount:{value:Number(t.amount_cents||0)/100},
+    counterparty:{name:t.counterparty_name||null, country:t.counterparty_country||null}}));   // no entity_ref → group by name
+  return {case:{case_id:b.case_id, subject:{entity_ref:subjRef}, entities:ents, transactions:txns,
+    resolution_edges:b.resolution_edges||[]}, reference:b.reference||{}};
+}
+function sliceNetworks(b){
+  const d=sliceShowcaseDetail(b);
+  const named=(d.case.transactions||[]).some(t=>(t.counterparty||{}).name);
+  const mf=named?scMoneyFlowGraph(d):'';
+  const rg=scResolutionGraph(d);
+  if(!mf&&!rg) return '';
+  return `<div class="illus" style="margin-top:14px">Network views — within-account aggregation by counterparty; substrate counterparties are per-account-local, so no cross-account entity resolution is implied.</div>${mf}${rg}`;
 }
 function gatherStagesHTML(){
   const st=(GATHER&&GATHER.stages)||[];
@@ -1247,6 +1275,7 @@ function paintSurface(loading){
         ${txTable(txns)}</div>
       ${boGraphHTML(b)}
     </div>
+    ${sliceNetworks(b)}
     ${walkHTML()}
     ${gatherPanelHTML()}
     ${determinePanelHTML()}

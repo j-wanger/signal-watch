@@ -492,6 +492,11 @@ build boundary (a LOCAL normalizer — build.py never imports the authoring laye
   - `python3 tests/gather_quality_harness.py --check` — the GATHER extraction-coverage REGRESSION GATE
     (Phase 70: replay the pinned live capture with NO model; assert finding_coverage/target-closure still
     match the baseline + the deterministic StubPlanner reference; `--freeze` re-captures from a live model).
+  - `python3 tests/drafter_quality_harness.py --check` / `--selftest` — the STR-DRAFTER quality REGRESSION
+    GATE (Phase 86, Stage 3: replay the pinned per-bundle casework consume results [stub + live] through the
+    pure scorer with NO subprocess/model; counts-only stub-vs-live sign/refuse + verifier/fabrication-guard
+    catch + consistency — NO oracle, the consistency-not-correctness class; `--freeze` re-captures from the
+    casework venv + a model). Companion-only; casework measured-not-modified; doc `docs/drafter-live.md`.
   - `python3 scripts/determination_validation_harness.py --check` / `--selftest` — the DETERMINATION-VALIDATION
     REGRESSION GATE (Phase 78, the "circularity exit"): replay the committed substrate-oracle capture with NO
     substrate, RE-RUN the engine per case (bundle-only: mechanism + ≥legs, human-gate inputs HELD OUT) and
@@ -555,8 +560,15 @@ correctness oracle: agent 54 / spine 33 of 66 · the **§12 determination pre-pr
 85, scored TWO-SIDED vs the exogenous `intended_disposition` oracle: the agent eliminates all 727 KYC
 structural over-flags + commits `file` on 74 oracle-file cases [engine 50] but over-files on the volume ML
 class [4482 vs engine 593] — it lacks the population base-rate prior the calibrated rule encodes, VINDICATING
-propose→gate→decide; companion-only, `evidence_requirements.py` byte-unchanged; `docs/determination-live.md`).
-Next, in leverage order: a real STR drafter (the Drafter Protocol exists) → a §14 triage second-rater. Contract
+propose→gate→decide; companion-only, `evidence_requirements.py` byte-unchanged; `docs/determination-live.md`)
+· the **STR drafter** — Stage 3 MEASURED Phase 86 (the already-wired DECIDE drafter gained its quality harness
+`tests/drafter_quality_harness.py`; NO correctness oracle → consistency-not-correctness, counts-only): over 4
+designed bundles the live agent matched the deterministic stub **4/4** (0 fabrications caught, 0 recoveries) —
+on the case casework would not complete it fail-closed honestly (`needs_more_info`; no narrative the verifiers
+would sign) rather than hallucinating a narrative; the HONEST finding = the measure is gate-BOUNDED (a competent drafter and the stub converge at the
+verifiers → the gate, not the drafter, determines defensibility), vindicating propose→gate→decide from the
+drafting side; companion-only, casework measured-not-modified, `docs/drafter-live.md`).
+Next: a §14 triage second-rater (Stage 4 — the §14 second-rater field is already plumbed end-to-end). Contract
 = `program-blueprint.md` §2/§4/§6/§11; the gates + the human decision stay deterministic by design.
 Per-phase detail: git log + `.dev-wiki/` journal + HANDOFF.md §8.
 

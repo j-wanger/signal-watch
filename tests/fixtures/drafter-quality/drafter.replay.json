@@ -1,0 +1,116 @@
+{
+  "note": "Phase 86 — the STR-drafter regression gate (Agentification Stage 3). `records` are the REAL per-bundle casework consume results (stub + live), pinned; --check replays them through the pure score_drafts() scorer with NO subprocess + NO model (the gather replay pattern). The STR drafter has NO correctness oracle — counts only, consistency-not-correctness; no rate/score/multiplier; the bundles are synthetic. casework is measured, not modified.",
+  "model": "local",
+  "live_real": true,
+  "records": [
+    {
+      "label": "Riverside (cleared-demo)",
+      "disposition": "cleared",
+      "stub": {
+        "signed": true,
+        "blocking_violations": [],
+        "narrative_present": true,
+        "drafter_effective": "stub"
+      },
+      "live": {
+        "signed": true,
+        "blocking_violations": [],
+        "narrative_present": true,
+        "drafter_effective": "openai"
+      }
+    },
+    {
+      "label": "Lakeshore (case-b, fan-in C3)",
+      "disposition": "cleared",
+      "stub": {
+        "signed": true,
+        "blocking_violations": [],
+        "narrative_present": true,
+        "drafter_effective": "stub"
+      },
+      "live": {
+        "signed": true,
+        "blocking_violations": [],
+        "narrative_present": true,
+        "drafter_effective": "openai"
+      }
+    },
+    {
+      "label": "Sanctions C14 (file)",
+      "disposition": "file",
+      "stub": {
+        "signed": true,
+        "blocking_violations": [],
+        "narrative_present": true,
+        "drafter_effective": "stub"
+      },
+      "live": {
+        "signed": true,
+        "blocking_violations": [],
+        "narrative_present": true,
+        "drafter_effective": "openai"
+      }
+    },
+    {
+      "label": "Narrative-seam CASE-P-0025128 (file)",
+      "disposition": "file",
+      "stub": {
+        "signed": false,
+        "blocking_violations": [],
+        "narrative_present": false,
+        "drafter_effective": "stub"
+      },
+      "live": {
+        "signed": false,
+        "blocking_violations": [],
+        "narrative_present": false,
+        "drafter_effective": "openai"
+      }
+    }
+  ],
+  "expected": {
+    "n": 4,
+    "stub_signed": 3,
+    "stub_refused": 1,
+    "live_signed": 3,
+    "live_refused": 1,
+    "live_stub_fallback": 0,
+    "agree": 4,
+    "recovered": 0,
+    "caught": 0,
+    "by_case": [
+      {
+        "label": "Riverside (cleared-demo)",
+        "disposition": "cleared",
+        "stub_signed": true,
+        "live_signed": true,
+        "live_effective": "openai",
+        "live_violations": []
+      },
+      {
+        "label": "Lakeshore (case-b, fan-in C3)",
+        "disposition": "cleared",
+        "stub_signed": true,
+        "live_signed": true,
+        "live_effective": "openai",
+        "live_violations": []
+      },
+      {
+        "label": "Sanctions C14 (file)",
+        "disposition": "file",
+        "stub_signed": true,
+        "live_signed": true,
+        "live_effective": "openai",
+        "live_violations": []
+      },
+      {
+        "label": "Narrative-seam CASE-P-0025128 (file)",
+        "disposition": "file",
+        "stub_signed": false,
+        "live_signed": false,
+        "live_effective": "openai",
+        "live_violations": []
+      }
+    ]
+  }
+}

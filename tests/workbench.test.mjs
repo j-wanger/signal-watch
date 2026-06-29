@@ -275,6 +275,10 @@ ok(/class="node connected"/.test(f), 'the streamed finale reaches the CONNECTED 
 ok((f.match(/class="vchk"/g)||[]).length === 6, 'the consume stage lists the six completeness elements (the verifier gate)');
 ok(/Signed STR/.test(f) && /multi-typology pattern/.test(f), 'the signed-STR narrative renders');
 ok(f.includes(escH('<not a tag>')), 'XSS: the model narrative is esc()-escaped');
+// Phase 86 (Stage 3 — the drafter measurement): the consume stage frames the six verifiers as the
+// CONSISTENCY-NOT-CORRECTNESS arbiter — the gate disposes whatever ANY backend wrote (no narrative oracle).
+ok(/the gate is the oracle on whatever the backend wrote/.test(f),
+   'Phase 86: the consume stage states the verifiers gate any backend draft (consistency-not-correctness)');
 const st = T.getState();
 ok(st.RUN && st.RUN.done && st.RUN.running === false, 'the decision settles (done payload, not running)');
 

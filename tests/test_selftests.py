@@ -98,6 +98,29 @@ def test_determination_proposer_quality_harness() -> None:
     assert r.returncode == 0, f"determination_proposer_quality_harness --check FAILED:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
 
 
+def test_drafter_quality_harness_selftest() -> None:
+    """Phase 86 — the STR-DRAFTER quality gate, dep-free scorer unit (no venv/model): assert score_drafts()
+    counts the stub-vs-live sign/refuse + verifier-catch + consistency correctly. The committed --check
+    regression gate (over the pinned live capture) is test_drafter_quality_harness below."""
+    path = ROOT / "tests" / "drafter_quality_harness.py"
+    assert path.exists(), "missing tests/drafter_quality_harness.py"
+    r = subprocess.run([sys.executable, str(path), "--selftest"], cwd=str(ROOT),
+                       capture_output=True, text=True, timeout=120)
+    assert r.returncode == 0, f"drafter_quality_harness --selftest FAILED:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
+
+
+def test_drafter_quality_harness() -> None:
+    """Phase 86 — the STR-DRAFTER quality REGRESSION GATE: replay the pinned per-bundle consume results
+    (stub + live) through the pure scorer with NO casework subprocess + NO model and assert the counts
+    (stub-vs-live sign/refuse, verifier/fabrication-guard catch, consistency) still match the frozen
+    baseline. Consistency-not-correctness; counts only (no accuracy/catch-rate)."""
+    path = ROOT / "tests" / "drafter_quality_harness.py"
+    assert path.exists(), "missing tests/drafter_quality_harness.py"
+    r = subprocess.run([sys.executable, str(path), "--check"], cwd=str(ROOT),
+                       capture_output=True, text=True, timeout=120)
+    assert r.returncode == 0, f"drafter_quality_harness --check FAILED:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}"
+
+
 def test_determination_validation_harness() -> None:
     """Phase 78 — the determination-validation REGRESSION GATE: replay the committed substrate-oracle capture
     with NO substrate and assert the live engine still matches the frozen confusion structure (the

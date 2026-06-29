@@ -30,7 +30,7 @@ model/fetch call (the live code is build-stripped, §4.5) — the agentic work i
 | **News extraction** (`serve_news.py:272`, `news_ground.py:87`) | extract entities/aliases/red-flags from pasted text or a fetched URL (+ a keep-biased verify pass) | grounded-or-stripped: every name a RAW substring of the article body | needs a live model on :8080 (honest error if absent) |
 | **Corpus derivation** (`serve_corpus.py:208`, `derive_signals.py:364`) | propose {section, verbatim flag, red-flag, C/D codes} per indicator | the FROZEN `check_record` gate disposes + **one** violation-guided re-prompt, then drops honestly — the most rigorously gated loop | needs a live model on :8080 |
 | **GATHER** (`osint_tools.py:463`, `LivePlanner:405`, `gate_finding:230`) | agentic **tool-calling** over a synthetic OSINT corpus — chains multi-hop, seeks the unmet determination atoms | each finding grounded-or-dropped against the exact records that tool returned | **YES, offline** — `StubPlanner` is the deterministic default + the coverage reference; the live path is the under-test variant |
-| **DECIDE drafting** (`serve_workbench.py:388`, the `serve_chain` Drafter Protocol) | draft the STR narrative (claude / openai / opencode drafters) | casework's six grounding verifiers refuse to sign what they can't reproduce | **YES, offline** — deterministic stub drafter; live drafters wired via creds/endpoint |
+| **DECIDE drafting** (`serve_workbench.py:388`, the `serve_chain` Drafter Protocol) | draft the STR narrative (claude / openai / opencode drafters) | casework's six grounding verifiers refuse to sign what they can't reproduce | **YES, offline** — deterministic stub drafter; live drafters wired via creds/endpoint; **MEASURED Phase 86** (`tests/drafter_quality_harness.py` — Stage 3, consistency-not-correctness) |
 | **Merge adjudication** (Phase 83 — `serve_merge.py`, `merge_adjudicator.py`, `tests/merge_adjudicator_quality_harness.py`) | propose each merge call (uphold / reject / both-defensible / escalate) + a rationale from the evidence ONLY (the oracle firewall) | scored against the committed non-circular oracle — the ONE gate with a correctness oracle; the `StubAdjudicator` (echo the spine) is the deterministic baseline | **YES, offline** — the stub baseline is dep-free + always checkable; the live agent is the under-test variant on :8080 |
 
 ## The roadmap — the next agentic loops (sequenced by leverage × dependency)
@@ -77,12 +77,24 @@ discipline the per-case agent cannot. Surfaced as the **6th companion live loop*
 `evidence_requirements.py` byte-unchanged) and pinned as a regression gate
 (`tests/determination_proposer_quality_harness.py`). Full walkthrough: `docs/determination-live.md`.
 
-### Stage 3 — the DRAFTING agent: a real STR drafter behind the verifiers  *(high leverage, near-zero new code)*
-Replace the deterministic stub drafter with a real agent drafter — the **Drafter Protocol + a `--drafter`
-switch already exist** and the six casework grounding verifiers are backend-agnostic (a hallucinated block is
-caught by the fabrication guard). This is exactly the "narrative seam" that fail-closed on a hard case this
-quarter — the slot a real drafter fills, while the verifiers keep it honest (signing what it cannot reproduce
-stays refused — the defensibility climax). Dependency: a live model + SDK creds.
+### Stage 3 — the DRAFTING agent: a real STR drafter behind the verifiers  ✅ **MEASURED (Phase 86)**
+The drafter was already wired (Phase 57 — the **Drafter Protocol + the `--drafter` switch**); what Stage 3 adds
+is the **measurement frame** the loop lacked. The STR drafter has **NO correctness oracle** (free-text
+narrative has no latent truth), so unlike Stages 1/2 this is the **consistency-not-correctness** class (the
+GATHER model): `tests/drafter_quality_harness.py` measures the live (local) agent drafter against the
+deterministic stub over the committed designed-scenario bundles, counts only (stub-vs-live SIGN/REFUSE +
+verifier/fabrication-guard CATCH + per-case CONSISTENCY); aml-casework is measured, not modified. **Measured
+(counts only, synthetic bundles; no rate, score, or multiplier — a model WAS on :8080):** over the 4 designed
+bundles the live agent matched the deterministic stub **4 / 4** — it signed the same 3 (narratives the six
+verifiers accepted, identical to the stub) and fail-closed on the same 1 (the narrative-seam case → casework's
+`needs_more_info`; no narrative the verifiers would sign), with **0 fabrications caught** and **0 recoveries**. The agent
+did NOT hallucinate a narrative to force a file — it honestly fail-closed exactly like the stub. **The honest
+finding: the drafter measure is consistency-BOUNDED by the gate** — because the verifiers refuse anything
+ungrounded, a *competent* agent drafter and the deterministic stub converge at the gate; **the gate, not the
+drafter, determines defensibility** (drafter quality is invisible above a competence floor). A tie is an honest
+result; it vindicates propose→gate→decide from the drafting side, mirroring Stage 2's vindication from the
+determination side. Surfaced as a regression gate (`--check`/`--freeze`); the fabrication-guard-fires
+demonstration lives in the scripted fail-closed beat (not contrived here). Full walkthrough: `docs/drafter-live.md`.
 
 ### Stage 4 — the SECOND-RATER agent: a §14 triage first pass  *(medium leverage, very light dependency)*
 The triage console already plumbs a labeled synthetic **second-rater** field end-to-end (curate → build → html
@@ -92,8 +104,10 @@ the §14 disposition vocabulary; NO new gate code.
 
 ### Cross-cutting — the EVALUATION discipline (what makes the agentic claim credible)
 Every agentified loop ships with an honest quality measure: **oracle-scored** where a ground truth exists (the
-merge gate — Stage 1), **consistency-not-correctness** where it doesn't (the GATHER stub-vs-live harness,
-`tests/gather_quality_harness.py`, is the model). No agent output is presented without its measure; every
+merge gate — Stage 1; the §12 determination — Stage 2), **consistency-not-correctness** where it doesn't — now
+TWO such harnesses: the GATHER stub-vs-live harness (`tests/gather_quality_harness.py`) and the STR-drafter
+harness (`tests/drafter_quality_harness.py` — Stage 3, whose tie finding is that the gate, not the drafter,
+determines defensibility). No agent output is presented without its measure; every
 measure is framed as counts only (no rate, score, or multiplier). This track is what turns "we use agents" into "here is how good the
 agent is, examinably."
 
@@ -114,9 +128,11 @@ These are the load-bearing reason the agentic layer is defensible; agentificatio
 
 - **Built:** the 4 original live loops + **Stage 1 (the merge adjudicator — the measured-quality headline,
   Phase 83)** + **Stage 2 (the §12 determination pre-proposer — the propose→gate→decide vindication, Phase
-  85)** = 6 live loops. **Next, in leverage order:** Stage 3 (STR drafter — the Drafter Protocol + a
-  `--drafter` switch already exist, near-zero new code) → Stage 4 (triage second-rater). Each is independently
-  shippable + companion-only; none touches a ship dist or a frozen gate.
+  85)** = 6 live loops, of which **Stage 3 (the STR drafter — the gate-bounded-defensibility tie, Phase 86)**
+  added the measurement frame to the already-wired DECIDE drafting loop (it measures an existing loop, it does
+  not add one). **Next:** Stage 4 (triage second-rater — the §14 second-rater field is already plumbed end-to
+  -end; swap an agent into the slot, a live model constrained to the §14 vocabulary, no new gate code). Each is
+  independently shippable + companion-only; none touches a ship dist or a frozen gate.
 - **Contract:** `program-blueprint.md` §2/§4/§6/§11 (the design); this doc is the build sequencing over it.
   Cross-pillar note: signal-watch RUNS the agents; substrate + casework are the deterministic producers/verifiers.
 - **The honest frame:** agentification here is mostly *wiring live models to seams that already exist, under

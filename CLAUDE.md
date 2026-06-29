@@ -506,6 +506,12 @@ triage console stays synthetic-curated by design (the substrate's label-blind al
 adjudicable fact pattern — the §12-right/§14-wrong-source boundary)] + the NON-ship offline report
 `docs/blueprint-report.html` + the `dist/triage/` triage console [Phase 49 — §14's loop embryo made
 demo-able]).
+**Agentification track (forward roadmap, cross-cutting): `docs/agentification-roadmap.md`** — the
+propose→gate→decide sequencing for the next agentic loops on top of the 4 already-live ones (news/corpus
+extraction · GATHER tool-calling · DECIDE drafting). Order by leverage: a merge adjudicator scored vs the
+GT-`<hash>` oracle (the measured-quality headline) → a §12 determination pre-proposer (the `determine_case`
+seam is built) → a real STR drafter (the Drafter Protocol exists) → a §14 triage second-rater. Contract =
+`program-blueprint.md` §2/§4/§6/§11; the gates + the human decision stay deterministic by design.
 Per-phase detail: git log + `.dev-wiki/` journal + HANDOFF.md §8.
 
 ## Definition of done

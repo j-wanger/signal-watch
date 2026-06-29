@@ -172,6 +172,14 @@ The bottleneck moved here. Three consumes, in rough value order:
   follow-on from Phase 17.
 - The speculative C15/C3/C4 widening stays **dropped** (not data-reachable; documented audit trail only).
 
+### Track D′ — AGENTIFICATION (signal-watch-run, cross-cutting; parallel, blocks no one)
+- signal-watch RUNS the agents; substrate + casework are the deterministic producers/verifiers. The 4 live
+  loops (news/corpus extraction · GATHER · DECIDE drafting) are built; the next loops sequence by leverage:
+  a merge adjudicator scored vs the GT-`<hash>` oracle (the measured-quality headline) → a §12 determination
+  pre-proposer → a real STR drafter → a §14 triage second-rater. Each is companion-only, under the
+  propose→gate→decide discipline (no ship dist / frozen gate touched). Detail:
+  [`agentification-roadmap.md`](agentification-roadmap.md); contract = `program-blueprint.md` §2/§4/§6/§11.
+
 ## Critical path
 
 The prior bottleneck (`substrate true_entities`) is **resolved** — it's emitted. The only remaining serial

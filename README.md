@@ -20,7 +20,7 @@ atoms beat monolithic scenarios).
 
 ## What's in here
 
-**Five offline ship artifacts** — each a single self-contained `file://` HTML, built by `scripts/build.py`,
+**Six offline ship artifacts** — each a single self-contained `file://` HTML, built by `scripts/build.py`,
 opened with no server:
 
 | Artifact | Build target | What it is |
@@ -30,6 +30,7 @@ opened with no server:
 | News stream | `news` | adverse-media / negative-news screening (a second atom stream) |
 | Gate console | `console` | the Class-J human-judgment adjudication gate |
 | Triage console | `triage` | the §14 continuous-adjudication loop |
+| Merge console | `merge` | the Class-J entity-resolution merge-adjudication gate (the one gate with a correctness oracle) |
 
 **One companion-only investigator workbench** (`workbench.html`, served — **not** a ship/build target):
 the clutter → signals → GATHER → DETERMINATION → decide arc over a vendored case population. The
@@ -37,7 +38,7 @@ DETERMINATION beat licenses the decision by **evidence-sufficiency, not combo-fr
 per-typology requirement profile; the unmet gaps name what to gather or build — see `docs/evidence-driven-filing.md`);
 the agentic GATHER beat is requirement-targeted; the finale is a cross-pillar signed STR.
 
-> **Shippable vs companion — the whole dependency story in one place.** The **five ship artifacts above are
+> **Shippable vs companion — the whole dependency story in one place.** The **six ship artifacts above are
 > the deliverable, fully self-contained**: a browser opens them, zero external dependencies (verified by an
 > isolated clone with no sibling repos present). The **investigator workbench is a companion**, but it too is
 > now shippable from a bare clone — its DECIDE signed-STR finale runs `aml-casework`, which is **vendored** into
@@ -53,7 +54,7 @@ the agentic GATHER beat is requirement-targeted; the finale is a cross-pillar si
 
 ```sh
 git clone <repo-url> signal-watch
-open signal-watch/dist/index.html        # launcher → links all 7 demos; or open dist/<target>/index.html
+open signal-watch/dist/index.html        # launcher → links all 8 demos; or open dist/<target>/index.html
 ```
 
 The only runtime dependency is a **web browser**. There is no server, no `pip install`, no `npm install`.
@@ -110,8 +111,8 @@ Walkthroughs: `docs/case-workbench.md`, `docs/chain-workbench.md`, `docs/corpus-
 
 ```sh
 uv run pytest                          # the umbrella (wraps the --selftests + the .mjs arc tests)
-python3 scripts/build.py --check all   # drift: every committed dist == a fresh build (8/8)
-node tests/corpus-explorer.test.mjs    # plus: gate-console / triage-console / news-stream / workbench .test.mjs
+python3 scripts/build.py --check all   # drift: every committed dist == a fresh build (9/9)
+node tests/corpus-explorer.test.mjs    # plus: gate-console / triage-console / merge-console / news-stream / workbench .test.mjs
 python3 scripts/derive_signals.py --selftest   # the derivation GATE (and the other scripts' --selftest)
 ```
 
